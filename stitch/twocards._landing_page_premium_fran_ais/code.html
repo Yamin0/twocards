@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+
+<html class="scroll-smooth" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>twocards. | CRM B2B pour les établissements de nuit</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=Nunito:wght@700;900&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed-dim": "#aec7fb",
+                        "on-primary-fixed-variant": "#2c4674",
+                        "on-primary-fixed": "#001b3f",
+                        "background": "#f5fbf9",
+                        "tertiary-fixed": "#d7e2ff",
+                        "surface-bright": "#f5fbf9",
+                        "primary-fixed": "#d7e2ff",
+                        "on-secondary-container": "#5d6463",
+                        "tertiary-container": "#13305c",
+                        "outline": "#747780",
+                        "surface-variant": "#dee4e2",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-container": "#13305c",
+                        "secondary-fixed": "#dee4e2",
+                        "on-error-container": "#93000a",
+                        "on-primary-container": "#8099cb",
+                        "inverse-on-surface": "#ecf2f0",
+                        "on-tertiary-fixed-variant": "#2d4673",
+                        "on-background": "#171d1c",
+                        "inverse-surface": "#2b3231",
+                        "on-secondary-fixed-variant": "#424847",
+                        "error": "#ba1a1a",
+                        "surface-tint": "#455e8d",
+                        "surface-container-low": "#eff5f3",
+                        "on-surface": "#171d1c",
+                        "on-primary": "#ffffff",
+                        "inverse-primary": "#adc7fc",
+                        "primary": "#001b40",
+                        "on-secondary-fixed": "#171d1c",
+                        "on-surface-variant": "#44474f",
+                        "tertiary": "#001b40",
+                        "surface-container-high": "#e3e9e8",
+                        "surface-dim": "#d5dbd9",
+                        "secondary": "#59605e",
+                        "on-error": "#ffffff",
+                        "secondary-container": "#dbe1df",
+                        "on-tertiary-container": "#8099cb",
+                        "outline-variant": "#c4c6d0",
+                        "on-tertiary-fixed": "#001b3f",
+                        "on-secondary": "#ffffff",
+                        "primary-fixed-dim": "#adc7fc",
+                        "surface-container": "#e9efed",
+                        "secondary-fixed-dim": "#c2c8c6",
+                        "surface-container-highest": "#dee4e2",
+                        "surface": "#f5fbf9",
+                        "error-container": "#ffdad6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"],
+                        "brand": ["Nunito"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .editorial-shadow {
+            box-shadow: 0 30px 50px -12px rgba(19, 48, 92, 0.04);
+        }
+        .hero-gradient {
+            background: linear-gradient(180deg, #13305c 0%, #001b40 100%);
+        }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface">
+<!-- Top Navigation Shell -->
+<header class="fixed top-0 w-full z-50 bg-[#f5fbf9] dark:bg-[#001b40] no-border">
+<nav class="max-w-[1440px] mx-auto px-12 py-6 flex justify-between items-center">
+<div class="text-2xl font-black text-[#001b40] dark:text-[#f5fbf9] font-brand">twocards.</div>
+<div class="hidden md:flex items-center space-x-10">
+<a class="font-headline uppercase tracking-widest text-[0.6875rem] text-[#13305c] dark:text-white border-b border-[#13305c] transition-colors duration-300" href="#">Solutions</a>
+<a class="font-headline uppercase tracking-widest text-[0.6875rem] text-[#8099cb] dark:text-slate-400 hover:text-[#13305c] transition-colors duration-300" href="#">Le Registre</a>
+<a class="font-headline uppercase tracking-widest text-[0.6875rem] text-[#8099cb] dark:text-slate-400 hover:text-[#13305c] transition-colors duration-300" href="#">Tarifs</a>
+<a class="font-headline uppercase tracking-widest text-[0.6875rem] text-[#8099cb] dark:text-slate-400 hover:text-[#13305c] transition-colors duration-300" href="#">Contact</a>
+</div>
+<div class="flex items-center space-x-6">
+<button class="font-headline uppercase tracking-widest text-[0.6875rem] text-[#13305c] dark:text-[#8099cb] hover:opacity-80 transition-all">Connexion</button>
+<button class="bg-[#13305c] text-white px-8 py-3 font-headline uppercase tracking-widest text-[0.6875rem] rounded-[0.125rem] active:opacity-80 transition-all">Demander une invitation</button>
+</div>
+</nav>
+</header>
+<main class="pt-[88px]">
+<!-- Hero Section -->
+<section class="hero-gradient text-white pt-24 pb-0 overflow-hidden">
+<div class="max-w-7xl mx-auto px-6 lg:px-12 text-center">
+<div class="inline-flex items-center space-x-2 mb-8 py-2 px-4 rounded-full bg-white/5 border border-white/10">
+<span class="font-label text-[0.625rem] uppercase tracking-widest text-on-primary-container">État du système : Opérationnel</span>
+<div class="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
+</div>
+<h1 class="font-headline text-5xl md:text-7xl font-extrabold tracking-tight mb-6 leading-[1.1]">
+                    Votre réseau d'établissements, <br/>
+<span class="text-on-primary-container">une seule plateforme.</span>
+</h1>
+<p class="max-w-2xl mx-auto text-lg md:text-xl text-on-primary-container font-light mb-12 leading-relaxed">
+                    Gérez les listes d'invités, les réservations de tables et votre réseau de RP et concierges depuis un tableau de bord unique. Conçu avec précision pour l'élite de la nuit.
+                </p>
+<div class="flex flex-col md:flex-row items-center justify-center gap-8 mb-20">
+<button class="bg-white text-primary px-10 py-4 font-headline uppercase tracking-widest text-xs font-bold rounded-[0.125rem] transition-all hover:bg-surface-container-low">
+                        Commencer en tant qu'établissement
+                    </button>
+<a class="font-headline uppercase tracking-widest text-xs font-bold border-b border-transparent hover:border-white transition-all py-1" href="#">
+                        Je suis un Concierge/RP
+                    </a>
+</div>
+<!-- Product Mockup -->
+<div class="relative max-w-5xl mx-auto">
+<div class="relative bg-surface-container-lowest rounded-xl overflow-hidden editorial-shadow transform translate-y-12">
+<img alt="Tableau de bord twocards." class="w-full h-auto" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCJYxVRbcwvsqoYf7yScTcTPpgtq_Kr5NQr9QVE1bxQv1Pb6Ubj12K7K4Y587SLa0_SaaH4JaAeBOpcS61lKpONav6ibh9mgCCWaHRBQN4WaIvUmcwfpyNotbD5ewV_4MnnL-pi9ldx-h04ndJOEZ3LmB147tzogvPtr9u4_VNR1hZqQS7PSD2nJUv3Nrpw6A9E3s7g3o0ny_DRaCJCCR-urU3VBhDQG6ivhcnRrTV_T6rC0lJ7hVFHJL9VvqCJHoYj1WsTSfahKwIa"/>
+<div class="absolute inset-0 bg-gradient-to-t from-[#13305c]/20 to-transparent pointer-events-none"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Features Section -->
+<section class="bg-surface pt-48 pb-32">
+<div class="max-w-7xl mx-auto px-6 lg:px-12">
+<div class="flex flex-col md:flex-row justify-between items-end mb-24">
+<div class="max-w-xl">
+<span class="font-label text-[0.6875rem] uppercase tracking-[0.2em] text-primary mb-4 block">Infrastructure Fondamentale</span>
+<h2 class="font-headline text-4xl md:text-5xl font-bold text-primary leading-tight">Conçu pour les exploitants de lieux</h2>
+</div>
+<div class="mt-8 md:mt-0">
+<p class="text-on-surface opacity-70 max-w-xs font-light leading-relaxed">
+                            Une interface sans frontières qui privilégie la précision des données sur le superflu cosmétique.
+                        </p>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-stretch">
+<!-- Feature Card 1 -->
+<div class="md:col-span-8 bg-surface-container-lowest p-12 flex flex-col justify-between editorial-shadow min-h-[400px]">
+<div>
+<span class="material-symbols-outlined text-primary text-4xl mb-6">group_add</span>
+<h3 class="font-headline text-2xl font-bold text-primary mb-4">Gestion de la liste d'invités</h3>
+<p class="text-on-surface/70 leading-relaxed max-w-md">
+                                Intégrez en toute fluidité les demandes provenant de multiples flux de RP. Approuvez, refusez ou surclassez vos invités d'un seul geste.
+                            </p>
+</div>
+<div class="mt-12 bg-surface-container-low p-6 rounded-lg">
+<img alt="Interface invités" class="w-full h-32 object-cover rounded opacity-80" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCScpJMdGVGeW5iiEC35gvHjhBnHCAdsn9JZChD_Od_3Y6GQlsVh2BBEW4-nYO1N8z1hAqk05t5CPicAfz8pKt4bi7Ltx_aBfTgjqJamqDbHr0LDEj4R_fzJfZAX3-bPs01A61cKX6J-BUoQkf9fGv_Vn8vkejuoKQNqYgpswLN2HUZ7JgEqTW8riBZrt5POWdAT2F5UlETNhzYtYdgD3CiBJpOGwo6dhkZ5yGbmElyj99aVbSq9mGfDX_NN7wTAVPZMr5n7HQPV4xm"/>
+</div>
+</div>
+<!-- Feature Card 2 -->
+<div class="md:col-span-4 bg-surface-container-lowest p-12 editorial-shadow">
+<span class="material-symbols-outlined text-primary text-4xl mb-6">calendar_month</span>
+<h3 class="font-headline text-2xl font-bold text-primary mb-4">Planification d'événements</h3>
+<p class="text-on-surface/70 leading-relaxed">
+                            Organisez votre calendrier saisonnier et vos plans de salle quotidiens avec une interface de qualité éditoriale.
+                        </p>
+<div class="mt-8">
+<div class="flex justify-between items-center py-3 border-b border-outline-variant/10">
+<span class="font-label text-[0.6875rem] uppercase opacity-50">SAM 12 OCT</span>
+<span class="font-headline text-sm font-bold">Gala de Minuit</span>
+</div>
+<div class="flex justify-between items-center py-3 border-b border-outline-variant/10">
+<span class="font-label text-[0.6875rem] uppercase opacity-50">DIM 13 OCT</span>
+<span class="font-headline text-sm font-bold">Soirée Résidence</span>
+</div>
+</div>
+</div>
+<!-- Feature Card 3 -->
+<div class="md:col-span-12 bg-surface-container-lowest p-12 flex flex-col md:flex-row gap-12 items-center editorial-shadow">
+<div class="flex-1">
+<span class="material-symbols-outlined text-primary text-4xl mb-6">payments</span>
+<h3 class="font-headline text-2xl font-bold text-primary mb-4">Suivi des commissions</h3>
+<p class="text-on-surface/70 leading-relaxed max-w-lg">
+                                Éliminez les litiges. Chaque arrivée d'invité et chaque dépense à table est automatiquement attribuée au bon partenaire RP, garantissant des paiements transparents.
+                            </p>
+</div>
+<div class="flex-1 w-full">
+<div class="bg-primary p-8 text-on-primary-container rounded-[0.125rem]">
+<div class="flex justify-between mb-4">
+<span class="font-label uppercase text-[0.625rem]">Revenu Total Généré</span>
+<span class="material-symbols-outlined text-sm">trending_up</span>
+</div>
+<div class="text-3xl font-headline font-bold text-white mb-2">42 850,00 €</div>
+<div class="w-full h-1 bg-white/10 rounded-full overflow-hidden">
+<div class="w-[75%] h-full bg-on-primary-container"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- How It Works Section -->
+<section class="bg-surface-container-low py-32">
+<div class="max-w-7xl mx-auto px-6 lg:px-12">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-24 items-start">
+<div>
+<span class="font-label text-[0.6875rem] uppercase tracking-[0.2em] text-primary mb-4 block">Le Processus</span>
+<h2 class="font-headline text-4xl md:text-5xl font-bold text-primary leading-tight mb-8">Comment ça marche</h2>
+<p class="text-on-surface/70 text-lg leading-relaxed mb-12">
+                            Transformez votre établissement d'une opération fragmentée en un réseau de précision en trois mouvements distincts.
+                        </p>
+<button class="bg-primary text-white px-10 py-4 font-headline uppercase tracking-widest text-xs font-bold rounded-[0.125rem] hover:opacity-90 transition-all">
+                            Voir la présentation
+                        </button>
+</div>
+<div class="space-y-20">
+<div class="relative">
+<span class="font-headline text-8xl font-black text-primary opacity-5 absolute -top-12 -left-8">01</span>
+<div class="relative z-10">
+<h3 class="font-headline text-2xl font-bold text-primary mb-4">Créez le profil de votre établissement</h3>
+<p class="text-on-surface/70 leading-relaxed max-w-sm">
+                                    Définissez votre espace, fixez les minimums de table et établissez votre image de marque au sein de l'écosystème twocards.
+                                </p>
+</div>
+</div>
+<div class="relative">
+<span class="font-headline text-8xl font-black text-primary opacity-5 absolute -top-12 -left-8">02</span>
+<div class="relative z-10">
+<h3 class="font-headline text-2xl font-bold text-primary mb-4">Connectez-vous avec les RP et concierges</h3>
+<p class="text-on-surface/70 leading-relaxed max-w-sm">
+                                    Invitez vos partenaires actuels ou parcourez notre réseau vérifié de professionnels de la nuit et de conciergeries premium.
+                                </p>
+</div>
+</div>
+<div class="relative">
+<span class="font-headline text-8xl font-black text-primary opacity-5 absolute -top-12 -left-8">03</span>
+<div class="relative z-10">
+<h3 class="font-headline text-2xl font-bold text-primary mb-4">Gérez et suivez tout</h3>
+<p class="text-on-surface/70 leading-relaxed max-w-sm">
+                                    Suivez vos réservations se synchroniser en temps réel. Les rapports automatisés vous font gagner plus de 15 heures de gestion manuelle par semaine.
+                                </p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Social Proof Section -->
+<section class="bg-surface py-32">
+<div class="max-w-7xl mx-auto px-6 lg:px-12 text-center">
+<span class="font-label text-[0.6875rem] uppercase tracking-[0.2em] text-primary/40 mb-12 block">Approuvé par les plus grands lieux d'Europe</span>
+<div class="flex flex-wrap justify-center items-center gap-12 md:gap-24 mb-32 grayscale opacity-40">
+<span class="font-brand text-2xl font-bold italic tracking-tighter">VANTAGE</span>
+<span class="font-headline text-2xl font-extrabold tracking-widest">MONOLITH</span>
+<span class="font-label text-xl font-black">OBSIDIAN.</span>
+<span class="font-brand text-2xl font-semibold">VELVET</span>
+<span class="font-headline text-xl font-bold italic">PRISM</span>
+</div>
+<div class="max-w-4xl mx-auto">
+<span class="material-symbols-outlined text-on-primary-container text-6xl mb-8 opacity-20">format_quote</span>
+<blockquote class="font-headline text-3xl md:text-4xl font-light italic text-primary leading-snug mb-10">
+                        "twocards. n'a pas seulement numérisé notre liste d'invités — il a révolutionné notre vision de notre réseau. L'esthétique éditoriale du tableau de bord correspond au luxe qu'attendent nos clients."
+                    </blockquote>
+<div class="flex items-center justify-center space-x-4">
+<div class="w-12 h-12 rounded-full overflow-hidden">
+<img alt="Fondateur" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBFinHyC4-TCu17dDha_nYJUJ7ALyEFtHw1NZFlC5q3_HcwxmwqDIf6aeue9jodCMKgDi-rmErqsrEaQZZARDOtk_fapmHiiWm2TgpSOm1W004vDHaxlm1uZNO7Pe2pr-u_R_FHpq10Mgbc2QbyhDa1-1VzwpeNUi5zLeQJmUwdioPPiSKnClNU0b46tAQrE_aLnIcw-ML2W3PuU0y79Szas5moFQztDNYf4l9ahu7keqO3a7H7jr-Ys2RIMT9Utjupmxkcke6o3T63"/>
+</div>
+<div class="text-left">
+<p class="font-headline font-bold text-primary">Julian Moreau</p>
+<p class="font-label text-[0.6875rem] uppercase tracking-wider opacity-60">Fondateur, L'Éclipse Paris</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- CTA Banner -->
+<section class="bg-primary py-24 mx-6 lg:mx-12 mb-32 rounded-[0.125rem] text-center">
+<div class="max-w-3xl mx-auto px-6">
+<h2 class="font-headline text-4xl md:text-5xl font-bold text-white mb-8">Prêt à optimiser vos opérations ?</h2>
+<div class="flex flex-col md:flex-row items-center justify-center gap-6">
+<button class="bg-white text-primary px-12 py-4 font-headline uppercase tracking-widest text-xs font-bold rounded-[0.125rem] hover:bg-surface-container-low transition-all">
+                        Demander un accès anticipé
+                    </button>
+<button class="border border-white/20 text-white px-12 py-4 font-headline uppercase tracking-widest text-xs font-bold rounded-[0.125rem] hover:bg-white/5 transition-all">
+                        Planifier une démo
+                    </button>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer Shell -->
+<footer class="w-full py-24 bg-[#eff5f3] dark:bg-[#001430] font-['Inter'] text-[0.875rem] leading-relaxed">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-12 px-12 lg:px-24 max-w-7xl mx-auto">
+<div class="col-span-1">
+<div class="text-xl font-bold text-[#001b40] dark:text-[#f5fbf9] mb-6">twocards.</div>
+<p class="text-[#171d1c] opacity-70 mb-8 max-w-xs">
+                    La plateforme de référence pour la gestion des établissements de nuit et l'intelligence réseau.
+                </p>
+<div class="flex space-x-4 opacity-50">
+<span class="material-symbols-outlined text-lg cursor-pointer hover:opacity-100 transition-opacity">public</span>
+<span class="material-symbols-outlined text-lg cursor-pointer hover:opacity-100 transition-opacity">alternate_email</span>
+</div>
+</div>
+<div class="col-span-1">
+<h4 class="font-semibold text-[#13305c] mb-6">Produit</h4>
+<ul class="space-y-4">
+<li><a class="text-[#171d1c] opacity-70 hover:opacity-100 transition-opacity" href="#">Pour les Lieux</a></li>
+<li><a class="text-[#171d1c] opacity-70 hover:opacity-100 transition-opacity" href="#">Pour les RP &amp; Concierges</a></li>
+<li><a class="text-[#171d1c] opacity-70 hover:opacity-100 transition-opacity" href="#">Le Registre</a></li>
+<li><a class="text-[#171d1c] opacity-70 hover:opacity-100 transition-opacity" href="#">Intégrations</a></li>
+</ul>
+</div>
+<div class="col-span-1">
+<h4 class="font-semibold text-[#13305c] mb-6">Entreprise</h4>
+<ul class="space-y-4">
+<li><a class="text-[#171d1c] opacity-70 hover:opacity-100 transition-opacity" href="#">À propos</a></li>
+<li><a class="text-[#171d1c] opacity-70 hover:opacity-100 transition-opacity" href="#">Rapports d'intelligence</a></li>
+<li><a class="text-[#171d1c] opacity-70 hover:opacity-100 transition-opacity" href="#">Carrières</a></li>
+<li><a class="text-[#171d1c] opacity-70 hover:opacity-100 transition-opacity" href="#">Sécurité</a></li>
+</ul>
+</div>
+<div class="col-span-1">
+<h4 class="font-semibold text-[#13305c] mb-6">Juridique</h4>
+<ul class="space-y-4">
+<li><a class="text-[#171d1c] opacity-70 hover:opacity-100 transition-opacity" href="#">Politique de confidentialité</a></li>
+<li><a class="text-[#171d1c] opacity-70 hover:opacity-100 transition-opacity" href="#">Conditions d'utilisation</a></li>
+<li><a class="text-[#171d1c] opacity-70 hover:opacity-100 transition-opacity" href="#">Conformité RGPD</a></li>
+<li><a class="text-[#171d1c] opacity-70 hover:opacity-100 transition-opacity" href="#">Contact</a></li>
+</ul>
+</div>
+</div>
+<!-- Copyright Bar -->
+<div class="mt-24 pt-12 border-t border-primary/5 px-12 lg:px-24">
+<div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center opacity-50">
+<span class="text-xs">© 2024 twocards. Tous droits réservés.</span>
+<span class="text-xs uppercase tracking-widest mt-4 md:mt-0">Précision. Autorité. Style.</span>
+</div>
+</div>
+</footer>
+</body></html>

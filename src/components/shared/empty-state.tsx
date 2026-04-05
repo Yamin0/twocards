@@ -1,0 +1,31 @@
+import { LucideIcon } from "lucide-react";
+
+type EmptyStateProps = {
+  icon: LucideIcon;
+  title: string;
+  description: string;
+  action?: {
+    label: string;
+    onClick: () => void;
+  };
+};
+
+export function EmptyState({ icon: Icon, title, description, action }: EmptyStateProps) {
+  return (
+    <div className="flex flex-col items-center justify-center py-20 text-center">
+      <div className="w-16 h-16 rounded-full bg-surface-low flex items-center justify-center mb-6">
+        <Icon className="w-8 h-8 text-on-primary-container" strokeWidth={1.5} />
+      </div>
+      <h3 className="font-[family-name:var(--font-manrope)] font-bold text-xl text-primary-dark mb-2">{title}</h3>
+      <p className="text-sm text-on-surface-variant max-w-sm">{description}</p>
+      {action && (
+        <button
+          onClick={action.onClick}
+          className="mt-6 bg-primary text-white px-8 py-3 text-xs font-bold uppercase tracking-widest rounded-sm"
+        >
+          {action.label}
+        </button>
+      )}
+    </div>
+  );
+}

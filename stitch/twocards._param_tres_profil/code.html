@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-dim": "#d5dbd9",
+                        "tertiary": "#001b40",
+                        "on-surface-variant": "#44474f",
+                        "primary-fixed-dim": "#adc7fc",
+                        "on-background": "#171d1c",
+                        "on-tertiary-container": "#8099cb",
+                        "surface-container": "#e9efed",
+                        "on-error-container": "#93000a",
+                        "surface-container-lowest": "#ffffff",
+                        "outline": "#747780",
+                        "surface-tint": "#455e8d",
+                        "on-tertiary-fixed-variant": "#2d4673",
+                        "on-secondary-fixed-variant": "#424847",
+                        "on-secondary-fixed": "#171d1c",
+                        "surface-container-highest": "#dee4e2",
+                        "on-tertiary-fixed": "#001b3f",
+                        "surface-container-low": "#eff5f3",
+                        "tertiary-container": "#13305c",
+                        "tertiary-fixed-dim": "#aec7fb",
+                        "on-primary-fixed": "#001b3f",
+                        "background": "#f5fbf9",
+                        "on-secondary": "#ffffff",
+                        "surface": "#f5fbf9",
+                        "tertiary-fixed": "#d7e2ff",
+                        "surface-bright": "#f5fbf9",
+                        "on-primary-container": "#8099cb",
+                        "primary-fixed": "#d7e2ff",
+                        "secondary-fixed-dim": "#c2c8c6",
+                        "on-secondary-container": "#5d6463",
+                        "surface-container-high": "#e3e9e8",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-fixed-variant": "#2c4674",
+                        "inverse-primary": "#adc7fc",
+                        "inverse-surface": "#2b3231",
+                        "inverse-on-surface": "#ecf2f0",
+                        "primary": "#001b40",
+                        "outline-variant": "#c4c6d0",
+                        "secondary-container": "#dbe1df",
+                        "error-container": "#ffdad6",
+                        "surface-variant": "#dee4e2",
+                        "error": "#ba1a1a",
+                        "secondary-fixed": "#dee4e2",
+                        "on-primary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "secondary": "#59605e",
+                        "primary-container": "#13305c",
+                        "on-surface": "#171d1c"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #f5fbf9;
+            color: #171d1c;
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+<!-- TopAppBar -->
+<header class="bg-[#f5fbf9] dark:bg-slate-950 flex justify-between items-center w-full px-8 h-16 fixed top-0 z-50">
+<div class="flex items-center gap-4">
+<span class="text-xl font-extrabold text-[#001b40] dark:text-white font-['Manrope'] tracking-tight">CRM Ledger</span>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-[#13305c] dark:text-blue-400">notifications</span>
+<div class="h-8 w-8 rounded-full overflow-hidden bg-surface-container-highest">
+<img alt="User Profile" class="h-full w-full object-cover" data-alt="close up professional portrait of a male manager with warm lighting and blurred office background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7RFDaLN_tUyRabCA78vr7RidVfAI3_0zkAUhV6OhudrOljoI8rHy2TOEvwfIvufx2uKmR7A5T-fb7TNL4MsrnUaO_lmp_DjoZPkSy79_PAXgIGs4pI5iMCzat8yDk0vBH2XfMi0IqmQr3s6RJwWSTK-ymno3scma2X_a9sRH_X1Ub3HFvMf9oFNYQaVt3Bu8deTn0_S1jflVk-Dl3tUpW7WBfNTfHe821KnJ9hplOHcAFmNXGFtO1W5dkiJ-hoTj2aomwb_XhTUtB"/>
+</div>
+</div>
+</div>
+</header>
+<div class="flex flex-1 pt-16 h-full">
+<!-- SideNavBar -->
+<aside class="bg-[#eff5f3] dark:bg-slate-900 h-screen w-64 fixed left-0 flex flex-col py-8 px-4 gap-2 border-none">
+<div class="mb-8 px-4">
+<h2 class="text-[#001b40] font-black font-['Manrope'] text-lg">Settings</h2>
+<p class="font-['Manrope'] text-sm tracking-wide uppercase text-[#8099cb]">Management</p>
+</div>
+<nav class="space-y-1">
+<a class="bg-white dark:bg-slate-800 text-[#13305c] dark:text-white font-bold rounded-sm flex items-center gap-3 px-4 py-3 border-r-2 border-[#13305c] transition-all" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-['Manrope'] text-sm tracking-wide uppercase">Profile</span>
+</a>
+<a class="text-[#8099cb] dark:text-slate-400 hover:text-[#13305c] dark:hover:text-white flex items-center gap-3 px-4 py-3 transition-colors" href="#">
+<span class="material-symbols-outlined">badge</span>
+<span class="font-['Manrope'] text-sm tracking-wide uppercase">Account</span>
+</a>
+<a class="text-[#8099cb] dark:text-slate-400 hover:text-[#13305c] dark:hover:text-white flex items-center gap-3 px-4 py-3 transition-colors" href="#">
+<span class="material-symbols-outlined">notifications</span>
+<span class="font-['Manrope'] text-sm tracking-wide uppercase">Notifications</span>
+</a>
+<a class="text-[#8099cb] dark:text-slate-400 hover:text-[#13305c] dark:hover:text-white flex items-center gap-3 px-4 py-3 transition-colors" href="#">
+<span class="material-symbols-outlined">payments</span>
+<span class="font-['Manrope'] text-sm tracking-wide uppercase">Billing</span>
+</a>
+<a class="text-[#8099cb] dark:text-slate-400 hover:text-[#13305c] dark:hover:text-white flex items-center gap-3 px-4 py-3 transition-colors" href="#">
+<span class="material-symbols-outlined">security</span>
+<span class="font-['Manrope'] text-sm tracking-wide uppercase">Security</span>
+</a>
+</nav>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-64 flex-1 bg-[#f5fbf9] p-12 min-h-screen">
+<div class="max-w-4xl mx-auto">
+<header class="mb-12">
+<h1 class="text-5xl font-extrabold font-headline text-primary tracking-tighter mb-2">Votre Profil</h1>
+<p class="text-secondary font-body">Gérez vos informations personnelles et les détails de votre établissement.</p>
+</header>
+<div class="space-y-12">
+<!-- Photo Section -->
+<section class="bg-surface-container-lowest p-8 rounded shadow-[0_24px_48px_rgba(19,48,92,0.04)] flex items-center gap-8">
+<div class="relative">
+<div class="w-32 h-32 rounded-full bg-primary flex items-center justify-center overflow-hidden border-4 border-surface-container-low">
+<img class="w-full h-full object-cover" data-alt="sharp close-up of a smiling male face in high-end photography style with cinematic lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA7OxH0rYZy0YpwOKF2qiB0UkM8lGY2w4sEv6XxMwEg59WyYV3e-gg2IS4Mwe0NL8rLfVOkp_i3A9aW8z91_UuKqxUMlaNkQ6a4hTU2IgpIpG07PF0uZc5MADbLRMzHBLA6JvZcJrKisOQDj2MTPVhq2hIo11oSSDtj4nbX5A7dG19LqYbT06S6hQNhTHHWpDLtXRGt5TbzDH6lfBIIf6MeRT-BR_vL2Yuk99O9MX7iYZCZNU3eR2amcayR9bOf9xwqsOptOOVUx_Uz"/>
+</div>
+<div class="absolute bottom-0 right-0 bg-primary text-white p-1.5 rounded-full border-2 border-white">
+<span class="material-symbols-outlined text-sm">edit</span>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<h3 class="font-headline font-bold text-xl text-primary">Photo de profil</h3>
+<button class="text-primary font-semibold text-sm hover:underline text-left">Modifier la photo</button>
+<p class="text-xs text-secondary mt-2">JPG, GIF ou PNG. Max 2Mo.</p>
+</div>
+</section>
+<!-- Form Section -->
+<section class="grid grid-cols-1 md:grid-cols-2 gap-12">
+<!-- User Info -->
+<div class="space-y-6">
+<h2 class="font-headline font-bold text-2xl text-primary border-b border-surface-container pb-4">Informations Personnelles</h2>
+<div class="space-y-4">
+<div class="flex flex-col gap-1.5">
+<label class="text-[0.75rem] font-bold uppercase tracking-widest text-[#44474f]">Nom complet</label>
+<input class="bg-surface-container-low border-none rounded-sm px-4 py-3 focus:ring-1 focus:ring-primary text-primary font-medium" type="text" value="Jean-Philippe Dubois"/>
+</div>
+<div class="flex flex-col gap-1.5">
+<label class="text-[0.75rem] font-bold uppercase tracking-widest text-[#44474f]">E-mail</label>
+<input class="bg-[#e9efed] border-none rounded-sm px-4 py-3 text-secondary-fixed-dim cursor-not-allowed" readonly="" type="email" value="jp.dubois@luxury-night.fr"/>
+</div>
+<div class="flex flex-col gap-1.5">
+<label class="text-[0.75rem] font-bold uppercase tracking-widest text-[#44474f]">Téléphone</label>
+<input class="bg-surface-container-low border-none rounded-sm px-4 py-3 focus:ring-1 focus:ring-primary text-primary font-medium" type="tel" value="+33 6 12 34 56 78"/>
+</div>
+<div class="flex flex-col gap-1.5">
+<label class="text-[0.75rem] font-bold uppercase tracking-widest text-[#44474f]">Ville</label>
+<input class="bg-surface-container-low border-none rounded-sm px-4 py-3 focus:ring-1 focus:ring-primary text-primary font-medium" type="text" value="Paris"/>
+</div>
+</div>
+</div>
+<!-- Venue Info -->
+<div class="space-y-6">
+<h2 class="font-headline font-bold text-2xl text-primary border-b border-surface-container pb-4">Détails de l'Établissement</h2>
+<div class="space-y-4">
+<div class="flex flex-col gap-1.5">
+<label class="text-[0.75rem] font-bold uppercase tracking-widest text-[#44474f]">Nom de l'établissement</label>
+<input class="bg-surface-container-low border-none rounded-sm px-4 py-3 focus:ring-1 focus:ring-primary text-primary font-medium" type="text" value="Le Velvet Privé"/>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="flex flex-col gap-1.5">
+<label class="text-[0.75rem] font-bold uppercase tracking-widest text-[#44474f]">Type</label>
+<select class="bg-surface-container-low border-none rounded-sm px-4 py-3 focus:ring-1 focus:ring-primary text-primary font-medium">
+<option>Club Privé</option>
+<option>Lounge</option>
+<option>Hôtel Bar</option>
+</select>
+</div>
+<div class="flex flex-col gap-1.5">
+<label class="text-[0.75rem] font-bold uppercase tracking-widest text-[#44474f]">Capacité</label>
+<input class="bg-surface-container-low border-none rounded-sm px-4 py-3 focus:ring-1 focus:ring-primary text-primary font-medium" type="number" value="450"/>
+</div>
+</div>
+<div class="flex flex-col gap-1.5">
+<label class="text-[0.75rem] font-bold uppercase tracking-widest text-[#44474f]">Adresse</label>
+<input class="bg-surface-container-low border-none rounded-sm px-4 py-3 focus:ring-1 focus:ring-primary text-primary font-medium" type="text" value="12 Avenue Montaigne, 75008 Paris"/>
+</div>
+</div>
+</div>
+</section>
+<!-- Wide Fields Section -->
+<section class="bg-surface-container-low p-8 rounded space-y-6">
+<div class="flex flex-col gap-1.5">
+<label class="text-[0.75rem] font-bold uppercase tracking-widest text-[#44474f]">Description</label>
+<textarea class="bg-surface-container-lowest border-none rounded-sm px-4 py-3 focus:ring-1 focus:ring-primary text-primary font-medium resize-none" rows="4">Un établissement d'exception au cœur du triangle d'or, offrant une expérience nocturne exclusive avec une programmation internationale et un service de conciergerie VIP dédié.</textarea>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<div class="flex flex-col gap-1.5">
+<label class="text-[0.75rem] font-bold uppercase tracking-widest text-[#44474f]">Horaires d'ouverture</label>
+<input class="bg-surface-container-lowest border-none rounded-sm px-4 py-3 focus:ring-1 focus:ring-primary text-primary font-medium" type="text" value="Mar-Sam: 23:00 - 06:00"/>
+</div>
+<div class="flex flex-col gap-1.5">
+<label class="text-[0.75rem] font-bold uppercase tracking-widest text-[#44474f]">Règles de consommation minimum</label>
+<input class="bg-surface-container-lowest border-none rounded-sm px-4 py-3 focus:ring-1 focus:ring-primary text-primary font-medium" type="text" value="À partir de 150€ par personne en table VIP"/>
+</div>
+</div>
+</section>
+<!-- Action Buttons -->
+<div class="flex items-center justify-between pt-12">
+<button class="bg-[#13305c] text-white px-10 py-4 font-bold text-sm tracking-widest uppercase transition-all active:scale-95 shadow-lg">
+                            Enregistrer les modifications
+                        </button>
+<button class="text-error font-semibold text-sm hover:underline">
+                            Supprimer le compte
+                        </button>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Footer -->
+<footer class="bg-[#f5fbf9] dark:bg-slate-950 flex justify-between items-center px-8 py-6 w-full mt-auto border-t border-slate-100 dark:border-slate-800">
+<span class="font-['Inter'] text-[11px] uppercase tracking-widest text-[#8099cb]">© 2024 Precision Editorial CRM</span>
+<div class="flex gap-8">
+<a class="font-['Inter'] text-[11px] uppercase tracking-widest text-[#8099cb] hover:text-[#13305c] transition-colors" href="#">Privacy Policy</a>
+<a class="font-['Inter'] text-[11px] uppercase tracking-widest text-[#8099cb] hover:text-[#13305c] transition-colors" href="#">Service Terms</a>
+<a class="font-['Inter'] text-[11px] uppercase tracking-widest text-[#8099cb] hover:text-[#13305c] transition-colors" href="#">Contact Support</a>
+</div>
+</footer>
+</body></html>

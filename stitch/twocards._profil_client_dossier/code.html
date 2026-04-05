@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>The Velvet Ledger | Guest Dossier</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, .font-headline { font-family: 'Manrope', sans-serif; }
+        .tonal-shift { background: linear-gradient(180deg, #f5fbf9 0%, #eff5f3 100%); }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "inverse-primary": "#adc7fc",
+                      "surface-container-lowest": "#ffffff",
+                      "secondary": "#59605e",
+                      "on-primary": "#ffffff",
+                      "surface-container-high": "#e3e9e8",
+                      "on-surface-variant": "#44474f",
+                      "surface-bright": "#f5fbf9",
+                      "on-tertiary-fixed": "#001b3f",
+                      "on-secondary": "#ffffff",
+                      "surface-dim": "#d5dbd9",
+                      "secondary-container": "#dbe1df",
+                      "tertiary-fixed-dim": "#aec7fb",
+                      "on-secondary-fixed": "#171d1c",
+                      "on-secondary-fixed-variant": "#424847",
+                      "on-secondary-container": "#5d6463",
+                      "on-primary-fixed-variant": "#2c4674",
+                      "primary-container": "#13305c",
+                      "primary-fixed": "#d7e2ff",
+                      "outline": "#747780",
+                      "surface-container-low": "#eff5f3",
+                      "on-surface": "#171d1c",
+                      "on-background": "#171d1c",
+                      "error": "#ba1a1a",
+                      "on-error-container": "#93000a",
+                      "background": "#f5fbf9",
+                      "secondary-fixed": "#dee4e2",
+                      "on-tertiary-container": "#8099cb",
+                      "surface-tint": "#455e8d",
+                      "on-tertiary-fixed-variant": "#2d4673",
+                      "on-error": "#ffffff",
+                      "inverse-on-surface": "#ecf2f0",
+                      "tertiary": "#001b40",
+                      "outline-variant": "#c4c6d0",
+                      "secondary-fixed-dim": "#c2c8c6",
+                      "surface-variant": "#dee4e2",
+                      "on-primary-fixed": "#001b3f",
+                      "primary": "#001b40",
+                      "tertiary-container": "#13305c",
+                      "on-primary-container": "#8099cb",
+                      "inverse-surface": "#2b3231",
+                      "primary-fixed-dim": "#adc7fc",
+                      "on-tertiary": "#ffffff",
+                      "surface-container-highest": "#dee4e2",
+                      "surface": "#f5fbf9",
+                      "surface-container": "#e9efed",
+                      "tertiary-fixed": "#d7e2ff",
+                      "error-container": "#ffdad6"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "fontFamily": {
+                      "headline": ["Manrope"],
+                      "body": ["Inter"],
+                      "label": ["Inter"]
+              }
+            }
+          }
+        }
+      </script>
+</head>
+<body class="bg-surface text-on-surface font-body overflow-x-hidden">
+<!-- Navigation Shell -->
+<nav class="h-screen w-64 fixed left-0 top-0 bg-surface-container-low flex flex-col py-8 px-4 z-50">
+<div class="mb-12 px-4">
+<span class="text-xl font-extrabold font-headline text-primary">The Velvet Ledger</span>
+<p class="text-[0.6875rem] uppercase tracking-widest text-secondary mt-1">Nightlife Management</p>
+</div>
+<div class="space-y-1 flex-grow">
+<a class="flex items-center gap-3 px-4 py-3 text-on-tertiary-container hover:bg-surface-container transition-colors rounded" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="text-sm font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-tertiary-container hover:bg-surface-container transition-colors rounded" href="#">
+<span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+<span class="text-sm font-medium">Events</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-primary font-bold border-r-2 border-primary bg-surface-container transition-colors rounded-l" href="#">
+<span class="material-symbols-outlined" data-icon="group" style="font-variation-settings: 'FILL' 1;">group</span>
+<span class="text-sm">Guests</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-tertiary-container hover:bg-surface-container transition-colors rounded" href="#">
+<span class="material-symbols-outlined" data-icon="list_alt">list_alt</span>
+<span class="text-sm font-medium">Guest Lists</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-tertiary-container hover:bg-surface-container transition-colors rounded" href="#">
+<span class="material-symbols-outlined" data-icon="grid_view">grid_view</span>
+<span class="text-sm font-medium">Table Map</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-tertiary-container hover:bg-surface-container transition-colors rounded" href="#">
+<span class="material-symbols-outlined" data-icon="confirmation_number">confirmation_number</span>
+<span class="text-sm font-medium">Reservations</span>
+</a>
+</div>
+<div class="mt-auto px-4 pt-4 border-t border-outline-variant/10">
+<div class="flex items-center gap-3">
+<img alt="Manager Profile" class="w-10 h-10 rounded-full object-cover" data-alt="Close-up professional portrait of a venue manager in a tailored suit, warm cinematic lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDfacQj9onY4nTstCXmQI1oD56FdjrIr8atOzUx5vACQDkWCyf3-1uBk8kIQWEFLaz_VGQao-w9lR1vtZS8UtIRx7jk0mRnuvjY1E44wZw6k-sRe279c45x6AxiM1VBFicOdLukdaAWOdcSRBs7mxZrYY2zm2J1n8KYb-GsuOu99sPt8EM35viQp1FffGRXJQHQclcP7et6sBo8vCz7Otktgx_GxyhJq7fQPPFxWL0JKjqsBMoBNUA471ROh13ulmTEUHBiQX7zS9VV"/>
+<div>
+<p class="text-xs font-bold text-primary">Manager Admin</p>
+<p class="text-[10px] text-secondary">Venue Principal</p>
+</div>
+</div>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="ml-64 min-h-screen">
+<!-- Top App Bar -->
+<header class="flex justify-between items-center h-16 px-12 sticky top-0 bg-surface z-40 tonal-shift">
+<div class="flex items-center gap-4 bg-surface-container-lowest px-4 py-2 rounded-lg w-96 border border-outline-variant/5">
+<span class="material-symbols-outlined text-outline" data-icon="search">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm w-full" placeholder="Rechercher un client..." type="text"/>
+</div>
+<div class="flex items-center gap-6">
+<span class="material-symbols-outlined text-primary cursor-pointer" data-icon="notifications">notifications</span>
+<span class="material-symbols-outlined text-primary cursor-pointer" data-icon="help_outline">help_outline</span>
+<div class="h-8 w-px bg-outline-variant/20"></div>
+<span class="text-[11px] font-bold tracking-widest text-secondary uppercase">Dossier Client #8291</span>
+</div>
+</header>
+<div class="p-12 space-y-12">
+<!-- Header Section -->
+<section class="flex justify-between items-start">
+<div class="flex items-center gap-10">
+<div class="relative">
+<div class="w-32 h-32 rounded-full overflow-hidden shadow-[0_24px_48px_-12px_rgba(19,48,92,0.08)] bg-surface-container-low border-4 border-surface-container-lowest">
+<img alt="Jean-Philippe Dubois" class="w-full h-full object-cover" data-alt="Portrait of a sophisticated French man in his 40s, elegant navy blazer, clean-shaven, soft studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAY4zxaj2Dd2brvJPuc3uelE6Zsr0MMG8I4W4EcDEkdKvF76nhphP4pyDhcZH-4H7ma_9ZP4AtrXIGspeYwEvdHv-_Uoc9uJ02m3AV5SA0LSWc9SqQoq_f07aq9yPsMOC3wzlW6f77ywhEOm6maCbOYhhfH3yyrgguQlKYlz0xzZL6Y3_vEcBjkVitGoa_orGAdBYj4sR-y-nqSzrb11dh9o-U4GGSvXPwPdpZmkFPQBoOiuOWb24idYUA7ITIvIfWPK7kPN-Bvw0Nn"/>
+</div>
+<div class="absolute -bottom-2 -right-2 bg-primary text-white text-[10px] font-bold px-3 py-1 rounded-full tracking-tighter uppercase">VIP Platinum</div>
+</div>
+<div>
+<h1 class="text-[2.75rem] font-extrabold font-headline text-primary tracking-tight leading-none mb-4">Jean-Philippe Dubois</h1>
+<div class="flex items-center gap-6 text-on-surface-variant">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-base" data-icon="call">call</span>
+<span class="text-sm font-medium">+33 6 12 34 56 78</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-base" data-icon="mail">mail</span>
+<span class="text-sm font-medium">jp.dubois@private-equity.fr</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-base" data-icon="location_on">location_on</span>
+<span class="text-sm font-medium">Paris, 8ème Arr.</span>
+</div>
+</div>
+</div>
+</div>
+<div class="flex gap-3">
+<button class="bg-surface-container-high px-10 py-3 text-primary text-xs font-bold uppercase tracking-widest hover:bg-surface-container-highest transition-colors rounded-[0.125rem]">Modifier</button>
+<button class="bg-primary px-10 py-3 text-on-primary text-xs font-bold uppercase tracking-widest hover:opacity-90 transition-all rounded-[0.125rem] shadow-sm">Ajouter Note</button>
+</div>
+</section>
+<!-- Metrics Data Strip -->
+<section class="bg-primary-container grid grid-cols-5 divide-x divide-white/5 py-10 px-8 rounded-lg">
+<div class="px-6 space-y-1">
+<p class="text-[0.6875rem] font-bold uppercase tracking-widest text-[#8099cb]">Total Visites</p>
+<p class="text-2xl font-extrabold font-headline text-white">23</p>
+</div>
+<div class="px-6 space-y-1">
+<p class="text-[0.6875rem] font-bold uppercase tracking-widest text-[#8099cb]">Dépenses Totales</p>
+<p class="text-2xl font-extrabold font-headline text-white">12 400€</p>
+</div>
+<div class="px-6 space-y-1">
+<p class="text-[0.6875rem] font-bold uppercase tracking-widest text-[#8099cb]">Dépense Moyenne</p>
+<p class="text-2xl font-extrabold font-headline text-white">539€</p>
+</div>
+<div class="px-6 space-y-1">
+<p class="text-[0.6875rem] font-bold uppercase tracking-widest text-[#8099cb]">Taille Groupe Moy.</p>
+<p class="text-2xl font-extrabold font-headline text-white">4</p>
+</div>
+<div class="px-6 space-y-1">
+<p class="text-[0.6875rem] font-bold uppercase tracking-widest text-[#8099cb]">Première Visite</p>
+<p class="text-2xl font-extrabold font-headline text-white">Mars 2025</p>
+</div>
+</section>
+<!-- Columns Layout -->
+<div class="flex gap-12">
+<!-- Left Column (60%) -->
+<div class="w-3/5 space-y-12">
+<!-- Historique des visites -->
+<div class="bg-surface-container-lowest p-8 rounded-xl shadow-[0_32px_64px_-16px_rgba(19,48,92,0.04)]">
+<h2 class="text-xl font-extrabold font-headline text-primary mb-8 tracking-tight">Historique des visites</h2>
+<div class="space-y-0.5">
+<div class="grid grid-cols-5 text-[0.6875rem] font-bold uppercase tracking-widest text-secondary mb-4 px-4">
+<div class="col-span-2">Événement &amp; Lieu</div>
+<div>Table</div>
+<div>Dépense</div>
+<div>Referral</div>
+</div>
+<!-- Row 1 -->
+<div class="grid grid-cols-5 items-center px-4 py-5 bg-surface-container-low transition-colors">
+<div class="col-span-2">
+<p class="text-sm font-bold text-primary">Crystal Gala</p>
+<p class="text-[10px] text-on-surface-variant">Le Velvet Lounge • 12 Oct 2025</p>
+</div>
+<div class="text-sm font-medium">VIP 04</div>
+<div class="text-sm font-bold text-primary">2 150€</div>
+<div class="text-xs text-on-surface-variant italic">Direct</div>
+</div>
+<!-- Row 2 -->
+<div class="grid grid-cols-5 items-center px-4 py-5 bg-white transition-colors">
+<div class="col-span-2">
+<p class="text-sm font-bold text-primary">Afterwork Private Equity</p>
+<p class="text-[10px] text-on-surface-variant">The Ledger Terrace • 28 Sep 2025</p>
+</div>
+<div class="text-sm font-medium">T-12</div>
+<div class="text-sm font-bold text-primary">890€</div>
+<div class="text-xs text-on-surface-variant italic">C. Dupont</div>
+</div>
+<!-- Row 3 -->
+<div class="grid grid-cols-5 items-center px-4 py-5 bg-surface-container-low transition-colors">
+<div class="col-span-2">
+<p class="text-sm font-bold text-primary">Lancement Automne</p>
+<p class="text-[10px] text-on-surface-variant">Le Velvet Lounge • 04 Sep 2025</p>
+</div>
+<div class="text-sm font-medium">VIP 01</div>
+<div class="text-sm font-bold text-primary">3 400€</div>
+<div class="text-xs text-on-surface-variant italic">M. Lefebvre</div>
+</div>
+</div>
+<button class="mt-8 text-[0.6875rem] font-bold uppercase tracking-widest text-primary flex items-center gap-2 hover:translate-x-1 transition-transform">
+                            Voir tout l'historique
+                            <span class="material-symbols-outlined text-sm" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+<!-- Réservations -->
+<div class="bg-surface-container-lowest p-8 rounded-xl shadow-[0_32px_64px_-16px_rgba(19,48,92,0.04)]">
+<div class="flex justify-between items-center mb-8">
+<h2 class="text-xl font-extrabold font-headline text-primary tracking-tight">Réservations à venir</h2>
+<span class="text-[0.6875rem] font-bold text-primary bg-primary-fixed px-3 py-1 rounded">2 Actives</span>
+</div>
+<div class="space-y-4">
+<div class="flex items-center justify-between p-5 border border-outline-variant/10 rounded-lg bg-surface">
+<div class="flex items-center gap-5">
+<div class="w-12 h-12 bg-white flex flex-col items-center justify-center rounded border border-outline-variant/20 shadow-sm">
+<span class="text-[10px] font-bold uppercase text-secondary">Nov</span>
+<span class="text-lg font-extrabold text-primary leading-none">14</span>
+</div>
+<div>
+<p class="text-sm font-bold text-primary">Privatisation Mezzanine</p>
+<p class="text-[10px] text-on-surface-variant">22:30 • 8 Personnes • Table VIP 02</p>
+</div>
+</div>
+<span class="bg-green-50 text-green-700 text-[10px] font-bold px-3 py-1 uppercase tracking-tighter rounded">Confirmé</span>
+</div>
+<div class="flex items-center justify-between p-5 border border-outline-variant/10 rounded-lg bg-surface">
+<div class="flex items-center gap-5">
+<div class="w-12 h-12 bg-white flex flex-col items-center justify-center rounded border border-outline-variant/20 shadow-sm">
+<span class="text-[10px] font-bold uppercase text-secondary">Dec</span>
+<span class="text-lg font-extrabold text-primary leading-none">31</span>
+</div>
+<div>
+<p class="text-sm font-bold text-primary">Réveillon New Year</p>
+<p class="text-[10px] text-on-surface-variant">21:00 • 4 Personnes • Table Dancefloor</p>
+</div>
+</div>
+<span class="bg-blue-50 text-blue-700 text-[10px] font-bold px-3 py-1 uppercase tracking-tighter rounded">En attente</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column (40%) -->
+<div class="w-2/5 space-y-10">
+<!-- Informations Client -->
+<div class="bg-surface-container-low p-8 rounded-xl">
+<h3 class="text-sm font-bold uppercase tracking-widest text-primary mb-6 border-b border-primary/10 pb-4">Informations Client</h3>
+<dl class="space-y-6">
+<div>
+<dt class="text-[0.6875rem] font-bold text-on-tertiary-container uppercase tracking-wider mb-1">Anniversaire</dt>
+<dd class="text-sm font-semibold text-primary">15 Mai 1982</dd>
+</div>
+<div>
+<dt class="text-[0.6875rem] font-bold text-on-tertiary-container uppercase tracking-wider mb-1">Préférence Table</dt>
+<dd class="text-sm font-semibold text-primary">Angle VIP, loin des enceintes</dd>
+</div>
+<div>
+<dt class="text-[0.6875rem] font-bold text-on-tertiary-container uppercase tracking-wider mb-1">Style Musical</dt>
+<dd class="text-sm font-semibold text-primary">Deep House, Nu Jazz</dd>
+</div>
+<div>
+<dt class="text-[0.6875rem] font-bold text-on-tertiary-container uppercase tracking-wider mb-1">Restrictions Alimentaires</dt>
+<dd class="text-sm font-semibold text-error">Allergie Crustacés (Sévère)</dd>
+</div>
+</dl>
+</div>
+<!-- Notes -->
+<div class="space-y-6">
+<div class="flex justify-between items-center">
+<h3 class="text-sm font-bold uppercase tracking-widest text-primary">Notes Internes</h3>
+<span class="material-symbols-outlined text-outline cursor-pointer text-lg" data-icon="add_circle">add_circle</span>
+</div>
+<div class="space-y-4">
+<div class="bg-white p-5 rounded border-l-4 border-primary shadow-sm">
+<p class="text-xs text-on-surface-variant leading-relaxed mb-3">"Préfère toujours le Champagne Dom Pérignon bien frappé dès l'arrivée. Ne jamais lui proposer la table près du bar."</p>
+<div class="flex justify-between items-center">
+<span class="text-[9px] font-bold text-secondary uppercase">Par Marc (Manager)</span>
+<span class="text-[9px] text-outline">12 Oct 2025</span>
+</div>
+</div>
+<div class="bg-white p-5 rounded border-l-4 border-outline-variant/30 shadow-sm">
+<p class="text-xs text-on-surface-variant leading-relaxed mb-3">"A fêté son anniversaire avec 12 invités. Très généreux en pourboires. À inviter prioritairement pour les events caritatifs."</p>
+<div class="flex justify-between items-center">
+<span class="text-[9px] font-bold text-secondary uppercase">Par Sophie</span>
+<span class="text-[9px] text-outline">15 Mai 2025</span>
+</div>
+</div>
+</div>
+<div class="pt-2">
+<textarea class="w-full bg-surface-container-lowest border border-outline-variant/20 rounded p-4 text-sm focus:ring-1 focus:ring-primary h-24 resize-none outline-none" placeholder="Écrire une note rapide..."></textarea>
+</div>
+</div>
+<!-- Tags -->
+<div>
+<h3 class="text-sm font-bold uppercase tracking-widest text-primary mb-6">Segments &amp; Tags</h3>
+<div class="flex flex-wrap gap-2">
+<span class="bg-primary text-white text-[10px] font-bold px-4 py-2 uppercase tracking-tighter rounded-full">High Spender</span>
+<span class="bg-surface-container-high text-primary text-[10px] font-bold px-4 py-2 uppercase tracking-tighter rounded-full">Regular</span>
+<span class="bg-surface-container-high text-primary text-[10px] font-bold px-4 py-2 uppercase tracking-tighter rounded-full">VIP Anniversaire</span>
+<span class="bg-surface-container-high text-primary text-[10px] font-bold px-4 py-2 uppercase tracking-tighter rounded-full">Service Bouteille</span>
+<span class="bg-surface-container-high text-primary text-[10px] font-bold px-4 py-2 uppercase tracking-tighter rounded-full">Private Equity</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Action Bar (Floating UX) -->
+<div class="fixed bottom-8 right-8 flex gap-4">
+<button class="w-14 h-14 bg-surface-container-lowest rounded-full shadow-xl flex items-center justify-center text-primary border border-outline-variant/10 hover:scale-110 duration-200">
+<span class="material-symbols-outlined" data-icon="print">print</span>
+</button>
+<button class="w-14 h-14 bg-primary text-white rounded-full shadow-xl flex items-center justify-center hover:scale-110 duration-200">
+<span class="material-symbols-outlined" data-icon="share" style="font-variation-settings: 'FILL' 1;">share</span>
+</button>
+</div>
+</body></html>

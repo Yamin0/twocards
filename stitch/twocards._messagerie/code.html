@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>twocards. | Messagerie</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface": "#f5fbf9",
+                        "surface-container-highest": "#dee4e2",
+                        "primary-fixed-dim": "#adc7fc",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-fixed": "#d7e2ff",
+                        "error-container": "#ffdad6",
+                        "surface-container": "#e9efed",
+                        "tertiary-container": "#13305c",
+                        "primary": "#001b40",
+                        "on-primary-container": "#8099cb",
+                        "inverse-surface": "#2b3231",
+                        "secondary-fixed-dim": "#c2c8c6",
+                        "outline-variant": "#c4c6d0",
+                        "on-primary-fixed": "#001b3f",
+                        "surface-variant": "#dee4e2",
+                        "inverse-on-surface": "#ecf2f0",
+                        "on-tertiary-fixed-variant": "#2d4673",
+                        "on-error": "#ffffff",
+                        "surface-tint": "#455e8d",
+                        "tertiary": "#001b40",
+                        "on-surface": "#171d1c",
+                        "on-background": "#171d1c",
+                        "error": "#ba1a1a",
+                        "surface-container-low": "#eff5f3",
+                        "secondary-fixed": "#dee4e2",
+                        "on-tertiary-container": "#8099cb",
+                        "on-error-container": "#93000a",
+                        "background": "#f5fbf9",
+                        "on-secondary-container": "#5d6463",
+                        "on-primary-fixed-variant": "#2c4674",
+                        "outline": "#747780",
+                        "primary-fixed": "#d7e2ff",
+                        "primary-container": "#13305c",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary-fixed": "#001b3f",
+                        "surface-bright": "#f5fbf9",
+                        "on-surface-variant": "#44474f",
+                        "on-secondary-fixed-variant": "#424847",
+                        "tertiary-fixed-dim": "#aec7fb",
+                        "on-secondary-fixed": "#171d1c",
+                        "surface-dim": "#d5dbd9",
+                        "secondary-container": "#dbe1df",
+                        "inverse-primary": "#adc7fc",
+                        "surface-container-high": "#e3e9e8",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary": "#59605e",
+                        "on-primary": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, .font-headline { font-family: 'Manrope', sans-serif; }
+    </style>
+</head>
+<body class="bg-surface text-on-background min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="bg-[#f5fbf9] dark:bg-slate-950 flex justify-between items-center w-full px-8 h-16 sticky top-0 z-50">
+<div class="flex items-center gap-8">
+<span class="font-manrope font-extrabold text-[#001b40] dark:text-white text-xl tracking-tighter">Velvet Ledger</span>
+<nav class="hidden md:flex gap-6">
+<a class="text-[#8099cb] font-medium hover:bg-[#e9efed] transition-colors px-3 py-1 rounded" href="#">Dashboard</a>
+<a class="text-[#13305c] font-bold border-b-2 border-[#13305c] px-3 py-1" href="#">Messaging</a>
+<a class="text-[#8099cb] font-medium hover:bg-[#e9efed] transition-colors px-3 py-1 rounded" href="#">Analytics</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 hover:bg-[#e9efed] transition-colors rounded-full">
+<span class="material-symbols-outlined text-[#13305c]" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 hover:bg-[#e9efed] transition-colors rounded-full">
+<span class="material-symbols-outlined text-[#13305c]" data-icon="settings">settings</span>
+</button>
+<div class="w-8 h-8 rounded-full overflow-hidden ml-2 bg-surface-container-highest">
+<img alt="User profile" data-alt="Close-up portrait of a professional man in a dark suit with soft natural lighting and a neutral grey background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB2a4RuvSV_Qh_RbiZXTWRMGBwZlwafPt9HH3hatL4KoYLx_WsRyT_zEdhTJBTHCWZ3VsgL3rItp3i-o6dw5ipiufvclMBLuXolLQxlwVdUhwpMHSGkbzZy2gS7GUaO56ORx0uXcrqpMDDCpUVJU-_3FdXM4RLfRiDZ6oBQRkBp33B6mAktkOOdfGTwngzKJihvTExXICXSX-0UADGNqqSxcJ-31UaLa_-q18aNzZuOm6dYImYx8eSTUUBKdi9B7cSP6ZSycX-YEo6B"/>
+</div>
+</div>
+</header>
+<main class="flex flex-1 overflow-hidden">
+<!-- SideNavBar (Suppressed for this specific task view as requested by layout focus, but showing structure for navigation context if needed) -->
+<aside class="hidden lg:flex flex-col h-full py-6 px-4 gap-4 bg-[#eff5f3] dark:bg-slate-900 w-64 border-r border-transparent">
+<div class="flex flex-col gap-1 mb-6">
+<span class="font-inter font-semibold text-[0.875rem] text-[#13305c]">The Grand Club</span>
+<span class="font-inter uppercase tracking-widest text-[0.6875rem] text-[#8099cb]">Admin Portal</span>
+</div>
+<nav class="flex flex-col gap-2">
+<a class="flex items-center gap-3 p-3 text-[#8099cb] hover:text-[#13305c] transition-all rounded" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-inter font-semibold text-[0.875rem]">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 p-3 text-[#13305c] font-bold bg-[#f5fbf9] scale-[0.99] rounded" href="#">
+<span class="material-symbols-outlined" data-icon="chat_bubble">chat_bubble</span>
+<span class="font-inter font-semibold text-[0.875rem]">Messaging</span>
+</a>
+<a class="flex items-center gap-3 p-3 text-[#8099cb] hover:text-[#13305c] transition-all rounded" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="font-inter font-semibold text-[0.875rem]">Guest List</span>
+</a>
+<a class="flex items-center gap-3 p-3 text-[#8099cb] hover:text-[#13305c] transition-all rounded" href="#">
+<span class="material-symbols-outlined" data-icon="layers">layers</span>
+<span class="font-inter font-semibold text-[0.875rem]">Table Map</span>
+</a>
+</nav>
+<div class="mt-auto">
+<button class="w-full bg-[#13305c] text-white py-3 font-semibold text-sm rounded-[0.125rem]">New Broadcast</button>
+</div>
+</aside>
+<!-- Main Messaging Interface -->
+<section class="flex flex-1 overflow-hidden">
+<!-- LEFT PANEL: Liste des conversations (35%) -->
+<div class="w-full md:w-[35%] bg-surface flex flex-col border-r border-transparent">
+<!-- Search Bar -->
+<div class="p-6 bg-surface">
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline" data-icon="search">search</span>
+<input class="w-full bg-surface-container-low border-none rounded-[0.125rem] pl-12 pr-4 py-3 text-sm focus:ring-0 placeholder:text-on-primary-container/60" placeholder="Rechercher une conversation..." type="text"/>
+</div>
+</div>
+<!-- Conversations List -->
+<div class="flex-1 overflow-y-auto px-4 pb-6 flex flex-col gap-4">
+<!-- Active Conv -->
+<div class="flex items-center gap-4 p-4 bg-surface-container-low rounded-[0.125rem] cursor-pointer shadow-sm">
+<div class="w-12 h-12 rounded-full bg-[#13305c] flex items-center justify-center text-white font-bold shrink-0">JD</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-baseline mb-1">
+<h3 class="font-inter font-semibold text-[#171d1c] truncate">Jean Dupont</h3>
+<span class="text-[0.75rem] text-[#44474f]">14:20</span>
+</div>
+<p class="text-[0.875rem] text-[#44474f] truncate">On se retrouve à l'entrée VIP pour le service de...</p>
+</div>
+</div>
+<!-- Unread Conv -->
+<div class="flex items-center gap-4 p-4 bg-surface-container-lowest rounded-[0.125rem] cursor-pointer hover:bg-surface-container-low transition-colors">
+<div class="w-12 h-12 rounded-full bg-[#13305c] flex items-center justify-center text-white font-bold shrink-0">ML</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-baseline mb-1">
+<h3 class="font-inter font-bold text-[#171d1c] truncate flex items-center gap-2">
+                                    Marie Laurent
+                                    <span class="w-2 h-2 rounded-full bg-[#13305c]"></span>
+</h3>
+<span class="text-[0.75rem] text-[#13305c] font-bold">12:05</span>
+</div>
+<p class="text-[0.875rem] text-[#171d1c] font-medium truncate">Avez-vous reçu le contrat pour samedi ?</p>
+</div>
+</div>
+<!-- Read Conv 1 -->
+<div class="flex items-center gap-4 p-4 bg-surface rounded-[0.125rem] cursor-pointer hover:bg-surface-container-low transition-colors">
+<div class="w-12 h-12 rounded-full bg-[#13305c] flex items-center justify-center text-white font-bold shrink-0">PB</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-baseline mb-1">
+<h3 class="font-inter font-semibold text-[#171d1c] truncate">Pierre Bertrand</h3>
+<span class="text-[0.75rem] text-[#44474f]">Hier</span>
+</div>
+<p class="text-[0.875rem] text-[#44474f] truncate">C'est parfait, merci beaucoup.</p>
+</div>
+</div>
+<!-- Read Conv 2 -->
+<div class="flex items-center gap-4 p-4 bg-surface-container-lowest rounded-[0.125rem] cursor-pointer hover:bg-surface-container-low transition-colors">
+<div class="w-12 h-12 rounded-full bg-[#13305c] flex items-center justify-center text-white font-bold shrink-0">SC</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-baseline mb-1">
+<h3 class="font-inter font-semibold text-[#171d1c] truncate">Sophie Castel</h3>
+<span class="text-[0.75rem] text-[#44474f]">Mar.</span>
+</div>
+<p class="text-[0.875rem] text-[#44474f] truncate">Le planning a été mis à jour dans le Ledger.</p>
+</div>
+</div>
+<!-- Read Conv 3 -->
+<div class="flex items-center gap-4 p-4 bg-surface rounded-[0.125rem] cursor-pointer hover:bg-surface-container-low transition-colors">
+<div class="w-12 h-12 rounded-full bg-[#13305c] flex items-center justify-center text-white font-bold shrink-0">RA</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-baseline mb-1">
+<h3 class="font-inter font-semibold text-[#171d1c] truncate">Robert Azur</h3>
+<span class="text-[0.75rem] text-[#44474f]">Lun.</span>
+</div>
+<p class="text-[0.875rem] text-[#44474f] truncate">On confirme pour le DJ set de 23h.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- RIGHT PANEL: Vue de la conversation (65%) -->
+<div class="hidden md:flex flex-1 flex-col bg-surface-container-lowest">
+<!-- Chat Header -->
+<div class="h-16 flex items-center justify-between px-8 bg-surface-container-lowest shadow-[0_4px_12px_rgba(19,48,92,0.02)] z-10">
+<div class="flex flex-col">
+<h2 class="font-headline font-semibold text-[#001b40] leading-none">Jean Dupont</h2>
+<span class="text-[0.6875rem] text-[#44474f] uppercase tracking-widest font-label mt-1">Établissement: Le Palais Bleu • Manager</span>
+</div>
+<div class="flex gap-4">
+<button class="p-2 hover:bg-surface-container-low transition-colors rounded-full text-[#13305c]">
+<span class="material-symbols-outlined" data-icon="call">call</span>
+</button>
+<button class="p-2 hover:bg-surface-container-low transition-colors rounded-full text-[#13305c]">
+<span class="material-symbols-outlined" data-icon="videocam">videocam</span>
+</button>
+<button class="p-2 hover:bg-surface-container-low transition-colors rounded-full text-[#13305c]">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</div>
+<!-- Message Area -->
+<div class="flex-1 bg-surface overflow-y-auto p-8 flex flex-col gap-6">
+<span class="text-[0.75rem] text-[#44474f] font-medium text-center py-2 uppercase tracking-widest">Aujourd'hui</span>
+<!-- Received Group -->
+<div class="flex flex-col items-start gap-1 max-w-[70%]">
+<div class="bg-surface-container-lowest p-4 rounded-[0.375rem] shadow-[0_2px_4px_rgba(19,48,92,0.03)]">
+<p class="text-sm text-[#171d1c] leading-relaxed">Bonjour ! J'ai bien reçu les listes pour ce soir. Tout semble en ordre pour le carré VIP Ouest.</p>
+</div>
+<span class="text-[0.7rem] text-[#44474f] ml-1">14:02</span>
+</div>
+<!-- Sent Group -->
+<div class="flex flex-col items-end gap-1 ml-auto max-w-[70%]">
+<div class="bg-[#13305c] p-4 rounded-[0.375rem] shadow-md">
+<p class="text-sm text-white leading-relaxed">Parfait, merci Jean. Est-ce que tu as pu confirmer le nombre de bouteilles de Champagne pour la table 12 ?</p>
+</div>
+<span class="text-[0.7rem] text-[#44474f] mr-1">14:15</span>
+</div>
+<!-- Received Group 2 -->
+<div class="flex flex-col items-start gap-1 max-w-[70%]">
+<div class="bg-surface-container-lowest p-4 rounded-[0.375rem] shadow-[0_2px_4px_rgba(19,48,92,0.03)]">
+<p class="text-sm text-[#171d1c] leading-relaxed">On se retrouve à l'entrée VIP pour le service de 23h, je te ferai un point complet à ce moment-là.</p>
+</div>
+<span class="text-[0.7rem] text-[#44474f] ml-1">14:20</span>
+</div>
+</div>
+<!-- Input Area -->
+<div class="p-6 bg-surface-container-lowest">
+<div class="flex items-center gap-4 bg-surface-container-low p-2 rounded-[0.125rem]">
+<button class="p-2 text-[#44474f] hover:text-[#13305c] transition-colors">
+<span class="material-symbols-outlined" data-icon="attach_file" style="font-variation-settings: 'wght' 200;">attach_file</span>
+</button>
+<input class="flex-1 bg-transparent border-none focus:ring-0 text-sm py-2 px-2 text-[#171d1c] placeholder:text-[#44474f]/50" placeholder="Écrire un message..." type="text"/>
+<button class="p-2 text-[#44474f] hover:text-[#13305c] transition-colors">
+<span class="material-symbols-outlined" data-icon="mood">mood</span>
+</button>
+<button class="bg-[#13305c] text-white p-3 rounded-[0.125rem] hover:opacity-90 transition-opacity flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="send">send</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar (Mobile only) -->
+<nav class="md:hidden flex justify-around items-center bg-[#f5fbf9] h-16 border-t border-transparent px-4">
+<button class="flex flex-col items-center gap-1 text-[#8099cb]">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="text-[0.625rem] font-bold uppercase">Dashboard</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-[#13305c]">
+<span class="material-symbols-outlined" data-icon="chat_bubble" data-weight="fill" style="font-variation-settings: 'FILL' 1;">chat_bubble</span>
+<span class="text-[0.625rem] font-bold uppercase">Messages</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-[#8099cb]">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="text-[0.625rem] font-bold uppercase">Guests</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-[#8099cb]">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="text-[0.625rem] font-bold uppercase">Profil</span>
+</button>
+</nav>
+</body></html>

@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>twocards. | Venue Manager Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Manrope:wght@600;700;800&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "secondary-fixed-dim": "#c2c8c6",
+                      "error-container": "#ffdad6",
+                      "primary-fixed-dim": "#adc7fc",
+                      "surface-tint": "#455e8d",
+                      "surface-container-high": "#e3e9e8",
+                      "error": "#ba1a1a",
+                      "surface": "#f5fbf9",
+                      "primary-fixed": "#d7e2ff",
+                      "on-surface-variant": "#44474f",
+                      "on-primary-fixed": "#001b3f",
+                      "surface-container-highest": "#dee4e2",
+                      "on-secondary": "#ffffff",
+                      "outline": "#747780",
+                      "on-tertiary-container": "#8099cb",
+                      "on-secondary-fixed": "#171d1c",
+                      "on-primary": "#ffffff",
+                      "surface-variant": "#dee4e2",
+                      "surface-container-low": "#eff5f3",
+                      "tertiary-fixed": "#d7e2ff",
+                      "primary-container": "#13305c",
+                      "tertiary": "#001b40",
+                      "on-secondary-fixed-variant": "#424847",
+                      "inverse-surface": "#2b3231",
+                      "background": "#f5fbf9",
+                      "outline-variant": "#c4c6d0",
+                      "surface-dim": "#d5dbd9",
+                      "secondary-container": "#dbe1df",
+                      "on-secondary-container": "#5d6463",
+                      "on-tertiary": "#ffffff",
+                      "inverse-on-surface": "#ecf2f0",
+                      "tertiary-container": "#13305c",
+                      "tertiary-fixed-dim": "#aec7fb",
+                      "secondary-fixed": "#dee4e2",
+                      "on-tertiary-fixed": "#001b3f",
+                      "on-primary-fixed-variant": "#2c4674",
+                      "surface-container-lowest": "#ffffff",
+                      "on-error-container": "#93000a",
+                      "on-background": "#171d1c",
+                      "on-surface": "#171d1c",
+                      "on-error": "#ffffff",
+                      "inverse-primary": "#adc7fc",
+                      "primary": "#001b40",
+                      "on-tertiary-fixed-variant": "#2d4673",
+                      "surface-bright": "#f5fbf9",
+                      "secondary": "#59605e",
+                      "surface-container": "#e9efed",
+                      "on-primary-container": "#8099cb"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "fontFamily": {
+                      "headline": [
+                              "Manrope"
+                      ],
+                      "body": [
+                              "Inter"
+                      ],
+                      "label": [
+                              "Inter"
+                      ]
+              }
+            },
+          },
+        }
+      </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        .font-manrope { font-family: 'Manrope', sans-serif; }
+    </style>
+</head>
+<body class="bg-[#f5fbf9] text-[#171d1c]">
+<!-- SideNavBar -->
+<aside class="h-screen w-64 fixed left-0 top-0 border-r-0 bg-white flex flex-col py-6 space-y-1 z-50">
+<div class="px-6 mb-8">
+<h1 class="font-manrope font-bold text-2xl tracking-tighter text-[#13305c]">twocards.</h1>
+<p class="font-manrope tracking-tight text-xs font-medium text-[#8099cb]">Venue Manager</p>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="bg-[#13305c] text-white rounded-sm font-semibold mx-2 px-4 py-3 flex items-center space-x-3 transition-all opacity-90" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-manrope tracking-tight text-sm">Tableau de bord</span>
+</a>
+<a class="text-[#171d1c] hover:bg-[#eff5f3] mx-2 px-4 py-3 rounded-sm flex items-center space-x-3 transition-colors font-manrope tracking-tight text-sm font-medium" href="#">
+<span class="material-symbols-outlined" data-icon="event">event</span>
+<span>Événements</span>
+</a>
+<a class="text-[#171d1c] hover:bg-[#eff5f3] mx-2 px-4 py-3 rounded-sm flex items-center space-x-3 transition-colors font-manrope tracking-tight text-sm font-medium" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span>Listes d'invités</span>
+</a>
+<a class="text-[#171d1c] hover:bg-[#eff5f3] mx-2 px-4 py-3 rounded-sm flex items-center space-x-3 transition-colors font-manrope tracking-tight text-sm font-medium" href="#">
+<span class="material-symbols-outlined" data-icon="grid_view">grid_view</span>
+<span>Plan des tables</span>
+</a>
+<a class="text-[#171d1c] hover:bg-[#eff5f3] mx-2 px-4 py-3 rounded-sm flex items-center space-x-3 transition-colors font-manrope tracking-tight text-sm font-medium" href="#">
+<span class="material-symbols-outlined" data-icon="confirmation_number">confirmation_number</span>
+<span>Réservations</span>
+</a>
+<a class="text-[#171d1c] hover:bg-[#eff5f3] mx-2 px-4 py-3 rounded-sm flex items-center space-x-3 transition-colors font-manrope tracking-tight text-sm font-medium" href="#">
+<span class="material-symbols-outlined" data-icon="diversity_3">diversity_3</span>
+<span>Réseau RP</span>
+</a>
+<a class="text-[#171d1c] hover:bg-[#eff5f3] mx-2 px-4 py-3 rounded-sm flex items-center space-x-3 transition-colors font-manrope tracking-tight text-sm font-medium" href="#">
+<span class="material-symbols-outlined" data-icon="monitoring">monitoring</span>
+<span>Analyses</span>
+</a>
+<a class="text-[#171d1c] hover:bg-[#eff5f3] mx-2 px-4 py-3 rounded-sm flex items-center space-x-3 transition-colors font-manrope tracking-tight text-sm font-medium" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span>Paramètres</span>
+</a>
+</nav>
+</aside>
+<main class="ml-64 min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<header class="flex justify-end items-center w-full px-8 py-4 bg-transparent">
+<div class="flex items-center space-x-6">
+<div class="relative group">
+<span class="material-symbols-outlined text-[#13305c] cursor-pointer transition-transform group-hover:scale-110" data-icon="notifications">notifications</span>
+</div>
+<div class="flex items-center space-x-2 group cursor-pointer">
+<span class="material-symbols-outlined text-[#13305c] transition-transform group-hover:scale-110" data-icon="account_circle">account_circle</span>
+<span class="font-inter text-xs tracking-widest uppercase text-[#8099cb] group-hover:text-[#13305c] transition-colors">Directeur</span>
+</div>
+</div>
+</header>
+<!-- Metric Bar (Pro-mode) -->
+<section class="w-full bg-[#13305c] py-6 px-12 grid grid-cols-4 gap-8 mb-12">
+<div class="flex flex-col">
+<span class="text-[#8099cb] font-inter text-[10px] uppercase tracking-[0.1em] mb-1 font-bold">Couverts ce soir</span>
+<span class="text-white font-manrope font-extrabold text-3xl">247</span>
+</div>
+<div class="flex flex-col border-l border-white/10 pl-8">
+<span class="text-[#8099cb] font-inter text-[10px] uppercase tracking-[0.1em] mb-1 font-bold">Demandes en attente</span>
+<span class="text-white font-manrope font-extrabold text-3xl">12</span>
+</div>
+<div class="flex flex-col border-l border-white/10 pl-8">
+<span class="text-[#8099cb] font-inter text-[10px] uppercase tracking-[0.1em] mb-1 font-bold">RP Actifs</span>
+<span class="text-white font-manrope font-extrabold text-3xl">34</span>
+</div>
+<div class="flex flex-col border-l border-white/10 pl-8">
+<span class="text-[#8099cb] font-inter text-[10px] uppercase tracking-[0.1em] mb-1 font-bold">Revenu mensuel</span>
+<span class="text-white font-manrope font-extrabold text-3xl">18 400 €</span>
+</div>
+</section>
+<div class="px-12 space-y-12 pb-12">
+<!-- Row 1: Event Summary -->
+<section>
+<div class="bg-white rounded-[0.375rem] p-8 flex flex-col md:flex-row justify-between items-end md:items-center shadow-[0_24px_48px_rgba(19,48,92,0.04)] relative overflow-hidden">
+<div class="absolute top-0 right-0 w-32 h-32 opacity-10 pointer-events-none">
+<span class="material-symbols-outlined text-[120px] text-[#13305c]" data-icon="celebration">celebration</span>
+</div>
+<div class="flex flex-col space-y-4 max-w-xl">
+<div>
+<span class="font-inter text-xs tracking-widest uppercase text-[#8099cb] block mb-2 font-bold">L'événement de ce soir</span>
+<h2 class="font-manrope text-4xl font-extrabold text-[#001b40] tracking-tight">Gala de Minuit</h2>
+<p class="text-[#8099cb] text-sm mt-1">Samedi 24 Octobre • 23:00 - 05:00</p>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-end">
+<span class="text-sm font-semibold text-[#171d1c]">187 / 300 confirmés</span>
+<span class="text-xs text-[#8099cb] font-medium uppercase tracking-wider">Taux d'occupation : 62%</span>
+</div>
+<div class="w-full h-[6px] bg-[#eff5f3]">
+<div class="h-full bg-[#13305c] w-[62%] transition-all"></div>
+</div>
+</div>
+</div>
+<div class="flex flex-col items-end mt-6 md:mt-0 space-y-2">
+<div class="bg-[#eff5f3] px-4 py-2 rounded-sm text-right">
+<span class="block text-[10px] uppercase font-bold text-[#8099cb] tracking-wider">Disponibilités Tables</span>
+<p class="text-sm font-semibold text-[#13305c]">4 VIP disponibles</p>
+<p class="text-sm font-semibold text-[#13305c]">2 Standard disponibles</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Row 2: Two Column Layout -->
+<section class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+<!-- Left: Incoming Requests -->
+<div class="flex flex-col space-y-8">
+<h3 class="font-manrope text-2xl font-bold text-[#001b40]">Demandes entrantes</h3>
+<div class="space-y-5">
+<!-- Request Item -->
+<div class="bg-[#eff5f3] p-6 rounded-sm flex items-center justify-between transition-all hover:bg-[#e9efed]">
+<div class="flex flex-col">
+<div class="flex items-center space-x-3 mb-1">
+<span class="font-manrope font-bold text-lg text-[#13305c]">Marc Antoine</span>
+<span class="bg-[#13305c]/10 text-[#13305c] text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">RP Or</span>
+</div>
+<div class="flex items-center space-x-4 text-xs text-[#8099cb]">
+<span class="flex items-center space-x-1"><span class="material-symbols-outlined text-[14px]" data-icon="groups">groups</span><span>8 invités</span></span>
+<span class="flex items-center space-x-1"><span class="material-symbols-outlined text-[14px]" data-icon="table_bar">table_bar</span><span>Carré VIP</span></span>
+<span class="flex items-center space-x-1"><span class="material-symbols-outlined text-[14px]" data-icon="schedule">schedule</span><span>Il y a 5 min</span></span>
+</div>
+</div>
+<div class="flex items-center space-x-3">
+<button class="bg-[#e9efed] text-[#13305c] font-bold text-xs uppercase tracking-widest px-4 py-3 hover:bg-[#dee4e2] transition-colors rounded-[0.125rem]">Refuser</button>
+<button class="bg-[#13305c] text-white font-bold text-xs uppercase tracking-widest px-6 py-3 hover:opacity-90 transition-all rounded-[0.125rem]">Accepter</button>
+</div>
+</div>
+<!-- Request Item (Alt Tonal) -->
+<div class="bg-white p-6 rounded-sm flex items-center justify-between transition-all hover:bg-[#eff5f3]">
+<div class="flex flex-col">
+<div class="flex items-center space-x-3 mb-1">
+<span class="font-manrope font-bold text-lg text-[#13305c]">Julie Masson</span>
+<span class="bg-[#13305c]/5 text-[#13305c] text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">RP Junior</span>
+</div>
+<div class="flex items-center space-x-4 text-xs text-[#8099cb]">
+<span class="flex items-center space-x-1"><span class="material-symbols-outlined text-[14px]" data-icon="groups">groups</span><span>4 invités</span></span>
+<span class="flex items-center space-x-1"><span class="material-symbols-outlined text-[14px]" data-icon="table_bar">table_bar</span><span>Standard</span></span>
+<span class="flex items-center space-x-1"><span class="material-symbols-outlined text-[14px]" data-icon="schedule">schedule</span><span>Il y a 14 min</span></span>
+</div>
+</div>
+<div class="flex items-center space-x-3">
+<button class="bg-[#e9efed] text-[#13305c] font-bold text-xs uppercase tracking-widest px-4 py-3 hover:bg-[#dee4e2] transition-colors rounded-[0.125rem]">Refuser</button>
+<button class="bg-[#13305c] text-white font-bold text-xs uppercase tracking-widest px-6 py-3 hover:opacity-90 transition-all rounded-[0.125rem]">Accepter</button>
+</div>
+</div>
+<!-- Request Item -->
+<div class="bg-[#eff5f3] p-6 rounded-sm flex items-center justify-between transition-all hover:bg-[#e9efed]">
+<div class="flex flex-col">
+<div class="flex items-center space-x-3 mb-1">
+<span class="font-manrope font-bold text-lg text-[#13305c]">Kevin Durand</span>
+<span class="bg-[#13305c]/10 text-[#13305c] text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">RP Or</span>
+</div>
+<div class="flex items-center space-x-4 text-xs text-[#8099cb]">
+<span class="flex items-center space-x-1"><span class="material-symbols-outlined text-[14px]" data-icon="groups">groups</span><span>12 invités</span></span>
+<span class="flex items-center space-x-1"><span class="material-symbols-outlined text-[14px]" data-icon="table_bar">table_bar</span><span>Balcon VIP</span></span>
+<span class="flex items-center space-x-1"><span class="material-symbols-outlined text-[14px]" data-icon="schedule">schedule</span><span>Il y a 22 min</span></span>
+</div>
+</div>
+<div class="flex items-center space-x-3">
+<button class="bg-[#e9efed] text-[#13305c] font-bold text-xs uppercase tracking-widest px-4 py-3 hover:bg-[#dee4e2] transition-colors rounded-[0.125rem]">Refuser</button>
+<button class="bg-[#13305c] text-white font-bold text-xs uppercase tracking-widest px-6 py-3 hover:opacity-90 transition-all rounded-[0.125rem]">Accepter</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Right: Top RP Leaderboard -->
+<div class="flex flex-col space-y-8">
+<div class="flex justify-between items-end">
+<h3 class="font-manrope text-2xl font-bold text-[#001b40]">Top RP du mois</h3>
+<span class="text-xs font-bold text-[#13305c] tracking-widest uppercase border-b-2 border-[#13305c] pb-1">Octobre</span>
+</div>
+<div class="space-y-1">
+<!-- Rank 1 -->
+<div class="flex items-center space-x-6 py-6 group cursor-default">
+<span class="font-manrope font-extrabold text-5xl text-[#13305c] opacity-20 group-hover:opacity-100 transition-opacity w-16">01</span>
+<div class="flex-1 flex flex-col">
+<span class="font-manrope text-xl font-bold text-[#171d1c]">Sarah Bernard</span>
+<span class="text-xs text-[#8099cb] uppercase tracking-wider font-medium">Agence Elite Night</span>
+</div>
+<div class="text-right">
+<span class="block font-manrope font-bold text-[#13305c] text-lg">1,240</span>
+<span class="text-[10px] text-[#8099cb] uppercase font-bold tracking-widest">Covers</span>
+</div>
+<div class="text-right w-24">
+<span class="block font-manrope font-bold text-[#13305c] text-lg">14.2k €</span>
+<span class="text-[10px] text-[#8099cb] uppercase font-bold tracking-widest">Revenu</span>
+</div>
+</div>
+<div class="h-[1px] bg-[#eff5f3] mx-4"></div>
+<!-- Rank 2 -->
+<div class="flex items-center space-x-6 py-6 group cursor-default">
+<span class="font-manrope font-extrabold text-5xl text-[#13305c] opacity-20 group-hover:opacity-100 transition-opacity w-16">02</span>
+<div class="flex-1 flex flex-col">
+<span class="font-manrope text-xl font-bold text-[#171d1c]">Thomas Clerc</span>
+<span class="text-xs text-[#8099cb] uppercase tracking-wider font-medium">Indépendant</span>
+</div>
+<div class="text-right">
+<span class="block font-manrope font-bold text-[#13305c] text-lg">980</span>
+<span class="text-[10px] text-[#8099cb] uppercase font-bold tracking-widest">Covers</span>
+</div>
+<div class="text-right w-24">
+<span class="block font-manrope font-bold text-[#13305c] text-lg">11.5k €</span>
+<span class="text-[10px] text-[#8099cb] uppercase font-bold tracking-widest">Revenu</span>
+</div>
+</div>
+<div class="h-[1px] bg-[#eff5f3] mx-4"></div>
+<!-- Rank 3 -->
+<div class="flex items-center space-x-6 py-6 group cursor-default">
+<span class="font-manrope font-extrabold text-5xl text-[#13305c] opacity-20 group-hover:opacity-100 transition-opacity w-16">03</span>
+<div class="flex-1 flex flex-col">
+<span class="font-manrope text-xl font-bold text-[#171d1c]">Lucas Meyer</span>
+<span class="text-xs text-[#8099cb] uppercase tracking-wider font-medium">Paris Vibes</span>
+</div>
+<div class="text-right">
+<span class="block font-manrope font-bold text-[#13305c] text-lg">845</span>
+<span class="text-[10px] text-[#8099cb] uppercase font-bold tracking-widest">Covers</span>
+</div>
+<div class="text-right w-24">
+<span class="block font-manrope font-bold text-[#13305c] text-lg">9.8k €</span>
+<span class="text-[10px] text-[#8099cb] uppercase font-bold tracking-widest">Revenu</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Row 3: Quick Actions -->
+<section class="pt-8 border-t border-[#eff5f3]">
+<div class="flex flex-col md:flex-row items-center justify-between bg-white p-10 rounded-sm shadow-[0_4px_24px_rgba(19,48,92,0.02)]">
+<div class="mb-6 md:mb-0">
+<h4 class="font-manrope text-xl font-bold text-[#13305c]">Actions rapides</h4>
+<p class="text-[#8099cb] text-sm font-medium">Gestion simplifiée de votre établissement</p>
+</div>
+<div class="flex flex-wrap items-center gap-6">
+<button class="bg-[#13305c] text-white font-bold text-xs uppercase tracking-widest px-10 py-4 hover:opacity-90 transition-all rounded-[0.125rem] flex items-center space-x-2">
+<span class="material-symbols-outlined text-sm" data-icon="add">add</span>
+<span>Créer un événement</span>
+</button>
+<button class="bg-[#e9efed] text-[#13305c] font-bold text-xs uppercase tracking-widest px-10 py-4 hover:bg-[#dee4e2] transition-colors rounded-[0.125rem]">
+                            Voir toutes les réservations
+                        </button>
+<button class="text-[#13305c] font-bold text-xs uppercase tracking-widest border-b border-[#13305c] pb-1 hover:text-[#001b40] transition-colors">
+                            Gérer le réseau RP
+                        </button>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- Bottom Map Visualization Fragment (Editorial Aesthetic) -->
+<div class="fixed bottom-8 right-8 w-64 aspect-video bg-white shadow-xl rounded-sm overflow-hidden p-2 group hover:w-80 transition-all duration-500">
+<div class="relative w-full h-full overflow-hidden grayscale contrast-125 opacity-70 group-hover:grayscale-0 group-hover:opacity-100 transition-all">
+<img alt="Vue aérienne d'un plan de salle de discothèque moderne avec des éclairages tamisés" class="w-full h-full object-cover" data-alt="abstract architectural blueprint of a club layout with neon accents and high contrast shadows minimalist style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA4mf7VsrS7KcHgdirEqd5h4G5onuhSKQyw-r6BcjKClFBMrHMk-eYxbblmMbLdSq1AN_ejz9C3fYdDoHNfsmMM8c6-jnOTaY5RYh_numgefG5vaZi2Difvxll6KFqYShs0J_1g2WyjhjubztcIzQwxlORoD2ADyOxzDifMbFEreLUVfeeE5G4USvt7PJiD95XB5ebSH1KBnpjjg0g5Jo8-foUqXNd7J90ONpLB5rTkknH6__3xvctgjkyq-B3KaAYC2Yy_LK14EDVC"/>
+<div class="absolute inset-0 bg-gradient-to-t from-[#13305c]/40 to-transparent"></div>
+<div class="absolute bottom-2 left-2 flex flex-col">
+<span class="text-[8px] text-white uppercase font-bold tracking-tighter">Live Map</span>
+<span class="text-[10px] text-white font-bold">Plan interactif des tables</span>
+</div>
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+<span class="material-symbols-outlined text-white text-3xl opacity-50" data-icon="explore">explore</span>
+</div>
+</div>
+</div>
+</body></html>

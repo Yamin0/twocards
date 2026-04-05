@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-variant": "#dee4e2",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-container": "#13305c",
+                        "outline": "#747780",
+                        "primary-fixed": "#d7e2ff",
+                        "on-secondary-container": "#5d6463",
+                        "surface-bright": "#f5fbf9",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-fixed-dim": "#aec7fb",
+                        "on-primary-fixed-variant": "#2c4674",
+                        "on-primary-fixed": "#001b3f",
+                        "tertiary-fixed": "#d7e2ff",
+                        "background": "#f5fbf9",
+                        "surface-tint": "#455e8d",
+                        "surface-container-low": "#eff5f3",
+                        "on-surface": "#171d1c",
+                        "error": "#ba1a1a",
+                        "on-secondary-fixed-variant": "#424847",
+                        "on-background": "#171d1c",
+                        "inverse-surface": "#2b3231",
+                        "on-secondary-fixed": "#171d1c",
+                        "primary": "#001b40",
+                        "on-primary": "#ffffff",
+                        "inverse-primary": "#adc7fc",
+                        "primary-container": "#13305c",
+                        "on-tertiary-fixed-variant": "#2d4673",
+                        "on-primary-container": "#8099cb",
+                        "inverse-on-surface": "#ecf2f0",
+                        "secondary-fixed": "#dee4e2",
+                        "on-error-container": "#93000a",
+                        "surface-dim": "#d5dbd9",
+                        "secondary": "#59605e",
+                        "secondary-container": "#dbe1df",
+                        "on-tertiary-container": "#8099cb",
+                        "on-error": "#ffffff",
+                        "tertiary": "#001b40",
+                        "surface-container-high": "#e3e9e8",
+                        "on-surface-variant": "#44474f",
+                        "surface-container-highest": "#dee4e2",
+                        "surface": "#f5fbf9",
+                        "error-container": "#ffdad6",
+                        "secondary-fixed-dim": "#c2c8c6",
+                        "outline-variant": "#c4c6d0",
+                        "on-tertiary-fixed": "#001b3f",
+                        "on-secondary": "#ffffff",
+                        "surface-container": "#e9efed",
+                        "primary-fixed-dim": "#adc7fc"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; background-color: #f5fbf9; color: #171d1c; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .editorial-shadow { box-shadow: 0 4px 30px 0 rgba(19, 48, 92, 0.04); }
+    </style>
+</head>
+<body class="bg-surface font-body selection:bg-primary/10">
+<!-- SideNavBar from JSON -->
+<aside class="h-screen w-64 fixed left-0 top-0 border-r-0 bg-[#eff5f3]/80 dark:bg-[#001b40]/80 backdrop-blur-xl flex flex-col py-8 px-6 z-50">
+<div class="mb-12 flex items-center gap-3">
+<div class="w-8 h-8 bg-primary flex items-center justify-center text-white text-xs font-bold">2C</div>
+<div class="text-2xl font-bold tracking-tighter text-[#001b40] dark:text-white font-headline">Concierge Privé</div>
+</div>
+<nav class="flex-1 space-y-2">
+<a class="flex items-center gap-4 py-3 px-4 transition-all duration-300 scale-95 ease-in-out text-[#13305c] dark:text-white border-r-4 border-[#13305c] dark:border-[#8099cb] bg-[#ffffff]/50 dark:bg-[#13305c]/30 font-headline tracking-tight text-sm font-semibold" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span>Tableau de bord</span>
+</a>
+<a class="flex items-center gap-4 py-3 px-4 transition-all duration-300 scale-95 ease-in-out text-[#8099cb] dark:text-slate-400 hover:text-[#13305c] hover:bg-[#ffffff]/40 dark:hover:bg-[#13305c]/20 font-headline tracking-tight text-sm font-semibold" href="#">
+<span class="material-symbols-outlined">calendar_today</span>
+<span>Mes Réservations</span>
+</a>
+<a class="flex items-center gap-4 py-3 px-4 transition-all duration-300 scale-95 ease-in-out text-[#8099cb] dark:text-slate-400 hover:text-[#13305c] hover:bg-[#ffffff]/40 dark:hover:bg-[#13305c]/20 font-headline tracking-tight text-sm font-semibold" href="#">
+<span class="material-symbols-outlined">confirmation_number</span>
+<span>Événements</span>
+</a>
+<a class="flex items-center gap-4 py-3 px-4 transition-all duration-300 scale-95 ease-in-out text-[#8099cb] dark:text-slate-400 hover:text-[#13305c] hover:bg-[#ffffff]/40 dark:hover:bg-[#13305c]/20 font-headline tracking-tight text-sm font-semibold" href="#">
+<span class="material-symbols-outlined">payments</span>
+<span>Commissions</span>
+</a>
+<a class="flex items-center gap-4 py-3 px-4 transition-all duration-300 scale-95 ease-in-out text-[#8099cb] dark:text-slate-400 hover:text-[#13305c] hover:bg-[#ffffff]/40 dark:hover:bg-[#13305c]/20 font-headline tracking-tight text-sm font-semibold" href="#">
+<span class="material-symbols-outlined">chat</span>
+<span>Messages</span>
+</a>
+<a class="flex items-center gap-4 py-3 px-4 transition-all duration-300 scale-95 ease-in-out text-[#8099cb] dark:text-slate-400 hover:text-[#13305c] hover:bg-[#ffffff]/40 dark:hover:bg-[#13305c]/20 font-headline tracking-tight text-sm font-semibold" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span>Paramètres</span>
+</a>
+</nav>
+<div class="mt-auto pt-8 border-t border-on-surface/5 space-y-2">
+<a class="flex items-center gap-4 py-2 px-4 text-[#8099cb] hover:text-[#13305c] text-xs font-headline tracking-tight font-semibold" href="#">
+<span class="material-symbols-outlined text-sm">help</span>
+<span>Aide</span>
+</a>
+<button class="w-full flex items-center gap-4 py-4 px-4 text-error font-headline tracking-tight text-sm font-bold uppercase transition-all hover:opacity-70">
+<span class="material-symbols-outlined">logout</span>
+<span>Déconnexion</span>
+</button>
+</div>
+</aside>
+<!-- TopNavBar from JSON -->
+<header class="fixed top-0 right-0 left-64 h-16 z-40 bg-[#f5fbf9]/50 dark:bg-[#001b40]/50 backdrop-blur-md flex justify-between items-center px-12 w-full">
+<div class="flex items-center gap-8">
+<span class="text-xl font-black text-[#001b40] dark:text-white font-headline tracking-tighter">twocards.</span>
+</div>
+<div class="flex items-center gap-6">
+<div class="relative">
+<span class="material-symbols-outlined text-[#13305c] cursor-pointer">notifications</span>
+<span class="absolute -top-1 -right-1 w-2 h-2 bg-error rounded-full"></span>
+</div>
+<div class="flex items-center gap-3">
+<span class="text-[10px] font-bold uppercase tracking-widest text-[#13305c] text-right hidden sm:block">
+                    Elite RP<br/><span class="text-[#8099cb]">Online</span>
+</span>
+<img alt="Avatar utilisateur" class="w-8 h-8 rounded-full border border-surface-container object-cover" data-alt="Close-up professional headshot of a stylish man in a navy blazer against a neutral urban background, soft natural lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDvFoPMWfmrjUDl1xpMghhU_6v2nTYxIwBqJEb7VmDPuiycOtgE5rVCM1uhsoKPRfWBY_-SArJC6cr1WQSj3FKFUe-_CwcNlQo_iI-rEgPCnrrWNNhXFCoWsxH5TPeOdWq6za6WduH83MFNq-SVBb3-B1OHb0ASAE47ggkFyalBblLudeTg6ZODwLJlGhfodPHttkoPwoDEbq_3HL0X3mXVdvt0h_zeaN3eRHOiU5kO_DcRxyKcbmBMu4jm-QbuKHgp4gul5CK4f-6J"/>
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="ml-64 pt-24 pb-12 px-12 min-h-screen">
+<!-- Header Section -->
+<section class="mb-12">
+<h1 class="text-4xl font-headline font-extrabold text-primary tracking-tight mb-2">Bonjour, Marc.</h1>
+<p class="text-secondary font-body text-sm tracking-wide">Voici l'aperçu de votre activité pour ce mois.</p>
+</section>
+<!-- Row 1: Statistiques -->
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+<div class="bg-surface-container-lowest p-8 editorial-shadow">
+<p class="text-[10px] font-bold text-on-tertiary-container uppercase tracking-[0.15em] mb-4">Réservations totales</p>
+<p class="text-4xl font-headline font-bold text-primary tracking-tighter">148</p>
+<div class="mt-4 flex items-center gap-1 text-[#22c55e] text-xs font-semibold">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<span>+12%</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-8 editorial-shadow">
+<p class="text-[10px] font-bold text-on-tertiary-container uppercase tracking-[0.15em] mb-4">Approbations en attente</p>
+<p class="text-4xl font-headline font-bold text-primary tracking-tighter">24</p>
+<div class="mt-4 flex items-center gap-1 text-[#8099cb] text-xs font-semibold">
+<span class="material-symbols-outlined text-sm">hourglass_empty</span>
+<span>Action requise</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-8 editorial-shadow">
+<p class="text-[10px] font-bold text-on-tertiary-container uppercase tracking-[0.15em] mb-4">Commissions gagnées</p>
+<p class="text-4xl font-headline font-bold text-primary tracking-tighter">4,850 €</p>
+<div class="mt-4 flex items-center gap-1 text-[#22c55e] text-xs font-semibold">
+<span class="material-symbols-outlined text-sm">payments</span>
+<span>Payé le 01/10</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-8 editorial-shadow">
+<p class="text-[10px] font-bold text-on-tertiary-container uppercase tracking-[0.15em] mb-4">Établissements actifs</p>
+<p class="text-4xl font-headline font-bold text-primary tracking-tighter">12</p>
+<div class="mt-4 flex items-center gap-1 text-[#8099cb] text-xs font-semibold">
+<span class="material-symbols-outlined text-sm">location_on</span>
+<span>Paris &amp; Monaco</span>
+</div>
+</div>
+</section>
+<!-- Row 2: Columns -->
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-12 mb-12 items-start">
+<!-- Column Left: Événements à venir -->
+<div class="lg:col-span-5">
+<div class="flex justify-between items-end mb-8 px-2">
+<h2 class="text-xl font-headline font-bold text-primary tracking-tight">Événements à venir</h2>
+</div>
+<div class="space-y-0 overflow-hidden bg-surface-container-low rounded-lg">
+<!-- Event Item 1 -->
+<div class="bg-surface-container-lowest p-6 flex justify-between items-center transition-all hover:bg-surface-container">
+<div>
+<p class="font-headline font-bold text-primary text-base">Gala de Charité d'Automne</p>
+<div class="flex gap-4 mt-1">
+<span class="text-[10px] uppercase tracking-widest text-[#8099cb]">L'Opéra de Paris</span>
+<span class="text-[10px] uppercase tracking-widest text-primary font-bold">14 Oct.</span>
+</div>
+</div>
+<div class="text-right">
+<span class="text-xs font-bold text-primary">12 Invités</span>
+</div>
+</div>
+<!-- Event Item 2 -->
+<div class="bg-surface p-6 flex justify-between items-center transition-all hover:bg-surface-container">
+<div>
+<p class="font-headline font-bold text-primary text-base">Soirée Privée Laurent Perrier</p>
+<div class="flex gap-4 mt-1">
+<span class="text-[10px] uppercase tracking-widest text-[#8099cb]">Matignon Paris</span>
+<span class="text-[10px] uppercase tracking-widest text-primary font-bold">16 Oct.</span>
+</div>
+</div>
+<div class="text-right">
+<span class="text-xs font-bold text-primary">8 Invités</span>
+</div>
+</div>
+<!-- Event Item 3 -->
+<div class="bg-surface-container-lowest p-6 flex justify-between items-center transition-all hover:bg-surface-container">
+<div>
+<p class="font-headline font-bold text-primary text-base">Défilé Exclusive Afterparty</p>
+<div class="flex gap-4 mt-1">
+<span class="text-[10px] uppercase tracking-widest text-[#8099cb]">L'Arc Paris</span>
+<span class="text-[10px] uppercase tracking-widest text-primary font-bold">20 Oct.</span>
+</div>
+</div>
+<div class="text-right">
+<span class="text-xs font-bold text-primary">15 Invités</span>
+</div>
+</div>
+<!-- Event Item 4 -->
+<div class="bg-surface p-6 flex justify-between items-center transition-all hover:bg-surface-container">
+<div>
+<p class="font-headline font-bold text-primary text-base">Inauguration Rooftop</p>
+<div class="flex gap-4 mt-1">
+<span class="text-[10px] uppercase tracking-widest text-[#8099cb]">Hotel de Crillon</span>
+<span class="text-[10px] uppercase tracking-widest text-primary font-bold">22 Oct.</span>
+</div>
+</div>
+<div class="text-right">
+<span class="text-xs font-bold text-primary">4 Invités</span>
+</div>
+</div>
+</div>
+<a class="mt-6 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-tertiary-container hover:opacity-70 transition-opacity px-2" href="#">
+                    Voir tous les événements
+                    <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</a>
+</div>
+<!-- Column Right: Réservations récentes -->
+<div class="lg:col-span-7">
+<div class="flex justify-between items-end mb-8 px-2">
+<h2 class="text-xl font-headline font-bold text-primary tracking-tight">Réservations récentes</h2>
+</div>
+<div class="w-full">
+<div class="grid grid-cols-5 px-6 pb-4 border-b-0">
+<span class="text-[10px] font-bold uppercase tracking-widest text-[#8099cb]">Invité</span>
+<span class="text-[10px] font-bold uppercase tracking-widest text-[#8099cb]">Établissement</span>
+<span class="text-[10px] font-bold uppercase tracking-widest text-[#8099cb]">Date</span>
+<span class="text-[10px] font-bold uppercase tracking-widest text-[#8099cb]">Couverts</span>
+<span class="text-[10px] font-bold uppercase tracking-widest text-[#8099cb] text-right">Statut</span>
+</div>
+<div class="space-y-0">
+<!-- Table Row 1 -->
+<div class="grid grid-cols-5 px-6 py-5 bg-surface-container-lowest items-center hover:bg-surface-container transition-colors">
+<span class="font-semibold text-sm text-primary">Jean-Pierre L.</span>
+<span class="text-xs text-secondary">Matignon Paris</span>
+<span class="text-xs text-secondary">Ce soir, 21:30</span>
+<span class="text-xs text-primary font-bold">6</span>
+<div class="text-right">
+<span class="inline-block px-3 py-1 bg-primary text-white text-[10px] font-bold rounded-full uppercase tracking-wider">Confirmé</span>
+</div>
+</div>
+<!-- Table Row 2 -->
+<div class="grid grid-cols-5 px-6 py-5 bg-surface items-center hover:bg-surface-container transition-colors">
+<span class="font-semibold text-sm text-primary">S. Henderson</span>
+<span class="text-xs text-secondary">L'Arc Paris</span>
+<span class="text-xs text-secondary">Demain, 23:00</span>
+<span class="text-xs text-primary font-bold">12</span>
+<div class="text-right">
+<span class="inline-block px-3 py-1 bg-surface-container text-[#44474f] text-[10px] font-bold rounded-full uppercase tracking-wider">En attente</span>
+</div>
+</div>
+<!-- Table Row 3 -->
+<div class="grid grid-cols-5 px-6 py-5 bg-surface-container-lowest items-center hover:bg-surface-container transition-colors">
+<span class="font-semibold text-sm text-primary">Elena Rossi</span>
+<span class="text-xs text-secondary">Hotel de Crillon</span>
+<span class="text-xs text-secondary">15 Oct., 20:00</span>
+<span class="text-xs text-primary font-bold">2</span>
+<div class="text-right">
+<span class="inline-block px-3 py-1 bg-primary text-white text-[10px] font-bold rounded-full uppercase tracking-wider">Confirmé</span>
+</div>
+</div>
+<!-- Table Row 4 -->
+<div class="grid grid-cols-5 px-6 py-5 bg-surface items-center hover:bg-surface-container transition-colors">
+<span class="font-semibold text-sm text-primary">David Cohen</span>
+<span class="text-xs text-secondary">Raspoutine</span>
+<span class="text-xs text-secondary">15 Oct., 00:30</span>
+<span class="text-xs text-primary font-bold">4</span>
+<div class="text-right">
+<span class="inline-block px-3 py-1 bg-surface-container-low text-[#44474f] text-[10px] font-bold rounded-full uppercase tracking-wider">Annulé</span>
+</div>
+</div>
+<!-- Table Row 5 -->
+<div class="grid grid-cols-5 px-6 py-5 bg-surface-container-lowest items-center hover:bg-surface-container transition-colors">
+<span class="font-semibold text-sm text-primary">Marc V.</span>
+<span class="text-xs text-secondary">Chez Castel</span>
+<span class="text-xs text-secondary">16 Oct., 22:00</span>
+<span class="text-xs text-primary font-bold">8</span>
+<div class="text-right">
+<span class="inline-block px-3 py-1 bg-surface-container text-[#44474f] text-[10px] font-bold rounded-full uppercase tracking-wider">En attente</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Bottom Row: Quick Actions -->
+<section class="flex flex-wrap gap-4 pt-8 border-t border-surface-container-high">
+<button class="bg-primary text-on-primary font-headline font-bold text-xs uppercase tracking-[0.2em] px-10 py-4 rounded-[0.125rem] transition-all hover:opacity-90 flex items-center gap-3">
+<span class="material-symbols-outlined text-sm">add</span>
+                Nouvelle Réservation
+            </button>
+<button class="bg-surface-container text-primary font-headline font-bold text-xs uppercase tracking-[0.2em] px-10 py-4 rounded-[0.125rem] transition-all hover:bg-surface-container-high flex items-center gap-3">
+<span class="material-symbols-outlined text-sm">search</span>
+                Parcourir les Événements
+            </button>
+</section>
+</main>
+</body></html>

@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>twocards - CRM Événements</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface": "#f5fbf9",
+                        "on-primary-container": "#8099cb",
+                        "on-error-container": "#93000a",
+                        "tertiary-fixed": "#d7e2ff",
+                        "on-surface": "#171d1c",
+                        "on-error": "#ffffff",
+                        "on-tertiary-container": "#8099cb",
+                        "on-surface-variant": "#44474f",
+                        "surface-container": "#e9efed",
+                        "error": "#ba1a1a",
+                        "secondary": "#59605e",
+                        "primary-container": "#13305c",
+                        "surface-dim": "#d5dbd9",
+                        "on-tertiary": "#ffffff",
+                        "inverse-on-surface": "#ecf2f0",
+                        "secondary-fixed-dim": "#c2c8c6",
+                        "inverse-primary": "#adc7fc",
+                        "background": "#f5fbf9",
+                        "surface-variant": "#dee4e2",
+                        "on-primary-fixed": "#001b3f",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-highest": "#dee4e2",
+                        "on-primary": "#ffffff",
+                        "surface-container-high": "#e3e9e8",
+                        "primary": "#001b40",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed-dim": "#aec7fb",
+                        "outline": "#747780",
+                        "on-secondary-container": "#5d6463",
+                        "secondary-container": "#dbe1df",
+                        "on-secondary-fixed": "#171d1c",
+                        "surface-bright": "#f5fbf9",
+                        "on-secondary": "#ffffff",
+                        "surface-container-low": "#eff5f3",
+                        "primary-fixed-dim": "#adc7fc",
+                        "on-secondary-fixed-variant": "#424847",
+                        "primary-fixed": "#d7e2ff",
+                        "tertiary-container": "#13305c",
+                        "secondary-fixed": "#dee4e2",
+                        "on-background": "#171d1c",
+                        "surface-tint": "#455e8d",
+                        "on-tertiary-fixed": "#001b3f",
+                        "tertiary": "#001b40",
+                        "outline-variant": "#c4c6d0",
+                        "inverse-surface": "#2b3231",
+                        "on-tertiary-fixed-variant": "#2d4673",
+                        "on-primary-fixed-variant": "#2c4674"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Inter", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .tonal-layering-no-borders {
+            border: none !important;
+        }
+        .scale-95-on-click:active {
+            transform: scale(0.95);
+        }
+        .flat-ui {
+            box-shadow: none;
+        }
+        .ambient-card-shadow {
+            box-shadow: 0 10px 40px -10px rgba(19, 48, 92, 0.04);
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body selection:bg-primary-fixed-dim">
+<!-- SIDE NAVIGATION SHELL -->
+<aside class="fixed left-0 top-0 h-full w-72 flex flex-col py-8 bg-[#eff5f3] dark:bg-slate-900 tonal-layering-no-borders z-50">
+<div class="px-8 mb-12">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-primary-container flex items-center justify-center rounded">
+<span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">confirmation_number</span>
+</div>
+<div>
+<h1 class="font-['Manrope'] font-black text-[#13305c] dark:text-white leading-tight">CRM Événementiel</h1>
+<p class="font-['Inter'] text-[10px] tracking-widest uppercase font-semibold text-slate-500">Édition Précision</p>
+</div>
+</div>
+</div>
+<nav class="flex-1 px-4 space-y-1">
+<a class="flex items-center gap-4 px-4 py-3 text-slate-400 dark:text-slate-500 hover:bg-white/50 dark:hover:bg-slate-800/30 transition-all duration-300 font-['Inter'] text-sm tracking-wide uppercase font-semibold scale-95-on-click" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span>Tableau de bord</span>
+</a>
+<!-- Active Tab: Événements -->
+<a class="flex items-center gap-4 px-4 py-3 bg-white dark:bg-slate-800 text-[#13305c] dark:text-white border-r-4 border-[#13305c] dark:border-blue-400 transition-all duration-300 font-['Inter'] text-sm tracking-wide uppercase font-semibold scale-95-on-click" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">event_available</span>
+<span>Événements</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 text-slate-400 dark:text-slate-500 hover:bg-white/50 dark:hover:bg-slate-800/30 transition-all duration-300 font-['Inter'] text-sm tracking-wide uppercase font-semibold scale-95-on-click" href="#">
+<span class="material-symbols-outlined">group</span>
+<span>Clients</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 text-slate-400 dark:text-slate-500 hover:bg-white/50 dark:hover:bg-slate-800/30 transition-all duration-300 font-['Inter'] text-sm tracking-wide uppercase font-semibold scale-95-on-click" href="#">
+<span class="material-symbols-outlined">confirmation_number</span>
+<span>Réservations</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 text-slate-400 dark:text-slate-500 hover:bg-white/50 dark:hover:bg-slate-800/30 transition-all duration-300 font-['Inter'] text-sm tracking-wide uppercase font-semibold scale-95-on-click" href="#">
+<span class="material-symbols-outlined">insights</span>
+<span>Analyses</span>
+</a>
+</nav>
+<div class="px-6 mt-8">
+<button class="w-full bg-primary-container text-white py-4 font-headline font-bold text-xs tracking-widest uppercase scale-95-on-click" style="border-radius: 0.125rem;">
+                Nouvel Événement
+            </button>
+</div>
+<div class="mt-auto px-4 space-y-1">
+<a class="flex items-center gap-4 px-4 py-3 text-slate-400 hover:bg-white/50 transition-all duration-300 font-['Inter'] text-sm tracking-wide uppercase font-semibold" href="#">
+<span class="material-symbols-outlined">help_outline</span>
+<span>Aide</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 text-slate-400 hover:bg-white/50 transition-all duration-300 font-['Inter'] text-sm tracking-wide uppercase font-semibold" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span>Déconnexion</span>
+</a>
+</div>
+</aside>
+<!-- MAIN CONTENT AREA -->
+<main class="ml-72 min-h-screen flex flex-col">
+<!-- TOP BAR -->
+<header class="bg-surface px-12 py-8 flex justify-between items-center">
+<h2 class="text-3xl font-headline font-extrabold tracking-tight text-primary">Événements</h2>
+<div class="flex bg-surface-container-low p-1 rounded-lg">
+<button class="flex items-center gap-2 px-6 py-2 bg-primary-container text-white rounded-md text-sm font-semibold transition-all">
+<span class="material-symbols-outlined text-sm">grid_view</span>
+                    Grille
+                </button>
+<button class="flex items-center gap-2 px-6 py-2 text-on-surface hover:bg-surface-container transition-all text-sm font-medium">
+<span class="material-symbols-outlined text-sm">list</span>
+                    Liste
+                </button>
+<button class="flex items-center gap-2 px-6 py-2 text-on-surface hover:bg-surface-container transition-all text-sm font-medium">
+<span class="material-symbols-outlined text-sm">calendar_month</span>
+                    Calendrier
+                </button>
+</div>
+</header>
+<!-- FILTER BAR -->
+<section class="bg-surface-container-low px-12 py-6">
+<div class="grid grid-cols-4 gap-6 max-w-6xl">
+<div class="space-y-1.5">
+<label class="block font-label text-[10px] font-bold uppercase tracking-widest text-on-surface-variant px-1">Ville</label>
+<select class="w-full bg-surface-container-lowest border-none py-3 px-4 text-sm font-medium focus:ring-1 focus:ring-primary">
+<option>Paris, France</option>
+<option>Lyon</option>
+<option>Marseille</option>
+</select>
+</div>
+<div class="space-y-1.5">
+<label class="block font-label text-[10px] font-bold uppercase tracking-widest text-on-surface-variant px-1">Date</label>
+<div class="relative">
+<input class="w-full bg-surface-container-lowest border-none py-3 px-4 text-sm font-medium focus:ring-1 focus:ring-primary" type="text" value="Ce weekend"/>
+<span class="material-symbols-outlined absolute right-3 top-2.5 text-slate-400 text-lg">event</span>
+</div>
+</div>
+<div class="space-y-1.5">
+<label class="block font-label text-[10px] font-bold uppercase tracking-widest text-on-surface-variant px-1">Établissement</label>
+<select class="w-full bg-surface-container-lowest border-none py-3 px-4 text-sm font-medium focus:ring-1 focus:ring-primary">
+<option>Tous les types</option>
+<option>Nightclub</option>
+<option>Lounge</option>
+<option>Toit-terrasse</option>
+</select>
+</div>
+<div class="space-y-1.5">
+<label class="block font-label text-[10px] font-bold uppercase tracking-widest text-on-surface-variant px-1">Statut</label>
+<select class="w-full bg-surface-container-lowest border-none py-3 px-4 text-sm font-medium focus:ring-1 focus:ring-primary">
+<option>Ouvert</option>
+<option>Fermé</option>
+<option>Tous</option>
+</select>
+</div>
+</div>
+</section>
+<!-- GRID VIEW -->
+<section class="flex-1 px-12 py-10 bg-surface">
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10">
+<!-- Event Card 1 -->
+<div class="bg-surface-container-lowest ambient-card-shadow overflow-hidden flex flex-col group cursor-pointer transition-transform duration-500 hover:-translate-y-1" style="border-radius: 0.375rem;">
+<div class="relative aspect-video overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="Sophisticated nightclub interior with deep blue neon lighting, silhouettes of people dancing, and professional laser light show in atmosphere." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDdN9yfT09-rR7mt5n-DKfDBzTCMq4Z1FHDy4QtEJHYSeE0pMNsKjCnLlJbjR784Nz45i-rhugZIGqLk6Eo1fSAaLd4NGB_3nKYMlk-Z59XbPckkwj6FMwkACQLBF8WBVRxtKQywqieVllkPh9IyNBNASz_vWtdPlG0jKMPrDJ7MJmHg8GYLvj-v5mndmV09ILF1X4DQmw_vqRthc2Z6kgLnlFrz33xf8yH0vQf-Wgq1n6IaNm8lFI6AUgCoT-oLUrodsNl2tnGbB24"/>
+<div class="absolute top-4 left-4">
+<span class="bg-primary text-white text-[10px] font-bold px-3 py-1.5 uppercase tracking-widest">Ouvert</span>
+</div>
+</div>
+<div class="p-8 space-y-4">
+<div class="space-y-1">
+<h3 class="text-xl font-headline font-bold text-primary leading-tight">Neon Pulse: Session Minuit</h3>
+<p class="text-sm font-body text-on-surface-variant font-medium">L'Élysée Montmartre</p>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-lg">schedule</span>
+<span class="text-xs font-medium">Samedi 24 Fév • 23:00 - 06:00</span>
+</div>
+<div class="flex flex-wrap gap-2 pt-2">
+<span class="bg-surface-container px-3 py-1 rounded-full text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">House</span>
+<span class="bg-surface-container px-3 py-1 rounded-full text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Techno</span>
+</div>
+</div>
+</div>
+<!-- Event Card 2 -->
+<div class="bg-surface-container-lowest ambient-card-shadow overflow-hidden flex flex-col group cursor-pointer transition-transform duration-500 hover:-translate-y-1" style="border-radius: 0.375rem;">
+<div class="relative aspect-video overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="Close-up of a high-end DJ mixer with illuminated buttons in a dark setting, soft purple and blue ambient lighting reflects on chrome." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDNUTORjBy8li7oP4HenPmKWs3m_D_Z5Dqd6JCxrDjQLa9sBtT0rujJRCbVs9FTANW6BfLnS-GuGZSqHfx3NbL2TQSrj1bwVRal5LhB81F_t8BuTVWB2JVM7NrHQQlZW_ipRR5uKl5QO0Ddccn2Ou9b0oflEaNce_JS8s9fTQemCWdLMwiU7m6hx11Zmr-Opj_hw-GMYvR6lEHwYV-cPoPRfnjKCzPgyCF9fe5S9WpuA710zDmc0mWvWk39SOjN5wEEpiBWHBzuOG8Z"/>
+<div class="absolute top-4 left-4">
+<span class="bg-primary text-white text-[10px] font-bold px-3 py-1.5 uppercase tracking-widest">Ouvert</span>
+</div>
+</div>
+<div class="p-8 space-y-4">
+<div class="space-y-1">
+<h3 class="text-xl font-headline font-bold text-primary leading-tight">Velvet Underground Exclusive</h3>
+<p class="text-sm font-body text-on-surface-variant font-medium">Le Rex Club</p>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-lg">schedule</span>
+<span class="text-xs font-medium">Vendredi 23 Fév • 22:00 - 05:00</span>
+</div>
+<div class="flex flex-wrap gap-2 pt-2">
+<span class="bg-surface-container px-3 py-1 rounded-full text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Electronic</span>
+<span class="bg-surface-container px-3 py-1 rounded-full text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">VIP Only</span>
+</div>
+</div>
+</div>
+<!-- Event Card 3 -->
+<div class="bg-surface-container-lowest ambient-card-shadow overflow-hidden flex flex-col group cursor-pointer transition-transform duration-500 hover:-translate-y-1 opacity-80" style="border-radius: 0.375rem;">
+<div class="relative aspect-video overflow-hidden grayscale">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="Elegant rooftop bar at night with empty velvet chairs and glass tables overlooking a city skyline with distant lights." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBJIkw4_BbiMtnepOnbOyF4KOj62YdiUtUqo4BTcvY7GCKqN7zrHW00kQE7ThUuv1ewlxInJR0U8nDqaVHQfc5XDAwpcpNiVSLgjNK0FmQWxLs9lNzl6HO8cscs2I0Tg2xoaGUUaoduylR0dVMhSR5FukV63C8sCX7Fxt54Buwa8wmBQH55WyANGCc6rQEbUxWn0LfSglQJdukVly_EjjplIFrap3TQ7rbwpUIBq1CR4a8Y_4NgvNEAOP4lXeAS9UcKyv61G5EUQOjy"/>
+<div class="absolute top-4 left-4">
+<span class="bg-surface-container text-on-surface-variant text-[10px] font-bold px-3 py-1.5 uppercase tracking-widest">Fermé</span>
+</div>
+</div>
+<div class="p-8 space-y-4">
+<div class="space-y-1">
+<h3 class="text-xl font-headline font-bold text-primary leading-tight">Skyline Aperitivo</h3>
+<p class="text-sm font-body text-on-surface-variant font-medium">Perchoir Marais</p>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-lg">schedule</span>
+<span class="text-xs font-medium">Lundi 19 Fév • Terminé</span>
+</div>
+<div class="flex flex-wrap gap-2 pt-2">
+<span class="bg-surface-container px-3 py-1 rounded-full text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Lounge</span>
+<span class="bg-surface-container px-3 py-1 rounded-full text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Jazz</span>
+</div>
+</div>
+</div>
+<!-- Event Card 4 -->
+<div class="bg-surface-container-lowest ambient-card-shadow overflow-hidden flex flex-col group cursor-pointer transition-transform duration-500 hover:-translate-y-1" style="border-radius: 0.375rem;">
+<div class="relative aspect-video overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="Modern geometric interior design with dramatic architectural lighting and metallic accents in a premium event space." src="https://lh3.googleusercontent.com/aida-public/AB6AXuANit2u4CCx2GFS7BdG2_TMH7GLzEcCagD-9Do5Nbo63ZouMc-qWNnkNamXh6oF-CN-nzNuYc9VrUX1ZQ4UwQPzga4j2PvbNM0ftMex2xUs1L42BkKaukaI3TnPoxQld7JbYOhZsgCq5uUfjDSiFMS-VfOGP32XUzm7l7kwprVLsAHgRITRxtkMGiq8CSyvyQ5fOUes74hjXfJWAkxjO-7s_kYjCeF-G_yf-n3XG8hnJkfnXXPI2ukT6lbOrI4NVar0UXqGcNQHkXGC"/>
+<div class="absolute top-4 left-4">
+<span class="bg-primary text-white text-[10px] font-bold px-3 py-1.5 uppercase tracking-widest">Ouvert</span>
+</div>
+</div>
+<div class="p-8 space-y-4">
+<div class="space-y-1">
+<h3 class="text-xl font-headline font-bold text-primary leading-tight">Architecture of Sound</h3>
+<p class="text-sm font-body text-on-surface-variant font-medium">La Machine du Moulin Rouge</p>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-lg">schedule</span>
+<span class="text-xs font-medium">Jeudi 29 Fév • 21:00 - 04:00</span>
+</div>
+<div class="flex flex-wrap gap-2 pt-2">
+<span class="bg-surface-container px-3 py-1 rounded-full text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Minimal</span>
+<span class="bg-surface-container px-3 py-1 rounded-full text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Art</span>
+</div>
+</div>
+</div>
+<!-- Event Card 5 -->
+<div class="bg-surface-container-lowest ambient-card-shadow overflow-hidden flex flex-col group cursor-pointer transition-transform duration-500 hover:-translate-y-1" style="border-radius: 0.375rem;">
+<div class="relative aspect-video overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="Interior of a luxury speak-easy bar with dark wood, leather sofas, and warm dim amber lighting create a cozy prestigious atmosphere." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBo-ab6Ss7rA5dzPo_p2d_fwmNuPnRwB3Rviz154pCulMVnJCMPsDUSEqsbncGl5fSmS567GPjNGKe-buCV-_GxXBtjD9dE_d_fB1_jnvVA-ASAfP3srNXKfRHioAlKffrv-D69BPkcjuyXGY2gtCjQBL_xa3umUlZa8iC9rLAICWdqdU6XyCdZZg-XEDenhCv8XHsxeDls-1oE_NIoZuz9t7JUZ7-o9xYAk27z6TlApEK1xSkiYdfF7yWBAH6Unq8pUcDufkJvdlnu"/>
+<div class="absolute top-4 left-4">
+<span class="bg-primary text-white text-[10px] font-bold px-3 py-1.5 uppercase tracking-widest">Ouvert</span>
+</div>
+</div>
+<div class="p-8 space-y-4">
+<div class="space-y-1">
+<h3 class="text-xl font-headline font-bold text-primary leading-tight">Private Ledger Gala</h3>
+<p class="text-sm font-body text-on-surface-variant font-medium">Hôtel de Crillon</p>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-lg">schedule</span>
+<span class="text-xs font-medium">Samedi 02 Mar • 20:00 - 02:00</span>
+</div>
+<div class="flex flex-wrap gap-2 pt-2">
+<span class="bg-surface-container px-3 py-1 rounded-full text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Gala</span>
+<span class="bg-surface-container px-3 py-1 rounded-full text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Privé</span>
+</div>
+</div>
+</div>
+<!-- Event Card 6 -->
+<div class="bg-surface-container-lowest ambient-card-shadow overflow-hidden flex flex-col group cursor-pointer transition-transform duration-500 hover:-translate-y-1" style="border-radius: 0.375rem;">
+<div class="relative aspect-video overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="Outdoor festival stage at dusk with huge LED screens showing abstract geometric patterns, crowds of people silhouettes in front." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBOLzj-HnZDS9ZHWwvUdioqEnc1NUFJ7v9rd-A2mQndggx6wBv4ZiQ40zQo9mRqJdWbCSM0EkUjhgUg1vtu2ShKs9-QO0k6QTeR6iQGiOLJCXLY2xRLKSv-Cqi-3MZs7NrqKujR6MJ-rMGI001b4WRTfcStkdUtHKzyeHH_4M8sd3m2egwSTtS2kNl2f2hFxxGcFD5eznnBXlsb8noAgBGlEcnL_4SfUg7_Ofroc9uArJC9M4Ii87LfK_ZITZTdu1Kwjaik9EDIWVij"/>
+<div class="absolute top-4 left-4">
+<span class="bg-primary text-white text-[10px] font-bold px-3 py-1.5 uppercase tracking-widest">Ouvert</span>
+</div>
+</div>
+<div class="p-8 space-y-4">
+<div class="space-y-1">
+<h3 class="text-xl font-headline font-bold text-primary leading-tight">After Hours: Warehouse Edition</h3>
+<p class="text-sm font-body text-on-surface-variant font-medium">Dock de Paris</p>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-lg">schedule</span>
+<span class="text-xs font-medium">Dimanche 03 Mar • 06:00 - 14:00</span>
+</div>
+<div class="flex flex-wrap gap-2 pt-2">
+<span class="bg-surface-container px-3 py-1 rounded-full text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Industrial</span>
+<span class="bg-surface-container px-3 py-1 rounded-full text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Techno</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- FOOTER / PAGINATION -->
+<footer class="bg-surface px-12 py-12 flex justify-between items-center">
+<div class="text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.2em]">
+                Affichage de 6 sur 42 événements
+            </div>
+<div class="flex gap-4">
+<button class="bg-surface-container-low w-10 h-10 flex items-center justify-center rounded-sm hover:bg-surface-container transition-all">
+<span class="material-symbols-outlined text-sm">chevron_left</span>
+</button>
+<div class="flex gap-2">
+<button class="bg-primary text-white w-10 h-10 flex items-center justify-center rounded-sm font-headline font-bold text-xs">1</button>
+<button class="bg-surface-container-lowest text-on-surface w-10 h-10 flex items-center justify-center rounded-sm font-headline font-bold text-xs">2</button>
+<button class="bg-surface-container-lowest text-on-surface w-10 h-10 flex items-center justify-center rounded-sm font-headline font-bold text-xs">3</button>
+</div>
+<button class="bg-surface-container-low w-10 h-10 flex items-center justify-center rounded-sm hover:bg-surface-container transition-all">
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</div>
+</footer>
+</main>
+</body></html>

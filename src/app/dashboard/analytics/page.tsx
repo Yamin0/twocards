@@ -1,0 +1,334 @@
+"use client";
+
+import { useState } from "react";
+import {
+  Download,
+  FileText,
+  ChevronDown,
+  Trophy,
+  TrendingUp,
+} from "lucide-react";
+
+const navLinks = ["Overview", "Live Maps", "Revenue", "Guests", "Settings"];
+
+const rpData = [
+  { rang: 1, nom: "Julien Lefevre", couverts: 312, ca: "12,480 EUR", commissions: "1,872 EUR", taille: "7.2" },
+  { rang: 2, nom: "Sophie Martin", couverts: 278, ca: "10,250 EUR", commissions: "1,537 EUR", taille: "6.8" },
+  { rang: 3, nom: "Camille Roux", couverts: 245, ca: "9,870 EUR", commissions: "1,480 EUR", taille: "5.9" },
+  { rang: 4, nom: "Marc Dubois", couverts: 198, ca: "7,650 EUR", commissions: "1,147 EUR", taille: "5.4" },
+];
+
+const barChartCouverts = [
+  { label: "Lun", height: 45 },
+  { label: "Mar", height: 65 },
+  { label: "Mer", height: 55 },
+  { label: "Jeu", height: 80 },
+  { label: "Ven", height: 95 },
+  { label: "Sam", height: 100 },
+  { label: "Dim", height: 35 },
+];
+
+const barChartRevenus = [
+  { label: "S1", height: 50 },
+  { label: "S2", height: 65 },
+  { label: "S3", height: 45 },
+  { label: "S4", height: 78 },
+  { label: "S5", height: 90 },
+  { label: "S6", height: 70 },
+  { label: "S7", height: 85 },
+  { label: "S8", height: 95 },
+  { label: "S9", height: 60 },
+  { label: "S10", height: 100 },
+];
+
+const topEvents = [
+  { name: "Nuit Blanche VIP", revenue: "8,200 EUR", covers: 142 },
+  { name: "Soiree Privee Champagne", revenue: "6,750 EUR", covers: 98 },
+  { name: "DJ Set International", revenue: "5,400 EUR", covers: 115 },
+];
+
+const periodTabs = ["7 jours", "30 jours", "90 jours", "Annee"];
+
+const donutSegments = [
+  { label: "Tables VIP", pct: 64, color: "bg-primary" },
+  { label: "Tables Standard", pct: 22, color: "bg-primary/50" },
+  { label: "Bar", pct: 14, color: "bg-on-primary-container" },
+];
+
+export default function AnalyticsPage() {
+  const [activeNav, setActiveNav] = useState("Overview");
+  const [activePeriod, setActivePeriod] = useState("30 jours");
+
+  return (
+    <div className="-mx-0">
+      {/* Dark Top Navigation Bar */}
+      <div className="bg-primary-dark px-6 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-8">
+          <h1 className="text-white font-[family-name:var(--font-manrope)] font-extrabold text-lg tracking-tight">
+            THE LEDGER
+          </h1>
+          <nav className="hidden md:flex items-center gap-1">
+            {navLinks.map((link) => (
+              <button
+                key={link}
+                onClick={() => setActiveNav(link)}
+                className={`px-3 py-1.5 rounded-sm text-sm font-medium transition-colors ${
+                  activeNav === link
+                    ? "bg-white/15 text-white"
+                    : "text-white/60 hover:text-white/90"
+                }`}
+              >
+                {link}
+              </button>
+            ))}
+          </nav>
+        </div>
+        <button className="flex items-center gap-1 text-white/60 text-sm hover:text-white transition-colors">
+          <span>Oct 2025</span>
+          <ChevronDown size={14} strokeWidth={1.5} />
+        </button>
+      </div>
+
+      {/* Data Strip */}
+      <div className="bg-tertiary-container px-6 py-5 flex flex-wrap items-end gap-6 md:gap-0 md:grid md:grid-cols-5">
+        {[
+          { label: "Total Couverts", value: "1,248" },
+          { label: "Chiffre d'Affaires", value: "42,650 EUR" },
+          { label: "Taille Moy. Groupe", value: "6.2" },
+          { label: "Meilleur RP", value: "JULIEN L." },
+        ].map((stat, i) => (
+          <div
+            key={i}
+            className={`flex flex-col ${
+              i > 0 ? "md:border-l md:border-white/10 md:pl-6" : ""
+            }`}
+          >
+            <span className="text-on-tertiary-container font-[family-name:var(--font-inter)] text-[10px] uppercase tracking-[0.1em] mb-1 font-bold">
+              {stat.label}
+            </span>
+            <span className="text-white font-[family-name:var(--font-manrope)] font-extrabold text-2xl">
+              {stat.value}
+            </span>
+          </div>
+        ))}
+
+        {/* Period selector */}
+        <div className="flex items-end md:justify-end">
+          <div className="flex gap-1 bg-white/10 rounded-sm p-0.5">
+            {periodTabs.map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActivePeriod(tab)}
+                className={`px-2.5 py-1 text-[10px] font-medium rounded-sm transition-colors ${
+                  activePeriod === tab
+                    ? "bg-white/20 text-white"
+                    : "text-white/50 hover:text-white/80"
+                }`}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Charts Row */}
+      <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Couverts Chart */}
+        <div className="bg-surface-card rounded-md editorial-shadow p-6">
+          <h3 className="text-primary-dark font-[family-name:var(--font-manrope)] font-bold text-sm mb-6">
+            Couverts dans le temps
+          </h3>
+          <div className="flex items-end justify-between gap-2 h-40">
+            {barChartCouverts.map((bar) => (
+              <div key={bar.label} className="flex-1 flex flex-col items-center gap-2">
+                <div className="w-full flex justify-center">
+                  <div
+                    className="w-8 bg-primary rounded-sm transition-all"
+                    style={{ height: `${bar.height * 1.4}px`, opacity: bar.height / 100 * 0.6 + 0.4 }}
+                  />
+                </div>
+                <span className="text-[10px] text-on-surface-variant">{bar.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Revenus Chart */}
+        <div className="bg-surface-card rounded-md editorial-shadow p-6">
+          <h3 className="text-primary-dark font-[family-name:var(--font-manrope)] font-bold text-sm mb-6">
+            Revenus dans le temps
+          </h3>
+          <div className="flex items-end justify-between gap-1.5 h-40">
+            {barChartRevenus.map((bar) => (
+              <div key={bar.label} className="flex-1 flex flex-col items-center gap-2">
+                <div className="w-full flex justify-center">
+                  <div
+                    className="w-6 bg-primary rounded-sm transition-all"
+                    style={{ height: `${bar.height * 1.4}px`, opacity: bar.height / 100 * 0.6 + 0.4 }}
+                  />
+                </div>
+                <span className="text-[10px] text-on-surface-variant">{bar.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* RP Performance Table */}
+      <div className="px-6 pb-6">
+        <div className="bg-surface-card rounded-md editorial-shadow overflow-hidden">
+          <div className="px-6 py-4">
+            <h3 className="text-primary-dark font-[family-name:var(--font-manrope)] font-bold text-sm">
+              Performance des RP
+            </h3>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-surface-low">
+                  <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
+                    Rang
+                  </th>
+                  <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
+                    Nom du RP
+                  </th>
+                  <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
+                    Couverts
+                  </th>
+                  <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
+                    CA Genere
+                  </th>
+                  <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
+                    Commissions Dues
+                  </th>
+                  <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
+                    Taille Moy. Groupe
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {rpData.map((rp, i) => (
+                  <tr
+                    key={rp.rang}
+                    className={i % 2 === 0 ? "bg-surface-card" : "bg-surface-low/50"}
+                  >
+                    <td className="px-6 py-3.5 text-on-background font-bold">
+                      <div className="flex items-center gap-2">
+                        {rp.rang === 1 && <Trophy size={14} strokeWidth={1.5} className="text-amber-500" />}
+                        {rp.rang}
+                      </div>
+                    </td>
+                    <td className="px-6 py-3.5 text-on-background font-medium">{rp.nom}</td>
+                    <td className="px-6 py-3.5 text-on-background">{rp.couverts}</td>
+                    <td className="px-6 py-3.5 text-on-background font-medium">{rp.ca}</td>
+                    <td className="px-6 py-3.5 text-on-background">{rp.commissions}</td>
+                    <td className="px-6 py-3.5 text-on-background">{rp.taille}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom Row */}
+      <div className="px-6 pb-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Meilleurs Evenements */}
+        <div className="bg-surface-card rounded-md editorial-shadow p-6">
+          <h3 className="text-primary-dark font-[family-name:var(--font-manrope)] font-bold text-sm mb-5">
+            Meilleurs Evenements
+          </h3>
+          <div className="space-y-4">
+            {topEvents.map((event, i) => (
+              <div key={i} className="flex items-center gap-4">
+                <div className="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center flex-shrink-0">
+                  <span className="text-xs font-bold text-on-primary-container">{i + 1}</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-on-background truncate">{event.name}</p>
+                  <p className="text-xs text-on-surface-variant">{event.covers} couverts</p>
+                </div>
+                <div className="flex items-center gap-1.5 text-sm font-bold text-on-background">
+                  <TrendingUp size={14} strokeWidth={1.5} className="text-emerald-600" />
+                  {event.revenue}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Repartition des Reservations */}
+        <div className="bg-surface-card rounded-md editorial-shadow p-6">
+          <h3 className="text-primary-dark font-[family-name:var(--font-manrope)] font-bold text-sm mb-5">
+            Repartition des Reservations
+          </h3>
+          <div className="flex items-center gap-8">
+            {/* Donut Chart Mockup */}
+            <div className="relative w-32 h-32 flex-shrink-0">
+              <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
+                {/* Background ring */}
+                <circle cx="18" cy="18" r="14" fill="none" stroke="#eff5f3" strokeWidth="4" />
+                {/* VIP - 64% */}
+                <circle
+                  cx="18" cy="18" r="14" fill="none"
+                  stroke="#13305c" strokeWidth="4"
+                  strokeDasharray="64 36"
+                  strokeDashoffset="0"
+                  strokeLinecap="round"
+                />
+                {/* Standard - 22% */}
+                <circle
+                  cx="18" cy="18" r="14" fill="none"
+                  stroke="rgba(19,48,92,0.45)" strokeWidth="4"
+                  strokeDasharray="22 78"
+                  strokeDashoffset="-64"
+                  strokeLinecap="round"
+                />
+                {/* Bar - 14% */}
+                <circle
+                  cx="18" cy="18" r="14" fill="none"
+                  stroke="#8099cb" strokeWidth="4"
+                  strokeDasharray="14 86"
+                  strokeDashoffset="-86"
+                  strokeLinecap="round"
+                />
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="text-xl font-extrabold font-[family-name:var(--font-manrope)] text-on-background">
+                  64%
+                </span>
+                <span className="text-[9px] text-on-surface-variant">VIP</span>
+              </div>
+            </div>
+
+            {/* Legend */}
+            <div className="space-y-3">
+              {donutSegments.map((seg) => (
+                <div key={seg.label} className="flex items-center gap-2.5">
+                  <span className={`w-3 h-3 rounded-full ${seg.color}`} />
+                  <div>
+                    <p className="text-sm text-on-background font-medium">{seg.label}</p>
+                    <p className="text-xs text-on-surface-variant">{seg.pct}%</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="px-6 pb-8 flex flex-wrap items-center gap-4">
+        <button className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-sm text-sm font-medium hover:bg-primary-dark transition-colors">
+          <FileText size={16} strokeWidth={1.5} />
+          Exporter le rapport
+        </button>
+        <button className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-on-surface-variant hover:text-on-background transition-colors">
+          <Download size={16} strokeWidth={1.5} />
+          Telecharger CSV
+        </button>
+      </div>
+    </div>
+  );
+}

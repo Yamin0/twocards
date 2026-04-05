@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "inverse-primary": "#adc7fc",
+                    "surface-container-lowest": "#ffffff",
+                    "secondary": "#59605e",
+                    "on-primary": "#ffffff",
+                    "surface-container-high": "#e3e9e8",
+                    "on-surface-variant": "#44474f",
+                    "surface-bright": "#f5fbf9",
+                    "on-tertiary-fixed": "#001b3f",
+                    "on-secondary": "#ffffff",
+                    "surface-dim": "#d5dbd9",
+                    "secondary-container": "#dbe1df",
+                    "tertiary-fixed-dim": "#aec7fb",
+                    "on-secondary-fixed": "#171d1c",
+                    "on-secondary-fixed-variant": "#424847",
+                    "on-secondary-container": "#5d6463",
+                    "on-primary-fixed-variant": "#2c4674",
+                    "primary-container": "#13305c",
+                    "primary-fixed": "#d7e2ff",
+                    "outline": "#747780",
+                    "surface-container-low": "#eff5f3",
+                    "on-surface": "#171d1c",
+                    "on-background": "#171d1c",
+                    "error": "#ba1a1a",
+                    "on-error-container": "#93000a",
+                    "background": "#f5fbf9",
+                    "secondary-fixed": "#dee4e2",
+                    "on-tertiary-container": "#8099cb",
+                    "surface-tint": "#455e8d",
+                    "on-tertiary-fixed-variant": "#2d4673",
+                    "on-error": "#ffffff",
+                    "inverse-on-surface": "#ecf2f0",
+                    "tertiary": "#001b40",
+                    "outline-variant": "#c4c6d0",
+                    "secondary-fixed-dim": "#c2c8c6",
+                    "surface-variant": "#dee4e2",
+                    "on-primary-fixed": "#001b3f",
+                    "primary": "#001b40",
+                    "tertiary-container": "#13305c",
+                    "on-primary-container": "#8099cb",
+                    "inverse-surface": "#2b3231",
+                    "primary-fixed-dim": "#adc7fc",
+                    "on-tertiary": "#ffffff",
+                    "surface-container-highest": "#dee4e2",
+                    "surface": "#f5fbf9",
+                    "surface-container": "#e9efed",
+                    "tertiary-fixed": "#d7e2ff",
+                    "error-container": "#ffdad6"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Manrope"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; background-color: #f5fbf9; }
+        .font-manrope { font-family: 'Manrope', sans-serif; }
+    </style>
+</head>
+<body class="text-on-surface bg-background min-h-screen">
+<!-- SideNavBar Integration -->
+<aside class="h-screen w-64 fixed left-0 top-0 bg-[#eff5f3] dark:bg-slate-900 flex flex-col py-8 px-4 z-50">
+<div class="mb-12 px-2">
+<h1 class="text-xl font-extrabold font-['Manrope'] text-[#001b40] dark:text-white">The Velvet Ledger</h1>
+<p class="text-[10px] uppercase tracking-widest text-[#8099cb] mt-1">Nightlife Management</p>
+</div>
+<nav class="flex-1 space-y-1">
+<div class="flex items-center gap-3 px-3 py-3 text-[#8099cb] dark:text-slate-500 hover:bg-[#e9efed] dark:hover:bg-slate-800 transition-colors rounded cursor-pointer">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-['Manrope'] font-bold text-sm tracking-tight">Dashboard</span>
+</div>
+<div class="flex items-center gap-3 px-3 py-3 text-[#8099cb] dark:text-slate-500 hover:bg-[#e9efed] dark:hover:bg-slate-800 transition-colors rounded cursor-pointer">
+<span class="material-symbols-outlined">calendar_today</span>
+<span class="font-['Manrope'] font-bold text-sm tracking-tight">Events</span>
+</div>
+<div class="flex items-center gap-3 px-3 py-3 text-[#8099cb] dark:text-slate-500 hover:bg-[#e9efed] dark:hover:bg-slate-800 transition-colors rounded cursor-pointer">
+<span class="material-symbols-outlined">list_alt</span>
+<span class="font-['Manrope'] font-bold text-sm tracking-tight">Guest Lists</span>
+</div>
+<div class="flex items-center gap-3 px-3 py-3 text-[#8099cb] dark:text-slate-500 hover:bg-[#e9efed] dark:hover:bg-slate-800 transition-colors rounded cursor-pointer">
+<span class="material-symbols-outlined">grid_view</span>
+<span class="font-['Manrope'] font-bold text-sm tracking-tight">Table Map</span>
+</div>
+<div class="flex items-center gap-3 px-3 py-3 text-[#8099cb] dark:text-slate-500 hover:bg-[#e9efed] dark:hover:bg-slate-800 transition-colors rounded cursor-pointer">
+<span class="material-symbols-outlined">confirmation_number</span>
+<span class="font-['Manrope'] font-bold text-sm tracking-tight">Reservations</span>
+</div>
+<div class="flex items-center gap-3 px-3 py-3 text-[#8099cb] dark:text-slate-500 hover:bg-[#e9efed] dark:hover:bg-slate-800 transition-colors rounded cursor-pointer">
+<span class="material-symbols-outlined">group_work</span>
+<span class="font-['Manrope'] font-bold text-sm tracking-tight">PR Network</span>
+</div>
+<div class="flex items-center gap-3 px-3 py-3 text-[#8099cb] dark:text-slate-500 hover:bg-[#e9efed] dark:hover:bg-slate-800 transition-colors rounded cursor-pointer">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-['Manrope'] font-bold text-sm tracking-tight">Analytics</span>
+</div>
+<!-- Active Tab: Guests (mapped from "Clients") -->
+<div class="flex items-center gap-3 px-3 py-3 text-[#13305c] dark:text-white font-bold border-r-2 border-[#13305c] dark:border-blue-400 bg-[#e9efed] dark:bg-slate-800 transition-colors rounded cursor-pointer">
+<span class="material-symbols-outlined">group</span>
+<span class="font-['Manrope'] font-bold text-sm tracking-tight">Guests</span>
+</div>
+<div class="flex items-center gap-3 px-3 py-3 text-[#8099cb] dark:text-slate-500 hover:bg-[#e9efed] dark:hover:bg-slate-800 transition-colors rounded cursor-pointer">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-['Manrope'] font-bold text-sm tracking-tight">Settings</span>
+</div>
+</nav>
+<div class="mt-auto flex items-center gap-3 px-2 pt-4">
+<img class="w-10 h-10 rounded-full object-cover" data-alt="portrait of a professional male venue manager in a tailored suit in a modern office environment" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDjNznLH_EgGMkOf2hcuJtfCDaXi-7h8Iqp-KiLsVNB7XEJmoeKZs_RUZr4PbKosCaAj6HhWdkX8fjkfUsn2wH59rg1ZZRREQ6QN8R0ab2M_7qLUjir8JlrCSHbws--BCJE6i-Cp3x0y203kNHCisHTzQpdrPKeOFjNz6_94k0XwlvP-FwbfAcfqpKasw2YQkcXrT26FPr3oBqGC6OZm7SrjNiZvtEg3_RqEU1s0-fcFkfB_N_medARWXfrXf_ALFcnKMtVR8A1WC_Q"/>
+<div class="flex flex-col">
+<span class="text-xs font-bold text-[#001b40] dark:text-white">Jean-Luc Moreau</span>
+<span class="text-[10px] text-[#8099cb]">Directeur Artistique</span>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-64 min-h-screen">
+<!-- TopAppBar Integration -->
+<header class="sticky top-0 h-16 px-8 flex justify-between items-center bg-[#f5fbf9] dark:bg-slate-950 z-40">
+<div class="flex items-center gap-4 flex-1">
+<span class="material-symbols-outlined text-[#8099cb]">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm font-['Inter'] w-64 text-on-surface" placeholder="Recherche globale..." type="text"/>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex gap-4">
+<span class="material-symbols-outlined text-[#8099cb] cursor-pointer hover:text-[#13305c] transition-all">notifications</span>
+<span class="material-symbols-outlined text-[#8099cb] cursor-pointer hover:text-[#13305c] transition-all">help_outline</span>
+</div>
+<div class="h-8 w-px bg-surface-container mx-2"></div>
+<div class="text-right">
+<p class="text-[10px] font-bold tracking-widest text-[#13305c] uppercase">Venue Status</p>
+<p class="text-xs text-[#8099cb]">Operational · High Demand</p>
+</div>
+</div>
+</header>
+<!-- Page Content: Clients -->
+<div class="px-12 py-10">
+<!-- Header Section -->
+<div class="flex justify-between items-end mb-12">
+<div>
+<h2 class="text-5xl font-manrope font-extrabold text-[#001b40] tracking-tighter">Clients</h2>
+<p class="text-[#8099cb] mt-2 font-body text-sm tracking-wide">Gestion de la base de données relationnelle et CRM prestige.</p>
+</div>
+<a class="text-[#13305c] font-manrope font-bold text-sm tracking-tight flex items-center gap-2 hover:opacity-70 transition-opacity" href="#">
+<span class="material-symbols-outlined text-sm">download</span>
+                    Exporter CSV
+                </a>
+</div>
+<!-- Precision Search Bar -->
+<div class="mb-8">
+<div class="relative w-full">
+<div class="absolute inset-y-0 left-5 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-[#8099cb]">search</span>
+</div>
+<input class="w-full h-14 pl-14 pr-6 bg-[#eff5f3] border-none rounded-none focus:ring-1 focus:ring-[#13305c] font-body text-[#171d1c] placeholder:text-[#8099cb] transition-all" placeholder="Rechercher par nom, téléphone ou email" type="text"/>
+</div>
+</div>
+<!-- Filters Row -->
+<div class="flex flex-wrap items-center gap-8 mb-12">
+<!-- Toggle: VIP Uniquement -->
+<label class="flex items-center cursor-pointer group">
+<div class="relative">
+<input class="sr-only peer" type="checkbox"/>
+<div class="w-10 h-5 bg-[#e9efed] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#13305c]"></div>
+</div>
+<span class="ml-3 text-xs font-manrope font-bold uppercase tracking-widest text-[#13305c]">VIP uniquement</span>
+</label>
+<!-- Dropdown: Nombre de visites -->
+<div class="relative group">
+<p class="text-[10px] text-[#8099cb] uppercase tracking-widest mb-1 font-bold">Nombre de visites</p>
+<select class="appearance-none bg-transparent border-none p-0 pr-8 font-manrope font-bold text-[#13305c] focus:ring-0 cursor-pointer text-sm">
+<option>Tous les niveaux</option>
+<option>1-5 visites</option>
+<option>5-20 visites</option>
+<option>20+ visites</option>
+</select>
+<span class="material-symbols-outlined absolute right-0 bottom-1 text-sm pointer-events-none">expand_more</span>
+</div>
+<!-- Date Picker: Dernière visite -->
+<div class="relative group">
+<p class="text-[10px] text-[#8099cb] uppercase tracking-widest mb-1 font-bold">Dernière visite</p>
+<input class="appearance-none bg-transparent border-none p-0 font-manrope font-bold text-[#13305c] focus:ring-0 cursor-pointer text-sm" type="date"/>
+</div>
+<!-- Dropdown: Recommandé par -->
+<div class="relative group">
+<p class="text-[10px] text-[#8099cb] uppercase tracking-widest mb-1 font-bold">Recommandé par</p>
+<select class="appearance-none bg-transparent border-none p-0 pr-8 font-manrope font-bold text-[#13305c] focus:ring-0 cursor-pointer text-sm">
+<option>Tous les PR</option>
+<option>Alexandre V.</option>
+<option>Marie-Claire D.</option>
+<option>Julian K.</option>
+</select>
+<span class="material-symbols-outlined absolute right-0 bottom-1 text-sm pointer-events-none">expand_more</span>
+</div>
+</div>
+<!-- Table Section (Precision Editorial Style) -->
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low">
+<th class="py-5 px-6 font-manrope font-bold text-[11px] uppercase tracking-[0.1em] text-[#001b40]">Nom</th>
+<th class="py-5 px-6 font-manrope font-bold text-[11px] uppercase tracking-[0.1em] text-[#001b40]">Téléphone</th>
+<th class="py-5 px-6 font-manrope font-bold text-[11px] uppercase tracking-[0.1em] text-[#001b40]">Total Visites</th>
+<th class="py-5 px-6 font-manrope font-bold text-[11px] uppercase tracking-[0.1em] text-[#001b40]">Dépenses Totales</th>
+<th class="py-5 px-6 font-manrope font-bold text-[11px] uppercase tracking-[0.1em] text-[#001b40]">Dernière Visite</th>
+<th class="py-5 px-6 font-manrope font-bold text-[11px] uppercase tracking-[0.1em] text-[#001b40]">Statut VIP</th>
+<th class="py-5 px-6 font-manrope font-bold text-[11px] uppercase tracking-[0.1em] text-[#001b40]">Recommandé par</th>
+</tr>
+</thead>
+<tbody class="font-body text-sm text-[#171d1c]">
+<!-- Row 1 -->
+<tr class="bg-white hover:bg-[#eff5f3] transition-colors cursor-pointer group">
+<td class="py-6 px-6 font-semibold">Marc-Antoine de Rochefort</td>
+<td class="py-6 px-6 text-[#8099cb]">+33 6 12 34 56 78</td>
+<td class="py-6 px-6">42</td>
+<td class="py-6 px-6 font-manrope font-bold">12 450 €</td>
+<td class="py-6 px-6">14 Nov 2023</td>
+<td class="py-6 px-6">
+<span class="bg-[#13305c] text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">VIP Gold</span>
+</td>
+<td class="py-6 px-6 text-[#8099cb]">Alexandre V.</td>
+</tr>
+<!-- Row 2 -->
+<tr class="bg-[#f5fbf9] hover:bg-[#eff5f3] transition-colors cursor-pointer">
+<td class="py-6 px-6 font-semibold">Léa Chatelet</td>
+<td class="py-6 px-6 text-[#8099cb]">+33 7 88 99 00 11</td>
+<td class="py-6 px-6">12</td>
+<td class="py-6 px-6 font-manrope font-bold">2 800 €</td>
+<td class="py-6 px-6">02 Dec 2023</td>
+<td class="py-6 px-6">—</td>
+<td class="py-6 px-6 text-[#8099cb]">Direct Booking</td>
+</tr>
+<!-- Row 3 -->
+<tr class="bg-white hover:bg-[#eff5f3] transition-colors cursor-pointer">
+<td class="py-6 px-6 font-semibold">Sébastien Faure</td>
+<td class="py-6 px-6 text-[#8099cb]">+33 6 54 32 10 98</td>
+<td class="py-6 px-6">8</td>
+<td class="py-6 px-6 font-manrope font-bold">1 450 €</td>
+<td class="py-6 px-6">28 Nov 2023</td>
+<td class="py-6 px-6">—</td>
+<td class="py-6 px-6 text-[#8099cb]">Marie-Claire D.</td>
+</tr>
+<!-- Row 4 -->
+<tr class="bg-[#f5fbf9] hover:bg-[#eff5f3] transition-colors cursor-pointer">
+<td class="py-6 px-6 font-semibold">Isabelle Laroche</td>
+<td class="py-6 px-6 text-[#8099cb]">+33 6 11 22 33 44</td>
+<td class="py-6 px-6">25</td>
+<td class="py-6 px-6 font-manrope font-bold">8 900 €</td>
+<td class="py-6 px-6">10 Dec 2023</td>
+<td class="py-6 px-6">
+<span class="bg-[#13305c] text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">VIP Black</span>
+</td>
+<td class="py-6 px-6 text-[#8099cb]">Julian K.</td>
+</tr>
+<!-- Row 5 -->
+<tr class="bg-white hover:bg-[#eff5f3] transition-colors cursor-pointer">
+<td class="py-6 px-6 font-semibold">Thomas Meunier</td>
+<td class="py-6 px-6 text-[#8099cb]">+33 6 00 11 22 33</td>
+<td class="py-6 px-6">3</td>
+<td class="py-6 px-6 font-manrope font-bold">450 €</td>
+<td class="py-6 px-6">05 Nov 2023</td>
+<td class="py-6 px-6">—</td>
+<td class="py-6 px-6 text-[#8099cb]">Direct Booking</td>
+</tr>
+<!-- Row 6 -->
+<tr class="bg-[#f5fbf9] hover:bg-[#eff5f3] transition-colors cursor-pointer">
+<td class="py-6 px-6 font-semibold">Camille Renard</td>
+<td class="py-6 px-6 text-[#8099cb]">+33 7 44 55 66 77</td>
+<td class="py-6 px-6">19</td>
+<td class="py-6 px-6 font-manrope font-bold">5 600 €</td>
+<td class="py-6 px-6">09 Dec 2023</td>
+<td class="py-6 px-6">
+<span class="bg-[#13305c] text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">VIP Blue</span>
+</td>
+<td class="py-6 px-6 text-[#8099cb]">Alexandre V.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Footer Stats Overlay -->
+<div class="mt-20 flex justify-between items-center bg-white p-10 shadow-sm">
+<div class="flex gap-16">
+<div>
+<p class="text-[10px] font-bold uppercase tracking-[0.2em] text-[#8099cb] mb-2">Total Clients</p>
+<p class="text-3xl font-manrope font-extrabold text-[#001b40]">2,842</p>
+</div>
+<div>
+<p class="text-[10px] font-bold uppercase tracking-[0.2em] text-[#8099cb] mb-2">Nouveaux ce mois</p>
+<p class="text-3xl font-manrope font-extrabold text-[#001b40]">+148</p>
+</div>
+<div>
+<p class="text-[10px] font-bold uppercase tracking-[0.2em] text-[#8099cb] mb-2">Rétention VIP</p>
+<p class="text-3xl font-manrope font-extrabold text-[#001b40]">94%</p>
+</div>
+</div>
+<div>
+<button class="bg-[#13305c] text-white font-manrope font-bold px-10 py-4 text-xs uppercase tracking-widest hover:opacity-90 transition-opacity">
+                        Ajouter un Client
+                    </button>
+</div>
+</div>
+</div>
+</main>
+</body></html>

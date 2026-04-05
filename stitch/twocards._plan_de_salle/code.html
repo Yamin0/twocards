@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Plan de Salle - The Velvet Ledger</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary": "#ffffff",
+                        "on-background": "#171d1c",
+                        "on-secondary-fixed": "#171d1c",
+                        "inverse-surface": "#2b3231",
+                        "inverse-on-surface": "#ecf2f0",
+                        "on-tertiary-fixed-variant": "#2d4673",
+                        "tertiary-container": "#13305c",
+                        "surface-container-highest": "#dee4e2",
+                        "surface-tint": "#455e8d",
+                        "surface-variant": "#dee4e2",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-container": "#5d6463",
+                        "surface-container-high": "#e3e9e8",
+                        "on-error": "#ffffff",
+                        "on-primary-fixed": "#001b3f",
+                        "surface-container": "#e9efed",
+                        "tertiary": "#001b40",
+                        "outline-variant": "#c4c6d0",
+                        "on-error-container": "#93000a",
+                        "primary-fixed": "#d7e2ff",
+                        "secondary-container": "#dbe1df",
+                        "surface": "#f5fbf9",
+                        "primary-fixed-dim": "#adc7fc",
+                        "on-surface": "#171d1c",
+                        "error": "#ba1a1a",
+                        "primary": "#001b40",
+                        "on-tertiary-container": "#8099cb",
+                        "on-primary-fixed-variant": "#2c4674",
+                        "surface-dim": "#d5dbd9",
+                        "secondary-fixed": "#dee4e2",
+                        "secondary-fixed-dim": "#c2c8c6",
+                        "on-surface-variant": "#44474f",
+                        "error-container": "#ffdad6",
+                        "on-secondary": "#ffffff",
+                        "outline": "#747780",
+                        "on-primary-container": "#8099cb",
+                        "on-primary": "#ffffff",
+                        "inverse-primary": "#adc7fc",
+                        "background": "#f5fbf9",
+                        "on-tertiary-fixed": "#001b3f",
+                        "on-secondary-fixed-variant": "#424847",
+                        "tertiary-fixed-dim": "#aec7fb",
+                        "tertiary-fixed": "#d7e2ff",
+                        "surface-container-low": "#eff5f3",
+                        "secondary": "#59605e",
+                        "surface-bright": "#f5fbf9"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .blueprint-grid {
+            background-image: radial-gradient(#eff5f3 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
+        }
+        .striped-table {
+            background: repeating-linear-gradient(
+                45deg,
+                #e9efed,
+                #e9efed 10px,
+                #dee4e2 10px,
+                #dee4e2 20px
+            );
+        }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface overflow-hidden h-screen flex">
+<!-- SideNavBar Integration -->
+<aside class="hidden md:flex flex-col h-full w-64 bg-surface-container-low p-6 space-y-8 border-r border-transparent">
+<div class="flex flex-col">
+<span class="text-lg font-black text-primary font-headline uppercase tracking-widest">The Grand Club</span>
+<span class="text-xs text-on-tertiary-container font-label uppercase tracking-tighter opacity-70">Friday Night Live</span>
+</div>
+<nav class="flex-1 space-y-2">
+<a class="flex items-center px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-all opacity-80 hover:opacity-100 rounded-sm" href="#">
+<span class="material-symbols-outlined mr-3">dashboard</span>
+<span class="font-label">Dashboard</span>
+</a>
+<a class="flex items-center px-4 py-3 bg-white text-primary font-bold rounded-sm shadow-sm" href="#">
+<span class="material-symbols-outlined mr-3">layers</span>
+<span class="font-label">Table Map</span>
+</a>
+<a class="flex items-center px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-all opacity-80 hover:opacity-100 rounded-sm" href="#">
+<span class="material-symbols-outlined mr-3">event_seat</span>
+<span class="font-label">Reservations</span>
+</a>
+<a class="flex items-center px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-all opacity-80 hover:opacity-100 rounded-sm" href="#">
+<span class="material-symbols-outlined mr-3">insert_chart</span>
+<span class="font-label">Analytics</span>
+</a>
+<a class="flex items-center px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-all opacity-80 hover:opacity-100 rounded-sm" href="#">
+<span class="material-symbols-outlined mr-3">history</span>
+<span class="font-label">Archive</span>
+</a>
+</nav>
+<div class="mt-auto pt-6 space-y-2">
+<button class="w-full bg-primary text-white py-3 px-4 font-bold text-xs uppercase tracking-widest transition-transform active:scale-95 duration-200">
+                New Reservation
+            </button>
+<div class="pt-4 flex flex-col space-y-2 border-t border-surface-container">
+<a class="flex items-center px-4 py-2 text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined mr-3">settings</span>
+<span class="text-xs font-medium">Settings</span>
+</a>
+<a class="flex items-center px-4 py-2 text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined mr-3">help_outline</span>
+<span class="text-xs font-medium">Support</span>
+</a>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col min-w-0">
+<!-- TopAppBar Integration -->
+<header class="flex justify-between items-center w-full px-8 py-4 bg-surface sticky top-0 z-10">
+<div class="flex items-center gap-6">
+<h1 class="font-headline font-extrabold text-2xl tracking-tight text-primary">Plan de Salle</h1>
+<div class="flex items-center bg-surface-container-low px-4 py-2 rounded-sm cursor-pointer hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-on-primary-container mr-2 text-sm">calendar_today</span>
+<span class="text-sm font-bold text-primary">Main Event - 24 Octobre 2023</span>
+<span class="material-symbols-outlined text-primary ml-2 text-sm">expand_more</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="bg-surface-container text-primary px-8 py-2 font-bold text-xs uppercase tracking-widest hover:bg-surface-container-high transition-colors active:scale-95 duration-200">
+                    Modifier le Plan
+                </button>
+<button class="bg-primary text-white px-8 py-2 font-bold text-xs uppercase tracking-widest shadow-sm hover:opacity-90 transition-opacity active:scale-95 duration-200">
+                    Ajouter une Table
+                </button>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- Map Canvas (70%) -->
+<div class="flex-[7] p-8 relative overflow-hidden bg-surface">
+<div class="w-full h-full bg-white rounded-sm shadow-[0_32px_64px_-12px_rgba(19,48,92,0.06)] relative blueprint-grid border-4 border-surface-container-low overflow-auto">
+<!-- Architectural Room Elements -->
+<div class="absolute inset-0">
+<!-- Walls -->
+<div class="absolute top-0 left-0 right-0 h-4 bg-surface-container"></div>
+<div class="absolute bottom-0 left-0 right-0 h-4 bg-surface-container"></div>
+<div class="absolute top-0 bottom-0 left-0 w-4 bg-surface-container"></div>
+<div class="absolute top-0 bottom-0 right-0 w-4 bg-surface-container"></div>
+<!-- DJ Booth -->
+<div class="absolute top-4 left-1/2 -translate-x-1/2 w-48 h-20 bg-surface-container flex items-center justify-center">
+<span class="text-[10px] font-bold text-on-tertiary-container uppercase tracking-widest">DJ BOOTH</span>
+</div>
+<!-- Bar Area -->
+<div class="absolute right-4 top-1/4 bottom-1/4 w-24 bg-surface-container flex flex-col items-center justify-center gap-2">
+<div class="w-1 h-32 bg-on-tertiary-container opacity-20 rounded-full"></div>
+<span class="text-[10px] font-bold text-on-tertiary-container uppercase tracking-widest vertical-text -rotate-90">ESPACE BAR</span>
+</div>
+<!-- Entrance -->
+<div class="absolute left-0 top-1/2 -translate-y-1/2 w-4 h-32 bg-primary"></div>
+<div class="absolute left-8 top-1/2 -translate-y-1/2">
+<span class="text-[10px] font-bold text-primary uppercase tracking-widest">ENTRÉE PRINCIPALE</span>
+</div>
+</div>
+<!-- Tables Cluster -->
+<div class="absolute inset-0 p-24 grid grid-cols-4 grid-rows-3 gap-12 pointer-events-none">
+<!-- Table 10 (Available) -->
+<div class="flex flex-col items-center justify-center pointer-events-auto cursor-pointer group">
+<div class="w-24 h-24 rounded-full bg-surface-container-low flex flex-col items-center justify-center transition-all group-hover:scale-105">
+<span class="text-primary font-bold text-xl font-headline">10</span>
+<span class="text-[10px] font-label text-on-tertiary-container font-medium">CAP: 4</span>
+</div>
+<div class="mt-2 text-[9px] font-bold text-primary opacity-40 uppercase tracking-tighter">Disponible</div>
+</div>
+<!-- Table 12 (Reserved - ACTIVE) -->
+<div class="flex flex-col items-center justify-center pointer-events-auto cursor-pointer group scale-110 relative">
+<div class="absolute -top-2 -right-2 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-md z-10 border border-surface-container">
+<span class="material-symbols-outlined text-primary text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<div class="w-32 h-24 rounded-xl bg-primary flex flex-col items-center justify-center shadow-lg transition-all">
+<span class="text-white font-bold text-2xl font-headline">12</span>
+<span class="text-[10px] font-label text-white/70 font-medium">VIP • 8 PERS</span>
+</div>
+<div class="mt-2 text-[9px] font-black text-primary uppercase tracking-widest">Jean Dupont</div>
+</div>
+<!-- Table 15 (Occupied) -->
+<div class="flex flex-col items-center justify-center pointer-events-auto cursor-pointer group">
+<div class="w-24 h-24 rounded-full bg-tertiary flex flex-col items-center justify-center transition-all group-hover:bg-primary">
+<span class="text-white font-bold text-xl font-headline">15</span>
+<span class="text-[10px] font-label text-white/50 font-medium">CAP: 6</span>
+</div>
+<div class="mt-2 text-[9px] font-bold text-tertiary opacity-80 uppercase tracking-tighter">En cours</div>
+</div>
+<!-- Table 18 (Blocked) -->
+<div class="flex flex-col items-center justify-center pointer-events-auto cursor-not-allowed group">
+<div class="w-32 h-24 rounded-sm striped-table flex flex-col items-center justify-center opacity-60">
+<span class="text-on-surface-variant font-bold text-xl font-headline opacity-50">18</span>
+<span class="text-[10px] font-label text-on-surface-variant opacity-40 uppercase font-black">BLOQUÉE</span>
+</div>
+</div>
+<!-- More Tables for layout density -->
+<div class="w-20 h-20 rounded-full bg-surface-container-low opacity-40 flex items-center justify-center"><span class="text-xs font-bold text-primary">11</span></div>
+<div class="w-20 h-20 rounded-full bg-surface-container-low opacity-40 flex items-center justify-center"><span class="text-xs font-bold text-primary">14</span></div>
+<div class="w-28 h-20 rounded-sm bg-surface-container-low opacity-40 flex items-center justify-center"><span class="text-xs font-bold text-primary">16</span></div>
+<div class="w-20 h-20 rounded-full bg-surface-container-low opacity-40 flex items-center justify-center"><span class="text-xs font-bold text-primary">17</span></div>
+</div>
+<!-- Floating Zoom Controls -->
+<div class="absolute bottom-6 right-6 flex flex-col gap-2">
+<button class="w-10 h-10 bg-white shadow-lg rounded-sm flex items-center justify-center hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-primary">add</span>
+</button>
+<button class="w-10 h-10 bg-white shadow-lg rounded-sm flex items-center justify-center hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-primary">remove</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Right Panel (30%) -->
+<aside class="flex-[3] bg-white border-l border-surface-container flex flex-col">
+<div class="p-8 border-b border-surface-container-low bg-surface-container-lowest">
+<div class="flex items-center justify-between mb-4">
+<h2 class="font-headline font-extrabold text-3xl text-primary">Table 12</h2>
+<span class="bg-primary-fixed text-on-primary-fixed text-[10px] font-bold px-3 py-1 uppercase tracking-widest rounded-full">VIP Area</span>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-surface-container-low p-4 rounded-sm">
+<span class="text-[10px] font-label uppercase tracking-widest text-on-tertiary-container block mb-1">Capacité</span>
+<span class="text-lg font-bold text-primary">8 Personnes</span>
+</div>
+<div class="bg-surface-container-low p-4 rounded-sm">
+<span class="text-[10px] font-label uppercase tracking-widest text-on-tertiary-container block mb-1">Minimum Spend</span>
+<span class="text-lg font-bold text-primary">2,000 €</span>
+</div>
+</div>
+</div>
+<div class="p-8 flex-1">
+<h3 class="text-[10px] font-label uppercase tracking-widest text-on-tertiary-container mb-6 flex items-center">
+<span class="w-4 h-[1px] bg-on-tertiary-container mr-2"></span>
+                        Détails de la Réservation
+                    </h3>
+<div class="space-y-8">
+<div>
+<span class="text-[10px] font-label uppercase tracking-widest text-on-tertiary-container opacity-60 block mb-1">Client Principal</span>
+<div class="flex items-center gap-4">
+<img alt="Client Portrait" class="w-12 h-12 rounded-sm object-cover" data-alt="Portrait headshot of a stylish professional man in a dark suit against a neutral background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZ5ti7-4ohbKBMvRNmqB29l-PbmsAJAQTK9n8QSm4v-miZgURtR2kGxiGwadX1qIHZqkeyq-6ltLj709aevqLq1ke8bOqSBJdssSRKBJ9ZnhNIajkrvM1iPgowQLmUUz2bHwD44ieINGjmkmLuVTXhRFPmMOVE9ge53pGIV1Ed8O2-Vz6N-_dPoUNa05AjXpfpQt9pX10twNvDIqcqrCr6fzAvmG7QMP7GC5oJHAJONZ0UA_-AWFmd_jqZt6pbb2pQdMXnLPPGF_Qp"/>
+<div>
+<span class="text-xl font-bold text-primary block">Jean Dupont</span>
+<span class="text-xs text-on-surface-variant">Client Gold • 12 Visites</span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-y-6">
+<div>
+<span class="text-[10px] font-label uppercase tracking-widest text-on-tertiary-container opacity-60 block mb-1">Hôtesse / PR</span>
+<span class="text-sm font-bold text-primary">Marie L.</span>
+</div>
+<div>
+<span class="text-[10px] font-label uppercase tracking-widest text-on-tertiary-container opacity-60 block mb-1">Taille du Groupe</span>
+<span class="text-sm font-bold text-primary">6 Invités</span>
+</div>
+<div>
+<span class="text-[10px] font-label uppercase tracking-widest text-on-tertiary-container opacity-60 block mb-1">Arrivée Prévue</span>
+<span class="text-sm font-bold text-primary">23:30</span>
+</div>
+<div>
+<span class="text-[10px] font-label uppercase tracking-widest text-on-tertiary-container opacity-60 block mb-1">Statut</span>
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-primary"></div>
+<span class="text-sm font-bold text-primary">Réservé</span>
+</div>
+</div>
+</div>
+<div class="bg-surface p-4 rounded-sm border-l-2 border-primary">
+<span class="text-[10px] font-label uppercase tracking-widest text-primary block mb-2 font-bold">Notes Internes</span>
+<p class="text-xs text-on-surface-variant italic leading-relaxed">Préfère l'emplacement près du bar. Célèbre un anniversaire. Prévoir 2 bouteilles de Cristal à l'arrivée.</p>
+</div>
+</div>
+</div>
+<div class="p-8 bg-surface-container-low space-y-4">
+<button class="w-full bg-primary text-white py-4 font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all active:scale-[0.98]">
+                        Arrivée (Check In)
+                    </button>
+<button class="w-full text-primary py-4 font-bold text-xs uppercase tracking-widest hover:bg-surface-container transition-all">
+                        Annuler la Réservation
+                    </button>
+</div>
+</aside>
+</div>
+</main>
+</body></html>

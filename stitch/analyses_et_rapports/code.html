@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-surface-variant": "#44474f",
+                        "tertiary-container": "#13305c",
+                        "surface-variant": "#dee4e2",
+                        "on-secondary-fixed": "#171d1c",
+                        "surface": "#f5fbf9",
+                        "secondary-container": "#dbe1df",
+                        "on-tertiary-container": "#8099cb",
+                        "surface-dim": "#d5dbd9",
+                        "on-background": "#171d1c",
+                        "background": "#f5fbf9",
+                        "inverse-primary": "#adc7fc",
+                        "on-primary-fixed-variant": "#2c4674",
+                        "on-error-container": "#93000a",
+                        "secondary": "#59605e",
+                        "on-secondary-container": "#5d6463",
+                        "outline": "#747780",
+                        "surface-container-low": "#eff5f3",
+                        "tertiary-fixed-dim": "#aec7fb",
+                        "primary": "#001b40",
+                        "tertiary": "#001b40",
+                        "primary-fixed": "#d7e2ff",
+                        "on-tertiary-fixed": "#001b3f",
+                        "on-tertiary-fixed-variant": "#2d4673",
+                        "surface-container-high": "#e3e9e8",
+                        "surface-tint": "#455e8d",
+                        "on-primary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "secondary-fixed": "#dee4e2",
+                        "primary-fixed-dim": "#adc7fc",
+                        "error-container": "#ffdad6",
+                        "on-primary-container": "#8099cb",
+                        "secondary-fixed-dim": "#c2c8c6",
+                        "on-surface": "#171d1c",
+                        "primary-container": "#13305c",
+                        "error": "#ba1a1a",
+                        "surface-bright": "#f5fbf9",
+                        "on-tertiary": "#ffffff",
+                        "inverse-on-surface": "#ecf2f0",
+                        "on-primary-fixed": "#001b3f",
+                        "surface-container": "#e9efed",
+                        "tertiary-fixed": "#d7e2ff",
+                        "surface-container-highest": "#dee4e2",
+                        "on-secondary-fixed-variant": "#424847",
+                        "on-secondary": "#ffffff",
+                        "inverse-surface": "#2b3231",
+                        "surface-container-lowest": "#ffffff",
+                        "outline-variant": "#c4c6d0"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, .font-headline { font-family: 'Manrope', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .shadow-editorial {
+            box-shadow: 0 24px 48px rgba(19, 48, 92, 0.04);
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen">
+<!-- Top Navigation / Shell Anchor -->
+<header class="bg-[#001b40] dark:bg-slate-950 flex justify-between items-center w-full px-8 h-16 fixed top-0 z-50 shadow-[0_24px_48px_rgba(19,48,92,0.06)]">
+<div class="font-['Manrope'] text-lg font-bold tracking-tighter text-white">THE LEDGER</div>
+<nav class="hidden md:flex items-center space-x-8 h-full">
+<a class="font-['Manrope'] tracking-tight text-white h-full flex items-center text-white border-b-2 border-white" href="#">Overview</a>
+<a class="font-['Manrope'] tracking-tight text-[#8099cb] h-full flex items-center hover:bg-[#13305c] transition-colors" href="#">Live Maps</a>
+<a class="font-['Manrope'] tracking-tight text-[#8099cb] h-full flex items-center hover:bg-[#13305c] transition-colors" href="#">Revenue</a>
+<a class="font-['Manrope'] tracking-tight text-[#8099cb] h-full flex items-center hover:bg-[#13305c] transition-colors" href="#">Guests</a>
+<a class="font-['Manrope'] tracking-tight text-[#8099cb] h-full flex items-center hover:bg-[#13305c] transition-colors" href="#">Settings</a>
+</nav>
+<div class="flex items-center space-x-6">
+<span class="material-symbols-outlined text-[#8099cb] cursor-pointer">notifications</span>
+<span class="material-symbols-outlined text-[#8099cb] cursor-pointer">apps</span>
+<div class="w-8 h-8 rounded-full overflow-hidden bg-surface-container">
+<img alt="Manager Profile" data-alt="Close up portrait of a professional venue manager in a clean white studio setting with soft lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDn_NqApp7Z35Tb8NvGNpcFEZ5JrBM928pQmI-OfdV-jeEpUNmiBmUb67rZNSlftZpzefn8525lkTi_RSQNkAKUB2fmZARIHELzZ_kF567smdg3OAf3mLgKeAnCvk-hA3w3H_89PQw_5yXL4Vs1e93ZwwmhJaSJsALNMtJGpD1IlHHyZymsWLqiP6tqhyzBCnqtZ6pi-y3PPAGH3E1VaYIL1jiy3mCppccAO8g2WFHQnhTWwVuMIGB-GI9p9BMwR-9AAeiQp4YGbndY"/>
+</div>
+</div>
+</header>
+<!-- Side Navigation (Web) -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 bg-[#f5fbf9] dark:bg-slate-900 flex flex-col py-8 hidden md:flex">
+<div class="px-6 mb-8">
+<div class="flex items-center space-x-3">
+<div class="w-10 h-10 bg-primary flex items-center justify-center text-white rounded-lg">
+<span class="material-symbols-outlined">nightlight</span>
+</div>
+<div>
+<div class="font-['Manrope'] font-black uppercase tracking-widest text-[#001b40] text-xs">MAIN STAGE</div>
+<div class="font-['Inter'] text-[10px] font-medium text-[#8099cb] uppercase tracking-wider">Premium Access</div>
+</div>
+</div>
+</div>
+<nav class="flex-1 px-4 space-y-1">
+<a class="flex items-center space-x-3 px-4 py-3 font-['Inter'] text-sm font-bold text-[#13305c] bg-[#eff5f3] dark:bg-slate-800 border-r-4 border-[#13305c] opacity-100 transition-all" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span>Overview</span>
+</a>
+<a class="flex items-center space-x-3 px-4 py-3 font-['Inter'] text-sm font-medium text-[#8099cb] dark:text-slate-500 hover:text-[#13305c] hover:bg-[#e9efed] opacity-90 hover:opacity-100 transition-all" href="#">
+<span class="material-symbols-outlined">map</span>
+<span>Live Maps</span>
+</a>
+<a class="flex items-center space-x-3 px-4 py-3 font-['Inter'] text-sm font-medium text-[#8099cb] dark:text-slate-500 hover:text-[#13305c] hover:bg-[#e9efed] opacity-90 hover:opacity-100 transition-all" href="#">
+<span class="material-symbols-outlined">payments</span>
+<span>Revenue</span>
+</a>
+<a class="flex items-center space-x-3 px-4 py-3 font-['Inter'] text-sm font-medium text-[#8099cb] dark:text-slate-500 hover:text-[#13305c] hover:bg-[#e9efed] opacity-90 hover:opacity-100 transition-all" href="#">
+<span class="material-symbols-outlined">group</span>
+<span>Guests</span>
+</a>
+<a class="flex items-center space-x-3 px-4 py-3 font-['Inter'] text-sm font-medium text-[#8099cb] dark:text-slate-500 hover:text-[#13305c] hover:bg-[#e9efed] opacity-90 hover:opacity-100 transition-all" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span>Settings</span>
+</a>
+</nav>
+<div class="px-6 mt-auto">
+<button class="w-full bg-primary text-white py-3 font-['Inter'] text-sm font-bold rounded-[0.125rem] tracking-wide">
+                New Event
+            </button>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="md:ml-64 pt-16 pb-20">
+<!-- TOP Data Strip -->
+<section class="bg-tertiary-container w-full px-8 py-8 flex flex-col md:flex-row justify-between items-start md:items-center space-y-6 md:space-y-0">
+<div class="flex flex-wrap gap-6">
+<div class="cursor-pointer">
+<div class="text-[0.6875rem] font-medium font-label uppercase tracking-[0.05em] text-[#8099cb] mb-1">TOTAL COUVERTS</div>
+<div class="text-3xl font-extrabold font-headline text-white leading-tight tracking-tight">1,248</div>
+</div>
+<div class="cursor-pointer">
+<div class="text-[0.6875rem] font-medium font-label uppercase tracking-[0.05em] text-[#8099cb] mb-1">CHIFFRE D'AFFAIRES</div>
+<div class="text-3xl font-extrabold font-headline text-white leading-tight tracking-tight">42,650€</div>
+</div>
+<div class="cursor-pointer">
+<div class="text-[0.6875rem] font-medium font-label uppercase tracking-[0.05em] text-[#8099cb] mb-1">TAILLE MOY. GROUPE</div>
+<div class="text-3xl font-extrabold font-headline text-white leading-tight tracking-tight">6.2</div>
+</div>
+<div class="cursor-pointer">
+<div class="text-[0.6875rem] font-medium font-label uppercase tracking-[0.05em] text-[#8099cb] mb-1">MEILLEUR RP</div>
+<div class="text-3xl font-extrabold font-headline text-white leading-tight tracking-tight">JULIEN L.</div>
+</div>
+</div>
+<div class="flex items-center space-x-6 text-sm font-medium font-label">
+<span class="text-white cursor-pointer border-b border-white pb-1">Cette semaine</span>
+<span class="text-[#8099cb] cursor-pointer hover:text-white transition-colors pb-1">Ce mois</span>
+<span class="text-[#8099cb] cursor-pointer hover:text-white transition-colors pb-1">Cette année</span>
+<span class="text-[#8099cb] cursor-pointer hover:text-white transition-colors pb-1 flex items-center">
+                    Personnalisé <span class="material-symbols-outlined text-[16px] ml-1">calendar_today</span>
+</span>
+</div>
+</section>
+<!-- Canvas -->
+<div class="px-8 mt-12 space-y-12">
+<!-- Row 1: Charts -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+<div class="bg-surface-container-lowest p-8 shadow-editorial">
+<h3 class="text-[0.6875rem] font-medium font-label uppercase tracking-[0.05em] text-on-surface-variant mb-6">Couverts dans le temps</h3>
+<div class="h-64 flex items-end justify-between w-full relative">
+<!-- Chart Lines (Simulated with Gradient Background) -->
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-low/20 to-transparent"></div>
+<div class="flex-1 h-[40%] bg-primary/10 mx-2 relative group cursor-pointer transition-all hover:bg-primary/20"></div>
+<div class="flex-1 h-[65%] bg-primary/10 mx-2 relative group cursor-pointer transition-all hover:bg-primary/20"></div>
+<div class="flex-1 h-[55%] bg-primary/10 mx-2 relative group cursor-pointer transition-all hover:bg-primary/20"></div>
+<div class="flex-1 h-[85%] bg-primary/20 mx-2 relative group cursor-pointer transition-all hover:bg-primary/30"></div>
+<div class="flex-1 h-[95%] bg-primary/40 mx-2 relative group cursor-pointer transition-all hover:bg-primary/50"></div>
+<div class="flex-1 h-[70%] bg-primary/10 mx-2 relative group cursor-pointer transition-all hover:bg-primary/20"></div>
+<div class="flex-1 h-[45%] bg-primary/10 mx-2 relative group cursor-pointer transition-all hover:bg-primary/20"></div>
+</div>
+<div class="flex justify-between mt-4 text-[0.6875rem] text-[#8099cb] font-label font-medium uppercase tracking-widest">
+<span>LUN</span><span>MAR</span><span>MER</span><span>JEU</span><span>VEN</span><span>SAM</span><span>DIM</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-8 shadow-editorial">
+<h3 class="text-[0.6875rem] font-medium font-label uppercase tracking-[0.05em] text-on-surface-variant mb-6">Revenus dans le temps</h3>
+<div class="h-64 flex items-end justify-between w-full space-x-1">
+<!-- Bar Chart Mockup -->
+<div class="flex-1 bg-surface-container-high hover:bg-secondary-container transition-colors h-[20%]"></div>
+<div class="flex-1 bg-surface-container-high hover:bg-secondary-container transition-colors h-[35%]"></div>
+<div class="flex-1 bg-surface-container-high hover:bg-secondary-container transition-colors h-[45%]"></div>
+<div class="flex-1 bg-surface-container-high hover:bg-secondary-container transition-colors h-[65%]"></div>
+<div class="flex-1 bg-primary h-[90%]"></div>
+<div class="flex-1 bg-surface-container-high hover:bg-secondary-container transition-colors h-[80%]"></div>
+<div class="flex-1 bg-surface-container-high hover:bg-secondary-container transition-colors h-[50%]"></div>
+<div class="flex-1 bg-surface-container-high hover:bg-secondary-container transition-colors h-[40%]"></div>
+<div class="flex-1 bg-surface-container-high hover:bg-secondary-container transition-colors h-[25%]"></div>
+<div class="flex-1 bg-surface-container-high hover:bg-secondary-container transition-colors h-[15%]"></div>
+</div>
+<div class="flex justify-between mt-4 text-[0.6875rem] text-[#8099cb] font-label font-medium uppercase tracking-widest">
+<span>S1</span><span>S2</span><span>S3</span><span>S4</span><span>S5</span><span>S6</span><span>S7</span><span>S8</span><span>S9</span><span>S10</span>
+</div>
+</div>
+</div>
+<!-- Row 2: Performance Table -->
+<div class="bg-surface-container-lowest shadow-editorial overflow-hidden">
+<div class="p-8 pb-4">
+<h3 class="text-[0.6875rem] font-medium font-label uppercase tracking-[0.05em] text-on-surface-variant">Performance des RP</h3>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead class="bg-surface-container-low">
+<tr>
+<th class="px-8 py-4 text-[0.6875rem] font-medium font-label uppercase tracking-[0.05em] text-[#8099cb]">Rang</th>
+<th class="px-8 py-4 text-[0.6875rem] font-medium font-label uppercase tracking-[0.05em] text-[#8099cb]">Nom du RP</th>
+<th class="px-8 py-4 text-[0.6875rem] font-medium font-label uppercase tracking-[0.05em] text-[#8099cb]">Couverts</th>
+<th class="px-8 py-4 text-[0.6875rem] font-medium font-label uppercase tracking-[0.05em] text-[#8099cb]">CA Généré</th>
+<th class="px-8 py-4 text-[0.6875rem] font-medium font-label uppercase tracking-[0.05em] text-[#8099cb]">Commissions Dues</th>
+<th class="px-8 py-4 text-[0.6875rem] font-medium font-label uppercase tracking-[0.05em] text-[#8099cb]">Taille Moy. Groupe</th>
+</tr>
+</thead>
+<tbody class="divide-y-0">
+<tr class="bg-surface-container-lowest hover:bg-surface-container transition-colors">
+<td class="px-8 py-6 font-headline font-extrabold text-2xl text-primary">01</td>
+<td class="px-8 py-6 font-semibold text-on-surface">Julien Lefebvre</td>
+<td class="px-8 py-6 font-medium">412</td>
+<td class="px-8 py-6 font-medium">12,400€</td>
+<td class="px-8 py-6 font-medium text-primary">1,240€</td>
+<td class="px-8 py-6 font-medium">8.4</td>
+</tr>
+<tr class="bg-surface-container-low/50 hover:bg-surface-container transition-colors">
+<td class="px-8 py-6 font-headline font-extrabold text-2xl text-primary">02</td>
+<td class="px-8 py-6 font-semibold text-on-surface">Marie Dubosc</td>
+<td class="px-8 py-6 font-medium">350</td>
+<td class="px-8 py-6 font-medium">10,250€</td>
+<td class="px-8 py-6 font-medium text-primary">1,025€</td>
+<td class="px-8 py-6 font-medium">6.1</td>
+</tr>
+<tr class="bg-surface-container-lowest hover:bg-surface-container transition-colors">
+<td class="px-8 py-6 font-headline font-extrabold text-2xl text-primary">03</td>
+<td class="px-8 py-6 font-semibold text-on-surface">Lucas Girard</td>
+<td class="px-8 py-6 font-medium">290</td>
+<td class="px-8 py-6 font-medium">8,100€</td>
+<td class="px-8 py-6 font-medium text-primary">810€</td>
+<td class="px-8 py-6 font-medium">4.5</td>
+</tr>
+<tr class="bg-surface-container-low/50 hover:bg-surface-container transition-colors">
+<td class="px-8 py-6 font-headline font-extrabold text-2xl text-primary">04</td>
+<td class="px-8 py-6 font-semibold text-on-surface">Sarah K.</td>
+<td class="px-8 py-6 font-medium">196</td>
+<td class="px-8 py-6 font-medium">11,900€</td>
+<td class="px-8 py-6 font-medium text-primary">1,190€</td>
+<td class="px-8 py-6 font-medium">12.2</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Row 3: Event & Split -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+<!-- Meilleurs Événements -->
+<div class="bg-surface-container-lowest p-8 shadow-editorial">
+<h3 class="text-[0.6875rem] font-medium font-label uppercase tracking-[0.05em] text-on-surface-variant mb-6">Meilleurs Événements</h3>
+<div class="space-y-6">
+<div class="flex items-center justify-between group">
+<div class="flex items-center space-x-4">
+<div class="w-12 h-12 bg-surface-container flex items-center justify-center font-headline font-bold text-primary">01</div>
+<div>
+<div class="font-bold text-primary">L'Héritage Night</div>
+<div class="text-[0.6875rem] text-[#8099cb] font-medium uppercase">Samedi 14 Oct</div>
+</div>
+</div>
+<div class="text-right">
+<div class="font-bold">14,200€</div>
+<div class="text-[0.6875rem] text-primary font-medium">210 Couverts</div>
+</div>
+</div>
+<div class="flex items-center justify-between group">
+<div class="flex items-center space-x-4">
+<div class="w-12 h-12 bg-surface-container flex items-center justify-center font-headline font-bold text-primary">02</div>
+<div>
+<div class="font-bold text-primary">Midnight Riviera</div>
+<div class="text-[0.6875rem] text-[#8099cb] font-medium uppercase">Vendredi 13 Oct</div>
+</div>
+</div>
+<div class="text-right">
+<div class="font-bold">11,450€</div>
+<div class="text-[0.6875rem] text-primary font-medium">185 Couverts</div>
+</div>
+</div>
+<div class="flex items-center justify-between group">
+<div class="flex items-center space-x-4">
+<div class="w-12 h-12 bg-surface-container flex items-center justify-center font-headline font-bold text-primary">03</div>
+<div>
+<div class="font-bold text-primary">Deep Soul Session</div>
+<div class="text-[0.6875rem] text-[#8099cb] font-medium uppercase">Jeudi 12 Oct</div>
+</div>
+</div>
+<div class="text-right">
+<div class="font-bold">6,800€</div>
+<div class="text-[0.6875rem] text-primary font-medium">92 Couverts</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Répartition des Réservations -->
+<div class="bg-surface-container-lowest p-8 shadow-editorial">
+<h3 class="text-[0.6875rem] font-medium font-label uppercase tracking-[0.05em] text-on-surface-variant mb-6">Répartition des Réservations</h3>
+<div class="flex flex-col md:flex-row items-center justify-around h-64">
+<div class="relative w-48 h-48 rounded-full border-[16px] border-primary flex items-center justify-center after:content-[''] after:absolute after:inset-[-16px] after:rounded-full after:border-[16px] after:border-surface-container after:border-l-transparent after:border-b-transparent after:rotate-45">
+<div class="text-center">
+<div class="text-3xl font-extrabold font-headline text-primary">64%</div>
+<div class="text-[0.6875rem] font-label font-medium uppercase text-[#8099cb]">Tables VIP</div>
+</div>
+</div>
+<div class="space-y-4 mt-6 md:mt-0">
+<div class="flex items-center space-x-3">
+<div class="w-3 h-3 bg-primary"></div>
+<div>
+<span class="text-sm font-semibold">Service Table</span>
+<span class="text-xs text-[#8099cb] block">64% — 798 Couverts</span>
+</div>
+</div>
+<div class="flex items-center space-x-3">
+<div class="w-3 h-3 bg-surface-container-high"></div>
+<div>
+<span class="text-sm font-semibold">Guest List</span>
+<span class="text-xs text-[#8099cb] block">36% — 450 Couverts</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Actions -->
+<div class="flex flex-col md:flex-row items-center justify-between pt-12 border-t border-surface-container-high">
+<div class="flex items-center space-x-8 mb-6 md:mb-0">
+<button class="bg-[#e9efed] hover:bg-surface-container-high text-primary px-10 py-4 font-bold text-sm tracking-wide transition-all rounded-[0.125rem]">
+                        Exporter le rapport
+                    </button>
+<a class="text-primary font-bold text-sm underline underline-offset-4 hover:text-[#13305c] transition-colors" href="#">
+                        Télécharger CSV
+                    </a>
+</div>
+<div class="text-[0.6875rem] font-label font-medium text-[#8099cb] uppercase tracking-[0.1em]">
+                    Dernière mise à jour: Aujourd'hui, 14:32
+                </div>
+</div>
+</div>
+</main>
+<!-- Mobile Navigation -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full bg-white flex justify-around items-center py-3 border-t-0 shadow-[0_-12px_24px_rgba(0,0,0,0.05)] z-50">
+<div class="flex flex-col items-center text-primary">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-[10px] font-bold mt-1">Overview</span>
+</div>
+<div class="flex flex-col items-center text-[#8099cb]">
+<span class="material-symbols-outlined">map</span>
+<span class="text-[10px] mt-1">Maps</span>
+</div>
+<div class="flex flex-col items-center text-[#8099cb]">
+<span class="material-symbols-outlined">payments</span>
+<span class="text-[10px] mt-1">Revenue</span>
+</div>
+<div class="flex flex-col items-center text-[#8099cb]">
+<span class="material-symbols-outlined">group</span>
+<span class="text-[10px] mt-1">Guests</span>
+</div>
+<div class="flex flex-col items-center text-[#8099cb]">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-[10px] mt-1">Settings</span>
+</div>
+</nav>
+</body></html>

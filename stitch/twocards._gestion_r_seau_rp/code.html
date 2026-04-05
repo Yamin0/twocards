@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-fixed-dim": "#adc7fc",
+                    "primary-container": "#13305c",
+                    "on-primary-fixed-variant": "#2c4674",
+                    "error": "#ba1a1a",
+                    "on-secondary-container": "#5d6463",
+                    "on-primary-fixed": "#001b3f",
+                    "secondary": "#59605e",
+                    "outline": "#747780",
+                    "on-secondary": "#ffffff",
+                    "tertiary-container": "#13305c",
+                    "surface-container-high": "#e3e9e8",
+                    "on-primary": "#ffffff",
+                    "surface-variant": "#dee4e2",
+                    "surface-container-low": "#eff5f3",
+                    "on-tertiary-fixed-variant": "#2d4673",
+                    "on-tertiary-fixed": "#001b3f",
+                    "on-tertiary": "#ffffff",
+                    "on-error-container": "#93000a",
+                    "inverse-surface": "#2b3231",
+                    "inverse-primary": "#adc7fc",
+                    "outline-variant": "#c4c6d0",
+                    "tertiary": "#001b40",
+                    "on-secondary-fixed-variant": "#424847",
+                    "on-primary-container": "#8099cb",
+                    "surface-bright": "#f5fbf9",
+                    "surface-tint": "#455e8d",
+                    "secondary-fixed": "#dee4e2",
+                    "background": "#f5fbf9",
+                    "tertiary-fixed-dim": "#aec7fb",
+                    "inverse-on-surface": "#ecf2f0",
+                    "error-container": "#ffdad6",
+                    "on-error": "#ffffff",
+                    "primary-fixed": "#d7e2ff",
+                    "surface-container": "#e9efed",
+                    "surface": "#f5fbf9",
+                    "primary": "#001b40",
+                    "surface-container-highest": "#dee4e2",
+                    "on-surface-variant": "#44474f",
+                    "on-surface": "#171d1c",
+                    "secondary-container": "#dbe1df",
+                    "on-background": "#171d1c",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-dim": "#d5dbd9",
+                    "on-secondary-fixed": "#171d1c",
+                    "tertiary-fixed": "#d7e2ff",
+                    "on-tertiary-container": "#8099cb",
+                    "secondary-fixed-dim": "#c2c8c6"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Manrope"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .editorial-shadow {
+            box-shadow: 0 24px 48px -12px rgba(19, 48, 92, 0.06);
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body selection:bg-primary-fixed-dim">
+<!-- SideNavBar (Shared Component) -->
+<nav class="h-screen w-72 fixed left-0 top-0 bg-[#eff5f3] flex flex-col pt-12 pb-8 px-6 space-y-4 z-50">
+<div class="mb-10 px-2">
+<h1 class="text-xl font-black text-[#001b40] font-headline tracking-tighter">twocards.</h1>
+<p class="text-[0.6875rem] uppercase tracking-[0.1em] text-on-surface-variant opacity-70">Precision CRM</p>
+</div>
+<div class="flex flex-col space-y-1">
+<div class="flex items-center space-x-3 px-4 py-3 text-[#8099cb] hover:bg-white/40 transition-all duration-300 cursor-pointer group">
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+<span class="font-['Inter'] text-[0.875rem] font-medium tracking-wide">Dashboard</span>
+</div>
+<div class="flex items-center space-x-3 px-4 py-3 text-[#8099cb] hover:bg-white/40 transition-all duration-300 cursor-pointer group">
+<span class="material-symbols-outlined text-[20px]">calendar_today</span>
+<span class="font-['Inter'] text-[0.875rem] font-medium tracking-wide">Events</span>
+</div>
+<div class="flex items-center space-x-3 px-4 py-3 text-[#8099cb] hover:bg-white/40 transition-all duration-300 cursor-pointer group">
+<span class="material-symbols-outlined text-[20px]">group</span>
+<span class="font-['Inter'] text-[0.875rem] font-medium tracking-wide">Guest Lists</span>
+</div>
+<div class="flex items-center space-x-3 px-4 py-3 text-[#8099cb] hover:bg-white/40 transition-all duration-300 cursor-pointer group">
+<span class="material-symbols-outlined text-[20px]">layers</span>
+<span class="font-['Inter'] text-[0.875rem] font-medium tracking-wide">Table Map</span>
+</div>
+<div class="flex items-center space-x-3 px-4 py-3 text-[#8099cb] hover:bg-white/40 transition-all duration-300 cursor-pointer group">
+<span class="material-symbols-outlined text-[20px]">confirmation_number</span>
+<span class="font-['Inter'] text-[0.875rem] font-medium tracking-wide">Reservations</span>
+</div>
+<!-- Active Navigation -->
+<div class="flex items-center space-x-3 px-4 py-3 text-[#13305c] font-bold border-r-4 border-[#13305c] hover:bg-white/40 transition-all duration-300 cursor-pointer group">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">hub</span>
+<span class="font-['Inter'] text-[0.875rem] tracking-wide">PR Network</span>
+</div>
+<div class="flex items-center space-x-3 px-4 py-3 text-[#8099cb] hover:bg-white/40 transition-all duration-300 cursor-pointer group">
+<span class="material-symbols-outlined text-[20px]">insights</span>
+<span class="font-['Inter'] text-[0.875rem] font-medium tracking-wide">Analytics</span>
+</div>
+<div class="flex items-center space-x-3 px-4 py-3 text-[#8099cb] hover:bg-white/40 transition-all duration-300 cursor-pointer group">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+<span class="font-['Inter'] text-[0.875rem] font-medium tracking-wide">Settings</span>
+</div>
+</div>
+</nav>
+<!-- Main Canvas -->
+<main class="ml-72 min-h-screen">
+<!-- Header Section -->
+<header class="pt-16 px-12 pb-10">
+<div class="flex justify-between items-start">
+<div>
+<h2 class="text-4xl font-headline font-extrabold text-primary tracking-tight mb-2">Votre Réseau de RP</h2>
+<p class="text-on-surface-variant font-body">Gérez vos concierges et RP connectés</p>
+</div>
+<button class="bg-primary text-white px-10 py-3 rounded-[0.125rem] text-[0.75rem] font-bold uppercase tracking-widest hover:opacity-90 active:scale-95 transition-all">
+                    Inviter un RP
+                </button>
+</div>
+<!-- Search Bar -->
+<div class="mt-12 relative max-w-2xl">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant opacity-60">search</span>
+<input class="w-full bg-surface-container-low border-none focus:ring-0 px-12 py-4 rounded-[0.125rem] text-sm text-on-surface placeholder:text-on-surface-variant/50" placeholder="Rechercher par nom ou agence" type="text"/>
+</div>
+</header>
+<!-- Data Strip -->
+<section class="bg-primary-container py-8 px-12 flex justify-between items-center w-full">
+<div class="flex flex-col">
+<span class="text-[0.6875rem] font-bold uppercase tracking-[0.15em] text-[#8099cb] mb-1">RP Actifs</span>
+<span class="text-2xl font-headline font-bold text-white">34</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[0.6875rem] font-bold uppercase tracking-[0.15em] text-[#8099cb] mb-1">Couverts (mois)</span>
+<span class="text-2xl font-headline font-bold text-white">1 247</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[0.6875rem] font-bold uppercase tracking-[0.15em] text-[#8099cb] mb-1">CA généré via RP</span>
+<span class="text-2xl font-headline font-bold text-white">89 300 €</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[0.6875rem] font-bold uppercase tracking-[0.15em] text-[#8099cb] mb-1">Taux de Com. Moyen</span>
+<span class="text-2xl font-headline font-bold text-white">12%</span>
+</div>
+</section>
+<!-- Filter Bar -->
+<section class="px-12 py-6 bg-surface-container-low flex items-center space-x-8">
+<div class="flex items-center space-x-3 group cursor-pointer">
+<span class="text-[0.75rem] font-bold uppercase tracking-wider text-on-surface-variant">Statut:</span>
+<span class="text-[0.75rem] font-bold text-primary flex items-center">Tous <span class="material-symbols-outlined text-[16px] ml-1">expand_more</span></span>
+</div>
+<div class="flex items-center space-x-3 group cursor-pointer">
+<span class="text-[0.75rem] font-bold uppercase tracking-wider text-on-surface-variant">Ville:</span>
+<span class="text-[0.75rem] font-bold text-primary flex items-center">Paris <span class="material-symbols-outlined text-[16px] ml-1">expand_more</span></span>
+</div>
+<div class="flex items-center space-x-3 group cursor-pointer">
+<span class="text-[0.75rem] font-bold uppercase tracking-wider text-on-surface-variant">Performance:</span>
+<span class="text-[0.75rem] font-bold text-primary flex items-center">Haut <span class="material-symbols-outlined text-[16px] ml-1">expand_more</span></span>
+</div>
+<div class="flex-grow"></div>
+<div class="flex items-center space-x-3 group cursor-pointer border-l border-outline-variant/20 pl-8">
+<span class="text-[0.75rem] font-bold uppercase tracking-wider text-on-surface-variant">Trier par:</span>
+<span class="text-[0.75rem] font-bold text-primary flex items-center">Chiffre d'affaires <span class="material-symbols-outlined text-[16px] ml-1">sort</span></span>
+</div>
+</section>
+<!-- PR Grid -->
+<section class="p-12 grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
+<!-- PR Card 1 -->
+<article class="bg-surface-container-lowest editorial-shadow p-8 rounded-[0.375rem] flex flex-col group hover:-translate-y-1 transition-transform duration-300">
+<div class="flex justify-between items-start mb-6">
+<div class="flex items-center space-x-4">
+<div class="w-14 h-14 rounded-full bg-primary-container flex items-center justify-center text-white font-headline font-bold text-lg">
+                            JD
+                        </div>
+<div>
+<h3 class="font-headline font-semibold text-primary text-lg leading-tight">Julien Delamarre</h3>
+<p class="text-sm text-on-surface-variant">Elite Concierge Paris</p>
+</div>
+</div>
+<span class="px-3 py-1 bg-primary-container text-white text-[0.625rem] font-bold uppercase tracking-widest rounded-full">Actif</span>
+</div>
+<div class="flex items-center text-xs text-on-surface-variant mb-6">
+<span class="material-symbols-outlined text-sm mr-1">location_on</span> Paris, France
+                </div>
+<div class="bg-surface-container-low p-5 space-y-4 rounded-[0.125rem] mb-8">
+<div class="flex justify-between items-center">
+<span class="text-[0.6875rem] font-bold uppercase tracking-widest text-on-surface-variant">Couverts ce mois</span>
+<span class="font-headline font-semibold text-primary">248</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-[0.6875rem] font-bold uppercase tracking-widest text-on-surface-variant">CA généré</span>
+<span class="font-headline font-semibold text-primary">18 450 €</span>
+</div>
+<div class="flex justify-between items-center pt-2 border-t border-outline-variant/10">
+<span class="text-[0.6875rem] font-bold uppercase tracking-widest text-primary">Commission due</span>
+<span class="font-headline font-bold text-primary">2 214 €</span>
+</div>
+</div>
+<div class="mt-auto flex justify-between items-center">
+<a class="text-[0.75rem] font-bold uppercase tracking-widest text-tertiary-container hover:underline underline-offset-4" href="#">Voir le Profil</a>
+<button class="text-on-surface-variant hover:text-primary">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</div>
+</article>
+<!-- PR Card 2 -->
+<article class="bg-surface-container-lowest editorial-shadow p-8 rounded-[0.375rem] flex flex-col group hover:-translate-y-1 transition-transform duration-300">
+<div class="flex justify-between items-start mb-6">
+<div class="flex items-center space-x-4">
+<div class="w-14 h-14 rounded-full bg-surface-container text-primary flex items-center justify-center font-headline font-bold text-lg">
+                            SB
+                        </div>
+<div>
+<h3 class="font-headline font-semibold text-primary text-lg leading-tight">Sarah Bellanger</h3>
+<p class="text-sm text-on-surface-variant">Freelance PR</p>
+</div>
+</div>
+<span class="px-3 py-1 bg-surface-container text-on-surface-variant text-[0.625rem] font-bold uppercase tracking-widest rounded-full">En attente</span>
+</div>
+<div class="flex items-center text-xs text-on-surface-variant mb-6">
+<span class="material-symbols-outlined text-sm mr-1">location_on</span> Lyon, France
+                </div>
+<div class="bg-surface-container-low p-5 space-y-4 rounded-[0.125rem] mb-8">
+<div class="flex justify-between items-center">
+<span class="text-[0.6875rem] font-bold uppercase tracking-widest text-on-surface-variant">Couverts ce mois</span>
+<span class="font-headline font-semibold text-primary">0</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-[0.6875rem] font-bold uppercase tracking-widest text-on-surface-variant">CA généré</span>
+<span class="font-headline font-semibold text-primary">0 €</span>
+</div>
+<div class="flex justify-between items-center pt-2 border-t border-outline-variant/10">
+<span class="text-[0.6875rem] font-bold uppercase tracking-widest text-primary">Commission due</span>
+<span class="font-headline font-bold text-primary">0 €</span>
+</div>
+</div>
+<div class="mt-auto flex justify-between items-center">
+<a class="text-[0.75rem] font-bold uppercase tracking-widest text-tertiary-container hover:underline underline-offset-4" href="#">Voir le Profil</a>
+<button class="text-on-surface-variant hover:text-primary">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</div>
+</article>
+<!-- PR Card 3 -->
+<article class="bg-surface-container-lowest editorial-shadow p-8 rounded-[0.375rem] flex flex-col group hover:-translate-y-1 transition-transform duration-300">
+<div class="flex justify-between items-start mb-6">
+<div class="flex items-center space-x-4">
+<div class="w-14 h-14 rounded-full bg-primary-container flex items-center justify-center text-white font-headline font-bold text-lg">
+                            MC
+                        </div>
+<div>
+<h3 class="font-headline font-semibold text-primary text-lg leading-tight">Marc Chen</h3>
+<p class="text-sm text-on-surface-variant">Vanguard Events</p>
+</div>
+</div>
+<span class="px-3 py-1 bg-primary-container text-white text-[0.625rem] font-bold uppercase tracking-widest rounded-full">Actif</span>
+</div>
+<div class="flex items-center text-xs text-on-surface-variant mb-6">
+<span class="material-symbols-outlined text-sm mr-1">location_on</span> Paris, France
+                </div>
+<div class="bg-surface-container-low p-5 space-y-4 rounded-[0.125rem] mb-8">
+<div class="flex justify-between items-center">
+<span class="text-[0.6875rem] font-bold uppercase tracking-widest text-on-surface-variant">Couverts ce mois</span>
+<span class="font-headline font-semibold text-primary">156</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-[0.6875rem] font-bold uppercase tracking-widest text-on-surface-variant">CA généré</span>
+<span class="font-headline font-semibold text-primary">12 800 €</span>
+</div>
+<div class="flex justify-between items-center pt-2 border-t border-outline-variant/10">
+<span class="text-[0.6875rem] font-bold uppercase tracking-widest text-primary">Commission due</span>
+<span class="font-headline font-bold text-primary">1 536 €</span>
+</div>
+</div>
+<div class="mt-auto flex justify-between items-center">
+<a class="text-[0.75rem] font-bold uppercase tracking-widest text-tertiary-container hover:underline underline-offset-4" href="#">Voir le Profil</a>
+<button class="text-on-surface-variant hover:text-primary">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</div>
+</article>
+<!-- PR Card 4 -->
+<article class="bg-surface-container-lowest editorial-shadow p-8 rounded-[0.375rem] flex flex-col group hover:-translate-y-1 transition-transform duration-300">
+<div class="flex justify-between items-start mb-6">
+<div class="flex items-center space-x-4">
+<div class="w-14 h-14 rounded-full bg-surface-bright border border-outline-variant/30 flex items-center justify-center text-primary font-headline font-bold text-lg">
+                            AL
+                        </div>
+<div>
+<h3 class="font-headline font-semibold text-primary text-lg leading-tight">Amélie Laurent</h3>
+<p class="text-sm text-on-surface-variant">Luxury Network Co.</p>
+</div>
+</div>
+<span class="px-3 py-1 bg-surface text-on-surface-variant text-[0.625rem] font-bold uppercase tracking-widest rounded-full">Inactif</span>
+</div>
+<div class="flex items-center text-xs text-on-surface-variant mb-6">
+<span class="material-symbols-outlined text-sm mr-1">location_on</span> Nice, France
+                </div>
+<div class="bg-surface-container-low p-5 space-y-4 rounded-[0.125rem] mb-8">
+<div class="flex justify-between items-center">
+<span class="text-[0.6875rem] font-bold uppercase tracking-widest text-on-surface-variant">Couverts ce mois</span>
+<span class="font-headline font-semibold text-primary">12</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-[0.6875rem] font-bold uppercase tracking-widest text-on-surface-variant">CA généré</span>
+<span class="font-headline font-semibold text-primary">920 €</span>
+</div>
+<div class="flex justify-between items-center pt-2 border-t border-outline-variant/10">
+<span class="text-[0.6875rem] font-bold uppercase tracking-widest text-primary">Commission due</span>
+<span class="font-headline font-bold text-primary">110 €</span>
+</div>
+</div>
+<div class="mt-auto flex justify-between items-center">
+<a class="text-[0.75rem] font-bold uppercase tracking-widest text-tertiary-container hover:underline underline-offset-4" href="#">Voir le Profil</a>
+<button class="text-on-surface-variant hover:text-primary">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</div>
+</article>
+<!-- PR Card 5 -->
+<article class="bg-surface-container-lowest editorial-shadow p-8 rounded-[0.375rem] flex flex-col group hover:-translate-y-1 transition-transform duration-300">
+<div class="flex justify-between items-start mb-6">
+<div class="flex items-center space-x-4">
+<div class="w-14 h-14 rounded-full bg-primary-container flex items-center justify-center text-white font-headline font-bold text-lg">
+                            PV
+                        </div>
+<div>
+<h3 class="font-headline font-semibold text-primary text-lg leading-tight">Pierre Valmont</h3>
+<p class="text-sm text-on-surface-variant">Riviera Nights</p>
+</div>
+</div>
+<span class="px-3 py-1 bg-primary-container text-white text-[0.625rem] font-bold uppercase tracking-widest rounded-full">Actif</span>
+</div>
+<div class="flex items-center text-xs text-on-surface-variant mb-6">
+<span class="material-symbols-outlined text-sm mr-1">location_on</span> Cannes, France
+                </div>
+<div class="bg-surface-container-low p-5 space-y-4 rounded-[0.125rem] mb-8">
+<div class="flex justify-between items-center">
+<span class="text-[0.6875rem] font-bold uppercase tracking-widest text-on-surface-variant">Couverts ce mois</span>
+<span class="font-headline font-semibold text-primary">412</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-[0.6875rem] font-bold uppercase tracking-widest text-on-surface-variant">CA généré</span>
+<span class="font-headline font-semibold text-primary">32 100 €</span>
+</div>
+<div class="flex justify-between items-center pt-2 border-t border-outline-variant/10">
+<span class="text-[0.6875rem] font-bold uppercase tracking-widest text-primary">Commission due</span>
+<span class="font-headline font-bold text-primary">3 852 €</span>
+</div>
+</div>
+<div class="mt-auto flex justify-between items-center">
+<a class="text-[0.75rem] font-bold uppercase tracking-widest text-tertiary-container hover:underline underline-offset-4" href="#">Voir le Profil</a>
+<button class="text-on-surface-variant hover:text-primary">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</div>
+</article>
+<!-- Invitation Card -->
+<article class="bg-surface-container-low border-2 border-dashed border-outline-variant/40 p-8 rounded-[0.375rem] flex flex-col items-center justify-center text-center group cursor-pointer hover:border-primary/40 transition-colors duration-300">
+<div class="w-16 h-16 rounded-full bg-white flex items-center justify-center text-primary-container mb-6 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl">person_add</span>
+</div>
+<h3 class="font-headline font-bold text-primary text-lg mb-2">Étendre votre réseau</h3>
+<p class="text-sm text-on-surface-variant max-w-[200px] mb-6">Invitez de nouveaux partenaires RP à rejoindre votre établissement.</p>
+<button class="text-[0.75rem] font-bold uppercase tracking-widest text-primary border-b-2 border-primary/20 pb-1">Envoyer une invitation</button>
+</article>
+</section>
+<!-- Insights Bento Preview -->
+<section class="p-12">
+<h4 class="text-[0.75rem] font-bold uppercase tracking-[0.2em] text-on-surface-variant mb-8">Tendances du Réseau</h4>
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+<div class="md:col-span-2 bg-surface-container-lowest editorial-shadow p-8 rounded-[0.375rem]">
+<div class="flex justify-between items-center mb-10">
+<h5 class="font-headline font-bold text-primary">Progression mensuelle CA</h5>
+<span class="text-xs font-bold text-green-600 bg-green-50 px-2 py-1">+14.2%</span>
+</div>
+<div class="h-48 w-full bg-surface-container-low rounded relative overflow-hidden">
+<div class="absolute inset-0 flex items-end px-4 pb-4 space-x-2">
+<div class="flex-grow bg-primary-container/20 h-[30%]"></div>
+<div class="flex-grow bg-primary-container/20 h-[45%]"></div>
+<div class="flex-grow bg-primary-container/20 h-[35%]"></div>
+<div class="flex-grow bg-primary-container/20 h-[60%]"></div>
+<div class="flex-grow bg-primary-container/20 h-[80%]"></div>
+<div class="flex-grow bg-primary-container h-[95%]"></div>
+</div>
+</div>
+</div>
+<div class="md:col-span-2 bg-surface-container-lowest editorial-shadow p-8 rounded-[0.375rem] flex flex-col justify-between">
+<div>
+<h5 class="font-headline font-bold text-primary mb-2">Meilleur Performance</h5>
+<p class="text-sm text-on-surface-variant">Pierre Valmont a généré le plus de réservations cette semaine.</p>
+</div>
+<div class="mt-8 flex items-center justify-between">
+<div class="flex -space-x-2">
+<div class="w-10 h-10 rounded-full border-2 border-white bg-primary-container"></div>
+<div class="w-10 h-10 rounded-full border-2 border-white bg-on-primary-container"></div>
+<div class="w-10 h-10 rounded-full border-2 border-white bg-surface-variant"></div>
+<div class="w-10 h-10 rounded-full border-2 border-white bg-surface-container flex items-center justify-center text-[10px] font-bold text-primary">+12</div>
+</div>
+<button class="bg-surface-container-high px-6 py-2 text-[0.6875rem] font-bold uppercase tracking-widest text-primary">Rapport complet</button>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Contextual FAB -->
+<button class="fixed bottom-10 right-10 w-16 h-16 bg-primary text-white flex items-center justify-center editorial-shadow transition-all hover:scale-110 active:scale-95 group">
+<span class="material-symbols-outlined text-2xl group-hover:rotate-90 transition-transform">add</span>
+</button>
+</body></html>
