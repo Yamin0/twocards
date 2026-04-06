@@ -193,7 +193,7 @@ export default function OnboardingPage() {
                       </label>
                       <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/60 text-sm">
-                          &euro;
+                          MAD
                         </span>
                         <input
                           type="number"
@@ -257,7 +257,7 @@ export default function OnboardingPage() {
                       </label>
                       <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/60 text-sm">
-                          &euro;
+                          MAD
                         </span>
                         <input
                           type="number"
@@ -296,7 +296,7 @@ export default function OnboardingPage() {
                     </div>
                     <div>
                       <p className="text-2xl font-bold text-primary-dark font-[family-name:var(--font-manrope)]">
-                        {potentialRevenue.toLocaleString("fr-FR")}&euro;
+                        {potentialRevenue.toLocaleString("fr-FR")} MAD
                       </p>
                       <p className="text-xs text-on-surface-variant font-[family-name:var(--font-inter)]">
                         Revenu potentiel / soir

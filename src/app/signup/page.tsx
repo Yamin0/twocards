@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import {
   Building2,
   UserCheck,
@@ -12,6 +14,9 @@ import {
   MapPin,
   Eye,
   EyeOff,
+  AlertCircle,
+  Loader2,
+  CheckCircle,
 } from "lucide-react";
 
 type Role = "etablissement" | "concierge";
@@ -21,14 +26,99 @@ export default function SignupPage() {
   const [role, setRole] = useState<Role>("etablissement");
   const [venueType, setVenueType] = useState<VenueType>("club");
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const router = useRouter();
+
+  const [form, setForm] = useState({
+    fullname: "",
+    email: "",
+    password: "",
+    phone: "",
+    venueName: "",
+    city: "",
+  });
+
+  const updateForm = (field: string, value: string) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    if (form.password.length < 8) {
+      setError("Le mot de passe doit contenir au moins 8 caracteres.");
+      setLoading(false);
+      return;
+    }
+
+    const supabase = createClient();
+
+    const { error } = await supabase.auth.signUp({
+      email: form.email,
+      password: form.password,
+      options: {
+        data: {
+          full_name: form.fullname,
+          phone: form.phone,
+          role: role,
+          venue_name: role === "etablissement" ? form.venueName : null,
+          venue_type: role === "etablissement" ? venueType : null,
+          city: role === "etablissement" ? form.city : null,
+        },
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+
+    if (error) {
+      setError(
+        error.message === "User already registered"
+          ? "Un compte existe deja avec cet email."
+          : error.message
+      );
+      setLoading(false);
+      return;
+    }
+
+    setSuccess(true);
+    setLoading(false);
+  };
+
+  if (success) {
+    return (
+      <div className="min-h-screen bg-surface flex items-center justify-center px-4">
+        <div className="max-w-md w-full bg-surface-card rounded-md editorial-shadow p-10 text-center">
+          <div className="mx-auto w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mb-6">
+            <CheckCircle size={32} strokeWidth={1.5} className="text-emerald-600" />
+          </div>
+          <h1 className="text-2xl font-bold text-primary-dark font-[family-name:var(--font-manrope)] mb-3">
+            Verifiez votre email
+          </h1>
+          <p className="text-sm text-on-surface-variant font-[family-name:var(--font-inter)] mb-6 leading-relaxed">
+            Un lien de confirmation a ete envoye a{" "}
+            <strong className="text-on-background">{form.email}</strong>.
+            <br />
+            Cliquez dessus pour activer votre compte.
+          </p>
+          <Link
+            href="/login"
+            className="inline-block px-6 py-2.5 bg-primary text-white rounded-sm text-sm font-semibold hover:bg-primary-dark transition-colors"
+          >
+            Aller a la connexion
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-surface flex flex-col">
       <div className="flex-1 flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-2xl">
-          {/* Card */}
           <div className="bg-surface-card rounded-md editorial-shadow p-8 sm:p-10">
-            {/* Header with accent line */}
             <div className="flex gap-4 mb-8">
               <div className="w-1 rounded-full bg-primary shrink-0" />
               <div>
@@ -42,14 +132,20 @@ export default function SignupPage() {
               </div>
             </div>
 
-            <form className="space-y-8" onSubmit={(e) => e.preventDefault()}>
+            {error && (
+              <div className="mb-6 flex items-center gap-2 rounded-sm bg-error-container p-3 text-sm text-error">
+                <AlertCircle size={16} strokeWidth={1.5} />
+                {error}
+              </div>
+            )}
+
+            <form className="space-y-8" onSubmit={handleSubmit}>
               {/* Role selector */}
               <fieldset className="space-y-3">
                 <legend className="font-[family-name:var(--font-inter)] text-xs uppercase tracking-wider text-on-surface-variant mb-1">
                   Je suis
                 </legend>
                 <div className="grid grid-cols-2 gap-3">
-                  {/* Etablissement */}
                   <label className="relative cursor-pointer">
                     <input
                       type="radio"
@@ -60,12 +156,8 @@ export default function SignupPage() {
                       className="peer sr-only"
                     />
                     <div className="flex items-center gap-3 p-4 rounded-sm bg-surface-low peer-checked:bg-primary/5 peer-checked:ring-1 peer-checked:ring-primary-container transition-all">
-                      <div className="w-10 h-10 rounded-sm bg-surface-mid peer-checked:bg-primary/10 flex items-center justify-center shrink-0">
-                        <Building2
-                          size={20}
-                          strokeWidth={1.5}
-                          className="text-primary"
-                        />
+                      <div className="w-10 h-10 rounded-sm bg-surface-mid flex items-center justify-center shrink-0">
+                        <Building2 size={20} strokeWidth={1.5} className="text-primary" />
                       </div>
                       <div>
                         <p className="text-sm font-semibold text-on-background font-[family-name:var(--font-manrope)]">
@@ -78,7 +170,6 @@ export default function SignupPage() {
                     </div>
                   </label>
 
-                  {/* Concierge-RP */}
                   <label className="relative cursor-pointer">
                     <input
                       type="radio"
@@ -90,11 +181,7 @@ export default function SignupPage() {
                     />
                     <div className="flex items-center gap-3 p-4 rounded-sm bg-surface-low peer-checked:bg-primary/5 peer-checked:ring-1 peer-checked:ring-primary-container transition-all">
                       <div className="w-10 h-10 rounded-sm bg-surface-mid flex items-center justify-center shrink-0">
-                        <UserCheck
-                          size={20}
-                          strokeWidth={1.5}
-                          className="text-primary"
-                        />
+                        <UserCheck size={20} strokeWidth={1.5} className="text-primary" />
                       </div>
                       <div>
                         <p className="text-sm font-semibold text-on-background font-[family-name:var(--font-manrope)]">
@@ -115,70 +202,56 @@ export default function SignupPage() {
                   Informations personnelles
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {/* Nom complet */}
                   <div className="space-y-1.5">
-                    <label
-                      htmlFor="fullname"
-                      className="block font-[family-name:var(--font-inter)] text-xs uppercase tracking-wider text-on-surface-variant"
-                    >
+                    <label htmlFor="fullname" className="block font-[family-name:var(--font-inter)] text-xs uppercase tracking-wider text-on-surface-variant">
                       Nom complet
                     </label>
                     <div className="relative">
-                      <User
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/60"
-                        size={16}
-                        strokeWidth={1.5}
-                      />
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/60" size={16} strokeWidth={1.5} />
                       <input
                         id="fullname"
                         type="text"
-                        placeholder="Jean Dupont"
+                        placeholder="Karim Bennani"
+                        value={form.fullname}
+                        onChange={(e) => updateForm("fullname", e.target.value)}
+                        required
                         className="w-full pl-10 pr-4 py-2.5 bg-surface-low border-none rounded-sm text-sm text-on-background placeholder:text-on-surface-variant/50 font-[family-name:var(--font-inter)] focus:bg-surface-card focus:ring-1 focus:ring-primary-container focus:outline-none transition-colors"
                       />
                     </div>
                   </div>
 
-                  {/* Email */}
                   <div className="space-y-1.5">
-                    <label
-                      htmlFor="email"
-                      className="block font-[family-name:var(--font-inter)] text-xs uppercase tracking-wider text-on-surface-variant"
-                    >
+                    <label htmlFor="email" className="block font-[family-name:var(--font-inter)] text-xs uppercase tracking-wider text-on-surface-variant">
                       Email professionnel
                     </label>
                     <div className="relative">
-                      <Mail
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/60"
-                        size={16}
-                        strokeWidth={1.5}
-                      />
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/60" size={16} strokeWidth={1.5} />
                       <input
                         id="email"
                         type="email"
                         placeholder="nom@entreprise.com"
+                        value={form.email}
+                        onChange={(e) => updateForm("email", e.target.value)}
+                        required
                         className="w-full pl-10 pr-4 py-2.5 bg-surface-low border-none rounded-sm text-sm text-on-background placeholder:text-on-surface-variant/50 font-[family-name:var(--font-inter)] focus:bg-surface-card focus:ring-1 focus:ring-primary-container focus:outline-none transition-colors"
                       />
                     </div>
                   </div>
 
-                  {/* Password */}
                   <div className="space-y-1.5">
-                    <label
-                      htmlFor="password"
-                      className="block font-[family-name:var(--font-inter)] text-xs uppercase tracking-wider text-on-surface-variant"
-                    >
+                    <label htmlFor="password" className="block font-[family-name:var(--font-inter)] text-xs uppercase tracking-wider text-on-surface-variant">
                       Mot de passe
                     </label>
                     <div className="relative">
-                      <Lock
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/60"
-                        size={16}
-                        strokeWidth={1.5}
-                      />
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/60" size={16} strokeWidth={1.5} />
                       <input
                         id="password"
                         type={showPassword ? "text" : "password"}
                         placeholder="Min. 8 caracteres"
+                        value={form.password}
+                        onChange={(e) => updateForm("password", e.target.value)}
+                        required
+                        minLength={8}
                         className="w-full pl-10 pr-10 py-2.5 bg-surface-low border-none rounded-sm text-sm text-on-background placeholder:text-on-surface-variant/50 font-[family-name:var(--font-inter)] focus:bg-surface-card focus:ring-1 focus:ring-primary-container focus:outline-none transition-colors"
                       />
                       <button
@@ -186,33 +259,23 @@ export default function SignupPage() {
                         onClick={() => setShowPassword(!showPassword)}
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant/60 hover:text-on-surface-variant transition-colors"
                       >
-                        {showPassword ? (
-                          <EyeOff size={16} strokeWidth={1.5} />
-                        ) : (
-                          <Eye size={16} strokeWidth={1.5} />
-                        )}
+                        {showPassword ? <EyeOff size={16} strokeWidth={1.5} /> : <Eye size={16} strokeWidth={1.5} />}
                       </button>
                     </div>
                   </div>
 
-                  {/* Telephone */}
                   <div className="space-y-1.5">
-                    <label
-                      htmlFor="phone"
-                      className="block font-[family-name:var(--font-inter)] text-xs uppercase tracking-wider text-on-surface-variant"
-                    >
+                    <label htmlFor="phone" className="block font-[family-name:var(--font-inter)] text-xs uppercase tracking-wider text-on-surface-variant">
                       Telephone
                     </label>
                     <div className="relative">
-                      <Phone
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/60"
-                        size={16}
-                        strokeWidth={1.5}
-                      />
+                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/60" size={16} strokeWidth={1.5} />
                       <input
                         id="phone"
                         type="tel"
-                        placeholder="+33 6 12 34 56 78"
+                        placeholder="+212 6 12 34 56 78"
+                        value={form.phone}
+                        onChange={(e) => updateForm("phone", e.target.value)}
                         className="w-full pl-10 pr-4 py-2.5 bg-surface-low border-none rounded-sm text-sm text-on-background placeholder:text-on-surface-variant/50 font-[family-name:var(--font-inter)] focus:bg-surface-card focus:ring-1 focus:ring-primary-container focus:outline-none transition-colors"
                       />
                     </div>
@@ -220,61 +283,48 @@ export default function SignupPage() {
                 </div>
               </div>
 
-              {/* Establishment details — conditional */}
+              {/* Establishment details */}
               {role === "etablissement" && (
                 <div className="space-y-4">
                   <h2 className="text-sm font-semibold text-primary-dark font-[family-name:var(--font-manrope)]">
                     Details de l&apos;etablissement
                   </h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {/* Nom */}
                     <div className="space-y-1.5">
-                      <label
-                        htmlFor="venue-name"
-                        className="block font-[family-name:var(--font-inter)] text-xs uppercase tracking-wider text-on-surface-variant"
-                      >
+                      <label htmlFor="venue-name" className="block font-[family-name:var(--font-inter)] text-xs uppercase tracking-wider text-on-surface-variant">
                         Nom de l&apos;etablissement
                       </label>
                       <div className="relative">
-                        <Building2
-                          className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/60"
-                          size={16}
-                          strokeWidth={1.5}
-                        />
+                        <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/60" size={16} strokeWidth={1.5} />
                         <input
                           id="venue-name"
                           type="text"
                           placeholder="Le Grand Club"
+                          value={form.venueName}
+                          onChange={(e) => updateForm("venueName", e.target.value)}
                           className="w-full pl-10 pr-4 py-2.5 bg-surface-low border-none rounded-sm text-sm text-on-background placeholder:text-on-surface-variant/50 font-[family-name:var(--font-inter)] focus:bg-surface-card focus:ring-1 focus:ring-primary-container focus:outline-none transition-colors"
                         />
                       </div>
                     </div>
 
-                    {/* Ville */}
                     <div className="space-y-1.5">
-                      <label
-                        htmlFor="city"
-                        className="block font-[family-name:var(--font-inter)] text-xs uppercase tracking-wider text-on-surface-variant"
-                      >
+                      <label htmlFor="city" className="block font-[family-name:var(--font-inter)] text-xs uppercase tracking-wider text-on-surface-variant">
                         Ville
                       </label>
                       <div className="relative">
-                        <MapPin
-                          className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/60"
-                          size={16}
-                          strokeWidth={1.5}
-                        />
+                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/60" size={16} strokeWidth={1.5} />
                         <input
                           id="city"
                           type="text"
-                          placeholder="Paris"
+                          placeholder="Casablanca"
+                          value={form.city}
+                          onChange={(e) => updateForm("city", e.target.value)}
                           className="w-full pl-10 pr-4 py-2.5 bg-surface-low border-none rounded-sm text-sm text-on-background placeholder:text-on-surface-variant/50 font-[family-name:var(--font-inter)] focus:bg-surface-card focus:ring-1 focus:ring-primary-container focus:outline-none transition-colors"
                         />
                       </div>
                     </div>
                   </div>
 
-                  {/* Venue type */}
                   <div className="space-y-2">
                     <span className="block font-[family-name:var(--font-inter)] text-xs uppercase tracking-wider text-on-surface-variant">
                       Type de lieu
@@ -307,22 +357,19 @@ export default function SignupPage() {
                 </div>
               )}
 
-              {/* Submit */}
               <button
                 type="submit"
-                className="w-full py-2.5 bg-primary text-white rounded-sm text-sm font-semibold font-[family-name:var(--font-inter)] hover:bg-primary-dark transition-colors cursor-pointer"
+                disabled={loading}
+                className="w-full py-2.5 bg-primary text-white rounded-sm text-sm font-semibold font-[family-name:var(--font-inter)] hover:bg-primary-dark transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
-                Creer mon compte
+                {loading && <Loader2 size={16} className="animate-spin" />}
+                {loading ? "Creation en cours..." : "Creer mon compte"}
               </button>
             </form>
 
-            {/* Login link */}
             <p className="mt-6 text-center text-sm text-on-surface-variant font-[family-name:var(--font-inter)]">
               Deja un compte ?{" "}
-              <Link
-                href="/login"
-                className="text-primary font-medium hover:underline"
-              >
+              <Link href="/login" className="text-primary font-medium hover:underline">
                 Se connecter
               </Link>
             </p>
@@ -330,7 +377,6 @@ export default function SignupPage() {
         </div>
       </div>
 
-      {/* Footer */}
       <footer className="py-6 text-center text-xs text-on-surface-variant/60 font-[family-name:var(--font-inter)]">
         <span>&copy; 2026 twocards. Tous droits reserves.</span>
       </footer>

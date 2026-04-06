@@ -14,9 +14,9 @@ import {
 } from "lucide-react";
 
 const zones = [
-  { name: "VIP", minSpend: "2 500 \u20ac" },
-  { name: "Standard", minSpend: "800 \u20ac" },
-  { name: "Bar", minSpend: "0 \u20ac" },
+  { name: "VIP", minSpend: "2 500 MAD" },
+  { name: "Standard", minSpend: "800 MAD" },
+  { name: "Bar", minSpend: "0 MAD" },
 ];
 
 export default function NewReservationPage() {
@@ -33,7 +33,7 @@ export default function NewReservationPage() {
   });
 
   const currentZone = zones[selectedZone];
-  const commission = entryType === "table" ? "125 \u20ac" : "40 \u20ac";
+  const commission = entryType === "table" ? "250 MAD" : "80 MAD";
 
   return (
     <div className="bg-surface min-h-screen">

@@ -9,13 +9,13 @@ import {
   TrendingUp,
 } from "lucide-react";
 
-const navLinks = ["Overview", "Live Maps", "Revenue", "Guests", "Settings"];
+const navLinks = ["Vue d'ensemble", "Cartes en direct", "Revenus", "Clients", "Parametres"];
 
 const rpData = [
-  { rang: 1, nom: "Julien Lefevre", couverts: 312, ca: "12,480 EUR", commissions: "1,872 EUR", taille: "7.2" },
-  { rang: 2, nom: "Sophie Martin", couverts: 278, ca: "10,250 EUR", commissions: "1,537 EUR", taille: "6.8" },
-  { rang: 3, nom: "Camille Roux", couverts: 245, ca: "9,870 EUR", commissions: "1,480 EUR", taille: "5.9" },
-  { rang: 4, nom: "Marc Dubois", couverts: 198, ca: "7,650 EUR", commissions: "1,147 EUR", taille: "5.4" },
+  { rang: 1, nom: "Samy Benchekroun", couverts: 48, ca: "124 800 MAD", commissions: "12 480 MAD", taille: "7,2" },
+  { rang: 2, nom: "Yasmine El Idrissi", couverts: 35, ca: "102 500 MAD", commissions: "10 250 MAD", taille: "6,8" },
+  { rang: 3, nom: "Amine Tazi", couverts: 29, ca: "98 700 MAD", commissions: "9 870 MAD", taille: "5,9" },
+  { rang: 4, nom: "Nadia Berrada", couverts: 22, ca: "76 500 MAD", commissions: "7 650 MAD", taille: "5,4" },
 ];
 
 const barChartCouverts = [
@@ -42,12 +42,12 @@ const barChartRevenus = [
 ];
 
 const topEvents = [
-  { name: "Nuit Blanche VIP", revenue: "8,200 EUR", covers: 142 },
-  { name: "Soiree Privee Champagne", revenue: "6,750 EUR", covers: 98 },
-  { name: "DJ Set International", revenue: "5,400 EUR", covers: 115 },
+  { name: "Nuit Blanche VIP", revenue: "82 000 MAD", couverts: 18 },
+  { name: "Soiree Privee Champagne", revenue: "67 500 MAD", couverts: 12 },
+  { name: "DJ Set International", revenue: "54 000 MAD", couverts: 15 },
 ];
 
-const periodTabs = ["7 jours", "30 jours", "90 jours", "Annee"];
+const periodTabs = ["Cette semaine", "Ce mois", "Cette annee", "Personnalise"];
 
 const donutSegments = [
   { label: "Tables VIP", pct: 64, color: "bg-primary" },
@@ -56,17 +56,14 @@ const donutSegments = [
 ];
 
 export default function AnalyticsPage() {
-  const [activeNav, setActiveNav] = useState("Overview");
-  const [activePeriod, setActivePeriod] = useState("30 jours");
+  const [activeNav, setActiveNav] = useState("Vue d'ensemble");
+  const [activePeriod, setActivePeriod] = useState("Ce mois");
 
   return (
     <div className="-mx-0">
       {/* Dark Top Navigation Bar */}
       <div className="bg-primary-dark px-6 py-3 flex items-center justify-between">
         <div className="flex items-center gap-8">
-          <h1 className="text-white font-[family-name:var(--font-manrope)] font-extrabold text-lg tracking-tight">
-            THE LEDGER
-          </h1>
           <nav className="hidden md:flex items-center gap-1">
             {navLinks.map((link) => (
               <button
@@ -84,7 +81,7 @@ export default function AnalyticsPage() {
           </nav>
         </div>
         <button className="flex items-center gap-1 text-white/60 text-sm hover:text-white transition-colors">
-          <span>Oct 2025</span>
+          <span>Avr. 2026</span>
           <ChevronDown size={14} strokeWidth={1.5} />
         </button>
       </div>
@@ -92,10 +89,10 @@ export default function AnalyticsPage() {
       {/* Data Strip */}
       <div className="bg-tertiary-container px-6 py-5 flex flex-wrap items-end gap-6 md:gap-0 md:grid md:grid-cols-5">
         {[
-          { label: "Total Couverts", value: "1,248" },
-          { label: "Chiffre d'Affaires", value: "42,650 EUR" },
-          { label: "Taille Moy. Groupe", value: "6.2" },
-          { label: "Meilleur RP", value: "JULIEN L." },
+          { label: "Total Couverts", value: "134" },
+          { label: "Chiffre d'Affaires", value: "402 500 MAD" },
+          { label: "Taille Moy. Groupe", value: "6,2" },
+          { label: "Meilleur RP", value: "SAMY B." },
         ].map((stat, i) => (
           <div
             key={i}
@@ -247,7 +244,7 @@ export default function AnalyticsPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-on-background truncate">{event.name}</p>
-                  <p className="text-xs text-on-surface-variant">{event.covers} couverts</p>
+                  <p className="text-xs text-on-surface-variant">{event.couverts} couverts</p>
                 </div>
                 <div className="flex items-center gap-1.5 text-sm font-bold text-on-background">
                   <TrendingUp size={14} strokeWidth={1.5} className="text-emerald-600" />

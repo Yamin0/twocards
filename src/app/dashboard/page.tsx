@@ -15,16 +15,16 @@ import {
 } from "lucide-react";
 
 const stats = [
-  { label: "Couverts ce soir", value: "247" },
+  { label: "Couverts ce soir", value: "38" },
   { label: "Demandes en attente", value: "12" },
   { label: "RP Actifs", value: "34" },
-  { label: "Revenu mensuel", value: "18 400 \u20ac" },
+  { label: "Revenu mensuel", value: "782 000 MAD" },
 ];
 
 const requests = [
   {
     id: 1,
-    prName: "Julien Marchand",
+    prName: "Karim Bennani",
     badge: "RP Or",
     badgeColor: "bg-amber-100 text-amber-800",
     guests: 8,
@@ -34,7 +34,7 @@ const requests = [
   },
   {
     id: 2,
-    prName: "Camille Durand",
+    prName: "Lina Fassi",
     badge: "Junior",
     badgeColor: "bg-surface-mid text-on-surface-variant",
     guests: 4,
@@ -44,7 +44,7 @@ const requests = [
   },
   {
     id: 3,
-    prName: "Sophia Lenoir",
+    prName: "Sofia El Amrani",
     badge: "RP Or",
     badgeColor: "bg-amber-100 text-amber-800",
     guests: 12,
@@ -57,24 +57,24 @@ const requests = [
 const topPRs = [
   {
     rank: 1,
-    name: "Julien Marchand",
-    agency: "Prestige Nightlife",
-    covers: 342,
-    revenue: "28 600 \u20ac",
+    name: "Karim Bennani",
+    agency: "Prestige Marrakech",
+    covers: 52,
+    revenue: "286 000 MAD",
   },
   {
     rank: 2,
-    name: "Sophia Lenoir",
-    agency: "SL Concierge",
-    covers: 287,
-    revenue: "22 100 \u20ac",
+    name: "Sofia El Amrani",
+    agency: "SA Concierge",
+    covers: 41,
+    revenue: "221 000 MAD",
   },
   {
     rank: 3,
-    name: "Antoine Berger",
-    agency: "Nuit Parisienne",
-    covers: 198,
-    revenue: "15 400 \u20ac",
+    name: "Riad Lahlou",
+    agency: "Nuit de Casablanca",
+    covers: 28,
+    revenue: "154 000 MAD",
   },
 ];
 

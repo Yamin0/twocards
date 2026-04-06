@@ -234,7 +234,7 @@ export default function SettingsPage() {
               </label>
               <input
                 type="text"
-                defaultValue="Table Standard: 500 EUR | Table VIP: 1,500 EUR | Carre VIP: 3,000 EUR"
+                defaultValue="Table Standard: 500 MAD | Table VIP: 1,500 MAD | Carre VIP: 3,000 MAD"
                 className="w-full px-4 py-2.5 bg-surface-card border-none rounded-md text-sm text-on-background focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
             </div>

@@ -15,65 +15,65 @@ import {
 
 const stats = [
   { label: "RP Actifs", value: "34", icon: Users },
-  { label: "Couverts mois", value: "1 247", icon: Users },
-  { label: "CA g\u00e9n\u00e9r\u00e9 via RP", value: "89 300 \u20ac", icon: DollarSign },
-  { label: "Taux Com. Moyen", value: "12%", icon: Percent },
+  { label: "Couverts mois", value: "127", icon: Users },
+  { label: "CA genere via RP", value: "89 300 MAD", icon: DollarSign },
+  { label: "Taux Com. Moyen", value: "10%", icon: Percent },
 ];
 
 const prCards = [
   {
-    initials: "AM",
-    name: "Alexandre Martin",
-    agency: "NightLife Agency",
+    initials: "YA",
+    name: "Youssef Alaoui",
+    agency: "Nuit Blanche Agency",
     status: "Actif",
-    location: "Paris",
-    couverts: 312,
-    ca: "24 800 \u20ac",
-    commission: "2 976 \u20ac",
+    location: "Casablanca",
+    couverts: 48,
+    ca: "24 800 MAD",
+    commission: "2 480 MAD",
     color: "bg-primary",
   },
   {
-    initials: "MF",
-    name: "Marie Fontaine",
+    initials: "AB",
+    name: "Amira Benjelloun",
     agency: "Prestige Connect",
     status: "Actif",
-    location: "Paris",
-    couverts: 248,
-    ca: "19 200 \u20ac",
-    commission: "2 304 \u20ac",
+    location: "Casablanca",
+    couverts: 36,
+    ca: "19 200 MAD",
+    commission: "1 920 MAD",
     color: "bg-emerald-600",
   },
   {
-    initials: "PR",
-    name: "Philippe Renard",
-    agency: "Ind\u00e9pendant",
+    initials: "OT",
+    name: "Omar Tazi",
+    agency: "Independent",
     status: "Actif",
-    location: "Lyon",
-    couverts: 187,
-    ca: "14 500 \u20ac",
-    commission: "1 740 \u20ac",
+    location: "Marrakech",
+    couverts: 24,
+    ca: "14 500 MAD",
+    commission: "1 450 MAD",
     color: "bg-violet-600",
   },
   {
-    initials: "CL",
-    name: "Clara Lefebvre",
-    agency: "VIP Access",
+    initials: "SC",
+    name: "Salma Chraibi",
+    agency: "VIP Casablanca",
     status: "En attente",
-    location: "Cannes",
-    couverts: 95,
-    ca: "8 300 \u20ac",
-    commission: "996 \u20ac",
+    location: "Tanger",
+    couverts: 12,
+    ca: "8 300 MAD",
+    commission: "830 MAD",
     color: "bg-amber-600",
   },
   {
-    initials: "JB",
-    name: "Julien Beaumont",
-    agency: "NightLife Agency",
+    initials: "MF",
+    name: "Mehdi Fassi-Fihri",
+    agency: "Nuit Blanche Agency",
     status: "Inactif",
-    location: "Paris",
-    couverts: 42,
-    ca: "3 200 \u20ac",
-    commission: "384 \u20ac",
+    location: "Casablanca",
+    couverts: 7,
+    ca: "3 200 MAD",
+    commission: "320 MAD",
     color: "bg-rose-600",
   },
 ];
@@ -81,9 +81,9 @@ const prCards = [
 const monthlyCA = [
   { month: "Oct", value: 62 },
   { month: "Nov", value: 71 },
-  { month: "D\u00e9c", value: 89 },
+  { month: "Dec", value: 89 },
   { month: "Jan", value: 58 },
-  { month: "F\u00e9v", value: 74 },
+  { month: "Fev", value: 74 },
   { month: "Mar", value: 85 },
 ];
 
@@ -108,7 +108,7 @@ export default function NetworkPage() {
       {/* Header */}
       <div className="px-6 pt-8 pb-4 flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-primary-dark font-[family-name:var(--font-manrope)]">
-          Votre R\u00e9seau de RP
+          Votre Reseau de RP
         </h1>
         <button className="inline-flex items-center gap-2 bg-primary text-white rounded-sm px-5 py-2.5 text-sm font-medium hover:bg-primary-dark transition-colors">
           <UserPlus className="h-4 w-4" strokeWidth={1.5} />
@@ -125,7 +125,7 @@ export default function NetworkPage() {
           />
           <input
             type="text"
-            placeholder="Rechercher un RP par nom, agence ou ville\u2026"
+            placeholder="Rechercher un RP par nom, agence ou ville..."
             className="w-full bg-surface-low border-none rounded-sm py-3 pl-11 pr-4 text-sm text-on-background placeholder:text-on-surface-variant/60 focus:outline-none focus:ring-2 focus:ring-primary/20"
           />
         </div>
@@ -241,10 +241,10 @@ export default function NetworkPage() {
               <UserPlus className="h-5 w-5 text-on-surface-variant" strokeWidth={1.5} />
             </div>
             <h3 className="text-sm font-semibold text-primary-dark font-[family-name:var(--font-manrope)] mb-1">
-              \u00c9tendre votre r\u00e9seau
+              Etendre votre reseau
             </h3>
             <p className="text-xs text-on-surface-variant mb-4 max-w-[200px]">
-              Invitez de nouveaux RP pour d\u00e9velopper votre activit\u00e9
+              Invitez de nouveaux RP pour developper votre activite
             </p>
             <button className="inline-flex items-center gap-2 bg-primary text-white rounded-sm px-4 py-2 text-sm font-medium hover:bg-primary-dark transition-colors">
               Envoyer une invitation
@@ -290,13 +290,13 @@ export default function NetworkPage() {
           </h2>
           <div className="flex items-center gap-4 mb-4">
             <div className="h-14 w-14 rounded-full bg-primary flex items-center justify-center">
-              <span className="text-lg font-semibold text-white">AM</span>
+              <span className="text-lg font-semibold text-white">YA</span>
             </div>
             <div>
               <p className="text-base font-medium text-on-background">
-                Alexandre Martin
+                Youssef Alaoui
               </p>
-              <p className="text-sm text-on-surface-variant">NightLife Agency</p>
+              <p className="text-sm text-on-surface-variant">Nuit Blanche Agency</p>
             </div>
           </div>
 
@@ -304,13 +304,13 @@ export default function NetworkPage() {
             <div className="flex items-center justify-between">
               <span className="text-xs text-on-surface-variant">CA ce mois</span>
               <span className="text-sm font-semibold text-on-background font-[family-name:var(--font-manrope)]">
-                24 800 \u20ac
+                24 800 MAD
               </span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-xs text-on-surface-variant">Couverts</span>
               <span className="text-sm font-semibold text-on-background font-[family-name:var(--font-manrope)]">
-                312
+                48
               </span>
             </div>
             <div className="flex items-center justify-between">
@@ -324,7 +324,7 @@ export default function NetworkPage() {
           <div className="mt-4 flex items-center gap-2">
             <Star className="h-4 w-4 text-amber-500" strokeWidth={1.5} />
             <span className="text-xs text-on-surface-variant">
-              Top performeur depuis 3 mois cons\u00e9cutifs
+              Top performeur depuis 3 mois consecutifs
             </span>
           </div>
         </div>

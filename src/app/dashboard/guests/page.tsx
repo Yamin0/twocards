@@ -17,63 +17,63 @@ import Link from "next/link";
 const guests = [
   {
     id: "1",
-    nom: "Jean-Philippe Dubois",
-    telephone: "+33 6 12 34 56 78",
+    nom: "Hicham El Guerrouj",
+    telephone: "+212 6 12 34 56 78",
     totalVisites: 23,
-    depenses: "12 400 \u20ac",
+    depenses: "124 000 MAD",
     derniereVisite: "28 Mars 2026",
     vip: "VIP Platinum",
-    recommande: "Alexandre Martin",
+    recommande: "Youssef Alaoui",
   },
   {
     id: "2",
-    nom: "Sophie Laurent",
-    telephone: "+33 6 98 76 54 32",
+    nom: "Leila Hadioui",
+    telephone: "+212 6 98 76 54 32",
     totalVisites: 15,
-    depenses: "8 750 \u20ac",
+    depenses: "87 500 MAD",
     derniereVisite: "25 Mars 2026",
     vip: "VIP Gold",
-    recommande: "Marie Fontaine",
+    recommande: "Amira Benjelloun",
   },
   {
     id: "3",
-    nom: "Marc Beaumont",
-    telephone: "+33 6 55 44 33 22",
+    nom: "Enzo Rossi",
+    telephone: "+212 6 55 44 33 22",
     totalVisites: 8,
-    depenses: "3 200 \u20ac",
+    depenses: "32 000 MAD",
     derniereVisite: "20 Mars 2026",
     vip: null,
     recommande: "Direct",
   },
   {
     id: "4",
-    nom: "Isabelle Moreau",
-    telephone: "+33 6 77 88 99 00",
+    nom: "Asmae Boutaleb",
+    telephone: "+212 6 77 88 99 00",
     totalVisites: 31,
-    depenses: "18 900 \u20ac",
+    depenses: "189 000 MAD",
     derniereVisite: "27 Mars 2026",
     vip: "VIP Black",
-    recommande: "Philippe Renard",
+    recommande: "Omar Tazi",
   },
   {
     id: "5",
-    nom: "Thomas Girard",
-    telephone: "+33 6 11 22 33 44",
+    nom: "Khalid Bousfiha",
+    telephone: "+212 6 11 22 33 44",
     totalVisites: 5,
-    depenses: "1 850 \u20ac",
+    depenses: "18 500 MAD",
     derniereVisite: "15 Mars 2026",
     vip: null,
-    recommande: "Sophie Laurent",
+    recommande: "Leila Hadioui",
   },
   {
     id: "6",
-    nom: "Camille Rousseau",
-    telephone: "+33 6 66 55 44 33",
+    nom: "Zineb Lyoubi",
+    telephone: "+212 6 66 55 44 33",
     totalVisites: 19,
-    depenses: "9 600 \u20ac",
+    depenses: "96 000 MAD",
     derniereVisite: "26 Mars 2026",
     vip: "VIP Blue",
-    recommande: "Alexandre Martin",
+    recommande: "Youssef Alaoui",
   },
 ];
 
@@ -120,7 +120,7 @@ export default function GuestsPage() {
           />
           <input
             type="text"
-            placeholder="Rechercher un client par nom, t\u00e9l\u00e9phone ou email\u2026"
+            placeholder="Rechercher un client par nom, telephone ou email..."
             className="w-full bg-surface-low border-none rounded-sm py-3 pl-11 pr-4 text-sm text-on-background placeholder:text-on-surface-variant/60 focus:outline-none focus:ring-2 focus:ring-primary/20"
           />
         </div>
@@ -152,13 +152,13 @@ export default function GuestsPage() {
         {/* Derniere visite */}
         <button className="inline-flex items-center gap-1.5 bg-surface-mid rounded-sm px-3 py-2 text-sm text-on-surface-variant">
           <Calendar className="h-3.5 w-3.5" strokeWidth={1.5} />
-          Derni\u00e8re visite
+          Derniere visite
           <ChevronDown className="h-3.5 w-3.5" strokeWidth={1.5} />
         </button>
 
         {/* Recommande par */}
         <button className="inline-flex items-center gap-1.5 bg-surface-mid rounded-sm px-3 py-2 text-sm text-on-surface-variant">
-          Recommand\u00e9 par
+          Recommande par
           <ChevronDown className="h-3.5 w-3.5" strokeWidth={1.5} />
         </button>
       </div>
@@ -168,7 +168,7 @@ export default function GuestsPage() {
         <div className="bg-surface-card rounded-md editorial-shadow overflow-hidden">
           {/* Table Header */}
           <div className="grid grid-cols-7 gap-4 px-5 py-3 bg-surface-low">
-            {["Nom", "T\u00e9l\u00e9phone", "Total Visites", "D\u00e9penses Totales", "Derni\u00e8re Visite", "Statut VIP", "Recommand\u00e9 par"].map(
+            {["Nom", "Telephone", "Total Visites", "Depenses Totales", "Derniere Visite", "Statut VIP", "Recommande par"].map(
               (header) => (
                 <span
                   key={header}
@@ -243,7 +243,7 @@ export default function GuestsPage() {
               </div>
               <div>
                 <p className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant">
-                  R\u00e9tention VIP
+                  Retention VIP
                 </p>
                 <p className="text-lg font-semibold text-on-background font-[family-name:var(--font-manrope)]">
                   94%

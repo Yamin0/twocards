@@ -94,7 +94,7 @@ export function Features() {
                 Revenus ce mois
               </p>
               <p className="mt-2 font-[family-name:var(--font-manrope)] text-3xl font-bold text-white">
-                &euro;24,850
+                24,850 MAD
               </p>
               <div className="mt-4 flex items-center gap-3">
                 <div className="flex-1">
@@ -102,7 +102,7 @@ export function Features() {
                     Commissions versees
                   </p>
                   <p className="mt-1 font-[family-name:var(--font-manrope)] text-lg font-bold text-white">
-                    &euro;3,420
+                    3,420 MAD
                   </p>
                 </div>
                 <div className="flex-1">
@@ -110,7 +110,7 @@ export function Features() {
                     Taux moyen
                   </p>
                   <p className="mt-1 font-[family-name:var(--font-manrope)] text-lg font-bold text-white">
-                    12.4%
+                    10%
                   </p>
                 </div>
               </div>

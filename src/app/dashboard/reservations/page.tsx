@@ -24,7 +24,7 @@ const stats = [
   },
   {
     label: "Commissions gagnees",
-    value: "4 850 \u20ac",
+    value: "4 850 MAD",
     icon: Euro,
   },
   {
@@ -67,7 +67,7 @@ const upcomingEvents = [
 
 const recentReservations = [
   {
-    guest: "Alexandre Petit",
+    guest: "Youssef Alaoui",
     venue: "Maison Dorée",
     date: "24 Oct",
     covers: 6,
@@ -75,7 +75,7 @@ const recentReservations = [
     statusColor: "bg-green-100 text-green-800",
   },
   {
-    guest: "Isabelle Moreau",
+    guest: "Asmae Boutaleb",
     venue: "Le Phantom Club",
     date: "24 Oct",
     covers: 4,
@@ -83,7 +83,7 @@ const recentReservations = [
     statusColor: "bg-amber-100 text-amber-800",
   },
   {
-    guest: "Thomas Laurent",
+    guest: "Khalid Bousfiha",
     venue: "Jardin Perché",
     date: "23 Oct",
     covers: 8,
@@ -91,7 +91,7 @@ const recentReservations = [
     statusColor: "bg-green-100 text-green-800",
   },
   {
-    guest: "Marie Dubois",
+    guest: "Salma Chraibi",
     venue: "Maison Dorée",
     date: "23 Oct",
     covers: 2,
@@ -99,7 +99,7 @@ const recentReservations = [
     statusColor: "bg-red-100 text-red-800",
   },
   {
-    guest: "Nicolas Fabre",
+    guest: "Amine Tazi",
     venue: "Le Phantom Club",
     date: "22 Oct",
     covers: 10,
@@ -114,7 +114,7 @@ export default function ReservationsPage() {
       {/* Header */}
       <div className="px-8 pt-8 pb-6">
         <h1 className="text-primary-dark font-[family-name:var(--font-manrope)] text-3xl font-extrabold">
-          Bonjour, Marc.
+          Bonjour, Karim.
         </h1>
         <p className="text-on-surface-variant mt-1 text-sm">
           Gerez vos reservations et suivez vos performances.

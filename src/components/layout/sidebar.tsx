@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
@@ -57,14 +58,23 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         `}
       >
         {/* Logo section */}
-        <div className="flex items-center justify-between px-6 pt-8 pb-2">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight font-[family-name:var(--font-nunito)] text-on-surface">
-              twocards.
-            </h1>
-            <p className="text-xs font-[family-name:var(--font-inter)] text-on-surface-variant mt-0.5">
-              Venue Manager
-            </p>
+        <div className="flex items-center justify-between px-6 pt-6 pb-2">
+          <div className="flex items-center gap-3">
+            <Image
+              src="/logo-header.png"
+              alt="twocards. logo"
+              width={96}
+              height={96}
+              className="h-[96px] w-auto"
+            />
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight font-[family-name:var(--font-nunito)] text-on-surface">
+                twocards.
+              </h1>
+              <p className="text-xs font-[family-name:var(--font-inter)] text-on-surface-variant mt-0.5">
+                Venue Manager
+              </p>
+            </div>
           </div>
           <button
             onClick={onClose}
@@ -116,14 +126,17 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             <HelpCircle size={20} strokeWidth={1.5} />
             <span>Aide</span>
           </Link>
-          <button
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm w-full
-              font-[family-name:var(--font-manrope)]
-              text-error hover:text-error/80 transition-colors"
-          >
-            <LogOut size={20} strokeWidth={1.5} />
-            <span>Deconnexion</span>
-          </button>
+          <form action="/auth/signout" method="post">
+            <button
+              type="submit"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm w-full
+                font-[family-name:var(--font-manrope)]
+                text-error hover:text-error/80 transition-colors"
+            >
+              <LogOut size={20} strokeWidth={1.5} />
+              <span>Deconnexion</span>
+            </button>
+          </form>
         </div>
       </aside>
     </>

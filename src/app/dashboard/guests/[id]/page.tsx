@@ -15,18 +15,18 @@ import {
 import Link from "next/link";
 
 const guest = {
-  name: "Jean-Philippe Dubois",
-  phone: "+33 6 12 34 56 78",
-  email: "jp.dubois@email.com",
-  location: "Paris, 8\u00e8me",
+  name: "Hicham El Guerrouj",
+  phone: "+212 6 12 34 56 78",
+  email: "h.elguerrouj@email.com",
+  location: "Casablanca, Maarif",
   vip: "VIP Platinum",
   totalVisites: 23,
-  depensesTotales: "12 400 \u20ac",
-  depenseMoyenne: "539 \u20ac",
+  depensesTotales: "124 000 MAD",
+  depenseMoyenne: "539 MAD",
   tailleGroupeMoy: 4,
   premiereVisite: "Mars 2025",
   birthday: "14 Juin 1985",
-  tablePreference: "Carr\u00e9e VIP, pr\u00e8s de la piste",
+  tablePreference: "Carree VIP, pres de la piste",
   musicStyle: "Deep House, Tech House",
   allergies: "Fruits de mer, Arachides",
 };
@@ -35,26 +35,26 @@ const visitHistory = [
   {
     date: "28 Mars 2026",
     event: "Vendredi Signature",
-    venue: "L'Arc Paris",
+    venue: "L'Arc Casablanca",
     table: "VIP 12",
-    spend: "1 850 \u20ac",
-    referral: "Alexandre Martin",
+    spend: "1 850 MAD",
+    referral: "Youssef Alaoui",
   },
   {
     date: "14 Mars 2026",
     event: "Samedi Gold",
-    venue: "L'Arc Paris",
+    venue: "L'Arc Casablanca",
     table: "VIP 8",
-    spend: "2 300 \u20ac",
-    referral: "Alexandre Martin",
+    spend: "2 300 MAD",
+    referral: "Youssef Alaoui",
   },
   {
     date: "02 Mars 2026",
-    event: "Soir\u00e9e Priv\u00e9e",
+    event: "Soiree Privee",
     venue: "Raspoutine",
-    table: "Carr\u00e9 3",
-    spend: "3 100 \u20ac",
-    referral: "Marie Fontaine",
+    table: "Carre 3",
+    spend: "3 100 MAD",
+    referral: "Amira Benjelloun",
   },
 ];
 
@@ -64,11 +64,11 @@ const upcoming = [
     event: "Vendredi Signature",
     time: "23h30",
     partySize: 6,
-    status: "Confirm\u00e9e",
+    status: "Confirmee",
   },
   {
     date: "12 Avr",
-    event: "Soir\u00e9e Anniversaire",
+    event: "Soiree Anniversaire",
     time: "22h00",
     partySize: 12,
     status: "En attente",
@@ -77,20 +77,20 @@ const upcoming = [
 
 const notes = [
   {
-    author: "Alexandre M.",
+    author: "Youssef A.",
     date: "28 Mars 2026",
-    text: "Client fid\u00e8le, toujours tr\u00e8s g\u00e9n\u00e9reux. Pr\u00e9f\u00e8re le champagne Ruinart. Arriv\u00e9e g\u00e9n\u00e9ralement apr\u00e8s minuit.",
+    text: "Client fidele, toujours tres genereux. Prefere le champagne Ruinart. Arrivee generalement apres minuit.",
   },
   {
-    author: "Marie F.",
+    author: "Amira B.",
     date: "02 Mars 2026",
-    text: "Organise un anniversaire le 12 avril pour sa femme. Demande g\u00e2teau personnalis\u00e9 et d\u00e9coration VIP.",
+    text: "Organise un anniversaire le 12 avril pour sa femme. Demande gateau personnalise et decoration VIP.",
   },
 ];
 
 const tags = [
   "High Spender",
-  "R\u00e9gulier",
+  "Regulier",
   "VIP Anniversaire",
   "Champagne Lover",
   "Groupe +8",
@@ -112,7 +112,7 @@ export default async function GuestProfilePage({
           {/* Avatar */}
           <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
             <span className="text-2xl font-semibold text-primary font-[family-name:var(--font-manrope)]">
-              JP
+              HE
             </span>
           </div>
 
@@ -162,10 +162,10 @@ export default async function GuestProfilePage({
         <div className="bg-primary-container rounded-md p-5 grid grid-cols-5 gap-6">
           {[
             { label: "Total Visites", value: guest.totalVisites },
-            { label: "D\u00e9penses Totales", value: guest.depensesTotales },
-            { label: "D\u00e9pense Moyenne", value: guest.depenseMoyenne },
+            { label: "Depenses Totales", value: guest.depensesTotales },
+            { label: "Depense Moyenne", value: guest.depenseMoyenne },
             { label: "Taille Groupe Moy.", value: guest.tailleGroupeMoy },
-            { label: "Premi\u00e8re Visite", value: guest.premiereVisite },
+            { label: "Premiere Visite", value: guest.premiereVisite },
           ].map((m) => (
             <div key={m.label}>
               <p className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-primary-container">
@@ -191,7 +191,7 @@ export default async function GuestProfilePage({
               </h2>
             </div>
             <div className="grid grid-cols-6 gap-3 px-5 py-2 bg-surface-low">
-              {["Date", "\u00c9v\u00e9nement", "Lieu", "Table", "D\u00e9pense", "R\u00e9f\u00e9rent"].map(
+              {["Date", "Evenement", "Lieu", "Table", "Depense", "Referent"].map(
                 (h) => (
                   <span
                     key={h}
@@ -220,7 +220,7 @@ export default async function GuestProfilePage({
           {/* Upcoming Reservations */}
           <div>
             <h2 className="text-base font-semibold text-primary-dark font-[family-name:var(--font-manrope)] mb-3">
-              R\u00e9servations \u00e0 venir
+              Reservations a venir
             </h2>
             <div className="space-y-3">
               {upcoming.map((r, i) => (
@@ -254,7 +254,7 @@ export default async function GuestProfilePage({
                     </div>
                   </div>
                   <span
-                    className={`rounded-full px-2.5 py-0.5 text-[0.6875rem] font-medium ${r.status === "Confirm\u00e9e" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"}`}
+                    className={`rounded-full px-2.5 py-0.5 text-[0.6875rem] font-medium ${r.status === "Confirmee" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"}`}
                   >
                     {r.status}
                   </span>
@@ -291,7 +291,7 @@ export default async function GuestProfilePage({
                 />
                 <div>
                   <p className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant">
-                    Pr\u00e9f\u00e9rence table
+                    Preference table
                   </p>
                   <p className="text-sm text-on-background">
                     {guest.tablePreference}
