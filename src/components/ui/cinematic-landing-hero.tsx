@@ -172,21 +172,21 @@ export interface CinematicHeroProps extends React.HTMLAttributes<HTMLDivElement>
 
 export function CinematicHero({
   brandName = "twocards.",
-  tagline1 = "G\u00e9rez la nuit,",
-  tagline2 = "simplifiez vos soir\u00e9es.",
+  tagline1 = "Gérez la nuit,",
+  tagline2 = "simplifiez vos soirées.",
   cardHeading = "Le CRM de la nightlife.",
   cardDescription = (
     <>
       <span className="text-white font-semibold">twocards.</span> connecte les
-      \u00e9tablissements de nuit avec leur r\u00e9seau de concierges et RP.
-      R\u00e9servations, listes VIP, commissions — tout depuis un seul tableau
+      établissements de nuit avec leur réseau de concierges et RP.
+      Réservations, listes VIP, commissions — tout depuis un seul tableau
       de bord.
     </>
   ),
   metricValue = 782,
   metricLabel = "Revenu (K MAD)",
-  ctaHeading = "Rejoignez le r\u00e9seau.",
-  ctaDescription = "Rejoignez les \u00e9tablissements et concierges qui utilisent twocards. pour g\u00e9rer leurs soir\u00e9es.",
+  ctaHeading = "Rejoignez le réseau.",
+  ctaDescription = "Rejoignez les établissements et concierges qui utilisent twocards. pour gérer leurs soirées.",
   className,
   ...props
 }: CinematicHeroProps) {
@@ -317,7 +317,7 @@ export function CinematicHero({
             </svg>
             <div className="text-left">
               <div className="text-[10px] font-bold tracking-wider text-neutral-500 uppercase mb-[-2px]">Commencer en tant</div>
-              <div className="text-xl font-bold leading-none tracking-tight">\u00c9tablissement</div>
+              <div className="text-xl font-bold leading-none tracking-tight">Établissement</div>
             </div>
           </a>
           <a
@@ -436,7 +436,7 @@ export function CinematicHero({
                             </svg>
                           </div>
                           <div className="flex-1">
-                            <div className="text-[10px] text-neutral-300 font-semibold mb-0.5">12 r\u00e9servations</div>
+                            <div className="text-[10px] text-neutral-300 font-semibold mb-0.5">12 réservations</div>
                             <div className="text-[9px] text-neutral-500">cette semaine</div>
                           </div>
                           <div className="text-[10px] text-amber-400 font-bold">+5</div>
@@ -456,7 +456,7 @@ export function CinematicHero({
                   </div>
                   <div>
                     <p className="text-white text-xs lg:text-sm font-bold tracking-tight">Nuit Blanche VIP</p>
-                    <p className="text-blue-200/50 text-[10px] lg:text-xs font-medium">82 000 MAD g\u00e9n\u00e9r\u00e9s</p>
+                    <p className="text-blue-200/50 text-[10px] lg:text-xs font-medium">82 000 MAD générés</p>
                   </div>
                 </div>
 
