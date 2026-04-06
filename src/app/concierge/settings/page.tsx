@@ -1,17 +1,32 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useAuthUser } from "@/hooks/use-auth-user";
+import { ConciergeSkeleton } from "@/components/shared/loading-skeleton";
 import { User, Mail, Phone, MapPin, Save, CheckCircle, Loader2 } from "lucide-react";
 
 export default function ConciergeSettingsPage() {
+  const { fullName, email, isDemoConcierge, isLoading } = useAuthUser();
   const [form, setForm] = useState({
-    fullname: "Karim Bennani",
-    email: "karim@prestige-marrakech.com",
-    phone: "+212 6 12 34 56 78",
-    city: "Marrakech",
+    fullname: "",
+    email: "",
+    phone: "",
+    city: "",
   });
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
+
+  const initialized = useRef(false);
+  useEffect(() => {
+    if (!isLoading && !initialized.current) {
+      initialized.current = true;
+      if (isDemoConcierge) {
+        setForm({ fullname: "Karim Bennani", email: "karim@prestige-marrakech.com", phone: "+212 6 12 34 56 78", city: "Marrakech" });
+      } else {
+        setForm({ fullname: fullName || "", email: email || "", phone: "", city: "" });
+      }
+    }
+  }, [isLoading, isDemoConcierge, fullName, email]);
 
   const updateForm = (field: string, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -29,6 +44,8 @@ export default function ConciergeSettingsPage() {
     setSaving(false);
     setSuccess(true);
   };
+
+  if (isLoading) return <ConciergeSkeleton />;
 
   return (
     <div className="bg-surface min-h-screen">

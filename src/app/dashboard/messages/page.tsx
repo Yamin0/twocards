@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { useAuthUser } from "@/hooks/use-auth-user";
+import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
+import { useToast } from "@/hooks/use-toast";
 import {
   Search,
   Phone,
@@ -12,7 +15,7 @@ import {
   ArrowLeft,
 } from "lucide-react";
 
-const conversations = [
+const DEMO_CONVERSATIONS = [
   {
     id: 1,
     name: "Samy Benchekroun",
@@ -91,9 +94,31 @@ const conversations = [
 ];
 
 export default function MessagesPage() {
-  const [selectedId, setSelectedId] = useState<number | null>(1);
+  const { isDemoVenue, isLoading } = useAuthUser();
+
+  const conversations = isDemoVenue ? DEMO_CONVERSATIONS : [];
+
+  const [selectedId, setSelectedId] = useState<number | null>(isDemoVenue ? 1 : null);
   const [searchQuery, setSearchQuery] = useState("");
   const [messageInput, setMessageInput] = useState("");
+  const [localMessages, setLocalMessages] = useState<Record<number, typeof DEMO_CONVERSATIONS[0]["messages"]>>({});
+  const { toast, showToast } = useToast();
+
+  const handleSendMessage = () => {
+    if (!messageInput.trim() || !selectedId) return;
+    const newMsg = {
+      id: Date.now(),
+      sender: "me" as const,
+      text: messageInput.trim(),
+      time: new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }),
+      date: "Aujourd'hui",
+    };
+    setLocalMessages((prev) => ({
+      ...prev,
+      [selectedId]: [...(prev[selectedId] || []), newMsg],
+    }));
+    setMessageInput("");
+  };
 
   const selected = conversations.find((c) => c.id === selectedId);
 
@@ -101,14 +126,19 @@ export default function MessagesPage() {
     c.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // Merge original + local messages
+  const allMessages = selected
+    ? [...selected.messages, ...(localMessages[selected.id] || [])]
+    : [];
+
   // Group messages by date
-  const groupedMessages = selected
-    ? selected.messages.reduce<Record<string, typeof selected.messages>>((acc, msg) => {
-        if (!acc[msg.date]) acc[msg.date] = [];
-        acc[msg.date].push(msg);
-        return acc;
-      }, {})
-    : {};
+  const groupedMessages = allMessages.reduce<Record<string, typeof allMessages>>((acc, msg) => {
+    if (!acc[msg.date]) acc[msg.date] = [];
+    acc[msg.date].push(msg);
+    return acc;
+  }, {});
+
+  if (isLoading) return <DashboardSkeleton />;
 
   return (
     <div className="h-[calc(100vh-64px)] flex">
@@ -138,6 +168,13 @@ export default function MessagesPage() {
 
         {/* Conversations */}
         <div className="flex-1 overflow-y-auto">
+          {filteredConversations.length === 0 && (
+            <div className="flex items-center justify-center h-full">
+              <p className="text-on-surface-variant text-sm">
+                Aucune conversation
+              </p>
+            </div>
+          )}
           {filteredConversations.map((convo) => {
             const isActive = convo.id === selectedId;
             return (
@@ -226,13 +263,13 @@ export default function MessagesPage() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <button className="p-2 rounded-md text-on-surface-variant hover:bg-surface-low transition-colors">
+                <button onClick={() => showToast("Appel en cours...")} className="p-2 rounded-md text-on-surface-variant hover:bg-surface-low transition-colors">
                   <Phone size={18} strokeWidth={1.5} />
                 </button>
-                <button className="p-2 rounded-md text-on-surface-variant hover:bg-surface-low transition-colors">
+                <button onClick={() => showToast("Appel vidéo en cours...")} className="p-2 rounded-md text-on-surface-variant hover:bg-surface-low transition-colors">
                   <Video size={18} strokeWidth={1.5} />
                 </button>
-                <button className="p-2 rounded-md text-on-surface-variant hover:bg-surface-low transition-colors">
+                <button onClick={() => showToast("Options bientôt disponibles")} className="p-2 rounded-md text-on-surface-variant hover:bg-surface-low transition-colors">
                   <MoreVertical size={18} strokeWidth={1.5} />
                 </button>
               </div>
@@ -285,7 +322,7 @@ export default function MessagesPage() {
             {/* Message Input */}
             <div className="px-6 py-4 bg-surface-card editorial-shadow">
               <div className="flex items-center gap-3">
-                <button className="p-2 rounded-md text-on-surface-variant hover:bg-surface-low transition-colors">
+                <button onClick={() => showToast("Pièce jointe bientôt disponible")} className="p-2 rounded-md text-on-surface-variant hover:bg-surface-low transition-colors">
                   <Paperclip size={18} strokeWidth={1.5} />
                 </button>
                 <input
@@ -293,12 +330,13 @@ export default function MessagesPage() {
                   placeholder="Écrire un message..."
                   value={messageInput}
                   onChange={(e) => setMessageInput(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
                   className="flex-1 px-4 py-2.5 bg-surface-low border-none rounded-md text-sm text-on-background placeholder:text-on-surface-variant/60 focus:outline-none focus:ring-2 focus:ring-primary/20"
                 />
-                <button className="p-2 rounded-md text-on-surface-variant hover:bg-surface-low transition-colors">
+                <button onClick={() => showToast("Emojis bientôt disponibles")} className="p-2 rounded-md text-on-surface-variant hover:bg-surface-low transition-colors">
                   <Smile size={18} strokeWidth={1.5} />
                 </button>
-                <button className="p-2.5 bg-primary-container text-white rounded-sm hover:bg-primary transition-colors">
+                <button onClick={handleSendMessage} className="p-2.5 bg-primary-container text-white rounded-sm hover:bg-primary transition-colors">
                   <Send size={18} strokeWidth={1.5} />
                 </button>
               </div>
@@ -307,11 +345,18 @@ export default function MessagesPage() {
         ) : (
           <div className="flex-1 flex items-center justify-center">
             <p className="text-on-surface-variant text-sm">
-              Sélectionnez une conversation pour commencer
+              {conversations.length === 0 ? "Aucune conversation" : "Sélectionnez une conversation pour commencer"}
             </p>
           </div>
         )}
       </div>
+
+      {/* Toast */}
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-primary-dark text-white px-4 py-3 rounded-md shadow-lg">
+          <span className="text-sm font-medium">{toast}</span>
+        </div>
+      )}
     </div>
   );
 }

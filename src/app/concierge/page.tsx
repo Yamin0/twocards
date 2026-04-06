@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 import {
   UserPlus,
   Clock,
@@ -11,7 +12,11 @@ import {
   ChevronRight,
   Search,
   Filter,
+  Check,
+  X,
 } from "lucide-react";
+import { useAuthUser } from "@/hooks/use-auth-user";
+import { ConciergeSkeleton } from "@/components/shared/loading-skeleton";
 
 type EventStatus = "upcoming" | "past";
 
@@ -36,7 +41,7 @@ interface VenueEvent {
   reservationsMax: number;
 }
 
-const upcomingEvents: VenueEvent[] = [
+const DEMO_UPCOMING_EVENTS: VenueEvent[] = [
   {
     id: 1,
     venue: "Le Comptoir Darna",
@@ -279,7 +284,7 @@ const upcomingEvents: VenueEvent[] = [
   },
 ];
 
-const pastEvents: VenueEvent[] = [
+const DEMO_PAST_EVENTS: VenueEvent[] = [
   {
     id: 101,
     venue: "Le Comptoir Darna",
@@ -362,10 +367,21 @@ const pastEvents: VenueEvent[] = [
   },
 ];
 
+const months = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+
 export default function ConciergeDashboard() {
+  const { isDemoConcierge, isLoading } = useAuthUser();
   const [activeTab, setActiveTab] = useState<EventStatus>("upcoming");
   const [searchQuery, setSearchQuery] = useState("");
+  const [monthIndex, setMonthIndex] = useState(3); // Avril = index 3
+  const [showNewClientModal, setShowNewClientModal] = useState(false);
+  const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
+  const { toast, showToast } = useToast();
 
+  if (isLoading) return <ConciergeSkeleton />;
+
+  const upcomingEvents = isDemoConcierge ? DEMO_UPCOMING_EVENTS : [];
+  const pastEvents = isDemoConcierge ? DEMO_PAST_EVENTS : [];
   const events = activeTab === "upcoming" ? upcomingEvents : pastEvents;
   const filtered = searchQuery
     ? events.filter(
@@ -420,7 +436,10 @@ export default function ConciergeDashboard() {
                 className="pl-9 pr-4 py-2 text-sm bg-white border border-outline-variant/20 rounded-lg text-on-background placeholder:text-on-surface-variant/50 font-[family-name:var(--font-inter)] focus:ring-1 focus:ring-primary/30 focus:border-primary/30 focus:outline-none w-64 transition-colors"
               />
             </div>
-            <button className="p-2 rounded-lg border border-outline-variant/20 text-on-surface-variant hover:bg-surface-low transition-colors">
+            <button
+              onClick={() => showToast("Filtres avancés bientôt disponibles")}
+              className="p-2 rounded-lg border border-outline-variant/20 text-on-surface-variant hover:bg-surface-low transition-colors"
+            >
               <Filter size={16} strokeWidth={1.5} />
             </button>
           </div>
@@ -429,13 +448,19 @@ export default function ConciergeDashboard() {
 
       {/* Month navigation */}
       <div className="px-4 sm:px-6 pb-4 flex items-center gap-3">
-        <button className="p-1.5 rounded-lg hover:bg-surface-low transition-colors text-on-surface-variant">
+        <button
+          onClick={() => setMonthIndex(Math.max(0, monthIndex - 1))}
+          className="p-1.5 rounded-lg hover:bg-surface-low transition-colors text-on-surface-variant"
+        >
           <ChevronLeft size={18} strokeWidth={1.5} />
         </button>
         <h2 className="text-lg font-bold text-on-background font-[family-name:var(--font-manrope)]">
-          Avril 2026
+          {months[monthIndex]} 2026
         </h2>
-        <button className="p-1.5 rounded-lg hover:bg-surface-low transition-colors text-on-surface-variant">
+        <button
+          onClick={() => setMonthIndex(Math.min(11, monthIndex + 1))}
+          className="p-1.5 rounded-lg hover:bg-surface-low transition-colors text-on-surface-variant"
+        >
           <ChevronRight size={18} strokeWidth={1.5} />
         </button>
       </div>
@@ -444,7 +469,13 @@ export default function ConciergeDashboard() {
       <div className="px-4 sm:px-6 pb-10">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filtered.map((event) => (
-            <EventCard key={event.id} event={event} isPast={activeTab === "past"} />
+            <EventCard
+              key={event.id}
+              event={event}
+              isPast={activeTab === "past"}
+              onNewClient={() => { setSelectedEventId(event.id); setShowNewClientModal(true); }}
+              onMenu={() => showToast(`Options pour ${event.name}`)}
+            />
           ))}
         </div>
 
@@ -461,6 +492,54 @@ export default function ConciergeDashboard() {
           </div>
         )}
       </div>
+
+      {/* New Client Modal */}
+      {showNewClientModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-lg font-bold text-on-background font-[family-name:var(--font-manrope)]">
+                Nouveau client
+              </h2>
+              <button onClick={() => setShowNewClientModal(false)} className="text-on-surface-variant hover:text-on-background">
+                <X size={20} strokeWidth={1.5} />
+              </button>
+            </div>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                setShowNewClientModal(false);
+                showToast("Client ajouté à la liste");
+              }}
+              className="space-y-4"
+            >
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-on-surface-variant mb-1.5">Nom complet</label>
+                <input type="text" required className="w-full px-4 py-2.5 bg-surface-low border-none rounded-lg text-sm text-on-background focus:outline-none focus:ring-2 focus:ring-primary/20" />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-on-surface-variant mb-1.5">Téléphone</label>
+                <input type="tel" required className="w-full px-4 py-2.5 bg-surface-low border-none rounded-lg text-sm text-on-background focus:outline-none focus:ring-2 focus:ring-primary/20" />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-on-surface-variant mb-1.5">Nombre de personnes</label>
+                <input type="number" defaultValue={2} min={1} className="w-full px-4 py-2.5 bg-surface-low border-none rounded-lg text-sm text-on-background focus:outline-none focus:ring-2 focus:ring-primary/20" />
+              </div>
+              <button type="submit" className="w-full bg-primary text-white rounded-lg px-5 py-2.5 text-sm font-medium hover:opacity-90 transition-opacity">
+                Ajouter à la liste
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Toast */}
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-primary-dark text-white px-4 py-3 rounded-md shadow-lg">
+          <Check size={16} strokeWidth={2} />
+          <span className="text-sm font-medium">{toast}</span>
+        </div>
+      )}
     </div>
   );
 }
@@ -468,9 +547,13 @@ export default function ConciergeDashboard() {
 function EventCard({
   event,
   isPast,
+  onNewClient,
+  onMenu,
 }: {
   event: VenueEvent;
   isPast: boolean;
+  onNewClient: () => void;
+  onMenu: () => void;
 }) {
   return (
     <div
@@ -510,7 +593,7 @@ function EventCard({
           </div>
 
           {/* Three dot menu */}
-          <button className="absolute top-3 right-3 z-10 w-7 h-7 rounded-full bg-black/20 backdrop-blur-sm flex items-center justify-center text-white/80 hover:text-white hover:bg-black/30 transition-colors opacity-0 group-hover:opacity-100">
+          <button onClick={onMenu} className="absolute top-3 right-3 z-10 w-7 h-7 rounded-full bg-black/20 backdrop-blur-sm flex items-center justify-center text-white/80 hover:text-white hover:bg-black/30 transition-colors opacity-0 group-hover:opacity-100">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
               <circle cx="8" cy="3" r="1.5" />
               <circle cx="8" cy="8" r="1.5" />
@@ -588,7 +671,7 @@ function EventCard({
         </div>
 
         {/* Add client button */}
-        <button className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-surface-low hover:bg-surface-mid text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors font-[family-name:var(--font-inter)] cursor-pointer">
+        <button onClick={onNewClient} className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-surface-low hover:bg-surface-mid text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors font-[family-name:var(--font-inter)] cursor-pointer">
           <UserPlus size={16} strokeWidth={1.5} />
           Nouveau client
         </button>

@@ -1,6 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { useAuthUser } from "@/hooks/use-auth-user";
+import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
+import { useToast } from "@/hooks/use-toast";
 import {
   Search,
   Download,
@@ -11,10 +14,12 @@ import {
   Users,
   TrendingUp,
   ShieldCheck,
+  Check,
+  X,
 } from "lucide-react";
 import Link from "next/link";
 
-const guests = [
+const DEMO_GUESTS = [
   {
     id: "1",
     nom: "Hicham El Guerrouj",
@@ -95,8 +100,60 @@ function vipBadge(vip: string | null) {
   );
 }
 
+type SortField = "visites" | "derniereVisite" | "recommande" | null;
+
 export default function GuestsPage() {
+  const { isDemoVenue, isLoading } = useAuthUser();
   const [vipOnly, setVipOnly] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState<SortField>(null);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const { toast, showToast } = useToast();
+
+  const guests = isDemoVenue ? DEMO_GUESTS : [];
+
+  const filteredGuests = useMemo(() => {
+    let result = guests.filter((g) => {
+      if (vipOnly && !g.vip) return false;
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        return (
+          g.nom.toLowerCase().includes(q) ||
+          g.telephone.includes(q) ||
+          (g.recommande && g.recommande.toLowerCase().includes(q))
+        );
+      }
+      return true;
+    });
+
+    if (sortBy === "visites") {
+      result = [...result].sort((a, b) => b.totalVisites - a.totalVisites);
+    } else if (sortBy === "recommande") {
+      result = [...result].sort((a, b) => a.recommande.localeCompare(b.recommande));
+    }
+
+    return result;
+  }, [vipOnly, searchQuery, sortBy, guests]);
+
+  const handleExportCSV = () => {
+    const headers = ["Nom", "Téléphone", "Visites", "Dépenses", "Dernière Visite", "VIP", "Recommandé par"];
+    const csv = [
+      headers.join(","),
+      ...filteredGuests.map((g) =>
+        [g.nom, g.telephone, g.totalVisites, g.depenses, g.derniereVisite, g.vip || "-", g.recommande].map((v) => `"${v}"`).join(",")
+      ),
+    ].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "clients-twocards.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast("CSV téléchargé");
+  };
+
+  if (isLoading) return <DashboardSkeleton />;
 
   return (
     <div className="bg-surface min-h-screen">
@@ -105,7 +162,10 @@ export default function GuestsPage() {
         <h1 className="text-2xl font-semibold text-primary-dark font-[family-name:var(--font-manrope)]">
           Clients
         </h1>
-        <button className="inline-flex items-center gap-2 text-sm text-on-surface-variant hover:text-on-background transition-colors">
+        <button
+          onClick={handleExportCSV}
+          className="inline-flex items-center gap-2 text-sm text-on-surface-variant hover:text-on-background transition-colors"
+        >
           <Download className="h-4 w-4" strokeWidth={1.5} />
           Exporter CSV
         </button>
@@ -121,6 +181,8 @@ export default function GuestsPage() {
           <input
             type="text"
             placeholder="Rechercher un client par nom, téléphone ou email..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full bg-surface-low border-none rounded-sm py-3 pl-11 pr-4 text-sm text-on-background placeholder:text-on-surface-variant/60 focus:outline-none focus:ring-2 focus:ring-primary/20"
           />
         </div>
@@ -144,20 +206,29 @@ export default function GuestsPage() {
         </label>
 
         {/* Nombre de visites */}
-        <button className="inline-flex items-center gap-1.5 bg-surface-mid rounded-sm px-3 py-2 text-sm text-on-surface-variant">
+        <button
+          onClick={() => setSortBy(sortBy === "visites" ? null : "visites")}
+          className={`inline-flex items-center gap-1.5 rounded-sm px-3 py-2 text-sm ${sortBy === "visites" ? "bg-primary text-white" : "bg-surface-mid text-on-surface-variant"}`}
+        >
           Nombre de visites
           <ChevronDown className="h-3.5 w-3.5" strokeWidth={1.5} />
         </button>
 
         {/* Derniere visite */}
-        <button className="inline-flex items-center gap-1.5 bg-surface-mid rounded-sm px-3 py-2 text-sm text-on-surface-variant">
+        <button
+          onClick={() => setSortBy(sortBy === "derniereVisite" ? null : "derniereVisite")}
+          className={`inline-flex items-center gap-1.5 rounded-sm px-3 py-2 text-sm ${sortBy === "derniereVisite" ? "bg-primary text-white" : "bg-surface-mid text-on-surface-variant"}`}
+        >
           <Calendar className="h-3.5 w-3.5" strokeWidth={1.5} />
           Dernière visite
           <ChevronDown className="h-3.5 w-3.5" strokeWidth={1.5} />
         </button>
 
         {/* Recommandé par */}
-        <button className="inline-flex items-center gap-1.5 bg-surface-mid rounded-sm px-3 py-2 text-sm text-on-surface-variant">
+        <button
+          onClick={() => setSortBy(sortBy === "recommande" ? null : "recommande")}
+          className={`inline-flex items-center gap-1.5 rounded-sm px-3 py-2 text-sm ${sortBy === "recommande" ? "bg-primary text-white" : "bg-surface-mid text-on-surface-variant"}`}
+        >
           Recommandé par
           <ChevronDown className="h-3.5 w-3.5" strokeWidth={1.5} />
         </button>
@@ -181,9 +252,12 @@ export default function GuestsPage() {
           </div>
 
           {/* Table Rows */}
-          {guests
-            .filter((g) => !vipOnly || g.vip)
-            .map((guest, i) => (
+          {filteredGuests.length === 0 ? (
+            <div className="px-5 py-8 text-center text-sm text-on-surface-variant">
+              Aucun client trouvé
+            </div>
+          ) : (
+            filteredGuests.map((guest, i) => (
               <Link
                 key={guest.id}
                 href={`/dashboard/guests/${guest.id}`}
@@ -201,7 +275,8 @@ export default function GuestsPage() {
                   {guest.recommande}
                 </span>
               </Link>
-            ))}
+            ))
+          )}
         </div>
       </div>
 
@@ -218,7 +293,7 @@ export default function GuestsPage() {
                   Total Clients
                 </p>
                 <p className="text-lg font-semibold text-on-background font-[family-name:var(--font-manrope)]">
-                  2 842
+                  {isDemoVenue ? "2 842" : "0"}
                 </p>
               </div>
             </div>
@@ -232,7 +307,7 @@ export default function GuestsPage() {
                   Nouveaux ce mois
                 </p>
                 <p className="text-lg font-semibold text-on-background font-[family-name:var(--font-manrope)]">
-                  +148
+                  {isDemoVenue ? "+148" : "0"}
                 </p>
               </div>
             </div>
@@ -246,18 +321,69 @@ export default function GuestsPage() {
                   Rétention VIP
                 </p>
                 <p className="text-lg font-semibold text-on-background font-[family-name:var(--font-manrope)]">
-                  94%
+                  {isDemoVenue ? "94%" : "0%"}
                 </p>
               </div>
             </div>
           </div>
 
-          <button className="inline-flex items-center gap-2 bg-primary text-white rounded-sm px-5 py-2.5 text-sm font-medium hover:bg-primary-dark transition-colors">
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="inline-flex items-center gap-2 bg-primary text-white rounded-sm px-5 py-2.5 text-sm font-medium hover:bg-primary-dark transition-colors"
+          >
             <UserPlus className="h-4 w-4" strokeWidth={1.5} />
             Ajouter un Client
           </button>
         </div>
       </div>
+
+      {/* Add Client Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-surface-card rounded-md editorial-shadow p-6 w-full max-w-md mx-4">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-lg font-bold text-primary-dark font-[family-name:var(--font-manrope)]">
+                Nouveau Client
+              </h2>
+              <button onClick={() => setShowAddModal(false)} className="text-on-surface-variant hover:text-on-background">
+                <X size={20} strokeWidth={1.5} />
+              </button>
+            </div>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                setShowAddModal(false);
+                showToast("Client ajouté avec succès");
+              }}
+              className="space-y-4"
+            >
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-on-surface-variant mb-1.5">Nom complet</label>
+                <input type="text" required className="w-full px-4 py-2.5 bg-surface-low border-none rounded-md text-sm text-on-background focus:outline-none focus:ring-2 focus:ring-primary/20" />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-on-surface-variant mb-1.5">Téléphone</label>
+                <input type="tel" required className="w-full px-4 py-2.5 bg-surface-low border-none rounded-md text-sm text-on-background focus:outline-none focus:ring-2 focus:ring-primary/20" />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-on-surface-variant mb-1.5">Email</label>
+                <input type="email" className="w-full px-4 py-2.5 bg-surface-low border-none rounded-md text-sm text-on-background focus:outline-none focus:ring-2 focus:ring-primary/20" />
+              </div>
+              <button type="submit" className="w-full bg-primary text-white rounded-sm px-5 py-2.5 text-sm font-medium hover:bg-primary-dark transition-colors">
+                Ajouter
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Toast */}
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-primary-dark text-white px-4 py-3 rounded-md shadow-lg">
+          <Check size={16} strokeWidth={2} />
+          <span className="text-sm font-medium">{toast}</span>
+        </div>
+      )}
     </div>
   );
 }

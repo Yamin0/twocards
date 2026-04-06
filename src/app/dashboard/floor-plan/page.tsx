@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 import {
   ChevronDown,
   Plus,
@@ -17,6 +18,8 @@ import {
   Wine,
   DoorOpen,
 } from "lucide-react";
+import { useAuthUser } from "@/hooks/use-auth-user";
+import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
 
 interface Table {
   id: number;
@@ -29,7 +32,7 @@ interface Table {
   capacity: number;
 }
 
-const tables: Table[] = [
+const DEMO_TABLES: Table[] = [
   { id: 1, x: 80, y: 120, shape: "round", status: "available", vip: false, label: "1", capacity: 4 },
   { id: 2, x: 180, y: 120, shape: "round", status: "occupied", vip: false, label: "2", capacity: 4 },
   { id: 3, x: 280, y: 120, shape: "round", status: "available", vip: false, label: "3", capacity: 6 },
@@ -44,7 +47,7 @@ const tables: Table[] = [
   { id: 12, x: 220, y: 480, shape: "rect", status: "occupied", vip: true, label: "VIP 12", capacity: 12 },
 ];
 
-const selectedReservation = {
+const DEMO_SELECTED_RESERVATION = {
   client: "Hicham El Guerrouj",
   initials: "HE",
   pr: "Youssef Alaoui",
@@ -64,10 +67,18 @@ function tableColor(status: string, vip: boolean, selected: boolean) {
 }
 
 export default function FloorPlanPage() {
-  const [selectedTable, setSelectedTable] = useState<number>(12);
+  const { isDemoVenue, isLoading } = useAuthUser();
+  const [selectedTable, setSelectedTable] = useState<number>(isDemoVenue ? 12 : 0);
   const [zoom, setZoom] = useState(1);
+  const [checkedIn, setCheckedIn] = useState<Set<number>>(new Set());
+  const { toast, showToast } = useToast();
+
+  const tables = isDemoVenue ? DEMO_TABLES : [];
+  const selectedReservation = isDemoVenue ? DEMO_SELECTED_RESERVATION : null;
 
   const selected = tables.find((t) => t.id === selectedTable);
+
+  if (isLoading) return <DashboardSkeleton />;
 
   return (
     <div className="bg-surface min-h-screen">
@@ -77,15 +88,15 @@ export default function FloorPlanPage() {
           Plan de Salle
         </h1>
         <div className="flex items-center gap-3">
-          <button className="inline-flex items-center gap-1.5 bg-surface-mid rounded-sm px-3 py-2 text-sm text-on-surface-variant">
+          <button onClick={() => showToast("Sélection d'événement bientôt disponible")} className="inline-flex items-center gap-1.5 bg-surface-mid rounded-sm px-3 py-2 text-sm text-on-surface-variant">
             Vendredi Signature - 05 Avr
             <ChevronDown className="h-3.5 w-3.5" strokeWidth={1.5} />
           </button>
-          <button className="inline-flex items-center gap-2 bg-surface-mid rounded-sm px-4 py-2 text-sm text-on-surface-variant hover:text-on-background transition-colors">
+          <button onClick={() => showToast("Mode édition bientôt disponible")} className="inline-flex items-center gap-2 bg-surface-mid rounded-sm px-4 py-2 text-sm text-on-surface-variant hover:text-on-background transition-colors">
             <Pencil className="h-3.5 w-3.5" strokeWidth={1.5} />
             Modifier le Plan
           </button>
-          <button className="inline-flex items-center gap-2 bg-primary text-white rounded-sm px-4 py-2 text-sm font-medium hover:bg-primary-dark transition-colors">
+          <button onClick={() => showToast("Ajout de table bientôt disponible")} className="inline-flex items-center gap-2 bg-primary text-white rounded-sm px-4 py-2 text-sm font-medium hover:bg-primary-dark transition-colors">
             <PlusCircle className="h-3.5 w-3.5" strokeWidth={1.5} />
             Ajouter une Table
           </button>
@@ -157,6 +168,11 @@ export default function FloorPlanPage() {
               </div>
 
               {/* Tables */}
+              {tables.length === 0 && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <p className="text-sm text-on-surface-variant">Aucune table configurée</p>
+                </div>
+              )}
               {tables.map((table) => {
                 const isSelected = table.id === selectedTable;
                 const color = tableColor(table.status, table.vip, isSelected);
@@ -198,7 +214,7 @@ export default function FloorPlanPage() {
 
         {/* Right - Selected table details */}
         <div className="lg:col-span-3">
-          {selected ? (
+          {selected && selectedReservation ? (
             <div className="bg-surface-card rounded-md editorial-shadow p-5 space-y-5">
               {/* Table info */}
               <div>
@@ -283,11 +299,24 @@ export default function FloorPlanPage() {
 
               {/* Actions */}
               <div className="space-y-2">
-                <button className="w-full inline-flex items-center justify-center gap-2 bg-primary text-white rounded-sm px-4 py-2.5 text-sm font-medium hover:bg-primary-dark transition-colors">
+                <button
+                  onClick={() => {
+                    setCheckedIn((prev) => new Set(prev).add(selectedTable));
+                    showToast(`Table ${selected.label} — Check-in effectué`);
+                  }}
+                  disabled={checkedIn.has(selectedTable)}
+                  className={`w-full inline-flex items-center justify-center gap-2 rounded-sm px-4 py-2.5 text-sm font-medium transition-colors ${checkedIn.has(selectedTable) ? "bg-emerald-600 text-white cursor-default" : "bg-primary text-white hover:bg-primary-dark"}`}
+                >
                   <LogIn className="h-4 w-4" strokeWidth={1.5} />
-                  Arrivée (Check In)
+                  {checkedIn.has(selectedTable) ? "Arrivé ✓" : "Arrivée (Check In)"}
                 </button>
-                <button className="w-full inline-flex items-center justify-center gap-2 text-sm text-on-surface-variant hover:text-error transition-colors py-2">
+                <button
+                  onClick={() => {
+                    showToast(`Réservation table ${selected.label} annulée`);
+                    setSelectedTable(0);
+                  }}
+                  className="w-full inline-flex items-center justify-center gap-2 text-sm text-on-surface-variant hover:text-error transition-colors py-2"
+                >
                   <X className="h-3.5 w-3.5" strokeWidth={1.5} />
                   Annuler la Réservation
                 </button>
@@ -296,12 +325,21 @@ export default function FloorPlanPage() {
           ) : (
             <div className="bg-surface-card rounded-md editorial-shadow p-8 text-center">
               <p className="text-sm text-on-surface-variant">
-                Sélectionnez une table pour voir les détails
+                {tables.length === 0
+                  ? "Aucune table configurée"
+                  : "Sélectionnez une table pour voir les détails"}
               </p>
             </div>
           )}
         </div>
       </div>
+
+      {/* Toast */}
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-primary-dark text-white px-4 py-3 rounded-md shadow-lg">
+          <span className="text-sm font-medium">{toast}</span>
+        </div>
+      )}
 
       {/* Inline style for striped blocked tables */}
       <style jsx>{`

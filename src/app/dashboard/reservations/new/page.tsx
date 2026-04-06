@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 import {
   Search,
   Minus,
@@ -11,6 +12,7 @@ import {
   Users,
   MapPin,
   Sparkles,
+  Check,
 } from "lucide-react";
 
 const zones = [
@@ -32,8 +34,20 @@ export default function NewReservationPage() {
     specialRequests: "",
   });
 
+  const [submitted, setSubmitted] = useState(false);
+  const { toast, showToast } = useToast(3000);
+
   const currentZone = zones[selectedZone];
   const commission = entryType === "table" ? "250 MAD" : "80 MAD";
+
+  const handleSubmit = () => {
+    if (!formData.clientName || !formData.venue) {
+      showToast("Veuillez remplir le nom du client et l'établissement");
+      return;
+    }
+    setSubmitted(true);
+    showToast("Réservation envoyée avec succès !");
+  };
 
   return (
     <div className="bg-surface min-h-screen">
@@ -260,9 +274,13 @@ export default function NewReservationPage() {
             </div>
 
             {/* Submit */}
-            <button className="flex items-center gap-2 bg-primary text-white text-sm font-medium px-6 py-3 rounded-sm hover:opacity-90 transition-opacity w-full sm:w-auto justify-center">
-              <Send size={16} strokeWidth={1.5} />
-              Envoyer la réservation
+            <button
+              onClick={handleSubmit}
+              disabled={submitted}
+              className={`flex items-center gap-2 text-white text-sm font-medium px-6 py-3 rounded-sm w-full sm:w-auto justify-center transition-all ${submitted ? "bg-emerald-600 cursor-default" : "bg-primary hover:opacity-90"}`}
+            >
+              {submitted ? <Check size={16} strokeWidth={1.5} /> : <Send size={16} strokeWidth={1.5} />}
+              {submitted ? "Réservation envoyée" : "Envoyer la réservation"}
             </button>
           </div>
 
@@ -369,6 +387,14 @@ export default function NewReservationPage() {
           </div>
         </div>
       </div>
+
+      {/* Toast */}
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-primary-dark text-white px-4 py-3 rounded-md shadow-lg">
+          <Check size={16} strokeWidth={2} />
+          <span className="text-sm font-medium">{toast}</span>
+        </div>
+      )}
     </div>
   );
 }

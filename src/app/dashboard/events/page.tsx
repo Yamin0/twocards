@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useAuthUser } from "@/hooks/use-auth-user";
+import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
 import {
   LayoutGrid,
   List,
@@ -15,7 +17,7 @@ import {
 
 type ViewMode = "grid" | "list" | "calendar";
 
-const events = [
+const DEMO_EVENTS = [
   {
     id: 1,
     title: "Gala de Minuit",
@@ -97,14 +99,29 @@ const events = [
 ];
 
 export default function EventsPage() {
+  const { isDemoVenue, isLoading } = useAuthUser();
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [currentPage, setCurrentPage] = useState(1);
+  const [filterVille, setFilterVille] = useState("");
+  const [filterStatus, setFilterStatus] = useState("");
+
+  const events = isDemoVenue ? DEMO_EVENTS : [];
+
+  const filteredEvents = events.filter((e) => {
+    if (filterStatus && filterStatus !== "Statut") {
+      if (filterStatus === "Ouvert" && e.status !== "Ouvert" && e.status !== "Bientôt complet") return false;
+      if (filterStatus === "Fermé" && e.status !== "Fermé") return false;
+    }
+    return true;
+  });
 
   const viewButtons: { mode: ViewMode; icon: typeof LayoutGrid; label: string }[] = [
     { mode: "grid", icon: LayoutGrid, label: "Grille" },
     { mode: "list", icon: List, label: "Liste" },
     { mode: "calendar", icon: Calendar, label: "Calendrier" },
   ];
+
+  if (isLoading) return <DashboardSkeleton />;
 
   return (
     <div className="bg-surface min-h-screen">
@@ -139,16 +156,24 @@ export default function EventsPage() {
       {/* Filter Bar */}
       <div className="px-8 pb-6">
         <div className="bg-surface-low rounded-md p-4 flex flex-wrap items-center gap-3">
-          {["Ville", "Date", "Établissement", "Statut"].map((filter) => (
+          <div className="relative">
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className="bg-surface-card border-none text-sm pl-4 pr-8 py-2 rounded-sm focus:outline-none focus:ring-1 focus:ring-primary-container appearance-none cursor-pointer text-on-background"
+            >
+              <option value="">Statut</option>
+              <option value="Ouvert">Ouvert</option>
+              <option value="Fermé">Fermé</option>
+            </select>
+            <ChevronDown size={13} strokeWidth={1.5} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none" />
+          </div>
+          {["Ville", "Date", "Établissement"].map((filter) => (
             <div key={filter} className="relative">
               <select className="bg-surface-card border-none text-sm pl-4 pr-8 py-2 rounded-sm focus:outline-none focus:ring-1 focus:ring-primary-container appearance-none cursor-pointer text-on-background">
                 <option>{filter}</option>
               </select>
-              <ChevronDown
-                size={13}
-                strokeWidth={1.5}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none"
-              />
+              <ChevronDown size={13} strokeWidth={1.5} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none" />
             </div>
           ))}
         </div>
@@ -156,103 +181,111 @@ export default function EventsPage() {
 
       {/* Event Grid */}
       <div className="px-8 pb-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-          {events.map((event) => (
-            <div
-              key={event.id}
-              className={`group bg-surface-card rounded-md editorial-shadow overflow-hidden hover:-translate-y-1 transition-transform duration-200 ${
-                event.closed ? "opacity-60 grayscale" : ""
-              }`}
-            >
-              {/* Image Placeholder */}
-              <div className="relative aspect-video overflow-hidden">
-                <div
-                  className={`w-full h-full ${event.image} group-hover:scale-105 transition-transform duration-300`}
-                />
-                {/* Status Badge */}
-                <span
-                  className={`absolute top-3 right-3 text-[0.6875rem] font-semibold px-2.5 py-1 rounded-full ${event.statusColor}`}
-                >
-                  {event.status}
-                </span>
-              </div>
-
-              {/* Card Content */}
-              <div className="p-5">
-                <h3 className="text-primary-dark font-[family-name:var(--font-manrope)] font-bold text-base mb-1">
-                  {event.title}
-                </h3>
-                <p className="text-sm text-on-surface-variant flex items-center gap-1 mb-3">
-                  <MapPin size={13} strokeWidth={1.5} />
-                  {event.venue}
-                </p>
-
-                <div className="flex items-center gap-4 text-xs text-on-surface-variant mb-3">
-                  <span className="flex items-center gap-1">
-                    <Clock size={12} strokeWidth={1.5} />
-                    {event.date} &middot; {event.time}
+        {filteredEvents.length === 0 ? (
+          <div className="bg-surface-card rounded-md editorial-shadow p-8 text-center text-on-surface-variant text-sm">
+            Aucun événement trouvé
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+            {filteredEvents.map((event) => (
+              <div
+                key={event.id}
+                className={`group bg-surface-card rounded-md editorial-shadow overflow-hidden hover:-translate-y-1 transition-transform duration-200 ${
+                  event.closed ? "opacity-60 grayscale" : ""
+                }`}
+              >
+                {/* Image Placeholder */}
+                <div className="relative aspect-video overflow-hidden">
+                  <div
+                    className={`w-full h-full ${event.image} group-hover:scale-105 transition-transform duration-300`}
+                  />
+                  {/* Status Badge */}
+                  <span
+                    className={`absolute top-3 right-3 text-[0.6875rem] font-semibold px-2.5 py-1 rounded-full ${event.statusColor}`}
+                  >
+                    {event.status}
                   </span>
-                  {!event.closed && (
-                    <span className="flex items-center gap-1">
-                      <Users size={12} strokeWidth={1.5} />
-                      {event.spots} places
-                    </span>
-                  )}
                 </div>
 
-                {/* Genre Tags */}
-                <div className="flex flex-wrap gap-1.5">
-                  {event.genre.map((g) => (
-                    <span
-                      key={g}
-                      className="text-[0.625rem] font-medium bg-surface-low text-on-surface-variant px-2 py-0.5 rounded-full"
-                    >
-                      {g}
+                {/* Card Content */}
+                <div className="p-5">
+                  <h3 className="text-primary-dark font-[family-name:var(--font-manrope)] font-bold text-base mb-1">
+                    {event.title}
+                  </h3>
+                  <p className="text-sm text-on-surface-variant flex items-center gap-1 mb-3">
+                    <MapPin size={13} strokeWidth={1.5} />
+                    {event.venue}
+                  </p>
+
+                  <div className="flex items-center gap-4 text-xs text-on-surface-variant mb-3">
+                    <span className="flex items-center gap-1">
+                      <Clock size={12} strokeWidth={1.5} />
+                      {event.date} &middot; {event.time}
                     </span>
-                  ))}
+                    {!event.closed && (
+                      <span className="flex items-center gap-1">
+                        <Users size={12} strokeWidth={1.5} />
+                        {event.spots} places
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Genre Tags */}
+                  <div className="flex flex-wrap gap-1.5">
+                    {event.genre.map((g) => (
+                      <span
+                        key={g}
+                        className="text-[0.625rem] font-medium bg-surface-low text-on-surface-variant px-2 py-0.5 rounded-full"
+                      >
+                        {g}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Pagination */}
-      <div className="px-8 pb-10">
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-on-surface-variant">
-            Affichage de <strong className="text-on-background">6</strong> sur{" "}
-            <strong className="text-on-background">24</strong> événements
-          </p>
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-              className="w-8 h-8 flex items-center justify-center rounded-sm bg-surface-mid text-on-background hover:bg-surface-high transition-colors"
-            >
-              <ChevronLeft size={16} strokeWidth={1.5} />
-            </button>
-            {[1, 2, 3, 4].map((page) => (
+      {filteredEvents.length > 0 && (
+        <div className="px-8 pb-10">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-on-surface-variant">
+              Affichage de <strong className="text-on-background">{filteredEvents.length}</strong> sur{" "}
+              <strong className="text-on-background">{events.length}</strong> événements
+            </p>
+            <div className="flex items-center gap-1">
               <button
-                key={page}
-                onClick={() => setCurrentPage(page)}
-                className={`w-8 h-8 flex items-center justify-center rounded-sm text-sm font-medium transition-colors ${
-                  currentPage === page
-                    ? "bg-primary text-white"
-                    : "bg-surface-mid text-on-background hover:bg-surface-high"
-                }`}
+                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                className="w-8 h-8 flex items-center justify-center rounded-sm bg-surface-mid text-on-background hover:bg-surface-high transition-colors"
               >
-                {page}
+                <ChevronLeft size={16} strokeWidth={1.5} />
               </button>
-            ))}
-            <button
-              onClick={() => setCurrentPage(Math.min(4, currentPage + 1))}
-              className="w-8 h-8 flex items-center justify-center rounded-sm bg-surface-mid text-on-background hover:bg-surface-high transition-colors"
-            >
-              <ChevronRight size={16} strokeWidth={1.5} />
-            </button>
+              {[1].map((page) => (
+                <button
+                  key={page}
+                  onClick={() => setCurrentPage(page)}
+                  className={`w-8 h-8 flex items-center justify-center rounded-sm text-sm font-medium transition-colors ${
+                    currentPage === page
+                      ? "bg-primary text-white"
+                      : "bg-surface-mid text-on-background hover:bg-surface-high"
+                  }`}
+                >
+                  {page}
+                </button>
+              ))}
+              <button
+                onClick={() => setCurrentPage(Math.min(1, currentPage + 1))}
+                className="w-8 h-8 flex items-center justify-center rounded-sm bg-surface-mid text-on-background hover:bg-surface-high transition-colors"
+              >
+                <ChevronRight size={16} strokeWidth={1.5} />
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

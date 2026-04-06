@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useAuthUser } from "@/hooks/use-auth-user";
+import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
 import { StatsStrip } from "@/components/dashboard/stats-strip";
 import {
   Clock,
@@ -14,14 +16,21 @@ import {
   Utensils,
 } from "lucide-react";
 
-const stats = [
+const DEMO_STATS = [
   { label: "Couverts ce soir", value: "38" },
   { label: "Demandes en attente", value: "12" },
   { label: "RP Actifs", value: "34" },
   { label: "Revenu mensuel", value: "782 000 MAD" },
 ];
 
-const requests = [
+const EMPTY_STATS = [
+  { label: "Couverts ce soir", value: "0" },
+  { label: "Demandes en attente", value: "0" },
+  { label: "RP Actifs", value: "0" },
+  { label: "Revenu mensuel", value: "0 MAD" },
+];
+
+const DEMO_REQUESTS = [
   {
     id: 1,
     prName: "Karim Bennani",
@@ -54,7 +63,7 @@ const requests = [
   },
 ];
 
-const topPRs = [
+const DEMO_TOP_PRS = [
   {
     rank: 1,
     name: "Karim Bennani",
@@ -79,7 +88,22 @@ const topPRs = [
 ];
 
 export default function DashboardPage() {
-  const [activeRequests, setActiveRequests] = useState(requests);
+  const { isDemoVenue, isLoading, fullName } = useAuthUser();
+  const initializedRef = useRef(false);
+
+  const [activeRequests, setActiveRequests] = useState<typeof DEMO_REQUESTS>([]);
+
+  useEffect(() => {
+    if (!isLoading && !initializedRef.current) {
+      initializedRef.current = true;
+      if (isDemoVenue) {
+        setActiveRequests(DEMO_REQUESTS);
+      }
+    }
+  }, [isLoading, isDemoVenue]);
+
+  const stats = isDemoVenue ? DEMO_STATS : EMPTY_STATS;
+  const topPRs = isDemoVenue ? DEMO_TOP_PRS : [];
 
   const handleAccept = (id: number) => {
     setActiveRequests((prev) => prev.filter((r) => r.id !== id));
@@ -89,12 +113,14 @@ export default function DashboardPage() {
     setActiveRequests((prev) => prev.filter((r) => r.id !== id));
   };
 
+  if (isLoading) return <DashboardSkeleton />;
+
   return (
     <div className="bg-surface min-h-screen">
       {/* Page Header */}
       <div className="px-8 pt-8 pb-4">
         <h1 className="text-primary-dark font-[family-name:var(--font-manrope)] text-3xl font-extrabold">
-          Bonjour, Directeur.
+          Bonjour, {fullName || 'Directeur'}.
         </h1>
         <p className="text-on-surface-variant mt-1 text-sm">
           Voici un aperçu de votre établissement ce soir.
@@ -109,65 +135,67 @@ export default function DashboardPage() {
       </div>
 
       {/* Tonight's Event Card */}
-      <div className="px-8 pb-8">
-        <div className="bg-surface-card rounded-md editorial-shadow p-6">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant font-semibold mb-1">
-                Événement ce soir
-              </p>
-              <h2 className="text-primary-dark font-[family-name:var(--font-manrope)] text-xl font-bold">
-                Gala de Minuit
-              </h2>
-              <div className="flex items-center gap-4 mt-2 text-sm text-on-surface-variant">
-                <span className="flex items-center gap-1.5">
-                  <CalendarDays size={15} strokeWidth={1.5} />
-                  Samedi 24 Octobre
+      {isDemoVenue && (
+        <div className="px-8 pb-8">
+          <div className="bg-surface-card rounded-md editorial-shadow p-6">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant font-semibold mb-1">
+                  Événement ce soir
+                </p>
+                <h2 className="text-primary-dark font-[family-name:var(--font-manrope)] text-xl font-bold">
+                  Gala de Minuit
+                </h2>
+                <div className="flex items-center gap-4 mt-2 text-sm text-on-surface-variant">
+                  <span className="flex items-center gap-1.5">
+                    <CalendarDays size={15} strokeWidth={1.5} />
+                    Samedi 24 Octobre
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <Clock size={15} strokeWidth={1.5} />
+                    23:00 &ndash; 05:00
+                  </span>
+                </div>
+              </div>
+              <span className="bg-primary/10 text-primary-dark text-xs font-semibold px-3 py-1 rounded-full">
+                En cours
+              </span>
+            </div>
+
+            {/* Progress Bar */}
+            <div className="mt-5">
+              <div className="flex items-end justify-between mb-2">
+                <span className="text-sm font-medium text-on-background">
+                  187 / 300 couverts confirmés
                 </span>
-                <span className="flex items-center gap-1.5">
-                  <Clock size={15} strokeWidth={1.5} />
-                  23:00 &ndash; 05:00
+                <span className="text-sm font-bold text-primary-dark">62%</span>
+              </div>
+              <div className="w-full h-2 bg-surface-low rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-primary rounded-full transition-all"
+                  style={{ width: "62%" }}
+                />
+              </div>
+            </div>
+
+            {/* Table Availability */}
+            <div className="mt-4 flex gap-6">
+              <div className="flex items-center gap-2 text-sm text-on-surface-variant">
+                <Utensils size={14} strokeWidth={1.5} />
+                <span>
+                  <strong className="text-on-background">8</strong> tables VIP disponibles
+                </span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-on-surface-variant">
+                <Users size={14} strokeWidth={1.5} />
+                <span>
+                  <strong className="text-on-background">14</strong> tables standard disponibles
                 </span>
               </div>
             </div>
-            <span className="bg-primary/10 text-primary-dark text-xs font-semibold px-3 py-1 rounded-full">
-              En cours
-            </span>
-          </div>
-
-          {/* Progress Bar */}
-          <div className="mt-5">
-            <div className="flex items-end justify-between mb-2">
-              <span className="text-sm font-medium text-on-background">
-                187 / 300 couverts confirmés
-              </span>
-              <span className="text-sm font-bold text-primary-dark">62%</span>
-            </div>
-            <div className="w-full h-2 bg-surface-low rounded-full overflow-hidden">
-              <div
-                className="h-full bg-primary rounded-full transition-all"
-                style={{ width: "62%" }}
-              />
-            </div>
-          </div>
-
-          {/* Table Availability */}
-          <div className="mt-4 flex gap-6">
-            <div className="flex items-center gap-2 text-sm text-on-surface-variant">
-              <Utensils size={14} strokeWidth={1.5} />
-              <span>
-                <strong className="text-on-background">8</strong> tables VIP disponibles
-              </span>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-on-surface-variant">
-              <Users size={14} strokeWidth={1.5} />
-              <span>
-                <strong className="text-on-background">14</strong> tables standard disponibles
-              </span>
-            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Two Column Layout */}
       <div className="px-8 pb-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -240,47 +268,53 @@ export default function DashboardPage() {
             Top RP du mois
           </h3>
           <div className="space-y-0 rounded-md overflow-hidden editorial-shadow">
-            {topPRs.map((pr, i) => (
-              <div
-                key={pr.rank}
-                className={`p-5 relative overflow-hidden ${
-                  i % 2 === 0 ? "bg-surface-card" : "bg-surface-low"
-                }`}
-              >
-                {/* Large faded rank number */}
-                <span className="absolute -right-2 -top-3 text-[5rem] font-[family-name:var(--font-manrope)] font-extrabold text-primary/[0.04] leading-none select-none pointer-events-none">
-                  {pr.rank}
-                </span>
+            {topPRs.length === 0 ? (
+              <div className="bg-surface-card p-8 text-center text-on-surface-variant text-sm">
+                Aucun RP actif pour le moment
+              </div>
+            ) : (
+              topPRs.map((pr, i) => (
+                <div
+                  key={pr.rank}
+                  className={`p-5 relative overflow-hidden ${
+                    i % 2 === 0 ? "bg-surface-card" : "bg-surface-low"
+                  }`}
+                >
+                  {/* Large faded rank number */}
+                  <span className="absolute -right-2 -top-3 text-[5rem] font-[family-name:var(--font-manrope)] font-extrabold text-primary/[0.04] leading-none select-none pointer-events-none">
+                    {pr.rank}
+                  </span>
 
-                <div className="relative z-10">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-[family-name:var(--font-manrope)] font-bold text-on-background">
-                      {pr.name}
-                    </span>
-                  </div>
-                  <p className="text-xs text-on-surface-variant mb-3">{pr.agency}</p>
-                  <div className="flex items-center gap-6">
-                    <div>
-                      <p className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant font-semibold">
-                        Couverts
-                      </p>
-                      <p className="text-on-background font-[family-name:var(--font-manrope)] font-bold text-lg">
-                        {pr.covers}
-                      </p>
+                  <div className="relative z-10">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-[family-name:var(--font-manrope)] font-bold text-on-background">
+                        {pr.name}
+                      </span>
                     </div>
-                    <div>
-                      <p className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant font-semibold">
-                        Revenu
-                      </p>
-                      <p className="text-on-background font-[family-name:var(--font-manrope)] font-bold text-lg flex items-center gap-1">
-                        {pr.revenue}
-                        <TrendingUp size={14} strokeWidth={1.5} className="text-green-600" />
-                      </p>
+                    <p className="text-xs text-on-surface-variant mb-3">{pr.agency}</p>
+                    <div className="flex items-center gap-6">
+                      <div>
+                        <p className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant font-semibold">
+                          Couverts
+                        </p>
+                        <p className="text-on-background font-[family-name:var(--font-manrope)] font-bold text-lg">
+                          {pr.covers}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant font-semibold">
+                          Revenu
+                        </p>
+                        <p className="text-on-background font-[family-name:var(--font-manrope)] font-bold text-lg flex items-center gap-1">
+                          {pr.revenue}
+                          <TrendingUp size={14} strokeWidth={1.5} className="text-green-600" />
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </div>

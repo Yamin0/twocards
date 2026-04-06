@@ -1,9 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Download, TrendingUp, Wallet, Clock, Percent } from "lucide-react";
+import { Download, TrendingUp, Wallet, Clock, Percent, Check } from "lucide-react";
+import { useAuthUser } from "@/hooks/use-auth-user";
+import { TableSkeleton } from "@/components/shared/loading-skeleton";
+import { useToast } from "@/hooks/use-toast";
 
-const commissions = [
+const DEMO_COMMISSIONS = [
   { id: 1, venue: "Le Comptoir Darna", client: "Mehdi Alaoui", event: "OPENING NIGHT", date: "6 Avr.", montant: "6 400 MAD", status: "versé" },
   { id: 2, venue: "Sky Bar Casa", client: "Sarah Cohen", event: "SUNSET SESSION", date: "5 Avr.", montant: "2 800 MAD", status: "versé" },
   { id: 3, venue: "Le Lotus Club", client: "Omar Tazi", event: "LOTUS NIGHTS", date: "4 Avr.", montant: "9 600 MAD", status: "en attente" },
@@ -15,16 +18,39 @@ const commissions = [
 ];
 
 export default function ConciergeCommissionsPage() {
+  const { isDemoConcierge, isLoading } = useAuthUser();
   const [filter, setFilter] = useState("tous");
+  const { toast, showToast } = useToast();
 
+  if (isLoading) return <TableSkeleton />;
+
+  const commissions = isDemoConcierge ? DEMO_COMMISSIONS : [];
   const filtered =
     filter === "tous"
       ? commissions
       : commissions.filter((c) => c.status === filter);
 
-  const totalMonth = 48600;
-  const pending = 18800;
-  const paid = 29800;
+  const totalMonth = isDemoConcierge ? 48600 : 0;
+  const pending = isDemoConcierge ? 18800 : 0;
+  const paid = isDemoConcierge ? 29800 : 0;
+
+  const handleExport = () => {
+    const headers = ["Établissement", "Événement", "Client", "Date", "Montant", "Statut"];
+    const csv = [
+      headers.join(","),
+      ...commissions.map((c) =>
+        [c.venue, c.event, c.client, c.date, c.montant, c.status].map((v) => `"${v}"`).join(",")
+      ),
+    ].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "commissions-concierge-twocards.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast("CSV téléchargé");
+  };
 
   return (
     <div className="bg-surface min-h-screen">
@@ -38,7 +64,10 @@ export default function ConciergeCommissionsPage() {
             Suivez vos gains et versements
           </p>
         </div>
-        <button className="flex items-center gap-2 bg-white border border-outline-variant/20 text-on-surface-variant text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-surface-low transition-colors font-[family-name:var(--font-inter)]">
+        <button
+          onClick={handleExport}
+          className="flex items-center gap-2 bg-white border border-outline-variant/20 text-on-surface-variant text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-surface-low transition-colors font-[family-name:var(--font-inter)]"
+        >
           <Download size={16} strokeWidth={1.5} />
           Exporter CSV
         </button>
@@ -186,11 +215,26 @@ export default function ConciergeCommissionsPage() {
                     </td>
                   </tr>
                 ))}
+                {filtered.length === 0 && (
+                  <tr>
+                    <td colSpan={6} className="px-4 py-12 text-center text-sm text-on-surface-variant">
+                      Aucune commission trouvée
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
         </div>
       </div>
+
+      {/* Toast */}
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-primary-dark text-white px-4 py-3 rounded-md shadow-lg">
+          <Check size={16} strokeWidth={2} />
+          <span className="text-sm font-medium">{toast}</span>
+        </div>
+      )}
     </div>
   );
 }

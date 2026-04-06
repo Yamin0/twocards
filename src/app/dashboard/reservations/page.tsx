@@ -1,5 +1,8 @@
 "use client";
 
+import { useState } from "react";
+import { useAuthUser } from "@/hooks/use-auth-user";
+import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
 import {
   CalendarDays,
   Clock,
@@ -11,7 +14,7 @@ import {
   Search,
 } from "lucide-react";
 
-const stats = [
+const DEMO_STATS = [
   {
     label: "Réservations totales",
     value: "148",
@@ -34,7 +37,30 @@ const stats = [
   },
 ];
 
-const upcomingEvents = [
+const EMPTY_STATS = [
+  {
+    label: "Réservations totales",
+    value: "0",
+    icon: CalendarDays,
+  },
+  {
+    label: "Approbations en attente",
+    value: "0",
+    icon: Clock,
+  },
+  {
+    label: "Commissions gagnées",
+    value: "0 MAD",
+    icon: Euro,
+  },
+  {
+    label: "Établissements actifs",
+    value: "0",
+    icon: Building2,
+  },
+];
+
+const DEMO_UPCOMING_EVENTS = [
   {
     name: "Nuit Blanche",
     venue: "Le Phantom Club",
@@ -65,7 +91,7 @@ const upcomingEvents = [
   },
 ];
 
-const recentReservations = [
+const DEMO_RECENT_RESERVATIONS = [
   {
     guest: "Youssef Alaoui",
     venue: "Maison Dorée",
@@ -109,12 +135,25 @@ const recentReservations = [
 ];
 
 export default function ReservationsPage() {
+  const { isDemoVenue, isLoading, fullName } = useAuthUser();
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const stats = isDemoVenue ? DEMO_STATS : EMPTY_STATS;
+  const upcomingEvents = isDemoVenue ? DEMO_UPCOMING_EVENTS : [];
+  const recentReservations = isDemoVenue ? DEMO_RECENT_RESERVATIONS : [];
+
+  const filteredReservations = recentReservations.filter((r) =>
+    searchQuery ? r.guest.toLowerCase().includes(searchQuery.toLowerCase()) || r.venue.toLowerCase().includes(searchQuery.toLowerCase()) : true
+  );
+
+  if (isLoading) return <DashboardSkeleton />;
+
   return (
     <div className="bg-surface min-h-screen">
       {/* Header */}
       <div className="px-8 pt-8 pb-6">
         <h1 className="text-primary-dark font-[family-name:var(--font-manrope)] text-3xl font-extrabold">
-          Bonjour, Karim.
+          Bonjour, {fullName || 'Manager'}.
         </h1>
         <p className="text-on-surface-variant mt-1 text-sm">
           Gérez vos réservations et suivez vos performances.
@@ -151,29 +190,35 @@ export default function ReservationsPage() {
             Événements à venir
           </h3>
           <div className="rounded-md overflow-hidden editorial-shadow">
-            {upcomingEvents.map((event, i) => (
-              <div
-                key={i}
-                className={`p-4 ${i % 2 === 0 ? "bg-surface-card" : "bg-surface-low"}`}
-              >
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="font-[family-name:var(--font-manrope)] font-bold text-on-background">
-                      {event.name}
-                    </p>
-                    <p className="text-sm text-on-surface-variant mt-0.5">{event.venue}</p>
-                  </div>
-                  <div className="text-right shrink-0">
-                    <p className="text-sm font-medium text-on-background">{event.date}</p>
-                    <p className="text-xs text-on-surface-variant">{event.time}</p>
-                  </div>
-                </div>
-                <div className="mt-2 flex items-center gap-1.5 text-xs text-on-surface-variant">
-                  <Users size={12} strokeWidth={1.5} />
-                  <span>{event.spots} places restantes</span>
-                </div>
+            {upcomingEvents.length === 0 ? (
+              <div className="bg-surface-card p-8 text-center text-on-surface-variant text-sm">
+                Aucun événement à venir
               </div>
-            ))}
+            ) : (
+              upcomingEvents.map((event, i) => (
+                <div
+                  key={i}
+                  className={`p-4 ${i % 2 === 0 ? "bg-surface-card" : "bg-surface-low"}`}
+                >
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="font-[family-name:var(--font-manrope)] font-bold text-on-background">
+                        {event.name}
+                      </p>
+                      <p className="text-sm text-on-surface-variant mt-0.5">{event.venue}</p>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="text-sm font-medium text-on-background">{event.date}</p>
+                      <p className="text-xs text-on-surface-variant">{event.time}</p>
+                    </div>
+                  </div>
+                  <div className="mt-2 flex items-center gap-1.5 text-xs text-on-surface-variant">
+                    <Users size={12} strokeWidth={1.5} />
+                    <span>{event.spots} places restantes</span>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
 
@@ -192,6 +237,8 @@ export default function ReservationsPage() {
               <input
                 type="text"
                 placeholder="Rechercher..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="bg-surface-low border-none text-sm pl-8 pr-4 py-2 rounded-sm focus:outline-none focus:ring-1 focus:ring-primary-container w-48"
               />
             </div>
@@ -222,34 +269,40 @@ export default function ReservationsPage() {
             </div>
 
             {/* Table Rows */}
-            {recentReservations.map((res, i) => (
-              <div
-                key={i}
-                className={`px-4 py-3 grid grid-cols-12 gap-2 items-center ${
-                  i % 2 === 0 ? "bg-surface-card" : "bg-surface-low"
-                }`}
-              >
-                <span className="col-span-3 text-sm font-medium text-on-background truncate">
-                  {res.guest}
-                </span>
-                <span className="col-span-3 text-sm text-on-surface-variant truncate">
-                  {res.venue}
-                </span>
-                <span className="col-span-2 text-sm text-on-surface-variant">
-                  {res.date}
-                </span>
-                <span className="col-span-2 text-sm text-on-background font-medium">
-                  {res.covers}
-                </span>
-                <span className="col-span-2">
-                  <span
-                    className={`text-[0.6875rem] font-semibold px-2.5 py-1 rounded-full ${res.statusColor}`}
-                  >
-                    {res.status}
-                  </span>
-                </span>
+            {filteredReservations.length === 0 ? (
+              <div className="bg-surface-card p-8 text-center text-on-surface-variant text-sm">
+                Aucune réservation
               </div>
-            ))}
+            ) : (
+              filteredReservations.map((res, i) => (
+                <div
+                  key={i}
+                  className={`px-4 py-3 grid grid-cols-12 gap-2 items-center ${
+                    i % 2 === 0 ? "bg-surface-card" : "bg-surface-low"
+                  }`}
+                >
+                  <span className="col-span-3 text-sm font-medium text-on-background truncate">
+                    {res.guest}
+                  </span>
+                  <span className="col-span-3 text-sm text-on-surface-variant truncate">
+                    {res.venue}
+                  </span>
+                  <span className="col-span-2 text-sm text-on-surface-variant">
+                    {res.date}
+                  </span>
+                  <span className="col-span-2 text-sm text-on-background font-medium">
+                    {res.covers}
+                  </span>
+                  <span className="col-span-2">
+                    <span
+                      className={`text-[0.6875rem] font-semibold px-2.5 py-1 rounded-full ${res.statusColor}`}
+                    >
+                      {res.status}
+                    </span>
+                  </span>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>

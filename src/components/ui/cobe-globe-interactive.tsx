@@ -19,7 +19,7 @@ interface GlobeInteractiveProps {
 const defaultMarkers: InteractiveMarker[] = [
   { id: "paris", location: [48.86, 2.35], name: "Paris", venues: 12 },
   { id: "marrakech", location: [31.63, -8.01], name: "Marrakech", venues: 8 },
-  { id: "london", location: [53.0, -1.5], name: "Londres", venues: 6 },
+  { id: "london", location: [55.0, -1.5], name: "Londres", venues: 6 },
   { id: "madrid", location: [40.42, -3.70], name: "Madrid", venues: 4 },
 ]
 

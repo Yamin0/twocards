@@ -1,9 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { Plus, Star, Search, Phone, Mail, MoreHorizontal } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Plus, Star, Search, Phone, MoreHorizontal, X, Check } from "lucide-react";
+import { useAuthUser } from "@/hooks/use-auth-user";
+import { ConciergeSkeleton } from "@/components/shared/loading-skeleton";
+import { useToast } from "@/hooks/use-toast";
 
-const clients = [
+const DEMO_CLIENTS = [
   { id: 1, name: "Mehdi Alaoui", phone: "+212 6 12 34 56 78", email: "mehdi@email.com", visits: 12, totalSpent: "78 500 MAD", avgGroup: "6.2", lastVisit: "6 Avr. 2026", vip: true, tags: ["VIP", "Régulier"] },
   { id: 2, name: "Sarah Cohen", phone: "+212 6 23 45 67 89", email: "sarah@email.com", visits: 8, totalSpent: "52 000 MAD", avgGroup: "4.5", lastVisit: "5 Avr. 2026", vip: true, tags: ["VIP"] },
   { id: 3, name: "Omar Tazi", phone: "+212 6 34 56 78 90", email: "omar@email.com", visits: 5, totalSpent: "34 200 MAD", avgGroup: "8.0", lastVisit: "4 Avr. 2026", vip: false, tags: ["Groupe"] },
@@ -15,8 +18,26 @@ const clients = [
 ];
 
 export default function ConciergeClientsPage() {
+  const { isDemoConcierge, isLoading } = useAuthUser();
+  const [clients, setClients] = useState<typeof DEMO_CLIENTS>([]);
+  const initialized = useRef(false);
+
+  useEffect(() => {
+    if (!isLoading && !initialized.current) {
+      initialized.current = true;
+      if (isDemoConcierge) {
+        setClients(DEMO_CLIENTS);
+      }
+    }
+  }, [isLoading, isDemoConcierge]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterTag, setFilterTag] = useState("tous");
+  const [showNewClient, setShowNewClient] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [newPhone, setNewPhone] = useState("");
+  const [newEmail, setNewEmail] = useState("");
+  const [menuOpen, setMenuOpen] = useState<number | null>(null);
+  const { toast, showToast } = useToast();
 
   const allTags = ["tous", "VIP", "Régulier", "Groupe", "Nouveau", "Top client"];
 
@@ -30,6 +51,49 @@ export default function ConciergeClientsPage() {
     return matchSearch && matchTag;
   });
 
+  const handleAddClient = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newName.trim()) return;
+    const newClient = {
+      id: Date.now(),
+      name: newName.trim(),
+      phone: newPhone.trim() || "—",
+      email: newEmail.trim() || "—",
+      visits: 0,
+      totalSpent: "0 MAD",
+      avgGroup: "0",
+      lastVisit: "—",
+      vip: false,
+      tags: ["Nouveau"] as string[],
+    };
+    setClients((prev) => [newClient, ...prev]);
+    setShowNewClient(false);
+    setNewName("");
+    setNewPhone("");
+    setNewEmail("");
+    showToast(`${newClient.name} ajouté au carnet`);
+  };
+
+  const handleMenuAction = (action: string, clientName: string) => {
+    setMenuOpen(null);
+    if (action === "vip") {
+      setClients((prev) =>
+        prev.map((c) =>
+          c.name === clientName
+            ? { ...c, vip: !c.vip, tags: c.vip ? c.tags.filter((t) => t !== "VIP") : [...c.tags, "VIP"] }
+            : c
+        )
+      );
+      showToast(`Statut VIP mis à jour pour ${clientName}`);
+    } else if (action === "call") {
+      showToast(`Appel vers ${clientName}`);
+    } else if (action === "email") {
+      showToast(`Email vers ${clientName}`);
+    }
+  };
+
+  if (isLoading) return <ConciergeSkeleton />;
+
   return (
     <div className="bg-surface min-h-screen">
       {/* Header */}
@@ -42,7 +106,10 @@ export default function ConciergeClientsPage() {
             {clients.length} clients &middot; {clients.filter((c) => c.vip).length} VIP
           </p>
         </div>
-        <button className="flex items-center gap-2 bg-primary text-white text-sm font-medium px-4 py-2.5 rounded-lg hover:opacity-90 transition-opacity font-[family-name:var(--font-inter)]">
+        <button
+          onClick={() => setShowNewClient(true)}
+          className="flex items-center gap-2 bg-primary text-white text-sm font-medium px-4 py-2.5 rounded-lg hover:opacity-90 transition-opacity font-[family-name:var(--font-inter)]"
+        >
           <Plus size={16} strokeWidth={1.5} />
           Nouveau client
         </button>
@@ -192,18 +259,125 @@ export default function ConciergeClientsPage() {
                         ))}
                       </div>
                     </td>
-                    <td className="px-4 py-3.5">
-                      <button className="p-1 rounded-lg text-on-surface-variant/40 hover:text-on-surface-variant hover:bg-surface-low transition-colors">
+                    <td className="px-4 py-3.5 relative">
+                      <button
+                        onClick={() => setMenuOpen(menuOpen === client.id ? null : client.id)}
+                        className="p-1 rounded-lg text-on-surface-variant/40 hover:text-on-surface-variant hover:bg-surface-low transition-colors"
+                      >
                         <MoreHorizontal size={16} strokeWidth={1.5} />
                       </button>
+                      {menuOpen === client.id && (
+                        <>
+                          <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(null)} />
+                          <div className="absolute right-4 top-10 z-50 w-44 bg-white rounded-lg border border-outline-variant/10 shadow-lg py-1">
+                            <button
+                              onClick={() => handleMenuAction("vip", client.name)}
+                              className="w-full text-left px-4 py-2 text-sm text-on-background hover:bg-surface-low transition-colors"
+                            >
+                              {client.vip ? "Retirer VIP" : "Marquer VIP"}
+                            </button>
+                            <button
+                              onClick={() => handleMenuAction("call", client.name)}
+                              className="w-full text-left px-4 py-2 text-sm text-on-background hover:bg-surface-low transition-colors"
+                            >
+                              Appeler
+                            </button>
+                            <button
+                              onClick={() => handleMenuAction("email", client.name)}
+                              className="w-full text-left px-4 py-2 text-sm text-on-background hover:bg-surface-low transition-colors"
+                            >
+                              Envoyer un email
+                            </button>
+                          </div>
+                        </>
+                      )}
                     </td>
                   </tr>
                 ))}
+                {filtered.length === 0 && (
+                  <tr>
+                    <td colSpan={7} className="px-4 py-12 text-center text-sm text-on-surface-variant">
+                      Aucun client trouvé
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
         </div>
       </div>
+
+      {/* New Client Modal */}
+      {showNewClient && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-lg font-bold text-on-background font-[family-name:var(--font-manrope)]">
+                Nouveau client
+              </h2>
+              <button
+                onClick={() => setShowNewClient(false)}
+                className="p-1 rounded-lg text-on-surface-variant hover:text-on-background hover:bg-surface-low transition-colors"
+              >
+                <X size={18} strokeWidth={1.5} />
+              </button>
+            </div>
+            <form onSubmit={handleAddClient} className="space-y-4">
+              <div>
+                <label className="block text-xs font-medium text-on-surface-variant mb-1 font-[family-name:var(--font-inter)]">
+                  Nom complet *
+                </label>
+                <input
+                  type="text"
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  placeholder="Ex: Mohamed Tazi"
+                  className="w-full px-3 py-2 text-sm bg-surface-low border-none rounded-lg text-on-background placeholder:text-on-surface-variant/50 font-[family-name:var(--font-inter)] focus:ring-1 focus:ring-primary/30 focus:outline-none"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-on-surface-variant mb-1 font-[family-name:var(--font-inter)]">
+                  Téléphone
+                </label>
+                <input
+                  type="tel"
+                  value={newPhone}
+                  onChange={(e) => setNewPhone(e.target.value)}
+                  placeholder="+212 6 XX XX XX XX"
+                  className="w-full px-3 py-2 text-sm bg-surface-low border-none rounded-lg text-on-background placeholder:text-on-surface-variant/50 font-[family-name:var(--font-inter)] focus:ring-1 focus:ring-primary/30 focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-on-surface-variant mb-1 font-[family-name:var(--font-inter)]">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  value={newEmail}
+                  onChange={(e) => setNewEmail(e.target.value)}
+                  placeholder="email@example.com"
+                  className="w-full px-3 py-2 text-sm bg-surface-low border-none rounded-lg text-on-background placeholder:text-on-surface-variant/50 font-[family-name:var(--font-inter)] focus:ring-1 focus:ring-primary/30 focus:outline-none"
+                />
+              </div>
+              <button
+                type="submit"
+                className="w-full bg-primary text-white text-sm font-medium py-2.5 rounded-lg hover:opacity-90 transition-opacity"
+              >
+                Ajouter le client
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Toast */}
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-primary-dark text-white px-4 py-3 rounded-md shadow-lg">
+          <Check size={16} strokeWidth={2} />
+          <span className="text-sm font-medium">{toast}</span>
+        </div>
+      )}
     </div>
   );
 }

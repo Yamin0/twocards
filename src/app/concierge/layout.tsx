@@ -17,6 +17,8 @@ import {
   LogOut,
 } from "lucide-react";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuthUser } from "@/hooks/use-auth-user";
 
 const tabs = [
   { label: "Calendrier", href: "/concierge", icon: CalendarDays },
@@ -26,13 +28,27 @@ const tabs = [
   { label: "Paramètres", href: "/concierge/settings", icon: Settings },
 ];
 
+const demoVenues = [
+  "Tous les établissements",
+  "L'Arc Casablanca",
+  "Le Comptoir",
+  "Raspoutine",
+];
+
+const defaultVenues = ["Tous les établissements"];
+
 export default function ConciergeLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { isDemoConcierge } = useAuthUser();
+  const venues = isDemoConcierge ? demoVenues : defaultVenues;
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [venueDropdownOpen, setVenueDropdownOpen] = useState(false);
+  const [selectedVenue, setSelectedVenue] = useState(venues[0]);
 
   const isActive = (href: string) => {
     if (href === "/concierge") return pathname === "/concierge";
@@ -74,34 +90,57 @@ export default function ConciergeLayout({
             <div className="hidden sm:block h-6 w-px bg-outline-variant/20 mx-1" />
 
             {/* Venue selector (concierge works with multiple venues) */}
-            <button className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-surface-low transition-colors group">
-              <div className="w-7 h-7 rounded-full bg-primary-container flex items-center justify-center">
-                <span className="text-xs font-bold text-on-primary-container font-[family-name:var(--font-manrope)]">
-                  C
-                </span>
-              </div>
-              <div className="text-left">
-                <p className="text-sm font-semibold text-on-background font-[family-name:var(--font-manrope)] leading-tight">
-                  Tous les établissements
-                </p>
-              </div>
-              <ChevronDown
-                size={16}
-                strokeWidth={1.5}
-                className="text-on-surface-variant group-hover:text-on-surface transition-colors"
-              />
-            </button>
+            <div className="relative hidden sm:block">
+              <button
+                onClick={() => setVenueDropdownOpen(!venueDropdownOpen)}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-surface-low transition-colors group"
+              >
+                <div className="w-7 h-7 rounded-full bg-primary-container flex items-center justify-center">
+                  <span className="text-xs font-bold text-on-primary-container font-[family-name:var(--font-manrope)]">
+                    {selectedVenue[0]}
+                  </span>
+                </div>
+                <div className="text-left">
+                  <p className="text-sm font-semibold text-on-background font-[family-name:var(--font-manrope)] leading-tight">
+                    {selectedVenue}
+                  </p>
+                </div>
+                <ChevronDown
+                  size={16}
+                  strokeWidth={1.5}
+                  className={`text-on-surface-variant group-hover:text-on-surface transition-all ${venueDropdownOpen ? "rotate-180" : ""}`}
+                />
+              </button>
+              {venueDropdownOpen && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setVenueDropdownOpen(false)} />
+                  <div className="absolute top-full left-0 mt-1 w-56 bg-white rounded-md editorial-shadow border border-outline-variant/10 py-1 z-50">
+                    {venues.map((v) => (
+                      <button
+                        key={v}
+                        onClick={() => { setSelectedVenue(v); setVenueDropdownOpen(false); }}
+                        className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${v === selectedVenue ? "bg-primary/5 text-primary font-medium" : "text-on-background hover:bg-surface-low"}`}
+                      >
+                        {v}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
           </div>
 
           {/* Right: Icons */}
           <div className="flex items-center gap-1">
-            <button
+            <Link
+              href="/concierge/messages"
               className="relative p-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-low transition-colors"
               aria-label="Messages"
             >
               <MessageSquare size={20} strokeWidth={1.5} />
-            </button>
+            </Link>
             <button
+              onClick={() => router.push("/concierge")}
               className="relative p-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-low transition-colors"
               aria-label="Notifications"
             >

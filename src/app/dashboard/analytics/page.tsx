@@ -1,24 +1,28 @@
 "use client";
 
 import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 import {
   Download,
   FileText,
   ChevronDown,
   Trophy,
   TrendingUp,
+  Check,
 } from "lucide-react";
+import { useAuthUser } from "@/hooks/use-auth-user";
+import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
 
 const navLinks = ["Vue d'ensemble", "Cartes en direct", "Revenus", "Clients", "Paramètres"];
 
-const rpData = [
+const DEMO_RP_DATA = [
   { rang: 1, nom: "Samy Benchekroun", couverts: 48, ca: "124 800 MAD", commissions: "12 480 MAD", taille: "7,2" },
   { rang: 2, nom: "Yasmine El Idrissi", couverts: 35, ca: "102 500 MAD", commissions: "10 250 MAD", taille: "6,8" },
   { rang: 3, nom: "Amine Tazi", couverts: 29, ca: "98 700 MAD", commissions: "9 870 MAD", taille: "5,9" },
   { rang: 4, nom: "Nadia Berrada", couverts: 22, ca: "76 500 MAD", commissions: "7 650 MAD", taille: "5,4" },
 ];
 
-const barChartCouverts = [
+const DEMO_BAR_CHART_COUVERTS = [
   { label: "Lun", height: 45 },
   { label: "Mar", height: 65 },
   { label: "Mer", height: 55 },
@@ -28,7 +32,7 @@ const barChartCouverts = [
   { label: "Dim", height: 35 },
 ];
 
-const barChartRevenus = [
+const DEMO_BAR_CHART_REVENUS = [
   { label: "S1", height: 50 },
   { label: "S2", height: 65 },
   { label: "S3", height: 45 },
@@ -41,23 +45,112 @@ const barChartRevenus = [
   { label: "S10", height: 100 },
 ];
 
-const topEvents = [
+const DEMO_TOP_EVENTS = [
   { name: "Nuit Blanche VIP", revenue: "82 000 MAD", couverts: 18 },
   { name: "Soirée Privée Champagne", revenue: "67 500 MAD", couverts: 12 },
   { name: "DJ Set International", revenue: "54 000 MAD", couverts: 15 },
 ];
 
-const periodTabs = ["Cette semaine", "Ce mois", "Cette année", "Personnalisé"];
-
-const donutSegments = [
+const DEMO_DONUT_SEGMENTS = [
   { label: "Tables VIP", pct: 64, color: "bg-primary" },
   { label: "Tables Standard", pct: 22, color: "bg-primary/50" },
   { label: "Bar", pct: 14, color: "bg-on-primary-container" },
 ];
 
+const DEMO_STATS = [
+  { label: "Total Couverts", value: "134" },
+  { label: "Chiffre d'Affaires", value: "402 500 MAD" },
+  { label: "Taille Moy. Groupe", value: "6,2" },
+  { label: "Meilleur RP", value: "SAMY B." },
+];
+
+const EMPTY_BAR_CHART_COUVERTS = [
+  { label: "Lun", height: 0 },
+  { label: "Mar", height: 0 },
+  { label: "Mer", height: 0 },
+  { label: "Jeu", height: 0 },
+  { label: "Ven", height: 0 },
+  { label: "Sam", height: 0 },
+  { label: "Dim", height: 0 },
+];
+
+const EMPTY_BAR_CHART_REVENUS = [
+  { label: "S1", height: 0 },
+  { label: "S2", height: 0 },
+  { label: "S3", height: 0 },
+  { label: "S4", height: 0 },
+  { label: "S5", height: 0 },
+  { label: "S6", height: 0 },
+  { label: "S7", height: 0 },
+  { label: "S8", height: 0 },
+  { label: "S9", height: 0 },
+  { label: "S10", height: 0 },
+];
+
+const EMPTY_STATS = [
+  { label: "Total Couverts", value: "0" },
+  { label: "Chiffre d'Affaires", value: "0 MAD" },
+  { label: "Taille Moy. Groupe", value: "0" },
+  { label: "Meilleur RP", value: "—" },
+];
+
+const EMPTY_DONUT_SEGMENTS = [
+  { label: "Tables VIP", pct: 0, color: "bg-primary" },
+  { label: "Tables Standard", pct: 0, color: "bg-primary/50" },
+  { label: "Bar", pct: 0, color: "bg-on-primary-container" },
+];
+
+const periodTabs = ["Cette semaine", "Ce mois", "Cette année", "Personnalisé"];
+
+function downloadCSV(data: Record<string, string | number>[], filename: string) {
+  if (data.length === 0) return;
+  const headers = Object.keys(data[0]);
+  const csv = [
+    headers.join(","),
+    ...data.map((row) => headers.map((h) => `"${row[h]}"`).join(",")),
+  ].join("\n");
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 export default function AnalyticsPage() {
+  const { isDemoVenue, isLoading } = useAuthUser();
   const [activeNav, setActiveNav] = useState("Vue d'ensemble");
   const [activePeriod, setActivePeriod] = useState("Ce mois");
+  const { toast, showToast } = useToast();
+
+  const rpData = isDemoVenue ? DEMO_RP_DATA : [];
+  const barChartCouverts = isDemoVenue ? DEMO_BAR_CHART_COUVERTS : EMPTY_BAR_CHART_COUVERTS;
+  const barChartRevenus = isDemoVenue ? DEMO_BAR_CHART_REVENUS : EMPTY_BAR_CHART_REVENUS;
+  const topEvents = isDemoVenue ? DEMO_TOP_EVENTS : [];
+  const donutSegments = isDemoVenue ? DEMO_DONUT_SEGMENTS : EMPTY_DONUT_SEGMENTS;
+  const statsData = isDemoVenue ? DEMO_STATS : EMPTY_STATS;
+
+  const handleExportCSV = () => {
+    downloadCSV(
+      rpData.map((rp) => ({
+        Rang: rp.rang,
+        Nom: rp.nom,
+        Couverts: rp.couverts,
+        "CA Généré": rp.ca,
+        Commissions: rp.commissions,
+        "Taille Moy.": rp.taille,
+      })),
+      "analytics-twocards.csv"
+    );
+    showToast("CSV téléchargé");
+  };
+
+  const handleExportReport = () => {
+    showToast("Rapport exporté (PDF bientôt disponible)");
+  };
+
+  if (isLoading) return <DashboardSkeleton />;
 
   return (
     <div className="-mx-0">
@@ -88,12 +181,7 @@ export default function AnalyticsPage() {
 
       {/* Data Strip */}
       <div className="bg-tertiary-container px-6 py-5 flex flex-wrap items-end gap-6 md:gap-0 md:grid md:grid-cols-5">
-        {[
-          { label: "Total Couverts", value: "134" },
-          { label: "Chiffre d'Affaires", value: "402 500 MAD" },
-          { label: "Taille Moy. Groupe", value: "6,2" },
-          { label: "Meilleur RP", value: "SAMY B." },
-        ].map((stat, i) => (
+        {statsData.map((stat, i) => (
           <div
             key={i}
             className={`flex flex-col ${
@@ -205,6 +293,13 @@ export default function AnalyticsPage() {
                 </tr>
               </thead>
               <tbody>
+                {rpData.length === 0 && (
+                  <tr>
+                    <td colSpan={6} className="px-6 py-8 text-center text-sm text-on-surface-variant">
+                      Aucune donnée disponible
+                    </td>
+                  </tr>
+                )}
                 {rpData.map((rp, i) => (
                   <tr
                     key={rp.rang}
@@ -237,6 +332,9 @@ export default function AnalyticsPage() {
             Meilleurs Événements
           </h3>
           <div className="space-y-4">
+            {topEvents.length === 0 && (
+              <p className="text-sm text-on-surface-variant text-center py-4">Aucun événement</p>
+            )}
             {topEvents.map((event, i) => (
               <div key={i} className="flex items-center gap-4">
                 <div className="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center flex-shrink-0">
@@ -266,34 +364,38 @@ export default function AnalyticsPage() {
               <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
                 {/* Background ring */}
                 <circle cx="18" cy="18" r="14" fill="none" stroke="#eff5f3" strokeWidth="4" />
-                {/* VIP - 64% */}
-                <circle
-                  cx="18" cy="18" r="14" fill="none"
-                  stroke="#13305c" strokeWidth="4"
-                  strokeDasharray="64 36"
-                  strokeDashoffset="0"
-                  strokeLinecap="round"
-                />
-                {/* Standard - 22% */}
-                <circle
-                  cx="18" cy="18" r="14" fill="none"
-                  stroke="rgba(19,48,92,0.45)" strokeWidth="4"
-                  strokeDasharray="22 78"
-                  strokeDashoffset="-64"
-                  strokeLinecap="round"
-                />
-                {/* Bar - 14% */}
-                <circle
-                  cx="18" cy="18" r="14" fill="none"
-                  stroke="#8099cb" strokeWidth="4"
-                  strokeDasharray="14 86"
-                  strokeDashoffset="-86"
-                  strokeLinecap="round"
-                />
+                {isDemoVenue && (
+                  <>
+                    {/* VIP - 64% */}
+                    <circle
+                      cx="18" cy="18" r="14" fill="none"
+                      stroke="#13305c" strokeWidth="4"
+                      strokeDasharray="64 36"
+                      strokeDashoffset="0"
+                      strokeLinecap="round"
+                    />
+                    {/* Standard - 22% */}
+                    <circle
+                      cx="18" cy="18" r="14" fill="none"
+                      stroke="rgba(19,48,92,0.45)" strokeWidth="4"
+                      strokeDasharray="22 78"
+                      strokeDashoffset="-64"
+                      strokeLinecap="round"
+                    />
+                    {/* Bar - 14% */}
+                    <circle
+                      cx="18" cy="18" r="14" fill="none"
+                      stroke="#8099cb" strokeWidth="4"
+                      strokeDasharray="14 86"
+                      strokeDashoffset="-86"
+                      strokeLinecap="round"
+                    />
+                  </>
+                )}
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
                 <span className="text-xl font-extrabold font-[family-name:var(--font-manrope)] text-on-background">
-                  64%
+                  {isDemoVenue ? "64%" : "0%"}
                 </span>
                 <span className="text-[9px] text-on-surface-variant">VIP</span>
               </div>
@@ -317,15 +419,29 @@ export default function AnalyticsPage() {
 
       {/* Action Buttons */}
       <div className="px-6 pb-8 flex flex-wrap items-center gap-4">
-        <button className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-sm text-sm font-medium hover:bg-primary-dark transition-colors">
+        <button
+          onClick={handleExportReport}
+          className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-sm text-sm font-medium hover:bg-primary-dark transition-colors"
+        >
           <FileText size={16} strokeWidth={1.5} />
           Exporter le rapport
         </button>
-        <button className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-on-surface-variant hover:text-on-background transition-colors">
+        <button
+          onClick={handleExportCSV}
+          className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-on-surface-variant hover:text-on-background transition-colors"
+        >
           <Download size={16} strokeWidth={1.5} />
           Télécharger CSV
         </button>
       </div>
+
+      {/* Toast */}
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-primary-dark text-white px-4 py-3 rounded-md shadow-lg animate-in slide-in-from-bottom-4">
+          <Check size={16} strokeWidth={2} />
+          <span className="text-sm font-medium">{toast}</span>
+        </div>
+      )}
     </div>
   );
 }

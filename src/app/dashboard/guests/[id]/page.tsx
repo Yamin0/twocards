@@ -1,3 +1,8 @@
+"use client";
+
+import { useState } from "react";
+import { useParams } from "next/navigation";
+import { useToast } from "@/hooks/use-toast";
 import {
   Phone,
   Mail,
@@ -11,10 +16,14 @@ import {
   AlertTriangle,
   Clock,
   Users,
+  Check,
+  X,
 } from "lucide-react";
 import Link from "next/link";
+import { useAuthUser } from "@/hooks/use-auth-user";
+import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
 
-const guest = {
+const DEMO_GUEST = {
   name: "Hicham El Guerrouj",
   phone: "+212 6 12 34 56 78",
   email: "h.elguerrouj@email.com",
@@ -24,14 +33,14 @@ const guest = {
   depensesTotales: "124 000 MAD",
   depenseMoyenne: "539 MAD",
   tailleGroupeMoy: 4,
-  premièreVisite: "Mars 2025",
+  premiereVisite: "Mars 2025",
   birthday: "14 Juin 1985",
   tablePreference: "Carrée VIP, près de la piste",
   musicStyle: "Deep House, Tech House",
   allergies: "Fruits de mer, Arachides",
 };
 
-const visitHistory = [
+const DEMO_VISIT_HISTORY = [
   {
     date: "28 Mars 2026",
     event: "Vendredi Signature",
@@ -58,7 +67,7 @@ const visitHistory = [
   },
 ];
 
-const upcoming = [
+const DEMO_UPCOMING = [
   {
     date: "05 Avr",
     event: "Vendredi Signature",
@@ -75,7 +84,7 @@ const upcoming = [
   },
 ];
 
-const notes = [
+const DEMO_INITIAL_NOTES = [
   {
     author: "Youssef A.",
     date: "28 Mars 2026",
@@ -88,7 +97,7 @@ const notes = [
   },
 ];
 
-const tags = [
+const DEMO_TAGS = [
   "High Spender",
   "Régulier",
   "VIP Anniversaire",
@@ -97,12 +106,44 @@ const tags = [
   "Parrain Actif",
 ];
 
-export default async function GuestProfilePage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
+export default function GuestProfilePage() {
+  const params = useParams();
+  const { isDemoVenue, isLoading } = useAuthUser();
+  const [notes, setNotes] = useState(DEMO_INITIAL_NOTES);
+  const [showNoteModal, setShowNoteModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [noteText, setNoteText] = useState("");
+  const { toast, showToast } = useToast();
+
+  const handleAddNote = () => {
+    if (!noteText.trim()) return;
+    setNotes([
+      {
+        author: "Vous",
+        date: new Date().toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" }),
+        text: noteText.trim(),
+      },
+      ...notes,
+    ]);
+    setNoteText("");
+    setShowNoteModal(false);
+    showToast("Note ajoutée");
+  };
+
+  if (isLoading) return <DashboardSkeleton />;
+
+  if (!isDemoVenue) {
+    return (
+      <div className="bg-surface min-h-screen flex items-center justify-center">
+        <p className="text-sm text-on-surface-variant">Profil client non disponible</p>
+      </div>
+    );
+  }
+
+  const guest = DEMO_GUEST;
+  const visitHistory = DEMO_VISIT_HISTORY;
+  const upcoming = DEMO_UPCOMING;
+  const tags = DEMO_TAGS;
 
   return (
     <div className="bg-surface min-h-screen">
@@ -145,11 +186,17 @@ export default async function GuestProfilePage({
 
           {/* Actions */}
           <div className="flex items-center gap-2">
-            <button className="inline-flex items-center gap-2 bg-surface-mid rounded-sm px-4 py-2 text-sm text-on-surface-variant hover:text-on-background transition-colors">
+            <button
+              onClick={() => setShowEditModal(true)}
+              className="inline-flex items-center gap-2 bg-surface-mid rounded-sm px-4 py-2 text-sm text-on-surface-variant hover:text-on-background transition-colors"
+            >
               <Pencil className="h-3.5 w-3.5" strokeWidth={1.5} />
               Modifier
             </button>
-            <button className="inline-flex items-center gap-2 bg-primary text-white rounded-sm px-4 py-2 text-sm font-medium hover:bg-primary-dark transition-colors">
+            <button
+              onClick={() => setShowNoteModal(true)}
+              className="inline-flex items-center gap-2 bg-primary text-white rounded-sm px-4 py-2 text-sm font-medium hover:bg-primary-dark transition-colors"
+            >
               <StickyNote className="h-3.5 w-3.5" strokeWidth={1.5} />
               Ajouter une note
             </button>
@@ -165,7 +212,7 @@ export default async function GuestProfilePage({
             { label: "Dépenses Totales", value: guest.depensesTotales },
             { label: "Dépense Moyenne", value: guest.depenseMoyenne },
             { label: "Taille Groupe Moy.", value: guest.tailleGroupeMoy },
-            { label: "Première Visite", value: guest.premièreVisite },
+            { label: "Première Visite", value: guest.premiereVisite },
           ].map((m) => (
             <div key={m.label}>
               <p className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-primary-container">
@@ -273,52 +320,30 @@ export default async function GuestProfilePage({
             </h2>
             <div className="space-y-3">
               <div className="flex items-start gap-3">
-                <CalendarDays
-                  className="h-4 w-4 text-on-surface-variant mt-0.5"
-                  strokeWidth={1.5}
-                />
+                <CalendarDays className="h-4 w-4 text-on-surface-variant mt-0.5" strokeWidth={1.5} />
                 <div>
-                  <p className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant">
-                    Anniversaire
-                  </p>
+                  <p className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant">Anniversaire</p>
                   <p className="text-sm text-on-background">{guest.birthday}</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <Crown
-                  className="h-4 w-4 text-on-surface-variant mt-0.5"
-                  strokeWidth={1.5}
-                />
+                <Crown className="h-4 w-4 text-on-surface-variant mt-0.5" strokeWidth={1.5} />
                 <div>
-                  <p className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant">
-                    Préférence table
-                  </p>
-                  <p className="text-sm text-on-background">
-                    {guest.tablePreference}
-                  </p>
+                  <p className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant">Préférence table</p>
+                  <p className="text-sm text-on-background">{guest.tablePreference}</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <Music
-                  className="h-4 w-4 text-on-surface-variant mt-0.5"
-                  strokeWidth={1.5}
-                />
+                <Music className="h-4 w-4 text-on-surface-variant mt-0.5" strokeWidth={1.5} />
                 <div>
-                  <p className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant">
-                    Style musical
-                  </p>
+                  <p className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant">Style musical</p>
                   <p className="text-sm text-on-background">{guest.musicStyle}</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <AlertTriangle
-                  className="h-4 w-4 text-error mt-0.5"
-                  strokeWidth={1.5}
-                />
+                <AlertTriangle className="h-4 w-4 text-error mt-0.5" strokeWidth={1.5} />
                 <div>
-                  <p className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant">
-                    Allergies alimentaires
-                  </p>
+                  <p className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant">Allergies alimentaires</p>
                   <p className="text-sm text-error">{guest.allergies}</p>
                 </div>
               </div>
@@ -333,20 +358,12 @@ export default async function GuestProfilePage({
             <div className="space-y-4">
               {notes.map((n, i) => (
                 <div key={i} className={i > 0 ? "pt-4 border-t-0" : ""}>
-                  <div
-                    className={`p-3 rounded-md ${i % 2 === 0 ? "bg-surface" : "bg-surface-low"}`}
-                  >
+                  <div className={`p-3 rounded-md ${i % 2 === 0 ? "bg-surface" : "bg-surface-low"}`}>
                     <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-xs font-medium text-on-background">
-                        {n.author}
-                      </span>
-                      <span className="text-xs text-on-surface-variant">
-                        {n.date}
-                      </span>
+                      <span className="text-xs font-medium text-on-background">{n.author}</span>
+                      <span className="text-xs text-on-surface-variant">{n.date}</span>
                     </div>
-                    <p className="text-sm text-on-surface-variant leading-relaxed">
-                      {n.text}
-                    </p>
+                    <p className="text-sm text-on-surface-variant leading-relaxed">{n.text}</p>
                   </div>
                 </div>
               ))}
@@ -360,10 +377,7 @@ export default async function GuestProfilePage({
             </h2>
             <div className="flex flex-wrap gap-2">
               {tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="rounded-full bg-surface-low px-3 py-1 text-xs text-on-surface-variant"
-                >
+                <span key={tag} className="rounded-full bg-surface-low px-3 py-1 text-xs text-on-surface-variant">
                   {tag}
                 </span>
               ))}
@@ -371,6 +385,79 @@ export default async function GuestProfilePage({
           </div>
         </div>
       </div>
+
+      {/* Add Note Modal */}
+      {showNoteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-surface-card rounded-md editorial-shadow p-6 w-full max-w-md mx-4">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-primary-dark font-[family-name:var(--font-manrope)]">Ajouter une note</h2>
+              <button onClick={() => setShowNoteModal(false)} className="text-on-surface-variant hover:text-on-background">
+                <X size={20} strokeWidth={1.5} />
+              </button>
+            </div>
+            <textarea
+              value={noteText}
+              onChange={(e) => setNoteText(e.target.value)}
+              placeholder="Écrire une note..."
+              rows={4}
+              className="w-full px-4 py-2.5 bg-surface-low border-none rounded-md text-sm text-on-background resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 mb-4"
+            />
+            <button
+              onClick={handleAddNote}
+              className="w-full bg-primary text-white rounded-sm px-5 py-2.5 text-sm font-medium hover:bg-primary-dark transition-colors"
+            >
+              Enregistrer
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Modal */}
+      {showEditModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-surface-card rounded-md editorial-shadow p-6 w-full max-w-md mx-4">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-primary-dark font-[family-name:var(--font-manrope)]">Modifier le client</h2>
+              <button onClick={() => setShowEditModal(false)} className="text-on-surface-variant hover:text-on-background">
+                <X size={20} strokeWidth={1.5} />
+              </button>
+            </div>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                setShowEditModal(false);
+                showToast("Client mis à jour");
+              }}
+              className="space-y-4"
+            >
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-on-surface-variant mb-1.5">Nom</label>
+                <input type="text" defaultValue={guest.name} className="w-full px-4 py-2.5 bg-surface-low border-none rounded-md text-sm text-on-background focus:outline-none focus:ring-2 focus:ring-primary/20" />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-on-surface-variant mb-1.5">Téléphone</label>
+                <input type="tel" defaultValue={guest.phone} className="w-full px-4 py-2.5 bg-surface-low border-none rounded-md text-sm text-on-background focus:outline-none focus:ring-2 focus:ring-primary/20" />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-on-surface-variant mb-1.5">Email</label>
+                <input type="email" defaultValue={guest.email} className="w-full px-4 py-2.5 bg-surface-low border-none rounded-md text-sm text-on-background focus:outline-none focus:ring-2 focus:ring-primary/20" />
+              </div>
+              <button type="submit" className="w-full bg-primary text-white rounded-sm px-5 py-2.5 text-sm font-medium hover:bg-primary-dark transition-colors">
+                Enregistrer
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Toast */}
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-primary-dark text-white px-4 py-3 rounded-md shadow-lg">
+          <Check size={16} strokeWidth={2} />
+          <span className="text-sm font-medium">{toast}</span>
+        </div>
+      )}
     </div>
   );
 }

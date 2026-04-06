@@ -27,7 +27,7 @@ export function TabletShowcase() {
           }
         >
           <Image
-            src="/dashboard-preview.png"
+            src="/dashboard-preview-v2.png"
             alt="twocards. — Tableau de bord"
             height={720}
             width={1400}

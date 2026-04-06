@@ -1,17 +1,27 @@
 "use client";
 
-import { Download } from "lucide-react";
+import { Download, Check } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import { StatsStrip } from "@/components/dashboard/stats-strip";
 import { StatusBadge } from "@/components/shared/status-badge";
+import { useAuthUser } from "@/hooks/use-auth-user";
+import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
 
-const stats = [
+const DEMO_STATS = [
   { label: "Total Commissions", value: "6 600 MAD" },
   { label: "En attente", value: "1 220 MAD" },
   { label: "Payées ce mois", value: "5 380 MAD" },
   { label: "Prochain paiement", value: "01/05" },
 ];
 
-const commissions = [
+const EMPTY_STATS = [
+  { label: "Total Commissions", value: "0 MAD" },
+  { label: "En attente", value: "0 MAD" },
+  { label: "Payées ce mois", value: "0 MAD" },
+  { label: "Prochain paiement", value: "—" },
+];
+
+const DEMO_COMMISSIONS = [
   {
     date: "28 Oct 2025",
     rp: "Samy Benchekroun",
@@ -63,6 +73,36 @@ const commissions = [
 ];
 
 export default function CommissionsPage() {
+  const { isDemoVenue, isLoading } = useAuthUser();
+  const { toast, showToast } = useToast();
+
+  const stats = isDemoVenue ? DEMO_STATS : EMPTY_STATS;
+  const commissions = isDemoVenue ? DEMO_COMMISSIONS : [];
+
+  const handleExport = () => {
+    if (commissions.length === 0) {
+      showToast("Aucune donnée à exporter");
+      return;
+    }
+    const headers = ["Date", "RP", "Événement", "Montant", "Statut"];
+    const csv = [
+      headers.join(","),
+      ...commissions.map((c) =>
+        [c.date, c.rp, c.event, c.montant, c.statut].map((v) => `"${v}"`).join(",")
+      ),
+    ].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "commissions-twocards.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast("CSV téléchargé");
+  };
+
+  if (isLoading) return <DashboardSkeleton />;
+
   return (
     <div>
       {/* Header */}
@@ -85,7 +125,10 @@ export default function CommissionsPage() {
             <h2 className="text-sm font-bold font-[family-name:var(--font-manrope)] text-primary-dark">
               Historique des commissions
             </h2>
-            <button className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-sm text-xs font-medium hover:bg-primary-dark transition-colors">
+            <button
+              onClick={handleExport}
+              className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-sm text-xs font-medium hover:bg-primary-dark transition-colors"
+            >
               <Download size={14} strokeWidth={1.5} />
               Exporter
             </button>
@@ -113,6 +156,13 @@ export default function CommissionsPage() {
                 </tr>
               </thead>
               <tbody>
+                {commissions.length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-8 text-center text-sm text-on-surface-variant">
+                      Aucune commission enregistrée
+                    </td>
+                  </tr>
+                )}
                 {commissions.map((row, i) => (
                   <tr
                     key={i}
@@ -140,6 +190,14 @@ export default function CommissionsPage() {
           </div>
         </div>
       </div>
+
+      {/* Toast */}
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-primary-dark text-white px-4 py-3 rounded-md shadow-lg">
+          <Check size={16} strokeWidth={2} />
+          <span className="text-sm font-medium">{toast}</span>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 import {
   User,
   Shield,
@@ -9,7 +10,10 @@ import {
   Lock,
   Camera,
   ChevronDown,
+  Check,
 } from "lucide-react";
+import { useAuthUser } from "@/hooks/use-auth-user";
+import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
 
 const settingsNav = [
   { label: "Profile", icon: User, id: "profile" },
@@ -20,7 +24,27 @@ const settingsNav = [
 ];
 
 export default function SettingsPage() {
+  const { isDemoVenue, isLoading, fullName, email, venueName, initials } = useAuthUser();
   const [activeTab, setActiveTab] = useState("profile");
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const { toast, showToast } = useToast();
+
+  if (isLoading) return <DashboardSkeleton />;
+
+  const displayName = isDemoVenue ? "Marc Rousseau" : (fullName || "");
+  const displayEmail = isDemoVenue ? "marc@lecomptoir.fr" : (email || "");
+  const displayVenueName = isDemoVenue ? "Le Comptoir" : (venueName || "");
+  const displayInitials = isDemoVenue ? "MR" : initials;
+  const displayPhone = isDemoVenue ? "+33 6 12 34 56 78" : "";
+  const displayCity = isDemoVenue ? "Paris" : "";
+  const displayAddress = isDemoVenue ? "42 Rue de Rivoli, 75001 Paris" : "";
+  const displayCapacity = isDemoVenue ? 220 : undefined;
+  const displayType = isDemoVenue ? "restaurant-bar" : "restaurant";
+  const displayDescription = isDemoVenue
+    ? "Le Comptoir est un restaurant-bar branché situé au cœur de Paris, offrant une expérience culinaire raffinée dans un cadre contemporain. Nos soirées thématiques et notre carte de cocktails signatures en font un lieu incontournable de la vie nocturne parisienne."
+    : "";
+  const displayHours = isDemoVenue ? "Mar-Sam: 19h00 - 02h00 | Dim: 12h00 - 16h00" : "";
+  const displayMinSpend = isDemoVenue ? "Table Standard: 500 MAD | Table VIP: 1,500 MAD | Carré VIP: 3,000 MAD" : "";
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
@@ -66,15 +90,18 @@ export default function SettingsPage() {
             <div className="flex items-center gap-6">
               <div className="relative">
                 <div className="w-20 h-20 rounded-full bg-primary-container flex items-center justify-center">
-                  <span className="text-2xl font-bold text-on-primary-container">MR</span>
+                  <span className="text-2xl font-bold text-on-primary-container">{displayInitials}</span>
                 </div>
-                <button className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-primary text-white flex items-center justify-center shadow-md hover:bg-primary-dark transition-colors">
+                <button
+                  onClick={() => showToast("Upload photo bientôt disponible")}
+                  className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-primary text-white flex items-center justify-center shadow-md hover:bg-primary-dark transition-colors"
+                >
                   <Camera size={14} strokeWidth={1.5} />
                 </button>
               </div>
               <div>
                 <p className="text-sm font-medium text-on-background">Photo de profil</p>
-                <button className="text-xs text-primary font-medium mt-1 hover:underline">
+                <button onClick={() => showToast("Upload photo bientôt disponible")} className="text-xs text-primary font-medium mt-1 hover:underline">
                   Modifier la photo
                 </button>
               </div>
@@ -96,7 +123,7 @@ export default function SettingsPage() {
                   </label>
                   <input
                     type="text"
-                    defaultValue="Marc Rousseau"
+                    defaultValue={displayName}
                     className="w-full px-4 py-2.5 bg-surface-low border-none rounded-md text-sm text-on-background focus:outline-none focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
@@ -107,7 +134,7 @@ export default function SettingsPage() {
                   </label>
                   <input
                     type="email"
-                    defaultValue="marc@lecomptoir.fr"
+                    defaultValue={displayEmail}
                     disabled
                     className="w-full px-4 py-2.5 bg-surface-low border-none rounded-md text-sm text-on-surface-variant cursor-not-allowed opacity-60"
                   />
@@ -119,7 +146,7 @@ export default function SettingsPage() {
                   </label>
                   <input
                     type="tel"
-                    defaultValue="+33 6 12 34 56 78"
+                    defaultValue={displayPhone}
                     className="w-full px-4 py-2.5 bg-surface-low border-none rounded-md text-sm text-on-background focus:outline-none focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
@@ -130,7 +157,7 @@ export default function SettingsPage() {
                   </label>
                   <input
                     type="text"
-                    defaultValue="Paris"
+                    defaultValue={displayCity}
                     className="w-full px-4 py-2.5 bg-surface-low border-none rounded-md text-sm text-on-background focus:outline-none focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
@@ -150,7 +177,7 @@ export default function SettingsPage() {
                   </label>
                   <input
                     type="text"
-                    defaultValue="Le Comptoir"
+                    defaultValue={displayVenueName}
                     className="w-full px-4 py-2.5 bg-surface-low border-none rounded-md text-sm text-on-background focus:outline-none focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
@@ -162,7 +189,7 @@ export default function SettingsPage() {
                     </label>
                     <div className="relative">
                       <select
-                        defaultValue="restaurant-bar"
+                        defaultValue={displayType}
                         className="w-full px-4 py-2.5 bg-surface-low border-none rounded-md text-sm text-on-background appearance-none focus:outline-none focus:ring-2 focus:ring-primary/20"
                       >
                         <option value="restaurant">Restaurant</option>
@@ -184,7 +211,7 @@ export default function SettingsPage() {
                     </label>
                     <input
                       type="number"
-                      defaultValue={220}
+                      defaultValue={displayCapacity}
                       className="w-full px-4 py-2.5 bg-surface-low border-none rounded-md text-sm text-on-background focus:outline-none focus:ring-2 focus:ring-primary/20"
                     />
                   </div>
@@ -196,7 +223,7 @@ export default function SettingsPage() {
                   </label>
                   <input
                     type="text"
-                    defaultValue="42 Rue de Rivoli, 75001 Paris"
+                    defaultValue={displayAddress}
                     className="w-full px-4 py-2.5 bg-surface-low border-none rounded-md text-sm text-on-background focus:outline-none focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
@@ -212,7 +239,7 @@ export default function SettingsPage() {
               </label>
               <textarea
                 rows={3}
-                defaultValue="Le Comptoir est un restaurant-bar branché situé au cœur de Paris, offrant une expérience culinaire raffinée dans un cadre contemporain. Nos soirées thématiques et notre carte de cocktails signatures en font un lieu incontournable de la vie nocturne parisienne."
+                defaultValue={displayDescription}
                 className="w-full px-4 py-2.5 bg-surface-card border-none rounded-md text-sm text-on-background resize-none focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
             </div>
@@ -223,7 +250,7 @@ export default function SettingsPage() {
               </label>
               <input
                 type="text"
-                defaultValue="Mar-Sam: 19h00 - 02h00 | Dim: 12h00 - 16h00"
+                defaultValue={displayHours}
                 className="w-full px-4 py-2.5 bg-surface-card border-none rounded-md text-sm text-on-background focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
             </div>
@@ -234,7 +261,7 @@ export default function SettingsPage() {
               </label>
               <input
                 type="text"
-                defaultValue="Table Standard: 500 MAD | Table VIP: 1,500 MAD | Carré VIP: 3,000 MAD"
+                defaultValue={displayMinSpend}
                 className="w-full px-4 py-2.5 bg-surface-card border-none rounded-md text-sm text-on-background focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
             </div>
@@ -242,15 +269,60 @@ export default function SettingsPage() {
 
           {/* Action Buttons */}
           <div className="flex items-center justify-between pt-2 pb-8">
-            <button className="px-6 py-2.5 bg-primary text-white rounded-sm text-sm font-medium hover:bg-primary-dark transition-colors">
+            <button
+              onClick={() => showToast("Modifications enregistrées")}
+              className="px-6 py-2.5 bg-primary text-white rounded-sm text-sm font-medium hover:bg-primary-dark transition-colors"
+            >
               Enregistrer les modifications
             </button>
-            <button className="px-4 py-2.5 text-sm font-medium text-error hover:text-error/80 transition-colors">
+            <button
+              onClick={() => setShowDeleteConfirm(true)}
+              className="px-4 py-2.5 text-sm font-medium text-error hover:text-error/80 transition-colors"
+            >
               Supprimer le compte
             </button>
           </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-surface-card rounded-md editorial-shadow p-6 w-full max-w-sm mx-4 text-center">
+            <h2 className="text-lg font-bold text-primary-dark font-[family-name:var(--font-manrope)] mb-2">
+              Supprimer le compte ?
+            </h2>
+            <p className="text-sm text-on-surface-variant mb-6">
+              Cette action est irréversible. Toutes vos données seront supprimées.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="flex-1 px-4 py-2.5 bg-surface-mid text-on-background rounded-sm text-sm font-medium hover:bg-surface-high transition-colors"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={() => {
+                  setShowDeleteConfirm(false);
+                  showToast("Demande de suppression envoyée");
+                }}
+                className="flex-1 px-4 py-2.5 bg-error text-white rounded-sm text-sm font-medium hover:bg-error/80 transition-colors"
+              >
+                Confirmer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Toast */}
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-primary-dark text-white px-4 py-3 rounded-md shadow-lg">
+          <Check size={16} strokeWidth={2} />
+          <span className="text-sm font-medium">{toast}</span>
+        </div>
+      )}
     </div>
   );
 }

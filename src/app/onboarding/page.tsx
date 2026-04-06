@@ -319,14 +319,14 @@ export default function OnboardingPage() {
             {/* Footer actions */}
             <div className="flex items-center justify-between mt-8 pt-6">
               <Link
-                href="#"
+                href="/onboarding"
                 className="flex items-center gap-1.5 text-sm text-on-surface-variant font-[family-name:var(--font-inter)] hover:text-on-background transition-colors"
               >
                 <ArrowLeft size={14} strokeWidth={1.5} />
                 Retour
               </Link>
               <Link
-                href="#"
+                href="/dashboard"
                 className="flex items-center gap-1.5 px-6 py-2.5 bg-primary text-white rounded-sm text-sm font-semibold font-[family-name:var(--font-inter)] hover:bg-primary-dark transition-colors"
               >
                 Continuer
