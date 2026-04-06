@@ -1,266 +1,597 @@
 "use client";
 
-import { StatsStrip } from "@/components/dashboard/stats-strip";
+import { useState } from "react";
 import {
+  UserPlus,
+  Clock,
   Users,
+  Ticket,
   CalendarDays,
-  Plus,
-  ArrowRight,
-  TrendingUp,
-  Building2,
+  ChevronLeft,
+  ChevronRight,
+  Search,
+  Filter,
 } from "lucide-react";
 
-const stats = [
-  { label: "Réservations ce mois", value: "24" },
-  { label: "Couverts places", value: "156" },
-  { label: "Commissions dues", value: "48 600 MAD" },
-  { label: "Établissements actifs", value: "6" },
-];
+type EventStatus = "upcoming" | "past";
 
-const pendingReservations = [
+interface VenueEvent {
+  id: number;
+  venue: string;
+  venueShort: string;
+  name: string;
+  day: string;
+  date: number;
+  month: string;
+  time: string;
+  ageRestriction: string;
+  category: string;
+  categoryColor: string;
+  gradient: string;
+  listes: number;
+  entrees: number;
+  reservations: number;
+  listesMax: number;
+  entreesMax: number;
+  reservationsMax: number;
+}
+
+const upcomingEvents: VenueEvent[] = [
   {
     id: 1,
     venue: "Le Comptoir Darna",
-    city: "Marrakech",
-    guests: 8,
-    tableType: "Table VIP",
-    date: "Ce soir, 22:00",
-    status: "confirmée",
-    statusColor: "bg-emerald-100 text-emerald-800",
+    venueShort: "LCD",
+    name: "OPENING NIGHT",
+    day: "JEU.",
+    date: 9,
+    month: "AVR",
+    time: "22:00 - 04:00",
+    ageRestriction: "+21",
+    category: "SEASON",
+    categoryColor: "text-amber-600",
+    gradient: "from-purple-900 via-purple-700 to-indigo-900",
+    listes: 3,
+    entrees: 12,
+    reservations: 2,
+    listesMax: 15,
+    entreesMax: 45,
+    reservationsMax: 8,
   },
   {
     id: 2,
     venue: "Sky Bar Casa",
-    city: "Casablanca",
-    guests: 4,
-    tableType: "Table Standard",
-    date: "Demain, 21:00",
-    status: "en attente",
-    statusColor: "bg-amber-100 text-amber-800",
+    venueShort: "SBC",
+    name: "SUNSET SESSION",
+    day: "VEN.",
+    date: 10,
+    month: "AVR",
+    time: "18:00 - 02:00",
+    ageRestriction: "+21",
+    category: "WEEKLY",
+    categoryColor: "text-blue-600",
+    gradient: "from-orange-800 via-rose-700 to-pink-900",
+    listes: 0,
+    entrees: 0,
+    reservations: 1,
+    listesMax: 20,
+    entreesMax: 60,
+    reservationsMax: 12,
   },
   {
     id: 3,
     venue: "Le Lotus Club",
-    city: "Tanger",
-    guests: 12,
-    tableType: "Carré VIP",
-    date: "Sam. 12 Avr., 23:00",
-    status: "en attente",
-    statusColor: "bg-amber-100 text-amber-800",
+    venueShort: "LLC",
+    name: "LOTUS NIGHTS",
+    day: "SAM.",
+    date: 11,
+    month: "AVR",
+    time: "23:00 - 05:00",
+    ageRestriction: "+21",
+    category: "SEASON",
+    categoryColor: "text-amber-600",
+    gradient: "from-emerald-900 via-teal-800 to-cyan-900",
+    listes: 5,
+    entrees: 24,
+    reservations: 4,
+    listesMax: 25,
+    entreesMax: 80,
+    reservationsMax: 10,
+  },
+  {
+    id: 4,
+    venue: "Pacha Marrakech",
+    venueShort: "PM",
+    name: "HOUSE AFFAIR",
+    day: "DIM.",
+    date: 12,
+    month: "AVR",
+    time: "22:00 - 04:00",
+    ageRestriction: "+21",
+    category: "SPECIAL",
+    categoryColor: "text-red-600",
+    gradient: "from-red-900 via-rose-800 to-orange-900",
+    listes: 1,
+    entrees: 6,
+    reservations: 0,
+    listesMax: 10,
+    entreesMax: 30,
+    reservationsMax: 6,
+  },
+  {
+    id: 5,
+    venue: "Le Comptoir Darna",
+    venueShort: "LCD",
+    name: "LATIN VIBES",
+    day: "JEU.",
+    date: 16,
+    month: "AVR",
+    time: "22:00 - 04:00",
+    ageRestriction: "+21",
+    category: "WEEKLY",
+    categoryColor: "text-blue-600",
+    gradient: "from-yellow-800 via-amber-700 to-orange-900",
+    listes: 0,
+    entrees: 0,
+    reservations: 0,
+    listesMax: 15,
+    entreesMax: 45,
+    reservationsMax: 8,
+  },
+  {
+    id: 6,
+    venue: "Sky Bar Casa",
+    venueShort: "SBC",
+    name: "DEEP & CHILL",
+    day: "VEN.",
+    date: 17,
+    month: "AVR",
+    time: "19:00 - 02:00",
+    ageRestriction: "+21",
+    category: "WEEKLY",
+    categoryColor: "text-blue-600",
+    gradient: "from-slate-800 via-zinc-700 to-gray-900",
+    listes: 0,
+    entrees: 0,
+    reservations: 0,
+    listesMax: 20,
+    entreesMax: 60,
+    reservationsMax: 12,
+  },
+  {
+    id: 7,
+    venue: "Le Lotus Club",
+    venueShort: "LLC",
+    name: "AFRO HOUSE",
+    day: "SAM.",
+    date: 18,
+    month: "AVR",
+    time: "23:00 - 05:00",
+    ageRestriction: "+21",
+    category: "SEASON",
+    categoryColor: "text-amber-600",
+    gradient: "from-violet-900 via-fuchsia-800 to-pink-900",
+    listes: 0,
+    entrees: 0,
+    reservations: 0,
+    listesMax: 25,
+    entreesMax: 80,
+    reservationsMax: 10,
+  },
+  {
+    id: 8,
+    venue: "Pacha Marrakech",
+    venueShort: "PM",
+    name: "DISCO BALL",
+    day: "DIM.",
+    date: 19,
+    month: "AVR",
+    time: "22:00 - 04:00",
+    ageRestriction: "+21",
+    category: "SPECIAL",
+    categoryColor: "text-red-600",
+    gradient: "from-blue-900 via-indigo-800 to-violet-900",
+    listes: 0,
+    entrees: 0,
+    reservations: 0,
+    listesMax: 10,
+    entreesMax: 30,
+    reservationsMax: 6,
+  },
+  {
+    id: 9,
+    venue: "Le Comptoir Darna",
+    venueShort: "LCD",
+    name: "R&B CLASSICS",
+    day: "JEU.",
+    date: 23,
+    month: "AVR",
+    time: "22:00 - 04:00",
+    ageRestriction: "+21",
+    category: "WEEKLY",
+    categoryColor: "text-blue-600",
+    gradient: "from-cyan-900 via-sky-800 to-blue-900",
+    listes: 0,
+    entrees: 0,
+    reservations: 0,
+    listesMax: 15,
+    entreesMax: 45,
+    reservationsMax: 8,
+  },
+  {
+    id: 10,
+    venue: "Sky Bar Casa",
+    venueShort: "SBC",
+    name: "POOL PARTY",
+    day: "VEN.",
+    date: 24,
+    month: "AVR",
+    time: "14:00 - 22:00",
+    ageRestriction: "+18",
+    category: "SPECIAL",
+    categoryColor: "text-red-600",
+    gradient: "from-teal-800 via-emerald-700 to-green-900",
+    listes: 0,
+    entrees: 0,
+    reservations: 0,
+    listesMax: 30,
+    entreesMax: 100,
+    reservationsMax: 15,
+  },
+  {
+    id: 11,
+    venue: "Le Lotus Club",
+    venueShort: "LLC",
+    name: "TECHNO TEMPLE",
+    day: "SAM.",
+    date: 25,
+    month: "AVR",
+    time: "23:00 - 06:00",
+    ageRestriction: "+21",
+    category: "SEASON",
+    categoryColor: "text-amber-600",
+    gradient: "from-gray-900 via-zinc-800 to-neutral-900",
+    listes: 0,
+    entrees: 0,
+    reservations: 0,
+    listesMax: 25,
+    entreesMax: 80,
+    reservationsMax: 10,
+  },
+  {
+    id: 12,
+    venue: "Pacha Marrakech",
+    venueShort: "PM",
+    name: "IBIZA CALLING",
+    day: "DIM.",
+    date: 26,
+    month: "AVR",
+    time: "22:00 - 04:00",
+    ageRestriction: "+21",
+    category: "SPECIAL",
+    categoryColor: "text-red-600",
+    gradient: "from-rose-900 via-pink-800 to-fuchsia-900",
+    listes: 0,
+    entrees: 0,
+    reservations: 0,
+    listesMax: 10,
+    entreesMax: 30,
+    reservationsMax: 6,
   },
 ];
 
-const topVenues = [
+const pastEvents: VenueEvent[] = [
   {
-    rank: 1,
-    name: "Le Comptoir Darna",
-    city: "Marrakech",
-    covers: 68,
-    commission: "21 200 MAD",
+    id: 101,
+    venue: "Le Comptoir Darna",
+    venueShort: "LCD",
+    name: "LADIES NIGHT",
+    day: "JEU.",
+    date: 2,
+    month: "AVR",
+    time: "22:00 - 04:00",
+    ageRestriction: "+21",
+    category: "WEEKLY",
+    categoryColor: "text-blue-600",
+    gradient: "from-pink-900 via-rose-800 to-red-900",
+    listes: 8,
+    entrees: 34,
+    reservations: 5,
+    listesMax: 15,
+    entreesMax: 45,
+    reservationsMax: 8,
   },
   {
-    rank: 2,
-    name: "Sky Bar Casa",
-    city: "Casablanca",
-    covers: 45,
-    commission: "14 800 MAD",
+    id: 102,
+    venue: "Sky Bar Casa",
+    venueShort: "SBC",
+    name: "SKYLINE",
+    day: "VEN.",
+    date: 3,
+    month: "AVR",
+    time: "20:00 - 03:00",
+    ageRestriction: "+21",
+    category: "SEASON",
+    categoryColor: "text-amber-600",
+    gradient: "from-indigo-900 via-blue-800 to-cyan-900",
+    listes: 12,
+    entrees: 48,
+    reservations: 7,
+    listesMax: 20,
+    entreesMax: 60,
+    reservationsMax: 12,
   },
   {
-    rank: 3,
-    name: "Le Lotus Club",
-    city: "Tanger",
-    covers: 31,
-    commission: "9 600 MAD",
+    id: 103,
+    venue: "Le Lotus Club",
+    venueShort: "LLC",
+    name: "GRAND OPENING",
+    day: "SAM.",
+    date: 4,
+    month: "AVR",
+    time: "23:00 - 06:00",
+    ageRestriction: "+21",
+    category: "SPECIAL",
+    categoryColor: "text-red-600",
+    gradient: "from-amber-900 via-yellow-800 to-orange-900",
+    listes: 20,
+    entrees: 72,
+    reservations: 10,
+    listesMax: 25,
+    entreesMax: 80,
+    reservationsMax: 10,
   },
-];
-
-const recentClients = [
-  { name: "Mehdi Alaoui", lastVisit: "il y a 2 jours", totalSpent: "34 500 MAD", visits: 8 },
-  { name: "Sarah Cohen", lastVisit: "il y a 5 jours", totalSpent: "28 000 MAD", visits: 5 },
-  { name: "Omar Tazi", lastVisit: "la semaine dernière", totalSpent: "19 200 MAD", visits: 3 },
+  {
+    id: 104,
+    venue: "Pacha Marrakech",
+    venueShort: "PM",
+    name: "WARM UP",
+    day: "DIM.",
+    date: 5,
+    month: "AVR",
+    time: "22:00 - 04:00",
+    ageRestriction: "+21",
+    category: "SEASON",
+    categoryColor: "text-amber-600",
+    gradient: "from-stone-800 via-warmGray-700 to-neutral-900",
+    listes: 6,
+    entrees: 22,
+    reservations: 3,
+    listesMax: 10,
+    entreesMax: 30,
+    reservationsMax: 6,
+  },
 ];
 
 export default function ConciergeDashboard() {
+  const [activeTab, setActiveTab] = useState<EventStatus>("upcoming");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const events = activeTab === "upcoming" ? upcomingEvents : pastEvents;
+  const filtered = searchQuery
+    ? events.filter(
+        (e) =>
+          e.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          e.venue.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : events;
+
   return (
     <div className="bg-surface min-h-screen">
-      {/* Page Header */}
-      <div className="px-8 pt-8 pb-4">
-        <h1 className="text-primary-dark font-[family-name:var(--font-manrope)] text-3xl font-extrabold">
-          Bonjour, Concierge.
-        </h1>
-        <p className="text-on-surface-variant mt-1 text-sm">
-          Voici un aperçu de votre activité ce mois-ci.
-        </p>
-      </div>
+      {/* Sub-header with tabs and search */}
+      <div className="px-4 sm:px-6 pt-6 pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          {/* Event tabs */}
+          <div className="flex items-center gap-0">
+            <button
+              onClick={() => setActiveTab("past")}
+              className={`px-4 py-2 text-sm font-medium font-[family-name:var(--font-inter)] transition-colors border-b-2 ${
+                activeTab === "past"
+                  ? "border-primary text-primary"
+                  : "border-transparent text-on-surface-variant hover:text-on-surface"
+              }`}
+            >
+              Événements passés
+            </button>
+            <button
+              onClick={() => setActiveTab("upcoming")}
+              className={`px-4 py-2 text-sm font-medium font-[family-name:var(--font-inter)] transition-colors border-b-2 ${
+                activeTab === "upcoming"
+                  ? "border-primary text-primary"
+                  : "border-transparent text-on-surface-variant hover:text-on-surface"
+              }`}
+            >
+              Prochains événements
+            </button>
+          </div>
 
-      {/* Stats Strip */}
-      <div className="px-8 pb-6">
-        <div className="rounded-md overflow-hidden editorial-shadow">
-          <StatsStrip stats={stats} />
+          {/* Search + filter */}
+          <div className="flex items-center gap-2">
+            <div className="relative">
+              <Search
+                size={16}
+                strokeWidth={1.5}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/50"
+              />
+              <input
+                type="text"
+                placeholder="Rechercher un événement..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 pr-4 py-2 text-sm bg-white border border-outline-variant/20 rounded-lg text-on-background placeholder:text-on-surface-variant/50 font-[family-name:var(--font-inter)] focus:ring-1 focus:ring-primary/30 focus:border-primary/30 focus:outline-none w-64 transition-colors"
+              />
+            </div>
+            <button className="p-2 rounded-lg border border-outline-variant/20 text-on-surface-variant hover:bg-surface-low transition-colors">
+              <Filter size={16} strokeWidth={1.5} />
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Two Column Layout */}
-      <div className="px-8 pb-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left: Reservations */}
-        <div className="lg:col-span-7">
-          <h3 className="text-primary-dark font-[family-name:var(--font-manrope)] text-lg font-bold mb-4">
-            Mes réservations récentes
+      {/* Month navigation */}
+      <div className="px-4 sm:px-6 pb-4 flex items-center gap-3">
+        <button className="p-1.5 rounded-lg hover:bg-surface-low transition-colors text-on-surface-variant">
+          <ChevronLeft size={18} strokeWidth={1.5} />
+        </button>
+        <h2 className="text-lg font-bold text-on-background font-[family-name:var(--font-manrope)]">
+          Avril 2026
+        </h2>
+        <button className="p-1.5 rounded-lg hover:bg-surface-low transition-colors text-on-surface-variant">
+          <ChevronRight size={18} strokeWidth={1.5} />
+        </button>
+      </div>
+
+      {/* Event Grid */}
+      <div className="px-4 sm:px-6 pb-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {filtered.map((event) => (
+            <EventCard key={event.id} event={event} isPast={activeTab === "past"} />
+          ))}
+        </div>
+
+        {filtered.length === 0 && (
+          <div className="text-center py-16">
+            <CalendarDays
+              size={48}
+              strokeWidth={1}
+              className="mx-auto text-on-surface-variant/30 mb-4"
+            />
+            <p className="text-on-surface-variant text-sm font-[family-name:var(--font-inter)]">
+              Aucun événement trouvé
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function EventCard({
+  event,
+  isPast,
+}: {
+  event: VenueEvent;
+  isPast: boolean;
+}) {
+  return (
+    <div
+      className={`bg-white rounded-xl overflow-hidden border border-outline-variant/10 hover:shadow-lg transition-all duration-200 group ${
+        isPast ? "opacity-75 hover:opacity-100" : ""
+      }`}
+    >
+      {/* Flyer / Image area */}
+      <div className="relative">
+        <div
+          className={`h-40 bg-gradient-to-br ${event.gradient} flex items-center justify-center relative overflow-hidden`}
+        >
+          {/* Decorative elements */}
+          <div className="absolute inset-0 opacity-20">
+            <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full border border-white/30" />
+            <div className="absolute -bottom-6 -left-6 w-24 h-24 rounded-full border border-white/20" />
+          </div>
+
+          {/* Event name overlay */}
+          <h3 className="text-white text-2xl font-extrabold font-[family-name:var(--font-manrope)] tracking-wide relative z-10 text-center px-4 drop-shadow-lg">
+            {event.name}
           </h3>
-          <div className="space-y-0 rounded-md overflow-hidden editorial-shadow">
-            {pendingReservations.map((res, i) => (
-              <div
-                key={res.id}
-                className={`p-5 ${i % 2 === 0 ? "bg-surface-card" : "bg-surface-low"}`}
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="font-[family-name:var(--font-manrope)] font-bold text-on-background">
-                        {res.venue}
-                      </span>
-                      <span
-                        className={`text-[0.625rem] font-semibold px-2 py-0.5 rounded-full ${res.statusColor}`}
-                      >
-                        {res.status}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-4 text-sm text-on-surface-variant">
-                      <span className="flex items-center gap-1">
-                        <Building2 size={13} strokeWidth={1.5} />
-                        {res.city}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Users size={13} strokeWidth={1.5} />
-                        {res.guests} couverts
-                      </span>
-                      <span>{res.tableType}</span>
-                    </div>
-                    <p className="text-xs text-on-surface-variant mt-1.5 flex items-center gap-1">
-                      <CalendarDays size={12} strokeWidth={1.5} />
-                      {res.date}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))}
+
+          {/* Date badge */}
+          <div className="absolute top-3 left-3 z-10">
+            <div className="bg-primary text-white rounded-lg px-2.5 py-1.5 text-center min-w-[52px]">
+              <p className="text-[10px] font-bold font-[family-name:var(--font-inter)] uppercase leading-none">
+                {event.day}
+              </p>
+              <p className="text-xl font-extrabold font-[family-name:var(--font-manrope)] leading-none mt-0.5">
+                {event.date}
+              </p>
+              <p className="text-[10px] font-bold font-[family-name:var(--font-inter)] uppercase leading-none mt-0.5">
+                {event.month}
+              </p>
+            </div>
           </div>
+
+          {/* Three dot menu */}
+          <button className="absolute top-3 right-3 z-10 w-7 h-7 rounded-full bg-black/20 backdrop-blur-sm flex items-center justify-center text-white/80 hover:text-white hover:bg-black/30 transition-colors opacity-0 group-hover:opacity-100">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+              <circle cx="8" cy="3" r="1.5" />
+              <circle cx="8" cy="8" r="1.5" />
+              <circle cx="8" cy="13" r="1.5" />
+            </svg>
+          </button>
         </div>
 
-        {/* Right: Top Venues */}
-        <div className="lg:col-span-5">
-          <h3 className="text-primary-dark font-[family-name:var(--font-manrope)] text-lg font-bold mb-4">
-            Mes meilleurs établissements
-          </h3>
-          <div className="space-y-0 rounded-md overflow-hidden editorial-shadow">
-            {topVenues.map((venue, i) => (
-              <div
-                key={venue.rank}
-                className={`p-5 relative overflow-hidden ${
-                  i % 2 === 0 ? "bg-surface-card" : "bg-surface-low"
-                }`}
-              >
-                <span className="absolute -right-2 -top-3 text-[5rem] font-[family-name:var(--font-manrope)] font-extrabold text-primary/[0.04] leading-none select-none pointer-events-none">
-                  {venue.rank}
-                </span>
-
-                <div className="relative z-10">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-[family-name:var(--font-manrope)] font-bold text-on-background">
-                      {venue.name}
-                    </span>
-                  </div>
-                  <p className="text-xs text-on-surface-variant mb-3">{venue.city}</p>
-                  <div className="flex items-center gap-6">
-                    <div>
-                      <p className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant font-semibold">
-                        Couverts
-                      </p>
-                      <p className="text-on-background font-[family-name:var(--font-manrope)] font-bold text-lg">
-                        {venue.covers}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant font-semibold">
-                        Commission
-                      </p>
-                      <p className="text-on-background font-[family-name:var(--font-manrope)] font-bold text-lg flex items-center gap-1">
-                        {venue.commission}
-                        <TrendingUp size={14} strokeWidth={1.5} className="text-green-600" />
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+        {/* Time + age bar */}
+        <div className="flex items-center gap-2 px-3 py-2 bg-white border-b border-outline-variant/10">
+          <Clock size={13} strokeWidth={1.5} className="text-on-surface-variant/60" />
+          <span className="text-xs text-on-surface-variant font-[family-name:var(--font-inter)]">
+            {event.time}
+          </span>
+          <span className="text-xs text-on-surface-variant/40">
+            {event.ageRestriction}
+          </span>
         </div>
       </div>
 
-      {/* Recent Clients */}
-      <div className="px-8 pb-8">
-        <h3 className="text-primary-dark font-[family-name:var(--font-manrope)] text-lg font-bold mb-4">
-          Clients récents
-        </h3>
-        <div className="bg-surface-card rounded-md editorial-shadow overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-surface-low">
-                  <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
-                    Client
-                  </th>
-                  <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
-                    Dernière visite
-                  </th>
-                  <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
-                    Dépenses totales
-                  </th>
-                  <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
-                    Visites
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentClients.map((client, i) => (
-                  <tr key={client.name} className={i % 2 === 0 ? "bg-surface-card" : "bg-surface-low/50"}>
-                    <td className="px-6 py-3.5 text-on-background font-medium">{client.name}</td>
-                    <td className="px-6 py-3.5 text-on-surface-variant">{client.lastVisit}</td>
-                    <td className="px-6 py-3.5 text-on-background font-medium">{client.totalSpent}</td>
-                    <td className="px-6 py-3.5 text-on-background">{client.visits}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      {/* Event details */}
+      <div className="p-3">
+        {/* Category tag */}
+        <div className="mb-3">
+          <span
+            className={`text-xs font-bold font-[family-name:var(--font-inter)] ${event.categoryColor}`}
+          >
+            {event.category}
+          </span>
+          <span className="text-xs text-on-surface-variant/40 font-[family-name:var(--font-inter)]">
+            {" "}
+            | {event.venue}
+          </span>
+        </div>
+
+        {/* Stats row */}
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-1 text-center">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/60 font-[family-name:var(--font-inter)]">
+              Listes
+            </span>
+            <div className="flex items-center gap-0.5 ml-1">
+              <Users size={12} strokeWidth={1.5} className="text-emerald-500" />
+              <span className="text-xs font-bold text-on-background font-[family-name:var(--font-manrope)]">
+                {event.listes}
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-1 text-center">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/60 font-[family-name:var(--font-inter)]">
+              Entrées
+            </span>
+            <div className="flex items-center gap-0.5 ml-1">
+              <Ticket size={12} strokeWidth={1.5} className="text-blue-500" />
+              <span className="text-xs font-bold text-on-background font-[family-name:var(--font-manrope)]">
+                {event.entrees}
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-1 text-center">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/60 font-[family-name:var(--font-inter)]">
+              Réserv.
+            </span>
+            <div className="flex items-center gap-0.5 ml-1">
+              <CalendarDays
+                size={12}
+                strokeWidth={1.5}
+                className="text-red-400"
+              />
+              <span className="text-xs font-bold text-on-background font-[family-name:var(--font-manrope)]">
+                {event.reservations}
+              </span>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Quick Actions */}
-      <div className="px-8 pb-10">
-        <div className="bg-surface-low rounded-md p-5 flex items-center gap-4 flex-wrap">
-          <a
-            href="/concierge/reservations"
-            className="flex items-center gap-2 bg-primary text-white text-sm font-medium px-5 py-2.5 rounded-sm hover:opacity-90 transition-opacity"
-          >
-            <Plus size={16} strokeWidth={1.5} />
-            Nouvelle réservation
-          </a>
-          <a
-            href="/concierge/venues"
-            className="flex items-center gap-2 bg-surface-mid text-on-background text-sm font-medium px-5 py-2.5 rounded-sm hover:bg-surface-high transition-colors"
-          >
-            <Building2 size={16} strokeWidth={1.5} />
-            Parcourir les établissements
-          </a>
-          <a
-            href="/concierge/commissions"
-            className="flex items-center gap-1 text-primary-dark text-sm font-medium hover:underline ml-2"
-          >
-            Voir mes commissions
-            <ArrowRight size={14} strokeWidth={1.5} />
-          </a>
-        </div>
+        {/* Add client button */}
+        <button className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-surface-low hover:bg-surface-mid text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors font-[family-name:var(--font-inter)] cursor-pointer">
+          <UserPlus size={16} strokeWidth={1.5} />
+          Nouveau client
+        </button>
       </div>
     </div>
   );

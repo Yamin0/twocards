@@ -1,76 +1,186 @@
 "use client";
 
-import { Download } from "lucide-react";
-import { StatsStrip } from "@/components/dashboard/stats-strip";
-
-const stats = [
-  { label: "Total ce mois", value: "48 600 MAD" },
-  { label: "En attente", value: "18 800 MAD" },
-  { label: "Versé", value: "29 800 MAD" },
-  { label: "Taux moyen", value: "10%" },
-];
+import { useState } from "react";
+import { Download, TrendingUp, Wallet, Clock, Percent } from "lucide-react";
 
 const commissions = [
-  { id: 1, venue: "Le Comptoir Darna", client: "Mehdi Alaoui", date: "6 Avr.", montant: "6 400 MAD", status: "versé" },
-  { id: 2, venue: "Sky Bar Casa", client: "Sarah Cohen", date: "5 Avr.", montant: "2 800 MAD", status: "versé" },
-  { id: 3, venue: "Le Lotus Club", client: "Omar Tazi", date: "4 Avr.", montant: "9 600 MAD", status: "en attente" },
-  { id: 4, venue: "Le Comptoir Darna", client: "Lina Berrada", date: "3 Avr.", montant: "4 200 MAD", status: "versé" },
-  { id: 5, venue: "Pacha Marrakech", client: "Youssef Fassi", date: "2 Avr.", montant: "7 800 MAD", status: "en attente" },
-  { id: 6, venue: "Sky Bar Casa", client: "Amira Benjelloun", date: "1 Avr.", montant: "3 200 MAD", status: "versé" },
-  { id: 7, venue: "Le Comptoir Darna", client: "Karim Tazi", date: "31 Mar.", montant: "5 400 MAD", status: "versé" },
-  { id: 8, venue: "Le Lotus Club", client: "Nadia Chraibi", date: "30 Mar.", montant: "9 200 MAD", status: "en attente" },
+  { id: 1, venue: "Le Comptoir Darna", client: "Mehdi Alaoui", event: "OPENING NIGHT", date: "6 Avr.", montant: "6 400 MAD", status: "versé" },
+  { id: 2, venue: "Sky Bar Casa", client: "Sarah Cohen", event: "SUNSET SESSION", date: "5 Avr.", montant: "2 800 MAD", status: "versé" },
+  { id: 3, venue: "Le Lotus Club", client: "Omar Tazi", event: "LOTUS NIGHTS", date: "4 Avr.", montant: "9 600 MAD", status: "en attente" },
+  { id: 4, venue: "Le Comptoir Darna", client: "Lina Berrada", event: "LATIN VIBES", date: "3 Avr.", montant: "4 200 MAD", status: "versé" },
+  { id: 5, venue: "Pacha Marrakech", client: "Youssef Fassi", event: "HOUSE AFFAIR", date: "2 Avr.", montant: "7 800 MAD", status: "en attente" },
+  { id: 6, venue: "Sky Bar Casa", client: "Amira Benjelloun", event: "DEEP & CHILL", date: "1 Avr.", montant: "3 200 MAD", status: "versé" },
+  { id: 7, venue: "Le Comptoir Darna", client: "Karim Tazi", event: "R&B CLASSICS", date: "31 Mar.", montant: "5 400 MAD", status: "versé" },
+  { id: 8, venue: "Le Lotus Club", client: "Nadia Chraibi", event: "AFRO HOUSE", date: "30 Mar.", montant: "9 200 MAD", status: "en attente" },
 ];
 
 export default function ConciergeCommissionsPage() {
+  const [filter, setFilter] = useState("tous");
+
+  const filtered =
+    filter === "tous"
+      ? commissions
+      : commissions.filter((c) => c.status === filter);
+
+  const totalMonth = 48600;
+  const pending = 18800;
+  const paid = 29800;
+
   return (
     <div className="bg-surface min-h-screen">
-      <div className="px-8 pt-8 pb-4 flex items-center justify-between">
+      {/* Header */}
+      <div className="px-4 sm:px-6 pt-6 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-primary-dark font-[family-name:var(--font-manrope)] text-2xl font-extrabold">
-            Mes commissions
+          <h1 className="text-xl font-bold text-on-background font-[family-name:var(--font-manrope)]">
+            Commissions
           </h1>
-          <p className="text-on-surface-variant mt-1 text-sm">
-            Suivez vos gains et l&apos;historique de vos versements.
+          <p className="text-sm text-on-surface-variant font-[family-name:var(--font-inter)] mt-0.5">
+            Suivez vos gains et versements
           </p>
         </div>
-        <button className="flex items-center gap-2 bg-surface-mid text-on-background text-sm font-medium px-5 py-2.5 rounded-sm hover:bg-surface-high transition-colors">
+        <button className="flex items-center gap-2 bg-white border border-outline-variant/20 text-on-surface-variant text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-surface-low transition-colors font-[family-name:var(--font-inter)]">
           <Download size={16} strokeWidth={1.5} />
-          Exporter
+          Exporter CSV
         </button>
       </div>
 
-      {/* Stats */}
-      <div className="px-8 pb-6">
-        <div className="rounded-md overflow-hidden editorial-shadow">
-          <StatsStrip stats={stats} />
+      {/* Stats cards */}
+      <div className="px-4 sm:px-6 pb-6 grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="bg-white rounded-xl border border-outline-variant/10 p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Wallet size={16} strokeWidth={1.5} className="text-primary" />
+            </div>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/60 font-[family-name:var(--font-inter)]">
+              Total ce mois
+            </span>
+          </div>
+          <p className="text-xl font-extrabold text-on-background font-[family-name:var(--font-manrope)]">
+            {totalMonth.toLocaleString()} MAD
+          </p>
+        </div>
+        <div className="bg-white rounded-xl border border-outline-variant/10 p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
+              <Clock size={16} strokeWidth={1.5} className="text-amber-600" />
+            </div>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/60 font-[family-name:var(--font-inter)]">
+              En attente
+            </span>
+          </div>
+          <p className="text-xl font-extrabold text-on-background font-[family-name:var(--font-manrope)]">
+            {pending.toLocaleString()} MAD
+          </p>
+        </div>
+        <div className="bg-white rounded-xl border border-outline-variant/10 p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+              <TrendingUp size={16} strokeWidth={1.5} className="text-emerald-600" />
+            </div>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/60 font-[family-name:var(--font-inter)]">
+              Versé
+            </span>
+          </div>
+          <p className="text-xl font-extrabold text-on-background font-[family-name:var(--font-manrope)]">
+            {paid.toLocaleString()} MAD
+          </p>
+        </div>
+        <div className="bg-white rounded-xl border border-outline-variant/10 p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+              <Percent size={16} strokeWidth={1.5} className="text-blue-600" />
+            </div>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/60 font-[family-name:var(--font-inter)]">
+              Taux moyen
+            </span>
+          </div>
+          <p className="text-xl font-extrabold text-on-background font-[family-name:var(--font-manrope)]">
+            10%
+          </p>
         </div>
       </div>
 
+      {/* Filters */}
+      <div className="px-4 sm:px-6 pb-4 flex items-center gap-2">
+        {[
+          { key: "tous", label: "Tous" },
+          { key: "versé", label: "Versé" },
+          { key: "en attente", label: "En attente" },
+        ].map((f) => (
+          <button
+            key={f.key}
+            onClick={() => setFilter(f.key)}
+            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors font-[family-name:var(--font-inter)] ${
+              filter === f.key
+                ? "bg-primary text-white"
+                : "bg-white border border-outline-variant/20 text-on-surface-variant hover:bg-surface-low"
+            }`}
+          >
+            {f.label}
+          </button>
+        ))}
+      </div>
+
       {/* Table */}
-      <div className="px-8 pb-8">
-        <div className="bg-surface-card rounded-md editorial-shadow overflow-hidden">
+      <div className="px-4 sm:px-6 pb-8">
+        <div className="bg-white rounded-xl border border-outline-variant/10 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-surface-low">
-                  <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">Établissement</th>
-                  <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">Client</th>
-                  <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">Date</th>
-                  <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">Montant</th>
-                  <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">Statut</th>
+                <tr className="border-b border-outline-variant/10">
+                  <th className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/60 font-[family-name:var(--font-inter)]">
+                    Établissement
+                  </th>
+                  <th className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/60 font-[family-name:var(--font-inter)]">
+                    Événement
+                  </th>
+                  <th className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/60 font-[family-name:var(--font-inter)]">
+                    Client
+                  </th>
+                  <th className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/60 font-[family-name:var(--font-inter)]">
+                    Date
+                  </th>
+                  <th className="text-right px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/60 font-[family-name:var(--font-inter)]">
+                    Montant
+                  </th>
+                  <th className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/60 font-[family-name:var(--font-inter)]">
+                    Statut
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                {commissions.map((c, i) => (
-                  <tr key={c.id} className={i % 2 === 0 ? "bg-surface-card" : "bg-surface-low/50"}>
-                    <td className="px-6 py-3.5 text-on-background font-medium">{c.venue}</td>
-                    <td className="px-6 py-3.5 text-on-background">{c.client}</td>
-                    <td className="px-6 py-3.5 text-on-surface-variant">{c.date}</td>
-                    <td className="px-6 py-3.5 text-on-background font-bold">{c.montant}</td>
-                    <td className="px-6 py-3.5">
-                      <span className={`text-[0.625rem] font-semibold px-2 py-0.5 rounded-full ${
-                        c.status === "versé" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"
-                      }`}>
+                {filtered.map((c, i) => (
+                  <tr
+                    key={c.id}
+                    className={`border-b border-outline-variant/5 hover:bg-surface-low/50 transition-colors ${
+                      i % 2 === 0 ? "" : "bg-surface/30"
+                    }`}
+                  >
+                    <td className="px-4 py-3.5 text-on-background font-medium font-[family-name:var(--font-manrope)]">
+                      {c.venue}
+                    </td>
+                    <td className="px-4 py-3.5">
+                      <span className="text-xs font-bold text-on-surface-variant/80 font-[family-name:var(--font-inter)]">
+                        {c.event}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3.5 text-on-background font-[family-name:var(--font-inter)]">
+                      {c.client}
+                    </td>
+                    <td className="px-4 py-3.5 text-on-surface-variant font-[family-name:var(--font-inter)]">
+                      {c.date}
+                    </td>
+                    <td className="px-4 py-3.5 text-right text-on-background font-bold font-[family-name:var(--font-manrope)]">
+                      {c.montant}
+                    </td>
+                    <td className="px-4 py-3.5">
+                      <span
+                        className={`text-[10px] font-semibold px-2.5 py-1 rounded-full ${
+                          c.status === "versé"
+                            ? "bg-emerald-100 text-emerald-800"
+                            : "bg-amber-100 text-amber-800"
+                        }`}
+                      >
                         {c.status}
                       </span>
                     </td>
