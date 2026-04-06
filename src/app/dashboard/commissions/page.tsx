@@ -7,7 +7,7 @@ import { StatusBadge } from "@/components/shared/status-badge";
 const stats = [
   { label: "Total Commissions", value: "6 600 MAD" },
   { label: "En attente", value: "1 220 MAD" },
-  { label: "Payees ce mois", value: "5 380 MAD" },
+  { label: "Payées ce mois", value: "5 380 MAD" },
   { label: "Prochain paiement", value: "01/05" },
 ];
 
@@ -15,17 +15,17 @@ const commissions = [
   {
     date: "28 Oct 2025",
     rp: "Samy Benchekroun",
-    event: "Soiree VIP Vendredis",
+    event: "Soirée VIP Vendredis",
     montant: "1 870 MAD",
-    statut: "Paye",
+    statut: "Payé",
     variant: "success" as const,
   },
   {
     date: "25 Oct 2025",
     rp: "Yasmine El Idrissi",
-    event: "Nuit Blanche Special",
+    event: "Nuit Blanche Spécial",
     montant: "1 530 MAD",
-    statut: "Paye",
+    statut: "Payé",
     variant: "success" as const,
   },
   {
@@ -39,7 +39,7 @@ const commissions = [
   {
     date: "18 Oct 2025",
     rp: "Nadia Berrada",
-    event: "Soiree Privee Champagne",
+    event: "Soirée Privée Champagne",
     montant: "820 MAD",
     statut: "En attente",
     variant: "default" as const,
@@ -57,7 +57,7 @@ const commissions = [
     rp: "Samy Benchekroun",
     event: "Brunch Dimanche",
     montant: "1 420 MAD",
-    statut: "Paye",
+    statut: "Payé",
     variant: "success" as const,
   },
 ];
@@ -71,7 +71,7 @@ export default function CommissionsPage() {
           Commissions
         </h1>
         <p className="text-sm text-on-surface-variant mt-1">
-          Suivez et gerez les commissions de votre reseau RP.
+          Suivez et gérez les commissions de votre réseau RP.
         </p>
       </div>
 
@@ -102,7 +102,7 @@ export default function CommissionsPage() {
                     RP
                   </th>
                   <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
-                    Evenement
+                    Événement
                   </th>
                   <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
                     Montant

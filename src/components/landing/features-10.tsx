@@ -18,8 +18,8 @@ export function Features10() {
             <CardHeader className="pb-3">
               <CardHeading
                 icon={LayoutDashboard}
-                title="Tableau de bord en temps reel"
-                description="Visualisez vos couverts, revenus et reservations depuis une interface unique et intuitive."
+                title="Tableau de bord en temps réel"
+                description="Visualisez vos couverts, revenus et réservations depuis une interface unique et intuitive."
               />
             </CardHeader>
 
@@ -41,8 +41,8 @@ export function Features10() {
             <CardHeader className="pb-3">
               <CardHeading
                 icon={CalendarCheck}
-                title="Planification d'evenements"
-                description="Creez et gerez vos soirees avec des outils de planification complets et des accords de commission."
+                title="Planification d'événements"
+                description="Créez et gérez vos soirées avec des outils de planification complets et des accords de commission."
               />
             </CardHeader>
 
@@ -64,13 +64,13 @@ export function Features10() {
 
           <FeatureCard className="p-6 lg:col-span-2">
             <p className="mx-auto my-6 max-w-md text-balance text-center text-2xl font-semibold font-[family-name:var(--font-manrope)] text-primary-dark">
-              Gerez votre reseau de RP, automatisez les commissions et
-              developpez votre activite.
+              Gérez votre réseau de RP, automatisez les commissions et
+              développez votre activité.
             </p>
 
             <div className="flex justify-center gap-6 overflow-hidden">
               <CircularUI
-                label="Reservations"
+                label="Réservations"
                 circles={[{ pattern: "border" }, { pattern: "border" }]}
               />
 
@@ -80,7 +80,7 @@ export function Features10() {
               />
 
               <CircularUI
-                label="Reseau RP"
+                label="Réseau RP"
                 circles={[{ pattern: "blue" }, { pattern: "none" }]}
               />
 

@@ -10,7 +10,7 @@ export function Features() {
             Infrastructure Fondamentale
           </p>
           <h2 className="mt-3 font-[family-name:var(--font-manrope)] text-3xl font-bold text-primary-dark sm:text-4xl">
-            Concu pour les exploitants de lieux
+            Conçu pour les exploitants de lieux
           </h2>
         </div>
 
@@ -27,11 +27,11 @@ export function Features() {
                 />
               </div>
               <h3 className="font-[family-name:var(--font-manrope)] text-xl font-bold text-primary-dark">
-                Gestion de la liste d&apos;invites
+                Gestion de la liste d&apos;invités
               </h3>
               <p className="mt-3 max-w-md font-[family-name:var(--font-inter)] text-sm leading-relaxed text-on-surface-variant">
-                Centralisez toutes vos listes d&apos;invites en un seul endroit.
-                Validez, filtrez et suivez chaque entree en temps reel avec un
+                Centralisez toutes vos listes d&apos;invités en un seul endroit.
+                Validez, filtrez et suivez chaque entrée en temps réel avec un
                 historique complet des interactions.
               </p>
             </div>
@@ -54,11 +54,11 @@ export function Features() {
                 />
               </div>
               <h3 className="font-[family-name:var(--font-manrope)] text-xl font-bold text-primary-dark">
-                Planification d&apos;evenements
+                Planification d&apos;événements
               </h3>
               <p className="mt-3 font-[family-name:var(--font-inter)] text-sm leading-relaxed text-on-surface-variant">
-                Creez et gerez vos soirees avec des outils de planification
-                complets. Definissez les capacites, les tarifs et les accords
+                Créez et gérez vos soirées avec des outils de planification
+                complets. Définissez les capacités, les tarifs et les accords
                 de commission.
               </p>
             </div>
@@ -84,7 +84,7 @@ export function Features() {
               </h3>
               <p className="mt-3 max-w-md font-[family-name:var(--font-inter)] text-sm leading-relaxed text-on-surface-variant">
                 Automatisez le calcul et le versement des commissions pour votre
-                reseau de concierges et RP. Transparence totale, zero litige.
+                réseau de concierges et RP. Transparence totale, zéro litige.
               </p>
             </div>
 
@@ -99,7 +99,7 @@ export function Features() {
               <div className="mt-4 flex items-center gap-3">
                 <div className="flex-1">
                   <p className="font-[family-name:var(--font-inter)] text-xs text-on-primary-container">
-                    Commissions versees
+                    Commissions versées
                   </p>
                   <p className="mt-1 font-[family-name:var(--font-manrope)] text-lg font-bold text-white">
                     3,420 MAD

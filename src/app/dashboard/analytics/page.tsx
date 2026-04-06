@@ -9,7 +9,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 
-const navLinks = ["Vue d'ensemble", "Cartes en direct", "Revenus", "Clients", "Parametres"];
+const navLinks = ["Vue d'ensemble", "Cartes en direct", "Revenus", "Clients", "Paramètres"];
 
 const rpData = [
   { rang: 1, nom: "Samy Benchekroun", couverts: 48, ca: "124 800 MAD", commissions: "12 480 MAD", taille: "7,2" },
@@ -43,11 +43,11 @@ const barChartRevenus = [
 
 const topEvents = [
   { name: "Nuit Blanche VIP", revenue: "82 000 MAD", couverts: 18 },
-  { name: "Soiree Privee Champagne", revenue: "67 500 MAD", couverts: 12 },
+  { name: "Soirée Privée Champagne", revenue: "67 500 MAD", couverts: 12 },
   { name: "DJ Set International", revenue: "54 000 MAD", couverts: 15 },
 ];
 
-const periodTabs = ["Cette semaine", "Ce mois", "Cette annee", "Personnalise"];
+const periodTabs = ["Cette semaine", "Ce mois", "Cette année", "Personnalisé"];
 
 const donutSegments = [
   { label: "Tables VIP", pct: 64, color: "bg-primary" },
@@ -194,7 +194,7 @@ export default function AnalyticsPage() {
                     Couverts
                   </th>
                   <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
-                    CA Genere
+                    CA Généré
                   </th>
                   <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
                     Commissions Dues
@@ -231,10 +231,10 @@ export default function AnalyticsPage() {
 
       {/* Bottom Row */}
       <div className="px-6 pb-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Meilleurs Evenements */}
+        {/* Meilleurs Événements */}
         <div className="bg-surface-card rounded-md editorial-shadow p-6">
           <h3 className="text-primary-dark font-[family-name:var(--font-manrope)] font-bold text-sm mb-5">
-            Meilleurs Evenements
+            Meilleurs Événements
           </h3>
           <div className="space-y-4">
             {topEvents.map((event, i) => (
@@ -255,10 +255,10 @@ export default function AnalyticsPage() {
           </div>
         </div>
 
-        {/* Repartition des Reservations */}
+        {/* Répartition des Réservations */}
         <div className="bg-surface-card rounded-md editorial-shadow p-6">
           <h3 className="text-primary-dark font-[family-name:var(--font-manrope)] font-bold text-sm mb-5">
-            Repartition des Reservations
+            Répartition des Réservations
           </h3>
           <div className="flex items-center gap-8">
             {/* Donut Chart Mockup */}
@@ -323,7 +323,7 @@ export default function AnalyticsPage() {
         </button>
         <button className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-on-surface-variant hover:text-on-background transition-colors">
           <Download size={16} strokeWidth={1.5} />
-          Telecharger CSV
+          Télécharger CSV
         </button>
       </div>
     </div>

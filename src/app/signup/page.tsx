@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import {
   Building2,
@@ -29,7 +28,6 @@ export default function SignupPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const router = useRouter();
 
   const [form, setForm] = useState({
     fullname: "",
@@ -50,7 +48,7 @@ export default function SignupPage() {
     setLoading(true);
 
     if (form.password.length < 8) {
-      setError("Le mot de passe doit contenir au moins 8 caracteres.");
+      setError("Le mot de passe doit contenir au moins 8 caractères.");
       setLoading(false);
       return;
     }
@@ -76,7 +74,7 @@ export default function SignupPage() {
     if (error) {
       setError(
         error.message === "User already registered"
-          ? "Un compte existe deja avec cet email."
+          ? "Un compte existe déjà avec cet email."
           : error.message
       );
       setLoading(false);
@@ -95,10 +93,10 @@ export default function SignupPage() {
             <CheckCircle size={32} strokeWidth={1.5} className="text-emerald-600" />
           </div>
           <h1 className="text-2xl font-bold text-primary-dark font-[family-name:var(--font-manrope)] mb-3">
-            Verifiez votre email
+            Vérifiez votre email
           </h1>
           <p className="text-sm text-on-surface-variant font-[family-name:var(--font-inter)] mb-6 leading-relaxed">
-            Un lien de confirmation a ete envoye a{" "}
+            Un lien de confirmation a été envoyé à{" "}
             <strong className="text-on-background">{form.email}</strong>.
             <br />
             Cliquez dessus pour activer votre compte.
@@ -107,7 +105,7 @@ export default function SignupPage() {
             href="/login"
             className="inline-block px-6 py-2.5 bg-primary text-white rounded-sm text-sm font-semibold hover:bg-primary-dark transition-colors"
           >
-            Aller a la connexion
+            Aller à la connexion
           </Link>
         </div>
       </div>
@@ -123,10 +121,10 @@ export default function SignupPage() {
               <div className="w-1 rounded-full bg-primary shrink-0" />
               <div>
                 <h1 className="text-2xl font-bold text-primary-dark font-[family-name:var(--font-manrope)]">
-                  Creer votre compte
+                  Créer votre compte
                 </h1>
                 <p className="text-sm text-on-surface-variant font-[family-name:var(--font-inter)] mt-1">
-                  Rejoignez le reseau twocards et gerez vos soirees
+                  Rejoignez le réseau twocards et gérez vos soirées
                   efficacement.
                 </p>
               </div>
@@ -161,7 +159,7 @@ export default function SignupPage() {
                       </div>
                       <div>
                         <p className="text-sm font-semibold text-on-background font-[family-name:var(--font-manrope)]">
-                          Etablissement
+                          Établissement
                         </p>
                         <p className="text-xs text-on-surface-variant font-[family-name:var(--font-inter)]">
                           Club, bar, restaurant
@@ -247,7 +245,7 @@ export default function SignupPage() {
                       <input
                         id="password"
                         type={showPassword ? "text" : "password"}
-                        placeholder="Min. 8 caracteres"
+                        placeholder="Min. 8 caractères"
                         value={form.password}
                         onChange={(e) => updateForm("password", e.target.value)}
                         required
@@ -266,7 +264,7 @@ export default function SignupPage() {
 
                   <div className="space-y-1.5">
                     <label htmlFor="phone" className="block font-[family-name:var(--font-inter)] text-xs uppercase tracking-wider text-on-surface-variant">
-                      Telephone
+                      Téléphone
                     </label>
                     <div className="relative">
                       <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/60" size={16} strokeWidth={1.5} />
@@ -287,12 +285,12 @@ export default function SignupPage() {
               {role === "etablissement" && (
                 <div className="space-y-4">
                   <h2 className="text-sm font-semibold text-primary-dark font-[family-name:var(--font-manrope)]">
-                    Details de l&apos;etablissement
+                    Détails de l&apos;établissement
                   </h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
                       <label htmlFor="venue-name" className="block font-[family-name:var(--font-inter)] text-xs uppercase tracking-wider text-on-surface-variant">
-                        Nom de l&apos;etablissement
+                        Nom de l&apos;établissement
                       </label>
                       <div className="relative">
                         <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/60" size={16} strokeWidth={1.5} />
@@ -363,12 +361,12 @@ export default function SignupPage() {
                 className="w-full py-2.5 bg-primary text-white rounded-sm text-sm font-semibold font-[family-name:var(--font-inter)] hover:bg-primary-dark transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {loading && <Loader2 size={16} className="animate-spin" />}
-                {loading ? "Creation en cours..." : "Creer mon compte"}
+                {loading ? "Création en cours..." : "Créer mon compte"}
               </button>
             </form>
 
             <p className="mt-6 text-center text-sm text-on-surface-variant font-[family-name:var(--font-inter)]">
-              Deja un compte ?{" "}
+              Déjà un compte ?{" "}
               <Link href="/login" className="text-primary font-medium hover:underline">
                 Se connecter
               </Link>
@@ -378,7 +376,7 @@ export default function SignupPage() {
       </div>
 
       <footer className="py-6 text-center text-xs text-on-surface-variant/60 font-[family-name:var(--font-inter)]">
-        <span>&copy; 2026 twocards. Tous droits reserves.</span>
+        <span>&copy; 2026 twocards. Tous droits réservés.</span>
       </footer>
     </div>
   );

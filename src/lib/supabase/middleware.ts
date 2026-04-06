@@ -33,25 +33,47 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  const pathname = request.nextUrl.pathname;
+
   // Protected routes: redirect to login if not authenticated
   if (
     !user &&
-    request.nextUrl.pathname.startsWith("/dashboard")
+    (pathname.startsWith("/dashboard") || pathname.startsWith("/concierge"))
   ) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
   }
 
-  // Redirect authenticated users away from login/signup
+  // Redirect authenticated users away from login/signup to their role-specific dashboard
   if (
     user &&
-    (request.nextUrl.pathname === "/login" ||
-      request.nextUrl.pathname === "/signup")
+    (pathname === "/login" || pathname === "/signup")
   ) {
+    const role = user.user_metadata?.role;
     const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
+    url.pathname = role === "concierge" ? "/concierge" : "/dashboard";
     return NextResponse.redirect(url);
+  }
+
+  // Redirect concierge users away from /dashboard to /concierge
+  if (user && pathname.startsWith("/dashboard")) {
+    const role = user.user_metadata?.role;
+    if (role === "concierge") {
+      const url = request.nextUrl.clone();
+      url.pathname = "/concierge";
+      return NextResponse.redirect(url);
+    }
+  }
+
+  // Redirect etablissement users away from /concierge to /dashboard
+  if (user && pathname.startsWith("/concierge")) {
+    const role = user.user_metadata?.role;
+    if (role !== "concierge") {
+      const url = request.nextUrl.clone();
+      url.pathname = "/dashboard";
+      return NextResponse.redirect(url);
+    }
   }
 
   return supabaseResponse;

@@ -44,8 +44,8 @@ const events = [
   },
   {
     id: 3,
-    title: "Soiree Tropicale",
-    venue: "Jardin Perche",
+    title: "Soirée Tropicale",
+    venue: "Jardin Perché",
     date: "Jeu 3 Nov",
     time: "20:00 - 02:00",
     status: "Ouvert",
@@ -61,7 +61,7 @@ const events = [
     venue: "Le Phantom Club",
     date: "Ven 4 Nov",
     time: "00:00 - 07:00",
-    status: "Bientot complet",
+    status: "Bientôt complet",
     statusColor: "bg-amber-100 text-amber-800",
     genre: ["Deep House"],
     image: "bg-gradient-to-br from-slate-900 to-slate-700",
@@ -83,11 +83,11 @@ const events = [
   },
   {
     id: 6,
-    title: "Diner Spectacle",
+    title: "Dîner Spectacle",
     venue: "Maison Dorée",
     date: "Mer 26 Oct",
     time: "20:00 - 01:00",
-    status: "Ferme",
+    status: "Fermé",
     statusColor: "bg-surface-mid text-on-surface-variant",
     genre: ["Cabaret", "Live"],
     image: "bg-gradient-to-br from-gray-400 to-gray-500",
@@ -112,10 +112,10 @@ export default function EventsPage() {
       <div className="px-8 pt-8 pb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-primary-dark font-[family-name:var(--font-manrope)] text-3xl font-extrabold">
-            Evenements
+            Événements
           </h1>
           <p className="text-on-surface-variant mt-1 text-sm">
-            Parcourez et gerez les evenements a venir.
+            Parcourez et gérez les événements à venir.
           </p>
         </div>
         <div className="flex rounded-sm overflow-hidden">
@@ -139,7 +139,7 @@ export default function EventsPage() {
       {/* Filter Bar */}
       <div className="px-8 pb-6">
         <div className="bg-surface-low rounded-md p-4 flex flex-wrap items-center gap-3">
-          {["Ville", "Date", "Etablissement", "Statut"].map((filter) => (
+          {["Ville", "Date", "Établissement", "Statut"].map((filter) => (
             <div key={filter} className="relative">
               <select className="bg-surface-card border-none text-sm pl-4 pr-8 py-2 rounded-sm focus:outline-none focus:ring-1 focus:ring-primary-container appearance-none cursor-pointer text-on-background">
                 <option>{filter}</option>
@@ -222,7 +222,7 @@ export default function EventsPage() {
         <div className="flex items-center justify-between">
           <p className="text-sm text-on-surface-variant">
             Affichage de <strong className="text-on-background">6</strong> sur{" "}
-            <strong className="text-on-background">24</strong> evenements
+            <strong className="text-on-background">24</strong> événements
           </p>
           <div className="flex items-center gap-1">
             <button

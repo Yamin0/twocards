@@ -6,7 +6,7 @@ import { ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { BackgroundPaths } from "@/components/ui/background-paths";
 
-const words = ["restaurant", "club", "festival", "evenement"];
+const words = ["restaurant", "club", "festival", "événement"];
 
 export function Hero() {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -23,7 +23,7 @@ export function Hero() {
     return () => clearInterval(interval);
   }, []);
 
-  const titleStatic = "Plateforme tout-en-un concue pour votre";
+  const titleStatic = "Plateforme tout-en-un conçue pour votre";
 
   return (
     <BackgroundPaths>
@@ -69,8 +69,8 @@ export function Hero() {
             </h1>
 
             <p className="mx-auto mt-2 max-w-xl font-[family-name:var(--font-inter)] text-base leading-relaxed text-on-surface-variant lg:text-lg">
-              Gerez les listes d&apos;invites, les reservations de tables et
-              votre reseau de RP et concierges depuis un tableau de bord
+              Gérez les listes d&apos;invités, les réservations de tables et
+              votre réseau de RP et concierges depuis un tableau de bord
               unique.
             </p>
 
@@ -82,7 +82,7 @@ export function Hero() {
               >
                 <span className="flex items-center rounded-[1.15rem] px-8 py-4 text-sm font-semibold backdrop-blur-md bg-primary hover:bg-primary-dark text-white transition-all duration-300 group-hover:-translate-y-0.5">
                   <span className="opacity-90 group-hover:opacity-100 transition-opacity">
-                    Commencer en tant qu&apos;etablissement
+                    Commencer en tant qu&apos;établissement
                   </span>
                   <span className="ml-3 opacity-70 group-hover:opacity-100 group-hover:translate-x-1.5 transition-all duration-300">
                     &rarr;

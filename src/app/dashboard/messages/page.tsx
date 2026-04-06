@@ -24,9 +24,9 @@ const conversations = [
     unread: true,
     messages: [
       { id: 1, sender: "them", text: "Salut, j'ai un groupe de 8 pour samedi soir.", time: "13:45", date: "Aujourd'hui" },
-      { id: 2, sender: "me", text: "Salut Samy ! Bien sur, tu veux la table VIP habituelle ?", time: "13:52", date: "Aujourd'hui" },
-      { id: 3, sender: "them", text: "Oui exactement, ils veulent la grande table pres de la piste.", time: "14:10", date: "Aujourd'hui" },
-      { id: 4, sender: "me", text: "Parfait, c'est note. Consommation minimum de 2000 MAD pour le groupe, ca marche ?", time: "14:15", date: "Aujourd'hui" },
+      { id: 2, sender: "me", text: "Salut Samy ! Bien sûr, tu veux la table VIP habituelle ?", time: "13:52", date: "Aujourd'hui" },
+      { id: 3, sender: "them", text: "Oui exactement, ils veulent la grande table près de la piste.", time: "14:10", date: "Aujourd'hui" },
+      { id: 4, sender: "me", text: "Parfait, c'est noté. Consommation minimum de 2000 MAD pour le groupe, ça marche ?", time: "14:15", date: "Aujourd'hui" },
       { id: 5, sender: "them", text: "Je confirme la table VIP pour samedi soir, 8 personnes.", time: "14:32", date: "Aujourd'hui" },
     ],
   },
@@ -40,7 +40,7 @@ const conversations = [
     timestamp: "12:15",
     unread: true,
     messages: [
-      { id: 1, sender: "me", text: "Yasmine, ta reservation pour vendredi est validee. Table 12.", time: "11:30", date: "Aujourd'hui" },
+      { id: 1, sender: "me", text: "Yasmine, ta réservation pour vendredi est validée. Table 12.", time: "11:30", date: "Aujourd'hui" },
       { id: 2, sender: "them", text: "Merci pour la confirmation, je transmets au client.", time: "12:15", date: "Aujourd'hui" },
     ],
   },
@@ -50,12 +50,12 @@ const conversations = [
     initials: "NB",
     role: "RP Junior",
     venue: "Chez Castel",
-    lastMessage: "D'accord, je regarde les disponibilites et je reviens vers toi.",
+    lastMessage: "D'accord, je regarde les disponibilités et je reviens vers toi.",
     timestamp: "Hier",
     unread: false,
     messages: [
       { id: 1, sender: "them", text: "Salut, est-ce qu'il reste de la place pour un anniversaire le 15 ?", time: "18:20", date: "Hier" },
-      { id: 2, sender: "me", text: "D'accord, je regarde les disponibilites et je reviens vers toi.", time: "18:45", date: "Hier" },
+      { id: 2, sender: "me", text: "D'accord, je regarde les disponibilités et je reviens vers toi.", time: "18:45", date: "Hier" },
     ],
   },
   {
@@ -64,13 +64,13 @@ const conversations = [
     initials: "AT",
     role: "RP Senior",
     venue: "Le Baron",
-    lastMessage: "Les commissions de septembre sont bien arrivees, merci !",
+    lastMessage: "Les commissions de septembre sont bien arrivées, merci !",
     timestamp: "Lun",
     unread: false,
     messages: [
-      { id: 1, sender: "them", text: "Tu as envoye les commissions de septembre ?", time: "10:00", date: "Lundi" },
-      { id: 2, sender: "me", text: "Oui, le virement a ete fait vendredi.", time: "10:30", date: "Lundi" },
-      { id: 3, sender: "them", text: "Les commissions de septembre sont bien arrivees, merci !", time: "14:00", date: "Lundi" },
+      { id: 1, sender: "them", text: "Tu as envoyé les commissions de septembre ?", time: "10:00", date: "Lundi" },
+      { id: 2, sender: "me", text: "Oui, le virement a été fait vendredi.", time: "10:30", date: "Lundi" },
+      { id: 3, sender: "them", text: "Les commissions de septembre sont bien arrivées, merci !", time: "14:00", date: "Lundi" },
     ],
   },
   {
@@ -290,7 +290,7 @@ export default function MessagesPage() {
                 </button>
                 <input
                   type="text"
-                  placeholder="Ecrire un message..."
+                  placeholder="Écrire un message..."
                   value={messageInput}
                   onChange={(e) => setMessageInput(e.target.value)}
                   className="flex-1 px-4 py-2.5 bg-surface-low border-none rounded-md text-sm text-on-background placeholder:text-on-surface-variant/60 focus:outline-none focus:ring-2 focus:ring-primary/20"
@@ -307,7 +307,7 @@ export default function MessagesPage() {
         ) : (
           <div className="flex-1 flex items-center justify-center">
             <p className="text-on-surface-variant text-sm">
-              Selectionnez une conversation pour commencer
+              Sélectionnez une conversation pour commencer
             </p>
           </div>
         )}

@@ -24,9 +24,9 @@ const guest = {
   depensesTotales: "124 000 MAD",
   depenseMoyenne: "539 MAD",
   tailleGroupeMoy: 4,
-  premiereVisite: "Mars 2025",
+  premièreVisite: "Mars 2025",
   birthday: "14 Juin 1985",
-  tablePreference: "Carree VIP, pres de la piste",
+  tablePreference: "Carrée VIP, près de la piste",
   musicStyle: "Deep House, Tech House",
   allergies: "Fruits de mer, Arachides",
 };
@@ -50,9 +50,9 @@ const visitHistory = [
   },
   {
     date: "02 Mars 2026",
-    event: "Soiree Privee",
+    event: "Soirée Privée",
     venue: "Raspoutine",
-    table: "Carre 3",
+    table: "Carré 3",
     spend: "3 100 MAD",
     referral: "Amira Benjelloun",
   },
@@ -64,11 +64,11 @@ const upcoming = [
     event: "Vendredi Signature",
     time: "23h30",
     partySize: 6,
-    status: "Confirmee",
+    status: "Confirmée",
   },
   {
     date: "12 Avr",
-    event: "Soiree Anniversaire",
+    event: "Soirée Anniversaire",
     time: "22h00",
     partySize: 12,
     status: "En attente",
@@ -79,18 +79,18 @@ const notes = [
   {
     author: "Youssef A.",
     date: "28 Mars 2026",
-    text: "Client fidele, toujours tres genereux. Prefere le champagne Ruinart. Arrivee generalement apres minuit.",
+    text: "Client fidèle, toujours très généreux. Préfère le champagne Ruinart. Arrivée généralement après minuit.",
   },
   {
     author: "Amira B.",
     date: "02 Mars 2026",
-    text: "Organise un anniversaire le 12 avril pour sa femme. Demande gateau personnalise et decoration VIP.",
+    text: "Organise un anniversaire le 12 avril pour sa femme. Demande gâteau personnalisé et décoration VIP.",
   },
 ];
 
 const tags = [
   "High Spender",
-  "Regulier",
+  "Régulier",
   "VIP Anniversaire",
   "Champagne Lover",
   "Groupe +8",
@@ -162,10 +162,10 @@ export default async function GuestProfilePage({
         <div className="bg-primary-container rounded-md p-5 grid grid-cols-5 gap-6">
           {[
             { label: "Total Visites", value: guest.totalVisites },
-            { label: "Depenses Totales", value: guest.depensesTotales },
-            { label: "Depense Moyenne", value: guest.depenseMoyenne },
+            { label: "Dépenses Totales", value: guest.depensesTotales },
+            { label: "Dépense Moyenne", value: guest.depenseMoyenne },
             { label: "Taille Groupe Moy.", value: guest.tailleGroupeMoy },
-            { label: "Premiere Visite", value: guest.premiereVisite },
+            { label: "Première Visite", value: guest.premièreVisite },
           ].map((m) => (
             <div key={m.label}>
               <p className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-primary-container">
@@ -191,7 +191,7 @@ export default async function GuestProfilePage({
               </h2>
             </div>
             <div className="grid grid-cols-6 gap-3 px-5 py-2 bg-surface-low">
-              {["Date", "Evenement", "Lieu", "Table", "Depense", "Referent"].map(
+              {["Date", "Événement", "Lieu", "Table", "Dépense", "Référent"].map(
                 (h) => (
                   <span
                     key={h}
@@ -220,7 +220,7 @@ export default async function GuestProfilePage({
           {/* Upcoming Reservations */}
           <div>
             <h2 className="text-base font-semibold text-primary-dark font-[family-name:var(--font-manrope)] mb-3">
-              Reservations a venir
+              Réservations à venir
             </h2>
             <div className="space-y-3">
               {upcoming.map((r, i) => (
@@ -254,7 +254,7 @@ export default async function GuestProfilePage({
                     </div>
                   </div>
                   <span
-                    className={`rounded-full px-2.5 py-0.5 text-[0.6875rem] font-medium ${r.status === "Confirmee" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"}`}
+                    className={`rounded-full px-2.5 py-0.5 text-[0.6875rem] font-medium ${r.status === "Confirmée" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"}`}
                   >
                     {r.status}
                   </span>
@@ -291,7 +291,7 @@ export default async function GuestProfilePage({
                 />
                 <div>
                   <p className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant">
-                    Preference table
+                    Préférence table
                   </p>
                   <p className="text-sm text-on-background">
                     {guest.tablePreference}

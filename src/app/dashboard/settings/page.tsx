@@ -57,7 +57,7 @@ export default function SettingsPage() {
               Votre Profil
             </h1>
             <p className="text-sm text-on-surface-variant mt-1">
-              Gerez vos informations personnelles et les details de votre etablissement.
+              Gérez vos informations personnelles et les détails de votre établissement.
             </p>
           </div>
 
@@ -115,7 +115,7 @@ export default function SettingsPage() {
 
                 <div>
                   <label className="block text-[10px] font-bold uppercase tracking-wider text-on-surface-variant mb-1.5">
-                    Telephone
+                    Téléphone
                   </label>
                   <input
                     type="tel"
@@ -137,10 +137,10 @@ export default function SettingsPage() {
               </div>
             </div>
 
-            {/* Details de l'Etablissement */}
+            {/* Détails de l'Établissement */}
             <div className="bg-surface-card rounded-md editorial-shadow p-6 space-y-5">
               <h2 className="text-sm font-bold font-[family-name:var(--font-manrope)] text-primary-dark">
-                Details de l&apos;Etablissement
+                Détails de l&apos;Établissement
               </h2>
 
               <div className="space-y-4">
@@ -180,7 +180,7 @@ export default function SettingsPage() {
                   </div>
                   <div>
                     <label className="block text-[10px] font-bold uppercase tracking-wider text-on-surface-variant mb-1.5">
-                      Capacite
+                      Capacité
                     </label>
                     <input
                       type="number"
@@ -212,7 +212,7 @@ export default function SettingsPage() {
               </label>
               <textarea
                 rows={3}
-                defaultValue="Le Comptoir est un restaurant-bar branche situe au coeur de Paris, offrant une experience culinaire raffinee dans un cadre contemporain. Nos soirees thematiques et notre carte de cocktails signatures en font un lieu incontournable de la vie nocturne parisienne."
+                defaultValue="Le Comptoir est un restaurant-bar branché situé au cœur de Paris, offrant une expérience culinaire raffinée dans un cadre contemporain. Nos soirées thématiques et notre carte de cocktails signatures en font un lieu incontournable de la vie nocturne parisienne."
                 className="w-full px-4 py-2.5 bg-surface-card border-none rounded-md text-sm text-on-background resize-none focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
             </div>
@@ -230,11 +230,11 @@ export default function SettingsPage() {
 
             <div>
               <label className="block text-[10px] font-bold uppercase tracking-wider text-on-surface-variant mb-1.5">
-                Regles de consommation minimum
+                Règles de consommation minimum
               </label>
               <input
                 type="text"
-                defaultValue="Table Standard: 500 MAD | Table VIP: 1,500 MAD | Carre VIP: 3,000 MAD"
+                defaultValue="Table Standard: 500 MAD | Table VIP: 1,500 MAD | Carré VIP: 3,000 MAD"
                 className="w-full px-4 py-2.5 bg-surface-card border-none rounded-md text-sm text-on-background focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
             </div>

@@ -6,12 +6,10 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   CalendarDays,
-  Ticket,
   Users,
-  Grid3X3,
-  Network,
   CreditCard,
   MessageSquare,
+  Building2,
   BarChart3,
   Settings,
   HelpCircle,
@@ -25,29 +23,26 @@ interface SidebarProps {
 }
 
 const navItems = [
-  { label: "Tableau de bord", href: "/dashboard", icon: LayoutDashboard },
-  { label: "Réservations", href: "/dashboard/reservations", icon: CalendarDays },
-  { label: "Événements", href: "/dashboard/events", icon: Ticket },
-  { label: "Clients", href: "/dashboard/guests", icon: Users },
-  { label: "Plan de salle", href: "/dashboard/floor-plan", icon: Grid3X3 },
-  { label: "Réseau RP", href: "/dashboard/network", icon: Network },
-  { label: "Commissions", href: "/dashboard/commissions", icon: CreditCard },
-  { label: "Messages", href: "/dashboard/messages", icon: MessageSquare },
-  { label: "Analyses", href: "/dashboard/analytics", icon: BarChart3 },
-  { label: "Paramètres", href: "/dashboard/settings", icon: Settings },
+  { label: "Tableau de bord", href: "/concierge", icon: LayoutDashboard },
+  { label: "Mes réservations", href: "/concierge/reservations", icon: CalendarDays },
+  { label: "Mes clients", href: "/concierge/clients", icon: Users },
+  { label: "Établissements", href: "/concierge/venues", icon: Building2 },
+  { label: "Commissions", href: "/concierge/commissions", icon: CreditCard },
+  { label: "Messages", href: "/concierge/messages", icon: MessageSquare },
+  { label: "Statistiques", href: "/concierge/stats", icon: BarChart3 },
+  { label: "Paramètres", href: "/concierge/settings", icon: Settings },
 ];
 
-export function Sidebar({ isOpen, onClose }: SidebarProps) {
+export function SidebarConcierge({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
 
   const isActive = (href: string) => {
-    if (href === "/dashboard") return pathname === "/dashboard";
+    if (href === "/concierge") return pathname === "/concierge";
     return pathname.startsWith(href);
   };
 
   return (
     <>
-      {/* Mobile sidebar */}
       <aside
         className={`
           fixed inset-y-0 left-0 z-50 w-64 bg-surface-low backdrop-blur
@@ -63,16 +58,16 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             <Image
               src="/logo-header.png"
               alt="twocards. logo"
-              width={96}
-              height={96}
-              className="h-[96px] w-auto"
+              width={72}
+              height={72}
+              className="h-[72px] w-auto"
             />
             <div>
               <h1 className="text-2xl font-bold tracking-tight font-[family-name:var(--font-nunito)] text-on-surface">
                 twocards.
               </h1>
               <p className="text-xs font-[family-name:var(--font-inter)] text-on-surface-variant mt-0.5">
-                Venue Manager
+                Concierge / RP
               </p>
             </div>
           </div>
@@ -118,7 +113,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         {/* Bottom section */}
         <div className="px-3 pb-6 space-y-1">
           <Link
-            href="/dashboard/help"
+            href="/concierge/help"
             className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm
               font-[family-name:var(--font-manrope)]
               text-on-primary-container hover:text-primary-container transition-colors"

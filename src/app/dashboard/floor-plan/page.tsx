@@ -50,9 +50,9 @@ const selectedReservation = {
   pr: "Youssef Alaoui",
   partySize: 8,
   arrival: "23h30",
-  status: "Confirmee",
+  status: "Confirmée",
   minSpend: "3 000 MAD",
-  notes: "Anniversaire de sa femme. Gateau prevu a 1h00. Champagne Ruinart en priorite.",
+  notes: "Anniversaire de sa femme. Gâteau prévu à 1h00. Champagne Ruinart en priorité.",
 };
 
 function tableColor(status: string, vip: boolean, selected: boolean) {
@@ -100,7 +100,7 @@ export default function FloorPlanPage() {
         </div>
         <div className="flex items-center gap-1.5">
           <span className="h-3 w-3 rounded-full bg-primary/15" />
-          <span className="text-xs text-on-surface-variant">Occupee</span>
+          <span className="text-xs text-on-surface-variant">Occupée</span>
         </div>
         <div className="flex items-center gap-1.5">
           <span className="h-3 w-3 rounded bg-amber-100" />
@@ -108,11 +108,11 @@ export default function FloorPlanPage() {
         </div>
         <div className="flex items-center gap-1.5">
           <span className="h-3 w-3 rounded bg-surface-mid" />
-          <span className="text-xs text-on-surface-variant">Bloquee</span>
+          <span className="text-xs text-on-surface-variant">Bloquée</span>
         </div>
         <div className="flex items-center gap-1.5">
           <span className="h-3 w-3 rounded bg-primary" />
-          <span className="text-xs text-on-surface-variant">Selectionnee</span>
+          <span className="text-xs text-on-surface-variant">Sélectionnée</span>
         </div>
       </div>
 
@@ -152,7 +152,7 @@ export default function FloorPlanPage() {
               <div className="absolute left-5 top-1/2 -translate-y-1/2 bg-surface-low rounded-sm px-2 py-6 flex flex-col items-center gap-1">
                 <DoorOpen className="h-3.5 w-3.5 text-on-surface-variant" strokeWidth={1.5} />
                 <span className="text-[0.625rem] font-medium text-on-surface-variant uppercase tracking-wider [writing-mode:vertical-lr]">
-                  Entree
+                  Entrée
                 </span>
               </div>
 
@@ -216,7 +216,7 @@ export default function FloorPlanPage() {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <p className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant">
-                      Capacite
+                      Capacité
                     </p>
                     <p className="text-sm font-medium text-on-background">
                       {selected.capacity} personnes
@@ -236,7 +236,7 @@ export default function FloorPlanPage() {
               {/* Separator via tonal shift */}
               <div className="bg-surface-low rounded-md p-4">
                 <p className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant mb-3">
-                  Reservation
+                  Réservation
                 </p>
                 <div className="flex items-center gap-3 mb-3">
                   <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
@@ -261,7 +261,7 @@ export default function FloorPlanPage() {
                   </div>
                   <div className="flex items-center gap-2 text-on-surface-variant">
                     <Clock className="h-3.5 w-3.5" strokeWidth={1.5} />
-                    <span>Arrivee prevue: {selectedReservation.arrival}</span>
+                    <span>Arrivée prévue : {selectedReservation.arrival}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-[0.6875rem] font-medium text-emerald-800">
@@ -285,18 +285,18 @@ export default function FloorPlanPage() {
               <div className="space-y-2">
                 <button className="w-full inline-flex items-center justify-center gap-2 bg-primary text-white rounded-sm px-4 py-2.5 text-sm font-medium hover:bg-primary-dark transition-colors">
                   <LogIn className="h-4 w-4" strokeWidth={1.5} />
-                  Arrivee (Check In)
+                  Arrivée (Check In)
                 </button>
                 <button className="w-full inline-flex items-center justify-center gap-2 text-sm text-on-surface-variant hover:text-error transition-colors py-2">
                   <X className="h-3.5 w-3.5" strokeWidth={1.5} />
-                  Annuler la Reservation
+                  Annuler la Réservation
                 </button>
               </div>
             </div>
           ) : (
             <div className="bg-surface-card rounded-md editorial-shadow p-8 text-center">
               <p className="text-sm text-on-surface-variant">
-                Selectionnez une table pour voir les details
+                Sélectionnez une table pour voir les détails
               </p>
             </div>
           )}

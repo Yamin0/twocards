@@ -30,7 +30,7 @@ const requests = [
     guests: 8,
     tableType: "Table VIP",
     timeAgo: "il y a 12 min",
-    note: "Client fidele, 3e reservation ce mois",
+    note: "Client fidèle, 3e réservation ce mois",
   },
   {
     id: 2,
@@ -40,7 +40,7 @@ const requests = [
     guests: 4,
     tableType: "Table Standard",
     timeAgo: "il y a 34 min",
-    note: "Premiere reservation avec nous",
+    note: "Première réservation avec nous",
   },
   {
     id: 3,
@@ -48,9 +48,9 @@ const requests = [
     badge: "RP Or",
     badgeColor: "bg-amber-100 text-amber-800",
     guests: 12,
-    tableType: "Carre VIP",
+    tableType: "Carré VIP",
     timeAgo: "il y a 1h",
-    note: "Demande bouteilles Dom Perignon x3",
+    note: "Demande bouteilles Dom Pérignon x3",
   },
 ];
 
@@ -97,7 +97,7 @@ export default function DashboardPage() {
           Bonjour, Directeur.
         </h1>
         <p className="text-on-surface-variant mt-1 text-sm">
-          Voici un apercu de votre etablissement ce soir.
+          Voici un aperçu de votre établissement ce soir.
         </p>
       </div>
 
@@ -114,7 +114,7 @@ export default function DashboardPage() {
           <div className="flex items-start justify-between">
             <div>
               <p className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant font-semibold mb-1">
-                Evenement ce soir
+                Événement ce soir
               </p>
               <h2 className="text-primary-dark font-[family-name:var(--font-manrope)] text-xl font-bold">
                 Gala de Minuit
@@ -139,7 +139,7 @@ export default function DashboardPage() {
           <div className="mt-5">
             <div className="flex items-end justify-between mb-2">
               <span className="text-sm font-medium text-on-background">
-                187 / 300 couverts confirmes
+                187 / 300 couverts confirmés
               </span>
               <span className="text-sm font-bold text-primary-dark">62%</span>
             </div>
@@ -293,19 +293,19 @@ export default function DashboardPage() {
             className="flex items-center gap-2 bg-primary text-white text-sm font-medium px-5 py-2.5 rounded-sm hover:opacity-90 transition-opacity"
           >
             <Plus size={16} strokeWidth={1.5} />
-            Creer un evenement
+            Créer un événement
           </a>
           <a
             href="/dashboard/reservations"
             className="flex items-center gap-2 bg-surface-mid text-on-background text-sm font-medium px-5 py-2.5 rounded-sm hover:bg-surface-high transition-colors"
           >
-            Voir toutes les reservations
+            Voir toutes les réservations
           </a>
           <a
             href="/dashboard/network"
             className="flex items-center gap-1 text-primary-dark text-sm font-medium hover:underline ml-2"
           >
-            Gerer le reseau RP
+            Gérer le réseau RP
             <ArrowRight size={14} strokeWidth={1.5} />
           </a>
         </div>

@@ -2,20 +2,20 @@ import Link from "next/link";
 
 const footerLinks = {
   Produit: [
-    { label: "Fonctionnalites", href: "#solutions" },
+    { label: "Fonctionnalités", href: "#solutions" },
     { label: "Tarifs", href: "#tarifs" },
     { label: "Le Registre", href: "#registre" },
-    { label: "Securite", href: "#securite" },
+    { label: "Sécurité", href: "#securite" },
   ],
   Entreprise: [
-    { label: "A propos", href: "#about" },
+    { label: "À propos", href: "#about" },
     { label: "Blog", href: "#blog" },
-    { label: "Carriere", href: "#carriere" },
+    { label: "Carrière", href: "#carriere" },
     { label: "Contact", href: "#contact" },
   ],
   Juridique: [
-    { label: "Mentions legales", href: "#mentions" },
-    { label: "Politique de confidentialite", href: "#privacy" },
+    { label: "Mentions légales", href: "#mentions" },
+    { label: "Politique de confidentialité", href: "#privacy" },
     { label: "CGU", href: "#cgu" },
     { label: "Cookies", href: "#cookies" },
   ],
@@ -35,8 +35,8 @@ export function Footer() {
               twocards.
             </Link>
             <p className="mt-4 max-w-xs font-[family-name:var(--font-inter)] text-sm leading-relaxed text-on-surface-variant">
-              La plateforme CRM B2B pour les etablissements de nuit. Gerez vos
-              listes, vos evenements et votre reseau depuis un tableau de bord
+              La plateforme CRM B2B pour les établissements de nuit. Gérez vos
+              listes, vos événements et votre réseau depuis un tableau de bord
               unique.
             </p>
           </div>
@@ -68,7 +68,7 @@ export function Footer() {
       <div className="bg-surface-mid">
         <div className="mx-auto max-w-7xl px-6 py-6 lg:px-12">
           <p className="font-[family-name:var(--font-inter)] text-xs text-on-surface-variant">
-            &copy; 2026 twocards. Tous droits reserves.
+            &copy; 2026 twocards. Tous droits réservés.
           </p>
         </div>
       </div>

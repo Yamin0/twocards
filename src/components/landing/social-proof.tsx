@@ -19,9 +19,9 @@ export function SocialProof() {
         {/* Testimonial */}
         <div className="mx-auto mt-20 max-w-3xl text-center">
           <blockquote className="font-[family-name:var(--font-manrope)] text-xl font-semibold leading-relaxed text-primary-dark sm:text-2xl">
-            &ldquo;twocards a transforme notre facon de gerer les listes
-            d&apos;invites et les relations avec nos concierges. En trois mois,
-            nos revenus par soiree ont augmente de 34%.&rdquo;
+            &ldquo;twocards a transformé notre façon de gérer les listes
+            d&apos;invités et les relations avec nos concierges. En trois mois,
+            nos revenus par soirée ont augmenté de 34%.&rdquo;
           </blockquote>
           <div className="mt-8">
             <p className="font-[family-name:var(--font-manrope)] text-sm font-bold text-primary-dark">

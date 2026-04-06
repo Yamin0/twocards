@@ -21,8 +21,8 @@ const nunito = Nunito({
 });
 
 export const metadata: Metadata = {
-  title: "twocards. | CRM B2B pour les etablissements de nuit",
-  description: "Gerez les listes d'invites, les reservations de tables et votre reseau de RP et concierges depuis un tableau de bord unique.",
+  title: "twocards. | CRM B2B pour les établissements de nuit",
+  description: "Gérez les listes d'invités, les réservations de tables et votre réseau de RP et concierges depuis un tableau de bord unique.",
 };
 
 export default function RootLayout({

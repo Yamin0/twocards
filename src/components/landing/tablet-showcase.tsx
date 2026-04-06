@@ -14,13 +14,13 @@ export function TabletShowcase() {
           titleComponent={
             <div className="mx-auto max-w-7xl px-6 lg:px-12 text-center">
               <p className="font-[family-name:var(--font-manrope)] text-[0.6875rem] uppercase tracking-widest text-on-primary-container mb-4">
-                Decouvrez l&apos;interface
+                Découvrez l&apos;interface
               </p>
               <h2 className="font-[family-name:var(--font-manrope)] text-3xl font-bold text-white sm:text-4xl lg:text-5xl">
                 Un tableau de bord
                 <br />
                 <span className="text-on-primary-container">
-                  pense pour l&apos;action.
+                  pensé pour l&apos;action.
                 </span>
               </h2>
             </div>

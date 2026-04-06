@@ -16,7 +16,7 @@ import {
 const stats = [
   { label: "RP Actifs", value: "34", icon: Users },
   { label: "Couverts mois", value: "127", icon: Users },
-  { label: "CA genere via RP", value: "89 300 MAD", icon: DollarSign },
+  { label: "CA généré via RP", value: "89 300 MAD", icon: DollarSign },
   { label: "Taux Com. Moyen", value: "10%", icon: Percent },
 ];
 
@@ -83,7 +83,7 @@ const monthlyCA = [
   { month: "Nov", value: 71 },
   { month: "Dec", value: 89 },
   { month: "Jan", value: 58 },
-  { month: "Fev", value: 74 },
+  { month: "Fév", value: 74 },
   { month: "Mar", value: 85 },
 ];
 
@@ -108,7 +108,7 @@ export default function NetworkPage() {
       {/* Header */}
       <div className="px-6 pt-8 pb-4 flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-primary-dark font-[family-name:var(--font-manrope)]">
-          Votre Reseau de RP
+          Votre Réseau de RP
         </h1>
         <button className="inline-flex items-center gap-2 bg-primary text-white rounded-sm px-5 py-2.5 text-sm font-medium hover:bg-primary-dark transition-colors">
           <UserPlus className="h-4 w-4" strokeWidth={1.5} />
@@ -241,10 +241,10 @@ export default function NetworkPage() {
               <UserPlus className="h-5 w-5 text-on-surface-variant" strokeWidth={1.5} />
             </div>
             <h3 className="text-sm font-semibold text-primary-dark font-[family-name:var(--font-manrope)] mb-1">
-              Etendre votre reseau
+              Étendre votre réseau
             </h3>
             <p className="text-xs text-on-surface-variant mb-4 max-w-[200px]">
-              Invitez de nouveaux RP pour developper votre activite
+              Invitez de nouveaux RP pour développer votre activité
             </p>
             <button className="inline-flex items-center gap-2 bg-primary text-white rounded-sm px-4 py-2 text-sm font-medium hover:bg-primary-dark transition-colors">
               Envoyer une invitation
@@ -324,7 +324,7 @@ export default function NetworkPage() {
           <div className="mt-4 flex items-center gap-2">
             <Star className="h-4 w-4 text-amber-500" strokeWidth={1.5} />
             <span className="text-xs text-on-surface-variant">
-              Top performeur depuis 3 mois consecutifs
+              Top performeur depuis 3 mois consécutifs
             </span>
           </div>
         </div>

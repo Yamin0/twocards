@@ -120,7 +120,7 @@ export default function GuestsPage() {
           />
           <input
             type="text"
-            placeholder="Rechercher un client par nom, telephone ou email..."
+            placeholder="Rechercher un client par nom, téléphone ou email..."
             className="w-full bg-surface-low border-none rounded-sm py-3 pl-11 pr-4 text-sm text-on-background placeholder:text-on-surface-variant/60 focus:outline-none focus:ring-2 focus:ring-primary/20"
           />
         </div>
@@ -152,13 +152,13 @@ export default function GuestsPage() {
         {/* Derniere visite */}
         <button className="inline-flex items-center gap-1.5 bg-surface-mid rounded-sm px-3 py-2 text-sm text-on-surface-variant">
           <Calendar className="h-3.5 w-3.5" strokeWidth={1.5} />
-          Derniere visite
+          Dernière visite
           <ChevronDown className="h-3.5 w-3.5" strokeWidth={1.5} />
         </button>
 
-        {/* Recommande par */}
+        {/* Recommandé par */}
         <button className="inline-flex items-center gap-1.5 bg-surface-mid rounded-sm px-3 py-2 text-sm text-on-surface-variant">
-          Recommande par
+          Recommandé par
           <ChevronDown className="h-3.5 w-3.5" strokeWidth={1.5} />
         </button>
       </div>
@@ -168,7 +168,7 @@ export default function GuestsPage() {
         <div className="bg-surface-card rounded-md editorial-shadow overflow-hidden">
           {/* Table Header */}
           <div className="grid grid-cols-7 gap-4 px-5 py-3 bg-surface-low">
-            {["Nom", "Telephone", "Total Visites", "Depenses Totales", "Derniere Visite", "Statut VIP", "Recommande par"].map(
+            {["Nom", "Téléphone", "Total Visites", "Dépenses Totales", "Dernière Visite", "Statut VIP", "Recommandé par"].map(
               (header) => (
                 <span
                   key={header}
@@ -243,7 +243,7 @@ export default function GuestsPage() {
               </div>
               <div>
                 <p className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant">
-                  Retention VIP
+                  Rétention VIP
                 </p>
                 <p className="text-lg font-semibold text-on-background font-[family-name:var(--font-manrope)]">
                   94%

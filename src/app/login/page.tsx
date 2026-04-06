@@ -4,7 +4,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { Mail, Lock, Eye, EyeOff, AlertCircle, Loader2 } from "lucide-react";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
@@ -13,7 +12,6 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,7 +19,7 @@ export default function LoginPage() {
     setLoading(true);
 
     const supabase = createClient();
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
@@ -36,8 +34,9 @@ export default function LoginPage() {
       return;
     }
 
-    router.push("/dashboard");
-    router.refresh();
+    // Hard redirect based on role — must use window.location to trigger middleware
+    const role = data.user?.user_metadata?.role;
+    window.location.href = role === "concierge" ? "/concierge" : "/dashboard";
   };
 
   return (
@@ -61,15 +60,15 @@ export default function LoginPage() {
                 className="h-20 w-auto mb-4"
               />
               <span className="inline-block px-3 py-1 rounded-full bg-white/10 text-on-primary-container text-xs font-medium font-[family-name:var(--font-inter)] uppercase tracking-wider">
-                Espace Prive
+                Espace Privé
               </span>
               <h2 className="text-2xl font-bold text-white font-[family-name:var(--font-manrope)]">
-                Gerez votre nightlife,
+                Gérez votre nightlife,
                 <br />
-                simplifiez vos soirees.
+                simplifiez vos soirées.
               </h2>
               <p className="text-on-primary-container/80 text-sm font-[family-name:var(--font-inter)] leading-relaxed">
-                Listes d&apos;invites, reservations VIP et reseau de concierges
+                Listes d&apos;invités, réservations VIP et réseau de concierges
                 — tout depuis un seul tableau de bord.
               </p>
             </div>
@@ -87,7 +86,7 @@ export default function LoginPage() {
               Bon retour
             </h1>
             <p className="text-sm text-on-surface-variant font-[family-name:var(--font-inter)] mb-8">
-              Connectez-vous a votre espace professionnel
+              Connectez-vous à votre espace professionnel
             </p>
 
             {error && (
@@ -147,6 +146,7 @@ export default function LoginPage() {
                   />
                   <button
                     type="button"
+                    aria-label="Afficher le mot de passe"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant/60 hover:text-on-surface-variant transition-colors"
                   >
@@ -161,10 +161,10 @@ export default function LoginPage() {
 
               <div className="flex justify-end">
                 <Link
-                  href="#"
+                  href="/forgot-password"
                   className="text-xs text-primary font-medium font-[family-name:var(--font-inter)] hover:underline"
                 >
-                  Mot de passe oublie ?
+                  Mot de passe oublié ?
                 </Link>
               </div>
 
@@ -184,7 +184,7 @@ export default function LoginPage() {
                 href="/signup"
                 className="text-primary font-medium hover:underline"
               >
-                Creer un compte
+                Créer un compte
               </Link>
             </p>
           </div>
@@ -192,12 +192,12 @@ export default function LoginPage() {
       </div>
 
       <footer className="py-6 text-center text-xs text-on-surface-variant/60 font-[family-name:var(--font-inter)] space-x-4">
-        <span>&copy; 2026 twocards. Tous droits reserves.</span>
-        <Link href="#" className="hover:text-on-surface-variant">
+        <span>&copy; 2026 twocards. Tous droits réservés.</span>
+        <Link href="/legal" className="hover:text-on-surface-variant">
           Conditions d&apos;utilisation
         </Link>
-        <Link href="#" className="hover:text-on-surface-variant">
-          Politique de confidentialite
+        <Link href="/privacy" className="hover:text-on-surface-variant">
+          Politique de confidentialité
         </Link>
       </footer>
     </div>

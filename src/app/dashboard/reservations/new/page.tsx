@@ -42,13 +42,13 @@ export default function NewReservationPage() {
           {/* Left: Form (60%) */}
           <div className="lg:col-span-3">
             <h1 className="text-primary-dark font-[family-name:var(--font-manrope)] text-2xl font-extrabold mb-6">
-              Nouvelle Reservation
+              Nouvelle Réservation
             </h1>
 
             {/* Venue & Event */}
             <div className="bg-surface-card rounded-md editorial-shadow p-6 mb-4">
               <label className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant font-semibold block mb-2">
-                Etablissement
+                Établissement
               </label>
               <div className="relative mb-4">
                 <Search
@@ -58,7 +58,7 @@ export default function NewReservationPage() {
                 />
                 <input
                   type="text"
-                  placeholder="Rechercher un etablissement..."
+                  placeholder="Rechercher un établissement..."
                   value={formData.venue}
                   onChange={(e) =>
                     setFormData({ ...formData, venue: e.target.value })
@@ -68,7 +68,7 @@ export default function NewReservationPage() {
               </div>
 
               <label className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant font-semibold block mb-2">
-                Evenement / Date
+                Événement / Date
               </label>
               <div className="relative">
                 <CalendarDays
@@ -78,7 +78,7 @@ export default function NewReservationPage() {
                 />
                 <input
                   type="text"
-                  placeholder="Selectionner un evenement ou une date..."
+                  placeholder="Sélectionner un événement ou une date..."
                   value={formData.event}
                   onChange={(e) =>
                     setFormData({ ...formData, event: e.target.value })
@@ -110,7 +110,7 @@ export default function NewReservationPage() {
                 </div>
                 <div>
                   <label className="text-xs text-on-surface-variant mb-1 block">
-                    Telephone
+                    Téléphone
                   </label>
                   <input
                     type="tel"
@@ -169,7 +169,7 @@ export default function NewReservationPage() {
                 {/* Entry type toggle */}
                 <div className="flex-1">
                   <p className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant font-semibold mb-2">
-                    Type d&apos;entree
+                    Type d&apos;entrée
                   </p>
                   <div className="flex rounded-sm overflow-hidden">
                     <button
@@ -180,7 +180,7 @@ export default function NewReservationPage() {
                           : "bg-surface-mid text-on-background hover:bg-surface-high"
                       }`}
                     >
-                      Reservation Table
+                      Réservation Table
                     </button>
                     <button
                       onClick={() => setEntryType("guestlist")}
@@ -190,7 +190,7 @@ export default function NewReservationPage() {
                           : "bg-surface-mid text-on-background hover:bg-surface-high"
                       }`}
                     >
-                      Liste d&apos;invites
+                      Liste d&apos;invités
                     </button>
                   </div>
                 </div>
@@ -201,7 +201,7 @@ export default function NewReservationPage() {
             {entryType === "table" && (
               <div className="bg-surface-low rounded-md p-6 mb-4">
                 <p className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant font-semibold mb-4">
-                  Details de la table
+                  Détails de la table
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
@@ -246,10 +246,10 @@ export default function NewReservationPage() {
             {/* Special Requests */}
             <div className="bg-surface-card rounded-md editorial-shadow p-6 mb-6">
               <label className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant font-semibold block mb-2">
-                Demandes speciales
+                Demandes spéciales
               </label>
               <textarea
-                placeholder="Anniversaire, allergies, preferences de placement..."
+                placeholder="Anniversaire, allergies, préférences de placement..."
                 value={formData.specialRequests}
                 onChange={(e) =>
                   setFormData({ ...formData, specialRequests: e.target.value })
@@ -262,7 +262,7 @@ export default function NewReservationPage() {
             {/* Submit */}
             <button className="flex items-center gap-2 bg-primary text-white text-sm font-medium px-6 py-3 rounded-sm hover:opacity-90 transition-opacity w-full sm:w-auto justify-center">
               <Send size={16} strokeWidth={1.5} />
-              Envoyer la reservation
+              Envoyer la réservation
             </button>
           </div>
 
@@ -273,22 +273,22 @@ export default function NewReservationPage() {
                 <div className="mb-5">
                   <div className="w-10 h-1 bg-primary rounded-full mb-3" />
                   <h2 className="text-primary-dark font-[family-name:var(--font-manrope)] text-lg font-bold">
-                    Resume de la reservation
+                    Résumé de la réservation
                   </h2>
                 </div>
 
                 <div className="space-y-4">
                   <div>
                     <p className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant font-semibold">
-                      Etablissement
+                      Établissement
                     </p>
                     <p className="text-on-background text-sm mt-0.5">
-                      {formData.venue || "Non selectionne"}
+                      {formData.venue || "Non sélectionné"}
                     </p>
                   </div>
                   <div>
                     <p className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant font-semibold">
-                      Evenement
+                      Événement
                     </p>
                     <p className="text-on-background text-sm mt-0.5">
                       {formData.event || "Non selectionne"}
@@ -299,7 +299,7 @@ export default function NewReservationPage() {
                       Client
                     </p>
                     <p className="text-on-background text-sm mt-0.5">
-                      {formData.clientName || "Non renseigne"}
+                      {formData.clientName || "Non renseigné"}
                     </p>
                   </div>
                   <div className="flex items-center gap-6">
@@ -357,7 +357,7 @@ export default function NewReservationPage() {
                   <div className="flex items-center gap-1.5 mb-1">
                     <Sparkles size={13} strokeWidth={1.5} className="text-primary-dark" />
                     <p className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant font-semibold">
-                      Commission estimee
+                      Commission estimée
                     </p>
                   </div>
                   <p className="text-primary-dark font-[family-name:var(--font-manrope)] font-extrabold text-2xl">

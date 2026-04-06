@@ -111,8 +111,8 @@ export default function OnboardingPage() {
               Configurez vos tables
             </h1>
             <p className="text-sm text-on-surface-variant font-[family-name:var(--font-inter)] mb-6">
-              Definissez le nombre de tables et les minimums de depense pour
-              votre etablissement.
+              Définissez le nombre de tables et les minimums de dépense pour
+              votre établissement.
             </p>
 
             {/* Tabs */}
@@ -352,8 +352,8 @@ export default function OnboardingPage() {
               </h3>
             </div>
             <p className="text-xs text-on-surface-variant font-[family-name:var(--font-inter)] leading-relaxed mb-3">
-              Les etablissements qui configurent un ratio de 1 table VIP pour 2
-              tables standard constatent un revenu par soiree 30% plus eleve.
+              Les établissements qui configurent un ratio de 1 table VIP pour 2
+              tables standard constatent un revenu par soirée 30% plus élevé.
             </p>
             <p className="text-xs text-on-surface-variant/60 font-[family-name:var(--font-inter)]">
               Vous pourrez toujours modifier cette configuration plus tard

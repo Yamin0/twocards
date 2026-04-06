@@ -13,7 +13,7 @@ import {
 
 const stats = [
   {
-    label: "Reservations totales",
+    label: "Réservations totales",
     value: "148",
     icon: CalendarDays,
   },
@@ -23,12 +23,12 @@ const stats = [
     icon: Clock,
   },
   {
-    label: "Commissions gagnees",
+    label: "Commissions gagnées",
     value: "4 850 MAD",
     icon: Euro,
   },
   {
-    label: "Etablissements actifs",
+    label: "Établissements actifs",
     value: "12",
     icon: Building2,
   },
@@ -71,7 +71,7 @@ const recentReservations = [
     venue: "Maison Dorée",
     date: "24 Oct",
     covers: 6,
-    status: "Confirmee",
+    status: "Confirmée",
     statusColor: "bg-green-100 text-green-800",
   },
   {
@@ -87,7 +87,7 @@ const recentReservations = [
     venue: "Jardin Perché",
     date: "23 Oct",
     covers: 8,
-    status: "Confirmee",
+    status: "Confirmée",
     statusColor: "bg-green-100 text-green-800",
   },
   {
@@ -95,7 +95,7 @@ const recentReservations = [
     venue: "Maison Dorée",
     date: "23 Oct",
     covers: 2,
-    status: "Refusee",
+    status: "Refusée",
     statusColor: "bg-red-100 text-red-800",
   },
   {
@@ -103,7 +103,7 @@ const recentReservations = [
     venue: "Le Phantom Club",
     date: "22 Oct",
     covers: 10,
-    status: "Confirmee",
+    status: "Confirmée",
     statusColor: "bg-green-100 text-green-800",
   },
 ];
@@ -117,7 +117,7 @@ export default function ReservationsPage() {
           Bonjour, Karim.
         </h1>
         <p className="text-on-surface-variant mt-1 text-sm">
-          Gerez vos reservations et suivez vos performances.
+          Gérez vos réservations et suivez vos performances.
         </p>
       </div>
 
@@ -148,7 +148,7 @@ export default function ReservationsPage() {
         {/* Left: Upcoming Events */}
         <div className="lg:col-span-5">
           <h3 className="text-primary-dark font-[family-name:var(--font-manrope)] text-lg font-bold mb-4">
-            Evenements a venir
+            Événements à venir
           </h3>
           <div className="rounded-md overflow-hidden editorial-shadow">
             {upcomingEvents.map((event, i) => (
@@ -181,7 +181,7 @@ export default function ReservationsPage() {
         <div className="lg:col-span-7">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-primary-dark font-[family-name:var(--font-manrope)] text-lg font-bold">
-              Reservations recentes
+              Réservations récentes
             </h3>
             <div className="relative">
               <Search
@@ -199,7 +199,7 @@ export default function ReservationsPage() {
           <div className="rounded-md overflow-hidden editorial-shadow">
             {/* Table Header */}
             <div className="bg-surface-mid px-4 py-3 grid grid-cols-12 gap-2">
-              {["Invite", "Etablissement", "Date", "Couverts", "Statut"].map(
+              {["Invité", "Établissement", "Date", "Couverts", "Statut"].map(
                 (header, i) => (
                   <span
                     key={i}
@@ -262,14 +262,14 @@ export default function ReservationsPage() {
             className="flex items-center gap-2 bg-primary text-white text-sm font-medium px-5 py-2.5 rounded-sm hover:opacity-90 transition-opacity"
           >
             <Plus size={16} strokeWidth={1.5} />
-            Nouvelle Reservation
+            Nouvelle Réservation
           </a>
           <a
             href="/dashboard/events"
             className="flex items-center gap-2 bg-surface-mid text-on-background text-sm font-medium px-5 py-2.5 rounded-sm hover:bg-surface-high transition-colors"
           >
             <Search size={16} strokeWidth={1.5} />
-            Parcourir les Evenements
+            Parcourir les Événements
           </a>
         </div>
       </div>
