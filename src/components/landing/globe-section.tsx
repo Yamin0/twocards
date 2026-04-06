@@ -4,10 +4,10 @@ import { GlobeInteractive } from "@/components/ui/cobe-globe-interactive";
 import { MapPin } from "lucide-react";
 
 const cities = [
-  { name: "Paris", flag: "🇫🇷", venues: 42 },
-  { name: "Marrakech", flag: "🇲🇦", venues: 28 },
-  { name: "Londres", flag: "🇬🇧", venues: 35 },
-  { name: "Madrid", flag: "🇪🇸", venues: 19 },
+  { name: "Paris", flag: "🇫🇷", venues: 12 },
+  { name: "Marrakech", flag: "🇲🇦", venues: 8 },
+  { name: "Londres", flag: "🇬🇧", venues: 6 },
+  { name: "Madrid", flag: "🇪🇸", venues: 4 },
 ];
 
 export function GlobeSection() {
