@@ -17,7 +17,6 @@ export default function Home() {
       <Navbar />
       <main className="pt-[88px]">
         <Hero />
-        <TabletShowcase />
         <Features />
         <FeaturesVenues />
         <Features10 />
@@ -25,6 +24,7 @@ export default function Home() {
         <HowItWorks />
         <SocialProof />
         <CinematicSection />
+        <TabletShowcase />
         <CtaBanner />
       </main>
       <Footer />
