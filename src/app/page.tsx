@@ -7,6 +7,7 @@ import { Features10 } from "@/components/landing/features-10";
 import { GlobeSection } from "@/components/landing/globe-section";
 import { HowItWorks } from "@/components/landing/how-it-works";
 import { SocialProof } from "@/components/landing/social-proof";
+import { CinematicSection } from "@/components/landing/cinematic-section";
 import { CtaBanner } from "@/components/landing/cta-banner";
 import { Footer } from "@/components/layout/footer";
 
@@ -23,6 +24,7 @@ export default function Home() {
         <GlobeSection />
         <HowItWorks />
         <SocialProof />
+        <CinematicSection />
         <CtaBanner />
       </main>
       <Footer />
