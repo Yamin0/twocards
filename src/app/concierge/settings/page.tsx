@@ -16,6 +16,13 @@ export default function ConciergeSettingsPage() {
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
 
+  useEffect(() => {
+    if (success) {
+      const t = setTimeout(() => setSuccess(false), 3000);
+      return () => clearTimeout(t);
+    }
+  }, [success]);
+
   const initialized = useRef(false);
   useEffect(() => {
     if (!isLoading && !initialized.current) {
@@ -83,7 +90,7 @@ export default function ConciergeSettingsPage() {
                     type="text"
                     value={form.fullname}
                     onChange={(e) => updateForm("fullname", e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-surface-low border-none rounded-sm text-sm text-on-background font-[family-name:var(--font-inter)] focus:bg-surface-card focus:ring-1 focus:ring-primary-container focus:outline-none transition-colors"
+                    className="w-full pl-10 pr-4 py-2.5 bg-surface-low border-none rounded-sm text-sm text-on-background font-[family-name:var(--font-inter)] focus:bg-surface-card focus:ring-1 focus:ring-primary/30 focus:outline-none transition-colors"
                   />
                 </div>
               </div>
@@ -98,7 +105,7 @@ export default function ConciergeSettingsPage() {
                     type="email"
                     value={form.email}
                     onChange={(e) => updateForm("email", e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-surface-low border-none rounded-sm text-sm text-on-background font-[family-name:var(--font-inter)] focus:bg-surface-card focus:ring-1 focus:ring-primary-container focus:outline-none transition-colors"
+                    className="w-full pl-10 pr-4 py-2.5 bg-surface-low border-none rounded-sm text-sm text-on-background font-[family-name:var(--font-inter)] focus:bg-surface-card focus:ring-1 focus:ring-primary/30 focus:outline-none transition-colors"
                   />
                 </div>
               </div>
@@ -113,7 +120,7 @@ export default function ConciergeSettingsPage() {
                     type="tel"
                     value={form.phone}
                     onChange={(e) => updateForm("phone", e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-surface-low border-none rounded-sm text-sm text-on-background font-[family-name:var(--font-inter)] focus:bg-surface-card focus:ring-1 focus:ring-primary-container focus:outline-none transition-colors"
+                    className="w-full pl-10 pr-4 py-2.5 bg-surface-low border-none rounded-sm text-sm text-on-background font-[family-name:var(--font-inter)] focus:bg-surface-card focus:ring-1 focus:ring-primary/30 focus:outline-none transition-colors"
                   />
                 </div>
               </div>
@@ -128,7 +135,7 @@ export default function ConciergeSettingsPage() {
                     type="text"
                     value={form.city}
                     onChange={(e) => updateForm("city", e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-surface-low border-none rounded-sm text-sm text-on-background font-[family-name:var(--font-inter)] focus:bg-surface-card focus:ring-1 focus:ring-primary-container focus:outline-none transition-colors"
+                    className="w-full pl-10 pr-4 py-2.5 bg-surface-low border-none rounded-sm text-sm text-on-background font-[family-name:var(--font-inter)] focus:bg-surface-card focus:ring-1 focus:ring-primary/30 focus:outline-none transition-colors"
                   />
                 </div>
               </div>

@@ -88,15 +88,15 @@ export default function FloorPlanPage() {
           Plan de Salle
         </h1>
         <div className="flex items-center gap-3">
-          <button onClick={() => showToast("Sélection d'événement bientôt disponible")} className="inline-flex items-center gap-1.5 bg-surface-mid rounded-sm px-3 py-2 text-sm text-on-surface-variant">
+          <button onClick={() => showToast("Cette fonctionnalité sera disponible prochainement")} className="inline-flex items-center gap-1.5 bg-surface-mid rounded-sm px-3 py-2 text-sm text-on-surface-variant">
             Vendredi Signature - 05 Avr
             <ChevronDown className="h-3.5 w-3.5" strokeWidth={1.5} />
           </button>
-          <button onClick={() => showToast("Mode édition bientôt disponible")} className="inline-flex items-center gap-2 bg-surface-mid rounded-sm px-4 py-2 text-sm text-on-surface-variant hover:text-on-background transition-colors">
+          <button onClick={() => showToast("Cette fonctionnalité sera disponible prochainement")} className="inline-flex items-center gap-2 bg-surface-mid rounded-sm px-4 py-2 text-sm text-on-surface-variant hover:text-on-background transition-colors">
             <Pencil className="h-3.5 w-3.5" strokeWidth={1.5} />
             Modifier le Plan
           </button>
-          <button onClick={() => showToast("Ajout de table bientôt disponible")} className="inline-flex items-center gap-2 bg-primary text-white rounded-sm px-4 py-2 text-sm font-medium hover:bg-primary-dark transition-colors">
+          <button onClick={() => showToast("Cette fonctionnalité sera disponible prochainement")} className="inline-flex items-center gap-2 bg-primary text-white rounded-sm px-4 py-2 text-sm font-medium hover:bg-primary-dark transition-colors">
             <PlusCircle className="h-3.5 w-3.5" strokeWidth={1.5} />
             Ajouter une Table
           </button>
@@ -133,9 +133,8 @@ export default function FloorPlanPage() {
         <div className="lg:col-span-7">
           <div className="bg-surface-card rounded-md editorial-shadow overflow-hidden relative">
             <div
-              className="blueprint-grid relative"
+              className="blueprint-grid relative h-[400px] md:h-[600px]"
               style={{
-                height: 600,
                 transform: `scale(${zoom})`,
                 transformOrigin: "top left",
               }}
@@ -195,7 +194,7 @@ export default function FloorPlanPage() {
             </div>
 
             {/* Zoom controls */}
-            <div className="absolute bottom-4 right-4 flex flex-col gap-1">
+            <div className="absolute bottom-3 right-3 md:bottom-4 md:right-4 flex flex-col gap-1 z-10">
               <button
                 onClick={() => setZoom((z) => Math.min(z + 0.1, 1.5))}
                 className="h-8 w-8 bg-surface-card editorial-shadow rounded-sm flex items-center justify-center text-on-surface-variant hover:text-on-background transition-colors"

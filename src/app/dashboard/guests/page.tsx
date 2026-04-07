@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useAuthUser } from "@/hooks/use-auth-user";
 import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
 import { useToast } from "@/hooks/use-toast";
@@ -110,6 +110,16 @@ export default function GuestsPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const { toast, showToast } = useToast();
 
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setShowAddModal(false);
+    };
+    if (showAddModal) {
+      document.addEventListener("keydown", handleEsc);
+      return () => document.removeEventListener("keydown", handleEsc);
+    }
+  }, [showAddModal]);
+
   const guests = isDemoVenue ? DEMO_GUESTS : [];
 
   const filteredGuests = useMemo(() => {
@@ -136,6 +146,7 @@ export default function GuestsPage() {
   }, [vipOnly, searchQuery, sortBy, guests]);
 
   const handleExportCSV = () => {
+    const today = new Date().toISOString().split("T")[0];
     const headers = ["Nom", "Téléphone", "Visites", "Dépenses", "Dernière Visite", "VIP", "Recommandé par"];
     const csv = [
       headers.join(","),
@@ -147,7 +158,7 @@ export default function GuestsPage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "clients-twocards.csv";
+    a.download = `clients-${today}.csv`;
     a.click();
     URL.revokeObjectURL(url);
     showToast("CSV téléchargé");
@@ -238,17 +249,14 @@ export default function GuestsPage() {
       <div className="px-6">
         <div className="bg-surface-card rounded-md editorial-shadow overflow-hidden">
           {/* Table Header */}
-          <div className="grid grid-cols-7 gap-4 px-5 py-3 bg-surface-low">
-            {["Nom", "Téléphone", "Total Visites", "Dépenses Totales", "Dernière Visite", "Statut VIP", "Recommandé par"].map(
-              (header) => (
-                <span
-                  key={header}
-                  className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant"
-                >
-                  {header}
-                </span>
-              )
-            )}
+          <div className="grid grid-cols-4 sm:grid-cols-7 gap-4 px-5 py-3 bg-surface-low">
+            <span className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant">Nom</span>
+            <span className="hidden sm:block font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant">Téléphone</span>
+            <span className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant">Total Visites</span>
+            <span className="hidden sm:block font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant">Dépenses Totales</span>
+            <span className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant">Dernière Visite</span>
+            <span className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant">Statut VIP</span>
+            <span className="hidden sm:block font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant">Recommandé par</span>
           </div>
 
           {/* Table Rows */}
@@ -261,17 +269,17 @@ export default function GuestsPage() {
               <Link
                 key={guest.id}
                 href={`/dashboard/guests/${guest.id}`}
-                className={`grid grid-cols-7 gap-4 px-5 py-3.5 items-center text-sm hover:bg-surface-low/60 transition-colors ${i % 2 === 1 ? "bg-surface" : "bg-surface-card"}`}
+                className={`grid grid-cols-4 sm:grid-cols-7 gap-4 px-5 py-3.5 items-center text-sm hover:bg-surface-low/60 transition-colors ${i % 2 === 1 ? "bg-surface" : "bg-surface-card"}`}
               >
                 <span className="font-medium text-on-background truncate">
                   {guest.nom}
                 </span>
-                <span className="text-on-surface-variant">{guest.telephone}</span>
+                <span className="hidden sm:block text-on-surface-variant">{guest.telephone}</span>
                 <span className="text-on-background">{guest.totalVisites}</span>
-                <span className="text-on-background font-medium">{guest.depenses}</span>
+                <span className="hidden sm:block text-on-background font-medium">{guest.depenses}</span>
                 <span className="text-on-surface-variant">{guest.derniereVisite}</span>
                 <span>{vipBadge(guest.vip)}</span>
-                <span className="text-on-surface-variant truncate">
+                <span className="hidden sm:block text-on-surface-variant truncate">
                   {guest.recommande}
                 </span>
               </Link>

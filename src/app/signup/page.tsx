@@ -254,6 +254,7 @@ export default function SignupPage() {
                       />
                       <button
                         type="button"
+                        aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
                         onClick={() => setShowPassword(!showPassword)}
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant/60 hover:text-on-surface-variant transition-colors"
                       >
@@ -300,6 +301,7 @@ export default function SignupPage() {
                           placeholder="Le Grand Club"
                           value={form.venueName}
                           onChange={(e) => updateForm("venueName", e.target.value)}
+                          required
                           className="w-full pl-10 pr-4 py-2.5 bg-surface-low border-none rounded-sm text-sm text-on-background placeholder:text-on-surface-variant/50 font-[family-name:var(--font-inter)] focus:bg-surface-card focus:ring-1 focus:ring-primary-container focus:outline-none transition-colors"
                         />
                       </div>
@@ -317,6 +319,7 @@ export default function SignupPage() {
                           placeholder="Casablanca"
                           value={form.city}
                           onChange={(e) => updateForm("city", e.target.value)}
+                          required
                           className="w-full pl-10 pr-4 py-2.5 bg-surface-low border-none rounded-sm text-sm text-on-background placeholder:text-on-surface-variant/50 font-[family-name:var(--font-inter)] focus:bg-surface-card focus:ring-1 focus:ring-primary-container focus:outline-none transition-colors"
                         />
                       </div>
@@ -376,7 +379,7 @@ export default function SignupPage() {
       </div>
 
       <footer className="py-6 text-center text-xs text-on-surface-variant/60 font-[family-name:var(--font-inter)]">
-        <span>&copy; 2026 twocards. Tous droits réservés.</span>
+        <span>&copy; {new Date().getFullYear()} twocards. Tous droits réservés.</span>
       </footer>
     </div>
   );

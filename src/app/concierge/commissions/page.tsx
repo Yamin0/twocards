@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Download, TrendingUp, Wallet, Clock, Percent, Check } from "lucide-react";
+import { Download, TrendingUp, Wallet, Clock, Percent, Check, Search } from "lucide-react";
 import { useAuthUser } from "@/hooks/use-auth-user";
 import { TableSkeleton } from "@/components/shared/loading-skeleton";
 import { useToast } from "@/hooks/use-toast";
@@ -20,21 +20,28 @@ const DEMO_COMMISSIONS = [
 export default function ConciergeCommissionsPage() {
   const { isDemoConcierge, isLoading } = useAuthUser();
   const [filter, setFilter] = useState("tous");
+  const [search, setSearch] = useState("");
   const { toast, showToast } = useToast();
 
   if (isLoading) return <TableSkeleton />;
 
   const commissions = isDemoConcierge ? DEMO_COMMISSIONS : [];
-  const filtered =
-    filter === "tous"
-      ? commissions
-      : commissions.filter((c) => c.status === filter);
+  const searchLower = search.toLowerCase();
+  const filtered = commissions.filter((c) => {
+    const matchesFilter = filter === "tous" || c.status === filter;
+    const matchesSearch =
+      !search ||
+      c.venue.toLowerCase().includes(searchLower) ||
+      c.client.toLowerCase().includes(searchLower);
+    return matchesFilter && matchesSearch;
+  });
 
   const totalMonth = isDemoConcierge ? 48600 : 0;
   const pending = isDemoConcierge ? 18800 : 0;
   const paid = isDemoConcierge ? 29800 : 0;
 
   const handleExport = () => {
+    const today = new Date().toISOString().split("T")[0];
     const headers = ["Établissement", "Événement", "Client", "Date", "Montant", "Statut"];
     const csv = [
       headers.join(","),
@@ -46,7 +53,7 @@ export default function ConciergeCommissionsPage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "commissions-concierge-twocards.csv";
+    a.download = `commissions-concierge-${today}.csv`;
     a.click();
     URL.revokeObjectURL(url);
     showToast("CSV téléchargé");
@@ -64,13 +71,25 @@ export default function ConciergeCommissionsPage() {
             Suivez vos gains et versements
           </p>
         </div>
-        <button
-          onClick={handleExport}
-          className="flex items-center gap-2 bg-white border border-outline-variant/20 text-on-surface-variant text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-surface-low transition-colors font-[family-name:var(--font-inter)]"
-        >
-          <Download size={16} strokeWidth={1.5} />
-          Exporter CSV
-        </button>
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/40" size={16} strokeWidth={1.5} />
+            <input
+              type="text"
+              placeholder="Rechercher..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-10 pr-4 py-2 bg-surface-low rounded-full text-sm text-on-background font-[family-name:var(--font-inter)] focus:ring-1 focus:ring-primary/30 focus:outline-none w-48"
+            />
+          </div>
+          <button
+            onClick={handleExport}
+            className="flex items-center gap-2 bg-white border border-outline-variant/20 text-on-surface-variant text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-surface-low transition-colors font-[family-name:var(--font-inter)]"
+          >
+            <Download size={16} strokeWidth={1.5} />
+            Exporter CSV
+          </button>
+        </div>
       </div>
 
       {/* Stats cards */}
@@ -217,8 +236,18 @@ export default function ConciergeCommissionsPage() {
                 ))}
                 {filtered.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="px-4 py-12 text-center text-sm text-on-surface-variant">
-                      Aucune commission trouvée
+                    <td colSpan={6}>
+                      <div className="flex flex-col items-center justify-center py-16 text-center">
+                        <div className="w-12 h-12 rounded-full bg-surface-low flex items-center justify-center mb-4">
+                          <Wallet size={24} strokeWidth={1.5} className="text-on-surface-variant/40" />
+                        </div>
+                        <p className="text-sm font-medium text-on-surface-variant font-[family-name:var(--font-inter)]">
+                          Aucune commission pour le moment
+                        </p>
+                        <p className="text-xs text-on-surface-variant/60 font-[family-name:var(--font-inter)] mt-1">
+                          Vos commissions apparaîtront ici
+                        </p>
+                      </div>
                     </td>
                   </tr>
                 )}

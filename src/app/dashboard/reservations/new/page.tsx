@@ -35,16 +35,32 @@ export default function NewReservationPage() {
   });
 
   const [submitted, setSubmitted] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const { toast, showToast } = useToast(3000);
 
   const currentZone = zones[selectedZone];
   const commission = entryType === "table" ? "250 MAD" : "80 MAD";
 
+  const clearError = (field: string) => {
+    setErrors((prev) => {
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
+  };
+
   const handleSubmit = () => {
-    if (!formData.clientName || !formData.venue) {
-      showToast("Veuillez remplir le nom du client et l'établissement");
-      return;
-    }
+    const newErrors: Record<string, string> = {};
+    if (!formData.clientName.trim()) newErrors.clientName = "Le nom est requis";
+    if (!formData.venue.trim()) newErrors.venue = "L'établissement est requis";
+    if (formData.clientEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.clientEmail))
+      newErrors.clientEmail = "Email invalide";
+    if (formData.clientPhone && !/^[+]?[\d\s()-]{7,}$/.test(formData.clientPhone))
+      newErrors.clientPhone = "Numéro de téléphone invalide";
+    if (partySize < 1) newErrors.partySize = "Minimum 1 personne";
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) return;
+
     setSubmitted(true);
     showToast("Réservation envoyée avec succès !");
   };
@@ -74,11 +90,13 @@ export default function NewReservationPage() {
                   type="text"
                   placeholder="Rechercher un établissement..."
                   value={formData.venue}
-                  onChange={(e) =>
-                    setFormData({ ...formData, venue: e.target.value })
-                  }
+                  onChange={(e) => {
+                    setFormData({ ...formData, venue: e.target.value });
+                    clearError("venue");
+                  }}
                   className="w-full bg-surface-low border-none text-sm pl-9 pr-4 py-2.5 rounded-sm focus:outline-none focus:ring-1 focus:ring-primary-container"
                 />
+                {errors.venue && <p className="text-xs text-red-500 mt-1">{errors.venue}</p>}
               </div>
 
               <label className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant font-semibold block mb-2">
@@ -116,11 +134,13 @@ export default function NewReservationPage() {
                     type="text"
                     placeholder="Jean Dupont"
                     value={formData.clientName}
-                    onChange={(e) =>
-                      setFormData({ ...formData, clientName: e.target.value })
-                    }
+                    onChange={(e) => {
+                      setFormData({ ...formData, clientName: e.target.value });
+                      clearError("clientName");
+                    }}
                     className="w-full bg-surface-low border-none text-sm px-4 py-2.5 rounded-sm focus:outline-none focus:ring-1 focus:ring-primary-container"
                   />
+                  {errors.clientName && <p className="text-xs text-red-500 mt-1">{errors.clientName}</p>}
                 </div>
                 <div>
                   <label className="text-xs text-on-surface-variant mb-1 block">
@@ -130,11 +150,13 @@ export default function NewReservationPage() {
                     type="tel"
                     placeholder="+33 6 12 34 56 78"
                     value={formData.clientPhone}
-                    onChange={(e) =>
-                      setFormData({ ...formData, clientPhone: e.target.value })
-                    }
+                    onChange={(e) => {
+                      setFormData({ ...formData, clientPhone: e.target.value });
+                      clearError("clientPhone");
+                    }}
                     className="w-full bg-surface-low border-none text-sm px-4 py-2.5 rounded-sm focus:outline-none focus:ring-1 focus:ring-primary-container"
                   />
+                  {errors.clientPhone && <p className="text-xs text-red-500 mt-1">{errors.clientPhone}</p>}
                 </div>
                 <div>
                   <label className="text-xs text-on-surface-variant mb-1 block">
@@ -144,11 +166,13 @@ export default function NewReservationPage() {
                     type="email"
                     placeholder="jean@exemple.fr"
                     value={formData.clientEmail}
-                    onChange={(e) =>
-                      setFormData({ ...formData, clientEmail: e.target.value })
-                    }
+                    onChange={(e) => {
+                      setFormData({ ...formData, clientEmail: e.target.value });
+                      clearError("clientEmail");
+                    }}
                     className="w-full bg-surface-low border-none text-sm px-4 py-2.5 rounded-sm focus:outline-none focus:ring-1 focus:ring-primary-container"
                   />
+                  {errors.clientEmail && <p className="text-xs text-red-500 mt-1">{errors.clientEmail}</p>}
                 </div>
               </div>
             </div>
@@ -178,6 +202,7 @@ export default function NewReservationPage() {
                       <Plus size={16} strokeWidth={1.5} className="text-on-background" />
                     </button>
                   </div>
+                  {errors.partySize && <p className="text-xs text-red-500 mt-1">{errors.partySize}</p>}
                 </div>
 
                 {/* Entry type toggle */}
@@ -309,7 +334,7 @@ export default function NewReservationPage() {
                       Événement
                     </p>
                     <p className="text-on-background text-sm mt-0.5">
-                      {formData.event || "Non selectionne"}
+                      {formData.event || "Non sélectionné"}
                     </p>
                   </div>
                   <div>

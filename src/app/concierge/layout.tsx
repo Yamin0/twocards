@@ -16,7 +16,7 @@ import {
   Settings,
   LogOut,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthUser } from "@/hooks/use-auth-user";
 
@@ -48,6 +48,17 @@ export default function ConciergeLayout({
   const venues = isDemoConcierge ? demoVenues : defaultVenues;
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [venueDropdownOpen, setVenueDropdownOpen] = useState(false);
+
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileMenuOpen]);
   const [selectedVenue, setSelectedVenue] = useState(venues[0]);
 
   const isActive = (href: string) => {

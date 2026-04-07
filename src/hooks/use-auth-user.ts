@@ -23,6 +23,8 @@ export function useAuthUser() {
         setVenueName(data.user.user_metadata?.venue_name ?? null);
       }
       setIsLoading(false);
+    }).catch(() => {
+      setIsLoading(false);
     });
   }, []);
 
@@ -41,6 +43,7 @@ export function useAuthUser() {
     initials: fullName
       ? fullName
           .split(" ")
+          .filter((n) => n.length > 0)
           .map((n) => n[0])
           .join("")
           .toUpperCase()

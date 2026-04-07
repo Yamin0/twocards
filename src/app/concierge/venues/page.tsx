@@ -1,10 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { MapPin, Star, ArrowRight, X, Check, Phone, Mail, Globe, Building2 } from "lucide-react";
+import { MapPin, Star, ArrowRight, X, Phone, Mail, Globe, Building2 } from "lucide-react";
 import { useAuthUser } from "@/hooks/use-auth-user";
 import { ConciergeSkeleton } from "@/components/shared/loading-skeleton";
-import { useToast } from "@/hooks/use-toast";
 
 const DEMO_VENUES = [
   { id: 1, name: "Le Comptoir Darna", city: "Marrakech", type: "Restaurant-Club", commission: "10%", covers: 68, rating: 4.8, active: true, phone: "+212 5 24 43 77 02", email: "contact@comptoirdarna.com", address: "Avenue Echouhada, Hivernage, Marrakech", hours: "20h – 3h" },
@@ -18,7 +17,6 @@ const DEMO_VENUES = [
 export default function ConciergeVenuesPage() {
   const { isDemoConcierge, isLoading } = useAuthUser();
   const [expandedId, setExpandedId] = useState<number | null>(null);
-  const { toast, showToast } = useToast();
 
   const venues = isDemoConcierge ? DEMO_VENUES : [];
 
@@ -61,7 +59,7 @@ export default function ConciergeVenuesPage() {
                 </div>
                 <div className="flex items-center gap-1 text-sm">
                   <Star size={14} strokeWidth={1.5} className="text-amber-500 fill-amber-500" />
-                  <span className="font-semibold text-on-background">{venue.rating}</span>
+                  <span className="font-semibold text-on-background">{venue.rating}/5</span>
                 </div>
               </div>
 
@@ -96,7 +94,7 @@ export default function ConciergeVenuesPage() {
                   </div>
                   <div className="flex items-center gap-2 text-sm text-on-surface-variant">
                     <Mail size={14} strokeWidth={1.5} className="text-primary" />
-                    <span className="truncate">{venue.email}</span>
+                    <a href={`mailto:${venue.email}`} className="truncate hover:text-primary transition-colors">{venue.email}</a>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-on-surface-variant">
                     <MapPin size={14} strokeWidth={1.5} className="text-primary" />
@@ -107,12 +105,12 @@ export default function ConciergeVenuesPage() {
                     <span>Horaires : {venue.hours}</span>
                   </div>
                 </div>
-                <button
-                  onClick={() => showToast(`Message envoyé à ${venue.name}`)}
-                  className="w-full bg-primary text-white text-sm font-medium py-2 rounded-lg hover:opacity-90 transition-opacity mt-2"
+                <a
+                  href={`mailto:${venue.email}`}
+                  className="block w-full bg-primary text-white text-sm font-medium py-2 rounded-lg hover:opacity-90 transition-opacity mt-2 text-center"
                 >
                   Contacter l&apos;établissement
-                </button>
+                </a>
               </div>
             )}
           </div>
@@ -125,13 +123,6 @@ export default function ConciergeVenuesPage() {
         )}
       </div>
 
-      {/* Toast */}
-      {toast && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-primary-dark text-white px-4 py-3 rounded-md shadow-lg">
-          <Check size={16} strokeWidth={2} />
-          <span className="text-sm font-medium">{toast}</span>
-        </div>
-      )}
     </div>
   );
 }

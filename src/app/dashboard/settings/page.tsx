@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import {
   User,
@@ -11,6 +11,7 @@ import {
   Camera,
   ChevronDown,
   Check,
+  Loader2,
 } from "lucide-react";
 import { useAuthUser } from "@/hooks/use-auth-user";
 import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
@@ -27,24 +28,78 @@ export default function SettingsPage() {
   const { isDemoVenue, isLoading, fullName, email, venueName, initials } = useAuthUser();
   const [activeTab, setActiveTab] = useState("profile");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [success, setSuccess] = useState(false);
   const { toast, showToast } = useToast();
+
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    city: "",
+    venueName: "",
+    venueType: "restaurant",
+    capacity: "",
+    address: "",
+    description: "",
+    hours: "",
+    minSpend: "",
+  });
+
+  const initialized = useRef(false);
+  useEffect(() => {
+    if (!isLoading && !initialized.current) {
+      initialized.current = true;
+      if (isDemoVenue) {
+        setForm({
+          name: "Marc Rousseau",
+          email: "marc@lecomptoir.fr",
+          phone: "+33 6 12 34 56 78",
+          city: "Paris",
+          venueName: "Le Comptoir",
+          venueType: "restaurant-bar",
+          capacity: "220",
+          address: "42 Rue de Rivoli, 75001 Paris",
+          description:
+            "Le Comptoir est un restaurant-bar branché situé au cœur de Paris, offrant une expérience culinaire raffinée dans un cadre contemporain. Nos soirées thématiques et notre carte de cocktails signatures en font un lieu incontournable de la vie nocturne parisienne.",
+          hours: "Mar-Sam: 19h00 - 02h00 | Dim: 12h00 - 16h00",
+          minSpend: "Table Standard: 500 MAD | Table VIP: 1,500 MAD | Carré VIP: 3,000 MAD",
+        });
+      } else {
+        setForm((prev) => ({
+          ...prev,
+          name: fullName || "",
+          email: email || "",
+          venueName: venueName || "",
+        }));
+      }
+    }
+  }, [isLoading, isDemoVenue, fullName, email, venueName]);
+
+  useEffect(() => {
+    if (success) {
+      const t = setTimeout(() => setSuccess(false), 3000);
+      return () => clearTimeout(t);
+    }
+  }, [success]);
+
+  const updateForm = (field: string, value: string) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+    setSuccess(false);
+  };
+
+  const handleSubmit = async () => {
+    setSaving(true);
+    setSuccess(false);
+    await new Promise((resolve) => setTimeout(resolve, 600));
+    setSaving(false);
+    setSuccess(true);
+    showToast("Modifications enregistrées avec succès");
+  };
 
   if (isLoading) return <DashboardSkeleton />;
 
-  const displayName = isDemoVenue ? "Marc Rousseau" : (fullName || "");
-  const displayEmail = isDemoVenue ? "marc@lecomptoir.fr" : (email || "");
-  const displayVenueName = isDemoVenue ? "Le Comptoir" : (venueName || "");
   const displayInitials = isDemoVenue ? "MR" : initials;
-  const displayPhone = isDemoVenue ? "+33 6 12 34 56 78" : "";
-  const displayCity = isDemoVenue ? "Paris" : "";
-  const displayAddress = isDemoVenue ? "42 Rue de Rivoli, 75001 Paris" : "";
-  const displayCapacity = isDemoVenue ? 220 : undefined;
-  const displayType = isDemoVenue ? "restaurant-bar" : "restaurant";
-  const displayDescription = isDemoVenue
-    ? "Le Comptoir est un restaurant-bar branché situé au cœur de Paris, offrant une expérience culinaire raffinée dans un cadre contemporain. Nos soirées thématiques et notre carte de cocktails signatures en font un lieu incontournable de la vie nocturne parisienne."
-    : "";
-  const displayHours = isDemoVenue ? "Mar-Sam: 19h00 - 02h00 | Dim: 12h00 - 16h00" : "";
-  const displayMinSpend = isDemoVenue ? "Table Standard: 500 MAD | Table VIP: 1,500 MAD | Carré VIP: 3,000 MAD" : "";
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
@@ -123,7 +178,8 @@ export default function SettingsPage() {
                   </label>
                   <input
                     type="text"
-                    defaultValue={displayName}
+                    value={form.name}
+                    onChange={(e) => updateForm("name", e.target.value)}
                     className="w-full px-4 py-2.5 bg-surface-low border-none rounded-md text-sm text-on-background focus:outline-none focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
@@ -134,7 +190,7 @@ export default function SettingsPage() {
                   </label>
                   <input
                     type="email"
-                    defaultValue={displayEmail}
+                    value={form.email}
                     disabled
                     className="w-full px-4 py-2.5 bg-surface-low border-none rounded-md text-sm text-on-surface-variant cursor-not-allowed opacity-60"
                   />
@@ -146,7 +202,8 @@ export default function SettingsPage() {
                   </label>
                   <input
                     type="tel"
-                    defaultValue={displayPhone}
+                    value={form.phone}
+                    onChange={(e) => updateForm("phone", e.target.value)}
                     className="w-full px-4 py-2.5 bg-surface-low border-none rounded-md text-sm text-on-background focus:outline-none focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
@@ -157,7 +214,8 @@ export default function SettingsPage() {
                   </label>
                   <input
                     type="text"
-                    defaultValue={displayCity}
+                    value={form.city}
+                    onChange={(e) => updateForm("city", e.target.value)}
                     className="w-full px-4 py-2.5 bg-surface-low border-none rounded-md text-sm text-on-background focus:outline-none focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
@@ -177,7 +235,8 @@ export default function SettingsPage() {
                   </label>
                   <input
                     type="text"
-                    defaultValue={displayVenueName}
+                    value={form.venueName}
+                    onChange={(e) => updateForm("venueName", e.target.value)}
                     className="w-full px-4 py-2.5 bg-surface-low border-none rounded-md text-sm text-on-background focus:outline-none focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
@@ -189,7 +248,8 @@ export default function SettingsPage() {
                     </label>
                     <div className="relative">
                       <select
-                        defaultValue={displayType}
+                        value={form.venueType}
+                        onChange={(e) => updateForm("venueType", e.target.value)}
                         className="w-full px-4 py-2.5 bg-surface-low border-none rounded-md text-sm text-on-background appearance-none focus:outline-none focus:ring-2 focus:ring-primary/20"
                       >
                         <option value="restaurant">Restaurant</option>
@@ -211,7 +271,8 @@ export default function SettingsPage() {
                     </label>
                     <input
                       type="number"
-                      defaultValue={displayCapacity}
+                      value={form.capacity}
+                      onChange={(e) => updateForm("capacity", e.target.value)}
                       className="w-full px-4 py-2.5 bg-surface-low border-none rounded-md text-sm text-on-background focus:outline-none focus:ring-2 focus:ring-primary/20"
                     />
                   </div>
@@ -223,7 +284,8 @@ export default function SettingsPage() {
                   </label>
                   <input
                     type="text"
-                    defaultValue={displayAddress}
+                    value={form.address}
+                    onChange={(e) => updateForm("address", e.target.value)}
                     className="w-full px-4 py-2.5 bg-surface-low border-none rounded-md text-sm text-on-background focus:outline-none focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
@@ -239,7 +301,8 @@ export default function SettingsPage() {
               </label>
               <textarea
                 rows={3}
-                defaultValue={displayDescription}
+                value={form.description}
+                onChange={(e) => updateForm("description", e.target.value)}
                 className="w-full px-4 py-2.5 bg-surface-card border-none rounded-md text-sm text-on-background resize-none focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
             </div>
@@ -250,7 +313,8 @@ export default function SettingsPage() {
               </label>
               <input
                 type="text"
-                defaultValue={displayHours}
+                value={form.hours}
+                onChange={(e) => updateForm("hours", e.target.value)}
                 className="w-full px-4 py-2.5 bg-surface-card border-none rounded-md text-sm text-on-background focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
             </div>
@@ -261,7 +325,8 @@ export default function SettingsPage() {
               </label>
               <input
                 type="text"
-                defaultValue={displayMinSpend}
+                value={form.minSpend}
+                onChange={(e) => updateForm("minSpend", e.target.value)}
                 className="w-full px-4 py-2.5 bg-surface-card border-none rounded-md text-sm text-on-background focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
             </div>
@@ -270,10 +335,12 @@ export default function SettingsPage() {
           {/* Action Buttons */}
           <div className="flex items-center justify-between pt-2 pb-8">
             <button
-              onClick={() => showToast("Modifications enregistrées")}
-              className="px-6 py-2.5 bg-primary text-white rounded-sm text-sm font-medium hover:bg-primary-dark transition-colors"
+              onClick={handleSubmit}
+              disabled={saving}
+              className="px-6 py-2.5 bg-primary text-white rounded-sm text-sm font-medium hover:bg-primary-dark transition-colors disabled:opacity-60 flex items-center gap-2"
             >
-              Enregistrer les modifications
+              {saving && <Loader2 size={16} className="animate-spin" />}
+              {saving ? "Enregistrement..." : "Enregistrer les modifications"}
             </button>
             <button
               onClick={() => setShowDeleteConfirm(true)}

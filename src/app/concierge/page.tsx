@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import {
   UserPlus,
@@ -377,6 +377,16 @@ export default function ConciergeDashboard() {
   const [showNewClientModal, setShowNewClientModal] = useState(false);
   const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
   const { toast, showToast } = useToast();
+
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setShowNewClientModal(false);
+    };
+    if (showNewClientModal) {
+      document.addEventListener("keydown", handleEsc);
+      return () => document.removeEventListener("keydown", handleEsc);
+    }
+  }, [showNewClientModal]);
 
   if (isLoading) return <ConciergeSkeleton />;
 

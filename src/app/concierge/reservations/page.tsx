@@ -50,18 +50,45 @@ export default function ConciergeReservationsPage() {
     }
   }, [isLoading, isDemoConcierge]);
   const [showModal, setShowModal] = useState(false);
+
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setShowModal(false);
+    };
+    if (showModal) {
+      document.addEventListener("keydown", handleEsc);
+      return () => document.removeEventListener("keydown", handleEsc);
+    }
+  }, [showModal]);
+
   const [newClient, setNewClient] = useState("");
   const [newVenue, setNewVenue] = useState(venues[0]);
   const [newGuests, setNewGuests] = useState("");
   const [newDate, setNewDate] = useState("");
   const [newTime, setNewTime] = useState("");
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const { toast, showToast } = useToast();
 
   const filtered = filter === "toutes" ? reservations : reservations.filter((r) => r.status === filter);
 
+  const clearError = (field: string) => {
+    setErrors((prev) => {
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newClient.trim() || !newVenue) return;
+    const newErrors: Record<string, string> = {};
+    if (!newClient.trim()) newErrors.client = "Le nom du client est requis";
+    if (!newVenue) newErrors.venue = "L'établissement est requis";
+    if (newGuests && parseInt(newGuests) < 1) newErrors.guests = "Minimum 1 personne";
+    if (!newDate.trim()) newErrors.date = "La date est requise";
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) return;
+
     const venueCity: Record<string, string> = {
       "Le Comptoir Darna": "Marrakech",
       "Sky Bar Casa": "Casablanca",
@@ -83,6 +110,7 @@ export default function ConciergeReservationsPage() {
     };
     setReservations((prev) => [newRes, ...prev]);
     setShowModal(false);
+    setErrors({});
     setNewClient("");
     setNewGuests("");
     setNewDate("");
@@ -118,7 +146,7 @@ export default function ConciergeReservationsPage() {
           <button
             key={f}
             onClick={() => setFilter(f)}
-            className={`px-4 py-1.5 rounded-full text-xs font-medium transition-colors capitalize ${
+            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors capitalize ${
               filter === f ? "bg-primary text-white" : "bg-surface-low text-on-surface-variant hover:bg-surface-mid"
             }`}
           >
@@ -178,14 +206,14 @@ export default function ConciergeReservationsPage() {
 
       {/* New Reservation Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-lg font-bold text-on-background font-[family-name:var(--font-manrope)]">
                 Nouvelle réservation
               </h2>
               <button
-                onClick={() => setShowModal(false)}
+                onClick={() => { setShowModal(false); setErrors({}); }}
                 className="p-1 rounded-lg text-on-surface-variant hover:text-on-background hover:bg-surface-low transition-colors"
               >
                 <X size={18} strokeWidth={1.5} />
@@ -198,13 +226,17 @@ export default function ConciergeReservationsPage() {
                 </label>
                 <select
                   value={newVenue}
-                  onChange={(e) => setNewVenue(e.target.value)}
+                  onChange={(e) => {
+                    setNewVenue(e.target.value);
+                    clearError("venue");
+                  }}
                   className="w-full px-3 py-2 text-sm bg-surface-low border-none rounded-lg text-on-background font-[family-name:var(--font-inter)] focus:ring-1 focus:ring-primary/30 focus:outline-none"
                 >
                   {venues.map((v) => (
                     <option key={v} value={v}>{v}</option>
                   ))}
                 </select>
+                {errors.venue && <p className="text-xs text-red-500 mt-1">{errors.venue}</p>}
               </div>
               <div>
                 <label className="block text-xs font-medium text-on-surface-variant mb-1">
@@ -213,11 +245,14 @@ export default function ConciergeReservationsPage() {
                 <input
                   type="text"
                   value={newClient}
-                  onChange={(e) => setNewClient(e.target.value)}
+                  onChange={(e) => {
+                    setNewClient(e.target.value);
+                    clearError("client");
+                  }}
                   placeholder="Ex: Mohamed Tazi"
                   className="w-full px-3 py-2 text-sm bg-surface-low border-none rounded-lg text-on-background placeholder:text-on-surface-variant/50 font-[family-name:var(--font-inter)] focus:ring-1 focus:ring-primary/30 focus:outline-none"
-                  required
                 />
+                {errors.client && <p className="text-xs text-red-500 mt-1">{errors.client}</p>}
               </div>
               <div className="grid grid-cols-3 gap-3">
                 <div>
@@ -227,11 +262,15 @@ export default function ConciergeReservationsPage() {
                   <input
                     type="number"
                     value={newGuests}
-                    onChange={(e) => setNewGuests(e.target.value)}
+                    onChange={(e) => {
+                      setNewGuests(e.target.value);
+                      clearError("guests");
+                    }}
                     placeholder="4"
                     min="1"
                     className="w-full px-3 py-2 text-sm bg-surface-low border-none rounded-lg text-on-background placeholder:text-on-surface-variant/50 font-[family-name:var(--font-inter)] focus:ring-1 focus:ring-primary/30 focus:outline-none"
                   />
+                  {errors.guests && <p className="text-xs text-red-500 mt-1">{errors.guests}</p>}
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-on-surface-variant mb-1">
@@ -240,10 +279,14 @@ export default function ConciergeReservationsPage() {
                   <input
                     type="text"
                     value={newDate}
-                    onChange={(e) => setNewDate(e.target.value)}
+                    onChange={(e) => {
+                      setNewDate(e.target.value);
+                      clearError("date");
+                    }}
                     placeholder="12 Avr."
                     className="w-full px-3 py-2 text-sm bg-surface-low border-none rounded-lg text-on-background placeholder:text-on-surface-variant/50 font-[family-name:var(--font-inter)] focus:ring-1 focus:ring-primary/30 focus:outline-none"
                   />
+                  {errors.date && <p className="text-xs text-red-500 mt-1">{errors.date}</p>}
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-on-surface-variant mb-1">

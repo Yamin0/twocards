@@ -132,6 +132,7 @@ export default function AnalyticsPage() {
   const statsData = isDemoVenue ? DEMO_STATS : EMPTY_STATS;
 
   const handleExportCSV = () => {
+    const today = new Date().toISOString().split("T")[0];
     downloadCSV(
       rpData.map((rp) => ({
         Rang: rp.rang,
@@ -141,7 +142,7 @@ export default function AnalyticsPage() {
         Commissions: rp.commissions,
         "Taille Moy.": rp.taille,
       })),
-      "analytics-twocards.csv"
+      `analytics-${today}.csv`
     );
     showToast("CSV téléchargé");
   };
@@ -284,10 +285,10 @@ export default function AnalyticsPage() {
                   <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
                     CA Généré
                   </th>
-                  <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
+                  <th className="hidden md:table-cell text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
                     Commissions Dues
                   </th>
-                  <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
+                  <th className="hidden md:table-cell text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
                     Taille Moy. Groupe
                   </th>
                 </tr>
@@ -314,8 +315,8 @@ export default function AnalyticsPage() {
                     <td className="px-6 py-3.5 text-on-background font-medium">{rp.nom}</td>
                     <td className="px-6 py-3.5 text-on-background">{rp.couverts}</td>
                     <td className="px-6 py-3.5 text-on-background font-medium">{rp.ca}</td>
-                    <td className="px-6 py-3.5 text-on-background">{rp.commissions}</td>
-                    <td className="px-6 py-3.5 text-on-background">{rp.taille}</td>
+                    <td className="hidden md:table-cell px-6 py-3.5 text-on-background">{rp.commissions}</td>
+                    <td className="hidden md:table-cell px-6 py-3.5 text-on-background">{rp.taille}</td>
                   </tr>
                 ))}
               </tbody>

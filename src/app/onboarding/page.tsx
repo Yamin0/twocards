@@ -16,7 +16,7 @@ import {
 const steps = [
   { number: 1, label: "Profil" },
   { number: 2, label: "Tables" },
-  { number: 3, label: "Equipe" },
+  { number: 3, label: "Équipe" },
   { number: 4, label: "Lancement" },
 ];
 
@@ -92,7 +92,7 @@ export default function OnboardingPage() {
 
           {/* Mobile step indicator */}
           <span className="sm:hidden text-xs font-medium text-on-surface-variant font-[family-name:var(--font-inter)]">
-            Etape {currentStep} / {steps.length}
+            Étape {currentStep} / {steps.length}
           </span>
         </div>
       </header>
@@ -104,7 +104,7 @@ export default function OnboardingPage() {
           <div className="bg-surface-card rounded-md editorial-shadow p-6 sm:p-8">
             {/* Step label */}
             <span className="inline-block px-2.5 py-1 rounded-full bg-primary/5 text-primary text-xs font-medium font-[family-name:var(--font-inter)] mb-4">
-              Etape 2 sur 4
+              Étape 2 sur 4
             </span>
 
             <h1 className="text-xl font-bold text-primary-dark font-[family-name:var(--font-manrope)] mb-1">
@@ -135,7 +135,7 @@ export default function OnboardingPage() {
                     : "text-on-surface-variant hover:text-on-background"
                 }`}
               >
-                Plan Personnalise
+                Plan Personnalisé
               </button>
             </div>
 
@@ -189,7 +189,7 @@ export default function OnboardingPage() {
                     {/* Min spend */}
                     <div className="space-y-1.5">
                       <label className="block font-[family-name:var(--font-inter)] text-xs uppercase tracking-wider text-on-surface-variant">
-                        Minimum de depense
+                        Minimum de dépense
                       </label>
                       <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/60 text-sm">
@@ -253,7 +253,7 @@ export default function OnboardingPage() {
                     {/* Min spend */}
                     <div className="space-y-1.5">
                       <label className="block font-[family-name:var(--font-inter)] text-xs uppercase tracking-wider text-on-surface-variant">
-                        Minimum de depense
+                        Minimum de dépense
                       </label>
                       <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/60 text-sm">
@@ -275,7 +275,7 @@ export default function OnboardingPage() {
                 {/* Summary preview */}
                 <div className="bg-surface-low rounded-sm p-5">
                   <h3 className="text-xs font-[family-name:var(--font-inter)] uppercase tracking-wider text-on-surface-variant mb-3">
-                    Apercu de la configuration
+                    Aperçu de la configuration
                   </h3>
                   <div className="grid grid-cols-3 gap-4">
                     <div>
@@ -291,7 +291,7 @@ export default function OnboardingPage() {
                         ~{totalCapacity}
                       </p>
                       <p className="text-xs text-on-surface-variant font-[family-name:var(--font-inter)]">
-                        Capacite estimee
+                        Capacité estimée
                       </p>
                     </div>
                     <div>
@@ -310,7 +310,7 @@ export default function OnboardingPage() {
             {activeTab === "personnalise" && (
               <div className="flex items-center justify-center py-16">
                 <p className="text-sm text-on-surface-variant font-[family-name:var(--font-inter)]">
-                  L&apos;editeur de plan personnalise sera disponible
+                  L&apos;éditeur de plan personnalisé sera disponible
                   prochainement.
                 </p>
               </div>
@@ -357,7 +357,7 @@ export default function OnboardingPage() {
             </p>
             <p className="text-xs text-on-surface-variant/60 font-[family-name:var(--font-inter)]">
               Vous pourrez toujours modifier cette configuration plus tard
-              depuis les parametres.
+              depuis les paramètres.
             </p>
           </div>
         </aside>

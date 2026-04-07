@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -114,6 +114,26 @@ export default function GuestProfilePage() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [noteText, setNoteText] = useState("");
   const { toast, showToast } = useToast();
+
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setShowNoteModal(false);
+    };
+    if (showNoteModal) {
+      document.addEventListener("keydown", handleEsc);
+      return () => document.removeEventListener("keydown", handleEsc);
+    }
+  }, [showNoteModal]);
+
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setShowEditModal(false);
+    };
+    if (showEditModal) {
+      document.addEventListener("keydown", handleEsc);
+      return () => document.removeEventListener("keydown", handleEsc);
+    }
+  }, [showEditModal]);
 
   const handleAddNote = () => {
     if (!noteText.trim()) return;

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-const words = ["restaurant", "club festival", "club de plage", "evenement"];
+const words = ["restaurant", "club festival", "club de plage", "événement"];
 
 export function RotatingText() {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -25,7 +25,7 @@ export function RotatingText() {
         <h2 className="font-[family-name:var(--font-manrope)] text-3xl font-bold text-primary-dark sm:text-4xl lg:text-5xl leading-tight">
           Plateforme tout-en-un
           <br />
-          concue pour votre{" "}
+          conçue pour votre{" "}
           <span
             className={`inline-block text-primary transition-all duration-400 ease-in-out ${
               isAnimating

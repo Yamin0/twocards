@@ -144,8 +144,8 @@ export default function MessagesPage() {
     <div className="h-[calc(100vh-64px)] flex">
       {/* Conversation List - Left Panel */}
       <div
-        className={`w-full lg:w-[35%] bg-surface-card editorial-shadow flex flex-col ${
-          selectedId !== null ? "hidden lg:flex" : "flex"
+        className={`w-full md:w-[35%] bg-surface-card editorial-shadow ${
+          selectedId !== null ? "hidden md:flex md:flex-col" : "flex flex-col"
         }`}
       >
         {/* Search */}
@@ -233,8 +233,8 @@ export default function MessagesPage() {
 
       {/* Chat View - Right Panel */}
       <div
-        className={`flex-1 flex flex-col bg-surface ${
-          selectedId === null ? "hidden lg:flex" : "flex"
+        className={`flex-1 bg-surface ${
+          selectedId === null ? "hidden md:flex md:flex-col" : "flex flex-col"
         }`}
       >
         {selected ? (
@@ -244,9 +244,10 @@ export default function MessagesPage() {
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => setSelectedId(null)}
-                  className="lg:hidden p-1 text-on-surface-variant hover:text-on-background transition-colors"
+                  className="md:hidden flex items-center gap-1 p-1 text-on-surface-variant hover:text-on-background transition-colors"
                 >
-                  <ArrowLeft size={20} strokeWidth={1.5} />
+                  <ArrowLeft size={16} strokeWidth={2} />
+                  Retour
                 </button>
                 <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center">
                   <span className="text-xs font-bold text-on-primary-container">

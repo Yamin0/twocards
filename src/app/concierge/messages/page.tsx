@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Send, Building2, Check, MessageSquare } from "lucide-react";
+import { Send, Building2, Check, MessageSquare, ArrowLeft } from "lucide-react";
 import { useAuthUser } from "@/hooks/use-auth-user";
 import { ConciergeSkeleton } from "@/components/shared/loading-skeleton";
 import { useToast } from "@/hooks/use-toast";
@@ -133,9 +133,9 @@ export default function ConciergeMessagesPage() {
       </div>
 
       <div className="px-8 pb-8">
-        <div className="bg-surface-card rounded-md editorial-shadow overflow-hidden grid grid-cols-1 lg:grid-cols-3" style={{ height: "calc(100vh - 200px)" }}>
+        <div className="bg-surface-card rounded-md editorial-shadow overflow-hidden grid grid-cols-1 md:grid-cols-3" style={{ height: "calc(100vh - 200px)" }}>
           {/* Conversation list */}
-          <div className="border-r border-outline-variant/20 overflow-y-auto">
+          <div className={`border-r border-outline-variant/20 overflow-y-auto ${activeConv !== null ? "hidden md:flex md:flex-col" : "flex flex-col"}`}>
             {conversations.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full py-16">
                 <MessageSquare size={32} strokeWidth={1} className="text-on-surface-variant/30 mb-3" />
@@ -186,7 +186,7 @@ export default function ConciergeMessagesPage() {
           </div>
 
           {/* Chat area */}
-          <div className="lg:col-span-2 flex flex-col">
+          <div className={`md:col-span-2 flex flex-col ${activeConv === null ? "hidden md:flex" : ""}`}>
             {!activeConvData ? (
               <div className="flex-1 flex flex-col items-center justify-center">
                 <MessageSquare size={40} strokeWidth={1} className="text-on-surface-variant/30 mb-3" />
@@ -195,6 +195,13 @@ export default function ConciergeMessagesPage() {
             ) : (
               <>
                 <div className="p-4 border-b border-outline-variant/20 flex items-center gap-3">
+                  <button
+                    onClick={() => setActiveConv(null)}
+                    className="md:hidden flex items-center gap-1 text-sm text-primary font-medium mr-1"
+                  >
+                    <ArrowLeft size={16} strokeWidth={2} />
+                    Retour
+                  </button>
                   <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center">
                     <Building2 size={18} strokeWidth={1.5} className="text-on-primary-container" />
                   </div>
@@ -245,7 +252,7 @@ export default function ConciergeMessagesPage() {
                       onChange={(e) => setInputValue(e.target.value)}
                       onKeyDown={handleKeyDown}
                       placeholder="Écrire un message..."
-                      className="flex-1 px-4 py-2.5 bg-surface-low border-none rounded-sm text-sm text-on-background placeholder:text-on-surface-variant/50 font-[family-name:var(--font-inter)] focus:ring-1 focus:ring-primary-container focus:outline-none"
+                      className="flex-1 px-4 py-2.5 bg-surface-low border-none rounded-sm text-sm text-on-background placeholder:text-on-surface-variant/50 font-[family-name:var(--font-inter)] focus:ring-1 focus:ring-primary/30 focus:outline-none"
                     />
                     <button
                       onClick={handleSend}

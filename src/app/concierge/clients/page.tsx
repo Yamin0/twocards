@@ -39,6 +39,16 @@ export default function ConciergeClientsPage() {
   const [menuOpen, setMenuOpen] = useState<number | null>(null);
   const { toast, showToast } = useToast();
 
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setShowNewClient(false);
+    };
+    if (showNewClient) {
+      document.addEventListener("keydown", handleEsc);
+      return () => document.removeEventListener("keydown", handleEsc);
+    }
+  }, [showNewClient]);
+
   const allTags = ["tous", "VIP", "Régulier", "Groupe", "Nouveau", "Top client"];
 
   const filtered = clients.filter((c) => {
@@ -158,7 +168,7 @@ export default function ConciergeClientsPage() {
                   <th className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/60 font-[family-name:var(--font-inter)]">
                     Client
                   </th>
-                  <th className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/60 font-[family-name:var(--font-inter)]">
+                  <th className="hidden sm:table-cell text-left px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/60 font-[family-name:var(--font-inter)]">
                     Contact
                   </th>
                   <th className="text-center px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/60 font-[family-name:var(--font-inter)]">
@@ -167,7 +177,7 @@ export default function ConciergeClientsPage() {
                   <th className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/60 font-[family-name:var(--font-inter)]">
                     Dépenses
                   </th>
-                  <th className="text-center px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/60 font-[family-name:var(--font-inter)]">
+                  <th className="hidden sm:table-cell text-center px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/60 font-[family-name:var(--font-inter)]">
                     Grp. moy.
                   </th>
                   <th className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/60 font-[family-name:var(--font-inter)]">
@@ -213,7 +223,7 @@ export default function ConciergeClientsPage() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3.5">
+                    <td className="hidden sm:table-cell px-4 py-3.5">
                       <div className="flex items-center gap-3">
                         <a
                           href={`tel:${client.phone}`}
@@ -234,7 +244,7 @@ export default function ConciergeClientsPage() {
                         {client.totalSpent}
                       </span>
                     </td>
-                    <td className="px-4 py-3.5 text-center">
+                    <td className="hidden sm:table-cell px-4 py-3.5 text-center">
                       <span className="text-on-surface-variant font-[family-name:var(--font-inter)]">
                         {client.avgGroup}
                       </span>
@@ -309,7 +319,7 @@ export default function ConciergeClientsPage() {
 
       {/* New Client Modal */}
       {showNewClient && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-lg font-bold text-on-background font-[family-name:var(--font-manrope)]">

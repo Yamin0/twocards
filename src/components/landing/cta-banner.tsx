@@ -19,7 +19,7 @@ export function CtaBanner() {
             Demander un accès anticipé
           </Link>
           <Link
-            href="#contact"
+            href="/signup"
             className="rounded-sm border border-white/30 px-6 py-3 font-[family-name:var(--font-manrope)] text-sm font-semibold text-white transition-colors hover:bg-white/10"
           >
             Planifier une démo

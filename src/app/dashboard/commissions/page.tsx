@@ -1,6 +1,6 @@
 "use client";
 
-import { Download, Check } from "lucide-react";
+import { Download, Check, Wallet } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { StatsStrip } from "@/components/dashboard/stats-strip";
 import { StatusBadge } from "@/components/shared/status-badge";
@@ -84,6 +84,7 @@ export default function CommissionsPage() {
       showToast("Aucune donnée à exporter");
       return;
     }
+    const today = new Date().toISOString().split("T")[0];
     const headers = ["Date", "RP", "Événement", "Montant", "Statut"];
     const csv = [
       headers.join(","),
@@ -95,7 +96,7 @@ export default function CommissionsPage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "commissions-twocards.csv";
+    a.download = `commissions-${today}.csv`;
     a.click();
     URL.revokeObjectURL(url);
     showToast("CSV téléchargé");
@@ -144,7 +145,7 @@ export default function CommissionsPage() {
                   <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
                     RP
                   </th>
-                  <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
+                  <th className="hidden sm:table-cell text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
                     Événement
                   </th>
                   <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
@@ -158,8 +159,18 @@ export default function CommissionsPage() {
               <tbody>
                 {commissions.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="px-6 py-8 text-center text-sm text-on-surface-variant">
-                      Aucune commission enregistrée
+                    <td colSpan={5}>
+                      <div className="flex flex-col items-center justify-center py-16 text-center">
+                        <div className="w-12 h-12 rounded-full bg-surface-low flex items-center justify-center mb-4">
+                          <Wallet size={24} strokeWidth={1.5} className="text-on-surface-variant/40" />
+                        </div>
+                        <p className="text-sm font-medium text-on-surface-variant font-[family-name:var(--font-inter)]">
+                          Aucune commission enregistrée
+                        </p>
+                        <p className="text-xs text-on-surface-variant/60 font-[family-name:var(--font-inter)] mt-1">
+                          Les commissions de votre réseau RP apparaîtront ici
+                        </p>
+                      </div>
                     </td>
                   </tr>
                 )}
@@ -174,7 +185,7 @@ export default function CommissionsPage() {
                     <td className="px-6 py-3.5 text-on-background font-medium">
                       {row.rp}
                     </td>
-                    <td className="px-6 py-3.5 text-on-background">
+                    <td className="hidden sm:table-cell px-6 py-3.5 text-on-background">
                       {row.event}
                     </td>
                     <td className="px-6 py-3.5 text-on-background font-bold">

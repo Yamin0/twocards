@@ -158,9 +158,15 @@ export default function ConciergeStatsPage() {
               ))}
             </div>
           ) : (
-            <div className="flex items-center justify-center h-44">
-              <p className="text-sm text-on-surface-variant font-[family-name:var(--font-inter)]">
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <div className="w-12 h-12 rounded-full bg-surface-low flex items-center justify-center mb-4">
+                <TrendingUp size={24} strokeWidth={1.5} className="text-on-surface-variant/40" />
+              </div>
+              <p className="text-sm font-medium text-on-surface-variant font-[family-name:var(--font-inter)]">
                 Aucune donnée disponible
+              </p>
+              <p className="text-xs text-on-surface-variant/60 font-[family-name:var(--font-inter)] mt-1">
+                Les statistiques apparaîtront ici
               </p>
             </div>
           )}
@@ -198,9 +204,15 @@ export default function ConciergeStatsPage() {
               ))}
             </div>
           ) : (
-            <div className="flex items-center justify-center h-44">
-              <p className="text-sm text-on-surface-variant font-[family-name:var(--font-inter)]">
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <div className="w-12 h-12 rounded-full bg-surface-low flex items-center justify-center mb-4">
+                <Users size={24} strokeWidth={1.5} className="text-on-surface-variant/40" />
+              </div>
+              <p className="text-sm font-medium text-on-surface-variant font-[family-name:var(--font-inter)]">
                 Aucune donnée disponible
+              </p>
+              <p className="text-xs text-on-surface-variant/60 font-[family-name:var(--font-inter)] mt-1">
+                La répartition apparaîtra ici
               </p>
             </div>
           )}
@@ -261,8 +273,18 @@ export default function ConciergeStatsPage() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={4} className="px-4 py-8 text-center text-sm text-on-surface-variant font-[family-name:var(--font-inter)]">
-                      Aucune donnée disponible
+                    <td colSpan={4}>
+                      <div className="flex flex-col items-center justify-center py-16 text-center">
+                        <div className="w-12 h-12 rounded-full bg-surface-low flex items-center justify-center mb-4">
+                          <CalendarDays size={24} strokeWidth={1.5} className="text-on-surface-variant/40" />
+                        </div>
+                        <p className="text-sm font-medium text-on-surface-variant font-[family-name:var(--font-inter)]">
+                          Aucune donnée disponible
+                        </p>
+                        <p className="text-xs text-on-surface-variant/60 font-[family-name:var(--font-inter)] mt-1">
+                          Le détail mensuel apparaîtra ici
+                        </p>
+                      </div>
                     </td>
                   </tr>
                 )}

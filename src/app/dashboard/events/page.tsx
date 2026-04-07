@@ -103,6 +103,8 @@ export default function EventsPage() {
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [currentPage, setCurrentPage] = useState(1);
   const [filterVille, setFilterVille] = useState("");
+  const [filterDate, setFilterDate] = useState("");
+  const [filterEtablissement, setFilterEtablissement] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
 
   const events = isDemoVenue ? DEMO_EVENTS : [];
@@ -114,6 +116,8 @@ export default function EventsPage() {
     }
     return true;
   });
+
+  const totalPages = Math.max(1, Math.ceil(filteredEvents.length / 6));
 
   const viewButtons: { mode: ViewMode; icon: typeof LayoutGrid; label: string }[] = [
     { mode: "grid", icon: LayoutGrid, label: "Grille" },
@@ -168,22 +172,86 @@ export default function EventsPage() {
             </select>
             <ChevronDown size={13} strokeWidth={1.5} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none" />
           </div>
-          {["Ville", "Date", "Établissement"].map((filter) => (
-            <div key={filter} className="relative">
-              <select className="bg-surface-card border-none text-sm pl-4 pr-8 py-2 rounded-sm focus:outline-none focus:ring-1 focus:ring-primary-container appearance-none cursor-pointer text-on-background">
-                <option>{filter}</option>
-              </select>
-              <ChevronDown size={13} strokeWidth={1.5} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none" />
-            </div>
-          ))}
+          <div className="relative">
+            <select
+              value={filterVille}
+              onChange={(e) => setFilterVille(e.target.value)}
+              className="bg-surface-card border-none text-sm pl-4 pr-8 py-2 rounded-sm focus:outline-none focus:ring-1 focus:ring-primary-container appearance-none cursor-pointer text-on-background"
+            >
+              <option value="">Ville</option>
+            </select>
+            <ChevronDown size={13} strokeWidth={1.5} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none" />
+          </div>
+          <div className="relative">
+            <select
+              value={filterDate}
+              onChange={(e) => setFilterDate(e.target.value)}
+              className="bg-surface-card border-none text-sm pl-4 pr-8 py-2 rounded-sm focus:outline-none focus:ring-1 focus:ring-primary-container appearance-none cursor-pointer text-on-background"
+            >
+              <option value="">Date</option>
+            </select>
+            <ChevronDown size={13} strokeWidth={1.5} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none" />
+          </div>
+          <div className="relative">
+            <select
+              value={filterEtablissement}
+              onChange={(e) => setFilterEtablissement(e.target.value)}
+              className="bg-surface-card border-none text-sm pl-4 pr-8 py-2 rounded-sm focus:outline-none focus:ring-1 focus:ring-primary-container appearance-none cursor-pointer text-on-background"
+            >
+              <option value="">Établissement</option>
+            </select>
+            <ChevronDown size={13} strokeWidth={1.5} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none" />
+          </div>
         </div>
       </div>
 
-      {/* Event Grid */}
+      {/* Event Content */}
       <div className="px-8 pb-8">
         {filteredEvents.length === 0 ? (
           <div className="bg-surface-card rounded-md editorial-shadow p-8 text-center text-on-surface-variant text-sm">
             Aucun événement trouvé
+          </div>
+        ) : viewMode === "calendar" ? (
+          <div className="bg-surface-card rounded-md editorial-shadow p-12 text-center">
+            <Calendar size={40} strokeWidth={1.2} className="mx-auto text-on-surface-variant mb-4" />
+            <p className="text-on-surface-variant text-sm">Vue calendrier bient&ocirc;t disponible</p>
+          </div>
+        ) : viewMode === "list" ? (
+          <div className="flex flex-col gap-3">
+            {filteredEvents.map((event) => (
+              <div
+                key={event.id}
+                className={`bg-surface-card rounded-md editorial-shadow px-5 py-4 flex items-center gap-5 hover:-translate-y-0.5 transition-transform duration-200 ${
+                  event.closed ? "opacity-60 grayscale" : ""
+                }`}
+              >
+                <div className={`w-12 h-12 rounded-md flex-shrink-0 ${event.image}`} />
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-primary-dark font-[family-name:var(--font-manrope)] font-bold text-sm truncate">
+                    {event.title}
+                  </h3>
+                  <p className="text-xs text-on-surface-variant flex items-center gap-1 mt-0.5">
+                    <MapPin size={11} strokeWidth={1.5} />
+                    {event.venue}
+                  </p>
+                </div>
+                <div className="hidden sm:flex items-center gap-1 text-xs text-on-surface-variant flex-shrink-0">
+                  <Clock size={12} strokeWidth={1.5} />
+                  {event.date} &middot; {event.time}
+                </div>
+                {!event.closed && (
+                  <div className="hidden md:flex items-center gap-1 text-xs text-on-surface-variant flex-shrink-0">
+                    <Users size={12} strokeWidth={1.5} />
+                    {event.spots} places
+                  </div>
+                )}
+                <span
+                  className={`text-[0.6875rem] font-semibold px-2.5 py-1 rounded-full flex-shrink-0 ${event.statusColor}`}
+                >
+                  {event.status}
+                </span>
+              </div>
+            ))}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
@@ -277,7 +345,7 @@ export default function EventsPage() {
                 </button>
               ))}
               <button
-                onClick={() => setCurrentPage(Math.min(1, currentPage + 1))}
+                onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                 className="w-8 h-8 flex items-center justify-center rounded-sm bg-surface-mid text-on-background hover:bg-surface-high transition-colors"
               >
                 <ChevronRight size={16} strokeWidth={1.5} />

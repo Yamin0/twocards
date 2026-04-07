@@ -30,6 +30,7 @@ export default function LoginPage() {
           ? "Email ou mot de passe incorrect."
           : error.message
       );
+      setPassword("");
       setLoading(false);
       return;
     }
@@ -146,7 +147,7 @@ export default function LoginPage() {
                   />
                   <button
                     type="button"
-                    aria-label="Afficher le mot de passe"
+                    aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant/60 hover:text-on-surface-variant transition-colors"
                   >
@@ -192,7 +193,7 @@ export default function LoginPage() {
       </div>
 
       <footer className="py-6 text-center text-xs text-on-surface-variant/60 font-[family-name:var(--font-inter)] space-x-4">
-        <span>&copy; 2026 twocards. Tous droits réservés.</span>
+        <span>&copy; {new Date().getFullYear()} twocards. Tous droits réservés.</span>
         <Link href="/legal" className="hover:text-on-surface-variant">
           Conditions d&apos;utilisation
         </Link>

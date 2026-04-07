@@ -8,7 +8,7 @@ interface TopbarProps {
 }
 
 export function Topbar({ onMenuToggle }: TopbarProps) {
-  const { fullName, email, venueName, initials } = useAuthUser();
+  const { fullName, email, venueName, initials, isLoading } = useAuthUser();
 
   return (
     <header className="sticky top-0 z-30 bg-surface/80 backdrop-blur-[12px]">
@@ -33,23 +33,35 @@ export function Topbar({ onMenuToggle }: TopbarProps) {
             aria-label="Notifications"
           >
             <Bell size={20} strokeWidth={1.5} />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full" />
           </button>
 
           {/* User avatar section */}
           <div className="flex items-center gap-3">
             <div className="text-right hidden sm:block">
-              <p className="text-sm font-medium font-[family-name:var(--font-manrope)] text-on-surface leading-tight">
-                {fullName || email || "Utilisateur"}
-              </p>
-              <p className="text-xs font-[family-name:var(--font-inter)] text-on-surface-variant">
-                {venueName || "Venue Manager"}
-              </p>
+              {isLoading ? (
+                <>
+                  <div className="h-3 w-20 bg-surface-low rounded animate-pulse mb-1 ml-auto" />
+                  <div className="h-2.5 w-14 bg-surface-low rounded animate-pulse ml-auto" />
+                </>
+              ) : (
+                <>
+                  <p className="text-sm font-medium font-[family-name:var(--font-manrope)] text-on-surface leading-tight">
+                    {fullName || email || "Utilisateur"}
+                  </p>
+                  <p className="text-xs font-[family-name:var(--font-inter)] text-on-surface-variant">
+                    {venueName || "Venue Manager"}
+                  </p>
+                </>
+              )}
             </div>
             <div className="w-9 h-9 rounded-full bg-primary-container flex items-center justify-center">
-              <span className="text-sm font-semibold font-[family-name:var(--font-manrope)] text-on-primary-container">
-                {initials || "U"}
-              </span>
+              {isLoading ? (
+                <div className="w-9 h-9 rounded-full bg-surface-low animate-pulse" />
+              ) : (
+                <span className="text-sm font-semibold font-[family-name:var(--font-manrope)] text-on-primary-container">
+                  {initials || "U"}
+                </span>
+              )}
             </div>
           </div>
         </div>

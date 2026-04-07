@@ -36,10 +36,17 @@ export function Features() {
               </p>
             </div>
             {/* Placeholder for feature visual */}
-            <div className="mt-8 flex h-40 items-center justify-center rounded-md bg-surface-low">
-              <span className="font-[family-name:var(--font-inter)] text-xs text-on-surface-variant/50">
-                Feature illustration
-              </span>
+            <div className="mt-8 w-full h-40 rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
+              <div className="space-y-2 w-3/4">
+                <div className="h-3 bg-primary/20 rounded-full w-full" />
+                <div className="h-3 bg-primary/15 rounded-full w-4/5" />
+                <div className="h-3 bg-primary/10 rounded-full w-3/5" />
+                <div className="flex gap-2 mt-4">
+                  <div className="h-8 w-8 rounded-full bg-primary/20" />
+                  <div className="h-8 w-8 rounded-full bg-primary/15" />
+                  <div className="h-8 w-8 rounded-full bg-primary/10" />
+                </div>
+              </div>
             </div>
           </div>
 
@@ -62,10 +69,17 @@ export function Features() {
                 de commission.
               </p>
             </div>
-            <div className="mt-8 flex h-40 items-center justify-center rounded-md bg-surface-low">
-              <span className="font-[family-name:var(--font-inter)] text-xs text-on-surface-variant/50">
-                Calendar preview
-              </span>
+            <div className="mt-8 w-full h-40 rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 p-4">
+              <div className="grid grid-cols-7 gap-1">
+                {["L","M","M","J","V","S","D"].map((d,i) => (
+                  <div key={i} className="text-[9px] text-center text-on-surface-variant font-medium">{d}</div>
+                ))}
+                {Array.from({length: 28}, (_, i) => (
+                  <div key={i} className={`text-[9px] text-center py-1 rounded-sm ${i === 14 ? 'bg-primary text-white font-bold' : 'text-on-surface-variant/60'}`}>
+                    {i + 1}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 

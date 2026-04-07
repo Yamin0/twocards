@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useAuthUser } from "@/hooks/use-auth-user";
 import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
 import { useToast } from "@/hooks/use-toast";
@@ -129,6 +129,16 @@ export default function NetworkPage() {
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [selectedPR, setSelectedPR] = useState<string | null>(null);
   const { toast, showToast } = useToast();
+
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setShowInviteModal(false);
+    };
+    if (showInviteModal) {
+      document.addEventListener("keydown", handleEsc);
+      return () => document.removeEventListener("keydown", handleEsc);
+    }
+  }, [showInviteModal]);
 
   const stats = isDemoVenue ? DEMO_STATS : EMPTY_STATS;
   const prCards = isDemoVenue ? DEMO_PR_CARDS : [];

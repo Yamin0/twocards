@@ -2,22 +2,22 @@ import Link from "next/link";
 
 const footerLinks = {
   Produit: [
-    { label: "Fonctionnalités", href: "#solutions" },
-    { label: "Tarifs", href: "#tarifs" },
-    { label: "Le Registre", href: "#registre" },
-    { label: "Sécurité", href: "#securite" },
+    { label: "Fonctionnalités", href: "#features" },
+    { label: "Tarifs", href: "/signup" },
+    { label: "Le Registre", href: "/signup" },
+    { label: "Sécurité", href: "#" },
   ],
   Entreprise: [
-    { label: "À propos", href: "#about" },
-    { label: "Blog", href: "#blog" },
-    { label: "Carrière", href: "#carriere" },
+    { label: "À propos", href: "#" },
+    { label: "Blog", href: "#" },
+    { label: "Carrière", href: "#" },
     { label: "Contact", href: "#contact" },
   ],
   Juridique: [
-    { label: "Mentions légales", href: "#mentions" },
-    { label: "Politique de confidentialité", href: "#privacy" },
-    { label: "CGU", href: "#cgu" },
-    { label: "Cookies", href: "#cookies" },
+    { label: "Mentions légales", href: "#" },
+    { label: "Politique de confidentialité", href: "#" },
+    { label: "CGU", href: "#" },
+    { label: "Cookies", href: "#" },
   ],
 };
 
@@ -68,7 +68,7 @@ export function Footer() {
       <div className="bg-surface-mid">
         <div className="mx-auto max-w-7xl px-6 py-6 lg:px-12">
           <p className="font-[family-name:var(--font-inter)] text-xs text-on-surface-variant">
-            &copy; 2026 twocards. Tous droits réservés.
+            &copy; {new Date().getFullYear()} twocards. Tous droits réservés.
           </p>
         </div>
       </div>

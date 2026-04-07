@@ -14,19 +14,19 @@ const highlights = [
     icon: Layers,
     title: "Plan de salle interactif",
     description:
-      "Visualisez votre salle en temps reel. Assignez, deplacez et gerez les tables VIP et standard d'un glissement.",
+      "Visualisez votre salle en temps réel. Assignez, déplacez et gérez les tables VIP et standard d'un glissement.",
   },
   {
     icon: Zap,
-    title: "Commissions automatisees",
+    title: "Commissions automatisées",
     description:
       "Calcul, suivi et versement des commissions RP en un clic. Historique complet et transparence totale.",
   },
   {
     icon: PieChart,
-    title: "Rapports detailles",
+    title: "Rapports détaillés",
     description:
-      "Exportez vos analyses par periode, par RP ou par evenement. Prenez des decisions basees sur les donnees.",
+      "Exportez vos analyses par période, par RP ou par événement. Prenez des décisions basées sur les données.",
   },
 ];
 
@@ -34,12 +34,12 @@ const useCases = [
   {
     icon: UserCheck,
     label: "Check-in rapide",
-    description: "Validez les arrivees en un scan",
+    description: "Validez les arrivées en un scan",
   },
   {
     icon: ClipboardList,
-    label: "Listes d'invites",
-    description: "Centralisez et filtrez en temps reel",
+    label: "Listes d'invités",
+    description: "Centralisez et filtrez en temps réel",
   },
 ];
 
@@ -116,7 +116,7 @@ export function FeaturesShowcase() {
               <div className="flex items-center gap-2 mb-1">
                 <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
                 <span className="text-[0.6875rem] font-semibold text-primary-dark">
-                  Nouvelle arrivee
+                  Nouvelle arrivée
                 </span>
               </div>
               <p className="text-xs text-on-surface-variant">
@@ -128,14 +128,14 @@ export function FeaturesShowcase() {
           {/* Right — Content */}
           <div>
             <p className="font-[family-name:var(--font-manrope)] text-[0.6875rem] uppercase tracking-widest text-on-surface-variant mb-3">
-              Puissance & simplicite
+              Puissance & simplicité
             </p>
             <h2 className="font-[family-name:var(--font-manrope)] text-3xl font-bold text-primary-dark sm:text-4xl mb-5">
-              Votre salle, vos regles, notre technologie.
+              Votre salle, vos règles, notre technologie.
             </h2>
             <p className="font-[family-name:var(--font-inter)] text-sm leading-relaxed text-on-surface-variant mb-8 max-w-md">
               twocards. combine une interface intuitive avec des outils puissants
-              pour vous donner une visibilite totale sur votre activite, du plan
+              pour vous donner une visibilité totale sur votre activité, du plan
               de salle aux commissions RP.
             </p>
 
@@ -161,7 +161,7 @@ export function FeaturesShowcase() {
               href="/signup"
               className="group inline-flex items-center gap-2 font-[family-name:var(--font-manrope)] text-sm font-semibold text-primary transition-colors hover:text-primary-dark"
             >
-              Decouvrir toutes les fonctionnalites
+              Découvrir toutes les fonctionnalités
               <ArrowRight
                 size={16}
                 strokeWidth={1.5}
