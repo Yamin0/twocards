@@ -18,7 +18,6 @@ import {
   LogOut,
   X,
 } from "lucide-react";
-import { GlowMenuVertical } from "@/components/layout/glow-menu";
 import type { GlowMenuItem } from "@/components/layout/glow-menu";
 
 interface SidebarProps {
@@ -141,13 +140,21 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           </button>
         </div>
 
-        {/* Glow Navigation */}
+        {/* Navigation */}
         <nav className="flex-1 overflow-y-auto px-3 py-6">
-          <GlowMenuVertical
-            items={navItems}
-            basePath="/dashboard"
-            onNavigate={onClose}
-          />
+          <ul className="space-y-0.5">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <li key={item.href}>
+                  <Link href={item.href} onClick={onClose} className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm text-white/50 hover:text-white/80 font-[family-name:var(--font-manrope)]">
+                    <Icon size={20} strokeWidth={1.5} />
+                    <span>{item.label}</span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
         </nav>
 
         {/* Bottom section */}
