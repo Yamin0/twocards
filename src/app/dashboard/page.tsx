@@ -1,348 +1,256 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
 import { useAuthUser } from "@/hooks/use-auth-user";
 import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
-import { StatsStrip } from "@/components/dashboard/stats-strip";
+import Link from "next/link";
 import {
-  Clock,
-  Users,
-  CheckCircle,
-  XCircle,
   CalendarDays,
-  Plus,
-  ArrowRight,
+  Ticket,
+  Users,
+  Grid3X3,
+  Network,
+  CreditCard,
+  MessageSquare,
+  BarChart3,
+  Clock,
   TrendingUp,
-  Utensils,
+  ArrowRight,
 } from "lucide-react";
 
+const folders = [
+  {
+    label: "Réservations",
+    description: "Gérer les réservations et les tables",
+    href: "/dashboard/reservations",
+    icon: CalendarDays,
+    color: "from-blue-500/10 to-blue-600/5",
+    iconColor: "text-blue-500",
+    iconBg: "bg-blue-500/10",
+    preview: ["12 réservations ce soir", "3 en attente de confirmation"],
+  },
+  {
+    label: "Événements",
+    description: "Planifier et gérer vos soirées",
+    href: "/dashboard/events",
+    icon: Ticket,
+    color: "from-purple-500/10 to-purple-600/5",
+    iconColor: "text-purple-500",
+    iconBg: "bg-purple-500/10",
+    preview: ["Gala de Minuit — Sam. 24 Oct", "187/300 couverts confirmés"],
+  },
+  {
+    label: "Clients",
+    description: "Base de données des clients et invités",
+    href: "/dashboard/guests",
+    icon: Users,
+    color: "from-green-500/10 to-green-600/5",
+    iconColor: "text-green-500",
+    iconBg: "bg-green-500/10",
+    preview: ["1 240 clients enregistrés", "38 nouveaux ce mois"],
+  },
+  {
+    label: "Plan de salle",
+    description: "Configuration des tables et espaces",
+    href: "/dashboard/floor-plan",
+    icon: Grid3X3,
+    color: "from-pink-500/10 to-pink-600/5",
+    iconColor: "text-pink-500",
+    iconBg: "bg-pink-500/10",
+    preview: ["8 tables VIP disponibles", "14 tables standard"],
+  },
+  {
+    label: "Réseau RP",
+    description: "Concierges et partenaires actifs",
+    href: "/dashboard/network",
+    icon: Network,
+    color: "from-sky-500/10 to-sky-600/5",
+    iconColor: "text-sky-500",
+    iconBg: "bg-sky-500/10",
+    preview: ["34 RP actifs", "Top: Karim Bennani — 52 couverts"],
+  },
+  {
+    label: "Commissions",
+    description: "Suivi des paiements et commissions",
+    href: "/dashboard/commissions",
+    icon: CreditCard,
+    color: "from-amber-500/10 to-amber-600/5",
+    iconColor: "text-amber-500",
+    iconBg: "bg-amber-500/10",
+    preview: ["782 000 MAD ce mois", "12 paiements en attente"],
+  },
+  {
+    label: "Messages",
+    description: "Conversations avec les RP et clients",
+    href: "/dashboard/messages",
+    icon: MessageSquare,
+    color: "from-indigo-500/10 to-indigo-600/5",
+    iconColor: "text-indigo-500",
+    iconBg: "bg-indigo-500/10",
+    preview: ["5 messages non lus", "Samy B. — Table VIP samedi"],
+  },
+  {
+    label: "Analyses",
+    description: "Statistiques et performances",
+    href: "/dashboard/analytics",
+    icon: BarChart3,
+    color: "from-teal-500/10 to-teal-600/5",
+    iconColor: "text-teal-500",
+    iconBg: "bg-teal-500/10",
+    preview: ["+18% de couverts vs mois dernier", "Taux de remplissage: 78%"],
+  },
+];
+
 const DEMO_STATS = [
-  { label: "Couverts ce soir", value: "38" },
-  { label: "Demandes en attente", value: "12" },
-  { label: "RP Actifs", value: "34" },
-  { label: "Revenu mensuel", value: "782 000 MAD" },
-];
-
-const EMPTY_STATS = [
-  { label: "Couverts ce soir", value: "0" },
-  { label: "Demandes en attente", value: "0" },
-  { label: "RP Actifs", value: "0" },
-  { label: "Revenu mensuel", value: "0 MAD" },
-];
-
-const DEMO_REQUESTS = [
   {
-    id: 1,
-    prName: "Karim Bennani",
-    badge: "RP Or",
-    badgeColor: "bg-amber-100 text-amber-800",
-    guests: 8,
-    tableType: "Table VIP",
-    timeAgo: "il y a 12 min",
-    note: "Client fidèle, 3e réservation ce mois",
+    label: "Couverts ce soir",
+    value: "38",
+    icon: Users,
+    trend: "+12%",
   },
   {
-    id: 2,
-    prName: "Lina Fassi",
-    badge: "Junior",
-    badgeColor: "bg-surface-mid text-on-surface-variant",
-    guests: 4,
-    tableType: "Table Standard",
-    timeAgo: "il y a 34 min",
-    note: "Première réservation avec nous",
+    label: "Demandes en attente",
+    value: "12",
+    icon: Clock,
+    trend: null,
   },
   {
-    id: 3,
-    prName: "Sofia El Amrani",
-    badge: "RP Or",
-    badgeColor: "bg-amber-100 text-amber-800",
-    guests: 12,
-    tableType: "Carré VIP",
-    timeAgo: "il y a 1h",
-    note: "Demande bouteilles Dom Pérignon x3",
-  },
-];
-
-const DEMO_TOP_PRS = [
-  {
-    rank: 1,
-    name: "Karim Bennani",
-    agency: "Prestige Marrakech",
-    covers: 52,
-    revenue: "286 000 MAD",
+    label: "RP Actifs",
+    value: "34",
+    icon: Network,
+    trend: "+3",
   },
   {
-    rank: 2,
-    name: "Sofia El Amrani",
-    agency: "SA Concierge",
-    covers: 41,
-    revenue: "221 000 MAD",
-  },
-  {
-    rank: 3,
-    name: "Riad Lahlou",
-    agency: "Nuit de Casablanca",
-    covers: 28,
-    revenue: "154 000 MAD",
+    label: "Revenu mensuel",
+    value: "782K MAD",
+    icon: TrendingUp,
+    trend: "+18%",
   },
 ];
 
 export default function DashboardPage() {
   const { isDemoVenue, isLoading, fullName } = useAuthUser();
-  const initializedRef = useRef(false);
-
-  const [activeRequests, setActiveRequests] = useState<typeof DEMO_REQUESTS>([]);
-
-  useEffect(() => {
-    if (!isLoading && !initializedRef.current) {
-      initializedRef.current = true;
-      if (isDemoVenue) {
-        setActiveRequests(DEMO_REQUESTS);
-      }
-    }
-  }, [isLoading, isDemoVenue]);
-
-  const stats = isDemoVenue ? DEMO_STATS : EMPTY_STATS;
-  const topPRs = isDemoVenue ? DEMO_TOP_PRS : [];
-
-  const handleAccept = (id: number) => {
-    setActiveRequests((prev) => prev.filter((r) => r.id !== id));
-  };
-
-  const handleRefuse = (id: number) => {
-    setActiveRequests((prev) => prev.filter((r) => r.id !== id));
-  };
 
   if (isLoading) return <DashboardSkeleton />;
 
+  const stats = isDemoVenue ? DEMO_STATS : [];
+
   return (
-    <div className="bg-surface min-h-screen">
-      {/* Page Header */}
-      <div className="px-8 pt-8 pb-4">
+    <div className="px-6 py-8">
+      {/* Greeting */}
+      <div className="mb-8">
         <h1 className="text-primary-dark font-[family-name:var(--font-manrope)] text-3xl font-extrabold">
-          Bonjour, {fullName || 'Directeur'}.
+          Bonjour, {fullName || "Directeur"}.
         </h1>
         <p className="text-on-surface-variant mt-1 text-sm">
-          Voici un aperçu de votre établissement ce soir.
+          Voici un aperçu de votre établissement.
         </p>
       </div>
 
-      {/* Stats Strip */}
-      <div className="px-8 pb-6">
-        <div className="rounded-md overflow-hidden editorial-shadow">
-          <StatsStrip stats={stats} />
-        </div>
-      </div>
-
-      {/* Tonight's Event Card */}
+      {/* Quick Stats */}
       {isDemoVenue && (
-        <div className="px-8 pb-8">
-          <div className="bg-surface-card rounded-md editorial-shadow p-6">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant font-semibold mb-1">
-                  Événement ce soir
-                </p>
-                <h2 className="text-primary-dark font-[family-name:var(--font-manrope)] text-xl font-bold">
-                  Gala de Minuit
-                </h2>
-                <div className="flex items-center gap-4 mt-2 text-sm text-on-surface-variant">
-                  <span className="flex items-center gap-1.5">
-                    <CalendarDays size={15} strokeWidth={1.5} />
-                    Samedi 24 Octobre
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <Clock size={15} strokeWidth={1.5} />
-                    23:00 &ndash; 05:00
-                  </span>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+          {stats.map((stat) => {
+            const Icon = stat.icon;
+            return (
+              <div
+                key={stat.label}
+                className="bg-white rounded-2xl p-5 editorial-shadow border border-outline-variant/10"
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <div className="w-10 h-10 rounded-xl bg-primary/5 flex items-center justify-center">
+                    <Icon
+                      size={20}
+                      strokeWidth={1.5}
+                      className="text-primary"
+                    />
+                  </div>
+                  {stat.trend && (
+                    <span className="text-xs font-semibold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
+                      {stat.trend}
+                    </span>
+                  )}
                 </div>
+                <p className="text-2xl font-bold font-[family-name:var(--font-manrope)] text-on-background">
+                  {stat.value}
+                </p>
+                <p className="text-xs text-on-surface-variant mt-0.5">
+                  {stat.label}
+                </p>
               </div>
-              <span className="bg-primary/10 text-primary-dark text-xs font-semibold px-3 py-1 rounded-full">
-                En cours
-              </span>
-            </div>
-
-            {/* Progress Bar */}
-            <div className="mt-5">
-              <div className="flex items-end justify-between mb-2">
-                <span className="text-sm font-medium text-on-background">
-                  187 / 300 couverts confirmés
-                </span>
-                <span className="text-sm font-bold text-primary-dark">62%</span>
-              </div>
-              <div className="w-full h-2 bg-surface-low rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-primary rounded-full transition-all"
-                  style={{ width: "62%" }}
-                />
-              </div>
-            </div>
-
-            {/* Table Availability */}
-            <div className="mt-4 flex gap-6">
-              <div className="flex items-center gap-2 text-sm text-on-surface-variant">
-                <Utensils size={14} strokeWidth={1.5} />
-                <span>
-                  <strong className="text-on-background">8</strong> tables VIP disponibles
-                </span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-on-surface-variant">
-                <Users size={14} strokeWidth={1.5} />
-                <span>
-                  <strong className="text-on-background">14</strong> tables standard disponibles
-                </span>
-              </div>
-            </div>
-          </div>
+            );
+          })}
         </div>
       )}
 
-      {/* Two Column Layout */}
-      <div className="px-8 pb-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left: Incoming Requests */}
-        <div className="lg:col-span-7">
-          <h3 className="text-primary-dark font-[family-name:var(--font-manrope)] text-lg font-bold mb-4">
-            Demandes entrantes
-          </h3>
-          <div className="space-y-0 rounded-md overflow-hidden editorial-shadow">
-            {activeRequests.map((req, i) => (
-              <div
-                key={req.id}
-                className={`p-5 ${i % 2 === 0 ? "bg-surface-card" : "bg-surface-low"}`}
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="font-[family-name:var(--font-manrope)] font-bold text-on-background">
-                        {req.prName}
-                      </span>
-                      <span
-                        className={`text-[0.625rem] font-semibold px-2 py-0.5 rounded-full ${req.badgeColor}`}
-                      >
-                        {req.badge}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-4 text-sm text-on-surface-variant">
-                      <span className="flex items-center gap-1">
-                        <Users size={13} strokeWidth={1.5} />
-                        {req.guests} couverts
-                      </span>
-                      <span>{req.tableType}</span>
-                      <span className="flex items-center gap-1">
-                        <Clock size={13} strokeWidth={1.5} />
-                        {req.timeAgo}
-                      </span>
-                    </div>
-                    <p className="text-xs text-on-surface-variant mt-1.5">{req.note}</p>
-                  </div>
-                  <div className="flex items-center gap-2 ml-4 shrink-0">
-                    <button
-                      onClick={() => handleAccept(req.id)}
-                      className="flex items-center gap-1.5 bg-primary text-white text-sm font-medium px-4 py-2 rounded-sm hover:opacity-90 transition-opacity"
-                    >
-                      <CheckCircle size={14} strokeWidth={1.5} />
-                      Accepter
-                    </button>
-                    <button
-                      onClick={() => handleRefuse(req.id)}
-                      className="flex items-center gap-1.5 bg-surface-mid text-on-background text-sm font-medium px-4 py-2 rounded-sm hover:bg-surface-high transition-colors"
-                    >
-                      <XCircle size={14} strokeWidth={1.5} />
-                      Refuser
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-            {activeRequests.length === 0 && (
-              <div className="bg-surface-card p-8 text-center text-on-surface-variant text-sm">
-                Aucune demande en attente.
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Right: Top PRs */}
-        <div className="lg:col-span-5">
-          <h3 className="text-primary-dark font-[family-name:var(--font-manrope)] text-lg font-bold mb-4">
-            Top RP du mois
-          </h3>
-          <div className="space-y-0 rounded-md overflow-hidden editorial-shadow">
-            {topPRs.length === 0 ? (
-              <div className="bg-surface-card p-8 text-center text-on-surface-variant text-sm">
-                Aucun RP actif pour le moment
-              </div>
-            ) : (
-              topPRs.map((pr, i) => (
-                <div
-                  key={pr.rank}
-                  className={`p-5 relative overflow-hidden ${
-                    i % 2 === 0 ? "bg-surface-card" : "bg-surface-low"
-                  }`}
-                >
-                  {/* Large faded rank number */}
-                  <span className="absolute -right-2 -top-3 text-[5rem] font-[family-name:var(--font-manrope)] font-extrabold text-primary/[0.04] leading-none select-none pointer-events-none">
-                    {pr.rank}
-                  </span>
-
-                  <div className="relative z-10">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="font-[family-name:var(--font-manrope)] font-bold text-on-background">
-                        {pr.name}
-                      </span>
-                    </div>
-                    <p className="text-xs text-on-surface-variant mb-3">{pr.agency}</p>
-                    <div className="flex items-center gap-6">
-                      <div>
-                        <p className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant font-semibold">
-                          Couverts
-                        </p>
-                        <p className="text-on-background font-[family-name:var(--font-manrope)] font-bold text-lg">
-                          {pr.covers}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant font-semibold">
-                          Revenu
-                        </p>
-                        <p className="text-on-background font-[family-name:var(--font-manrope)] font-bold text-lg flex items-center gap-1">
-                          {pr.revenue}
-                          <TrendingUp size={14} strokeWidth={1.5} className="text-green-600" />
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
+      {/* Section Folders */}
+      <div className="mb-6">
+        <h2 className="text-primary-dark font-[family-name:var(--font-manrope)] text-lg font-bold mb-1">
+          Vos espaces
+        </h2>
+        <p className="text-on-surface-variant text-sm">
+          Cliquez sur un espace pour y accéder.
+        </p>
       </div>
 
-      {/* Quick Actions */}
-      <div className="px-8 pb-10">
-        <div className="bg-surface-low rounded-md p-5 flex items-center gap-4">
-          <a
-            href="/dashboard/events"
-            className="flex items-center gap-2 bg-primary text-white text-sm font-medium px-5 py-2.5 rounded-sm hover:opacity-90 transition-opacity"
-          >
-            <Plus size={16} strokeWidth={1.5} />
-            Créer un événement
-          </a>
-          <a
-            href="/dashboard/reservations"
-            className="flex items-center gap-2 bg-surface-mid text-on-background text-sm font-medium px-5 py-2.5 rounded-sm hover:bg-surface-high transition-colors"
-          >
-            Voir toutes les réservations
-          </a>
-          <a
-            href="/dashboard/network"
-            className="flex items-center gap-1 text-primary-dark text-sm font-medium hover:underline ml-2"
-          >
-            Gérer le réseau RP
-            <ArrowRight size={14} strokeWidth={1.5} />
-          </a>
-        </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        {folders.map((folder) => {
+          const Icon = folder.icon;
+          return (
+            <Link
+              key={folder.href}
+              href={folder.href}
+              className="group relative bg-white rounded-2xl p-5 editorial-shadow border border-outline-variant/10 hover:border-outline-variant/25 hover:shadow-lg transition-all duration-200 overflow-hidden"
+            >
+              {/* Gradient background */}
+              <div
+                className={`absolute inset-0 bg-gradient-to-br ${folder.color} opacity-0 group-hover:opacity-100 transition-opacity duration-300`}
+              />
+
+              <div className="relative z-10">
+                {/* Icon + Arrow */}
+                <div className="flex items-center justify-between mb-4">
+                  <div
+                    className={`w-11 h-11 rounded-xl ${folder.iconBg} flex items-center justify-center`}
+                  >
+                    <Icon
+                      size={22}
+                      strokeWidth={1.5}
+                      className={folder.iconColor}
+                    />
+                  </div>
+                  <ArrowRight
+                    size={16}
+                    strokeWidth={1.5}
+                    className="text-on-surface-variant/0 group-hover:text-on-surface-variant group-hover:translate-x-1 transition-all duration-200"
+                  />
+                </div>
+
+                {/* Title + Description */}
+                <h3 className="font-[family-name:var(--font-manrope)] font-bold text-on-background text-base mb-1">
+                  {folder.label}
+                </h3>
+                <p className="text-xs text-on-surface-variant mb-4">
+                  {folder.description}
+                </p>
+
+                {/* Preview Lines */}
+                {isDemoVenue && (
+                  <div className="space-y-1.5 pt-3 border-t border-outline-variant/15">
+                    {folder.preview.map((line, i) => (
+                      <p
+                        key={i}
+                        className="text-[0.6875rem] text-on-surface-variant/80 leading-tight flex items-center gap-1.5"
+                      >
+                        <span className="w-1 h-1 rounded-full bg-on-surface-variant/30 shrink-0" />
+                        {line}
+                      </p>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </Link>
+          );
+        })}
       </div>
     </div>
   );
