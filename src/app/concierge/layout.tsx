@@ -19,13 +19,45 @@ import {
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthUser } from "@/hooks/use-auth-user";
+import { GlowMenu } from "@/components/layout/glow-menu";
+import type { GlowMenuItem } from "@/components/layout/glow-menu";
 
-const tabs = [
-  { label: "Calendrier", href: "/concierge", icon: CalendarDays },
-  { label: "CRM", href: "/concierge/clients", icon: Users },
-  { label: "Commissions", href: "/concierge/commissions", icon: CreditCard },
-  { label: "Statistiques", href: "/concierge/stats", icon: BarChart3 },
-  { label: "Paramètres", href: "/concierge/settings", icon: Settings },
+const glowTabs: GlowMenuItem[] = [
+  {
+    label: "Calendrier",
+    href: "/concierge",
+    icon: CalendarDays,
+    gradient: "radial-gradient(circle, rgba(59,130,246,0.15) 0%, rgba(37,99,235,0.06) 50%, rgba(29,78,216,0) 100%)",
+    iconColor: "text-blue-400",
+  },
+  {
+    label: "CRM",
+    href: "/concierge/clients",
+    icon: Users,
+    gradient: "radial-gradient(circle, rgba(34,197,94,0.15) 0%, rgba(22,163,74,0.06) 50%, rgba(21,128,61,0) 100%)",
+    iconColor: "text-green-400",
+  },
+  {
+    label: "Commissions",
+    href: "/concierge/commissions",
+    icon: CreditCard,
+    gradient: "radial-gradient(circle, rgba(245,158,11,0.15) 0%, rgba(217,119,6,0.06) 50%, rgba(180,83,9,0) 100%)",
+    iconColor: "text-amber-400",
+  },
+  {
+    label: "Statistiques",
+    href: "/concierge/stats",
+    icon: BarChart3,
+    gradient: "radial-gradient(circle, rgba(168,85,247,0.15) 0%, rgba(147,51,234,0.06) 50%, rgba(126,34,206,0) 100%)",
+    iconColor: "text-purple-400",
+  },
+  {
+    label: "Paramètres",
+    href: "/concierge/settings",
+    icon: Settings,
+    gradient: "radial-gradient(circle, rgba(148,163,184,0.15) 0%, rgba(100,116,139,0.06) 50%, rgba(71,85,105,0) 100%)",
+    iconColor: "text-slate-400",
+  },
 ];
 
 const demoVenues = [
@@ -100,7 +132,7 @@ export default function ConciergeLayout({
 
             <div className="hidden sm:block h-6 w-px bg-outline-variant/20 mx-1" />
 
-            {/* Venue selector (concierge works with multiple venues) */}
+            {/* Venue selector */}
             <div className="relative hidden sm:block">
               <button
                 onClick={() => setVenueDropdownOpen(!venueDropdownOpen)}
@@ -171,31 +203,14 @@ export default function ConciergeLayout({
           </div>
         </div>
 
-        {/* Tabs */}
-        <nav className="flex items-center gap-0 px-4 sm:px-6 overflow-x-auto scrollbar-hide">
-          {tabs.map((tab) => {
-            const active = isActive(tab.href);
-            const Icon = tab.icon;
-            return (
-              <Link
-                key={tab.href}
-                href={tab.href}
-                className={`
-                  flex items-center gap-2 px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors
-                  font-[family-name:var(--font-inter)]
-                  ${
-                    active
-                      ? "border-primary text-primary"
-                      : "border-transparent text-on-surface-variant hover:text-on-surface hover:border-outline-variant/30"
-                  }
-                `}
-              >
-                <Icon size={18} strokeWidth={1.5} />
-                {tab.label}
-              </Link>
-            );
-          })}
-        </nav>
+        {/* Glow Menu Tabs */}
+        <div className="flex justify-center px-4 sm:px-6 py-2">
+          <GlowMenu
+            items={glowTabs}
+            basePath="/concierge"
+            onNavigate={() => setMobileMenuOpen(false)}
+          />
+        </div>
       </header>
 
       {/* Mobile Menu Overlay */}
@@ -205,8 +220,8 @@ export default function ConciergeLayout({
             className="fixed inset-0 bg-black/20 z-40 lg:hidden"
             onClick={() => setMobileMenuOpen(false)}
           />
-          <div className="fixed top-14 left-0 right-0 bg-white z-40 lg:hidden border-b border-outline-variant/15 p-4 space-y-1 editorial-shadow">
-            {tabs.map((tab) => {
+          <div className="fixed top-14 left-0 right-0 bg-primary-dark z-40 lg:hidden border-b border-white/[0.08] p-3 space-y-0.5 shadow-[0_4px_30px_rgba(0,27,64,0.3)]">
+            {glowTabs.map((tab) => {
               const active = isActive(tab.href);
               const Icon = tab.icon;
               return (
@@ -215,13 +230,15 @@ export default function ConciergeLayout({
                   href={tab.href}
                   onClick={() => setMobileMenuOpen(false)}
                   className={`
-                    flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors
+                    flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors
+                    font-[family-name:var(--font-manrope)]
                     ${
                       active
-                        ? "bg-primary/5 text-primary"
-                        : "text-on-surface-variant hover:bg-surface-low"
+                        ? `text-white ${tab.iconColor}`
+                        : "text-white/50 hover:text-white/80"
                     }
                   `}
+                  style={active ? { background: tab.gradient } : undefined}
                 >
                   <Icon size={20} strokeWidth={1.5} />
                   {tab.label}
