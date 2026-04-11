@@ -16,76 +16,78 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-surface/80 backdrop-blur-[12px]">
-      <div className="mx-auto flex h-[88px] max-w-7xl items-center justify-between px-6 lg:px-12">
-        {/* Logo */}
-        <Link href="/" className="flex-shrink-0 flex items-center gap-2">
-          <Image
-            src="/logo-cards-transp.png"
-            alt="twocards."
-            width={56}
-            height={56}
-            className="h-14 w-auto"
-            priority
-          />
-          <span className="font-[family-name:var(--font-nunito)] text-2xl font-extrabold text-primary-dark tracking-tight">
-            twocards.
-          </span>
-        </Link>
+    <header className="fixed top-0 left-0 right-0 z-50 p-4">
+      <div className="mx-auto max-w-4xl">
+        <div className="flex h-14 items-center justify-between px-6 liquid-glass-header rounded-full">
+          {/* Logo */}
+          <Link href="/" className="flex items-center gap-2">
+            <Image
+              src="/logo-cards-transp.png"
+              alt="twocards."
+              width={32}
+              height={32}
+              className="h-8 w-auto brightness-0 invert"
+              priority
+            />
+            <span className="font-[family-name:var(--font-nunito)] text-lg font-bold text-white tracking-tight">
+              twocards<span className="text-blue-400">.</span>
+            </span>
+          </Link>
 
-        {/* Desktop nav */}
-        <nav className="hidden items-center gap-8 lg:flex">
-          {navLinks.map((link) => (
+          {/* Desktop nav */}
+          <nav className="hidden items-center gap-6 text-sm text-white/70 md:flex">
+            {navLinks.map((link, i) => (
+              <Link
+                key={`nav-${i}`}
+                href={link.href}
+                className="hover:text-white transition-colors font-[family-name:var(--font-manrope)]"
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+
+          {/* Desktop actions */}
+          <div className="hidden items-center gap-3 md:flex">
             <Link
-              key={link.href}
-              href={link.href}
-              className="font-[family-name:var(--font-manrope)] text-[0.6875rem] uppercase tracking-widest text-on-surface-variant transition-colors hover:text-on-background"
+              href="/login"
+              className="text-sm text-white/70 hover:text-white transition-colors font-[family-name:var(--font-manrope)]"
             >
-              {link.label}
+              Connexion
             </Link>
-          ))}
-        </nav>
+            <Link
+              href="/signup"
+              className="bg-blue-500 hover:bg-blue-400 text-white font-medium rounded-lg px-5 py-2 text-sm transition-all hover:scale-[1.02] font-[family-name:var(--font-manrope)]"
+            >
+              Commencer
+            </Link>
+          </div>
 
-        {/* Desktop actions */}
-        <div className="hidden items-center gap-4 lg:flex">
-          <Link
-            href="/login"
-            className="font-[family-name:var(--font-manrope)] text-[0.6875rem] uppercase tracking-widest text-on-surface-variant transition-colors hover:text-on-background"
+          {/* Mobile hamburger */}
+          <button
+            onClick={() => setMobileOpen(!mobileOpen)}
+            className="text-white/80 hover:text-white md:hidden transition-colors"
+            aria-label="Toggle menu"
           >
-            Connexion
-          </Link>
-          <Link
-            href="/signup"
-            className="rounded-sm bg-primary px-6 py-3 font-[family-name:var(--font-manrope)] text-[0.6875rem] uppercase tracking-widest text-white transition-opacity hover:opacity-90"
-          >
-            Demander une invitation
-          </Link>
+            {mobileOpen ? (
+              <X size={22} strokeWidth={1.5} />
+            ) : (
+              <Menu size={22} strokeWidth={1.5} />
+            )}
+          </button>
         </div>
-
-        {/* Mobile hamburger */}
-        <button
-          onClick={() => setMobileOpen(!mobileOpen)}
-          className="text-on-background lg:hidden"
-          aria-label="Toggle menu"
-        >
-          {mobileOpen ? (
-            <X size={24} strokeWidth={1.5} />
-          ) : (
-            <Menu size={24} strokeWidth={1.5} />
-          )}
-        </button>
       </div>
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="bg-surface/95 backdrop-blur-[12px] lg:hidden">
-          <nav className="flex flex-col gap-6 px-6 py-8">
-            {navLinks.map((link) => (
+        <div className="mt-2 mx-auto max-w-4xl liquid-glass rounded-2xl p-4 md:hidden">
+          <nav className="flex flex-col gap-1">
+            {navLinks.map((link, i) => (
               <Link
-                key={link.href}
+                key={`mob-${i}`}
                 href={link.href}
                 onClick={() => setMobileOpen(false)}
-                className="font-[family-name:var(--font-manrope)] text-[0.6875rem] uppercase tracking-widest text-on-surface-variant transition-colors hover:text-on-background"
+                className="px-4 py-3 rounded-xl text-sm text-white/70 hover:text-white hover:bg-white/5 transition-all font-[family-name:var(--font-manrope)]"
               >
                 {link.label}
               </Link>
@@ -93,16 +95,16 @@ export function Navbar() {
             <Link
               href="/login"
               onClick={() => setMobileOpen(false)}
-              className="font-[family-name:var(--font-manrope)] text-[0.6875rem] uppercase tracking-widest text-on-surface-variant transition-colors hover:text-on-background"
+              className="px-4 py-3 rounded-xl text-sm text-white/70 hover:text-white hover:bg-white/5 transition-all font-[family-name:var(--font-manrope)]"
             >
               Connexion
             </Link>
             <Link
               href="/signup"
               onClick={() => setMobileOpen(false)}
-              className="w-fit rounded-sm bg-primary px-6 py-3 font-[family-name:var(--font-manrope)] text-[0.6875rem] uppercase tracking-widest text-white"
+              className="mt-2 bg-blue-500 text-white font-medium rounded-xl px-4 py-3 text-sm text-center transition-all hover:bg-blue-400 font-[family-name:var(--font-manrope)]"
             >
-              Demander une invitation
+              Commencer
             </Link>
           </nav>
         </div>

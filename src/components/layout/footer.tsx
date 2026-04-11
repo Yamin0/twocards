@@ -23,18 +23,18 @@ const footerLinks = {
 
 export function Footer() {
   return (
-    <footer className="bg-surface-low">
+    <footer className="border-t border-white/[0.08]">
       <div className="mx-auto max-w-7xl px-6 py-16 lg:px-12 lg:py-20">
         <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-4">
           {/* Brand column */}
           <div>
             <Link
               href="/"
-              className="font-[family-name:var(--font-nunito)] text-xl font-bold text-primary-dark"
+              className="font-[family-name:var(--font-nunito)] text-xl font-bold text-white"
             >
-              twocards.
+              twocards<span className="text-blue-400">.</span>
             </Link>
-            <p className="mt-4 max-w-xs font-[family-name:var(--font-inter)] text-sm leading-relaxed text-on-surface-variant">
+            <p className="mt-4 max-w-xs font-[family-name:var(--font-inter)] text-sm leading-relaxed text-white/40">
               La plateforme CRM B2B pour les établissements de nuit. Gérez vos
               listes, vos événements et votre réseau depuis un tableau de bord
               unique.
@@ -44,15 +44,15 @@ export function Footer() {
           {/* Link columns */}
           {Object.entries(footerLinks).map(([title, links]) => (
             <div key={title}>
-              <p className="font-[family-name:var(--font-manrope)] text-[0.6875rem] uppercase tracking-widest text-on-surface-variant">
+              <p className="font-[family-name:var(--font-manrope)] text-xs font-semibold uppercase tracking-widest text-white/40">
                 {title}
               </p>
               <ul className="mt-4 flex flex-col gap-3">
-                {links.map((link) => (
-                  <li key={link.href}>
+                {links.map((link, i) => (
+                  <li key={`${title}-${i}`}>
                     <Link
                       href={link.href}
-                      className="font-[family-name:var(--font-inter)] text-sm text-on-surface-variant transition-colors hover:text-on-background"
+                      className="font-[family-name:var(--font-inter)] text-sm text-white/40 transition-colors hover:text-white"
                     >
                       {link.label}
                     </Link>
@@ -64,12 +64,16 @@ export function Footer() {
         </div>
       </div>
 
-      {/* Copyright bar — tonal shift instead of border */}
-      <div className="bg-surface-mid">
-        <div className="mx-auto max-w-7xl px-6 py-6 lg:px-12">
-          <p className="font-[family-name:var(--font-inter)] text-xs text-on-surface-variant">
+      {/* Copyright bar */}
+      <div className="border-t border-white/[0.06]">
+        <div className="mx-auto max-w-7xl px-6 py-6 lg:px-12 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="font-[family-name:var(--font-inter)] text-xs text-white/30">
             &copy; {new Date().getFullYear()} twocards. Tous droits réservés.
           </p>
+          <div className="flex items-center gap-6 text-xs text-white/30">
+            <Link href="#features" className="hover:text-white/60 transition-colors">Solutions</Link>
+            <Link href="/signup" className="hover:text-white/60 transition-colors">Tarifs</Link>
+          </div>
         </div>
       </div>
     </footer>

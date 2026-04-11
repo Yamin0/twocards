@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useAuthUser } from "@/hooks/use-auth-user";
 import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
-import { useToast } from "@/hooks/use-toast";
 import {
   Search,
   Download,
@@ -17,7 +16,6 @@ import {
   Check,
   X,
 } from "lucide-react";
-import Link from "next/link";
 
 const DEMO_GUESTS = [
   {
@@ -85,14 +83,14 @@ const DEMO_GUESTS = [
 function vipBadge(vip: string | null) {
   if (!vip) return null;
   const colorMap: Record<string, string> = {
-    "VIP Platinum": "bg-on-surface/10 text-on-surface",
-    "VIP Gold": "bg-amber-100 text-amber-800",
-    "VIP Black": "bg-on-background text-white",
-    "VIP Blue": "bg-blue-100 text-blue-800",
+    "VIP Platinum": "bg-white/10 text-white border border-white/20",
+    "VIP Gold": "bg-amber-400/15 text-amber-400 border border-amber-400/20",
+    "VIP Black": "bg-white/[0.06] text-white border border-white/15",
+    "VIP Blue": "bg-blue-400/15 text-blue-400 border border-blue-400/20",
   };
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[0.6875rem] font-medium ${colorMap[vip] ?? "bg-surface-mid text-on-surface-variant"}`}
+      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[0.6875rem] font-medium ${colorMap[vip] ?? "bg-white/10 text-white/50 border border-white/10"}`}
     >
       <Crown className="h-3 w-3" strokeWidth={1.5} />
       {vip}
@@ -108,7 +106,12 @@ export default function GuestsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<SortField>(null);
   const [showAddModal, setShowAddModal] = useState(false);
-  const { toast, showToast } = useToast();
+  const [toast, setToast] = useState<string | null>(null);
+
+  const showToast = useCallback((message: string) => {
+    setToast(message);
+    setTimeout(() => setToast(null), 3000);
+  }, []);
 
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
@@ -147,7 +150,7 @@ export default function GuestsPage() {
 
   const handleExportCSV = () => {
     const today = new Date().toISOString().split("T")[0];
-    const headers = ["Nom", "Téléphone", "Visites", "Dépenses", "Dernière Visite", "VIP", "Recommandé par"];
+    const headers = ["Nom", "Telephone", "Visites", "Depenses", "Derniere Visite", "VIP", "Recommande par"];
     const csv = [
       headers.join(","),
       ...filteredGuests.map((g) =>
@@ -161,32 +164,39 @@ export default function GuestsPage() {
     a.download = `clients-${today}.csv`;
     a.click();
     URL.revokeObjectURL(url);
-    showToast("CSV téléchargé");
+    showToast("CSV telecharge");
   };
 
   if (isLoading) return <DashboardSkeleton />;
 
   return (
-    <div className="bg-surface min-h-screen">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="px-6 pt-8 pb-4 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-primary-dark font-[family-name:var(--font-manrope)]">
-          Clients
-        </h1>
-        <button
-          onClick={handleExportCSV}
-          className="inline-flex items-center gap-2 text-sm text-on-surface-variant hover:text-on-background transition-colors"
-        >
-          <Download className="h-4 w-4" strokeWidth={1.5} />
-          Exporter CSV
-        </button>
+      <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-extrabold font-[family-name:var(--font-manrope)] text-white">
+              Clients
+            </h1>
+            <p className="text-sm text-white/50 mt-1">
+              Gérez votre base de clients et suivez leur fidélité.
+            </p>
+          </div>
+          <button
+            onClick={handleExportCSV}
+            className="flex items-center gap-2 px-4 py-2.5 bg-blue-500 text-white rounded-xl text-xs font-semibold hover:bg-blue-600 transition-colors shadow-lg shadow-blue-500/20"
+          >
+            <Download className="h-4 w-4" strokeWidth={1.5} />
+            Exporter CSV
+          </button>
+        </div>
       </div>
 
-      {/* Search */}
-      <div className="px-6 pb-4">
-        <div className="relative">
+      {/* Search + Filters */}
+      <div className="flex flex-col sm:flex-row gap-4">
+        <div className="relative flex-1">
           <Search
-            className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-on-surface-variant"
+            className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30"
             strokeWidth={1.5}
           />
           <input
@@ -194,21 +204,21 @@ export default function GuestsPage() {
             placeholder="Rechercher un client par nom, téléphone ou email..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-surface-low border-none rounded-sm py-3 pl-11 pr-4 text-sm text-on-background placeholder:text-on-surface-variant/60 focus:outline-none focus:ring-2 focus:ring-primary/20"
+            className="w-full bg-white/[0.05] border border-white/[0.1] rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-blue-400/40 transition-colors"
           />
         </div>
       </div>
 
       {/* Filters */}
-      <div className="px-6 pb-6 flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         {/* VIP Toggle */}
         <label className="inline-flex items-center gap-2 cursor-pointer">
-          <span className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant">
+          <span className="text-[0.625rem] text-white/30 uppercase tracking-wider">
             VIP
           </span>
           <button
             onClick={() => setVipOnly(!vipOnly)}
-            className={`relative w-9 h-5 rounded-full transition-colors ${vipOnly ? "bg-primary" : "bg-surface-mid"}`}
+            className={`relative w-9 h-5 rounded-full transition-colors ${vipOnly ? "bg-blue-500" : "bg-white/[0.1]"}`}
           >
             <span
               className={`absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white transition-transform ${vipOnly ? "translate-x-4" : "translate-x-0"}`}
@@ -219,7 +229,7 @@ export default function GuestsPage() {
         {/* Nombre de visites */}
         <button
           onClick={() => setSortBy(sortBy === "visites" ? null : "visites")}
-          className={`inline-flex items-center gap-1.5 rounded-sm px-3 py-2 text-sm ${sortBy === "visites" ? "bg-primary text-white" : "bg-surface-mid text-on-surface-variant"}`}
+          className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm transition-colors ${sortBy === "visites" ? "bg-blue-500 text-white" : "bg-white/[0.07] text-white/50 border border-white/[0.1] hover:bg-white/[0.1]"}`}
         >
           Nombre de visites
           <ChevronDown className="h-3.5 w-3.5" strokeWidth={1.5} />
@@ -228,107 +238,104 @@ export default function GuestsPage() {
         {/* Derniere visite */}
         <button
           onClick={() => setSortBy(sortBy === "derniereVisite" ? null : "derniereVisite")}
-          className={`inline-flex items-center gap-1.5 rounded-sm px-3 py-2 text-sm ${sortBy === "derniereVisite" ? "bg-primary text-white" : "bg-surface-mid text-on-surface-variant"}`}
+          className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm transition-colors ${sortBy === "derniereVisite" ? "bg-blue-500 text-white" : "bg-white/[0.07] text-white/50 border border-white/[0.1] hover:bg-white/[0.1]"}`}
         >
           <Calendar className="h-3.5 w-3.5" strokeWidth={1.5} />
-          Dernière visite
+          Derniere visite
           <ChevronDown className="h-3.5 w-3.5" strokeWidth={1.5} />
         </button>
 
-        {/* Recommandé par */}
+        {/* Recommande par */}
         <button
           onClick={() => setSortBy(sortBy === "recommande" ? null : "recommande")}
-          className={`inline-flex items-center gap-1.5 rounded-sm px-3 py-2 text-sm ${sortBy === "recommande" ? "bg-primary text-white" : "bg-surface-mid text-on-surface-variant"}`}
+          className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm transition-colors ${sortBy === "recommande" ? "bg-blue-500 text-white" : "bg-white/[0.07] text-white/50 border border-white/[0.1] hover:bg-white/[0.1]"}`}
         >
-          Recommandé par
+          Recommande par
           <ChevronDown className="h-3.5 w-3.5" strokeWidth={1.5} />
         </button>
       </div>
 
       {/* Table */}
-      <div className="px-6">
-        <div className="bg-surface-card rounded-md editorial-shadow overflow-hidden">
-          {/* Table Header */}
-          <div className="grid grid-cols-4 sm:grid-cols-7 gap-4 px-5 py-3 bg-surface-low">
-            <span className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant">Nom</span>
-            <span className="hidden sm:block font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant">Téléphone</span>
-            <span className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant">Total Visites</span>
-            <span className="hidden sm:block font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant">Dépenses Totales</span>
-            <span className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant">Dernière Visite</span>
-            <span className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant">Statut VIP</span>
-            <span className="hidden sm:block font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant">Recommandé par</span>
-          </div>
-
-          {/* Table Rows */}
-          {filteredGuests.length === 0 ? (
-            <div className="px-5 py-8 text-center text-sm text-on-surface-variant">
-              Aucun client trouvé
-            </div>
-          ) : (
-            filteredGuests.map((guest, i) => (
-              <Link
-                key={guest.id}
-                href={`/dashboard/guests/${guest.id}`}
-                className={`grid grid-cols-4 sm:grid-cols-7 gap-4 px-5 py-3.5 items-center text-sm hover:bg-surface-low/60 transition-colors ${i % 2 === 1 ? "bg-surface" : "bg-surface-card"}`}
-              >
-                <span className="font-medium text-on-background truncate">
-                  {guest.nom}
-                </span>
-                <span className="hidden sm:block text-on-surface-variant">{guest.telephone}</span>
-                <span className="text-on-background">{guest.totalVisites}</span>
-                <span className="hidden sm:block text-on-background font-medium">{guest.depenses}</span>
-                <span className="text-on-surface-variant">{guest.derniereVisite}</span>
-                <span>{vipBadge(guest.vip)}</span>
-                <span className="hidden sm:block text-on-surface-variant truncate">
-                  {guest.recommande}
-                </span>
-              </Link>
-            ))
-          )}
+      <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl overflow-hidden">
+        {/* Table Header */}
+        <div className="grid grid-cols-4 sm:grid-cols-7 gap-4 px-5 py-3 bg-white/[0.04]">
+          <span className="text-[0.625rem] text-white/30 uppercase tracking-wider">Nom</span>
+          <span className="hidden sm:block text-[0.625rem] text-white/30 uppercase tracking-wider">Telephone</span>
+          <span className="text-[0.625rem] text-white/30 uppercase tracking-wider">Total Visites</span>
+          <span className="hidden sm:block text-[0.625rem] text-white/30 uppercase tracking-wider">Depenses Totales</span>
+          <span className="text-[0.625rem] text-white/30 uppercase tracking-wider">Derniere Visite</span>
+          <span className="text-[0.625rem] text-white/30 uppercase tracking-wider">Statut VIP</span>
+          <span className="hidden sm:block text-[0.625rem] text-white/30 uppercase tracking-wider">Recommande par</span>
         </div>
+
+        {/* Table Rows */}
+        {filteredGuests.length === 0 ? (
+          <div className="px-5 py-8 text-center text-sm text-white/40">
+            Aucun client trouve
+          </div>
+        ) : (
+          filteredGuests.map((guest, i) => (
+            <div
+              key={guest.id}
+              className={`grid grid-cols-4 sm:grid-cols-7 gap-4 px-5 py-3.5 items-center text-sm hover:bg-white/[0.06] transition-colors border-t border-white/[0.06] ${i % 2 === 1 ? "bg-white/[0.02]" : ""}`}
+            >
+              <span className="font-medium text-white truncate">
+                {guest.nom}
+              </span>
+              <span className="hidden sm:block text-white/50">{guest.telephone}</span>
+              <span className="text-white">{guest.totalVisites}</span>
+              <span className="hidden sm:block text-white font-medium">{guest.depenses}</span>
+              <span className="text-white/50">{guest.derniereVisite}</span>
+              <span>{vipBadge(guest.vip)}</span>
+              <span className="hidden sm:block text-white/50 truncate">
+                {guest.recommande}
+              </span>
+            </div>
+          ))
+        )}
       </div>
 
       {/* Footer Stats */}
-      <div className="px-6 pt-8 pb-6">
-        <div className="bg-surface-card rounded-md editorial-shadow p-5 flex flex-wrap items-center justify-between gap-6">
+      <div className="mt-8">
+        <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl p-5 flex flex-wrap items-center justify-between gap-6">
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-3">
-              <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center">
-                <Users className="h-4 w-4 text-primary" strokeWidth={1.5} />
+              <div className="h-9 w-9 rounded-full bg-blue-500/15 flex items-center justify-center">
+                <Users className="h-4 w-4 text-blue-400" strokeWidth={1.5} />
               </div>
               <div>
-                <p className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant">
+                <p className="text-[0.625rem] text-white/30 uppercase tracking-wider">
                   Total Clients
                 </p>
-                <p className="text-lg font-semibold text-on-background font-[family-name:var(--font-manrope)]">
+                <p className="text-lg font-semibold text-white">
                   {isDemoVenue ? "2 842" : "0"}
                 </p>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center">
-                <TrendingUp className="h-4 w-4 text-primary" strokeWidth={1.5} />
+              <div className="h-9 w-9 rounded-full bg-blue-500/15 flex items-center justify-center">
+                <TrendingUp className="h-4 w-4 text-blue-400" strokeWidth={1.5} />
               </div>
               <div>
-                <p className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant">
+                <p className="text-[0.625rem] text-white/30 uppercase tracking-wider">
                   Nouveaux ce mois
                 </p>
-                <p className="text-lg font-semibold text-on-background font-[family-name:var(--font-manrope)]">
+                <p className="text-lg font-semibold text-white">
                   {isDemoVenue ? "+148" : "0"}
                 </p>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center">
-                <ShieldCheck className="h-4 w-4 text-primary" strokeWidth={1.5} />
+              <div className="h-9 w-9 rounded-full bg-blue-500/15 flex items-center justify-center">
+                <ShieldCheck className="h-4 w-4 text-blue-400" strokeWidth={1.5} />
               </div>
               <div>
-                <p className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant">
-                  Rétention VIP
+                <p className="text-[0.625rem] text-white/30 uppercase tracking-wider">
+                  Retention VIP
                 </p>
-                <p className="text-lg font-semibold text-on-background font-[family-name:var(--font-manrope)]">
+                <p className="text-lg font-semibold text-white">
                   {isDemoVenue ? "94%" : "0%"}
                 </p>
               </div>
@@ -337,7 +344,7 @@ export default function GuestsPage() {
 
           <button
             onClick={() => setShowAddModal(true)}
-            className="inline-flex items-center gap-2 bg-primary text-white rounded-sm px-5 py-2.5 text-sm font-medium hover:bg-primary-dark transition-colors"
+            className="inline-flex items-center gap-2 bg-blue-500 text-white rounded-xl px-5 py-2.5 text-sm font-medium hover:bg-blue-600 transition-colors"
           >
             <UserPlus className="h-4 w-4" strokeWidth={1.5} />
             Ajouter un Client
@@ -347,13 +354,13 @@ export default function GuestsPage() {
 
       {/* Add Client Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-surface-card rounded-md editorial-shadow p-6 w-full max-w-md mx-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl p-6 w-full max-w-md mx-4">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-lg font-bold text-primary-dark font-[family-name:var(--font-manrope)]">
+              <h2 className="text-lg font-bold text-white">
                 Nouveau Client
               </h2>
-              <button onClick={() => setShowAddModal(false)} className="text-on-surface-variant hover:text-on-background">
+              <button onClick={() => setShowAddModal(false)} className="text-white/40 hover:text-white transition-colors">
                 <X size={20} strokeWidth={1.5} />
               </button>
             </div>
@@ -361,23 +368,23 @@ export default function GuestsPage() {
               onSubmit={(e) => {
                 e.preventDefault();
                 setShowAddModal(false);
-                showToast("Client ajouté avec succès");
+                showToast("Client ajoute avec succes");
               }}
               className="space-y-4"
             >
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-on-surface-variant mb-1.5">Nom complet</label>
-                <input type="text" required className="w-full px-4 py-2.5 bg-surface-low border-none rounded-md text-sm text-on-background focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                <label className="block text-[0.625rem] text-white/30 uppercase tracking-wider mb-1.5">Nom complet</label>
+                <input type="text" required className="w-full px-4 py-2.5 bg-white/[0.05] border border-white/[0.1] rounded-xl text-sm text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500/30" />
               </div>
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-on-surface-variant mb-1.5">Téléphone</label>
-                <input type="tel" required className="w-full px-4 py-2.5 bg-surface-low border-none rounded-md text-sm text-on-background focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                <label className="block text-[0.625rem] text-white/30 uppercase tracking-wider mb-1.5">Telephone</label>
+                <input type="tel" required className="w-full px-4 py-2.5 bg-white/[0.05] border border-white/[0.1] rounded-xl text-sm text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500/30" />
               </div>
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-on-surface-variant mb-1.5">Email</label>
-                <input type="email" className="w-full px-4 py-2.5 bg-surface-low border-none rounded-md text-sm text-on-background focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                <label className="block text-[0.625rem] text-white/30 uppercase tracking-wider mb-1.5">Email</label>
+                <input type="email" className="w-full px-4 py-2.5 bg-white/[0.05] border border-white/[0.1] rounded-xl text-sm text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500/30" />
               </div>
-              <button type="submit" className="w-full bg-primary text-white rounded-sm px-5 py-2.5 text-sm font-medium hover:bg-primary-dark transition-colors">
+              <button type="submit" className="w-full bg-blue-500 text-white rounded-xl px-5 py-2.5 text-sm font-medium hover:bg-blue-600 transition-colors">
                 Ajouter
               </button>
             </form>
@@ -387,7 +394,7 @@ export default function GuestsPage() {
 
       {/* Toast */}
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-primary-dark text-white px-4 py-3 rounded-md shadow-lg">
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 backdrop-blur-xl bg-white/15 border border-white/20 text-white px-5 py-3 rounded-xl shadow-lg">
           <Check size={16} strokeWidth={2} />
           <span className="text-sm font-medium">{toast}</span>
         </div>

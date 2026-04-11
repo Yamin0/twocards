@@ -1,11 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
+import { useState, useCallback } from "react";
 import {
   Download,
   FileText,
-  ChevronDown,
   Trophy,
   TrendingUp,
   Check,
@@ -13,13 +11,11 @@ import {
 import { useAuthUser } from "@/hooks/use-auth-user";
 import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
 
-const navLinks = ["Vue d'ensemble", "Cartes en direct", "Revenus", "Clients", "Paramètres"];
-
 const DEMO_RP_DATA = [
-  { rang: 1, nom: "Samy Benchekroun", couverts: 48, ca: "124 800 MAD", commissions: "12 480 MAD", taille: "7,2" },
-  { rang: 2, nom: "Yasmine El Idrissi", couverts: 35, ca: "102 500 MAD", commissions: "10 250 MAD", taille: "6,8" },
-  { rang: 3, nom: "Amine Tazi", couverts: 29, ca: "98 700 MAD", commissions: "9 870 MAD", taille: "5,9" },
-  { rang: 4, nom: "Nadia Berrada", couverts: 22, ca: "76 500 MAD", commissions: "7 650 MAD", taille: "5,4" },
+  { rang: 1, nom: "Liam Hamza", couverts: 48, ca: "124 800 MAD", commissions: "12 480 MAD", taille: "7,2" },
+  { rang: 2, nom: "Karim Bennani", couverts: 35, ca: "102 500 MAD", commissions: "10 250 MAD", taille: "6,8" },
+  { rang: 3, nom: "Youssef El Idrissi", couverts: 29, ca: "98 700 MAD", commissions: "9 870 MAD", taille: "5,9" },
+  { rang: 4, nom: "Sofia Alaoui", couverts: 22, ca: "76 500 MAD", commissions: "7 650 MAD", taille: "5,4" },
 ];
 
 const DEMO_BAR_CHART_COUVERTS = [
@@ -47,21 +43,21 @@ const DEMO_BAR_CHART_REVENUS = [
 
 const DEMO_TOP_EVENTS = [
   { name: "Nuit Blanche VIP", revenue: "82 000 MAD", couverts: 18 },
-  { name: "Soirée Privée Champagne", revenue: "67 500 MAD", couverts: 12 },
+  { name: "Soiree Privee Champagne", revenue: "67 500 MAD", couverts: 12 },
   { name: "DJ Set International", revenue: "54 000 MAD", couverts: 15 },
 ];
 
 const DEMO_DONUT_SEGMENTS = [
-  { label: "Tables VIP", pct: 64, color: "bg-primary" },
-  { label: "Tables Standard", pct: 22, color: "bg-primary/50" },
-  { label: "Bar", pct: 14, color: "bg-on-primary-container" },
+  { label: "Tables VIP", pct: 64, color: "bg-blue-400" },
+  { label: "Tables Standard", pct: 22, color: "bg-blue-400/50" },
+  { label: "Bar", pct: 14, color: "bg-white/20" },
 ];
 
 const DEMO_STATS = [
   { label: "Total Couverts", value: "134" },
   { label: "Chiffre d'Affaires", value: "402 500 MAD" },
   { label: "Taille Moy. Groupe", value: "6,2" },
-  { label: "Meilleur RP", value: "SAMY B." },
+  { label: "Meilleur RP", value: "LIAM H." },
 ];
 
 const EMPTY_BAR_CHART_COUVERTS = [
@@ -91,16 +87,16 @@ const EMPTY_STATS = [
   { label: "Total Couverts", value: "0" },
   { label: "Chiffre d'Affaires", value: "0 MAD" },
   { label: "Taille Moy. Groupe", value: "0" },
-  { label: "Meilleur RP", value: "—" },
+  { label: "Meilleur RP", value: "\u2014" },
 ];
 
 const EMPTY_DONUT_SEGMENTS = [
-  { label: "Tables VIP", pct: 0, color: "bg-primary" },
-  { label: "Tables Standard", pct: 0, color: "bg-primary/50" },
-  { label: "Bar", pct: 0, color: "bg-on-primary-container" },
+  { label: "Tables VIP", pct: 0, color: "bg-blue-400" },
+  { label: "Tables Standard", pct: 0, color: "bg-blue-400/50" },
+  { label: "Bar", pct: 0, color: "bg-white/20" },
 ];
 
-const periodTabs = ["Cette semaine", "Ce mois", "Cette année", "Personnalisé"];
+const periodTabs = ["Cette semaine", "Ce mois", "Cette ann\u00e9e"];
 
 function downloadCSV(data: Record<string, string | number>[], filename: string) {
   if (data.length === 0) return;
@@ -120,9 +116,13 @@ function downloadCSV(data: Record<string, string | number>[], filename: string) 
 
 export default function AnalyticsPage() {
   const { isDemoVenue, isLoading } = useAuthUser();
-  const [activeNav, setActiveNav] = useState("Vue d'ensemble");
   const [activePeriod, setActivePeriod] = useState("Ce mois");
-  const { toast, showToast } = useToast();
+  const [toast, setToast] = useState<string | null>(null);
+
+  const showToast = useCallback((message: string) => {
+    setToast(message);
+    setTimeout(() => setToast(null), 3000);
+  }, []);
 
   const rpData = isDemoVenue ? DEMO_RP_DATA : [];
   const barChartCouverts = isDemoVenue ? DEMO_BAR_CHART_COUVERTS : EMPTY_BAR_CHART_COUVERTS;
@@ -131,130 +131,129 @@ export default function AnalyticsPage() {
   const donutSegments = isDemoVenue ? DEMO_DONUT_SEGMENTS : EMPTY_DONUT_SEGMENTS;
   const statsData = isDemoVenue ? DEMO_STATS : EMPTY_STATS;
 
-  const handleExportCSV = () => {
+  const handleExportCSV = useCallback(() => {
     const today = new Date().toISOString().split("T")[0];
     downloadCSV(
-      rpData.map((rp) => ({
+      (isDemoVenue ? DEMO_RP_DATA : []).map((rp) => ({
         Rang: rp.rang,
         Nom: rp.nom,
         Couverts: rp.couverts,
-        "CA Généré": rp.ca,
+        "CA G\u00e9n\u00e9r\u00e9": rp.ca,
         Commissions: rp.commissions,
         "Taille Moy.": rp.taille,
       })),
       `analytics-${today}.csv`
     );
-    showToast("CSV téléchargé");
-  };
+    showToast("CSV t\u00e9l\u00e9charg\u00e9");
+  }, [isDemoVenue, showToast]);
 
-  const handleExportReport = () => {
-    showToast("Rapport exporté (PDF bientôt disponible)");
-  };
+  const handleExportReport = useCallback(() => {
+    showToast("Rapport export\u00e9 (PDF bient\u00f4t disponible)");
+  }, [showToast]);
 
   if (isLoading) return <DashboardSkeleton />;
 
   return (
-    <div className="-mx-0">
-      {/* Dark Top Navigation Bar */}
-      <div className="bg-primary-dark px-6 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-8">
-          <nav className="hidden md:flex items-center gap-1">
-            {navLinks.map((link) => (
-              <button
-                key={link}
-                onClick={() => setActiveNav(link)}
-                className={`px-3 py-1.5 rounded-sm text-sm font-medium transition-colors ${
-                  activeNav === link
-                    ? "bg-white/15 text-white"
-                    : "text-white/60 hover:text-white/90"
-                }`}
-              >
-                {link}
-              </button>
-            ))}
-          </nav>
+    <div className="space-y-6">
+      {/* Header Glass Card */}
+      <div>
+        <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl p-8">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+            <div>
+              <h1 className="text-white font-[family-name:var(--font-manrope)] font-extrabold text-3xl tracking-tight">
+                Analyses
+              </h1>
+              <p className="text-white/50 text-sm mt-2">
+                Suivez les performances de votre venue en temps r\u00e9el.
+              </p>
+            </div>
+
+            {/* Period Selector */}
+            <div className="flex gap-1 backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-2xl p-1">
+              {periodTabs.map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActivePeriod(tab)}
+                  className={`px-4 py-2 text-xs font-medium rounded-xl transition-all ${
+                    activePeriod === tab
+                      ? "bg-blue-500 text-white shadow-lg shadow-blue-500/25"
+                      : "text-white/50 hover:text-white/80"
+                  }`}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
-        <button className="flex items-center gap-1 text-white/60 text-sm hover:text-white transition-colors">
-          <span>Avr. 2026</span>
-          <ChevronDown size={14} strokeWidth={1.5} />
-        </button>
       </div>
 
-      {/* Data Strip */}
-      <div className="bg-tertiary-container px-6 py-5 flex flex-wrap items-end gap-6 md:gap-0 md:grid md:grid-cols-5">
+      {/* Stats Strip */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {statsData.map((stat, i) => (
           <div
             key={i}
-            className={`flex flex-col ${
-              i > 0 ? "md:border-l md:border-white/10 md:pl-6" : ""
-            }`}
+            className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-2xl p-5"
           >
-            <span className="text-on-tertiary-container font-[family-name:var(--font-inter)] text-[10px] uppercase tracking-[0.1em] mb-1 font-bold">
+            <span className="text-white/40 font-[family-name:var(--font-manrope)] text-[10px] uppercase tracking-[0.12em] font-bold">
               {stat.label}
             </span>
-            <span className="text-white font-[family-name:var(--font-manrope)] font-extrabold text-2xl">
+            <p className="text-white font-[family-name:var(--font-manrope)] font-extrabold text-2xl mt-1.5">
               {stat.value}
-            </span>
+            </p>
           </div>
         ))}
-
-        {/* Period selector */}
-        <div className="flex items-end md:justify-end">
-          <div className="flex gap-1 bg-white/10 rounded-sm p-0.5">
-            {periodTabs.map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActivePeriod(tab)}
-                className={`px-2.5 py-1 text-[10px] font-medium rounded-sm transition-colors ${
-                  activePeriod === tab
-                    ? "bg-white/20 text-white"
-                    : "text-white/50 hover:text-white/80"
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
-        </div>
       </div>
 
       {/* Charts Row */}
-      <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Couverts Chart */}
-        <div className="bg-surface-card rounded-md editorial-shadow p-6">
-          <h3 className="text-primary-dark font-[family-name:var(--font-manrope)] font-bold text-sm mb-6">
-            Couverts dans le temps
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Couverts par jour */}
+        <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl p-6">
+          <h3 className="text-white font-[family-name:var(--font-manrope)] font-bold text-sm mb-6">
+            Couverts par jour
           </h3>
           <div className="flex items-end justify-between gap-2 h-40">
             {barChartCouverts.map((bar) => (
               <div key={bar.label} className="flex-1 flex flex-col items-center gap-2">
                 <div className="w-full flex justify-center">
                   <div
-                    className="w-8 bg-primary rounded-sm transition-all"
-                    style={{ height: `${bar.height * 1.4}px`, opacity: bar.height / 100 * 0.6 + 0.4 }}
-                  />
+                    className="w-8 rounded-lg transition-all relative overflow-hidden"
+                    style={{ height: `${Math.max(bar.height * 1.4, 4)}px` }}
+                  >
+                    <div className="absolute inset-0 bg-blue-400/30" />
+                    <div
+                      className="absolute bottom-0 left-0 right-0 bg-blue-400 rounded-lg"
+                      style={{ height: `${bar.height}%` }}
+                    />
+                  </div>
                 </div>
-                <span className="text-[10px] text-on-surface-variant">{bar.label}</span>
+                <span className="text-[10px] text-white/40">{bar.label}</span>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Revenus Chart */}
-        <div className="bg-surface-card rounded-md editorial-shadow p-6">
-          <h3 className="text-primary-dark font-[family-name:var(--font-manrope)] font-bold text-sm mb-6">
-            Revenus dans le temps
+        {/* Revenus par semaine */}
+        <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl p-6">
+          <h3 className="text-white font-[family-name:var(--font-manrope)] font-bold text-sm mb-6">
+            Revenus par semaine
           </h3>
           <div className="flex items-end justify-between gap-1.5 h-40">
             {barChartRevenus.map((bar) => (
               <div key={bar.label} className="flex-1 flex flex-col items-center gap-2">
                 <div className="w-full flex justify-center">
                   <div
-                    className="w-6 bg-primary rounded-sm transition-all"
-                    style={{ height: `${bar.height * 1.4}px`, opacity: bar.height / 100 * 0.6 + 0.4 }}
-                  />
+                    className="w-6 rounded-lg transition-all relative overflow-hidden"
+                    style={{ height: `${Math.max(bar.height * 1.4, 4)}px` }}
+                  >
+                    <div className="absolute inset-0 bg-blue-400/30" />
+                    <div
+                      className="absolute bottom-0 left-0 right-0 bg-blue-400 rounded-lg"
+                      style={{ height: `${bar.height}%` }}
+                    />
+                  </div>
                 </div>
-                <span className="text-[10px] text-on-surface-variant">{bar.label}</span>
+                <span className="text-[10px] text-white/40">{bar.label}</span>
               </div>
             ))}
           </div>
@@ -262,61 +261,63 @@ export default function AnalyticsPage() {
       </div>
 
       {/* RP Performance Table */}
-      <div className="px-6 pb-6">
-        <div className="bg-surface-card rounded-md editorial-shadow overflow-hidden">
-          <div className="px-6 py-4">
-            <h3 className="text-primary-dark font-[family-name:var(--font-manrope)] font-bold text-sm">
+      <div>
+        <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl overflow-hidden">
+          <div className="px-6 py-5">
+            <h3 className="text-white font-[family-name:var(--font-manrope)] font-bold text-sm">
               Performance des RP
             </h3>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-surface-low">
-                  <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
+                <tr className="border-t border-white/[0.08]">
+                  <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-white/40">
                     Rang
                   </th>
-                  <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
-                    Nom du RP
+                  <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-white/40">
+                    Nom
                   </th>
-                  <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
+                  <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-white/40">
                     Couverts
                   </th>
-                  <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
-                    CA Généré
+                  <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-white/40">
+                    CA
                   </th>
-                  <th className="hidden md:table-cell text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
-                    Commissions Dues
+                  <th className="hidden md:table-cell text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-white/40">
+                    Commissions
                   </th>
-                  <th className="hidden md:table-cell text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
-                    Taille Moy. Groupe
+                  <th className="hidden md:table-cell text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-white/40">
+                    Taille Moy.
                   </th>
                 </tr>
               </thead>
               <tbody>
                 {rpData.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="px-6 py-8 text-center text-sm text-on-surface-variant">
-                      Aucune donnée disponible
+                    <td colSpan={6} className="px-6 py-8 text-center text-sm text-white/40">
+                      Aucune donn\u00e9e disponible
                     </td>
                   </tr>
                 )}
                 {rpData.map((rp, i) => (
                   <tr
                     key={rp.rang}
-                    className={i % 2 === 0 ? "bg-surface-card" : "bg-surface-low/50"}
+                    className={`border-t border-white/[0.06] ${
+                      i % 2 === 1 ? "bg-white/[0.03]" : ""
+                    } hover:bg-white/[0.05] transition-colors`}
                   >
-                    <td className="px-6 py-3.5 text-on-background font-bold">
+                    <td className="px-6 py-3.5 text-white font-bold">
                       <div className="flex items-center gap-2">
-                        {rp.rang === 1 && <Trophy size={14} strokeWidth={1.5} className="text-amber-500" />}
+                        {rp.rang === 1 && <Trophy size={14} strokeWidth={1.5} className="text-amber-400" />}
                         {rp.rang}
                       </div>
                     </td>
-                    <td className="px-6 py-3.5 text-on-background font-medium">{rp.nom}</td>
-                    <td className="px-6 py-3.5 text-on-background">{rp.couverts}</td>
-                    <td className="px-6 py-3.5 text-on-background font-medium">{rp.ca}</td>
-                    <td className="hidden md:table-cell px-6 py-3.5 text-on-background">{rp.commissions}</td>
-                    <td className="hidden md:table-cell px-6 py-3.5 text-on-background">{rp.taille}</td>
+                    <td className="px-6 py-3.5 text-white font-medium">{rp.nom}</td>
+                    <td className="px-6 py-3.5 text-white/80">{rp.couverts}</td>
+                    <td className="px-6 py-3.5 text-white font-medium">{rp.ca}</td>
+                    <td className="hidden md:table-cell px-6 py-3.5 text-white/80">{rp.commissions}</td>
+                    <td className="hidden md:table-cell px-6 py-3.5 text-white/80">{rp.taille}</td>
                   </tr>
                 ))}
               </tbody>
@@ -326,27 +327,27 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Bottom Row */}
-      <div className="px-6 pb-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Meilleurs Événements */}
-        <div className="bg-surface-card rounded-md editorial-shadow p-6">
-          <h3 className="text-primary-dark font-[family-name:var(--font-manrope)] font-bold text-sm mb-5">
-            Meilleurs Événements
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Meilleurs Evenements */}
+        <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl p-6">
+          <h3 className="text-white font-[family-name:var(--font-manrope)] font-bold text-sm mb-5">
+            Meilleurs \u00c9v\u00e9nements
           </h3>
           <div className="space-y-4">
             {topEvents.length === 0 && (
-              <p className="text-sm text-on-surface-variant text-center py-4">Aucun événement</p>
+              <p className="text-sm text-white/40 text-center py-4">Aucun \u00e9v\u00e9nement</p>
             )}
             {topEvents.map((event, i) => (
               <div key={i} className="flex items-center gap-4">
-                <div className="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center flex-shrink-0">
-                  <span className="text-xs font-bold text-on-primary-container">{i + 1}</span>
+                <div className="w-8 h-8 rounded-full bg-blue-500/20 border border-blue-400/30 flex items-center justify-center flex-shrink-0">
+                  <span className="text-xs font-bold text-blue-400">{i + 1}</span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-on-background truncate">{event.name}</p>
-                  <p className="text-xs text-on-surface-variant">{event.couverts} couverts</p>
+                  <p className="text-sm font-medium text-white truncate">{event.name}</p>
+                  <p className="text-xs text-white/40">{event.couverts} couverts</p>
                 </div>
-                <div className="flex items-center gap-1.5 text-sm font-bold text-on-background">
-                  <TrendingUp size={14} strokeWidth={1.5} className="text-emerald-600" />
+                <div className="flex items-center gap-1.5 text-sm font-bold text-white">
+                  <TrendingUp size={14} strokeWidth={1.5} className="text-emerald-400" />
                   {event.revenue}
                 </div>
               </div>
@@ -354,23 +355,23 @@ export default function AnalyticsPage() {
           </div>
         </div>
 
-        {/* Répartition des Réservations */}
-        <div className="bg-surface-card rounded-md editorial-shadow p-6">
-          <h3 className="text-primary-dark font-[family-name:var(--font-manrope)] font-bold text-sm mb-5">
-            Répartition des Réservations
+        {/* Repartition des Reservations */}
+        <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl p-6">
+          <h3 className="text-white font-[family-name:var(--font-manrope)] font-bold text-sm mb-5">
+            R\u00e9partition des R\u00e9servations
           </h3>
           <div className="flex items-center gap-8">
-            {/* Donut Chart Mockup */}
+            {/* Donut Chart SVG */}
             <div className="relative w-32 h-32 flex-shrink-0">
               <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
                 {/* Background ring */}
-                <circle cx="18" cy="18" r="14" fill="none" stroke="#eff5f3" strokeWidth="4" />
+                <circle cx="18" cy="18" r="14" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="4" />
                 {isDemoVenue && (
                   <>
                     {/* VIP - 64% */}
                     <circle
                       cx="18" cy="18" r="14" fill="none"
-                      stroke="#13305c" strokeWidth="4"
+                      stroke="#60a5fa" strokeWidth="4"
                       strokeDasharray="64 36"
                       strokeDashoffset="0"
                       strokeLinecap="round"
@@ -378,7 +379,7 @@ export default function AnalyticsPage() {
                     {/* Standard - 22% */}
                     <circle
                       cx="18" cy="18" r="14" fill="none"
-                      stroke="rgba(19,48,92,0.45)" strokeWidth="4"
+                      stroke="rgba(96,165,250,0.5)" strokeWidth="4"
                       strokeDasharray="22 78"
                       strokeDashoffset="-64"
                       strokeLinecap="round"
@@ -386,7 +387,7 @@ export default function AnalyticsPage() {
                     {/* Bar - 14% */}
                     <circle
                       cx="18" cy="18" r="14" fill="none"
-                      stroke="#8099cb" strokeWidth="4"
+                      stroke="rgba(255,255,255,0.2)" strokeWidth="4"
                       strokeDasharray="14 86"
                       strokeDashoffset="-86"
                       strokeLinecap="round"
@@ -395,10 +396,10 @@ export default function AnalyticsPage() {
                 )}
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-xl font-extrabold font-[family-name:var(--font-manrope)] text-on-background">
+                <span className="text-xl font-extrabold font-[family-name:var(--font-manrope)] text-white">
                   {isDemoVenue ? "64%" : "0%"}
                 </span>
-                <span className="text-[9px] text-on-surface-variant">VIP</span>
+                <span className="text-[9px] text-white/40">VIP</span>
               </div>
             </div>
 
@@ -408,8 +409,8 @@ export default function AnalyticsPage() {
                 <div key={seg.label} className="flex items-center gap-2.5">
                   <span className={`w-3 h-3 rounded-full ${seg.color}`} />
                   <div>
-                    <p className="text-sm text-on-background font-medium">{seg.label}</p>
-                    <p className="text-xs text-on-surface-variant">{seg.pct}%</p>
+                    <p className="text-sm text-white font-medium">{seg.label}</p>
+                    <p className="text-xs text-white/40">{seg.pct}%</p>
                   </div>
                 </div>
               ))}
@@ -419,27 +420,27 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Action Buttons */}
-      <div className="px-6 pb-8 flex flex-wrap items-center gap-4">
+      <div className="flex flex-wrap items-center gap-4">
         <button
           onClick={handleExportReport}
-          className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-sm text-sm font-medium hover:bg-primary-dark transition-colors"
+          className="flex items-center gap-2 px-5 py-2.5 bg-blue-500 text-white rounded-xl text-sm font-medium hover:bg-blue-600 transition-colors shadow-lg shadow-blue-500/25"
         >
           <FileText size={16} strokeWidth={1.5} />
           Exporter le rapport
         </button>
         <button
           onClick={handleExportCSV}
-          className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-on-surface-variant hover:text-on-background transition-colors"
+          className="flex items-center gap-2 px-5 py-2.5 backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] text-white/80 rounded-xl text-sm font-medium hover:bg-white/[0.12] hover:text-white transition-colors"
         >
           <Download size={16} strokeWidth={1.5} />
-          Télécharger CSV
+          T\u00e9l\u00e9charger CSV
         </button>
       </div>
 
       {/* Toast */}
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-primary-dark text-white px-4 py-3 rounded-md shadow-lg animate-in slide-in-from-bottom-4">
-          <Check size={16} strokeWidth={2} />
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 backdrop-blur-xl bg-white/15 border border-white/20 text-white px-5 py-3 rounded-xl shadow-2xl animate-in slide-in-from-bottom-4">
+          <Check size={16} strokeWidth={2} className="text-blue-400" />
           <span className="text-sm font-medium">{toast}</span>
         </div>
       )}

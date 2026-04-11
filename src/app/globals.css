@@ -102,3 +102,54 @@
   background-image: radial-gradient(#eff5f3 1.5px, transparent 1.5px);
   background-size: 24px 24px;
 }
+
+/* Liquid glass utilities */
+.liquid-glass {
+  background: rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.liquid-glass-header {
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.liquid-glass-enhanced {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* Scrollbar for glass backgrounds */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 4px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 9999px;
+}
+
+/* Logo marquee animations */
+@keyframes scroll-left {
+  from { transform: translateX(0); }
+  to { transform: translateX(-33.333%); }
+}
+@keyframes scroll-right {
+  from { transform: translateX(-33.333%); }
+  to { transform: translateX(0); }
+}
+.animate-scroll-left {
+  animation: scroll-left 25s linear infinite;
+}
+.animate-scroll-right {
+  animation: scroll-right 25s linear infinite;
+}

@@ -6,51 +6,40 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   Home,
+  CalendarDays,
+  Users,
+  CreditCard,
+  BarChart3,
+  MessageSquare,
+  Building2,
   Bell,
   Settings,
   User,
   LogOut,
+  HelpCircle,
   Menu,
   X,
   ChevronDown,
 } from "lucide-react";
 import { useAuthUser } from "@/hooks/use-auth-user";
-import { GlowMenu } from "@/components/layout/glow-menu";
-import type { GlowMenuItem } from "@/components/layout/glow-menu";
 
-const menuItems: GlowMenuItem[] = [
-  {
-    label: "Accueil",
-    href: "/concierge",
-    icon: Home,
-    gradient:
-      "radial-gradient(circle, rgba(59,130,246,0.15) 0%, rgba(37,99,235,0.06) 50%, rgba(29,78,216,0) 100%)",
-    iconColor: "text-blue-400",
-  },
-  {
-    label: "Notifications",
-    href: "/concierge/notifications",
-    icon: Bell,
-    gradient:
-      "radial-gradient(circle, rgba(249,115,22,0.15) 0%, rgba(234,88,12,0.06) 50%, rgba(194,65,12,0) 100%)",
-    iconColor: "text-orange-400",
-  },
-  {
-    label: "Paramètres",
-    href: "/concierge/settings",
-    icon: Settings,
-    gradient:
-      "radial-gradient(circle, rgba(34,197,94,0.15) 0%, rgba(22,163,74,0.06) 50%, rgba(21,128,61,0) 100%)",
-    iconColor: "text-green-400",
-  },
-  {
-    label: "Profil",
-    href: "/concierge/profile",
-    icon: User,
-    gradient:
-      "radial-gradient(circle, rgba(168,85,247,0.15) 0%, rgba(147,51,234,0.06) 50%, rgba(126,34,206,0) 100%)",
-    iconColor: "text-purple-400",
-  },
+const mainNav = [
+  { icon: Home, label: "Accueil", href: "/concierge" },
+  { icon: CalendarDays, label: "Calendrier", href: "/concierge/reservations" },
+  { icon: Users, label: "CRM Clients", href: "/concierge/clients" },
+  { icon: CreditCard, label: "Commissions", href: "/concierge/commissions" },
+  { icon: BarChart3, label: "Statistiques", href: "/concierge/stats" },
+];
+
+const toolsNav = [
+  { icon: MessageSquare, label: "Messages", href: "/concierge/messages" },
+  { icon: Building2, label: "Établissements", href: "/concierge/venues" },
+];
+
+const adminNav = [
+  { icon: Bell, label: "Notifications", href: "/concierge/notifications" },
+  { icon: Settings, label: "Paramètres", href: "/concierge/settings" },
+  { icon: User, label: "Profil", href: "/concierge/profile" },
 ];
 
 const demoVenues = [
@@ -70,12 +59,12 @@ export default function ConciergeLayout({
   const pathname = usePathname();
   const { isDemoConcierge, fullName, initials, isLoading } = useAuthUser();
   const venues = isDemoConcierge ? demoVenues : defaultVenues;
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [venueDropdownOpen, setVenueDropdownOpen] = useState(false);
   const [selectedVenue, setSelectedVenue] = useState(venues[0]);
 
   useEffect(() => {
-    if (mobileMenuOpen) {
+    if (sidebarOpen) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
@@ -83,165 +72,218 @@ export default function ConciergeLayout({
     return () => {
       document.body.style.overflow = "";
     };
-  }, [mobileMenuOpen]);
+  }, [sidebarOpen]);
 
   const isActive = (href: string) => {
     if (href === "/concierge") return pathname === "/concierge";
     return pathname.startsWith(href);
   };
 
-  return (
-    <div className="min-h-screen bg-surface">
-      {/* Top Header */}
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-outline-variant/10">
-        <div className="max-w-7xl mx-auto flex items-center justify-between px-6 h-16">
-          {/* Left: Logo + Venue selector */}
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-1.5 rounded-lg text-on-surface-variant hover:text-on-surface transition-colors"
-              aria-label="Menu"
+  const NavSection = ({
+    title,
+    items,
+  }: {
+    title: string;
+    items: typeof mainNav;
+  }) => (
+    <div>
+      <h4 className="text-white/50 text-[0.6875rem] font-semibold uppercase tracking-wider mb-2 px-3">
+        {title}
+      </h4>
+      <nav className="space-y-0.5">
+        {items.map((item) => {
+          const Icon = item.icon;
+          const active = isActive(item.href);
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              onClick={() => setSidebarOpen(false)}
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 hover:scale-[1.01] font-[family-name:var(--font-manrope)] ${
+                active
+                  ? "bg-white/20 text-white border border-white/20"
+                  : "text-white/60 hover:bg-white/10 hover:text-white"
+              }`}
             >
-              {mobileMenuOpen ? (
-                <X size={22} strokeWidth={1.5} />
-              ) : (
-                <Menu size={22} strokeWidth={1.5} />
-              )}
-            </button>
-
-            <Link href="/concierge" className="flex items-center gap-2.5">
-              <Image
-                src="/logo-header.png"
-                alt="twocards."
-                width={36}
-                height={36}
-                className="h-9 w-auto"
-              />
-              <span className="text-lg font-bold tracking-tight font-[family-name:var(--font-nunito)] text-primary-dark hidden sm:inline">
-                twocards<span className="text-primary">.</span>
-              </span>
+              <Icon size={18} strokeWidth={1.5} />
+              {item.label}
             </Link>
+          );
+        })}
+      </nav>
+    </div>
+  );
 
-            {/* Venue selector */}
-            <div className="hidden sm:flex items-center gap-2">
-              <div className="h-6 w-px bg-outline-variant/20 mx-1" />
-              <div className="relative">
-                <button
-                  onClick={() => setVenueDropdownOpen(!venueDropdownOpen)}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-surface-low transition-colors group"
-                >
-                  <div className="w-6 h-6 rounded-full bg-primary-container flex items-center justify-center">
-                    <span className="text-[0.625rem] font-bold text-on-primary-container font-[family-name:var(--font-manrope)]">
-                      {selectedVenue[0]}
-                    </span>
-                  </div>
-                  <p className="text-sm font-semibold text-on-background font-[family-name:var(--font-manrope)]">
-                    {selectedVenue}
+  return (
+    <div className="h-screen relative overflow-hidden bg-[#0a0a0f]">
+      {/* Animated gradient blobs */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-[40%] -left-[20%] w-[70%] h-[70%] rounded-full bg-indigo-600/15 blur-[120px] animate-pulse" />
+        <div className="absolute -bottom-[30%] -right-[20%] w-[60%] h-[60%] rounded-full bg-cyan-600/10 blur-[120px] animate-pulse [animation-delay:1s]" />
+        <div className="absolute top-[20%] right-[10%] w-[40%] h-[40%] rounded-full bg-violet-500/8 blur-[100px] animate-pulse [animation-delay:2s]" />
+      </div>
+
+      <div className="relative z-10 p-4 lg:p-6 grid grid-cols-12 gap-4 lg:gap-6 h-screen">
+        {/* Mobile top bar */}
+        <div className="col-span-12 lg:hidden flex items-center justify-between backdrop-blur-xl bg-white/10 border border-white/15 rounded-2xl px-4 py-3">
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="p-1.5 rounded-lg text-white/70 hover:text-white transition-colors"
+            aria-label="Menu"
+          >
+            {sidebarOpen ? <X size={22} strokeWidth={1.5} /> : <Menu size={22} strokeWidth={1.5} />}
+          </button>
+          <Link href="/concierge" className="flex items-center gap-2">
+            <Image src="/logo-header.png" alt="twocards." width={28} height={28} className="h-7 w-auto brightness-0 invert" />
+            <span className="text-lg font-bold tracking-tight font-[family-name:var(--font-nunito)] text-white">
+              twocards<span className="text-blue-400">.</span>
+            </span>
+          </Link>
+          <div className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center">
+            <span className="text-xs font-semibold text-white font-[family-name:var(--font-manrope)]">
+              {initials || "U"}
+            </span>
+          </div>
+        </div>
+
+        {/* Mobile sidebar overlay */}
+        {sidebarOpen && (
+          <>
+            <div
+              className="fixed inset-0 bg-black/40 z-40 lg:hidden"
+              onClick={() => setSidebarOpen(false)}
+            />
+            <div className="fixed top-20 left-4 right-4 z-50 lg:hidden backdrop-blur-xl bg-white/10 border border-white/15 rounded-3xl p-5 space-y-5 max-h-[70vh] overflow-y-auto">
+              <NavSection title="Navigation" items={mainNav} />
+              <NavSection title="Outils" items={toolsNav} />
+              <NavSection title="Compte" items={adminNav} />
+              <div className="pt-3 border-t border-white/10">
+                <form action="/auth/signout" method="post">
+                  <button
+                    type="submit"
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-red-400/80 hover:text-red-400 hover:bg-white/10 transition-all w-full font-[family-name:var(--font-manrope)]"
+                  >
+                    <LogOut size={18} strokeWidth={1.5} />
+                    Déconnexion
+                  </button>
+                </form>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Desktop sidebar */}
+        <aside className="hidden lg:flex col-span-2 backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl p-5 flex-col h-[calc(100vh-48px)] overflow-hidden">
+          {/* Logo */}
+          <div className="text-center mb-4 pb-4 border-b border-white/10">
+            <div className="flex items-center justify-center gap-2.5 mb-1">
+              <Image src="/logo-header.png" alt="twocards." width={36} height={36} className="h-9 w-auto brightness-0 invert" />
+              <span className="text-xl font-bold tracking-tight font-[family-name:var(--font-nunito)] text-white">
+                twocards<span className="text-blue-400">.</span>
+              </span>
+            </div>
+            <p className="text-white/40 text-xs font-[family-name:var(--font-inter)]">Espace Concierge</p>
+          </div>
+
+          {/* Venue selector */}
+          <div className="mb-4 relative">
+            <button
+              onClick={() => setVenueDropdownOpen(!venueDropdownOpen)}
+              className="w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all"
+            >
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="w-6 h-6 rounded-full bg-white/15 flex items-center justify-center shrink-0">
+                  <span className="text-[0.5rem] font-bold text-white">{selectedVenue[0]}</span>
+                </div>
+                <span className="text-sm font-medium text-white truncate font-[family-name:var(--font-manrope)]">
+                  {selectedVenue}
+                </span>
+              </div>
+              <ChevronDown
+                size={14}
+                strokeWidth={1.5}
+                className={`text-white/40 transition-transform shrink-0 ${venueDropdownOpen ? "rotate-180" : ""}`}
+              />
+            </button>
+            {venueDropdownOpen && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setVenueDropdownOpen(false)} />
+                <div className="absolute top-full left-0 right-0 mt-1 backdrop-blur-xl bg-white/10 border border-white/15 rounded-xl py-1 z-50">
+                  {venues.map((v) => (
+                    <button
+                      key={v}
+                      onClick={() => {
+                        setSelectedVenue(v);
+                        setVenueDropdownOpen(false);
+                      }}
+                      className={`w-full text-left px-3 py-2 text-sm transition-colors ${
+                        v === selectedVenue
+                          ? "bg-white/10 text-white font-medium"
+                          : "text-white/60 hover:bg-white/5 hover:text-white"
+                      }`}
+                    >
+                      {v}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Navigation */}
+          <div className="flex-1 overflow-y-auto space-y-5 scrollbar-thin">
+            <NavSection title="Navigation" items={mainNav} />
+            <NavSection title="Outils" items={toolsNav} />
+            <NavSection title="Compte" items={adminNav} />
+          </div>
+
+          {/* Bottom */}
+          <div className="pt-4 mt-4 border-t border-white/10 space-y-2">
+            <div className="flex items-center gap-3 px-3 py-2">
+              <div className="w-9 h-9 rounded-full bg-white/15 flex items-center justify-center shrink-0">
+                {isLoading ? (
+                  <div className="w-9 h-9 rounded-full bg-white/10 animate-pulse" />
+                ) : (
+                  <span className="text-sm font-semibold text-white font-[family-name:var(--font-manrope)]">
+                    {initials || "U"}
+                  </span>
+                )}
+              </div>
+              <div className="min-w-0">
+                {isLoading ? (
+                  <div className="h-3 w-20 bg-white/10 rounded animate-pulse" />
+                ) : (
+                  <p className="text-sm font-medium text-white truncate font-[family-name:var(--font-manrope)]">
+                    {fullName || "Concierge"}
                   </p>
-                  <ChevronDown
-                    size={14}
-                    strokeWidth={1.5}
-                    className={`text-on-surface-variant transition-all ${venueDropdownOpen ? "rotate-180" : ""}`}
-                  />
-                </button>
-                {venueDropdownOpen && (
-                  <>
-                    <div
-                      className="fixed inset-0 z-40"
-                      onClick={() => setVenueDropdownOpen(false)}
-                    />
-                    <div className="absolute top-full left-0 mt-1 w-56 bg-white rounded-xl editorial-shadow border border-outline-variant/10 py-1 z-50">
-                      {venues.map((v) => (
-                        <button
-                          key={v}
-                          onClick={() => {
-                            setSelectedVenue(v);
-                            setVenueDropdownOpen(false);
-                          }}
-                          className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${v === selectedVenue ? "bg-primary/5 text-primary font-medium" : "text-on-background hover:bg-surface-low"}`}
-                        >
-                          {v}
-                        </button>
-                      ))}
-                    </div>
-                  </>
                 )}
               </div>
             </div>
-          </div>
 
-          {/* Center: Glow Menu */}
-          <div className="hidden md:flex">
-            <GlowMenu items={menuItems} basePath="/concierge" />
-          </div>
-
-          {/* Right: User + Logout */}
-          <div className="flex items-center gap-3">
-            <div className="text-right hidden sm:block">
-              {isLoading ? (
-                <div className="h-3 w-20 bg-surface-low rounded animate-pulse" />
-              ) : (
-                <p className="text-sm font-medium font-[family-name:var(--font-manrope)] text-on-surface">
-                  {fullName || "Utilisateur"}
-                </p>
-              )}
-            </div>
-            <div className="w-9 h-9 rounded-full bg-primary-container flex items-center justify-center">
-              {isLoading ? (
-                <div className="w-9 h-9 rounded-full bg-surface-low animate-pulse" />
-              ) : (
-                <span className="text-sm font-semibold font-[family-name:var(--font-manrope)] text-on-primary-container">
-                  {initials || "U"}
-                </span>
-              )}
-            </div>
+            <Link
+              href="/concierge/help"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-white/40 hover:text-white/70 hover:bg-white/10 transition-all font-[family-name:var(--font-manrope)]"
+            >
+              <HelpCircle size={18} strokeWidth={1.5} />
+              Aide
+            </Link>
             <form action="/auth/signout" method="post">
               <button
                 type="submit"
-                className="p-2 rounded-lg text-on-surface-variant hover:text-error transition-colors"
-                aria-label="Déconnexion"
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-red-400/70 hover:text-red-400 hover:bg-white/10 transition-all w-full font-[family-name:var(--font-manrope)]"
               >
                 <LogOut size={18} strokeWidth={1.5} />
+                Déconnexion
               </button>
             </form>
           </div>
-        </div>
-      </header>
+        </aside>
 
-      {/* Mobile Menu */}
-      {mobileMenuOpen && (
-        <>
-          <div
-            className="fixed inset-0 bg-black/20 z-40 md:hidden"
-            onClick={() => setMobileMenuOpen(false)}
-          />
-          <div className="fixed top-16 left-0 right-0 bg-primary-dark z-40 md:hidden p-3 space-y-0.5 shadow-[0_4px_30px_rgba(0,27,64,0.3)]">
-            {menuItems.map((item) => {
-              const active = isActive(item.href);
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`
-                    flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors
-                    font-[family-name:var(--font-manrope)]
-                    ${active ? "text-white" : "text-white/50 hover:text-white/80"}
-                  `}
-                  style={active ? { background: item.gradient } : undefined}
-                >
-                  <Icon size={20} strokeWidth={1.5} />
-                  {item.label}
-                </Link>
-              );
-            })}
-          </div>
-        </>
-      )}
-
-      {/* Content */}
-      <main className="max-w-7xl mx-auto">{children}</main>
+        {/* Main content */}
+        <main className="col-span-12 lg:col-span-10 h-[calc(100vh-48px)] lg:h-[calc(100vh-48px)] overflow-y-auto overflow-x-hidden scrollbar-thin">
+          {children}
+        </main>
+      </div>
     </div>
   );
 }
