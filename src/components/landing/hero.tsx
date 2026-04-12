@@ -26,8 +26,8 @@ const phoneCards = [
   },
   {
     title: "Dashboard",
-    sub: "Vue complète de votre établissement — stats, réservations et performance.",
-    badge: "ANALYTICS",
+    sub: "",
+    badge: "",
     gradient: "from-emerald-600 to-teal-900",
     icon: BarChart3,
     videoSrc: "/videos/dashboard.mp4",
