@@ -30,6 +30,7 @@ const phoneCards = [
     badge: "ANALYTICS",
     gradient: "from-emerald-600 to-teal-900",
     icon: BarChart3,
+    videoSrc: "/videos/dashboard.mp4",
   },
   {
     title: "Réseau RP",

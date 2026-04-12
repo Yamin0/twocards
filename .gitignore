@@ -40,3 +40,6 @@ next-env.d.ts
 
 # mcp config (contains API tokens)
 .mcp.json
+
+# remotion video project (standalone, not part of Next.js app)
+/dashboard-video/
