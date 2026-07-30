@@ -35,9 +35,9 @@ export function Footer() {
               twocards<span className="text-blue-400">.</span>
             </Link>
             <p className="mt-4 max-w-xs font-[family-name:var(--font-inter)] text-sm leading-relaxed text-white/40">
-              La plateforme CRM B2B pour les établissements de nuit. Gérez vos
-              listes, vos événements et votre réseau depuis un tableau de bord
-              unique.
+              Le channel manager B2B des concierges et RP. TwoCards distribue
+              l&apos;inventaire des établissements, attribue chaque client et
+              automatise les commissions.
             </p>
           </div>
 

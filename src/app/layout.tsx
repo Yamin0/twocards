@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Manrope, Inter, Nunito } from "next/font/google";
+import { Manrope, Inter, Nunito, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 
 const manrope = Manrope({
@@ -11,7 +11,7 @@ const manrope = Manrope({
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  weight: ["400", "500", "600", "700"],
 });
 
 const nunito = Nunito({
@@ -20,9 +20,17 @@ const nunito = Nunito({
   weight: ["700", "800"],
 });
 
+const instrumentSerif = Instrument_Serif({
+  variable: "--font-instrument-serif",
+  subsets: ["latin"],
+  weight: "400",
+  style: ["normal", "italic"],
+});
+
 export const metadata: Metadata = {
-  title: "twocards. | CRM B2B pour les établissements de nuit",
-  description: "Gérez les listes d'invités, les réservations de tables et votre réseau de RP et concierges depuis un tableau de bord unique.",
+  title: "twocards. | Transformez chaque recommandation en réservation traçable",
+  description:
+    "TwoCards connecte les établissements aux concierges et RP vérifiés, synchronise les disponibilités et automatise l'attribution, les acomptes et les commissions.",
 };
 
 export default function RootLayout({
@@ -33,7 +41,7 @@ export default function RootLayout({
   return (
     <html
       lang="fr"
-      className={`${manrope.variable} ${inter.variable} ${nunito.variable} scroll-smooth`}
+      className={`${manrope.variable} ${inter.variable} ${nunito.variable} ${instrumentSerif.variable} scroll-smooth`}
     >
       <body>{children}</body>
     </html>
