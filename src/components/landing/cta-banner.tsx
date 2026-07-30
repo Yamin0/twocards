@@ -2,66 +2,52 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { GlassButton } from "@/components/ui/liquid-glass";
 
 export function CtaBanner() {
   return (
     <section
       id="contact"
-      className="bg-black px-8 py-24 md:px-28 md:py-32 font-[family-name:var(--font-inter)]"
+      className="relative flex min-h-[80vh] items-center justify-center overflow-hidden px-6 py-28 font-[family-name:var(--font-grotesk)]"
+      style={{
+        background: `url("https://images.unsplash.com/photo-1528605248644-14dd04022da1?q=80&w=2000&auto=format&fit=crop") center center / cover`,
+      }}
     >
+      <div className="absolute inset-0 bg-black/50" />
+
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-100px" }}
-        transition={{ duration: 0.6 }}
-        className="mx-auto flex max-w-3xl flex-col items-center text-center"
+        transition={{ duration: 0.7 }}
+        className="relative z-10 flex max-w-3xl flex-col items-center text-center"
       >
-        <div className="landing-glass mb-6 flex items-center gap-2 rounded-lg px-3 py-2">
-          <span className="rounded-md bg-white px-2 py-0.5 text-sm font-medium text-black">
-            Founding Circle
-          </span>
-          <span className="text-sm font-medium text-white/65">
-            Marrakech — places limitées
-          </span>
-        </div>
-
-        <h2 className="mb-4 text-4xl font-medium leading-tight tracking-[-1px] text-white md:text-6xl">
-          Digitalisez les relations qui{" "}
-          <span className="font-[family-name:var(--font-instrument-serif)] font-normal italic">
-            existent déjà
-          </span>
-          .
-        </h2>
-
-        <p
-          className="mb-8 max-w-xl text-lg leading-relaxed opacity-90"
-          style={{ color: "hsl(var(--hero-subtitle))" }}
-        >
-          Installation gratuite pendant le pilote, import de votre réseau
-          existant et rapport de performance hebdomadaire. Le payant ne commence
-          qu&apos;après la preuve du ROI.
+        <p className="mb-6 text-[11px] font-medium uppercase tracking-[0.28em] text-white/80">
+          Founding Circle — Marrakech, places limitées
         </p>
 
-        <div className="flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
-          <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
-            <Link
-              href="/signup"
-              className="inline-block rounded-full bg-white px-8 py-3.5 text-base font-medium text-black"
-            >
+        <h2 className="mb-6 font-[family-name:var(--font-display)] text-5xl font-normal leading-[1.1] text-white md:text-7xl">
+          Digitalisez les relations qui{" "}
+          <em className="italic">existent déjà</em>.
+        </h2>
+
+        <p className="mb-10 max-w-xl text-[15px] font-light leading-relaxed text-white/85">
+          Installation gratuite pendant le pilote, import de votre réseau
+          existant et rapport de performance hebdomadaire. Le payant ne
+          commence qu&apos;après la preuve du ROI.
+        </p>
+
+        <div className="flex flex-col items-center gap-6 sm:flex-row">
+          <GlassButton href="/signup">
+            <p className="text-base font-light tracking-wide text-white">
               Demander un accès
-            </Link>
-          </motion.div>
+            </p>
+          </GlassButton>
           <Link
             href="/signup?role=concierge"
-            className="group inline-flex items-center gap-2 text-sm font-semibold text-white/65 transition-colors hover:text-white"
+            className="text-[11px] font-medium uppercase tracking-[0.18em] text-white/80 underline decoration-white/30 underline-offset-4 transition-colors hover:text-white"
           >
             Je suis concierge / RP
-            <ArrowRight
-              size={16}
-              strokeWidth={2}
-              className="transition-transform group-hover:translate-x-1"
-            />
           </Link>
         </div>
       </motion.div>

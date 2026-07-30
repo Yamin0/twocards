@@ -1,5 +1,11 @@
 import type { Metadata } from "next";
-import { Manrope, Inter, Nunito, Instrument_Serif } from "next/font/google";
+import {
+  Manrope,
+  Inter,
+  Nunito,
+  Cormorant_Garamond,
+  Hanken_Grotesk,
+} from "next/font/google";
 import "./globals.css";
 
 const manrope = Manrope({
@@ -20,11 +26,17 @@ const nunito = Nunito({
   weight: ["700", "800"],
 });
 
-const instrumentSerif = Instrument_Serif({
-  variable: "--font-instrument-serif",
+const cormorant = Cormorant_Garamond({
+  variable: "--font-display",
   subsets: ["latin"],
-  weight: "400",
+  weight: ["400", "500", "600"],
   style: ["normal", "italic"],
+});
+
+const hankenGrotesk = Hanken_Grotesk({
+  variable: "--font-grotesk",
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600"],
 });
 
 export const metadata: Metadata = {
@@ -41,7 +53,7 @@ export default function RootLayout({
   return (
     <html
       lang="fr"
-      className={`${manrope.variable} ${inter.variable} ${nunito.variable} ${instrumentSerif.variable} scroll-smooth`}
+      className={`${manrope.variable} ${inter.variable} ${nunito.variable} ${cormorant.variable} ${hankenGrotesk.variable} scroll-smooth`}
     >
       <body>{children}</body>
     </html>

@@ -2,12 +2,11 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Building2, Handshake, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 const audiences = [
   {
     id: "etablissements",
-    icon: Building2,
     label: "Établissements",
     title: "Remplissez les bonnes tables.",
     accent: "Mesurez chaque apporteur.",
@@ -19,11 +18,13 @@ const audiences = [
       "Factures vérifiées et commissions calculées automatiquement",
       "Compatible avec vos outils existants, sans rien remplacer",
     ],
+    image:
+      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=1600&auto=format&fit=crop",
+    imageAlt: "Salle de restaurant élégante",
     cta: { label: "Rejoindre en tant qu'établissement", href: "/signup" },
   },
   {
     id: "concierges",
-    icon: Handshake,
     label: "Concierges & RP",
     title: "Confirmez vos clients plus vite.",
     accent: "Suivez tout votre argent.",
@@ -35,7 +36,13 @@ const audiences = [
       "Lien client sécurisé : confirmation, acompte et demandes spéciales",
       "Commission tracée dès l'origine, payée selon un calendrier fixe",
     ],
-    cta: { label: "Rejoindre en tant que concierge / RP", href: "/signup?role=concierge" },
+    image:
+      "https://images.unsplash.com/photo-1470337458703-46ad1756a187?q=80&w=1600&auto=format&fit=crop",
+    imageAlt: "Cocktail servi au bar",
+    cta: {
+      label: "Rejoindre en tant que concierge / RP",
+      href: "/signup?role=concierge",
+    },
   },
 ];
 
@@ -43,60 +50,62 @@ export function ValueProps() {
   return (
     <section
       id="solutions"
-      className="bg-black px-8 py-24 md:px-28 md:py-32 font-[family-name:var(--font-inter)]"
+      className="border-t border-black/[0.06] bg-[var(--landing-ivory)] px-6 py-24 md:px-16 md:py-32 font-[family-name:var(--font-grotesk)]"
     >
       <div className="mx-auto max-w-6xl">
-        <motion.h2
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.6 }}
-          className="mb-16 text-center text-4xl font-medium leading-tight tracking-[-1px] text-white md:text-5xl"
+          className="mb-20 text-center"
         >
-          Deux côtés du réseau.
-          <br />
-          Une seule{" "}
-          <span className="font-[family-name:var(--font-instrument-serif)] font-normal italic">
-            source de vérité
-          </span>
-          .
-        </motion.h2>
+          <p className="mb-3 text-[11px] font-medium uppercase tracking-[0.28em] text-[var(--landing-mute)]">
+            Deux côtés du réseau
+          </p>
+          <h2 className="font-[family-name:var(--font-display)] text-4xl font-normal leading-tight text-[var(--landing-ink)] md:text-6xl">
+            Une seule <em className="italic">source de vérité</em>.
+          </h2>
+        </motion.div>
 
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-16 md:grid-cols-2 md:gap-12">
           {audiences.map((audience, i) => (
-            <motion.div
+            <motion.article
               key={audience.id}
               id={audience.id}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-80px" }}
-              transition={{ duration: 0.6, delay: i * 0.15 }}
-              className="landing-glass flex flex-col rounded-2xl p-8 md:p-10"
+              transition={{ duration: 0.7, delay: i * 0.15 }}
+              className="flex flex-col"
             >
-              <div className="mb-6 flex items-center gap-3">
-                <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/10">
-                  <audience.icon size={20} strokeWidth={1.5} className="text-white" />
-                </span>
-                <span className="text-sm font-medium uppercase tracking-widest text-white/65">
-                  {audience.label}
-                </span>
+              <div className="mb-8 overflow-hidden">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={audience.image}
+                  alt={audience.imageAlt}
+                  className="aspect-[4/3] w-full object-cover transition-transform duration-700 hover:scale-[1.03]"
+                />
               </div>
 
-              <h3 className="mb-4 text-2xl font-medium leading-snug text-white md:text-3xl">
-                {audience.title}{" "}
-                <span className="font-[family-name:var(--font-instrument-serif)] font-normal italic">
-                  {audience.accent}
-                </span>
+              <p className="mb-4 text-[11px] font-medium uppercase tracking-[0.28em] text-[var(--landing-mute)]">
+                {audience.label}
+              </p>
+
+              <h3 className="mb-5 font-[family-name:var(--font-display)] text-3xl font-normal leading-snug text-[var(--landing-ink)] md:text-4xl">
+                {audience.title} <em className="italic">{audience.accent}</em>
               </h3>
 
-              <p className="mb-8 text-base leading-relaxed text-white/65">
+              <p className="mb-8 text-[15px] font-light leading-relaxed text-[var(--landing-ink)]/70">
                 {audience.description}
               </p>
 
-              <ul className="mb-10 flex flex-col gap-3">
+              <ul className="mb-10 flex flex-col">
                 {audience.points.map((point) => (
-                  <li key={point} className="flex items-start gap-3 text-sm leading-relaxed text-white/80">
-                    <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-white/60" />
+                  <li
+                    key={point}
+                    className="border-t border-black/[0.08] py-3.5 text-[14px] font-light leading-relaxed text-[var(--landing-ink)]/80 last:border-b"
+                  >
                     {point}
                   </li>
                 ))}
@@ -104,16 +113,16 @@ export function ValueProps() {
 
               <Link
                 href={audience.cta.href}
-                className="group mt-auto inline-flex items-center gap-2 text-sm font-semibold text-white"
+                className="group mt-auto inline-flex items-center gap-3 text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--landing-ink)]"
               >
                 {audience.cta.label}
                 <ArrowRight
-                  size={16}
-                  strokeWidth={2}
+                  size={14}
+                  strokeWidth={1.5}
                   className="transition-transform group-hover:translate-x-1"
                 />
               </Link>
-            </motion.div>
+            </motion.article>
           ))}
         </div>
       </div>

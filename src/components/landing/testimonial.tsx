@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef } from "react";
-import Image from "next/image";
 import { motion, useScroll, useTransform, MotionValue } from "framer-motion";
 
 const QUOTE =
@@ -20,15 +19,15 @@ function Word({
 }) {
   const start = index / total;
   const end = (index + 1) / total;
-  const opacity = useTransform(progress, [start, end], [0.2, 1]);
+  const opacity = useTransform(progress, [start, end], [0.25, 1]);
   const color = useTransform(
     progress,
     [start, end],
-    ["hsl(0 0% 35%)", "hsl(0 0% 100%)"]
+    ["hsl(40 8% 78%)", "hsl(0 0% 5%)"]
   );
 
   return (
-    <motion.span style={{ opacity, color }} className="mr-[0.3em]">
+    <motion.span style={{ opacity, color }} className="mr-[0.28em]">
       {word}
     </motion.span>
   );
@@ -44,16 +43,16 @@ export function Testimonial() {
   const words = QUOTE.split(" ");
 
   return (
-    <section className="flex min-h-screen items-center bg-black px-8 py-24 md:px-28 md:py-32 font-[family-name:var(--font-inter)]">
+    <section className="flex min-h-screen items-center bg-[var(--landing-ivory)] px-6 py-24 md:px-16 md:py-32">
       <div
         ref={containerRef}
-        className="mx-auto flex max-w-3xl flex-col items-start gap-10"
+        className="mx-auto flex max-w-3xl flex-col items-start gap-12"
       >
-        <span className="font-[family-name:var(--font-instrument-serif)] text-7xl italic leading-none text-white/40">
-          &ldquo;
-        </span>
+        <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-[var(--landing-mute)] font-[family-name:var(--font-grotesk)]">
+          Notre conviction
+        </p>
 
-        <p className="flex flex-wrap text-4xl font-medium leading-[1.2] md:text-5xl">
+        <p className="flex flex-wrap font-[family-name:var(--font-display)] text-[34px] font-normal leading-[1.25] md:text-[46px]">
           {words.map((word, i) => (
             <Word
               key={i}
@@ -63,24 +62,15 @@ export function Testimonial() {
               progress={scrollYProgress}
             />
           ))}
-          <span className="ml-2 text-white/65">&rdquo;</span>
         </p>
 
-        <div className="flex items-center gap-4">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full border-[3px] border-white bg-white/5">
-            <Image
-              src="/logo-cards-transp.png"
-              alt="twocards."
-              width={28}
-              height={28}
-              className="h-7 w-auto brightness-0 invert"
-            />
-          </div>
+        <div className="flex items-center gap-5 font-[family-name:var(--font-grotesk)]">
+          <span className="h-px w-12 bg-black/20" />
           <div>
-            <p className="text-base font-semibold leading-7 text-white">
+            <p className="text-sm font-medium text-[var(--landing-ink)]">
               La mission TwoCards
             </p>
-            <p className="text-sm font-normal leading-5 text-white/65">
+            <p className="text-[13px] font-light text-[var(--landing-mute)]">
               L&apos;infrastructure de la recommandation hospitality
             </p>
           </div>

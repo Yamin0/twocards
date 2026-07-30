@@ -2,10 +2,10 @@ import Link from "next/link";
 
 const footerLinks = {
   Produit: [
-    { label: "Fonctionnalités", href: "#features" },
+    { label: "Solutions", href: "#solutions" },
+    { label: "Établissements", href: "#etablissements" },
+    { label: "Concierges & RP", href: "#concierges" },
     { label: "Tarifs", href: "/signup" },
-    { label: "Le Registre", href: "/signup" },
-    { label: "Sécurité", href: "#" },
   ],
   Entreprise: [
     { label: "À propos", href: "#" },
@@ -23,18 +23,18 @@ const footerLinks = {
 
 export function Footer() {
   return (
-    <footer className="border-t border-white/[0.08]">
-      <div className="mx-auto max-w-7xl px-6 py-16 lg:px-12 lg:py-20">
+    <footer className="border-t border-black/[0.06] bg-[var(--landing-ivory)] text-[var(--landing-ink)] font-[family-name:var(--font-grotesk)]">
+      <div className="mx-auto max-w-6xl px-6 py-16 md:px-16 md:py-20">
         <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-4">
           {/* Brand column */}
           <div>
             <Link
               href="/"
-              className="font-[family-name:var(--font-nunito)] text-xl font-bold text-white"
+              className="font-[family-name:var(--font-display)] text-2xl font-medium tracking-tight"
             >
-              twocards<span className="text-blue-400">.</span>
+              twocards<span className="text-[var(--landing-mute)]">.</span>
             </Link>
-            <p className="mt-4 max-w-xs font-[family-name:var(--font-inter)] text-sm leading-relaxed text-white/40">
+            <p className="mt-4 max-w-xs text-[13px] font-light leading-relaxed text-[var(--landing-ink)]/60">
               Le channel manager B2B des concierges et RP. TwoCards distribue
               l&apos;inventaire des établissements, attribue chaque client et
               automatise les commissions.
@@ -44,15 +44,15 @@ export function Footer() {
           {/* Link columns */}
           {Object.entries(footerLinks).map(([title, links]) => (
             <div key={title}>
-              <p className="font-[family-name:var(--font-manrope)] text-xs font-semibold uppercase tracking-widest text-white/40">
+              <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-[var(--landing-mute)]">
                 {title}
               </p>
-              <ul className="mt-4 flex flex-col gap-3">
+              <ul className="mt-5 flex flex-col gap-3">
                 {links.map((link, i) => (
                   <li key={`${title}-${i}`}>
                     <Link
                       href={link.href}
-                      className="font-[family-name:var(--font-inter)] text-sm text-white/40 transition-colors hover:text-white"
+                      className="text-[13px] font-light text-[var(--landing-ink)]/60 transition-colors hover:text-[var(--landing-ink)]"
                     >
                       {link.label}
                     </Link>
@@ -65,14 +65,24 @@ export function Footer() {
       </div>
 
       {/* Copyright bar */}
-      <div className="border-t border-white/[0.06]">
-        <div className="mx-auto max-w-7xl px-6 py-6 lg:px-12 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="font-[family-name:var(--font-inter)] text-xs text-white/30">
+      <div className="border-t border-black/[0.06]">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 py-6 sm:flex-row md:px-16">
+          <p className="text-xs font-light text-[var(--landing-mute)]">
             &copy; {new Date().getFullYear()} twocards. Tous droits réservés.
           </p>
-          <div className="flex items-center gap-6 text-xs text-white/30">
-            <Link href="#features" className="hover:text-white/60 transition-colors">Solutions</Link>
-            <Link href="/signup" className="hover:text-white/60 transition-colors">Tarifs</Link>
+          <div className="flex items-center gap-6 text-xs font-light text-[var(--landing-mute)]">
+            <Link
+              href="#solutions"
+              className="transition-colors hover:text-[var(--landing-ink)]"
+            >
+              Solutions
+            </Link>
+            <Link
+              href="/signup"
+              className="transition-colors hover:text-[var(--landing-ink)]"
+            >
+              Tarifs
+            </Link>
           </div>
         </div>
       </div>

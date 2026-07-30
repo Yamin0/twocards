@@ -1,163 +1,197 @@
 "use client";
 
-import { useRef } from "react";
 import Link from "next/link";
-import Image from "next/image";
-import { ChevronDown } from "lucide-react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
+import {
+  CalendarCheck,
+  QrCode,
+  ReceiptText,
+  Percent,
+  Scale,
+} from "lucide-react";
+import { GlassEffect, GlassButton, GlassFilter } from "@/components/ui/liquid-glass";
 
 const navLinks = [
-  { label: "Accueil", href: "/" },
-  { label: "Solutions", href: "#solutions", chevron: true },
+  { label: "Solutions", href: "#solutions" },
   { label: "Établissements", href: "#etablissements" },
   { label: "Concierges & RP", href: "#concierges" },
   { label: "Contact", href: "#contact" },
 ];
 
+const modules = [
+  { icon: CalendarCheck, label: "Réservations" },
+  { icon: QrCode, label: "Check-in" },
+  { icon: ReceiptText, label: "Factures" },
+  { icon: Percent, label: "Commissions" },
+  { icon: Scale, label: "Litiges" },
+];
+
+const fadeUp = {
+  initial: { opacity: 0, y: 24 },
+  animate: { opacity: 1, y: 0 },
+};
+
 export function Hero() {
-  const sectionRef = useRef<HTMLElement>(null);
-
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start start", "end start"],
-  });
-
-  const contentY = useTransform(scrollYProgress, [0, 1], [0, -200]);
-  const contentOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
-  const dashboardY = useTransform(scrollYProgress, [0, 1], [0, -250]);
-
   return (
-    <section
-      ref={sectionRef}
-      className="relative min-h-screen overflow-hidden bg-black text-white font-[family-name:var(--font-inter)]"
-    >
+    <section className="relative overflow-hidden bg-[var(--landing-ivory)] text-[var(--landing-ink)] font-[family-name:var(--font-grotesk)]">
+      <GlassFilter />
+
       {/* Navbar */}
-      <header className="flex items-center justify-between px-8 md:px-28 py-4">
-        <div className="flex items-center gap-12 md:gap-20">
-          <Link href="/" className="flex items-center gap-2">
-            <Image
-              src="/logo-cards-transp.png"
-              alt="twocards."
-              width={28}
-              height={28}
-              className="h-7 w-auto brightness-0 invert"
-              priority
-            />
-            <span className="text-xl font-bold tracking-tight">
-              twocards<span className="text-white/60">.</span>
-            </span>
-          </Link>
-          <nav className="hidden items-center gap-1 md:flex">
-            {navLinks.map((link) => (
-              <Link
-                key={link.label}
-                href={link.href}
-                className="flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium text-white/65 transition-colors hover:text-white"
-              >
-                {link.label}
-                {link.chevron && <ChevronDown size={14} strokeWidth={2} />}
-              </Link>
-            ))}
-          </nav>
-        </div>
+      <header className="flex items-center justify-between border-b border-black/[0.06] px-6 py-5 md:px-16">
         <Link
-          href="/login"
-          className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-black transition-opacity hover:opacity-85"
+          href="/"
+          className="font-[family-name:var(--font-display)] text-[26px] font-medium leading-none tracking-tight"
         >
-          Connexion
+          twocards<span className="text-[var(--landing-mute)]">.</span>
         </Link>
+        <nav className="hidden items-center gap-8 md:flex">
+          {navLinks.map((link) => (
+            <Link
+              key={link.label}
+              href={link.href}
+              className="text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--landing-ink)]/60 transition-colors hover:text-[var(--landing-ink)]"
+            >
+              {link.label}
+            </Link>
+          ))}
+        </nav>
+        <div className="flex items-center gap-6">
+          <Link
+            href="/login"
+            className="hidden text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--landing-ink)]/60 transition-colors hover:text-[var(--landing-ink)] sm:block"
+          >
+            Connexion
+          </Link>
+          <Link
+            href="/signup"
+            className="rounded-full bg-[var(--landing-ink)] px-5 py-2.5 text-[13px] font-medium text-[var(--landing-ivory)] transition-opacity hover:opacity-80"
+          >
+            Demander un accès
+          </Link>
+        </div>
       </header>
 
-      {/* Hero content */}
-      <motion.div
-        style={{ y: contentY, opacity: contentOpacity }}
-        className="mt-16 md:mt-20 flex flex-col items-center px-4 text-center"
-      >
-        {/* Tag pill */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="landing-glass mb-6 flex items-center gap-2 rounded-lg px-3 py-2"
-        >
-          <span className="rounded-md bg-white px-2 py-0.5 text-sm font-medium text-black">
-            Nouveau
-          </span>
-          <span className="text-sm font-medium text-white/65">
-            TwoCards passe aux réservations traçables
-          </span>
-        </motion.div>
-
-        {/* Title */}
-        <motion.h1
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="mb-3 text-5xl font-medium leading-tight tracking-[-2px] md:text-7xl md:leading-[1.15] font-[family-name:var(--font-inter)]"
-        >
-          Chaque recommandation.
-          <br />
-          Une réservation{" "}
-          <span className="font-[family-name:var(--font-instrument-serif)] font-normal italic">
-            traçable
-          </span>
-          .
-        </motion.h1>
-
-        {/* Subtitle */}
+      {/* Hero editorial */}
+      <div className="mx-auto flex max-w-4xl flex-col items-center px-6 pb-20 pt-20 text-center md:pb-28 md:pt-28">
         <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="mb-8 text-lg font-normal leading-6 opacity-90"
-          style={{ color: "hsl(var(--hero-subtitle))" }}
+          {...fadeUp}
+          transition={{ duration: 0.6 }}
+          className="mb-8 text-[11px] font-medium uppercase tracking-[0.28em] text-[var(--landing-mute)]"
         >
-          TwoCards connecte les établissements aux concierges et RP vérifiés,
-          <br className="hidden sm:block" /> synchronise les disponibilités et
-          automatise l&apos;attribution, les acomptes et les commissions.
+          Le channel manager des concierges &amp; RP
         </motion.p>
 
-        {/* CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
+        <motion.h1
+          {...fadeUp}
+          transition={{ duration: 0.7, delay: 0.1 }}
+          className="mb-8 font-[family-name:var(--font-display)] text-[52px] font-normal leading-[1.06] tracking-[-0.01em] md:text-[84px]"
         >
-          <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
-            <Link
-              href="/signup"
-              className="inline-block rounded-full bg-white px-8 py-3.5 text-base font-medium text-black"
-            >
-              Commencer gratuitement
-            </Link>
-          </motion.div>
+          Chaque recommandation
+          <br />
+          devient une réservation{" "}
+          <em className="font-normal italic">traçable</em>.
+        </motion.h1>
+
+        <motion.p
+          {...fadeUp}
+          transition={{ duration: 0.7, delay: 0.2 }}
+          className="mb-10 max-w-xl text-[15px] font-light leading-relaxed text-[var(--landing-ink)]/70"
+        >
+          TwoCards connecte les établissements aux concierges et RP vérifiés,
+          synchronise les disponibilités et automatise l&apos;attribution, les
+          acomptes et les commissions.
+        </motion.p>
+
+        <motion.div
+          {...fadeUp}
+          transition={{ duration: 0.7, delay: 0.3 }}
+          className="flex flex-col items-center gap-5 sm:flex-row"
+        >
+          <Link
+            href="/signup"
+            className="rounded-full bg-[var(--landing-ink)] px-8 py-3.5 text-[14px] font-medium text-[var(--landing-ivory)] transition-opacity hover:opacity-80"
+          >
+            Commencer gratuitement
+          </Link>
+          <Link
+            href="/signup?role=concierge"
+            className="text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--landing-ink)]/60 underline decoration-black/20 underline-offset-4 transition-colors hover:text-[var(--landing-ink)]"
+          >
+            Je suis concierge / RP
+          </Link>
         </motion.div>
+      </div>
+
+      {/* Photo band + liquid glass */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1, delay: 0.4 }}
+        className="relative flex min-h-[70vh] w-full flex-col items-center justify-center gap-8 overflow-hidden px-6 py-24"
+        style={{
+          background: `url("https://images.unsplash.com/photo-1414235077428-338989a2e8c0?q=80&w=2000&auto=format&fit=crop") center center / cover`,
+          animation: "moveBackground 120s linear infinite",
+        }}
+      >
+        <div className="absolute inset-0 bg-black/35" />
+
+        <div className="relative z-10 flex flex-col items-center gap-8">
+          <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-white/80">
+            Une seule plateforme, de la demande au paiement
+          </p>
+
+          {/* Glass dock of modules */}
+          <GlassEffect className="rounded-3xl p-2">
+            <div className="flex items-center gap-1 p-2 sm:gap-2">
+              {modules.map((module) => (
+                <div
+                  key={module.label}
+                  className="flex w-[72px] flex-col items-center gap-2 rounded-2xl px-1 py-3 transition-all duration-500 hover:scale-110 sm:w-24 sm:px-3"
+                  style={{
+                    transitionTimingFunction:
+                      "cubic-bezier(0.175, 0.885, 0.32, 2.2)",
+                  }}
+                >
+                  <module.icon
+                    size={26}
+                    strokeWidth={1.25}
+                    className="text-white"
+                  />
+                  <span className="text-[9px] font-medium uppercase tracking-[0.12em] text-white/90 sm:text-[10px]">
+                    {module.label}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </GlassEffect>
+
+          <GlassButton href="/signup">
+            <p className="text-base font-light tracking-wide text-white">
+              Découvrir TwoCards
+            </p>
+          </GlassButton>
+        </div>
       </motion.div>
 
-      {/* Dashboard + video area */}
-      <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 0.4 }}
-        className="relative mt-12 w-screen"
-        style={{ marginLeft: "calc(-50vw + 50%)", aspectRatio: "16/9" }}
-      >
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="absolute inset-0 h-full w-full object-cover"
-          src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260307_083826_e938b29f-a43a-41ec-a153-3d4730578ab8.mp4"
-        />
-        <motion.img
-          src="/dashboard-preview-v2.png"
-          alt="Dashboard TwoCards"
-          style={{ y: dashboardY, mixBlendMode: "luminosity" }}
-          className="absolute left-1/2 top-1/2 z-20 w-[90%] max-w-5xl -translate-x-1/2 -translate-y-1/2 rounded-2xl"
-        />
-        <div className="pointer-events-none absolute bottom-0 left-0 right-0 z-30 h-40 bg-gradient-to-t from-black to-transparent" />
-      </motion.div>
+      {/* Product frame */}
+      <div className="border-b border-black/[0.06] px-6 py-20 md:px-16 md:py-28">
+        <div className="mx-auto max-w-5xl">
+          <p className="mb-3 text-center text-[11px] font-medium uppercase tracking-[0.28em] text-[var(--landing-mute)]">
+            Le produit
+          </p>
+          <h2 className="mx-auto mb-12 max-w-2xl text-center font-[family-name:var(--font-display)] text-4xl font-normal leading-tight md:text-5xl">
+            Qui remplit vos tables,
+            <br />
+            <em className="italic">noir sur blanc</em>.
+          </h2>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/dashboard-preview-v2.png"
+            alt="Dashboard TwoCards"
+            className="w-full rounded-lg border border-black/10 shadow-[0_30px_80px_-40px_rgba(13,13,13,0.35)]"
+          />
+        </div>
+      </div>
     </section>
   );
 }

@@ -7,7 +7,7 @@ import { Footer } from "@/components/layout/footer";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-[var(--landing-ivory)] text-[var(--landing-ink)]">
       <main>
         <Hero />
         <Testimonial />
@@ -15,9 +15,7 @@ export default function Home() {
         <Journey />
         <CtaBanner />
       </main>
-      <div className="bg-black">
-        <Footer />
-      </div>
+      <Footer />
     </div>
   );
 }
