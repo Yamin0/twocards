@@ -8,16 +8,14 @@ const footerLinks = {
     { label: "Influenceurs", href: "/influenceurs" },
   ],
   Entreprise: [
-    { label: "À propos", href: "#" },
-    { label: "Blog", href: "#" },
-    { label: "Carrière", href: "#" },
-    { label: "Contact", href: "#contact" },
+    { label: "Founding Circle", href: "/#contact" },
+    { label: "Connexion", href: "/login" },
+    { label: "Demander un accès", href: "/signup" },
   ],
   Juridique: [
-    { label: "Mentions légales", href: "#" },
-    { label: "Politique de confidentialité", href: "#" },
-    { label: "CGU", href: "#" },
-    { label: "Cookies", href: "#" },
+    { label: "Mentions légales", href: "/legal/mentions-legales" },
+    { label: "Politique de confidentialité", href: "/legal/confidentialite" },
+    { label: "CGU", href: "/legal/cgu" },
   ],
 };
 
@@ -72,16 +70,16 @@ export function Footer() {
           </p>
           <div className="flex items-center gap-6 text-xs font-normal text-[var(--landing-mute)]">
             <Link
-              href="#solutions"
+              href="/legal/mentions-legales"
               className="transition-colors hover:text-[var(--landing-ink)]"
             >
-              Solutions
+              Mentions légales
             </Link>
             <Link
-              href="/signup"
+              href="/#contact"
               className="transition-colors hover:text-[var(--landing-ink)]"
             >
-              Tarifs
+              Contact
             </Link>
           </div>
         </div>

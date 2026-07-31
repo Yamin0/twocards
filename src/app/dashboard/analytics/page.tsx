@@ -157,7 +157,7 @@ export default function AnalyticsPage() {
     <div className="space-y-6">
       {/* Header Glass Card */}
       <div>
-        <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl p-8">
+        <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-8">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
             <div>
               <h1 className="text-white font-[family-name:var(--font-manrope)] font-extrabold text-3xl tracking-tight">
@@ -169,7 +169,7 @@ export default function AnalyticsPage() {
             </div>
 
             {/* Period Selector */}
-            <div className="flex gap-1 backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-2xl p-1">
+            <div className="flex gap-1 backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl p-1">
               {periodTabs.map((tab) => (
                 <button
                   key={tab}
@@ -193,7 +193,7 @@ export default function AnalyticsPage() {
         {statsData.map((stat, i) => (
           <div
             key={i}
-            className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-2xl p-5"
+            className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl p-5"
           >
             <span className="text-white/40 font-[family-name:var(--font-manrope)] text-[10px] uppercase tracking-[0.12em] font-bold">
               {stat.label}
@@ -208,7 +208,7 @@ export default function AnalyticsPage() {
       {/* Charts Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Couverts par jour */}
-        <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl p-6">
+        <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
           <h3 className="text-white font-[family-name:var(--font-manrope)] font-bold text-sm mb-6">
             Couverts par jour
           </h3>
@@ -234,7 +234,7 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Revenus par semaine */}
-        <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl p-6">
+        <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
           <h3 className="text-white font-[family-name:var(--font-manrope)] font-bold text-sm mb-6">
             Revenus par semaine
           </h3>
@@ -262,7 +262,7 @@ export default function AnalyticsPage() {
 
       {/* RP Performance Table */}
       <div>
-        <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl overflow-hidden">
+        <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl overflow-hidden">
           <div className="px-6 py-5">
             <h3 className="text-white font-[family-name:var(--font-manrope)] font-bold text-sm">
               Performance des RP
@@ -329,7 +329,7 @@ export default function AnalyticsPage() {
       {/* Bottom Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Meilleurs Evenements */}
-        <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl p-6">
+        <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
           <h3 className="text-white font-[family-name:var(--font-manrope)] font-bold text-sm mb-5">
             Meilleurs \u00c9v\u00e9nements
           </h3>
@@ -356,7 +356,7 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Repartition des Reservations */}
-        <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl p-6">
+        <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
           <h3 className="text-white font-[family-name:var(--font-manrope)] font-bold text-sm mb-5">
             R\u00e9partition des R\u00e9servations
           </h3>
@@ -430,7 +430,7 @@ export default function AnalyticsPage() {
         </button>
         <button
           onClick={handleExportCSV}
-          className="flex items-center gap-2 px-5 py-2.5 backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] text-white/80 rounded-xl text-sm font-medium hover:bg-white/[0.12] hover:text-white transition-colors"
+          className="flex items-center gap-2 px-5 py-2.5 backdrop-blur-2xl bg-black/45 border border-white/[0.12] text-white/80 rounded-xl text-sm font-medium hover:bg-white/[0.12] hover:text-white transition-colors"
         >
           <Download size={16} strokeWidth={1.5} />
           T\u00e9l\u00e9charger CSV

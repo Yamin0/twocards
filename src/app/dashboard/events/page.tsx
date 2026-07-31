@@ -777,7 +777,7 @@ export default function EventsPage() {
   return (
     <div className="space-y-6">
       {/* ── Header ── */}
-      <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl p-6">
+      <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-white font-[family-name:var(--font-manrope)]">Événements</h1>
@@ -801,19 +801,19 @@ export default function EventsPage() {
       {/* ── Stats strip ── */}
       {isDemoVenue && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-2xl p-4">
+          <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl p-4">
             <p className="text-white/40 text-xs">Événements actifs</p>
             <p className="text-xl font-bold text-white mt-1 font-[family-name:var(--font-manrope)]">{activeEvents}</p>
           </div>
-          <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-2xl p-4">
+          <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl p-4">
             <p className="text-white/40 text-xs">Réservations totales</p>
             <p className="text-xl font-bold text-blue-400 mt-1 font-[family-name:var(--font-manrope)]">{totalReservations}</p>
           </div>
-          <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-2xl p-4">
+          <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl p-4">
             <p className="text-white/40 text-xs">RP mobilisés</p>
             <p className="text-xl font-bold text-white mt-1 font-[family-name:var(--font-manrope)]">{totalRp}</p>
           </div>
-          <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-2xl p-4">
+          <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl p-4">
             <p className="text-white/40 text-xs">Taux de remplissage moy.</p>
             <p className="text-xl font-bold text-green-400 mt-1 font-[family-name:var(--font-manrope)]">{avgFill}%</p>
           </div>
@@ -825,10 +825,10 @@ export default function EventsPage() {
         <div className="relative flex-1 min-w-[200px] max-w-sm">
           <Search size={15} strokeWidth={1.5} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
           <input type="text" placeholder="Rechercher un événement..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-xl text-sm text-white placeholder:text-white/25 focus:outline-none focus:border-blue-400/40 transition-colors" />
+            className="w-full pl-9 pr-4 py-2.5 backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-xl text-sm text-white placeholder:text-white/25 focus:outline-none focus:border-blue-400/40 transition-colors" />
         </div>
         <div className="relative">
-          <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="appearance-none pl-4 pr-9 py-2.5 backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-xl text-sm text-white/70 focus:outline-none focus:border-blue-400/40 transition-colors cursor-pointer">
+          <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="appearance-none pl-4 pr-9 py-2.5 backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-xl text-sm text-white/70 focus:outline-none focus:border-blue-400/40 transition-colors cursor-pointer">
             <option value="" className="bg-[#1a1a2e]">Tous les statuts</option>
             <option value="Ouvert" className="bg-[#1a1a2e]">Ouvert</option>
             <option value="Fermé" className="bg-[#1a1a2e]">Fermé</option>
@@ -840,13 +840,13 @@ export default function EventsPage() {
 
       {/* ── Content ── */}
       {filteredEvents.length === 0 && viewMode !== "calendar" ? (
-        <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl p-12 text-center">
+        <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-12 text-center">
           <Ticket size={36} strokeWidth={1} className="mx-auto text-white/15 mb-3" />
           <p className="text-sm text-white/30">Aucun événement trouvé</p>
         </div>
       ) : viewMode === "calendar" ? (
         /* ── Calendar view ── */
-        <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl overflow-hidden">
+        <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl overflow-hidden">
           <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.08]">
             <button onClick={() => { if (calMonth === 0) { setCalMonth(11); setCalYear(calYear - 1); } else setCalMonth(calMonth - 1); }} className="p-2 rounded-xl text-white/40 hover:text-white hover:bg-white/[0.08] transition-all">
               <ChevronLeft size={18} strokeWidth={1.5} />
@@ -885,7 +885,7 @@ export default function EventsPage() {
         </div>
       ) : viewMode === "list" ? (
         /* ── List view ── */
-        <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl overflow-hidden">
+        <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl overflow-hidden">
           <div className="grid grid-cols-12 gap-4 px-5 py-3 border-b border-white/[0.08] text-[0.6875rem] text-white/30 uppercase tracking-wider font-semibold">
             <div className="col-span-4">Événement</div>
             <div className="col-span-2 hidden md:block">Date & Heure</div>
@@ -954,7 +954,7 @@ export default function EventsPage() {
             const fillPercent = Math.round(((event.totalSpots - event.spots) / event.totalSpots) * 100);
             const Icon = ICONS[event.iconIdx] ?? Sparkles;
             return (
-              <div key={event.id} className={`group backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl overflow-hidden hover:bg-white/[0.09] transition-all duration-300 ${event.closed ? "opacity-50" : ""}`}>
+              <div key={event.id} className={`group backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl overflow-hidden hover:bg-white/[0.09] transition-all duration-300 ${event.closed ? "opacity-50" : ""}`}>
                 <div className={`relative h-32 overflow-hidden cursor-pointer ${!event.coverImage ? `bg-gradient-to-br ${event.gradient}` : ""}`} onClick={() => openView(event.id)}>
                   {event.coverImage ? (
                     <>

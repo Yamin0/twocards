@@ -105,20 +105,20 @@ export default function ConciergeClientsPage() {
   if (isLoading) return <ConciergeSkeleton />;
 
   return (
-    <div className="bg-surface min-h-screen">
+    <div className="bg-transparent min-h-screen">
       {/* Header */}
       <div className="px-4 sm:px-6 pt-6 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold text-on-background font-[family-name:var(--font-manrope)]">
+          <h1 className="text-xl font-bold text-white font-[family-name:var(--font-manrope)]">
             Carnet de contacts
           </h1>
-          <p className="text-sm text-on-surface-variant font-[family-name:var(--font-inter)] mt-0.5">
+          <p className="text-sm text-white/60 font-[family-name:var(--font-inter)] mt-0.5">
             {clients.length} clients &middot; {clients.filter((c) => c.vip).length} VIP
           </p>
         </div>
         <button
           onClick={() => setShowNewClient(true)}
-          className="flex items-center gap-2 bg-primary text-white text-sm font-medium px-4 py-2.5 rounded-lg hover:opacity-90 transition-opacity font-[family-name:var(--font-inter)]"
+          className="flex items-center gap-2 bg-white/15 text-white text-sm font-medium px-4 py-2.5 rounded-lg hover:opacity-90 transition-opacity font-[family-name:var(--font-inter)]"
         >
           <Plus size={16} strokeWidth={1.5} />
           Nouveau client
@@ -131,14 +131,14 @@ export default function ConciergeClientsPage() {
           <Search
             size={16}
             strokeWidth={1.5}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/50"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60/50"
           />
           <input
             type="text"
             placeholder="Rechercher par nom ou téléphone..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 text-sm bg-white border border-outline-variant/20 rounded-lg text-on-background placeholder:text-on-surface-variant/50 font-[family-name:var(--font-inter)] focus:ring-1 focus:ring-primary/30 focus:border-primary/30 focus:outline-none transition-colors"
+            className="w-full pl-9 pr-4 py-2 text-sm bg-white/[0.07] border border-white/10/20 rounded-lg text-white placeholder:text-white/60/50 font-[family-name:var(--font-inter)] focus:ring-1 focus:ring-white/30/30 focus:border-primary/30 focus:outline-none transition-colors"
           />
         </div>
         <div className="flex items-center gap-2 overflow-x-auto">
@@ -148,8 +148,8 @@ export default function ConciergeClientsPage() {
               onClick={() => setFilterTag(tag)}
               className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors font-[family-name:var(--font-inter)] ${
                 filterTag === tag
-                  ? "bg-primary text-white"
-                  : "bg-white border border-outline-variant/20 text-on-surface-variant hover:bg-surface-low"
+                  ? "bg-white/15 text-white"
+                  : "bg-white/[0.07] border border-white/10/20 text-white/60 hover:bg-white/[0.05]"
               }`}
             >
               {tag === "tous" ? "Tous" : tag}
@@ -160,27 +160,27 @@ export default function ConciergeClientsPage() {
 
       {/* Client list - table style */}
       <div className="px-4 sm:px-6 pb-8">
-        <div className="bg-white rounded-xl border border-outline-variant/10 overflow-hidden">
+        <div className="bg-white/[0.07] rounded-xl border border-white/10/10 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-outline-variant/10">
-                  <th className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/60 font-[family-name:var(--font-inter)]">
+                <tr className="border-b border-white/10/10">
+                  <th className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-[family-name:var(--font-inter)]">
                     Client
                   </th>
-                  <th className="hidden sm:table-cell text-left px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/60 font-[family-name:var(--font-inter)]">
+                  <th className="hidden sm:table-cell text-left px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-[family-name:var(--font-inter)]">
                     Contact
                   </th>
-                  <th className="text-center px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/60 font-[family-name:var(--font-inter)]">
+                  <th className="text-center px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-[family-name:var(--font-inter)]">
                     Visites
                   </th>
-                  <th className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/60 font-[family-name:var(--font-inter)]">
+                  <th className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-[family-name:var(--font-inter)]">
                     Dépenses
                   </th>
-                  <th className="hidden sm:table-cell text-center px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/60 font-[family-name:var(--font-inter)]">
+                  <th className="hidden sm:table-cell text-center px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-[family-name:var(--font-inter)]">
                     Grp. moy.
                   </th>
-                  <th className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/60 font-[family-name:var(--font-inter)]">
+                  <th className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-[family-name:var(--font-inter)]">
                     Tags
                   </th>
                   <th className="w-10 px-4 py-3" />
@@ -190,14 +190,14 @@ export default function ConciergeClientsPage() {
                 {filtered.map((client, i) => (
                   <tr
                     key={client.id}
-                    className={`border-b border-outline-variant/5 hover:bg-surface-low/50 transition-colors ${
-                      i % 2 === 0 ? "" : "bg-surface/30"
+                    className={`border-b border-white/10/5 hover:bg-white/[0.05]/50 transition-colors ${
+                      i % 2 === 0 ? "" : "bg-transparent/30"
                     }`}
                   >
                     <td className="px-4 py-3.5">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-primary-container flex items-center justify-center shrink-0">
-                          <span className="text-xs font-bold text-on-primary-container font-[family-name:var(--font-manrope)]">
+                        <div className="w-9 h-9 rounded-full bg-white/15 flex items-center justify-center shrink-0">
+                          <span className="text-xs font-bold text-white/70 font-[family-name:var(--font-manrope)]">
                             {client.name
                               .split(" ")
                               .map((n) => n[0])
@@ -206,7 +206,7 @@ export default function ConciergeClientsPage() {
                         </div>
                         <div>
                           <div className="flex items-center gap-1.5">
-                            <span className="font-semibold text-on-background font-[family-name:var(--font-manrope)]">
+                            <span className="font-semibold text-white font-[family-name:var(--font-manrope)]">
                               {client.name}
                             </span>
                             {client.vip && (
@@ -217,7 +217,7 @@ export default function ConciergeClientsPage() {
                               />
                             )}
                           </div>
-                          <p className="text-[11px] text-on-surface-variant/60 font-[family-name:var(--font-inter)]">
+                          <p className="text-[11px] text-white/60/60 font-[family-name:var(--font-inter)]">
                             Dernier : {client.lastVisit}
                           </p>
                         </div>
@@ -227,7 +227,7 @@ export default function ConciergeClientsPage() {
                       <div className="flex items-center gap-3">
                         <a
                           href={`tel:${client.phone}`}
-                          className="flex items-center gap-1 text-xs text-on-surface-variant hover:text-primary transition-colors"
+                          className="flex items-center gap-1 text-xs text-white/60 hover:text-white transition-colors"
                         >
                           <Phone size={12} strokeWidth={1.5} />
                           {client.phone}
@@ -235,17 +235,17 @@ export default function ConciergeClientsPage() {
                       </div>
                     </td>
                     <td className="px-4 py-3.5 text-center">
-                      <span className="font-bold text-on-background font-[family-name:var(--font-manrope)]">
+                      <span className="font-bold text-white font-[family-name:var(--font-manrope)]">
                         {client.visits}
                       </span>
                     </td>
                     <td className="px-4 py-3.5">
-                      <span className="font-semibold text-on-background font-[family-name:var(--font-manrope)]">
+                      <span className="font-semibold text-white font-[family-name:var(--font-manrope)]">
                         {client.totalSpent}
                       </span>
                     </td>
                     <td className="hidden sm:table-cell px-4 py-3.5 text-center">
-                      <span className="text-on-surface-variant font-[family-name:var(--font-inter)]">
+                      <span className="text-white/60 font-[family-name:var(--font-inter)]">
                         {client.avgGroup}
                       </span>
                     </td>
@@ -261,7 +261,7 @@ export default function ConciergeClientsPage() {
                                 ? "bg-emerald-100 text-emerald-800"
                                 : tag === "Nouveau"
                                 ? "bg-blue-100 text-blue-800"
-                                : "bg-surface-low text-on-surface-variant"
+                                : "bg-white/[0.05] text-white/60"
                             }`}
                           >
                             {tag}
@@ -272,29 +272,29 @@ export default function ConciergeClientsPage() {
                     <td className="px-4 py-3.5 relative">
                       <button
                         onClick={() => setMenuOpen(menuOpen === client.id ? null : client.id)}
-                        className="p-1 rounded-lg text-on-surface-variant/40 hover:text-on-surface-variant hover:bg-surface-low transition-colors"
+                        className="p-1 rounded-lg text-white/60/40 hover:text-white/60 hover:bg-white/[0.05] transition-colors"
                       >
                         <MoreHorizontal size={16} strokeWidth={1.5} />
                       </button>
                       {menuOpen === client.id && (
                         <>
                           <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(null)} />
-                          <div className="absolute right-4 top-10 z-50 w-44 bg-white rounded-lg border border-outline-variant/10 shadow-lg py-1">
+                          <div className="absolute right-4 top-10 z-50 w-44 bg-white/[0.07] rounded-lg border border-white/10/10 shadow-lg py-1">
                             <button
                               onClick={() => handleMenuAction("vip", client.name)}
-                              className="w-full text-left px-4 py-2 text-sm text-on-background hover:bg-surface-low transition-colors"
+                              className="w-full text-left px-4 py-2 text-sm text-white hover:bg-white/[0.05] transition-colors"
                             >
                               {client.vip ? "Retirer VIP" : "Marquer VIP"}
                             </button>
                             <button
                               onClick={() => handleMenuAction("call", client.name)}
-                              className="w-full text-left px-4 py-2 text-sm text-on-background hover:bg-surface-low transition-colors"
+                              className="w-full text-left px-4 py-2 text-sm text-white hover:bg-white/[0.05] transition-colors"
                             >
                               Appeler
                             </button>
                             <button
                               onClick={() => handleMenuAction("email", client.name)}
-                              className="w-full text-left px-4 py-2 text-sm text-on-background hover:bg-surface-low transition-colors"
+                              className="w-full text-left px-4 py-2 text-sm text-white hover:bg-white/[0.05] transition-colors"
                             >
                               Envoyer un email
                             </button>
@@ -306,7 +306,7 @@ export default function ConciergeClientsPage() {
                 ))}
                 {filtered.length === 0 && (
                   <tr>
-                    <td colSpan={7} className="px-4 py-12 text-center text-sm text-on-surface-variant">
+                    <td colSpan={7} className="px-4 py-12 text-center text-sm text-white/60">
                       Aucun client trouvé
                     </td>
                   </tr>
@@ -320,21 +320,21 @@ export default function ConciergeClientsPage() {
       {/* New Client Modal */}
       {showNewClient && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6">
+          <div className="bg-white/[0.07] rounded-xl shadow-xl w-full max-w-md mx-4 p-6">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-lg font-bold text-on-background font-[family-name:var(--font-manrope)]">
+              <h2 className="text-lg font-bold text-white font-[family-name:var(--font-manrope)]">
                 Nouveau client
               </h2>
               <button
                 onClick={() => setShowNewClient(false)}
-                className="p-1 rounded-lg text-on-surface-variant hover:text-on-background hover:bg-surface-low transition-colors"
+                className="p-1 rounded-lg text-white/60 hover:text-white hover:bg-white/[0.05] transition-colors"
               >
                 <X size={18} strokeWidth={1.5} />
               </button>
             </div>
             <form onSubmit={handleAddClient} className="space-y-4">
               <div>
-                <label className="block text-xs font-medium text-on-surface-variant mb-1 font-[family-name:var(--font-inter)]">
+                <label className="block text-xs font-medium text-white/60 mb-1 font-[family-name:var(--font-inter)]">
                   Nom complet *
                 </label>
                 <input
@@ -342,12 +342,12 @@ export default function ConciergeClientsPage() {
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
                   placeholder="Ex: Mohamed Tazi"
-                  className="w-full px-3 py-2 text-sm bg-surface-low border-none rounded-lg text-on-background placeholder:text-on-surface-variant/50 font-[family-name:var(--font-inter)] focus:ring-1 focus:ring-primary/30 focus:outline-none"
+                  className="w-full px-3 py-2 text-sm bg-white/[0.05] border-none rounded-lg text-white placeholder:text-white/60/50 font-[family-name:var(--font-inter)] focus:ring-1 focus:ring-white/30/30 focus:outline-none"
                   required
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-on-surface-variant mb-1 font-[family-name:var(--font-inter)]">
+                <label className="block text-xs font-medium text-white/60 mb-1 font-[family-name:var(--font-inter)]">
                   Téléphone
                 </label>
                 <input
@@ -355,11 +355,11 @@ export default function ConciergeClientsPage() {
                   value={newPhone}
                   onChange={(e) => setNewPhone(e.target.value)}
                   placeholder="+212 6 XX XX XX XX"
-                  className="w-full px-3 py-2 text-sm bg-surface-low border-none rounded-lg text-on-background placeholder:text-on-surface-variant/50 font-[family-name:var(--font-inter)] focus:ring-1 focus:ring-primary/30 focus:outline-none"
+                  className="w-full px-3 py-2 text-sm bg-white/[0.05] border-none rounded-lg text-white placeholder:text-white/60/50 font-[family-name:var(--font-inter)] focus:ring-1 focus:ring-white/30/30 focus:outline-none"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-on-surface-variant mb-1 font-[family-name:var(--font-inter)]">
+                <label className="block text-xs font-medium text-white/60 mb-1 font-[family-name:var(--font-inter)]">
                   Email
                 </label>
                 <input
@@ -367,12 +367,12 @@ export default function ConciergeClientsPage() {
                   value={newEmail}
                   onChange={(e) => setNewEmail(e.target.value)}
                   placeholder="email@example.com"
-                  className="w-full px-3 py-2 text-sm bg-surface-low border-none rounded-lg text-on-background placeholder:text-on-surface-variant/50 font-[family-name:var(--font-inter)] focus:ring-1 focus:ring-primary/30 focus:outline-none"
+                  className="w-full px-3 py-2 text-sm bg-white/[0.05] border-none rounded-lg text-white placeholder:text-white/60/50 font-[family-name:var(--font-inter)] focus:ring-1 focus:ring-white/30/30 focus:outline-none"
                 />
               </div>
               <button
                 type="submit"
-                className="w-full bg-primary text-white text-sm font-medium py-2.5 rounded-lg hover:opacity-90 transition-opacity"
+                className="w-full bg-white/15 text-white text-sm font-medium py-2.5 rounded-lg hover:opacity-90 transition-opacity"
               >
                 Ajouter le client
               </button>
@@ -383,7 +383,7 @@ export default function ConciergeClientsPage() {
 
       {/* Toast */}
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-primary-dark text-white px-4 py-3 rounded-md shadow-lg">
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-white/15-dark text-white px-4 py-3 rounded-md shadow-lg">
           <Check size={16} strokeWidth={2} />
           <span className="text-sm font-medium">{toast}</span>
         </div>

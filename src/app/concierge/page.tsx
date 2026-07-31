@@ -16,6 +16,7 @@ import {
   Search,
   Bell,
   Plus,
+  Sparkles,
 } from "lucide-react";
 
 const folders = [
@@ -67,6 +68,14 @@ const folders = [
     iconColor: "text-sky-400",
     preview: ["4 établissements actifs", "Le Comptoir, Sky Bar, Le Lotus..."],
   },
+  {
+    label: "Assistant IA",
+    description: "Votre assistant intelligent twocards",
+    href: "/concierge/ai",
+    icon: Sparkles,
+    iconColor: "text-blue-400",
+    preview: ["Créer des réservations par commande", "Résumé de soirée automatique"],
+  },
 ];
 
 const DEMO_STATS = [
@@ -110,7 +119,7 @@ export default function ConciergePage() {
   return (
     <div className="space-y-6">
       {/* Header Card */}
-      <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl p-6">
+      <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-white font-[family-name:var(--font-manrope)]">
@@ -147,7 +156,7 @@ export default function ConciergePage() {
             return (
               <div
                 key={stat.label}
-                className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl p-5 transition-all duration-500 hover:scale-[1.02] hover:bg-white/[0.1]"
+                className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-5 transition-all duration-500 hover:scale-[1.02] hover:bg-white/[0.1]"
               >
                 <div className="flex items-center justify-between">
                   <div>
@@ -167,8 +176,31 @@ export default function ConciergePage() {
         </div>
       )}
 
+      {/* Recent Activity */}
+      {isDemoConcierge && (
+        <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
+          <h2 className="text-lg font-semibold text-white font-[family-name:var(--font-manrope)] mb-4">
+            Activité récente
+          </h2>
+          <div className="space-y-3">
+            {[
+              { text: "Réservation confirmée — Famille Tazi, 6 pers. au Comptoir", time: "Il y a 12 min", color: "bg-green-400" },
+              { text: "Commission versée — 9 820 MAD (Le Comptoir, Mars)", time: "Il y a 2h", color: "bg-amber-400" },
+              { text: "Nouveau client ajouté — Sarah Bennis (VIP)", time: "Il y a 5h", color: "bg-blue-400" },
+              { text: "No-show déclaré — Réda F. au Sky Bar", time: "Hier", color: "bg-red-400" },
+            ].map((a, i) => (
+              <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] transition-colors">
+                <div className={`w-2 h-2 rounded-full ${a.color} shrink-0`} />
+                <p className="text-sm text-white/60 font-[family-name:var(--font-inter)] flex-1">{a.text}</p>
+                <span className="text-xs text-white/25 shrink-0">{a.time}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Folder Cards */}
-      <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl p-6">
+      <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-xl font-semibold text-white font-[family-name:var(--font-manrope)]">

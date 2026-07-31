@@ -23,33 +23,33 @@ export default function ConciergeVenuesPage() {
   if (isLoading) return <ConciergeSkeleton />;
 
   return (
-    <div className="bg-surface min-h-screen">
+    <div className="bg-transparent min-h-screen">
       <div className="px-8 pt-8 pb-6">
-        <h1 className="text-primary-dark font-[family-name:var(--font-manrope)] text-2xl font-extrabold">
+        <h1 className="text-white font-[family-name:var(--font-manrope)] text-2xl font-extrabold">
           Mes établissements
         </h1>
-        <p className="text-on-surface-variant mt-1 text-sm">
+        <p className="text-white/60 mt-1 text-sm">
           Les établissements avec lesquels vous travaillez.
         </p>
       </div>
 
       <div className="px-8 pb-8 grid grid-cols-1 md:grid-cols-2 gap-4">
         {venues.map((venue) => (
-          <div key={venue.id} className="bg-surface-card rounded-md editorial-shadow overflow-hidden hover:-translate-y-0.5 transition-transform group">
+          <div key={venue.id} className="bg-white/[0.07] rounded-md editorial-shadow overflow-hidden hover:-translate-y-0.5 transition-transform group">
             <div className="p-6">
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-[family-name:var(--font-manrope)] font-bold text-lg text-on-background">
+                    <h3 className="font-[family-name:var(--font-manrope)] font-bold text-lg text-white">
                       {venue.name}
                     </h3>
                     {!venue.active && (
-                      <span className="text-[0.625rem] font-semibold px-2 py-0.5 rounded-full bg-surface-mid text-on-surface-variant">
+                      <span className="text-[0.625rem] font-semibold px-2 py-0.5 rounded-full bg-white/[0.05] text-white/60">
                         inactif
                       </span>
                     )}
                   </div>
-                  <div className="flex items-center gap-3 text-sm text-on-surface-variant">
+                  <div className="flex items-center gap-3 text-sm text-white/60">
                     <span className="flex items-center gap-1">
                       <MapPin size={13} strokeWidth={1.5} />
                       {venue.city}
@@ -59,23 +59,23 @@ export default function ConciergeVenuesPage() {
                 </div>
                 <div className="flex items-center gap-1 text-sm">
                   <Star size={14} strokeWidth={1.5} className="text-amber-500 fill-amber-500" />
-                  <span className="font-semibold text-on-background">{venue.rating}/5</span>
+                  <span className="font-semibold text-white">{venue.rating}/5</span>
                 </div>
               </div>
 
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <p className="text-[0.625rem] uppercase tracking-wider text-on-surface-variant font-semibold">Commission</p>
-                  <p className="text-on-background font-bold text-lg font-[family-name:var(--font-manrope)]">{venue.commission}</p>
+                  <p className="text-[0.625rem] uppercase tracking-wider text-white/60 font-semibold">Commission</p>
+                  <p className="text-white font-bold text-lg font-[family-name:var(--font-manrope)]">{venue.commission}</p>
                 </div>
                 <div>
-                  <p className="text-[0.625rem] uppercase tracking-wider text-on-surface-variant font-semibold">Couverts ce mois</p>
-                  <p className="text-on-background font-bold text-lg font-[family-name:var(--font-manrope)]">{venue.covers}</p>
+                  <p className="text-[0.625rem] uppercase tracking-wider text-white/60 font-semibold">Couverts ce mois</p>
+                  <p className="text-white font-bold text-lg font-[family-name:var(--font-manrope)]">{venue.covers}</p>
                 </div>
                 <div className="flex items-end justify-end">
                   <button
                     onClick={() => setExpandedId(expandedId === venue.id ? null : venue.id)}
-                    className="text-primary text-sm font-medium flex items-center gap-1 hover:opacity-80 transition-opacity"
+                    className="text-white text-sm font-medium flex items-center gap-1 hover:opacity-80 transition-opacity"
                   >
                     {expandedId === venue.id ? "Fermer" : "Voir"}
                     <ArrowRight size={14} strokeWidth={1.5} className={`transition-transform ${expandedId === venue.id ? "rotate-90" : ""}`} />
@@ -86,28 +86,28 @@ export default function ConciergeVenuesPage() {
 
             {/* Expanded details */}
             {expandedId === venue.id && (
-              <div className="px-6 pb-6 pt-0 border-t border-outline-variant/10 mt-0 pt-4 space-y-3">
+              <div className="px-6 pb-6 pt-0 border-t border-white/10/10 mt-0 pt-4 space-y-3">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="flex items-center gap-2 text-sm text-on-surface-variant">
-                    <Phone size={14} strokeWidth={1.5} className="text-primary" />
-                    <a href={`tel:${venue.phone}`} className="hover:text-primary transition-colors">{venue.phone}</a>
+                  <div className="flex items-center gap-2 text-sm text-white/60">
+                    <Phone size={14} strokeWidth={1.5} className="text-white" />
+                    <a href={`tel:${venue.phone}`} className="hover:text-white transition-colors">{venue.phone}</a>
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-on-surface-variant">
-                    <Mail size={14} strokeWidth={1.5} className="text-primary" />
-                    <a href={`mailto:${venue.email}`} className="truncate hover:text-primary transition-colors">{venue.email}</a>
+                  <div className="flex items-center gap-2 text-sm text-white/60">
+                    <Mail size={14} strokeWidth={1.5} className="text-white" />
+                    <a href={`mailto:${venue.email}`} className="truncate hover:text-white transition-colors">{venue.email}</a>
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-on-surface-variant">
-                    <MapPin size={14} strokeWidth={1.5} className="text-primary" />
+                  <div className="flex items-center gap-2 text-sm text-white/60">
+                    <MapPin size={14} strokeWidth={1.5} className="text-white" />
                     <span>{venue.address}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-on-surface-variant">
-                    <Globe size={14} strokeWidth={1.5} className="text-primary" />
+                  <div className="flex items-center gap-2 text-sm text-white/60">
+                    <Globe size={14} strokeWidth={1.5} className="text-white" />
                     <span>Horaires : {venue.hours}</span>
                   </div>
                 </div>
                 <a
                   href={`mailto:${venue.email}`}
-                  className="block w-full bg-primary text-white text-sm font-medium py-2 rounded-lg hover:opacity-90 transition-opacity mt-2 text-center"
+                  className="block w-full bg-white/15 text-white text-sm font-medium py-2 rounded-lg hover:opacity-90 transition-opacity mt-2 text-center"
                 >
                   Contacter l&apos;établissement
                 </a>
@@ -117,8 +117,8 @@ export default function ConciergeVenuesPage() {
         ))}
         {venues.length === 0 && (
           <div className="col-span-full text-center py-16">
-            <Building2 size={48} strokeWidth={1} className="mx-auto text-on-surface-variant/30 mb-4" />
-            <p className="text-sm text-on-surface-variant">Aucun établissement partenaire</p>
+            <Building2 size={48} strokeWidth={1} className="mx-auto text-white/60/30 mb-4" />
+            <p className="text-sm text-white/60">Aucun établissement partenaire</p>
           </div>
         )}
       </div>

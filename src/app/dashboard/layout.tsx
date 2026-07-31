@@ -103,17 +103,17 @@ export default function DashboardLayout({
 
   return (
     <PRQualityProvider>
-      <div className="h-screen relative overflow-hidden bg-[#141210]">
+      <div className="min-h-screen lg:h-screen relative lg:overflow-hidden bg-[#141210]">
         {/* Fond photo neutre (remplacer public/dashboard-bg.jpg par votre photo) */}
         <div
-          className="absolute inset-0 bg-cover bg-center"
+          className="fixed inset-0 bg-cover bg-center"
           style={{ backgroundImage: "url(/dashboard-bg.jpg)" }}
         />
         {/* Voile de lisibilité */}
-        <div className="absolute inset-0 bg-black/35" />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/40" />
+        <div className="fixed inset-0 bg-black/35" />
+        <div className="fixed inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/40" />
 
-        <div className="relative z-10 p-4 lg:p-6 grid grid-cols-12 gap-4 lg:gap-6 h-screen">
+        <div className="relative z-10 p-4 lg:p-6 grid grid-cols-12 gap-4 lg:gap-6 lg:h-screen">
           {/* Mobile top bar */}
           <div className="col-span-12 lg:hidden flex items-center justify-between backdrop-blur-2xl bg-black/45 border border-white/10 rounded-2xl px-4 py-3">
             <button
@@ -226,7 +226,7 @@ export default function DashboardLayout({
           </aside>
 
           {/* Main content */}
-          <main className="col-span-12 lg:col-span-10 h-[calc(100vh-48px)] lg:h-[calc(100vh-48px)] overflow-y-auto overflow-x-hidden scrollbar-thin">
+          <main className="col-span-12 lg:col-span-10 lg:h-[calc(100vh-48px)] lg:overflow-y-auto overflow-x-hidden scrollbar-thin">
             {children}
           </main>
         </div>

@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { Mail, Lock, Eye, EyeOff, AlertCircle, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+
+const inputClass =
+  "w-full rounded-xl border border-black/15 bg-white px-11 py-3.5 text-sm text-[var(--landing-ink)] outline-none transition-all placeholder:text-black/30 focus:border-black/40 focus:ring-1 focus:ring-black/10";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -36,41 +38,30 @@ export default function LoginPage() {
     }
 
     // Hard redirect based on role — must use window.location to trigger middleware
-    const role = data.user?.user_metadata?.role;
+    const role =
+      data.user?.app_metadata?.role ?? data.user?.user_metadata?.role;
     window.location.href = role === "concierge" ? "/concierge" : "/dashboard";
   };
 
   return (
-    <div className="min-h-screen relative flex items-center justify-center px-4 py-12 overflow-hidden bg-[#0a0a0f]">
-      {/* Animated gradient blobs */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-[40%] -left-[20%] w-[70%] h-[70%] rounded-full bg-purple-600/20 blur-[120px] animate-pulse" />
-        <div className="absolute -bottom-[30%] -right-[20%] w-[60%] h-[60%] rounded-full bg-blue-600/15 blur-[120px] animate-pulse [animation-delay:1s]" />
-        <div className="absolute top-[20%] right-[10%] w-[40%] h-[40%] rounded-full bg-indigo-500/10 blur-[100px] animate-pulse [animation-delay:2s]" />
-      </div>
-
-      {/* Frosted glass card */}
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[var(--landing-ivory)] px-4 py-12 font-body text-[var(--landing-ink)]">
       <div className="relative w-full max-w-md">
-        <div className="bg-white/[0.06] backdrop-blur-2xl border border-white/[0.08] rounded-[32px] p-8 sm:p-10 shadow-[0_8px_64px_rgba(0,0,0,0.4)]">
-          {/* Logo */}
-          <div className="flex flex-col items-center mb-8">
-            <Image
-              src="/logo-header.png"
-              alt="twocards."
-              width={56}
-              height={56}
-              className="h-14 w-auto brightness-0 invert mb-3"
-            />
-            <span className="text-2xl font-extrabold text-white font-[family-name:var(--font-nunito)] tracking-tight">
-              twocards<span className="text-blue-400">.</span>
-            </span>
-            <p className="text-white/40 text-sm font-[family-name:var(--font-inter)] mt-1">
-              Connectez-vous à votre espace
-            </p>
-          </div>
+        {/* Wordmark */}
+        <div className="mb-10 flex flex-col items-center">
+          <Link
+            href="/"
+            className="font-title text-3xl font-medium tracking-tight"
+          >
+            twocards<span className="text-[var(--landing-mute)]">.</span>
+          </Link>
+          <p className="mt-2 text-[11px] font-medium uppercase tracking-[0.28em] text-[var(--landing-mute)]">
+            Connexion à votre espace
+          </p>
+        </div>
 
+        <div className="rounded-2xl border border-black/[0.08] bg-white/60 p-8 sm:p-10">
           {error && (
-            <div className="mb-6 flex items-center gap-2 rounded-2xl bg-red-500/10 border border-red-500/20 p-3.5 text-sm text-red-300">
+            <div className="mb-6 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 p-3.5 text-sm text-red-700">
               <AlertCircle size={16} strokeWidth={1.5} className="shrink-0" />
               {error}
             </div>
@@ -80,13 +71,13 @@ export default function LoginPage() {
             <div className="space-y-2">
               <label
                 htmlFor="email"
-                className="block text-xs uppercase tracking-wider text-white/50 font-[family-name:var(--font-inter)] font-medium"
+                className="block text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--landing-mute)]"
               >
                 Email
               </label>
               <div className="relative">
                 <Mail
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-black/30"
                   size={16}
                   strokeWidth={1.5}
                 />
@@ -97,7 +88,7 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full pl-11 pr-4 py-3.5 bg-white/[0.06] border border-white/[0.08] rounded-2xl text-sm text-white placeholder:text-white/25 font-[family-name:var(--font-inter)] focus:bg-white/[0.1] focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10 transition-all"
+                  className={inputClass}
                 />
               </div>
             </div>
@@ -105,13 +96,13 @@ export default function LoginPage() {
             <div className="space-y-2">
               <label
                 htmlFor="password"
-                className="block text-xs uppercase tracking-wider text-white/50 font-[family-name:var(--font-inter)] font-medium"
+                className="block text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--landing-mute)]"
               >
                 Mot de passe
               </label>
               <div className="relative">
                 <Lock
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-black/30"
                   size={16}
                   strokeWidth={1.5}
                 />
@@ -122,13 +113,17 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="w-full pl-11 pr-12 py-3.5 bg-white/[0.06] border border-white/[0.08] rounded-2xl text-sm text-white placeholder:text-white/25 font-[family-name:var(--font-inter)] focus:bg-white/[0.1] focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10 transition-all"
+                  className={`${inputClass} pr-12`}
                 />
                 <button
                   type="button"
-                  aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+                  aria-label={
+                    showPassword
+                      ? "Masquer le mot de passe"
+                      : "Afficher le mot de passe"
+                  }
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-black/30 transition-colors hover:text-black/60"
                 >
                   {showPassword ? (
                     <EyeOff size={16} strokeWidth={1.5} />
@@ -142,7 +137,7 @@ export default function LoginPage() {
             <div className="flex justify-end">
               <Link
                 href="/forgot-password"
-                className="text-xs text-blue-400/80 font-medium font-[family-name:var(--font-inter)] hover:text-blue-400 transition-colors"
+                className="text-xs font-medium text-[var(--landing-ink)]/60 underline decoration-black/20 underline-offset-4 transition-colors hover:text-[var(--landing-ink)]"
               >
                 Mot de passe oublié ?
               </Link>
@@ -151,25 +146,24 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 bg-white/15 hover:bg-white/20 border border-white/10 text-white rounded-2xl text-sm font-semibold font-[family-name:var(--font-inter)] transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 backdrop-blur-sm"
+              className="flex w-full items-center justify-center gap-2 rounded-full bg-[var(--landing-ink)] py-3.5 text-sm font-semibold text-[var(--landing-ivory)] transition-opacity hover:opacity-85 disabled:cursor-not-allowed disabled:opacity-40"
             >
               {loading && <Loader2 size={16} className="animate-spin" />}
               {loading ? "Connexion..." : "Se connecter"}
             </button>
           </form>
 
-          {/* Divider */}
-          <div className="flex items-center gap-3 my-6">
-            <div className="flex-1 h-px bg-white/[0.08]" />
-            <span className="text-[0.6875rem] text-white/30 font-[family-name:var(--font-inter)]">ou</span>
-            <div className="flex-1 h-px bg-white/[0.08]" />
+          <div className="my-6 flex items-center gap-3">
+            <div className="h-px flex-1 bg-black/[0.08]" />
+            <span className="text-[11px] text-black/30">ou</span>
+            <div className="h-px flex-1 bg-black/[0.08]" />
           </div>
 
-          <p className="text-center text-sm text-white/40 font-[family-name:var(--font-inter)]">
+          <p className="text-center text-sm text-[var(--landing-ink)]/55">
             Vous n&apos;avez pas de compte ?{" "}
             <Link
               href="/signup"
-              className="text-blue-400/80 font-medium hover:text-blue-400 transition-colors"
+              className="font-medium text-[var(--landing-ink)] underline decoration-black/20 underline-offset-4 transition-colors hover:decoration-black/60"
             >
               Créer un compte
             </Link>
@@ -177,12 +171,18 @@ export default function LoginPage() {
         </div>
 
         {/* Footer */}
-        <div className="mt-8 text-center text-xs text-white/20 font-[family-name:var(--font-inter)] space-x-4">
+        <div className="mt-8 space-x-4 text-center text-xs text-black/35">
           <span>&copy; {new Date().getFullYear()} twocards.</span>
-          <Link href="/legal" className="hover:text-white/40 transition-colors">
+          <Link
+            href="/legal/cgu"
+            className="transition-colors hover:text-black/60"
+          >
             Conditions
           </Link>
-          <Link href="/privacy" className="hover:text-white/40 transition-colors">
+          <Link
+            href="/legal/confidentialite"
+            className="transition-colors hover:text-black/60"
+          >
             Confidentialité
           </Link>
         </div>

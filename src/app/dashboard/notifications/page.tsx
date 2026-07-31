@@ -172,7 +172,7 @@ export default function NotificationsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl p-6">
+      <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-2xl font-extrabold font-[family-name:var(--font-manrope)] text-white">
@@ -196,7 +196,7 @@ export default function NotificationsPage() {
             <button
               onClick={clearAll}
               disabled={items.length === 0}
-              className="flex items-center gap-2 px-4 py-2.5 backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] text-white/60 rounded-xl text-xs font-semibold hover:bg-white/[0.12] hover:text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 px-4 py-2.5 backdrop-blur-2xl bg-black/45 border border-white/[0.12] text-white/60 rounded-xl text-xs font-semibold hover:bg-white/[0.12] hover:text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <Trash2 size={14} strokeWidth={2} />
               Supprimer tout
@@ -214,7 +214,7 @@ export default function NotificationsPage() {
             className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
               activeFilter === tab.key
                 ? "bg-blue-500 text-white"
-                : "backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] text-white/50 hover:text-white hover:bg-white/[0.12]"
+                : "backdrop-blur-2xl bg-black/45 border border-white/[0.12] text-white/50 hover:text-white hover:bg-white/[0.12]"
             }`}
           >
             {tab.label}
@@ -223,7 +223,7 @@ export default function NotificationsPage() {
       </div>
 
       {/* Notification List */}
-      <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl overflow-hidden">
+      <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl overflow-hidden">
         {filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center px-6">
             <div className="w-14 h-14 rounded-2xl bg-white/[0.06] flex items-center justify-center mb-4">

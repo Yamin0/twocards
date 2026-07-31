@@ -43,3 +43,4 @@ next-env.d.ts
 
 # remotion video project (standalone, not part of Next.js app)
 /dashboard-video/
+tsconfig.tsbuildinfo

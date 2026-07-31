@@ -8,7 +8,7 @@ export default function ConciergeNotFound() {
         <p className="text-8xl font-extrabold text-white/[0.06] font-[family-name:var(--font-manrope)] mb-2 select-none">
           404
         </p>
-        <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl p-10 -mt-10">
+        <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-10 -mt-10">
           <h1 className="text-xl font-bold text-white font-[family-name:var(--font-manrope)] mb-2">
             Page introuvable
           </h1>

@@ -36,9 +36,9 @@ export default function OnboardingPage() {
   const potentialRevenue = vipCount * vipMinSpend + standardCount * standardMinSpend;
 
   return (
-    <div className="min-h-screen bg-surface flex flex-col">
+    <div className="min-h-screen bg-[var(--landing-ivory)] flex flex-col">
       {/* Top bar */}
-      <header className="bg-surface-card editorial-shadow">
+      <header className="bg-white editorial-shadow">
         <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
           {/* Logo */}
           <span className="text-xl font-extrabold text-primary-dark font-[family-name:var(--font-nunito)] tracking-tight">
@@ -55,7 +55,7 @@ export default function OnboardingPage() {
                   {i > 0 && (
                     <div
                       className={`w-8 h-px ${
-                        isCompleted ? "bg-primary" : "bg-surface-dim"
+                        isCompleted ? "bg-primary" : "bg-black/[0.08]"
                       }`}
                     />
                   )}
@@ -66,7 +66,7 @@ export default function OnboardingPage() {
                           ? "bg-primary text-white"
                           : isActive
                           ? "bg-primary text-white"
-                          : "bg-surface-mid text-on-surface-variant"
+                          : "bg-black/[0.04] text-on-surface-variant"
                       }`}
                     >
                       {isCompleted ? (
@@ -101,7 +101,7 @@ export default function OnboardingPage() {
       <div className="flex-1 max-w-5xl w-full mx-auto px-4 py-8 flex gap-6">
         {/* Main card */}
         <div className="flex-1">
-          <div className="bg-surface-card rounded-md editorial-shadow p-6 sm:p-8">
+          <div className="bg-white rounded-md editorial-shadow p-6 sm:p-8">
             {/* Step label */}
             <span className="inline-block px-2.5 py-1 rounded-full bg-primary/5 text-primary text-xs font-medium font-[family-name:var(--font-inter)] mb-4">
               Étape 2 sur 4
@@ -116,12 +116,12 @@ export default function OnboardingPage() {
             </p>
 
             {/* Tabs */}
-            <div className="flex gap-1 bg-surface-low rounded-sm p-1 mb-8 w-fit">
+            <div className="flex gap-1 bg-black/[0.04] rounded-sm p-1 mb-8 w-fit">
               <button
                 onClick={() => setActiveTab("rapide")}
                 className={`px-4 py-2 rounded-sm text-xs font-medium font-[family-name:var(--font-inter)] transition-colors cursor-pointer ${
                   activeTab === "rapide"
-                    ? "bg-surface-card text-on-background editorial-shadow"
+                    ? "bg-white text-on-background editorial-shadow"
                     : "text-on-surface-variant hover:text-on-background"
                 }`}
               >
@@ -131,7 +131,7 @@ export default function OnboardingPage() {
                 onClick={() => setActiveTab("personnalise")}
                 className={`px-4 py-2 rounded-sm text-xs font-medium font-[family-name:var(--font-inter)] transition-colors cursor-pointer ${
                   activeTab === "personnalise"
-                    ? "bg-surface-card text-on-background editorial-shadow"
+                    ? "bg-white text-on-background editorial-shadow"
                     : "text-on-surface-variant hover:text-on-background"
                 }`}
               >
@@ -144,7 +144,7 @@ export default function OnboardingPage() {
                 {/* Two column grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   {/* VIP Tables */}
-                  <div className="bg-surface-low rounded-sm p-5 space-y-4">
+                  <div className="bg-black/[0.04] rounded-sm p-5 space-y-4">
                     <div className="flex items-center gap-2">
                       <div className="w-8 h-8 rounded-sm bg-primary/10 flex items-center justify-center">
                         <Crown
@@ -169,7 +169,7 @@ export default function OnboardingPage() {
                           onClick={() =>
                             setVipCount(Math.max(0, vipCount - 1))
                           }
-                          className="w-8 h-8 rounded-sm bg-surface-card flex items-center justify-center text-on-surface-variant hover:text-on-background transition-colors cursor-pointer"
+                          className="w-8 h-8 rounded-sm bg-white flex items-center justify-center text-on-surface-variant hover:text-on-background transition-colors cursor-pointer"
                         >
                           <Minus size={14} strokeWidth={1.5} />
                         </button>
@@ -179,7 +179,7 @@ export default function OnboardingPage() {
                         <button
                           type="button"
                           onClick={() => setVipCount(vipCount + 1)}
-                          className="w-8 h-8 rounded-sm bg-surface-card flex items-center justify-center text-on-surface-variant hover:text-on-background transition-colors cursor-pointer"
+                          className="w-8 h-8 rounded-sm bg-white flex items-center justify-center text-on-surface-variant hover:text-on-background transition-colors cursor-pointer"
                         >
                           <Plus size={14} strokeWidth={1.5} />
                         </button>
@@ -201,14 +201,14 @@ export default function OnboardingPage() {
                           onChange={(e) =>
                             setVipMinSpend(Number(e.target.value))
                           }
-                          className="w-full pl-8 pr-4 py-2.5 bg-surface-card border-none rounded-sm text-sm text-on-background font-[family-name:var(--font-inter)] focus:ring-1 focus:ring-primary-container focus:outline-none transition-colors"
+                          className="w-full pl-8 pr-4 py-2.5 bg-white border-none rounded-sm text-sm text-on-background font-[family-name:var(--font-inter)] focus:ring-1 focus:ring-primary-container focus:outline-none transition-colors"
                         />
                       </div>
                     </div>
                   </div>
 
                   {/* Standard Tables */}
-                  <div className="bg-surface-low rounded-sm p-5 space-y-4">
+                  <div className="bg-black/[0.04] rounded-sm p-5 space-y-4">
                     <div className="flex items-center gap-2">
                       <div className="w-8 h-8 rounded-sm bg-secondary-container/50 flex items-center justify-center">
                         <Users
@@ -233,7 +233,7 @@ export default function OnboardingPage() {
                           onClick={() =>
                             setStandardCount(Math.max(0, standardCount - 1))
                           }
-                          className="w-8 h-8 rounded-sm bg-surface-card flex items-center justify-center text-on-surface-variant hover:text-on-background transition-colors cursor-pointer"
+                          className="w-8 h-8 rounded-sm bg-white flex items-center justify-center text-on-surface-variant hover:text-on-background transition-colors cursor-pointer"
                         >
                           <Minus size={14} strokeWidth={1.5} />
                         </button>
@@ -243,7 +243,7 @@ export default function OnboardingPage() {
                         <button
                           type="button"
                           onClick={() => setStandardCount(standardCount + 1)}
-                          className="w-8 h-8 rounded-sm bg-surface-card flex items-center justify-center text-on-surface-variant hover:text-on-background transition-colors cursor-pointer"
+                          className="w-8 h-8 rounded-sm bg-white flex items-center justify-center text-on-surface-variant hover:text-on-background transition-colors cursor-pointer"
                         >
                           <Plus size={14} strokeWidth={1.5} />
                         </button>
@@ -265,7 +265,7 @@ export default function OnboardingPage() {
                           onChange={(e) =>
                             setStandardMinSpend(Number(e.target.value))
                           }
-                          className="w-full pl-8 pr-4 py-2.5 bg-surface-card border-none rounded-sm text-sm text-on-background font-[family-name:var(--font-inter)] focus:ring-1 focus:ring-primary-container focus:outline-none transition-colors"
+                          className="w-full pl-8 pr-4 py-2.5 bg-white border-none rounded-sm text-sm text-on-background font-[family-name:var(--font-inter)] focus:ring-1 focus:ring-primary-container focus:outline-none transition-colors"
                         />
                       </div>
                     </div>
@@ -273,7 +273,7 @@ export default function OnboardingPage() {
                 </div>
 
                 {/* Summary preview */}
-                <div className="bg-surface-low rounded-sm p-5">
+                <div className="bg-black/[0.04] rounded-sm p-5">
                   <h3 className="text-xs font-[family-name:var(--font-inter)] uppercase tracking-wider text-on-surface-variant mb-3">
                     Aperçu de la configuration
                   </h3>
@@ -338,7 +338,7 @@ export default function OnboardingPage() {
 
         {/* Floating aside — expert tip */}
         <aside className="hidden lg:block w-64 shrink-0">
-          <div className="bg-surface-card rounded-md editorial-shadow p-5 sticky top-24">
+          <div className="bg-white rounded-md editorial-shadow p-5 sticky top-24">
             <div className="flex items-start gap-3 mb-3">
               <div className="w-8 h-8 rounded-full bg-primary/5 flex items-center justify-center shrink-0 mt-0.5">
                 <Lightbulb

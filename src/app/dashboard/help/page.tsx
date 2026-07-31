@@ -18,7 +18,7 @@ import { useAuthUser } from "@/hooks/use-auth-user";
 import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
 
 const glassCard =
-  "backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl";
+  "backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl";
 
 const faqItems = [
   {

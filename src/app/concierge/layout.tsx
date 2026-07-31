@@ -12,7 +12,6 @@ import {
   BarChart3,
   MessageSquare,
   Building2,
-  Bell,
   Settings,
   User,
   LogOut,
@@ -20,6 +19,7 @@ import {
   Menu,
   X,
   ChevronDown,
+  Sparkles,
 } from "lucide-react";
 import { useAuthUser } from "@/hooks/use-auth-user";
 
@@ -34,12 +34,12 @@ const mainNav = [
 const toolsNav = [
   { icon: MessageSquare, label: "Messages", href: "/concierge/messages" },
   { icon: Building2, label: "Établissements", href: "/concierge/venues" },
+  { icon: Sparkles, label: "Assistant IA", href: "/concierge/ai" },
 ];
 
 const adminNav = [
-  { icon: Bell, label: "Notifications", href: "/concierge/notifications" },
   { icon: Settings, label: "Paramètres", href: "/concierge/settings" },
-  { icon: User, label: "Profil", href: "/concierge/profile" },
+  { icon: User, label: "Profil", href: "/concierge/settings" },
 ];
 
 const demoVenues = [
@@ -115,15 +115,16 @@ export default function ConciergeLayout({
   );
 
   return (
-    <div className="h-screen relative overflow-hidden bg-[#0a0a0f]">
-      {/* Animated gradient blobs */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-[40%] -left-[20%] w-[70%] h-[70%] rounded-full bg-indigo-600/15 blur-[120px] animate-pulse" />
-        <div className="absolute -bottom-[30%] -right-[20%] w-[60%] h-[60%] rounded-full bg-cyan-600/10 blur-[120px] animate-pulse [animation-delay:1s]" />
-        <div className="absolute top-[20%] right-[10%] w-[40%] h-[40%] rounded-full bg-violet-500/8 blur-[100px] animate-pulse [animation-delay:2s]" />
-      </div>
+    <div className="min-h-screen lg:h-screen relative lg:overflow-hidden bg-[#141210]">
+      {/* Fond photo neutre (remplacer public/dashboard-bg.jpg par votre photo) */}
+      <div
+        className="fixed inset-0 bg-cover bg-center"
+        style={{ backgroundImage: "url(/dashboard-bg.jpg)" }}
+      />
+      <div className="fixed inset-0 bg-black/35" />
+      <div className="fixed inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/40" />
 
-      <div className="relative z-10 p-4 lg:p-6 grid grid-cols-12 gap-4 lg:gap-6 h-screen">
+      <div className="relative z-10 p-4 lg:p-6 grid grid-cols-12 gap-4 lg:gap-6 lg:h-screen">
         {/* Mobile top bar */}
         <div className="col-span-12 lg:hidden flex items-center justify-between backdrop-blur-xl bg-white/10 border border-white/15 rounded-2xl px-4 py-3">
           <button
@@ -173,7 +174,7 @@ export default function ConciergeLayout({
         )}
 
         {/* Desktop sidebar */}
-        <aside className="hidden lg:flex col-span-2 backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl p-5 flex-col h-[calc(100vh-48px)] overflow-hidden">
+        <aside className="hidden lg:flex col-span-2 backdrop-blur-2xl bg-black/45 border border-white/10 rounded-3xl p-5 flex-col h-[calc(100vh-48px)] shadow-[0_20px_60px_-20px_rgba(0,0,0,0.6)] overflow-hidden">
           {/* Logo */}
           <div className="text-center mb-4 pb-4 border-b border-white/10">
             <div className="flex items-center justify-center gap-2.5 mb-1">
@@ -261,7 +262,7 @@ export default function ConciergeLayout({
             </div>
 
             <Link
-              href="/concierge/help"
+              href="/concierge/settings"
               className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-white/40 hover:text-white/70 hover:bg-white/10 transition-all font-[family-name:var(--font-manrope)]"
             >
               <HelpCircle size={18} strokeWidth={1.5} />
@@ -280,7 +281,7 @@ export default function ConciergeLayout({
         </aside>
 
         {/* Main content */}
-        <main className="col-span-12 lg:col-span-10 h-[calc(100vh-48px)] lg:h-[calc(100vh-48px)] overflow-y-auto overflow-x-hidden scrollbar-thin">
+        <main className="col-span-12 lg:col-span-10 lg:h-[calc(100vh-48px)] lg:overflow-y-auto overflow-x-hidden scrollbar-thin">
           {children}
         </main>
       </div>

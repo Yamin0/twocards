@@ -47,9 +47,24 @@ const suisse = localFont({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://twocardspro.com"),
   title: "twocards. | Transformez chaque recommandation en réservation traçable",
   description:
     "TwoCards connecte les établissements aux concierges et RP vérifiés, synchronise les disponibilités et automatise l'attribution, les acomptes et les commissions.",
+  openGraph: {
+    type: "website",
+    locale: "fr_FR",
+    siteName: "twocards.",
+    title: "twocards. | Le channel manager des concierges & RP",
+    description:
+      "Chaque recommandation devient une réservation traçable : attribution, acomptes, check-in, factures vérifiées et commissions automatisées.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "twocards. | Le channel manager des concierges & RP",
+    description:
+      "Chaque recommandation devient une réservation traçable : attribution, acomptes, check-in, factures vérifiées et commissions automatisées.",
+  },
 };
 
 export default function RootLayout({

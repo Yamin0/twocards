@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
-import { useState } from "react";
+import { Suspense, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import {
   Building2,
@@ -20,11 +20,27 @@ import {
 } from "lucide-react";
 
 type Role = "etablissement" | "concierge";
-type VenueType = "club" | "restaurant" | "lounge" | "bar";
+type VenueType =
+  | "club"
+  | "restaurant"
+  | "rooftop"
+  | "lounge"
+  | "bar"
+  | "beach-club"
+  | "hotel-riad";
 
-export default function SignupPage() {
-  const [role, setRole] = useState<Role>("etablissement");
-  const [venueType, setVenueType] = useState<VenueType>("club");
+const inputClass =
+  "w-full rounded-xl border border-black/15 bg-white px-11 py-3.5 text-sm text-[var(--landing-ink)] outline-none transition-all placeholder:text-black/30 focus:border-black/40 focus:ring-1 focus:ring-black/10";
+
+const labelClass =
+  "block text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--landing-mute)]";
+
+function SignupForm() {
+  const searchParams = useSearchParams();
+  const [role, setRole] = useState<Role>(
+    searchParams.get("role") === "concierge" ? "concierge" : "etablissement"
+  );
+  const [venueType, setVenueType] = useState<VenueType>("restaurant");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -86,35 +102,29 @@ export default function SignupPage() {
     setLoading(false);
   };
 
-  // Shared glass input style
-  const inputClass =
-    "w-full pl-11 pr-4 py-3.5 bg-white/[0.06] border border-white/[0.08] rounded-2xl text-sm text-white placeholder:text-white/25 font-[family-name:var(--font-inter)] focus:bg-white/[0.1] focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10 transition-all";
-
   if (success) {
     return (
-      <div className="min-h-screen relative flex items-center justify-center px-4 overflow-hidden bg-[#0a0a0f]">
-        {/* Animated gradient blobs */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-[40%] -left-[20%] w-[70%] h-[70%] rounded-full bg-emerald-600/20 blur-[120px] animate-pulse" />
-          <div className="absolute -bottom-[30%] -right-[20%] w-[60%] h-[60%] rounded-full bg-blue-600/15 blur-[120px] animate-pulse [animation-delay:1s]" />
-        </div>
-
-        <div className="relative max-w-md w-full bg-white/[0.06] backdrop-blur-2xl border border-white/[0.08] rounded-[32px] p-10 text-center shadow-[0_8px_64px_rgba(0,0,0,0.4)]">
-          <div className="mx-auto w-16 h-16 rounded-full bg-emerald-500/15 border border-emerald-500/20 flex items-center justify-center mb-6">
-            <CheckCircle size={32} strokeWidth={1.5} className="text-emerald-400" />
+      <div className="relative flex min-h-screen items-center justify-center bg-[var(--landing-ivory)] px-4 font-body text-[var(--landing-ink)]">
+        <div className="w-full max-w-md rounded-2xl border border-black/[0.08] bg-white/60 p-10 text-center">
+          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-emerald-200 bg-emerald-50">
+            <CheckCircle
+              size={32}
+              strokeWidth={1.5}
+              className="text-emerald-600"
+            />
           </div>
-          <h1 className="text-2xl font-bold text-white font-[family-name:var(--font-manrope)] mb-3">
+          <h1 className="mb-3 font-title text-2xl font-normal">
             Vérifiez votre email
           </h1>
-          <p className="text-sm text-white/50 font-[family-name:var(--font-inter)] mb-6 leading-relaxed">
+          <p className="mb-6 text-sm leading-relaxed text-[var(--landing-ink)]/60">
             Un lien de confirmation a été envoyé à{" "}
-            <strong className="text-white/80">{form.email}</strong>.
+            <strong className="text-[var(--landing-ink)]">{form.email}</strong>.
             <br />
             Cliquez dessus pour activer votre compte.
           </p>
           <Link
             href="/login"
-            className="inline-block px-6 py-3 bg-white/15 hover:bg-white/20 border border-white/10 text-white rounded-2xl text-sm font-semibold transition-all backdrop-blur-sm"
+            className="inline-block rounded-full bg-[var(--landing-ink)] px-6 py-3 text-sm font-semibold text-[var(--landing-ivory)] transition-opacity hover:opacity-85"
           >
             Aller à la connexion
           </Link>
@@ -124,36 +134,24 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen relative flex items-center justify-center px-4 py-12 overflow-hidden bg-[#0a0a0f]">
-      {/* Animated gradient blobs */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-[40%] -left-[20%] w-[70%] h-[70%] rounded-full bg-purple-600/20 blur-[120px] animate-pulse" />
-        <div className="absolute -bottom-[30%] -right-[20%] w-[60%] h-[60%] rounded-full bg-blue-600/15 blur-[120px] animate-pulse [animation-delay:1s]" />
-        <div className="absolute top-[20%] right-[10%] w-[40%] h-[40%] rounded-full bg-indigo-500/10 blur-[100px] animate-pulse [animation-delay:2s]" />
-      </div>
-
-      {/* Frosted glass card */}
+    <div className="relative flex min-h-screen items-center justify-center bg-[var(--landing-ivory)] px-4 py-12 font-body text-[var(--landing-ink)]">
       <div className="relative w-full max-w-2xl">
-        <div className="bg-white/[0.06] backdrop-blur-2xl border border-white/[0.08] rounded-[32px] p-8 sm:p-10 shadow-[0_8px_64px_rgba(0,0,0,0.4)]">
-          {/* Header */}
-          <div className="flex flex-col items-center mb-8">
-            <Image
-              src="/logo-header.png"
-              alt="twocards."
-              width={56}
-              height={56}
-              className="h-14 w-auto brightness-0 invert mb-3"
-            />
-            <span className="text-2xl font-extrabold text-white font-[family-name:var(--font-nunito)] tracking-tight">
-              twocards<span className="text-blue-400">.</span>
-            </span>
-            <p className="text-white/40 text-sm font-[family-name:var(--font-inter)] mt-1">
-              Rejoignez le réseau et gérez vos soirées
-            </p>
-          </div>
+        {/* Wordmark */}
+        <div className="mb-10 flex flex-col items-center">
+          <Link
+            href="/"
+            className="font-title text-3xl font-medium tracking-tight"
+          >
+            twocards<span className="text-[var(--landing-mute)]">.</span>
+          </Link>
+          <p className="mt-2 text-[11px] font-medium uppercase tracking-[0.28em] text-[var(--landing-mute)]">
+            Rejoindre le réseau
+          </p>
+        </div>
 
+        <div className="rounded-2xl border border-black/[0.08] bg-white/60 p-8 sm:p-10">
           {error && (
-            <div className="mb-6 flex items-center gap-2 rounded-2xl bg-red-500/10 border border-red-500/20 p-3.5 text-sm text-red-300">
+            <div className="mb-6 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 p-3.5 text-sm text-red-700">
               <AlertCircle size={16} strokeWidth={1.5} className="shrink-0" />
               {error}
             </div>
@@ -162,10 +160,8 @@ export default function SignupPage() {
           <form className="space-y-8" onSubmit={handleSubmit}>
             {/* Role selector */}
             <fieldset className="space-y-3">
-              <legend className="text-xs uppercase tracking-wider text-white/50 font-[family-name:var(--font-inter)] font-medium mb-1">
-                Je suis
-              </legend>
-              <div className="grid grid-cols-2 gap-3">
+              <legend className={`${labelClass} mb-1`}>Je suis</legend>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <label className="relative cursor-pointer">
                   <input
                     type="radio"
@@ -175,16 +171,14 @@ export default function SignupPage() {
                     onChange={() => setRole("etablissement")}
                     className="peer sr-only"
                   />
-                  <div className="flex items-center gap-3 p-4 rounded-2xl bg-white/[0.04] border border-white/[0.06] peer-checked:bg-white/[0.1] peer-checked:border-white/[0.15] transition-all">
-                    <div className="w-10 h-10 rounded-xl bg-white/[0.06] flex items-center justify-center shrink-0">
-                      <Building2 size={20} strokeWidth={1.5} className="text-blue-400" />
+                  <div className="flex items-center gap-3 rounded-xl border border-black/10 bg-white p-4 transition-all peer-checked:border-black peer-checked:ring-1 peer-checked:ring-black">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[var(--landing-ink)] text-[var(--landing-ivory)]">
+                      <Building2 size={18} strokeWidth={1.5} />
                     </div>
                     <div>
-                      <p className="text-sm font-semibold text-white font-[family-name:var(--font-manrope)]">
-                        Établissement
-                      </p>
-                      <p className="text-xs text-white/40 font-[family-name:var(--font-inter)]">
-                        Club, bar, restaurant
+                      <p className="text-sm font-semibold">Établissement</p>
+                      <p className="text-xs text-[var(--landing-mute)]">
+                        Restaurant, rooftop, club, hôtel
                       </p>
                     </div>
                   </div>
@@ -199,16 +193,14 @@ export default function SignupPage() {
                     onChange={() => setRole("concierge")}
                     className="peer sr-only"
                   />
-                  <div className="flex items-center gap-3 p-4 rounded-2xl bg-white/[0.04] border border-white/[0.06] peer-checked:bg-white/[0.1] peer-checked:border-white/[0.15] transition-all">
-                    <div className="w-10 h-10 rounded-xl bg-white/[0.06] flex items-center justify-center shrink-0">
-                      <UserCheck size={20} strokeWidth={1.5} className="text-purple-400" />
+                  <div className="flex items-center gap-3 rounded-xl border border-black/10 bg-white p-4 transition-all peer-checked:border-black peer-checked:ring-1 peer-checked:ring-black">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[var(--landing-ink)] text-[var(--landing-ivory)]">
+                      <UserCheck size={18} strokeWidth={1.5} />
                     </div>
                     <div>
-                      <p className="text-sm font-semibold text-white font-[family-name:var(--font-manrope)]">
-                        Concierge-RP
-                      </p>
-                      <p className="text-xs text-white/40 font-[family-name:var(--font-inter)]">
-                        Promoteur, relations
+                      <p className="text-sm font-semibold">Concierge / RP</p>
+                      <p className="text-xs text-[var(--landing-mute)]">
+                        Conciergerie, promoteur, influenceur
                       </p>
                     </div>
                   </div>
@@ -218,16 +210,20 @@ export default function SignupPage() {
 
             {/* Personal info */}
             <div className="space-y-4">
-              <h2 className="text-sm font-semibold text-white/70 font-[family-name:var(--font-manrope)]">
+              <h2 className="text-sm font-semibold text-[var(--landing-ink)]/80">
                 Informations personnelles
               </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <label htmlFor="fullname" className="block text-xs uppercase tracking-wider text-white/50 font-[family-name:var(--font-inter)] font-medium">
+                  <label htmlFor="fullname" className={labelClass}>
                     Nom complet
                   </label>
                   <div className="relative">
-                    <User className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" size={16} strokeWidth={1.5} />
+                    <User
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-black/30"
+                      size={16}
+                      strokeWidth={1.5}
+                    />
                     <input
                       id="fullname"
                       type="text"
@@ -241,11 +237,15 @@ export default function SignupPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <label htmlFor="email" className="block text-xs uppercase tracking-wider text-white/50 font-[family-name:var(--font-inter)] font-medium">
+                  <label htmlFor="email" className={labelClass}>
                     Email professionnel
                   </label>
                   <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" size={16} strokeWidth={1.5} />
+                    <Mail
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-black/30"
+                      size={16}
+                      strokeWidth={1.5}
+                    />
                     <input
                       id="email"
                       type="email"
@@ -259,11 +259,15 @@ export default function SignupPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <label htmlFor="password" className="block text-xs uppercase tracking-wider text-white/50 font-[family-name:var(--font-inter)] font-medium">
+                  <label htmlFor="password" className={labelClass}>
                     Mot de passe
                   </label>
                   <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" size={16} strokeWidth={1.5} />
+                    <Lock
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-black/30"
+                      size={16}
+                      strokeWidth={1.5}
+                    />
                     <input
                       id="password"
                       type={showPassword ? "text" : "password"}
@@ -272,25 +276,37 @@ export default function SignupPage() {
                       onChange={(e) => updateForm("password", e.target.value)}
                       required
                       minLength={8}
-                      className="w-full pl-11 pr-12 py-3.5 bg-white/[0.06] border border-white/[0.08] rounded-2xl text-sm text-white placeholder:text-white/25 font-[family-name:var(--font-inter)] focus:bg-white/[0.1] focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10 transition-all"
+                      className={`${inputClass} pr-12`}
                     />
                     <button
                       type="button"
-                      aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+                      aria-label={
+                        showPassword
+                          ? "Masquer le mot de passe"
+                          : "Afficher le mot de passe"
+                      }
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-black/30 transition-colors hover:text-black/60"
                     >
-                      {showPassword ? <EyeOff size={16} strokeWidth={1.5} /> : <Eye size={16} strokeWidth={1.5} />}
+                      {showPassword ? (
+                        <EyeOff size={16} strokeWidth={1.5} />
+                      ) : (
+                        <Eye size={16} strokeWidth={1.5} />
+                      )}
                     </button>
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <label htmlFor="phone" className="block text-xs uppercase tracking-wider text-white/50 font-[family-name:var(--font-inter)] font-medium">
+                  <label htmlFor="phone" className={labelClass}>
                     Téléphone
                   </label>
                   <div className="relative">
-                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" size={16} strokeWidth={1.5} />
+                    <Phone
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-black/30"
+                      size={16}
+                      strokeWidth={1.5}
+                    />
                     <input
                       id="phone"
                       type="tel"
@@ -307,22 +323,28 @@ export default function SignupPage() {
             {/* Establishment details */}
             {role === "etablissement" && (
               <div className="space-y-4">
-                <h2 className="text-sm font-semibold text-white/70 font-[family-name:var(--font-manrope)]">
+                <h2 className="text-sm font-semibold text-[var(--landing-ink)]/80">
                   Détails de l&apos;établissement
                 </h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <label htmlFor="venue-name" className="block text-xs uppercase tracking-wider text-white/50 font-[family-name:var(--font-inter)] font-medium">
+                    <label htmlFor="venue-name" className={labelClass}>
                       Nom de l&apos;établissement
                     </label>
                     <div className="relative">
-                      <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" size={16} strokeWidth={1.5} />
+                      <Building2
+                        className="absolute left-4 top-1/2 -translate-y-1/2 text-black/30"
+                        size={16}
+                        strokeWidth={1.5}
+                      />
                       <input
                         id="venue-name"
                         type="text"
-                        placeholder="Le Grand Club"
+                        placeholder="Le Grand Rooftop"
                         value={form.venueName}
-                        onChange={(e) => updateForm("venueName", e.target.value)}
+                        onChange={(e) =>
+                          updateForm("venueName", e.target.value)
+                        }
                         required
                         className={inputClass}
                       />
@@ -330,15 +352,19 @@ export default function SignupPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <label htmlFor="city" className="block text-xs uppercase tracking-wider text-white/50 font-[family-name:var(--font-inter)] font-medium">
+                    <label htmlFor="city" className={labelClass}>
                       Ville
                     </label>
                     <div className="relative">
-                      <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" size={16} strokeWidth={1.5} />
+                      <MapPin
+                        className="absolute left-4 top-1/2 -translate-y-1/2 text-black/30"
+                        size={16}
+                        strokeWidth={1.5}
+                      />
                       <input
                         id="city"
                         type="text"
-                        placeholder="Casablanca"
+                        placeholder="Marrakech"
                         value={form.city}
                         onChange={(e) => updateForm("city", e.target.value)}
                         required
@@ -349,16 +375,17 @@ export default function SignupPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <span className="block text-xs uppercase tracking-wider text-white/50 font-[family-name:var(--font-inter)] font-medium">
-                    Type de lieu
-                  </span>
+                  <span className={labelClass}>Type de lieu</span>
                   <div className="flex flex-wrap gap-2">
                     {(
                       [
-                        { value: "club", label: "Club" },
                         { value: "restaurant", label: "Restaurant" },
+                        { value: "rooftop", label: "Rooftop" },
+                        { value: "club", label: "Club" },
                         { value: "lounge", label: "Lounge" },
                         { value: "bar", label: "Bar" },
+                        { value: "beach-club", label: "Beach club" },
+                        { value: "hotel-riad", label: "Hôtel / Riad" },
                       ] as const
                     ).map((type) => (
                       <label key={type.value} className="cursor-pointer">
@@ -370,7 +397,7 @@ export default function SignupPage() {
                           onChange={() => setVenueType(type.value)}
                           className="peer sr-only"
                         />
-                        <span className="inline-block px-4 py-2 rounded-full text-xs font-medium font-[family-name:var(--font-inter)] bg-white/[0.04] border border-white/[0.06] text-white/50 peer-checked:bg-white/15 peer-checked:border-white/20 peer-checked:text-white transition-all">
+                        <span className="inline-block rounded-full border border-black/15 bg-white px-4 py-2 text-xs font-medium text-[var(--landing-ink)]/60 transition-all peer-checked:border-black peer-checked:bg-[var(--landing-ink)] peer-checked:text-[var(--landing-ivory)]">
                           {type.label}
                         </span>
                       </label>
@@ -383,33 +410,44 @@ export default function SignupPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 bg-white/15 hover:bg-white/20 border border-white/10 text-white rounded-2xl text-sm font-semibold font-[family-name:var(--font-inter)] transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 backdrop-blur-sm"
+              className="flex w-full items-center justify-center gap-2 rounded-full bg-[var(--landing-ink)] py-3.5 text-sm font-semibold text-[var(--landing-ivory)] transition-opacity hover:opacity-85 disabled:cursor-not-allowed disabled:opacity-40"
             >
               {loading && <Loader2 size={16} className="animate-spin" />}
               {loading ? "Création en cours..." : "Créer mon compte"}
             </button>
           </form>
 
-          {/* Divider */}
-          <div className="flex items-center gap-3 my-6">
-            <div className="flex-1 h-px bg-white/[0.08]" />
-            <span className="text-[0.6875rem] text-white/30 font-[family-name:var(--font-inter)]">ou</span>
-            <div className="flex-1 h-px bg-white/[0.08]" />
+          <div className="my-6 flex items-center gap-3">
+            <div className="h-px flex-1 bg-black/[0.08]" />
+            <span className="text-[11px] text-black/30">ou</span>
+            <div className="h-px flex-1 bg-black/[0.08]" />
           </div>
 
-          <p className="text-center text-sm text-white/40 font-[family-name:var(--font-inter)]">
+          <p className="text-center text-sm text-[var(--landing-ink)]/55">
             Déjà un compte ?{" "}
-            <Link href="/login" className="text-blue-400/80 font-medium hover:text-blue-400 transition-colors">
+            <Link
+              href="/login"
+              className="font-medium text-[var(--landing-ink)] underline decoration-black/20 underline-offset-4 transition-colors hover:decoration-black/60"
+            >
               Se connecter
             </Link>
           </p>
         </div>
 
-        {/* Footer */}
-        <div className="mt-8 text-center text-xs text-white/20 font-[family-name:var(--font-inter)]">
-          <span>&copy; {new Date().getFullYear()} twocards. Tous droits réservés.</span>
+        <div className="mt-8 text-center text-xs text-black/35">
+          <span>
+            &copy; {new Date().getFullYear()} twocards. Tous droits réservés.
+          </span>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={null}>
+      <SignupForm />
+    </Suspense>
   );
 }

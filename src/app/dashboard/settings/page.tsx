@@ -36,7 +36,7 @@ const settingsNav = [
 /*  Reusable glass classes                                             */
 /* ------------------------------------------------------------------ */
 const glassCard =
-  "backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl";
+  "backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl";
 const inputCls =
   "w-full px-4 py-2.5 bg-white/[0.05] border border-white/[0.1] rounded-xl text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-blue-400/40 transition-colors";
 const labelCls =

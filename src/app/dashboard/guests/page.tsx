@@ -172,7 +172,7 @@ export default function GuestsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl p-6">
+      <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-2xl font-extrabold font-[family-name:var(--font-manrope)] text-white">
@@ -256,7 +256,7 @@ export default function GuestsPage() {
       </div>
 
       {/* Table */}
-      <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl overflow-hidden">
+      <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl overflow-hidden">
         {/* Table Header */}
         <div className="grid grid-cols-4 sm:grid-cols-7 gap-4 px-5 py-3 bg-white/[0.04]">
           <span className="text-[0.625rem] text-white/30 uppercase tracking-wider">Nom</span>
@@ -297,7 +297,7 @@ export default function GuestsPage() {
 
       {/* Footer Stats */}
       <div className="mt-8">
-        <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl p-5 flex flex-wrap items-center justify-between gap-6">
+        <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-5 flex flex-wrap items-center justify-between gap-6">
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-3">
               <div className="h-9 w-9 rounded-full bg-blue-500/15 flex items-center justify-center">
@@ -355,7 +355,7 @@ export default function GuestsPage() {
       {/* Add Client Modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl p-6 w-full max-w-md mx-4">
+          <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6 w-full max-w-md mx-4">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-lg font-bold text-white">
                 Nouveau Client

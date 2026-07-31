@@ -51,7 +51,7 @@ export async function updateSession(request: NextRequest) {
     user &&
     (pathname === "/login" || pathname === "/signup")
   ) {
-    const role = user.user_metadata?.role;
+    const role = (user.app_metadata?.role ?? user.user_metadata?.role);
     const url = request.nextUrl.clone();
     url.pathname = role === "concierge" ? "/concierge" : "/dashboard";
     return NextResponse.redirect(url);
@@ -59,7 +59,7 @@ export async function updateSession(request: NextRequest) {
 
   // Redirect concierge users away from /dashboard to /concierge
   if (user && inSection("/dashboard")) {
-    const role = user.user_metadata?.role;
+    const role = (user.app_metadata?.role ?? user.user_metadata?.role);
     if (role === "concierge") {
       const url = request.nextUrl.clone();
       url.pathname = "/concierge";
@@ -69,7 +69,7 @@ export async function updateSession(request: NextRequest) {
 
   // Redirect etablissement users away from /concierge to /dashboard
   if (user && inSection("/concierge")) {
-    const role = user.user_metadata?.role;
+    const role = (user.app_metadata?.role ?? user.user_metadata?.role);
     if (role !== "concierge") {
       const url = request.nextUrl.clone();
       url.pathname = "/dashboard";

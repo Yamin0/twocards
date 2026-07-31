@@ -154,8 +154,8 @@ export default function GuestProfilePage() {
 
   if (!isDemoVenue) {
     return (
-      <div className="bg-surface min-h-screen flex items-center justify-center">
-        <p className="text-sm text-on-surface-variant">Profil client non disponible</p>
+      <div className="bg-transparent min-h-screen flex items-center justify-center">
+        <p className="text-sm text-white/60">Profil client non disponible</p>
       </div>
     );
   }
@@ -166,13 +166,13 @@ export default function GuestProfilePage() {
   const tags = DEMO_TAGS;
 
   return (
-    <div className="bg-surface min-h-screen">
+    <div className="bg-transparent min-h-screen">
       {/* Header */}
       <div className="px-6 pt-8 pb-6">
-        <div className="bg-surface-card rounded-md editorial-shadow p-6 flex flex-wrap items-start gap-6">
+        <div className="bg-white/[0.07] rounded-md editorial-shadow p-6 flex flex-wrap items-start gap-6">
           {/* Avatar */}
-          <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-            <span className="text-2xl font-semibold text-primary font-[family-name:var(--font-manrope)]">
+          <div className="h-20 w-20 rounded-full bg-white/15/10 flex items-center justify-center flex-shrink-0">
+            <span className="text-2xl font-semibold text-white font-[family-name:var(--font-manrope)]">
               HE
             </span>
           </div>
@@ -180,15 +180,15 @@ export default function GuestProfilePage() {
           {/* Info */}
           <div className="flex-1 min-w-0">
             <div className="flex flex-wrap items-center gap-3 mb-2">
-              <h1 className="text-2xl font-semibold text-primary-dark font-[family-name:var(--font-manrope)]">
+              <h1 className="text-2xl font-semibold text-white font-[family-name:var(--font-manrope)]">
                 {guest.name}
               </h1>
-              <span className="inline-flex items-center gap-1 rounded-full bg-on-surface/10 px-2.5 py-0.5 text-[0.6875rem] font-medium text-on-surface">
+              <span className="inline-flex items-center gap-1 rounded-full bg-on-surface/10 px-2.5 py-0.5 text-[0.6875rem] font-medium text-white">
                 <Crown className="h-3 w-3" strokeWidth={1.5} />
                 {guest.vip}
               </span>
             </div>
-            <div className="flex flex-wrap items-center gap-5 text-sm text-on-surface-variant">
+            <div className="flex flex-wrap items-center gap-5 text-sm text-white/60">
               <span className="inline-flex items-center gap-1.5">
                 <Phone className="h-3.5 w-3.5" strokeWidth={1.5} />
                 {guest.phone}
@@ -208,14 +208,14 @@ export default function GuestProfilePage() {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setShowEditModal(true)}
-              className="inline-flex items-center gap-2 bg-surface-mid rounded-sm px-4 py-2 text-sm text-on-surface-variant hover:text-on-background transition-colors"
+              className="inline-flex items-center gap-2 bg-white/[0.05] rounded-sm px-4 py-2 text-sm text-white/60 hover:text-white transition-colors"
             >
               <Pencil className="h-3.5 w-3.5" strokeWidth={1.5} />
               Modifier
             </button>
             <button
               onClick={() => setShowNoteModal(true)}
-              className="inline-flex items-center gap-2 bg-primary text-white rounded-sm px-4 py-2 text-sm font-medium hover:bg-primary-dark transition-colors"
+              className="inline-flex items-center gap-2 bg-white/15 text-white rounded-sm px-4 py-2 text-sm font-medium hover:bg-white/15-dark transition-colors"
             >
               <StickyNote className="h-3.5 w-3.5" strokeWidth={1.5} />
               Ajouter une note
@@ -226,7 +226,7 @@ export default function GuestProfilePage() {
 
       {/* Metrics Strip */}
       <div className="px-6 pb-6">
-        <div className="bg-primary-container rounded-md p-5 grid grid-cols-5 gap-6">
+        <div className="bg-white/15 rounded-md p-5 grid grid-cols-5 gap-6">
           {[
             { label: "Total Visites", value: guest.totalVisites },
             { label: "Dépenses Totales", value: guest.depensesTotales },
@@ -235,7 +235,7 @@ export default function GuestProfilePage() {
             { label: "Première Visite", value: guest.premiereVisite },
           ].map((m) => (
             <div key={m.label}>
-              <p className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-primary-container">
+              <p className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-white/70">
                 {m.label}
               </p>
               <p className="text-xl font-semibold text-white font-[family-name:var(--font-manrope)] mt-1">
@@ -251,18 +251,18 @@ export default function GuestProfilePage() {
         {/* Left - 60% */}
         <div className="lg:col-span-3 space-y-6">
           {/* Visit History */}
-          <div className="bg-surface-card rounded-md editorial-shadow overflow-hidden">
+          <div className="bg-white/[0.07] rounded-md editorial-shadow overflow-hidden">
             <div className="px-5 pt-5 pb-3">
-              <h2 className="text-base font-semibold text-primary-dark font-[family-name:var(--font-manrope)]">
+              <h2 className="text-base font-semibold text-white font-[family-name:var(--font-manrope)]">
                 Historique des visites
               </h2>
             </div>
-            <div className="grid grid-cols-6 gap-3 px-5 py-2 bg-surface-low">
+            <div className="grid grid-cols-6 gap-3 px-5 py-2 bg-white/[0.05]">
               {["Date", "Événement", "Lieu", "Table", "Dépense", "Référent"].map(
                 (h) => (
                   <span
                     key={h}
-                    className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant"
+                    className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-white/60"
                   >
                     {h}
                   </span>
@@ -272,43 +272,43 @@ export default function GuestProfilePage() {
             {visitHistory.map((v, i) => (
               <div
                 key={i}
-                className={`grid grid-cols-6 gap-3 px-5 py-3 text-sm ${i % 2 === 1 ? "bg-surface" : ""}`}
+                className={`grid grid-cols-6 gap-3 px-5 py-3 text-sm ${i % 2 === 1 ? "bg-transparent" : ""}`}
               >
-                <span className="text-on-surface-variant">{v.date}</span>
-                <span className="text-on-background font-medium">{v.event}</span>
-                <span className="text-on-surface-variant">{v.venue}</span>
-                <span className="text-on-background">{v.table}</span>
-                <span className="text-on-background font-medium">{v.spend}</span>
-                <span className="text-on-surface-variant">{v.referral}</span>
+                <span className="text-white/60">{v.date}</span>
+                <span className="text-white font-medium">{v.event}</span>
+                <span className="text-white/60">{v.venue}</span>
+                <span className="text-white">{v.table}</span>
+                <span className="text-white font-medium">{v.spend}</span>
+                <span className="text-white/60">{v.referral}</span>
               </div>
             ))}
           </div>
 
           {/* Upcoming Reservations */}
           <div>
-            <h2 className="text-base font-semibold text-primary-dark font-[family-name:var(--font-manrope)] mb-3">
+            <h2 className="text-base font-semibold text-white font-[family-name:var(--font-manrope)] mb-3">
               Réservations à venir
             </h2>
             <div className="space-y-3">
               {upcoming.map((r, i) => (
                 <div
                   key={i}
-                  className="bg-surface-card rounded-md editorial-shadow p-4 flex items-center justify-between"
+                  className="bg-white/[0.07] rounded-md editorial-shadow p-4 flex items-center justify-between"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="h-12 w-12 rounded-md bg-primary/10 flex flex-col items-center justify-center">
-                      <span className="text-xs font-semibold text-primary leading-none">
+                    <div className="h-12 w-12 rounded-md bg-white/15/10 flex flex-col items-center justify-center">
+                      <span className="text-xs font-semibold text-white leading-none">
                         {r.date.split(" ")[0]}
                       </span>
-                      <span className="text-[0.625rem] text-primary/70">
+                      <span className="text-[0.625rem] text-white/70">
                         {r.date.split(" ")[1]}
                       </span>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-on-background">
+                      <p className="text-sm font-medium text-white">
                         {r.event}
                       </p>
-                      <div className="flex items-center gap-3 mt-0.5 text-xs text-on-surface-variant">
+                      <div className="flex items-center gap-3 mt-0.5 text-xs text-white/60">
                         <span className="inline-flex items-center gap-1">
                           <Clock className="h-3 w-3" strokeWidth={1.5} />
                           {r.time}
@@ -334,56 +334,56 @@ export default function GuestProfilePage() {
         {/* Right - 40% */}
         <div className="lg:col-span-2 space-y-6">
           {/* Client Info */}
-          <div className="bg-surface-card rounded-md editorial-shadow p-5">
-            <h2 className="text-base font-semibold text-primary-dark font-[family-name:var(--font-manrope)] mb-4">
+          <div className="bg-white/[0.07] rounded-md editorial-shadow p-5">
+            <h2 className="text-base font-semibold text-white font-[family-name:var(--font-manrope)] mb-4">
               Informations client
             </h2>
             <div className="space-y-3">
               <div className="flex items-start gap-3">
-                <CalendarDays className="h-4 w-4 text-on-surface-variant mt-0.5" strokeWidth={1.5} />
+                <CalendarDays className="h-4 w-4 text-white/60 mt-0.5" strokeWidth={1.5} />
                 <div>
-                  <p className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant">Anniversaire</p>
-                  <p className="text-sm text-on-background">{guest.birthday}</p>
+                  <p className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-white/60">Anniversaire</p>
+                  <p className="text-sm text-white">{guest.birthday}</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <Crown className="h-4 w-4 text-on-surface-variant mt-0.5" strokeWidth={1.5} />
+                <Crown className="h-4 w-4 text-white/60 mt-0.5" strokeWidth={1.5} />
                 <div>
-                  <p className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant">Préférence table</p>
-                  <p className="text-sm text-on-background">{guest.tablePreference}</p>
+                  <p className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-white/60">Préférence table</p>
+                  <p className="text-sm text-white">{guest.tablePreference}</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <Music className="h-4 w-4 text-on-surface-variant mt-0.5" strokeWidth={1.5} />
+                <Music className="h-4 w-4 text-white/60 mt-0.5" strokeWidth={1.5} />
                 <div>
-                  <p className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant">Style musical</p>
-                  <p className="text-sm text-on-background">{guest.musicStyle}</p>
+                  <p className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-white/60">Style musical</p>
+                  <p className="text-sm text-white">{guest.musicStyle}</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <AlertTriangle className="h-4 w-4 text-error mt-0.5" strokeWidth={1.5} />
+                <AlertTriangle className="h-4 w-4 text-red-400 mt-0.5" strokeWidth={1.5} />
                 <div>
-                  <p className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant">Allergies alimentaires</p>
-                  <p className="text-sm text-error">{guest.allergies}</p>
+                  <p className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-white/60">Allergies alimentaires</p>
+                  <p className="text-sm text-red-400">{guest.allergies}</p>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Notes */}
-          <div className="bg-surface-card rounded-md editorial-shadow p-5">
-            <h2 className="text-base font-semibold text-primary-dark font-[family-name:var(--font-manrope)] mb-4">
+          <div className="bg-white/[0.07] rounded-md editorial-shadow p-5">
+            <h2 className="text-base font-semibold text-white font-[family-name:var(--font-manrope)] mb-4">
               Notes internes
             </h2>
             <div className="space-y-4">
               {notes.map((n, i) => (
                 <div key={i} className={i > 0 ? "pt-4 border-t-0" : ""}>
-                  <div className={`p-3 rounded-md ${i % 2 === 0 ? "bg-surface" : "bg-surface-low"}`}>
+                  <div className={`p-3 rounded-md ${i % 2 === 0 ? "bg-transparent" : "bg-white/[0.05]"}`}>
                     <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-xs font-medium text-on-background">{n.author}</span>
-                      <span className="text-xs text-on-surface-variant">{n.date}</span>
+                      <span className="text-xs font-medium text-white">{n.author}</span>
+                      <span className="text-xs text-white/60">{n.date}</span>
                     </div>
-                    <p className="text-sm text-on-surface-variant leading-relaxed">{n.text}</p>
+                    <p className="text-sm text-white/60 leading-relaxed">{n.text}</p>
                   </div>
                 </div>
               ))}
@@ -391,13 +391,13 @@ export default function GuestProfilePage() {
           </div>
 
           {/* Tags */}
-          <div className="bg-surface-card rounded-md editorial-shadow p-5">
-            <h2 className="text-base font-semibold text-primary-dark font-[family-name:var(--font-manrope)] mb-3">
+          <div className="bg-white/[0.07] rounded-md editorial-shadow p-5">
+            <h2 className="text-base font-semibold text-white font-[family-name:var(--font-manrope)] mb-3">
               Tags
             </h2>
             <div className="flex flex-wrap gap-2">
               {tags.map((tag) => (
-                <span key={tag} className="rounded-full bg-surface-low px-3 py-1 text-xs text-on-surface-variant">
+                <span key={tag} className="rounded-full bg-white/[0.05] px-3 py-1 text-xs text-white/60">
                   {tag}
                 </span>
               ))}
@@ -409,10 +409,10 @@ export default function GuestProfilePage() {
       {/* Add Note Modal */}
       {showNoteModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-surface-card rounded-md editorial-shadow p-6 w-full max-w-md mx-4">
+          <div className="bg-white/[0.07] rounded-md editorial-shadow p-6 w-full max-w-md mx-4">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-primary-dark font-[family-name:var(--font-manrope)]">Ajouter une note</h2>
-              <button onClick={() => setShowNoteModal(false)} className="text-on-surface-variant hover:text-on-background">
+              <h2 className="text-lg font-bold text-white font-[family-name:var(--font-manrope)]">Ajouter une note</h2>
+              <button onClick={() => setShowNoteModal(false)} className="text-white/60 hover:text-white">
                 <X size={20} strokeWidth={1.5} />
               </button>
             </div>
@@ -421,11 +421,11 @@ export default function GuestProfilePage() {
               onChange={(e) => setNoteText(e.target.value)}
               placeholder="Écrire une note..."
               rows={4}
-              className="w-full px-4 py-2.5 bg-surface-low border-none rounded-md text-sm text-on-background resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 mb-4"
+              className="w-full px-4 py-2.5 bg-white/[0.05] border-none rounded-md text-sm text-white resize-none focus:outline-none focus:ring-2 focus:ring-white/30/20 mb-4"
             />
             <button
               onClick={handleAddNote}
-              className="w-full bg-primary text-white rounded-sm px-5 py-2.5 text-sm font-medium hover:bg-primary-dark transition-colors"
+              className="w-full bg-white/15 text-white rounded-sm px-5 py-2.5 text-sm font-medium hover:bg-white/15-dark transition-colors"
             >
               Enregistrer
             </button>
@@ -436,10 +436,10 @@ export default function GuestProfilePage() {
       {/* Edit Modal */}
       {showEditModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-surface-card rounded-md editorial-shadow p-6 w-full max-w-md mx-4">
+          <div className="bg-white/[0.07] rounded-md editorial-shadow p-6 w-full max-w-md mx-4">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-primary-dark font-[family-name:var(--font-manrope)]">Modifier le client</h2>
-              <button onClick={() => setShowEditModal(false)} className="text-on-surface-variant hover:text-on-background">
+              <h2 className="text-lg font-bold text-white font-[family-name:var(--font-manrope)]">Modifier le client</h2>
+              <button onClick={() => setShowEditModal(false)} className="text-white/60 hover:text-white">
                 <X size={20} strokeWidth={1.5} />
               </button>
             </div>
@@ -452,18 +452,18 @@ export default function GuestProfilePage() {
               className="space-y-4"
             >
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-on-surface-variant mb-1.5">Nom</label>
-                <input type="text" defaultValue={guest.name} className="w-full px-4 py-2.5 bg-surface-low border-none rounded-md text-sm text-on-background focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-white/60 mb-1.5">Nom</label>
+                <input type="text" defaultValue={guest.name} className="w-full px-4 py-2.5 bg-white/[0.05] border-none rounded-md text-sm text-white focus:outline-none focus:ring-2 focus:ring-white/30/20" />
               </div>
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-on-surface-variant mb-1.5">Téléphone</label>
-                <input type="tel" defaultValue={guest.phone} className="w-full px-4 py-2.5 bg-surface-low border-none rounded-md text-sm text-on-background focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-white/60 mb-1.5">Téléphone</label>
+                <input type="tel" defaultValue={guest.phone} className="w-full px-4 py-2.5 bg-white/[0.05] border-none rounded-md text-sm text-white focus:outline-none focus:ring-2 focus:ring-white/30/20" />
               </div>
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-on-surface-variant mb-1.5">Email</label>
-                <input type="email" defaultValue={guest.email} className="w-full px-4 py-2.5 bg-surface-low border-none rounded-md text-sm text-on-background focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-white/60 mb-1.5">Email</label>
+                <input type="email" defaultValue={guest.email} className="w-full px-4 py-2.5 bg-white/[0.05] border-none rounded-md text-sm text-white focus:outline-none focus:ring-2 focus:ring-white/30/20" />
               </div>
-              <button type="submit" className="w-full bg-primary text-white rounded-sm px-5 py-2.5 text-sm font-medium hover:bg-primary-dark transition-colors">
+              <button type="submit" className="w-full bg-white/15 text-white rounded-sm px-5 py-2.5 text-sm font-medium hover:bg-white/15-dark transition-colors">
                 Enregistrer
               </button>
             </form>
@@ -473,7 +473,7 @@ export default function GuestProfilePage() {
 
       {/* Toast */}
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-primary-dark text-white px-4 py-3 rounded-md shadow-lg">
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-white/15-dark text-white px-4 py-3 rounded-md shadow-lg">
           <Check size={16} strokeWidth={2} />
           <span className="text-sm font-medium">{toast}</span>
         </div>

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 
-const DEMO_VENUE_EMAIL = "yaminbenhamou@gmail.com";
+const DEMO_VENUE_EMAILS = ["yaminbenhamou@gmail.com", "test@twocardspro.com"];
 const DEMO_CONCIERGE_EMAIL = "adminconcierge@twocardspro.com";
 
 export function useAuthUser() {
@@ -19,7 +19,11 @@ export function useAuthUser() {
       if (data.user) {
         setEmail(data.user.email ?? null);
         setFullName(data.user.user_metadata?.full_name ?? null);
-        setRole(data.user.user_metadata?.role ?? null);
+        setRole(
+          data.user.app_metadata?.role ??
+            data.user.user_metadata?.role ??
+            null
+        );
         setVenueName(data.user.user_metadata?.venue_name ?? null);
       }
       setIsLoading(false);
@@ -28,7 +32,7 @@ export function useAuthUser() {
     });
   }, []);
 
-  const isDemoVenue = email === DEMO_VENUE_EMAIL;
+  const isDemoVenue = email !== null && DEMO_VENUE_EMAILS.includes(email);
   const isDemoConcierge = email === DEMO_CONCIERGE_EMAIL;
 
   return {

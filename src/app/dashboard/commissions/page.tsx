@@ -258,7 +258,7 @@ export default function CommissionsPage() {
   return (
     <div className="space-y-6 font-[family-name:var(--font-inter)]">
       {/* ---- Header ---- */}
-      <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl p-6">
+      <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
         <h1 className="text-2xl font-extrabold font-[family-name:var(--font-manrope)] text-white">
           Commissions
         </h1>
@@ -274,7 +274,7 @@ export default function CommissionsPage() {
           return (
             <div
               key={s.label}
-              className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-2xl p-5"
+              className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl p-5"
             >
               <div
                 className={`w-10 h-10 rounded-xl ${s.bgColor} flex items-center justify-center mb-3`}
@@ -291,7 +291,7 @@ export default function CommissionsPage() {
       </div>
 
       {/* ---- Commission table ---- */}
-      <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl overflow-hidden">
+      <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl overflow-hidden">
         {/* Toolbar */}
         <div className="px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.08]">
           <h2 className="text-sm font-bold font-[family-name:var(--font-manrope)] text-white">

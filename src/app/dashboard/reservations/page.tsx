@@ -187,7 +187,7 @@ export default function ReservationsPage() {
   return (
     <div className="space-y-6">
       {/* ── Header ── */}
-      <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl p-6">
+      <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-white font-[family-name:var(--font-manrope)]">
@@ -217,7 +217,7 @@ export default function ReservationsPage() {
             return (
               <div
                 key={stat.label}
-                className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-2xl p-5 transition-all duration-500 hover:bg-white/[0.1]"
+                className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl p-5 transition-all duration-500 hover:bg-white/[0.1]"
               >
                 <div className="flex items-center justify-between mb-3">
                   <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
@@ -251,7 +251,7 @@ export default function ReservationsPage() {
       {/* ── Main grid ── */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* ── Reservations table ── */}
-        <div className="xl:col-span-2 backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl p-6">
+        <div className="xl:col-span-2 backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
           {/* Toolbar */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div className="flex items-center gap-2">
@@ -415,7 +415,7 @@ export default function ReservationsPage() {
         <div className="space-y-6">
           {/* Nouvelles demandes (pending) */}
           {isDemoVenue && (
-            <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-2xl p-5">
+            <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl p-5">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-sm font-semibold text-white font-[family-name:var(--font-manrope)]">
                   Nouvelles demandes
@@ -486,7 +486,7 @@ export default function ReservationsPage() {
           )}
 
           {/* Événements à venir */}
-          <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-2xl p-5">
+          <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl p-5">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-semibold text-white font-[family-name:var(--font-manrope)]">
                 Événements à venir
@@ -543,7 +543,7 @@ export default function ReservationsPage() {
 
           {/* Résa par conciergerie */}
           {isDemoVenue && (
-            <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-2xl p-5">
+            <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl p-5">
               <h3 className="text-sm font-semibold text-white font-[family-name:var(--font-manrope)] mb-4">
                 Résa par conciergerie
               </h3>

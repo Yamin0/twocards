@@ -122,24 +122,24 @@ export default function ConciergeMessagesPage() {
   if (isLoading) return <ConciergeSkeleton />;
 
   return (
-    <div className="bg-surface min-h-screen">
+    <div className="bg-transparent min-h-screen">
       <div className="px-8 pt-8 pb-4">
-        <h1 className="text-primary-dark font-[family-name:var(--font-manrope)] text-2xl font-extrabold">
+        <h1 className="text-white font-[family-name:var(--font-manrope)] text-2xl font-extrabold">
           Messages
         </h1>
-        <p className="text-on-surface-variant mt-1 text-sm">
+        <p className="text-white/60 mt-1 text-sm">
           Échangez avec vos établissements partenaires.
         </p>
       </div>
 
       <div className="px-8 pb-8">
-        <div className="bg-surface-card rounded-md editorial-shadow overflow-hidden grid grid-cols-1 md:grid-cols-3" style={{ height: "calc(100vh - 200px)" }}>
+        <div className="bg-white/[0.07] rounded-md editorial-shadow overflow-hidden grid grid-cols-1 md:grid-cols-3" style={{ height: "calc(100vh - 200px)" }}>
           {/* Conversation list */}
-          <div className={`border-r border-outline-variant/20 overflow-y-auto ${activeConv !== null ? "hidden md:flex md:flex-col" : "flex flex-col"}`}>
+          <div className={`border-r border-white/10/20 overflow-y-auto ${activeConv !== null ? "hidden md:flex md:flex-col" : "flex flex-col"}`}>
             {conversations.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full py-16">
-                <MessageSquare size={32} strokeWidth={1} className="text-on-surface-variant/30 mb-3" />
-                <p className="text-sm text-on-surface-variant">Aucune conversation</p>
+                <MessageSquare size={32} strokeWidth={1} className="text-white/60/30 mb-3" />
+                <p className="text-sm text-white/60">Aucune conversation</p>
               </div>
             ) : (
               conversations.map((conv) => {
@@ -152,31 +152,31 @@ export default function ConciergeMessagesPage() {
                     key={conv.id}
                     onClick={() => setActiveConv(conv.id)}
                     className={`w-full text-left p-4 transition-colors ${
-                      activeConv === conv.id ? "bg-primary/5" : "hover:bg-surface-low"
+                      activeConv === conv.id ? "bg-white/15/5" : "hover:bg-white/[0.05]"
                     }`}
                   >
                     <div className="flex items-start justify-between mb-1">
                       <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center flex-shrink-0">
-                          <Building2 size={14} strokeWidth={1.5} className="text-on-primary-container" />
+                        <div className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center flex-shrink-0">
+                          <Building2 size={14} strokeWidth={1.5} className="text-white/70" />
                         </div>
                         <div>
-                          <p className="font-[family-name:var(--font-manrope)] font-bold text-sm text-on-background">
+                          <p className="font-[family-name:var(--font-manrope)] font-bold text-sm text-white">
                             {conv.venue}
                           </p>
-                          <p className="text-[0.625rem] text-on-surface-variant">{conv.city}</p>
+                          <p className="text-[0.625rem] text-white/60">{conv.city}</p>
                         </div>
                       </div>
                       <div className="flex flex-col items-end gap-1">
-                        <span className="text-[0.625rem] text-on-surface-variant">{conv.time}</span>
+                        <span className="text-[0.625rem] text-white/60">{conv.time}</span>
                         {conv.unread > 0 && (
-                          <span className="w-5 h-5 rounded-full bg-primary text-white text-[0.625rem] font-bold flex items-center justify-center">
+                          <span className="w-5 h-5 rounded-full bg-white/15 text-white text-[0.625rem] font-bold flex items-center justify-center">
                             {conv.unread}
                           </span>
                         )}
                       </div>
                     </div>
-                    <p className="text-xs text-on-surface-variant truncate mt-1 ml-10">
+                    <p className="text-xs text-white/60 truncate mt-1 ml-10">
                       {lastMsg}
                     </p>
                   </button>
@@ -189,27 +189,27 @@ export default function ConciergeMessagesPage() {
           <div className={`md:col-span-2 flex flex-col ${activeConv === null ? "hidden md:flex" : ""}`}>
             {!activeConvData ? (
               <div className="flex-1 flex flex-col items-center justify-center">
-                <MessageSquare size={40} strokeWidth={1} className="text-on-surface-variant/30 mb-3" />
-                <p className="text-sm text-on-surface-variant">Sélectionnez une conversation</p>
+                <MessageSquare size={40} strokeWidth={1} className="text-white/60/30 mb-3" />
+                <p className="text-sm text-white/60">Sélectionnez une conversation</p>
               </div>
             ) : (
               <>
-                <div className="p-4 border-b border-outline-variant/20 flex items-center gap-3">
+                <div className="p-4 border-b border-white/10/20 flex items-center gap-3">
                   <button
                     onClick={() => setActiveConv(null)}
-                    className="md:hidden flex items-center gap-1 text-sm text-primary font-medium mr-1"
+                    className="md:hidden flex items-center gap-1 text-sm text-white font-medium mr-1"
                   >
                     <ArrowLeft size={16} strokeWidth={2} />
                     Retour
                   </button>
-                  <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center">
-                    <Building2 size={18} strokeWidth={1.5} className="text-on-primary-container" />
+                  <div className="w-10 h-10 rounded-full bg-white/15 flex items-center justify-center">
+                    <Building2 size={18} strokeWidth={1.5} className="text-white/70" />
                   </div>
                   <div>
-                    <p className="font-[family-name:var(--font-manrope)] font-bold text-on-background">
+                    <p className="font-[family-name:var(--font-manrope)] font-bold text-white">
                       {activeConvData.venue}
                     </p>
-                    <p className="text-xs text-on-surface-variant">
+                    <p className="text-xs text-white/60">
                       {activeConvData.city}
                     </p>
                   </div>
@@ -225,14 +225,14 @@ export default function ConciergeMessagesPage() {
                       <div
                         className={`max-w-[75%] px-4 py-2.5 rounded-2xl ${
                           msg.from === "me"
-                            ? "bg-primary text-white rounded-br-sm"
-                            : "bg-surface-low text-on-background rounded-bl-sm"
+                            ? "bg-white/15 text-white rounded-br-sm"
+                            : "bg-white/[0.05] text-white rounded-bl-sm"
                         }`}
                       >
                         <p className="text-sm leading-relaxed">{msg.text}</p>
                         <p
                           className={`text-[0.625rem] mt-1 ${
-                            msg.from === "me" ? "text-white/60" : "text-on-surface-variant/60"
+                            msg.from === "me" ? "text-white/60" : "text-white/60/60"
                           }`}
                         >
                           {msg.time}
@@ -244,7 +244,7 @@ export default function ConciergeMessagesPage() {
                 </div>
 
                 {/* Input */}
-                <div className="p-4 border-t border-outline-variant/20">
+                <div className="p-4 border-t border-white/10/20">
                   <div className="flex items-center gap-3">
                     <input
                       type="text"
@@ -252,12 +252,12 @@ export default function ConciergeMessagesPage() {
                       onChange={(e) => setInputValue(e.target.value)}
                       onKeyDown={handleKeyDown}
                       placeholder="Écrire un message..."
-                      className="flex-1 px-4 py-2.5 bg-surface-low border-none rounded-sm text-sm text-on-background placeholder:text-on-surface-variant/50 font-[family-name:var(--font-inter)] focus:ring-1 focus:ring-primary/30 focus:outline-none"
+                      className="flex-1 px-4 py-2.5 bg-white/[0.05] border-none rounded-sm text-sm text-white placeholder:text-white/60/50 font-[family-name:var(--font-inter)] focus:ring-1 focus:ring-white/30/30 focus:outline-none"
                     />
                     <button
                       onClick={handleSend}
                       disabled={!inputValue.trim()}
-                      className="p-2.5 bg-primary text-white rounded-sm hover:opacity-90 transition-opacity disabled:opacity-50"
+                      className="p-2.5 bg-white/15 text-white rounded-sm hover:opacity-90 transition-opacity disabled:opacity-50"
                     >
                       <Send size={18} strokeWidth={1.5} />
                     </button>
@@ -271,7 +271,7 @@ export default function ConciergeMessagesPage() {
 
       {/* Toast */}
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-primary-dark text-white px-4 py-3 rounded-md shadow-lg">
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-white/15-dark text-white px-4 py-3 rounded-md shadow-lg">
           <Check size={16} strokeWidth={2} />
           <span className="text-sm font-medium">{toast}</span>
         </div>

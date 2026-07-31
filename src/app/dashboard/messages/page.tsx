@@ -180,7 +180,7 @@ export default function MessagesPage() {
 
   return (
     <div className="h-[calc(100vh-80px)] lg:h-[calc(100vh-48px)]">
-      <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl h-full flex overflow-hidden">
+      <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl h-full flex overflow-hidden">
         {/* ── Conversation List ── */}
         <div
           className={`w-full md:w-[340px] lg:w-[360px] border-r border-white/[0.08] flex-shrink-0 ${

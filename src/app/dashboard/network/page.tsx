@@ -127,7 +127,7 @@ export default function NetworkPage() {
   return (
     <div className="space-y-6">
       {/* ── Header ── */}
-      <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl p-6">
+      <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-white font-[family-name:var(--font-manrope)]">
@@ -150,15 +150,15 @@ export default function NetworkPage() {
       {/* ── Stats strip ── */}
       {isDemoVenue && (
         <div className="grid grid-cols-3 gap-4">
-          <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-2xl p-4">
+          <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl p-4">
             <p className="text-white/40 text-xs">RP Actifs</p>
             <p className="text-xl font-bold text-white mt-1 font-[family-name:var(--font-manrope)]">{activePRs}</p>
           </div>
-          <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-2xl p-4">
+          <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl p-4">
             <p className="text-white/40 text-xs">Couverts ce mois</p>
             <p className="text-xl font-bold text-blue-400 mt-1 font-[family-name:var(--font-manrope)]">{totalCouverts}</p>
           </div>
-          <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-2xl p-4">
+          <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl p-4">
             <p className="text-white/40 text-xs">En attente</p>
             <p className="text-xl font-bold text-amber-400 mt-1 font-[family-name:var(--font-manrope)]">{pendingPRs}</p>
           </div>
@@ -174,11 +174,11 @@ export default function NetworkPage() {
             placeholder="Rechercher un RP..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-xl text-sm text-white placeholder:text-white/25 focus:outline-none focus:border-blue-400/40 transition-colors"
+            className="w-full pl-9 pr-4 py-2.5 backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-xl text-sm text-white placeholder:text-white/25 focus:outline-none focus:border-blue-400/40 transition-colors"
           />
         </div>
         <div className="relative">
-          <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="appearance-none pl-4 pr-9 py-2.5 backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-xl text-sm text-white/70 focus:outline-none focus:border-blue-400/40 transition-colors cursor-pointer">
+          <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="appearance-none pl-4 pr-9 py-2.5 backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-xl text-sm text-white/70 focus:outline-none focus:border-blue-400/40 transition-colors cursor-pointer">
             <option value="" className="bg-[#1a1a2e]">Tous les statuts</option>
             <option value="Actif" className="bg-[#1a1a2e]">Actif</option>
             <option value="En attente" className="bg-[#1a1a2e]">En attente</option>
@@ -189,7 +189,7 @@ export default function NetworkPage() {
         <div className="relative">
           <button
             onClick={() => setSortDropdownOpen(!sortDropdownOpen)}
-            className="flex items-center gap-1.5 px-3 py-2.5 backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-xl text-xs text-white/50 hover:text-white transition-colors"
+            className="flex items-center gap-1.5 px-3 py-2.5 backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-xl text-xs text-white/50 hover:text-white transition-colors"
           >
             <TrendingUp size={13} strokeWidth={1.5} />
             Trier: {sortBy === "ca" ? "CA" : sortBy === "couverts" ? "Couverts" : "Attendance"}
@@ -219,7 +219,7 @@ export default function NetworkPage() {
         {/* ── PR cards list ── */}
         <div className="lg:col-span-7">
           {filteredPRs.length === 0 ? (
-            <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl p-12 text-center">
+            <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-12 text-center">
               <Users size={36} strokeWidth={1} className="mx-auto text-white/15 mb-3" />
               <p className="text-sm text-white/30">Aucun RP trouvé</p>
             </div>
@@ -229,7 +229,7 @@ export default function NetworkPage() {
                 <div
                   key={pr.id}
                   onClick={() => setSelectedPR(selectedPR === pr.id ? null : pr.id)}
-                  className={`backdrop-blur-xl bg-white/[0.07] border rounded-2xl p-5 cursor-pointer transition-all duration-300 hover:bg-white/[0.09] ${
+                  className={`backdrop-blur-2xl bg-black/45 border rounded-2xl p-5 cursor-pointer transition-all duration-300 hover:bg-white/[0.09] ${
                     selectedPR === pr.id ? "border-blue-400/30 shadow-[0_0_20px_rgba(96,165,250,0.1)]" : "border-white/[0.12]"
                   }`}
                 >
@@ -338,7 +338,7 @@ export default function NetworkPage() {
         <div className="lg:col-span-3 space-y-5">
           {/* Selected PR detail */}
           {selected ? (
-            <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl p-5 space-y-5">
+            <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-5 space-y-5">
               <div className="text-center">
                 <div className="h-16 w-16 rounded-full bg-blue-400/15 flex items-center justify-center mx-auto mb-3">
                   <span className="text-xl font-bold text-blue-400">{selected.initials}</span>
@@ -414,7 +414,7 @@ export default function NetworkPage() {
               </div>
             </div>
           ) : (
-            <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl p-8 text-center">
+            <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-8 text-center">
               <div className="w-12 h-12 rounded-xl bg-white/[0.06] flex items-center justify-center mx-auto mb-3">
                 <Users size={20} strokeWidth={1.5} className="text-white/20" />
               </div>
@@ -425,7 +425,7 @@ export default function NetworkPage() {
 
           {/* Top performer */}
           {topPerformer && isDemoVenue && (
-            <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl p-5 space-y-4">
+            <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-5 space-y-4">
               <div className="flex items-center gap-2">
                 <Award size={16} strokeWidth={1.5} className="text-amber-400" />
                 <h3 className="text-sm font-semibold text-white font-[family-name:var(--font-manrope)]">Meilleur performeur</h3>
@@ -465,7 +465,7 @@ export default function NetworkPage() {
 
           {/* Monthly CA chart */}
           {isDemoVenue && (
-            <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl p-5">
+            <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-5">
               <div className="flex items-center gap-2 mb-4">
                 <BarChart3 size={16} strokeWidth={1.5} className="text-white/30" />
                 <h3 className="text-sm font-semibold text-white font-[family-name:var(--font-manrope)]">CA mensuel RP</h3>

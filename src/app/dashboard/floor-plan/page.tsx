@@ -299,7 +299,7 @@ export default function FloorPlanPage() {
   return (
     <div className="space-y-6">
       {/* ── Header ── */}
-      <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl p-6 relative z-20">
+      <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6 relative z-20">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-white font-[family-name:var(--font-manrope)]">
@@ -320,7 +320,7 @@ export default function FloorPlanPage() {
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
                 editMode
                   ? "bg-blue-500 text-white shadow-[0_0_20px_rgba(96,165,250,0.3)]"
-                  : "backdrop-blur-xl bg-white/[0.07] border border-white/[0.15] text-white/60 hover:bg-white/[0.1] hover:text-white"
+                  : "backdrop-blur-2xl bg-black/45 border border-white/[0.15] text-white/60 hover:bg-white/[0.1] hover:text-white"
               }`}
             >
               {editMode ? (
@@ -340,7 +340,7 @@ export default function FloorPlanPage() {
             <div className="relative">
               <button
                 onClick={() => setEventDropdownOpen(!eventDropdownOpen)}
-                className="flex items-center gap-2 px-4 py-2.5 backdrop-blur-xl bg-white/[0.07] border border-white/[0.15] rounded-xl text-sm text-white hover:bg-white/[0.1] transition-all"
+                className="flex items-center gap-2 px-4 py-2.5 backdrop-blur-2xl bg-black/45 border border-white/[0.15] rounded-xl text-sm text-white hover:bg-white/[0.1] transition-all"
               >
                 <CalendarDays size={16} strokeWidth={1.5} className="text-blue-400" />
                 <span className="font-medium">{currentEvent.name}</span>
@@ -386,25 +386,25 @@ export default function FloorPlanPage() {
       {/* ── Stats strip ── */}
       {isDemoVenue && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-2xl p-4">
+          <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl p-4">
             <p className="text-white/40 text-xs">Tables occupées</p>
             <p className="text-xl font-bold text-white mt-1 font-[family-name:var(--font-manrope)]">
               {occupiedCount}/{currentTables.length}
             </p>
           </div>
-          <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-2xl p-4">
+          <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl p-4">
             <p className="text-white/40 text-xs">Disponibles</p>
             <p className="text-xl font-bold text-green-400 mt-1 font-[family-name:var(--font-manrope)]">
               {availableCount}
             </p>
           </div>
-          <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-2xl p-4">
+          <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl p-4">
             <p className="text-white/40 text-xs">Couverts réservés</p>
             <p className="text-xl font-bold text-white mt-1 font-[family-name:var(--font-manrope)]">
               {occupiedCapacity}
             </p>
           </div>
-          <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-2xl p-4">
+          <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl p-4">
             <p className="text-white/40 text-xs">Capacité totale</p>
             <p className="text-xl font-bold text-white mt-1 font-[family-name:var(--font-manrope)]">
               {totalCapacity}
@@ -443,7 +443,7 @@ export default function FloorPlanPage() {
       <div className="grid grid-cols-1 lg:grid-cols-10 gap-6">
         {/* ── Floor plan canvas ── */}
         <div className="lg:col-span-7">
-          <div className={`backdrop-blur-xl bg-white/[0.07] border rounded-3xl overflow-hidden relative ${
+          <div className={`backdrop-blur-2xl bg-black/45 border rounded-3xl overflow-hidden relative ${
             editMode ? "border-blue-400/30 shadow-[0_0_30px_rgba(96,165,250,0.08)]" : "border-white/[0.12]"
           }`}>
             {/* Edit mode banner */}
@@ -613,7 +613,7 @@ export default function FloorPlanPage() {
         {/* ── Sidebar: Selected table details ── */}
         <div className="lg:col-span-3">
           {selected ? (
-            <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl p-5 space-y-5">
+            <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-5 space-y-5">
               {/* Table info */}
               <div>
                 <div className="flex items-center justify-between mb-3">
@@ -746,7 +746,7 @@ export default function FloorPlanPage() {
               )}
             </div>
           ) : (
-            <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl p-8 text-center">
+            <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-8 text-center">
               <div className="w-12 h-12 rounded-xl bg-white/[0.06] flex items-center justify-center mx-auto mb-3">
                 {editMode ? (
                   <Pencil size={20} strokeWidth={1.5} className="text-blue-400/40" />
