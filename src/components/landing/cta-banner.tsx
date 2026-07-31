@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { GlassButton } from "@/components/ui/liquid-glass";
+import { WarpOverlay } from "@/components/ui/wrap-shader";
 
 export function CtaBanner() {
   return (
@@ -13,6 +14,7 @@ export function CtaBanner() {
         background: `url("https://images.unsplash.com/photo-1528605248644-14dd04022da1?q=80&w=2000&auto=format&fit=crop") center center / cover`,
       }}
     >
+      <WarpOverlay opacity={0.45} speed={0.3} />
       <div className="absolute inset-0 bg-black/50" />
 
       <motion.div

@@ -10,6 +10,7 @@ import {
   Scale,
 } from "lucide-react";
 import { GlassEffect, GlassButton, GlassFilter } from "@/components/ui/liquid-glass";
+import { WarpOverlay } from "@/components/ui/wrap-shader";
 
 const navLinks = [
   { label: "Solutions", href: "#solutions" },
@@ -133,6 +134,7 @@ export function Hero() {
           animation: "moveBackground 120s linear infinite",
         }}
       >
+        <WarpOverlay opacity={0.55} speed={0.4} />
         <div className="absolute inset-0 bg-black/35" />
 
         <div className="relative z-10 flex flex-col items-center gap-8">

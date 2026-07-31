@@ -1,6 +1,7 @@
 import { Hero } from "@/components/landing/hero";
 import { Testimonial } from "@/components/landing/testimonial";
 import { ValueProps } from "@/components/landing/value-props";
+import { Activity } from "@/components/landing/activity";
 import { Journey } from "@/components/landing/journey";
 import { CtaBanner } from "@/components/landing/cta-banner";
 import { Footer } from "@/components/layout/footer";
@@ -12,6 +13,7 @@ export default function Home() {
         <Hero />
         <Testimonial />
         <ValueProps />
+        <Activity />
         <Journey />
         <CtaBanner />
       </main>
