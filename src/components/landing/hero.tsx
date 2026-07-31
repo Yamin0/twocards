@@ -89,7 +89,7 @@ export function Hero() {
         <motion.h1
           {...fadeUp}
           transition={{ duration: 0.7, delay: 0.1 }}
-          className="mb-8 font-title text-[38px] font-light leading-[1.12] tracking-[-0.02em] md:text-[64px]"
+          className="mb-8 font-title text-[38px] font-normal leading-[1.12] tracking-[-0.02em] md:text-[64px]"
         >
           Chaque recommandation
           <br />
@@ -100,7 +100,7 @@ export function Hero() {
         <motion.p
           {...fadeUp}
           transition={{ duration: 0.7, delay: 0.2 }}
-          className="mb-10 max-w-xl text-[15px] font-light leading-relaxed text-[var(--landing-ink)]/70"
+          className="mb-10 max-w-xl text-[15px] font-normal leading-relaxed text-[var(--landing-ink)]/70"
         >
           TwoCards connecte les établissements aux concierges et RP vérifiés,
           synchronise les disponibilités et automatise l&apos;attribution, les
@@ -173,7 +173,7 @@ export function Hero() {
           </GlassEffect>
 
           <GlassButton href="/signup">
-            <p className="text-base font-light tracking-wide text-white">
+            <p className="text-base font-normal tracking-wide text-white">
               Découvrir TwoCards
             </p>
           </GlassButton>
@@ -186,7 +186,7 @@ export function Hero() {
           <p className="mb-3 text-center text-[11px] font-medium uppercase tracking-[0.28em] text-[var(--landing-mute)]">
             Le produit
           </p>
-          <h2 className="mx-auto mb-12 max-w-2xl text-center font-title text-3xl font-light leading-tight md:text-4xl">
+          <h2 className="mx-auto mb-12 max-w-2xl text-center font-title text-3xl font-normal leading-tight md:text-4xl">
             Qui remplit vos tables,
             <br />
             <em className="italic">noir sur blanc</em>.

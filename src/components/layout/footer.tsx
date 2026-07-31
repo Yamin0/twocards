@@ -34,7 +34,7 @@ export function Footer() {
             >
               twocards<span className="text-[var(--landing-mute)]">.</span>
             </Link>
-            <p className="mt-4 max-w-xs text-[13px] font-light leading-relaxed text-[var(--landing-ink)]/60">
+            <p className="mt-4 max-w-xs text-[13px] font-normal leading-relaxed text-[var(--landing-ink)]/60">
               Le channel manager B2B des concierges et RP. TwoCards distribue
               l&apos;inventaire des établissements, attribue chaque client et
               automatise les commissions.
@@ -52,7 +52,7 @@ export function Footer() {
                   <li key={`${title}-${i}`}>
                     <Link
                       href={link.href}
-                      className="text-[13px] font-light text-[var(--landing-ink)]/60 transition-colors hover:text-[var(--landing-ink)]"
+                      className="text-[13px] font-normal text-[var(--landing-ink)]/60 transition-colors hover:text-[var(--landing-ink)]"
                     >
                       {link.label}
                     </Link>
@@ -67,10 +67,10 @@ export function Footer() {
       {/* Copyright bar */}
       <div className="border-t border-black/[0.06]">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 py-6 sm:flex-row md:px-16">
-          <p className="text-xs font-light text-[var(--landing-mute)]">
+          <p className="text-xs font-normal text-[var(--landing-mute)]">
             &copy; {new Date().getFullYear()} twocards. Tous droits réservés.
           </p>
-          <div className="flex items-center gap-6 text-xs font-light text-[var(--landing-mute)]">
+          <div className="flex items-center gap-6 text-xs font-normal text-[var(--landing-mute)]">
             <Link
               href="#solutions"
               className="transition-colors hover:text-[var(--landing-ink)]"

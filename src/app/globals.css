@@ -111,12 +111,14 @@
   --landing-mute: #8d8d8d;
 }
 
-/* Piles typographiques landing : Gotham (si dispo) → Montserrat ; Suisse Int'l → Inter */
+/* Piles typographiques landing : Gotham (titres) / Suisse Int'l (textes),
+   auto-hébergées via next/font/local. Gotham n'existe qu'en Book (400) :
+   les titres restent donc en font-normal. */
 .font-title {
-  font-family: "Gotham", "Gotham Light", var(--font-display), sans-serif;
+  font-family: var(--font-gotham), var(--font-inter), sans-serif;
 }
 .font-body {
-  font-family: "Suisse Int'l", "Suisse Intl", var(--font-inter), sans-serif;
+  font-family: var(--font-suisse), var(--font-inter), sans-serif;
 }
 
 @keyframes moveBackground {

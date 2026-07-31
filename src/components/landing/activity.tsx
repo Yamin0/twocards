@@ -52,12 +52,12 @@ export function Activity() {
           <p className="mb-4 text-[11px] font-medium uppercase tracking-[0.28em] text-[var(--landing-mute)]">
             En temps réel
           </p>
-          <h2 className="mb-6 font-title text-3xl font-light leading-tight text-[var(--landing-ink)] md:text-4xl">
+          <h2 className="mb-6 font-title text-3xl font-normal leading-tight text-[var(--landing-ink)] md:text-4xl">
             Votre soirée se déroule.
             <br />
             <em className="italic">Vous êtes déjà au courant.</em>
           </h2>
-          <p className="mb-8 max-w-md text-[15px] font-light leading-relaxed text-[var(--landing-ink)]/70">
+          <p className="mb-8 max-w-md text-[15px] font-normal leading-relaxed text-[var(--landing-ink)]/70">
             Chaque événement du parcours — confirmation, arrivée du client,
             validation de la facture, commission — vous est notifié à l&apos;instant
             où il se produit. Côté concierge comme côté établissement, plus
@@ -72,7 +72,7 @@ export function Activity() {
             ].map((point) => (
               <li
                 key={point}
-                className="border-t border-black/[0.08] py-3.5 text-[14px] font-light leading-relaxed text-[var(--landing-ink)]/80 last:border-b"
+                className="border-t border-black/[0.08] py-3.5 text-[14px] font-normal leading-relaxed text-[var(--landing-ink)]/80 last:border-b"
               >
                 {point}
               </li>

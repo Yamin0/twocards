@@ -28,12 +28,12 @@ export function CtaBanner() {
           Founding Circle — Marrakech, places limitées
         </p>
 
-        <h2 className="mb-6 font-title text-4xl font-light leading-[1.15] text-white md:text-6xl">
+        <h2 className="mb-6 font-title text-4xl font-normal leading-[1.15] text-white md:text-6xl">
           Digitalisez les relations qui{" "}
           <em className="italic">existent déjà</em>.
         </h2>
 
-        <p className="mb-10 max-w-xl text-[15px] font-light leading-relaxed text-white/85">
+        <p className="mb-10 max-w-xl text-[15px] font-normal leading-relaxed text-white/85">
           Installation gratuite pendant le pilote, import de votre réseau
           existant et rapport de performance hebdomadaire. Le payant ne
           commence qu&apos;après la preuve du ROI.
@@ -41,7 +41,7 @@ export function CtaBanner() {
 
         <div className="flex flex-col items-center gap-6 sm:flex-row">
           <GlassButton href="/signup">
-            <p className="text-base font-light tracking-wide text-white">
+            <p className="text-base font-normal tracking-wide text-white">
               Demander un accès
             </p>
           </GlassButton>

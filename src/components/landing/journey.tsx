@@ -59,11 +59,11 @@ export function Journey() {
           <p className="mb-3 text-[11px] font-medium uppercase tracking-[0.28em] text-[var(--landing-mute)]">
             Le parcours
           </p>
-          <h2 className="font-title text-3xl font-light leading-tight text-[var(--landing-ink)] md:text-5xl">
+          <h2 className="font-title text-3xl font-normal leading-tight text-[var(--landing-ink)] md:text-5xl">
             De WhatsApp à une transaction{" "}
             <em className="italic">certaine</em>.
           </h2>
-          <p className="mx-auto mt-5 max-w-2xl text-[15px] font-light leading-relaxed text-[var(--landing-ink)]/70">
+          <p className="mx-auto mt-5 max-w-2xl text-[15px] font-normal leading-relaxed text-[var(--landing-ink)]/70">
             Chaque étape est horodatée et attribuée à un utilisateur. Sans
             doublon, sans litige, avec un paiement certain.
           </p>
@@ -79,13 +79,13 @@ export function Journey() {
               transition={{ duration: 0.5, delay: (i % 4) * 0.08 }}
               className="border-t border-black/[0.08] px-1 py-8 md:px-4"
             >
-              <span className="font-title text-[26px] font-light leading-none text-[var(--landing-mute)]">
+              <span className="font-title text-[26px] font-normal leading-none text-[var(--landing-mute)]">
                 {String(i + 1).padStart(2, "0")}
               </span>
               <h3 className="mt-4 text-[15px] font-medium text-[var(--landing-ink)]">
                 {step.title}
               </h3>
-              <p className="mt-2 text-[13px] font-light leading-relaxed text-[var(--landing-ink)]/65">
+              <p className="mt-2 text-[13px] font-normal leading-relaxed text-[var(--landing-ink)]/65">
                 {step.description}
               </p>
             </motion.div>

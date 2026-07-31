@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { Manrope, Inter, Nunito, Montserrat } from "next/font/google";
+import { Manrope, Inter, Nunito } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
 const manrope = Manrope({
@@ -20,11 +21,29 @@ const nunito = Nunito({
   weight: ["700", "800"],
 });
 
-const montserrat = Montserrat({
-  variable: "--font-display",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
-  style: ["normal", "italic"],
+// Gotham — licence client. Seul le Book (+ italique) est fourni.
+const gotham = localFont({
+  variable: "--font-gotham",
+  display: "swap",
+  src: [
+    { path: "./fonts/gotham-book-webfont.woff2", weight: "400", style: "normal" },
+    {
+      path: "./fonts/gotham-bookitalic-webfont.woff2",
+      weight: "400",
+      style: "italic",
+    },
+  ],
+});
+
+// Suisse Int'l — licence client. Book et Bold seulement : les poids Black
+// fournis ne sont utilisés nulle part et seraient préchargés pour rien.
+const suisse = localFont({
+  variable: "--font-suisse",
+  display: "swap",
+  src: [
+    { path: "./fonts/SuisseIntl-Book.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/SuisseIntl-Bold.woff2", weight: "700", style: "normal" },
+  ],
 });
 
 export const metadata: Metadata = {
@@ -41,7 +60,7 @@ export default function RootLayout({
   return (
     <html
       lang="fr"
-      className={`${manrope.variable} ${inter.variable} ${nunito.variable} ${montserrat.variable} scroll-smooth`}
+      className={`${manrope.variable} ${inter.variable} ${nunito.variable} ${gotham.variable} ${suisse.variable} scroll-smooth`}
     >
       <body>{children}</body>
     </html>

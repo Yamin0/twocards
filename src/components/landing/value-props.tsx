@@ -63,7 +63,7 @@ export function ValueProps() {
           <p className="mb-3 text-[11px] font-medium uppercase tracking-[0.28em] text-[var(--landing-mute)]">
             Deux côtés du réseau
           </p>
-          <h2 className="font-title text-3xl font-light leading-tight text-[var(--landing-ink)] md:text-5xl">
+          <h2 className="font-title text-3xl font-normal leading-tight text-[var(--landing-ink)] md:text-5xl">
             Une seule <em className="italic">source de vérité</em>.
           </h2>
         </motion.div>
@@ -92,11 +92,11 @@ export function ValueProps() {
                 {audience.label}
               </p>
 
-              <h3 className="mb-5 font-title text-2xl font-light leading-snug text-[var(--landing-ink)] md:text-3xl">
+              <h3 className="mb-5 font-title text-2xl font-normal leading-snug text-[var(--landing-ink)] md:text-3xl">
                 {audience.title} <em className="italic">{audience.accent}</em>
               </h3>
 
-              <p className="mb-8 text-[15px] font-light leading-relaxed text-[var(--landing-ink)]/70">
+              <p className="mb-8 text-[15px] font-normal leading-relaxed text-[var(--landing-ink)]/70">
                 {audience.description}
               </p>
 
@@ -104,7 +104,7 @@ export function ValueProps() {
                 {audience.points.map((point) => (
                   <li
                     key={point}
-                    className="border-t border-black/[0.08] py-3.5 text-[14px] font-light leading-relaxed text-[var(--landing-ink)]/80 last:border-b"
+                    className="border-t border-black/[0.08] py-3.5 text-[14px] font-normal leading-relaxed text-[var(--landing-ink)]/80 last:border-b"
                   >
                     {point}
                   </li>

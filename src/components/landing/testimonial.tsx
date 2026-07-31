@@ -52,7 +52,7 @@ export function Testimonial() {
           Notre conviction
         </p>
 
-        <p className="flex flex-wrap font-title text-[26px] font-light leading-[1.35] md:text-[36px]">
+        <p className="flex flex-wrap font-title text-[26px] font-normal leading-[1.35] md:text-[36px]">
           {words.map((word, i) => (
             <Word
               key={i}
@@ -70,7 +70,7 @@ export function Testimonial() {
             <p className="text-sm font-medium text-[var(--landing-ink)]">
               La mission TwoCards
             </p>
-            <p className="text-[13px] font-light text-[var(--landing-mute)]">
+            <p className="text-[13px] font-normal text-[var(--landing-mute)]">
               L&apos;infrastructure de la recommandation hospitality
             </p>
           </div>
