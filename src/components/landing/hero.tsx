@@ -10,7 +10,7 @@ import {
   Scale,
 } from "lucide-react";
 import { GlassEffect, GlassButton, GlassFilter } from "@/components/ui/liquid-glass";
-import { WarpOverlay } from "@/components/ui/wrap-shader";
+import { WarpOverlay, WarpBackground } from "@/components/ui/wrap-shader";
 
 const navLinks = [
   { label: "Solutions", href: "#solutions" },
@@ -37,8 +37,12 @@ export function Hero() {
     <section className="relative overflow-hidden bg-[var(--landing-ivory)] text-[var(--landing-ink)] font-[family-name:var(--font-grotesk)]">
       <GlassFilter />
 
-      {/* Navbar */}
-      <header className="flex items-center justify-between border-b border-black/[0.06] px-6 py-5 md:px-16">
+      {/* Bloc haut : navbar + héros sur fond shader */}
+      <div className="relative">
+        <WarpBackground speed={0.3} />
+
+        {/* Navbar */}
+        <header className="relative z-10 flex items-center justify-between border-b border-black/[0.06] px-6 py-5 md:px-16">
         <Link
           href="/"
           className="font-[family-name:var(--font-display)] text-[26px] font-medium leading-none tracking-tight"
@@ -73,7 +77,7 @@ export function Hero() {
       </header>
 
       {/* Hero editorial */}
-      <div className="mx-auto flex max-w-4xl flex-col items-center px-6 pb-20 pt-20 text-center md:pb-28 md:pt-28">
+      <div className="relative z-10 mx-auto flex max-w-4xl flex-col items-center px-6 pb-20 pt-20 text-center md:pb-28 md:pt-28">
         <motion.p
           {...fadeUp}
           transition={{ duration: 0.6 }}
@@ -121,6 +125,7 @@ export function Hero() {
             Je suis concierge / RP
           </Link>
         </motion.div>
+      </div>
       </div>
 
       {/* Photo band + liquid glass */}

@@ -45,6 +45,44 @@ export function WarpOverlay({
   );
 }
 
+/**
+ * Fond shader pleine surface en palette ivoire/champagne claire —
+ * pensé pour porter du texte encre par-dessus (héros éditorial).
+ */
+export function WarpBackground({
+  className = "",
+  speed = 0.3,
+}: {
+  className?: string;
+  speed?: number;
+}) {
+  return (
+    <div aria-hidden className={`pointer-events-none absolute inset-0 ${className}`}>
+      <Warp
+        style={{ height: "100%", width: "100%" }}
+        proportion={0.45}
+        softness={1}
+        distortion={0.25}
+        swirl={0.8}
+        swirlIterations={10}
+        shape="checks"
+        shapeScale={0.1}
+        scale={1}
+        rotation={0}
+        speed={speed}
+        colors={[
+          "hsl(43, 70%, 97%)",
+          "hsl(42, 50%, 89%)",
+          "hsl(38, 38%, 82%)",
+          "hsl(45, 60%, 94%)",
+        ]}
+      />
+      {/* voile de lisibilité */}
+      <div className="absolute inset-0 bg-[var(--landing-ivory)]/35" />
+    </div>
+  );
+}
+
 export default function WarpShaderHero() {
   return (
     <main className="relative min-h-screen overflow-hidden">
