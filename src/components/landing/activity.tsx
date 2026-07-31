@@ -6,7 +6,7 @@ import { ArrowRight, BadgePercent, QrCode, CalendarCheck } from "lucide-react";
 import DisplayCards from "@/components/ui/display-cards";
 
 const cardBase =
-  "border-black/10 bg-white/80 text-[var(--landing-ink)] hover:border-black/25 hover:bg-white after:from-[var(--landing-ivory)] font-[family-name:var(--font-grotesk)]";
+  "border-black/10 bg-white/80 text-[var(--landing-ink)] hover:border-black/25 hover:bg-white after:from-[var(--landing-ivory)] font-body";
 
 const activityCards = [
   {
@@ -40,7 +40,7 @@ const activityCards = [
 
 export function Activity() {
   return (
-    <section className="overflow-x-clip border-t border-black/[0.06] bg-[var(--landing-ivory)] px-6 py-24 md:px-16 md:py-32 font-[family-name:var(--font-grotesk)]">
+    <section className="overflow-x-clip border-t border-black/[0.06] bg-[var(--landing-ivory)] px-6 py-24 md:px-16 md:py-32 font-body">
       <div className="mx-auto grid max-w-6xl items-center gap-16 md:grid-cols-2 md:gap-12">
         {/* Moitié gauche — éditorial */}
         <motion.div
@@ -52,7 +52,7 @@ export function Activity() {
           <p className="mb-4 text-[11px] font-medium uppercase tracking-[0.28em] text-[var(--landing-mute)]">
             En temps réel
           </p>
-          <h2 className="mb-6 font-[family-name:var(--font-display)] text-4xl font-normal leading-tight text-[var(--landing-ink)] md:text-5xl">
+          <h2 className="mb-6 font-title text-3xl font-light leading-tight text-[var(--landing-ink)] md:text-4xl">
             Votre soirée se déroule.
             <br />
             <em className="italic">Vous êtes déjà au courant.</em>

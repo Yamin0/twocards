@@ -50,7 +50,7 @@ export function ValueProps() {
   return (
     <section
       id="solutions"
-      className="border-t border-black/[0.06] bg-[var(--landing-ivory)] px-6 py-24 md:px-16 md:py-32 font-[family-name:var(--font-grotesk)]"
+      className="border-t border-black/[0.06] bg-[var(--landing-ivory)] px-6 py-24 md:px-16 md:py-32 font-body"
     >
       <div className="mx-auto max-w-6xl">
         <motion.div
@@ -63,7 +63,7 @@ export function ValueProps() {
           <p className="mb-3 text-[11px] font-medium uppercase tracking-[0.28em] text-[var(--landing-mute)]">
             Deux côtés du réseau
           </p>
-          <h2 className="font-[family-name:var(--font-display)] text-4xl font-normal leading-tight text-[var(--landing-ink)] md:text-6xl">
+          <h2 className="font-title text-3xl font-light leading-tight text-[var(--landing-ink)] md:text-5xl">
             Une seule <em className="italic">source de vérité</em>.
           </h2>
         </motion.div>
@@ -92,7 +92,7 @@ export function ValueProps() {
                 {audience.label}
               </p>
 
-              <h3 className="mb-5 font-[family-name:var(--font-display)] text-3xl font-normal leading-snug text-[var(--landing-ink)] md:text-4xl">
+              <h3 className="mb-5 font-title text-2xl font-light leading-snug text-[var(--landing-ink)] md:text-3xl">
                 {audience.title} <em className="italic">{audience.accent}</em>
               </h3>
 

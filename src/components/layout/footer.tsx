@@ -23,14 +23,14 @@ const footerLinks = {
 
 export function Footer() {
   return (
-    <footer className="border-t border-black/[0.06] bg-[var(--landing-ivory)] text-[var(--landing-ink)] font-[family-name:var(--font-grotesk)]">
+    <footer className="border-t border-black/[0.06] bg-[var(--landing-ivory)] text-[var(--landing-ink)] font-body">
       <div className="mx-auto max-w-6xl px-6 py-16 md:px-16 md:py-20">
         <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-4">
           {/* Brand column */}
           <div>
             <Link
               href="/"
-              className="font-[family-name:var(--font-display)] text-2xl font-medium tracking-tight"
+              className="font-title text-2xl font-medium tracking-tight"
             >
               twocards<span className="text-[var(--landing-mute)]">.</span>
             </Link>

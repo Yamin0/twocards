@@ -1,11 +1,5 @@
 import type { Metadata } from "next";
-import {
-  Manrope,
-  Inter,
-  Nunito,
-  Cormorant_Garamond,
-  Hanken_Grotesk,
-} from "next/font/google";
+import { Manrope, Inter, Nunito, Montserrat } from "next/font/google";
 import "./globals.css";
 
 const manrope = Manrope({
@@ -17,7 +11,7 @@ const manrope = Manrope({
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["300", "400", "500", "600", "700"],
 });
 
 const nunito = Nunito({
@@ -26,17 +20,11 @@ const nunito = Nunito({
   weight: ["700", "800"],
 });
 
-const cormorant = Cormorant_Garamond({
+const montserrat = Montserrat({
   variable: "--font-display",
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  style: ["normal", "italic"],
-});
-
-const hankenGrotesk = Hanken_Grotesk({
-  variable: "--font-grotesk",
-  subsets: ["latin"],
   weight: ["300", "400", "500", "600"],
+  style: ["normal", "italic"],
 });
 
 export const metadata: Metadata = {
@@ -53,7 +41,7 @@ export default function RootLayout({
   return (
     <html
       lang="fr"
-      className={`${manrope.variable} ${inter.variable} ${nunito.variable} ${cormorant.variable} ${hankenGrotesk.variable} scroll-smooth`}
+      className={`${manrope.variable} ${inter.variable} ${nunito.variable} ${montserrat.variable} scroll-smooth`}
     >
       <body>{children}</body>
     </html>

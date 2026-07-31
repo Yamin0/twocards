@@ -34,7 +34,7 @@ const fadeUp = {
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden bg-[var(--landing-ivory)] text-[var(--landing-ink)] font-[family-name:var(--font-grotesk)]">
+    <section className="relative overflow-hidden bg-[var(--landing-ivory)] text-[var(--landing-ink)] font-body">
       <GlassFilter />
 
       {/* Bloc haut : navbar + héros sur fond shader */}
@@ -45,7 +45,7 @@ export function Hero() {
         <header className="relative z-10 flex items-center justify-between border-b border-black/[0.06] px-6 py-5 md:px-16">
         <Link
           href="/"
-          className="font-[family-name:var(--font-display)] text-[26px] font-medium leading-none tracking-tight"
+          className="font-title text-[26px] font-medium leading-none tracking-tight"
         >
           twocards<span className="text-[var(--landing-mute)]">.</span>
         </Link>
@@ -89,12 +89,12 @@ export function Hero() {
         <motion.h1
           {...fadeUp}
           transition={{ duration: 0.7, delay: 0.1 }}
-          className="mb-8 font-[family-name:var(--font-display)] text-[52px] font-normal leading-[1.06] tracking-[-0.01em] md:text-[84px]"
+          className="mb-8 font-title text-[38px] font-light leading-[1.12] tracking-[-0.02em] md:text-[64px]"
         >
           Chaque recommandation
           <br />
           devient une réservation{" "}
-          <em className="font-normal italic">traçable</em>.
+          <em className="italic">traçable</em>.
         </motion.h1>
 
         <motion.p
@@ -186,7 +186,7 @@ export function Hero() {
           <p className="mb-3 text-center text-[11px] font-medium uppercase tracking-[0.28em] text-[var(--landing-mute)]">
             Le produit
           </p>
-          <h2 className="mx-auto mb-12 max-w-2xl text-center font-[family-name:var(--font-display)] text-4xl font-normal leading-tight md:text-5xl">
+          <h2 className="mx-auto mb-12 max-w-2xl text-center font-title text-3xl font-light leading-tight md:text-4xl">
             Qui remplit vos tables,
             <br />
             <em className="italic">noir sur blanc</em>.

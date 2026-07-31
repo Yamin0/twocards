@@ -47,7 +47,7 @@ const steps = [
 
 export function Journey() {
   return (
-    <section className="border-t border-black/[0.06] bg-[var(--landing-ivory)] px-6 py-24 md:px-16 md:py-32 font-[family-name:var(--font-grotesk)]">
+    <section className="border-t border-black/[0.06] bg-[var(--landing-ivory)] px-6 py-24 md:px-16 md:py-32 font-body">
       <div className="mx-auto max-w-6xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -59,7 +59,7 @@ export function Journey() {
           <p className="mb-3 text-[11px] font-medium uppercase tracking-[0.28em] text-[var(--landing-mute)]">
             Le parcours
           </p>
-          <h2 className="font-[family-name:var(--font-display)] text-4xl font-normal leading-tight text-[var(--landing-ink)] md:text-6xl">
+          <h2 className="font-title text-3xl font-light leading-tight text-[var(--landing-ink)] md:text-5xl">
             De WhatsApp à une transaction{" "}
             <em className="italic">certaine</em>.
           </h2>
@@ -79,7 +79,7 @@ export function Journey() {
               transition={{ duration: 0.5, delay: (i % 4) * 0.08 }}
               className="border-t border-black/[0.08] px-1 py-8 md:px-4"
             >
-              <span className="font-[family-name:var(--font-display)] text-[28px] italic leading-none text-[var(--landing-mute)]">
+              <span className="font-title text-[26px] font-light leading-none text-[var(--landing-mute)]">
                 {String(i + 1).padStart(2, "0")}
               </span>
               <h3 className="mt-4 text-[15px] font-medium text-[var(--landing-ink)]">

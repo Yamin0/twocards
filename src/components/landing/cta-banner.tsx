@@ -9,7 +9,7 @@ export function CtaBanner() {
   return (
     <section
       id="contact"
-      className="relative flex min-h-[80vh] items-center justify-center overflow-hidden px-6 py-28 font-[family-name:var(--font-grotesk)]"
+      className="relative flex min-h-[80vh] items-center justify-center overflow-hidden px-6 py-28 font-body"
       style={{
         background: `url("https://images.unsplash.com/photo-1528605248644-14dd04022da1?q=80&w=2000&auto=format&fit=crop") center center / cover`,
       }}
@@ -28,7 +28,7 @@ export function CtaBanner() {
           Founding Circle — Marrakech, places limitées
         </p>
 
-        <h2 className="mb-6 font-[family-name:var(--font-display)] text-5xl font-normal leading-[1.1] text-white md:text-7xl">
+        <h2 className="mb-6 font-title text-4xl font-light leading-[1.15] text-white md:text-6xl">
           Digitalisez les relations qui{" "}
           <em className="italic">existent déjà</em>.
         </h2>

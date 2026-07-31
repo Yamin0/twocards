@@ -48,11 +48,11 @@ export function Testimonial() {
         ref={containerRef}
         className="mx-auto flex max-w-3xl flex-col items-start gap-12"
       >
-        <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-[var(--landing-mute)] font-[family-name:var(--font-grotesk)]">
+        <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-[var(--landing-mute)] font-body">
           Notre conviction
         </p>
 
-        <p className="flex flex-wrap font-[family-name:var(--font-display)] text-[34px] font-normal leading-[1.25] md:text-[46px]">
+        <p className="flex flex-wrap font-title text-[26px] font-light leading-[1.35] md:text-[36px]">
           {words.map((word, i) => (
             <Word
               key={i}
@@ -64,7 +64,7 @@ export function Testimonial() {
           ))}
         </p>
 
-        <div className="flex items-center gap-5 font-[family-name:var(--font-grotesk)]">
+        <div className="flex items-center gap-5 font-body">
           <span className="h-px w-12 bg-black/20" />
           <div>
             <p className="text-sm font-medium text-[var(--landing-ink)]">

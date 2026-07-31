@@ -111,6 +111,14 @@
   --landing-mute: #8d8d8d;
 }
 
+/* Piles typographiques landing : Gotham (si dispo) → Montserrat ; Suisse Int'l → Inter */
+.font-title {
+  font-family: "Gotham", "Gotham Light", var(--font-display), sans-serif;
+}
+.font-body {
+  font-family: "Suisse Int'l", "Suisse Intl", var(--font-inter), sans-serif;
+}
+
 @keyframes moveBackground {
   from {
     background-position: 0% 0%;
