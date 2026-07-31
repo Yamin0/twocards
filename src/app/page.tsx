@@ -6,6 +6,7 @@ import { Differentiators } from "@/components/landing/differentiators";
 import { Activity } from "@/components/landing/activity";
 import { Journey } from "@/components/landing/journey";
 import { Standards } from "@/components/landing/standards";
+import { NetworkBento } from "@/components/landing/network-bento";
 import { FaqHome } from "@/components/landing/faq-home";
 import { CtaBanner } from "@/components/landing/cta-banner";
 import { Footer } from "@/components/layout/footer";
@@ -22,6 +23,7 @@ export default function Home() {
         <Activity />
         <Journey />
         <Standards />
+        <NetworkBento />
         <FaqHome />
         <CtaBanner />
       </main>
