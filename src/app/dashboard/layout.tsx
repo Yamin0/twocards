@@ -21,6 +21,7 @@ import {
   X,
   Bell,
   Search,
+  Sparkles,
 } from "lucide-react";
 import { useAuthUser } from "@/hooks/use-auth-user";
 import { PRQualityProvider } from "@/contexts/pr-quality-context";
@@ -38,6 +39,7 @@ const toolsNav = [
   { icon: CreditCard, label: "Commissions", href: "/dashboard/commissions" },
   { icon: MessageSquare, label: "Messages", href: "/dashboard/messages" },
   { icon: BarChart3, label: "Analyses", href: "/dashboard/analytics" },
+  { icon: Sparkles, label: "Assistant IA", href: "/dashboard/ai" },
 ];
 
 const adminNav = [
@@ -101,17 +103,19 @@ export default function DashboardLayout({
 
   return (
     <PRQualityProvider>
-      <div className="h-screen relative overflow-hidden bg-[#0a0a0f]">
-        {/* Animated gradient blobs */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-[40%] -left-[20%] w-[70%] h-[70%] rounded-full bg-purple-600/15 blur-[120px] animate-pulse" />
-          <div className="absolute -bottom-[30%] -right-[20%] w-[60%] h-[60%] rounded-full bg-blue-600/10 blur-[120px] animate-pulse [animation-delay:1s]" />
-          <div className="absolute top-[20%] right-[10%] w-[40%] h-[40%] rounded-full bg-indigo-500/8 blur-[100px] animate-pulse [animation-delay:2s]" />
-        </div>
+      <div className="h-screen relative overflow-hidden bg-[#141210]">
+        {/* Fond photo neutre (remplacer public/dashboard-bg.jpg par votre photo) */}
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: "url(/dashboard-bg.jpg)" }}
+        />
+        {/* Voile de lisibilité */}
+        <div className="absolute inset-0 bg-black/35" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/40" />
 
         <div className="relative z-10 p-4 lg:p-6 grid grid-cols-12 gap-4 lg:gap-6 h-screen">
           {/* Mobile top bar */}
-          <div className="col-span-12 lg:hidden flex items-center justify-between backdrop-blur-xl bg-white/10 border border-white/15 rounded-2xl px-4 py-3">
+          <div className="col-span-12 lg:hidden flex items-center justify-between backdrop-blur-2xl bg-black/45 border border-white/10 rounded-2xl px-4 py-3">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
               className="p-1.5 rounded-lg text-white/70 hover:text-white transition-colors"
@@ -139,7 +143,7 @@ export default function DashboardLayout({
                 className="fixed inset-0 bg-black/40 z-40 lg:hidden"
                 onClick={() => setSidebarOpen(false)}
               />
-              <div className="fixed top-20 left-4 right-4 z-50 lg:hidden backdrop-blur-xl bg-white/10 border border-white/15 rounded-3xl p-5 space-y-5 max-h-[70vh] overflow-y-auto">
+              <div className="fixed top-20 left-4 right-4 z-50 lg:hidden backdrop-blur-2xl bg-black/60 border border-white/10 rounded-3xl p-5 space-y-5 max-h-[70vh] overflow-y-auto">
                 <NavSection title="Menu principal" items={mainNav} />
                 <NavSection title="Outils" items={toolsNav} />
                 <NavSection title="Administration" items={adminNav} />
@@ -159,7 +163,7 @@ export default function DashboardLayout({
           )}
 
           {/* Desktop sidebar */}
-          <aside className="hidden lg:flex col-span-2 backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl p-5 flex-col h-[calc(100vh-48px)] overflow-hidden">
+          <aside className="hidden lg:flex col-span-2 backdrop-blur-2xl bg-black/45 border border-white/10 rounded-3xl p-5 flex-col h-[calc(100vh-48px)] overflow-hidden shadow-[0_20px_60px_-20px_rgba(0,0,0,0.6)]">
             {/* Logo */}
             <div className="text-center mb-6 pb-4 border-b border-white/10">
               <div className="flex items-center justify-center gap-2.5 mb-1">
