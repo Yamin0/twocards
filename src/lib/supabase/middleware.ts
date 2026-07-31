@@ -35,11 +35,12 @@ export async function updateSession(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname;
 
+  // Match "/concierge" et "/concierge/..." mais pas "/concierges" (page publique)
+  const inSection = (section: string) =>
+    pathname === section || pathname.startsWith(`${section}/`);
+
   // Protected routes: redirect to login if not authenticated
-  if (
-    !user &&
-    (pathname.startsWith("/dashboard") || pathname.startsWith("/concierge"))
-  ) {
+  if (!user && (inSection("/dashboard") || inSection("/concierge"))) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
@@ -57,7 +58,7 @@ export async function updateSession(request: NextRequest) {
   }
 
   // Redirect concierge users away from /dashboard to /concierge
-  if (user && pathname.startsWith("/dashboard")) {
+  if (user && inSection("/dashboard")) {
     const role = user.user_metadata?.role;
     if (role === "concierge") {
       const url = request.nextUrl.clone();
@@ -67,7 +68,7 @@ export async function updateSession(request: NextRequest) {
   }
 
   // Redirect etablissement users away from /concierge to /dashboard
-  if (user && pathname.startsWith("/concierge")) {
+  if (user && inSection("/concierge")) {
     const role = user.user_metadata?.role;
     if (role !== "concierge") {
       const url = request.nextUrl.clone();

@@ -11,13 +11,7 @@ import {
 } from "lucide-react";
 import { GlassEffect, GlassButton, GlassFilter } from "@/components/ui/liquid-glass";
 import { WarpOverlay, WarpBackground } from "@/components/ui/wrap-shader";
-
-const navLinks = [
-  { label: "Solutions", href: "#solutions" },
-  { label: "Établissements", href: "#etablissements" },
-  { label: "Concierges & RP", href: "#concierges" },
-  { label: "Contact", href: "#contact" },
-];
+import { LandingNavbar } from "@/components/landing/navbar";
 
 const modules = [
   { icon: CalendarCheck, label: "Réservations" },
@@ -42,39 +36,7 @@ export function Hero() {
         <WarpBackground speed={0.3} />
 
         {/* Navbar */}
-        <header className="relative z-10 flex items-center justify-between border-b border-black/[0.06] px-6 py-5 md:px-16">
-        <Link
-          href="/"
-          className="font-title text-[26px] font-medium leading-none tracking-tight"
-        >
-          twocards<span className="text-[var(--landing-mute)]">.</span>
-        </Link>
-        <nav className="hidden items-center gap-8 md:flex">
-          {navLinks.map((link) => (
-            <Link
-              key={link.label}
-              href={link.href}
-              className="text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--landing-ink)]/60 transition-colors hover:text-[var(--landing-ink)]"
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
-        <div className="flex items-center gap-6">
-          <Link
-            href="/login"
-            className="hidden text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--landing-ink)]/60 transition-colors hover:text-[var(--landing-ink)] sm:block"
-          >
-            Connexion
-          </Link>
-          <Link
-            href="/signup"
-            className="rounded-full bg-[var(--landing-ink)] px-5 py-2.5 text-[13px] font-medium text-[var(--landing-ivory)] transition-opacity hover:opacity-80"
-          >
-            Demander un accès
-          </Link>
-        </div>
-      </header>
+        <LandingNavbar />
 
       {/* Hero editorial */}
       <div className="relative z-10 mx-auto flex max-w-4xl flex-col items-center px-6 pb-20 pt-20 text-center md:pb-28 md:pt-28">

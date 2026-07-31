@@ -2,10 +2,10 @@ import Link from "next/link";
 
 const footerLinks = {
   Produit: [
-    { label: "Solutions", href: "#solutions" },
-    { label: "Établissements", href: "#etablissements" },
-    { label: "Concierges & RP", href: "#concierges" },
-    { label: "Tarifs", href: "/signup" },
+    { label: "Restaurants", href: "/restaurants" },
+    { label: "Concierges", href: "/concierges" },
+    { label: "Hôtels", href: "/hotels" },
+    { label: "Influenceurs", href: "/influenceurs" },
   ],
   Entreprise: [
     { label: "À propos", href: "#" },
