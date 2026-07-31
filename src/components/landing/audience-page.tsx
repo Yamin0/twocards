@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { ArrowRight, Plus } from "lucide-react";
 import { LandingNavbar } from "@/components/landing/navbar";
+import { AudiencesStrip } from "@/components/landing/audiences-strip";
 import { Footer } from "@/components/layout/footer";
 import { GlassButton, GlassFilter } from "@/components/ui/liquid-glass";
 import { WarpOverlay, WarpBackground } from "@/components/ui/wrap-shader";
@@ -35,6 +37,7 @@ const fadeUp = {
 };
 
 export function AudiencePage({ data }: { data: AudiencePageData }) {
+  const pathname = usePathname();
   return (
     <div className="min-h-screen bg-[var(--landing-ivory)] text-[var(--landing-ink)] font-body">
       <GlassFilter />
@@ -216,6 +219,9 @@ export function AudiencePage({ data }: { data: AudiencePageData }) {
           </div>
         </div>
       </section>
+
+      {/* Les autres métiers du réseau */}
+      <AudiencesStrip exclude={pathname} />
 
       {/* CTA final */}
       <section className="border-t border-black/[0.06] px-6 py-24 md:py-32">

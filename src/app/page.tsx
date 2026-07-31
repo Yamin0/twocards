@@ -1,8 +1,12 @@
 import { Hero } from "@/components/landing/hero";
 import { Testimonial } from "@/components/landing/testimonial";
-import { ValueProps } from "@/components/landing/value-props";
+import { AudiencesStrip } from "@/components/landing/audiences-strip";
+import { VenuesCarousel } from "@/components/landing/venues-carousel";
+import { Differentiators } from "@/components/landing/differentiators";
 import { Activity } from "@/components/landing/activity";
 import { Journey } from "@/components/landing/journey";
+import { Standards } from "@/components/landing/standards";
+import { FaqHome } from "@/components/landing/faq-home";
 import { CtaBanner } from "@/components/landing/cta-banner";
 import { Footer } from "@/components/layout/footer";
 
@@ -12,9 +16,13 @@ export default function Home() {
       <main>
         <Hero />
         <Testimonial />
-        <ValueProps />
+        <AudiencesStrip />
+        <VenuesCarousel />
+        <Differentiators />
         <Activity />
         <Journey />
+        <Standards />
+        <FaqHome />
         <CtaBanner />
       </main>
       <Footer />

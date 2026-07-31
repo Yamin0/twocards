@@ -110,12 +110,12 @@ export function Hero() {
           </p>
 
           {/* Glass dock of modules */}
-          <GlassEffect className="rounded-3xl p-2">
-            <div className="flex items-center gap-1 p-2 sm:gap-2">
+          <GlassEffect className="max-w-full rounded-3xl p-2">
+            <div className="flex flex-wrap items-center justify-center gap-1 p-2 sm:gap-2">
               {modules.map((module) => (
                 <div
                   key={module.label}
-                  className="flex w-[72px] flex-col items-center gap-2 rounded-2xl px-1 py-3 transition-all duration-500 hover:scale-110 sm:w-24 sm:px-3"
+                  className="flex w-[86px] flex-col items-center gap-2 rounded-2xl px-1 py-3 transition-all duration-500 hover:scale-110 sm:w-24 sm:px-3"
                   style={{
                     transitionTimingFunction:
                       "cubic-bezier(0.175, 0.885, 0.32, 2.2)",
