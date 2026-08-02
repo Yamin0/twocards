@@ -68,7 +68,7 @@ export function Activity({ variant = "light" }: { variant?: Variant }) {
     <section
       className={`relative overflow-x-clip px-6 font-body ${
         onVideo
-          ? "bg-transparent py-28 md:px-16 md:py-36"
+          ? "bg-transparent py-16 md:px-16 md:py-20"
           : "border-t border-black/[0.06] bg-[var(--landing-ivory)] py-24 md:px-16 md:py-32"
       }`}
     >

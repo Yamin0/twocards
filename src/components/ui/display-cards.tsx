@@ -1,8 +1,21 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Sparkles } from "lucide-react";
+
+function useIsMobile() {
+  const [mobile, setMobile] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    const onChange = () => setMobile(mq.matches);
+    onChange();
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+  return mobile;
+}
 
 interface DisplayCardProps {
   className?: string;
@@ -69,23 +82,39 @@ export default function DisplayCards({ cards }: DisplayCardsProps) {
 
   const displayCards = cards || defaultCards;
 
+  const isMobile = useIsMobile();
+
   return (
     <div className="grid [grid-template-areas:'stack'] place-items-center">
       {displayCards.map((cardProps, index) => (
-        /* Chaque carte surgit à son tour à l'entrée dans le viewport —
-           essentiel sur mobile, où le hover n'existe pas. Le wrapper porte
-           la grid-area ; la carte garde ses translations décoratives. */
+        /* Chaque carte surgit à son tour à l'entrée dans le viewport.
+           Sur mobile, où le hover n'existe pas, l'arrivée reproduit le saut
+           du survol desktop : montée en dépassement puis retombée. Le
+           wrapper porte la grid-area ; la carte garde ses translations. */
         <motion.div
           key={index}
           className="[grid-area:stack]"
           initial={{ opacity: 0, y: 56, scale: 0.9 }}
-          whileInView={{ opacity: 1, y: 0, scale: 1 }}
+          whileInView={
+            isMobile
+              ? {
+                  opacity: [0, 1, 1, 1],
+                  y: [56, -26, 8, 0],
+                  scale: [0.9, 1.04, 1, 1],
+                }
+              : { opacity: 1, y: 0, scale: 1 }
+          }
           viewport={{ once: true, margin: "-60px" }}
-          transition={{
-            duration: 0.55,
-            delay: index * 0.25,
-            ease: [0.22, 1, 0.36, 1],
-          }}
+          transition={
+            isMobile
+              ? {
+                  duration: 0.9,
+                  delay: index * 0.3,
+                  times: [0, 0.45, 0.75, 1],
+                  ease: "easeOut",
+                }
+              : { duration: 0.55, delay: index * 0.25, ease: [0.22, 1, 0.36, 1] }
+          }
         >
           <DisplayCard {...cardProps} />
         </motion.div>

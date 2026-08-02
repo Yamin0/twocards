@@ -16,11 +16,14 @@ import { LandingNavbar } from "@/components/landing/navbar";
    précharge pas les vidéos et laisserait un fond noir, et sur les connexions
    lentes, où un scrub sur une vidéo partiellement bufferisée saccade. */
 
-const VIDEO_SRC = "/videos/hero-doors.mp4";
+/* 1080p pour desktop (20 Mo), 720p pour mobile (9 Mo) : même timeline,
+   même encodage all-intra, seul le poids du préchargement change. */
+const VIDEO_SRC_DESKTOP = "/videos/hero-doors.mp4";
+const VIDEO_SRC_MOBILE = "/videos/hero-doors-720.mp4";
 const DAMPING = 0.14;
 /* Respirations de vidéo nue autour de la section : courtes, sinon la vidéo
    « avance toute seule » sur un écran vide entre les deux temps. */
-const GAP_VH = 35;
+const GAP_VH = 10;
 const TAIL_VH = 40;
 
 export function ScrollVideoHero({ children }: { children?: React.ReactNode }) {
@@ -41,9 +44,13 @@ export function ScrollVideoHero({ children }: { children?: React.ReactNode }) {
     let cancelled = false;
     let objectUrl: string | null = null;
 
+    const src = window.matchMedia("(max-width: 767px)").matches
+      ? VIDEO_SRC_MOBILE
+      : VIDEO_SRC_DESKTOP;
+
     (async () => {
       try {
-        const res = await fetch(VIDEO_SRC);
+        const res = await fetch(src);
         if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`);
         const total = Number(res.headers.get("Content-Length")) || 0;
         const reader = res.body.getReader();
@@ -63,7 +70,7 @@ export function ScrollVideoHero({ children }: { children?: React.ReactNode }) {
       } catch {
         // Téléchargement contrôlé impossible : on laisse la balise vidéo
         // se débrouiller plutôt que de bloquer l'accès au site.
-        if (!cancelled) setVideoUrl(VIDEO_SRC);
+        if (!cancelled) setVideoUrl(src);
       }
 
       try {
