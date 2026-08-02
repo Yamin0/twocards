@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
@@ -15,18 +15,42 @@ const navLinks = [
 
 export function LandingNavbar({
   variant = "light",
+  fixed = false,
 }: {
   variant?: "light" | "dark";
+  fixed?: boolean;
 }) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const onDark = variant === "dark";
 
+  /* En mode épinglé, le fond n'apparaît qu'une fois la page défilée :
+     transparent posé sur la vidéo en haut, verre sombre lisible sur les
+     sections claires ensuite. */
+  useEffect(() => {
+    if (!fixed) return;
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [fixed]);
+
   return (
-    <div className="relative z-20 font-body">
+    <div
+      className={`font-body ${
+        fixed ? "fixed inset-x-0 top-0 z-50" : "relative z-20"
+      }`}
+    >
       <header
-        className={`flex items-center justify-between px-6 py-5 md:px-16 ${
+        className={`flex items-center justify-between px-6 py-5 transition-colors duration-300 md:px-16 ${
           onDark ? "border-b border-white/[0.08]" : "border-b border-black/[0.06]"
+        } ${
+          fixed && scrolled
+            ? onDark
+              ? "bg-black/60 backdrop-blur-md"
+              : "bg-[var(--landing-ivory)]/85 backdrop-blur-md"
+            : "bg-transparent"
         }`}
       >
         <Link

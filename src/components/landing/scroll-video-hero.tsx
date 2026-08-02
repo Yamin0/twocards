@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { motion, useScroll } from "framer-motion";
 import { LandingNavbar } from "@/components/landing/navbar";
@@ -11,32 +11,92 @@ import { LandingNavbar } from "@/components/landing/navbar";
    pause à la frame 0, scrub avant/arrière, retour exact à l'origine en haut
    de page, jamais d'autoplay.
 
-   Le contenu est remonté d'un écran (marginTop négatif) pour recouvrir la
-   vidéo épinglée. La séquence court donc sur 100dvh + hauteur des children
-   + TAIL_VH, et le scrub s'étale sur toute cette course.
+   La vidéo est téléchargée intégralement (fetch en flux → blob) derrière un
+   écran de chargement : indispensable sur mobile, où le navigateur ne
+   précharge pas les vidéos et laisserait un fond noir, et sur les connexions
+   lentes, où un scrub sur une vidéo partiellement bufferisée saccade. */
 
-   La cour se révèle très lumineuse en fin de séquence : un voile noir
-   s'intensifie avec le scroll pour garder le texte blanc lisible. */
-
+const VIDEO_SRC = "/videos/hero-doors.mp4";
 const DAMPING = 0.14;
-/* Respirations de vidéo nue qui encadrent la section : elles donnent au
-   scrub sa lenteur cinématique (~250 px de scroll par seconde de vidéo)
-   et laissent les portes s'ouvrir avant l'arrivée du texte. */
-const GAP_VH = 110;
-const TAIL_VH = 60;
+/* Respirations de vidéo nue autour de la section : courtes, sinon la vidéo
+   « avance toute seule » sur un écran vide entre les deux temps. */
+const GAP_VH = 35;
+const TAIL_VH = 40;
 
 export function ScrollVideoHero({ children }: { children?: React.ReactNode }) {
   const sectionRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [progress, setProgress] = useState(0);
+  const [phase, setPhase] = useState<"loading" | "fading" | "done">("loading");
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start start", "end end"],
   });
 
+  /* Préchargement : vidéo complète + polices, avec progression réelle. */
+  useEffect(() => {
+    let cancelled = false;
+    let objectUrl: string | null = null;
+
+    (async () => {
+      try {
+        const res = await fetch(VIDEO_SRC);
+        if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`);
+        const total = Number(res.headers.get("Content-Length")) || 0;
+        const reader = res.body.getReader();
+        const chunks: BlobPart[] = [];
+        let received = 0;
+        for (;;) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          chunks.push(value);
+          received += value.length;
+          if (!cancelled && total) {
+            setProgress(Math.min(0.97, received / total));
+          }
+        }
+        objectUrl = URL.createObjectURL(new Blob(chunks, { type: "video/mp4" }));
+        if (!cancelled) setVideoUrl(objectUrl);
+      } catch {
+        // Téléchargement contrôlé impossible : on laisse la balise vidéo
+        // se débrouiller plutôt que de bloquer l'accès au site.
+        if (!cancelled) setVideoUrl(VIDEO_SRC);
+      }
+
+      try {
+        await document.fonts.ready;
+      } catch {}
+
+      if (!cancelled) {
+        setProgress(1);
+        setPhase("fading");
+        setTimeout(() => !cancelled && setPhase("done"), 750);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, []);
+
+  /* Pas de défilement tant que le chargement couvre l'écran. */
+  useEffect(() => {
+    if (phase === "done") return;
+    const prev = document.documentElement.style.overflow;
+    document.documentElement.style.overflow = "hidden";
+    return () => {
+      document.documentElement.style.overflow = prev;
+    };
+  }, [phase]);
+
+  /* Scrub : le scroll pilote currentTime, lissé par amortissement. */
   useEffect(() => {
     const video = videoRef.current;
-    if (!video) return;
+    if (!video || !videoUrl) return;
 
     const reduced = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
@@ -75,15 +135,46 @@ export function ScrollVideoHero({ children }: { children?: React.ReactNode }) {
       cancelAnimationFrame(raf);
       video.removeEventListener("loadedmetadata", onMeta);
     };
-  }, [scrollYProgress]);
+  }, [scrollYProgress, videoUrl]);
+
+  const pct = Math.round(progress * 100);
 
   return (
     <section ref={sectionRef} className="relative bg-black">
+      {/* Écran de chargement : couvre le site tant que la vidéo complète
+          et les polices ne sont pas prêtes. */}
+      {phase !== "done" && (
+        <div
+          className={`fixed inset-0 z-[100] flex flex-col items-center justify-center gap-10 bg-[#0a0a0a] font-body transition-opacity duration-700 ${
+            phase === "fading" ? "pointer-events-none opacity-0" : "opacity-100"
+          }`}
+          role="status"
+          aria-label="Chargement du site"
+        >
+          <span className="font-title text-[30px] font-medium tracking-tight text-white">
+            twocards<span className="text-white/50">.</span>
+          </span>
+          <div className="flex flex-col items-center gap-4">
+            <div className="h-px w-56 overflow-hidden bg-white/15">
+              <div
+                className="h-full bg-white transition-[width] duration-300 ease-out"
+                style={{ width: `${pct}%` }}
+              />
+            </div>
+            <span className="text-[10px] font-medium uppercase tracking-[0.24em] text-white/50">
+              {pct} %
+            </span>
+          </div>
+        </div>
+      )}
+
+      <LandingNavbar variant="dark" fixed />
+
       {/* Fond vidéo épinglé, commun aux deux écrans */}
       <div className="sticky top-0 h-dvh w-full overflow-hidden">
         <video
           ref={videoRef}
-          src="/videos/hero-doors.mp4"
+          src={videoUrl ?? undefined}
           poster="/videos/hero-doors-poster.jpg"
           muted
           playsInline
@@ -102,8 +193,6 @@ export function ScrollVideoHero({ children }: { children?: React.ReactNode }) {
       <div className="relative z-10" style={{ marginTop: "-100dvh" }}>
         {/* Écran 1 — accroche */}
         <div className="flex h-dvh flex-col font-body">
-          <LandingNavbar variant="dark" />
-
           <div className="flex flex-1 flex-col items-center justify-center px-6 text-center">
             <h1 className="mb-8 max-w-4xl font-title text-[38px] font-normal leading-[1.12] tracking-[-0.02em] text-white md:text-[64px]">
               Chaque recommandation

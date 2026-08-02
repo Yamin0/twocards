@@ -19,8 +19,10 @@ function buildCards(variant: Variant) {
       : "after:from-[var(--landing-ivory)]",
   ].join(" ");
 
+  /* Effet « grisé jusqu'au survol » réservé au desktop : sur mobile il n'y a
+     pas de hover, les cartes arrivent donc directement en pleine couleur. */
   const washed =
-    "before:absolute before:w-[100%] before:outline-1 before:rounded-xl before:outline-border before:h-[100%] before:content-[''] before:bg-blend-overlay before:bg-background/50 grayscale-[100%] hover:before:opacity-0 before:transition-opacity before:duration-700 hover:grayscale-0 before:left-0 before:top-0";
+    "md:before:absolute md:before:w-[100%] md:before:outline-1 md:before:rounded-xl md:before:outline-border md:before:h-[100%] md:before:content-[''] md:before:bg-blend-overlay md:before:bg-background/50 md:grayscale-[100%] md:hover:before:opacity-0 md:before:transition-opacity md:before:duration-700 md:hover:grayscale-0 md:before:left-0 md:before:top-0";
 
   return [
     {
@@ -70,15 +72,9 @@ export function Activity({ variant = "light" }: { variant?: Variant }) {
           : "border-t border-black/[0.06] bg-[var(--landing-ivory)] py-24 md:px-16 md:py-32"
       }`}
     >
-      {/* Voile solidaire de la section : il assombrit la vidéo juste derrière
-          le texte, laisse l'image respirer côté cartes, et se fond en haut et
-          en bas pour ne créer aucune bande visible. */}
-      {onVideo && (
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-x-0 -inset-y-24 bg-black/60 [mask-image:linear-gradient(to_bottom,transparent,black_14%,black_86%,transparent)] md:bg-[linear-gradient(to_right,rgba(0,0,0,0.88)_0%,rgba(0,0,0,0.72)_42%,rgba(0,0,0,0.34)_70%,rgba(0,0,0,0.12)_100%)]"
-        />
-      )}
+      {/* Aucun voile ici : l'image doit rester visible. La lisibilité du texte
+          blanc passe par .text-on-video, dont l'ombre portée ne noircit que le
+          pourtour des glyphes au lieu de voiler la vidéo. */}
 
       {/* grid-cols-1 explicite : sans lui la colonne se dimensionne sur le
           min-content des cartes (352 px en dur) et rogne le texte en mobile. */}
@@ -92,16 +88,16 @@ export function Activity({ variant = "light" }: { variant?: Variant }) {
         >
           <p
             className={`mb-4 text-[11px] font-medium uppercase tracking-[0.28em] ${
-              onVideo ? "text-white/60" : "text-[var(--landing-mute)]"
+              onVideo
+                ? "text-on-video text-white/75"
+                : "text-[var(--landing-mute)]"
             }`}
           >
             En temps réel
           </p>
           <h2
             className={`mb-6 font-title text-3xl font-normal leading-tight md:text-4xl ${
-              onVideo
-                ? "text-white drop-shadow-[0_2px_20px_rgba(0,0,0,0.45)]"
-                : "text-[var(--landing-ink)]"
+              onVideo ? "text-on-video text-white" : "text-[var(--landing-ink)]"
             }`}
           >
             Votre soirée se déroule.
@@ -110,7 +106,9 @@ export function Activity({ variant = "light" }: { variant?: Variant }) {
           </h2>
           <p
             className={`mb-8 max-w-md text-[15px] font-normal leading-relaxed ${
-              onVideo ? "text-white/80" : "text-[var(--landing-ink)]/70"
+              onVideo
+                ? "text-on-video text-white/90"
+                : "text-[var(--landing-ink)]/70"
             }`}
           >
             Chaque événement du parcours — confirmation, arrivée du client,
@@ -126,7 +124,7 @@ export function Activity({ variant = "light" }: { variant?: Variant }) {
                 key={point}
                 className={`py-3.5 text-[14px] font-normal leading-relaxed last:border-b ${
                   onVideo
-                    ? "border-t border-white/20 text-white/85"
+                    ? "text-on-video border-t border-white/25 text-white/95"
                     : "border-t border-black/[0.08] text-[var(--landing-ink)]/80"
                 }`}
               >
@@ -138,7 +136,7 @@ export function Activity({ variant = "light" }: { variant?: Variant }) {
           <Link
             href="/signup?role=concierge"
             className={`group inline-flex items-center gap-3 text-[11px] font-medium uppercase tracking-[0.18em] ${
-              onVideo ? "text-white" : "text-[var(--landing-ink)]"
+              onVideo ? "text-on-video text-white" : "text-[var(--landing-ink)]"
             }`}
           >
             Recevoir mes commissions dans TwoCards

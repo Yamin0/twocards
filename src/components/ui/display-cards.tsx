@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Sparkles } from "lucide-react";
 
@@ -69,9 +70,25 @@ export default function DisplayCards({ cards }: DisplayCardsProps) {
   const displayCards = cards || defaultCards;
 
   return (
-    <div className="grid [grid-template-areas:'stack'] place-items-center opacity-100 animate-in fade-in-0 duration-700">
+    <div className="grid [grid-template-areas:'stack'] place-items-center">
       {displayCards.map((cardProps, index) => (
-        <DisplayCard key={index} {...cardProps} />
+        /* Chaque carte surgit à son tour à l'entrée dans le viewport —
+           essentiel sur mobile, où le hover n'existe pas. Le wrapper porte
+           la grid-area ; la carte garde ses translations décoratives. */
+        <motion.div
+          key={index}
+          className="[grid-area:stack]"
+          initial={{ opacity: 0, y: 56, scale: 0.9 }}
+          whileInView={{ opacity: 1, y: 0, scale: 1 }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={{
+            duration: 0.55,
+            delay: index * 0.25,
+            ease: [0.22, 1, 0.36, 1],
+          }}
+        >
+          <DisplayCard {...cardProps} />
+        </motion.div>
       ))}
     </div>
   );
