@@ -13,18 +13,32 @@ const navLinks = [
   { label: "Influenceurs", href: "/influenceurs" },
 ];
 
-export function LandingNavbar() {
+export function LandingNavbar({
+  variant = "light",
+}: {
+  variant?: "light" | "dark";
+}) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const onDark = variant === "dark";
 
   return (
     <div className="relative z-20 font-body">
-      <header className="flex items-center justify-between border-b border-black/[0.06] px-6 py-5 md:px-16">
+      <header
+        className={`flex items-center justify-between px-6 py-5 md:px-16 ${
+          onDark ? "border-b border-white/[0.08]" : "border-b border-black/[0.06]"
+        }`}
+      >
         <Link
           href="/"
-          className="font-title text-[26px] font-medium leading-none tracking-tight"
+          className={`font-title text-[26px] font-medium leading-none tracking-tight ${
+            onDark ? "text-white" : ""
+          }`}
         >
-          twocards<span className="text-[var(--landing-mute)]">.</span>
+          twocards
+          <span className={onDark ? "text-white/50" : "text-[var(--landing-mute)]"}>
+            .
+          </span>
         </Link>
 
         <nav className="hidden items-center gap-8 md:flex">
@@ -35,9 +49,13 @@ export function LandingNavbar() {
                 key={link.label}
                 href={link.href}
                 className={`text-[11px] font-medium uppercase tracking-[0.18em] transition-colors ${
-                  active
-                    ? "text-[var(--landing-ink)] underline decoration-black/30 underline-offset-8"
-                    : "text-[var(--landing-ink)]/60 hover:text-[var(--landing-ink)]"
+                  onDark
+                    ? active
+                      ? "text-white underline decoration-white/40 underline-offset-8"
+                      : "text-white/60 hover:text-white"
+                    : active
+                      ? "text-[var(--landing-ink)] underline decoration-black/30 underline-offset-8"
+                      : "text-[var(--landing-ink)]/60 hover:text-[var(--landing-ink)]"
                 }`}
               >
                 {link.label}
@@ -49,19 +67,31 @@ export function LandingNavbar() {
         <div className="flex items-center gap-6">
           <Link
             href="/login"
-            className="hidden text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--landing-ink)]/60 transition-colors hover:text-[var(--landing-ink)] sm:block"
+            className={`hidden text-[11px] font-medium uppercase tracking-[0.18em] transition-colors sm:block ${
+              onDark
+                ? "text-white/60 hover:text-white"
+                : "text-[var(--landing-ink)]/60 hover:text-[var(--landing-ink)]"
+            }`}
           >
             Connexion
           </Link>
           <Link
             href="/signup"
-            className="hidden rounded-full bg-[var(--landing-ink)] px-5 py-2.5 text-[13px] font-medium text-[var(--landing-ivory)] transition-opacity hover:opacity-80 sm:block"
+            className={`hidden rounded-full px-5 py-2.5 text-[13px] font-medium transition-opacity hover:opacity-80 sm:block ${
+              onDark
+                ? "bg-white text-black"
+                : "bg-[var(--landing-ink)] text-[var(--landing-ivory)]"
+            }`}
           >
             Demander un accès
           </Link>
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="text-[var(--landing-ink)]/70 transition-colors hover:text-[var(--landing-ink)] md:hidden"
+            className={`transition-colors md:hidden ${
+              onDark
+                ? "text-white/70 hover:text-white"
+                : "text-[var(--landing-ink)]/70 hover:text-[var(--landing-ink)]"
+            }`}
             aria-label="Ouvrir le menu"
           >
             {mobileOpen ? (

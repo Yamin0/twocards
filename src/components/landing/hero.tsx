@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { motion } from "framer-motion";
 import {
   CalendarCheck,
@@ -10,8 +9,8 @@ import {
   Scale,
 } from "lucide-react";
 import { GlassEffect, GlassButton, GlassFilter } from "@/components/ui/liquid-glass";
-import { WarpOverlay, WarpBackground } from "@/components/ui/wrap-shader";
-import { LandingNavbar } from "@/components/landing/navbar";
+import { WarpOverlay } from "@/components/ui/wrap-shader";
+import { ScrollVideoHero } from "@/components/landing/scroll-video-hero";
 
 const modules = [
   { icon: CalendarCheck, label: "Réservations" },
@@ -21,74 +20,16 @@ const modules = [
   { icon: Scale, label: "Litiges" },
 ];
 
-const fadeUp = {
-  initial: { opacity: 0, y: 24 },
-  animate: { opacity: 1, y: 0 },
-};
-
 export function Hero() {
   return (
-    <section className="relative overflow-hidden bg-[var(--landing-ivory)] text-[var(--landing-ink)] font-body">
+    // Pas d'overflow-hidden sur la section : il neutraliserait le
+    // position:sticky du hero vidéo. Le clipping se fait par sous-section.
+    <section className="relative bg-[var(--landing-ivory)] text-[var(--landing-ink)] font-body">
       <GlassFilter />
 
-      {/* Bloc haut : navbar + héros sur fond shader */}
-      <div className="relative">
-        <WarpBackground speed={0.3} />
-
-        {/* Navbar */}
-        <LandingNavbar />
-
-      {/* Hero editorial */}
-      <div className="relative z-10 mx-auto flex max-w-4xl flex-col items-center px-6 pb-20 pt-20 text-center md:pb-28 md:pt-28">
-        <motion.p
-          {...fadeUp}
-          transition={{ duration: 0.6 }}
-          className="mb-8 text-[11px] font-medium uppercase tracking-[0.28em] text-[var(--landing-mute)]"
-        >
-          Le channel manager des concierges &amp; RP
-        </motion.p>
-
-        <motion.h1
-          {...fadeUp}
-          transition={{ duration: 0.7, delay: 0.1 }}
-          className="mb-8 font-title text-[38px] font-normal leading-[1.12] tracking-[-0.02em] md:text-[64px]"
-        >
-          Chaque recommandation
-          <br />
-          devient une réservation{" "}
-          <em className="italic">traçable</em>.
-        </motion.h1>
-
-        <motion.p
-          {...fadeUp}
-          transition={{ duration: 0.7, delay: 0.2 }}
-          className="mb-10 max-w-xl text-[15px] font-normal leading-relaxed text-[var(--landing-ink)]/70"
-        >
-          TwoCards connecte les établissements aux concierges et RP vérifiés,
-          synchronise les disponibilités et automatise l&apos;attribution, les
-          acomptes et les commissions.
-        </motion.p>
-
-        <motion.div
-          {...fadeUp}
-          transition={{ duration: 0.7, delay: 0.3 }}
-          className="flex flex-col items-center gap-5 sm:flex-row"
-        >
-          <Link
-            href="/signup"
-            className="rounded-full bg-[var(--landing-ink)] px-8 py-3.5 text-[14px] font-medium text-[var(--landing-ivory)] transition-opacity hover:opacity-80"
-          >
-            Commencer gratuitement
-          </Link>
-          <Link
-            href="/signup?role=concierge"
-            className="text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--landing-ink)]/60 underline decoration-black/20 underline-offset-4 transition-colors hover:text-[var(--landing-ink)]"
-          >
-            Je suis concierge / RP
-          </Link>
-        </motion.div>
-      </div>
-      </div>
+      {/* Hero cinématique : vidéo des portes pilotée par le scroll,
+          navbar incluse (variant sombre) */}
+      <ScrollVideoHero />
 
       {/* Photo band + liquid glass */}
       <motion.div
