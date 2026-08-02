@@ -93,7 +93,7 @@ function PassportVisual() {
   return (
     <div className="text-left">
       <div className="mb-3 flex flex-wrap gap-1.5">
-        {["Marrakech", "Casablanca", "Paris", "Saint-Tropez", "Dubaï"].map(
+        {["Casablanca", "Paris", "Saint-Tropez", "Dubaï", "Ibiza"].map(
           (city, i) => (
             <span
               key={city}

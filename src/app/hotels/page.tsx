@@ -18,7 +18,7 @@ export default function HotelsPage() {
         subtitle:
           "La réservation difficile à obtenir est la première chose que chaque client demande au desk — et la seule que la plupart des établissements ne peuvent pas garantir. TwoCards la met à portée de votre conciergerie, avec une attribution claire à votre établissement sur chaque réservation.",
         primaryCta: { label: "Équiper mon desk", href: "/signup" },
-        secondaryCta: { label: "Parler à notre équipe", href: "/#contact" },
+        secondaryCta: { label: "Parler à notre équipe", href: "/signup" },
         steps: [
           {
             title: "Équipez votre desk concierge",

@@ -8,7 +8,7 @@ const footerLinks = {
     { label: "Influenceurs", href: "/influenceurs" },
   ],
   Entreprise: [
-    { label: "Founding Circle", href: "/#contact" },
+    { label: "Founding Circle", href: "/signup" },
     { label: "Connexion", href: "/login" },
     { label: "Demander un accès", href: "/signup" },
   ],
@@ -75,12 +75,12 @@ export function Footer() {
             >
               Mentions légales
             </Link>
-            <Link
-              href="/#contact"
+            <a
+              href="mailto:contact@twocardspro.com"
               className="transition-colors hover:text-[var(--landing-ink)]"
             >
               Contact
-            </Link>
+            </a>
           </div>
         </div>
       </div>

@@ -1,31 +1,17 @@
-import { Hero } from "@/components/landing/hero";
-import { Testimonial } from "@/components/landing/testimonial";
-import { AudiencesStrip } from "@/components/landing/audiences-strip";
-import { VenuesCarousel } from "@/components/landing/venues-carousel";
-import { Differentiators } from "@/components/landing/differentiators";
+import { ScrollVideoHero } from "@/components/landing/scroll-video-hero";
 import { Activity } from "@/components/landing/activity";
-import { Journey } from "@/components/landing/journey";
-import { Standards } from "@/components/landing/standards";
-import { NetworkBento } from "@/components/landing/network-bento";
-import { FaqHome } from "@/components/landing/faq-home";
-import { CtaBanner } from "@/components/landing/cta-banner";
+import { Differentiators } from "@/components/landing/differentiators";
 import { Footer } from "@/components/layout/footer";
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-[var(--landing-ivory)] text-[var(--landing-ink)]">
       <main>
-        <Hero />
-        <Testimonial />
-        <AudiencesStrip />
-        <VenuesCarousel />
+        {/* La section « En temps réel » défile en transparence sur la vidéo */}
+        <ScrollVideoHero>
+          <Activity variant="overlay" />
+        </ScrollVideoHero>
         <Differentiators />
-        <Activity />
-        <Journey />
-        <Standards />
-        <NetworkBento />
-        <FaqHome />
-        <CtaBanner />
       </main>
       <Footer />
     </div>

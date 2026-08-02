@@ -10,7 +10,6 @@ import {
 } from "lucide-react";
 import { GlassEffect, GlassButton, GlassFilter } from "@/components/ui/liquid-glass";
 import { WarpOverlay } from "@/components/ui/wrap-shader";
-import { ScrollVideoHero } from "@/components/landing/scroll-video-hero";
 
 const modules = [
   { icon: CalendarCheck, label: "Réservations" },
@@ -22,14 +21,8 @@ const modules = [
 
 export function Hero() {
   return (
-    // Pas d'overflow-hidden sur la section : il neutraliserait le
-    // position:sticky du hero vidéo. Le clipping se fait par sous-section.
     <section className="relative bg-[var(--landing-ivory)] text-[var(--landing-ink)] font-body">
       <GlassFilter />
-
-      {/* Hero cinématique : vidéo des portes pilotée par le scroll,
-          navbar incluse (variant sombre) */}
-      <ScrollVideoHero />
 
       {/* Photo band + liquid glass */}
       <motion.div
