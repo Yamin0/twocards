@@ -7,14 +7,14 @@ import { ArrowRight } from "lucide-react";
 export const AUDIENCES = [
   {
     href: "/restaurants",
-    label: "Restaurants",
+    label: "Établissements",
     line: "Remplissez vos tables à vos conditions.",
     image:
       "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?q=80&w=900&auto=format&fit=crop",
   },
   {
     href: "/concierges",
-    label: "Concierges & RP",
+    label: "Concierges / PR",
     line: "Chaque apport tracé, chaque commission payée.",
     image:
       "https://images.unsplash.com/photo-1470337458703-46ad1756a187?q=80&w=900&auto=format&fit=crop",

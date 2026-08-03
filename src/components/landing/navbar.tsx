@@ -7,8 +7,8 @@ import { Menu, X } from "lucide-react";
 
 const navLinks = [
   { label: "Accueil", href: "/" },
-  { label: "Restaurants", href: "/restaurants" },
-  { label: "Concierges", href: "/concierges" },
+  { label: "Établissements", href: "/restaurants" },
+  { label: "Concierges / PR", href: "/concierges" },
   { label: "Hôtels", href: "/hotels" },
   { label: "Influenceurs", href: "/influenceurs" },
 ];
@@ -65,7 +65,9 @@ export function LandingNavbar({
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-8 md:flex">
+        {/* Bascule à lg et non md : les cinq libellés plus le bloc d'accès
+            réclament ~960 px, le menu débordait entre 768 et 1024. */}
+        <nav className="hidden items-center gap-8 lg:flex">
           {navLinks.map((link) => {
             const active = pathname === link.href;
             return (
@@ -111,7 +113,7 @@ export function LandingNavbar({
           </Link>
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className={`transition-colors md:hidden ${
+            className={`transition-colors lg:hidden ${
               onDark
                 ? "text-white/70 hover:text-white"
                 : "text-[var(--landing-ink)]/70 hover:text-[var(--landing-ink)]"
@@ -129,7 +131,7 @@ export function LandingNavbar({
 
       {/* Menu mobile */}
       {mobileOpen && (
-        <nav className="absolute left-0 right-0 top-full z-30 flex flex-col border-b border-black/[0.08] bg-[var(--landing-ivory)] px-6 py-4 md:hidden">
+        <nav className="absolute left-0 right-0 top-full z-30 flex flex-col border-b border-black/[0.08] bg-[var(--landing-ivory)] px-6 py-4 lg:hidden">
           {navLinks.map((link) => (
             <Link
               key={link.label}

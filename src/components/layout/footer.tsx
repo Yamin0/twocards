@@ -2,8 +2,8 @@ import Link from "next/link";
 
 const footerLinks = {
   Produit: [
-    { label: "Restaurants", href: "/restaurants" },
-    { label: "Concierges", href: "/concierges" },
+    { label: "Établissements", href: "/restaurants" },
+    { label: "Concierges / PR", href: "/concierges" },
     { label: "Hôtels", href: "/hotels" },
     { label: "Influenceurs", href: "/influenceurs" },
   ],
