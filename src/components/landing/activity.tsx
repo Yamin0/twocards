@@ -56,7 +56,7 @@ function buildCards(variant: Variant) {
 }
 
 const POINTS = [
-  "Le concierge sait quand son client est arrivé — sans appeler la porte",
+  "Le concierge sait quand son client est arrivé, sans appeler la porte",
   "L'établissement voit qui a généré la table avant même le service",
   "La commission apparaît validée dès que la facture est vérifiée",
 ];
@@ -111,8 +111,8 @@ export function Activity({ variant = "light" }: { variant?: Variant }) {
                 : "text-[var(--landing-ink)]/70"
             }`}
           >
-            Chaque événement du parcours — confirmation, arrivée du client,
-            validation de la facture, commission — vous est notifié à
+            Chaque événement du parcours (confirmation, arrivée du client,
+            validation de la facture, commission) vous est notifié à
             l&apos;instant où il se produit. Côté concierge comme côté
             établissement, plus personne ne relance personne :
             l&apos;information arrive d&apos;elle-même.

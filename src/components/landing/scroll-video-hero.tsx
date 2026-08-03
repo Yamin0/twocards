@@ -21,9 +21,7 @@ import { LandingNavbar } from "@/components/landing/navbar";
 const VIDEO_SRC_DESKTOP = "/videos/hero-doors.mp4";
 const VIDEO_SRC_MOBILE = "/videos/hero-doors-720.mp4";
 const DAMPING = 0.14;
-/* Respirations de vidéo nue autour de la section : courtes, sinon la vidéo
-   « avance toute seule » sur un écran vide entre les deux temps. */
-const GAP_VH = 10;
+/* Respiration finale : la cour se révèle seule avant le pied de page. */
 const TAIL_VH = 40;
 
 export function ScrollVideoHero({ children }: { children?: React.ReactNode }) {
@@ -219,28 +217,9 @@ export function ScrollVideoHero({ children }: { children?: React.ReactNode }) {
             </Link>
           </div>
 
-          <div className="pointer-events-none flex flex-col items-center gap-3 pb-8">
-            <span className="text-[10px] font-medium uppercase tracking-[0.24em] text-white/60">
-              Faites défiler
-            </span>
-            <span className="h-10 w-px overflow-hidden bg-white/20">
-              <motion.span
-                animate={{ y: [-40, 40] }}
-                transition={{
-                  duration: 1.8,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-                className="block h-full w-full bg-white/70"
-              />
-            </span>
-          </div>
         </div>
 
-        {/* Respiration : les portes s'ouvrent seules avant l'arrivée du texte */}
-        <div style={{ height: `${GAP_VH}vh` }} />
-
-        {/* Écran 2 — section transmise, en transparence sur la vidéo */}
+        {/* Écrans suivants — sections transmises, en transparence sur la vidéo */}
         {children}
 
         {/* Respiration finale : la cour se révèle seule avant la suite */}

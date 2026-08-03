@@ -7,11 +7,11 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-[var(--landing-ivory)] text-[var(--landing-ink)]">
       <main>
-        {/* La section « En temps réel » défile en transparence sur la vidéo */}
+        {/* Tout le contenu défile en transparence sur la vidéo épinglée */}
         <ScrollVideoHero>
           <Activity variant="overlay" />
+          <Differentiators variant="overlay" />
         </ScrollVideoHero>
-        <Differentiators />
       </main>
       <Footer />
     </div>
