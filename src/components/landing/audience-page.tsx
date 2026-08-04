@@ -2,11 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { ArrowRight, Plus, QrCode, Mail } from "lucide-react";
 import { LandingNavbar } from "@/components/landing/navbar";
-import { AudiencesStrip } from "@/components/landing/audiences-strip";
 import { Footer } from "@/components/layout/footer";
 import { GlassButton, GlassFilter } from "@/components/ui/liquid-glass";
 import SocialCards, { type CardItem } from "@/components/ui/card-fan-carousel";
@@ -109,7 +107,6 @@ function MarqueeItem({
 const HERO_VIDEO_RATE = 0.8;
 
 export function AudiencePage({ data }: { data: AudiencePageData }) {
-  const pathname = usePathname();
   const onVideo = Boolean(data.heroVideo);
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -454,9 +451,6 @@ export function AudiencePage({ data }: { data: AudiencePageData }) {
           </div>
         </div>
       </section>
-
-      {/* Les autres métiers du réseau */}
-      <AudiencesStrip exclude={pathname} />
 
       {/* CTA final */}
       <section className="border-t border-black/[0.06] px-6 py-24 md:py-32">
