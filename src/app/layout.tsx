@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Manrope, Inter, Nunito } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
@@ -45,6 +45,13 @@ const suisse = localFont({
     { path: "./fonts/SuisseIntl-Bold.woff2", weight: "700", style: "normal" },
   ],
 });
+
+/* Teinte la barre de Safari iOS (et le chrome des navigateurs mobiles) dans
+   le noir de la navbar au lieu du blanc par défaut : la barre se fond dans le
+   site. Même valeur que l'écran de chargement du héros (#0a0a0a). */
+export const viewport: Viewport = {
+  themeColor: "#0a0a0a",
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://twocardspro.com"),
