@@ -86,15 +86,6 @@ export function Activity({ variant = "light" }: { variant?: Variant }) {
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.6 }}
         >
-          <p
-            className={`mb-4 text-[11px] font-medium uppercase tracking-[0.28em] ${
-              onVideo
-                ? "text-on-video text-white/75"
-                : "text-[var(--landing-mute)]"
-            }`}
-          >
-            En temps réel
-          </p>
           <h2
             className={`mb-6 font-title text-3xl font-normal leading-tight md:text-4xl ${
               onVideo ? "text-on-video text-white" : "text-[var(--landing-ink)]"
