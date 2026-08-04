@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, Plus, QrCode, Mail } from "lucide-react";
 import { LandingNavbar } from "@/components/landing/navbar";
 import { Footer } from "@/components/layout/footer";
@@ -13,6 +13,11 @@ import { WarpOverlay, WarpBackground } from "@/components/ui/wrap-shader";
 export interface AudiencePageData {
   label: string;
   titleStart: string;
+  /* Optionnel : mots qui se relaient entre titleStart et titleMiddle,
+     avec un glissement vertical doux. */
+  titleRotate?: string[];
+  /* Texte entre le mot tournant et l'accent italique. */
+  titleMiddle?: string;
   titleAccent: string;
   titleEnd: string;
   /* Optionnel : certaines pages laissent le héros au seul titre. */
@@ -106,6 +111,61 @@ function MarqueeItem({
    de perception des saccades. */
 const HERO_VIDEO_RATE = 0.8;
 
+/* Mot tournant du titre : chaque mot sort vers le haut et le suivant monte
+   à sa place, dans un léger flou. Tous les mots occupent la même cellule de
+   grille, la plus large fixant la largeur : le reste du titre ne bouge
+   jamais. En reduced-motion, simple fondu croisé. */
+function RotatingTitleWord({ words }: { words: string[] }) {
+  const [index, setIndex] = useState(0);
+  const reduced = useReducedMotion();
+
+  useEffect(() => {
+    const id = setInterval(
+      () => setIndex((i) => (i + 1) % words.length),
+      2600
+    );
+    return () => clearInterval(id);
+  }, [words.length]);
+
+  return (
+    <span className="relative inline-grid align-baseline">
+      {words.map((w) => (
+        <span
+          key={w}
+          aria-hidden
+          className="invisible col-start-1 row-start-1 whitespace-nowrap"
+        >
+          {w}
+        </span>
+      ))}
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.span
+          key={words[index]}
+          initial={
+            reduced
+              ? { opacity: 0 }
+              : { y: "0.55em", opacity: 0, filter: "blur(5px)" }
+          }
+          animate={
+            reduced
+              ? { opacity: 1 }
+              : { y: 0, opacity: 1, filter: "blur(0px)" }
+          }
+          exit={
+            reduced
+              ? { opacity: 0 }
+              : { y: "-0.55em", opacity: 0, filter: "blur(5px)" }
+          }
+          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+          className="col-start-1 row-start-1 whitespace-nowrap text-center"
+        >
+          {words[index]}
+        </motion.span>
+      </AnimatePresence>
+    </span>
+  );
+}
+
 export function AudiencePage({ data }: { data: AudiencePageData }) {
   const onVideo = Boolean(data.heroVideo);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -183,7 +243,14 @@ export function AudiencePage({ data }: { data: AudiencePageData }) {
                 onVideo ? "text-white" : ""
               }`}
             >
-              {data.titleStart} <em className="italic">{data.titleAccent}</em>
+              {data.titleStart}{" "}
+              {data.titleRotate && (
+                <>
+                  <RotatingTitleWord words={data.titleRotate} />{" "}
+                </>
+              )}
+              {data.titleMiddle && <>{data.titleMiddle} </>}
+              <em className="italic">{data.titleAccent}</em>
               {data.titleEnd}
             </motion.h1>
 
