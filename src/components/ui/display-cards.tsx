@@ -46,7 +46,11 @@ function DisplayCard({
   return (
     <div
       className={cn(
-        "relative flex h-36 w-[22rem] -skew-y-[8deg] select-none flex-col justify-between rounded-xl border-2 bg-muted/70 backdrop-blur-sm px-4 py-3 transition-all duration-700 after:absolute after:-right-1 after:top-[-5%] after:h-[110%] after:w-[20rem] after:bg-gradient-to-l after:from-background after:to-transparent after:content-[''] hover:border-white/20 hover:bg-muted [&>*]:flex [&>*]:items-center [&>*]:gap-2",
+        /* backdrop-blur réservé au desktop : sur mobile les cartes bougent au
+           scroll au-dessus de la vidéo scrubée, et recalculer le flou à chaque
+           frame saccade le défilement. Le fond est presque opaque (bg /70-/80),
+           la différence est invisible. */
+        "relative flex h-36 w-[22rem] -skew-y-[8deg] select-none flex-col justify-between rounded-xl border-2 bg-muted/70 md:backdrop-blur-sm px-4 py-3 transition-all duration-700 after:absolute after:-right-1 after:top-[-5%] after:h-[110%] after:w-[20rem] after:bg-gradient-to-l after:from-background after:to-transparent after:content-[''] hover:border-white/20 hover:bg-muted [&>*]:flex [&>*]:items-center [&>*]:gap-2",
         className
       )}
     >
@@ -88,25 +92,36 @@ function useViewportProgress(
     const el = ref.current;
     if (!active || !el) return;
 
+    /* La géométrie n'est mesurée qu'au montage et au resize : un
+       getBoundingClientRect à chaque frame de scroll force un layout au
+       milieu des écritures de transform des ressorts et saccade le
+       défilement. Entre deux mesures, seul scrollY est lu. */
+    let top = 0;
+    let span = 1;
     let frame = 0;
-    const measure = () => {
+
+    const update = () => {
       frame = 0;
-      const rect = el.getBoundingClientRect();
-      const span = window.innerHeight + rect.height;
-      const p = (window.innerHeight - rect.top) / span;
+      const p = (window.scrollY + window.innerHeight - top) / span;
       progress.set(Math.min(1, Math.max(0, p)));
     };
-    const schedule = () => {
-      if (!frame) frame = requestAnimationFrame(measure);
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+    const remeasure = () => {
+      const rect = el.getBoundingClientRect();
+      top = rect.top + window.scrollY;
+      span = window.innerHeight + rect.height;
+      update();
     };
 
-    measure();
-    window.addEventListener("scroll", schedule, { passive: true });
-    window.addEventListener("resize", schedule);
+    remeasure();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", remeasure);
     return () => {
       if (frame) cancelAnimationFrame(frame);
-      window.removeEventListener("scroll", schedule);
-      window.removeEventListener("resize", schedule);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", remeasure);
     };
   }, [ref, active, progress]);
 
@@ -132,14 +147,13 @@ function ScrollPopCard({
   const peak = start + 0.1;
   const end = start + 0.22;
 
+  /* Translation seule, sans échelle : un scale sur une carte en backdrop-blur
+     force le ré-échantillonnage du flou à chaque frame et saccade le scroll. */
   const lift = useTransform(progress, [start, peak, end], [0, -POP_LIFT, 0]);
-  const bump = useTransform(progress, [start, peak, end], [1, 1.035, 1]);
-
   const y = useSpring(lift, POP_SPRING);
-  const scale = useSpring(bump, POP_SPRING);
 
   return (
-    <motion.div style={enabled ? { y, scale } : undefined}>
+    <motion.div style={enabled ? { y, willChange: "transform" } : undefined}>
       <DisplayCard {...cardProps} />
     </motion.div>
   );

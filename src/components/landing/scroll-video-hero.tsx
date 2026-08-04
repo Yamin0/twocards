@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { motion, useScroll } from "framer-motion";
+import { useScroll } from "framer-motion";
 import { LandingNavbar } from "@/components/landing/navbar";
 
 /* Séquence cinématique : la vidéo des portes est épinglée en fond et sert de
@@ -98,6 +98,18 @@ export function ScrollVideoHero({ children }: { children?: React.ReactNode }) {
     };
   }, [phase]);
 
+  /* Deuxième filet pour iOS : si la frame a été composée pendant que l'écran
+     de chargement couvrait la vidéo, elle peut ne jamais être réaffichée à sa
+     disparition. Un micro-seek force le repaint ; le scrub ramènera la tête de
+     lecture vers le haut de page tout seul. */
+  useEffect(() => {
+    if (phase !== "done") return;
+    const video = videoRef.current;
+    if (video && video.readyState >= 2) {
+      video.currentTime = video.currentTime + 0.001;
+    }
+  }, [phase]);
+
   /* Scrub : le scroll pilote currentTime, lissé par amortissement. */
   useEffect(() => {
     const video = videoRef.current;
@@ -115,6 +127,13 @@ export function ScrollVideoHero({ children }: { children?: React.ReactNode }) {
       metaReady = true;
       // Force le rendu de la frame 0 (Safari/iOS ne peint rien avant un seek)
       video.currentTime = 0.001;
+      /* Le seek seul ne suffit pas au tout premier chargement sur iOS : tant
+         qu'aucune lecture n'a démarré, aucune frame n'est peinte et le fond
+         reste noir (un aller-retour de navigation « réparait » la page, le
+         fichier étant alors en cache). Lecture muette d'une frame, figée
+         aussitôt — permise sans geste car muted + playsInline. */
+      const kick = video.play();
+      if (kick) kick.then(() => video.pause()).catch(() => {});
     };
     if (video.readyState >= 1) onMeta();
     else video.addEventListener("loadedmetadata", onMeta, { once: true });
