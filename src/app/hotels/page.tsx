@@ -12,33 +12,43 @@ export default function HotelsPage() {
     <AudiencePage
       data={{
         label: "TwoCards pour les hôtels & riads",
+        heroVideo: "/videos/hotels-hero-60.mp4",
+        heroPoster: "/videos/hotels-hero-poster.jpg",
         titleStart: "Offrez à vos clients la table qu'ils",
         titleAccent: "veulent vraiment",
         titleEnd: ".",
-        subtitle:
-          "La table impossible à obtenir est la première chose qu'un client demande au desk, et la seule que la plupart des établissements ne peuvent pas garantir. TwoCards la met à portée de votre équipe sur trois points de contact, avec une attribution claire à votre établissement et une part du revenu généré.",
         primaryCta: { label: "Équiper mon établissement", href: "/signup" },
         secondaryCta: { label: "Parler à notre équipe", href: "/signup" },
+        stepsTitle: "Deux chemins.",
+        stepsAccent: "Un seul suivi.",
         steps: [
           {
+            icon: "qr",
             title: "Un QR code dans la chambre",
             description:
               "Posé sur le bureau ou le chevet, il ouvre la sélection des restaurants, clubs et expériences que vous recommandez. Le client réserve seul, à toute heure, sans passer par le desk.",
           },
           {
+            icon: "mail",
             title: "Un message avant l'arrivée",
             description:
               "Un lien envoyé par mail ou WhatsApp quelques jours avant le séjour. Le client arrive avec ses tables déjà réservées, et vous connaissez son programme avant qu'il ne franchisse la porte.",
           },
-          {
-            title: "Le desk réserve pour lui",
-            description:
-              "Votre concierge garde la main : disponibilités réelles, réservation au nom du client, suivi de chaque demande. Les trois chemins aboutissent au même tableau de bord.",
-          },
         ],
-        image:
-          "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2000&auto=format&fit=crop",
-        imageAlt: "Piscine d'un hôtel de luxe",
+        marquee: {
+          label: "Ils nous font confiance.",
+          items: [
+            { name: "Six Senses", logo: "/logos/six-senses.png", scale: 1.35 },
+            { name: "Aman", logo: "/logos/aman.png", scale: 0.75 },
+            { name: "St. Regis", logo: "/logos/st-regis.png" },
+            { name: "Cheval Blanc", logo: "/logos/cheval-blanc.png", scale: 1.2 },
+            { name: "Raffles", logo: "/logos/raffles.png", scale: 1.35 },
+            { name: "Shangri-La", logo: "/logos/shangri-la.png", scale: 1.5 },
+          ],
+        },
+        image: "/images/hotels-beach.jpg",
+        imageAlt:
+          "Piscine d'un hôtel en bord de mer, transats et parasols rayés face à la plage",
         statement:
           "Le service que vos clients réclament. La traçabilité que votre direction exige.",
         gainsTitle: "Ce que votre établissement",
@@ -65,6 +75,11 @@ export default function HotelsPage() {
               "QR en chambre, lien avant l'arrivée, sélection de restaurants recommandés : vos clients réservent dans un univers à vos couleurs, attribué à votre établissement.",
           },
           {
+            title: "Votre desk garde la main",
+            description:
+              "Votre concierge voit les disponibilités réelles, réserve au nom du client et suit chaque demande. Qu'elle vienne de la chambre, d'un message ou du desk, toute réservation remonte au même tableau de bord.",
+          },
+          {
             title: "Un suivi auditable de bout en bout",
             description:
               "Tableau de bord en temps réel, réservations modifiables, historique horodaté de chaque demande et versements à échéance fixe. Votre direction peut vérifier chaque ligne.",
@@ -75,6 +90,22 @@ export default function HotelsPage() {
               "Tous les établissements du réseau sont vérifiés, avec conditions affichées et réputation transactionnelle. Vous savez où vous envoyez vos clients.",
           },
         ],
+        /* Photos libres de droit, à remplacer : il suffit d'écraser les
+           fichiers public/images/carousel/01.jpg … 09.jpg. */
+        carousel: {
+          label: "Ce que vos clients réservent",
+          cards: [
+            { imgUrl: "/images/carousel/01.jpg", alt: "Piscine d'hôtel" },
+            { imgUrl: "/images/carousel/02.jpg", alt: "Table de restaurant" },
+            { imgUrl: "/images/carousel/03.jpg", alt: "Rooftop au coucher du soleil" },
+            { imgUrl: "/images/carousel/04.jpg", alt: "Club" },
+            { imgUrl: "/images/carousel/05.jpg", alt: "Plage" },
+            { imgUrl: "/images/carousel/06.jpg", alt: "Dîner privé" },
+            { imgUrl: "/images/carousel/07.jpg", alt: "Salle de restaurant" },
+            { imgUrl: "/images/carousel/08.jpg", alt: "Bar" },
+            { imgUrl: "/images/carousel/09.jpg", alt: "Terrasse" },
+          ],
+        },
         faq: [
           {
             q: "TwoCards remplace-t-il notre PMS ou notre outil de conciergerie ?",
