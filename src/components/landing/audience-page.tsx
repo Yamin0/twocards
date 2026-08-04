@@ -112,12 +112,18 @@ function MarqueeItem({
 const HERO_VIDEO_RATE = 0.8;
 
 /* Mot tournant du titre : chaque mot sort vers le haut et le suivant monte
-   à sa place, dans un léger flou. Tous les mots occupent la même cellule de
-   grille, la plus large fixant la largeur : le reste du titre ne bouge
-   jamais. En reduced-motion, simple fondu croisé. */
+   à sa place, dans un léger flou. En reduced-motion, simple fondu croisé.
+
+   La largeur suit le mot affiché au lieu d'être figée sur le plus long :
+   réserver la largeur maximale creusait un blanc autour des mots courts.
+   Elle est mesurée sur des copies hors flux (donc jamais approximée à partir
+   du nombre de caractères) et animée, ce qui évite aussi que la ligne saute
+   à l'instant du changement. */
 function RotatingTitleWord({ words }: { words: string[] }) {
   const [index, setIndex] = useState(0);
+  const [width, setWidth] = useState<number | null>(null);
   const reduced = useReducedMotion();
+  const measurers = useRef<Array<HTMLSpanElement | null>>([]);
 
   useEffect(() => {
     const id = setInterval(
@@ -127,17 +133,47 @@ function RotatingTitleWord({ words }: { words: string[] }) {
     return () => clearInterval(id);
   }, [words.length]);
 
+  useEffect(() => {
+    const apply = () => {
+      const el = measurers.current[index];
+      if (el) setWidth(el.getBoundingClientRect().width);
+    };
+    apply();
+    /* Les polices du titre sont chargées en display:swap : sans nouvelle
+       mesure après leur arrivée, la largeur resterait celle du fallback. */
+    document.fonts?.ready.then(apply).catch(() => {});
+    window.addEventListener("resize", apply);
+    return () => window.removeEventListener("resize", apply);
+  }, [index]);
+
   return (
-    <span className="relative inline-grid align-baseline">
-      {words.map((w) => (
+    <motion.span
+      className="relative inline-grid align-baseline"
+      animate={width === null ? undefined : { width }}
+      initial={false}
+      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+    >
+      {/* Copies de mesure : hors flux, elles ne dictent pas la largeur. */}
+      {words.map((w, i) => (
         <span
           key={w}
           aria-hidden
-          className="invisible col-start-1 row-start-1 whitespace-nowrap"
+          ref={(el) => {
+            measurers.current[i] = el;
+          }}
+          className="pointer-events-none invisible absolute left-0 top-0 whitespace-nowrap"
         >
           {w}
         </span>
       ))}
+      {/* Ancre de hauteur, largeur nulle : conserve la ligne et la ligne de
+          base pendant le temps mort entre le mot sortant et le suivant. */}
+      <span
+        aria-hidden
+        className="invisible col-start-1 row-start-1 w-0 overflow-hidden"
+      >
+        {words[0]}
+      </span>
       <AnimatePresence mode="wait" initial={false}>
         <motion.span
           key={words[index]}
@@ -157,12 +193,12 @@ function RotatingTitleWord({ words }: { words: string[] }) {
               : { y: "-0.55em", opacity: 0, filter: "blur(5px)" }
           }
           transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-          className="col-start-1 row-start-1 whitespace-nowrap text-center"
+          className="col-start-1 row-start-1 whitespace-nowrap"
         >
           {words[index]}
         </motion.span>
       </AnimatePresence>
-    </span>
+    </motion.span>
   );
 }
 
