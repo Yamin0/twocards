@@ -1,8 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowRight, BadgePercent, QrCode, CalendarCheck } from "lucide-react";
+import { BadgePercent, QrCode, CalendarCheck } from "lucide-react";
 import DisplayCards from "@/components/ui/display-cards";
 
 type Variant = "light" | "overlay";
@@ -124,19 +123,6 @@ export function Activity({ variant = "light" }: { variant?: Variant }) {
             ))}
           </ul>
 
-          <Link
-            href="/signup?role=concierge"
-            className={`group inline-flex items-center gap-3 text-[11px] font-medium uppercase tracking-[0.18em] ${
-              onVideo ? "text-on-video text-white" : "text-[var(--landing-ink)]"
-            }`}
-          >
-            Recevoir mes commissions dans TwoCards
-            <ArrowRight
-              size={14}
-              strokeWidth={1.5}
-              className="transition-transform group-hover:translate-x-1"
-            />
-          </Link>
         </motion.div>
 
         {/* Moitié droite — cartes empilées */}
