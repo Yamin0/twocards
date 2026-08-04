@@ -430,9 +430,12 @@ export function AudiencePage({ data }: { data: AudiencePageData }) {
           </h2>
 
           <div className="flex flex-col">
+            {/* name commun : le navigateur referme la question précédente
+                quand on en ouvre une autre, sans état à gérer. */}
             {data.faq.map((item) => (
               <details
                 key={item.q}
+                name="faq"
                 className="group border-t border-black/[0.08] last:border-b"
               >
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-5 text-[15px] font-medium [&::-webkit-details-marker]:hidden">
