@@ -588,31 +588,6 @@ export default function DashboardPage() {
         </div>
       </motion.div>
 
-      {/* Widget flottant : prochaine arrivée */}
-      <motion.div
-        initial={{ opacity: 0, x: 24 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.6, delay: 0.4 }}
-        className="pointer-events-none fixed right-6 top-1/3 z-30 hidden 2xl:block"
-      >
-        <div className="pointer-events-auto w-60 rounded-2xl bg-blue-500/90 p-4 shadow-[0_20px_50px_-15px_rgba(59,130,246,0.5)] backdrop-blur-xl">
-          <div className="mb-2 flex items-center justify-between">
-            <span className="text-[11px] font-medium uppercase tracking-wide text-white/80">
-              Prochaine arrivée
-            </span>
-            <QrCode size={15} className="text-white/80" />
-          </div>
-          <p className="text-sm font-semibold text-white">Yasmine Alaoui</p>
-          <p className="mb-2 text-[11px] text-white/75">Table 7 · Rooftop</p>
-          <div className="flex items-end justify-between">
-            <span className="text-3xl font-semibold tabular-nums text-white">22:30</span>
-            <span className="rounded-md bg-white/20 px-2 py-1 text-[10px] font-medium text-white">
-              Jota Conciergerie
-            </span>
-          </div>
-        </div>
-      </motion.div>
-
       {/* Modal détail réservation */}
       <AnimatePresence>
         {selected && (

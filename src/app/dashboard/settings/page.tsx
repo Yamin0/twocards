@@ -5,10 +5,8 @@ import {
   User,
   Shield,
   Bell,
-  CreditCard,
   Lock,
   Camera,
-  ChevronDown,
   Check,
   Loader2,
   Building2,
@@ -29,7 +27,6 @@ const settingsNav = [
   { label: "Établissement", icon: Building2, id: "etablissement" },
   { label: "Notifications", icon: Bell, id: "notifications" },
   { label: "Sécurité", icon: Lock, id: "securite" },
-  { label: "Facturation", icon: CreditCard, id: "facturation" },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -41,9 +38,13 @@ const inputCls =
   "w-full px-4 py-2.5 bg-white/[0.05] border border-white/[0.1] rounded-xl text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-blue-400/40 transition-colors";
 const labelCls =
   "block text-[0.625rem] text-white/30 uppercase tracking-wider mb-1.5";
-const selectCls =
-  "w-full appearance-none px-4 py-2.5 bg-white/[0.05] border border-white/[0.1] rounded-xl text-sm text-white focus:outline-none focus:border-blue-400/40 transition-colors";
-const optionBg = "bg-[#1a1a2e]";
+const VENUE_TYPE_LABELS: Record<string, string> = {
+  restaurant: "Restaurant",
+  bar: "Bar",
+  club: "Club",
+  "restaurant-bar": "Restaurant-Bar",
+  lounge: "Lounge",
+};
 
 /* ------------------------------------------------------------------ */
 /*  Toggle component                                                   */
@@ -219,10 +220,6 @@ export default function SettingsPage() {
       title: "Sécurité",
       subtitle: "Protégez votre compte avec un mot de passe fort.",
     },
-    facturation: {
-      title: "Facturation",
-      subtitle: "Gérez votre abonnement et vos paiements.",
-    },
   };
 
   const header = tabHeaders[activeTab];
@@ -338,42 +335,20 @@ export default function SettingsPage() {
           <input
             type="text"
             value={form.venueName}
-            onChange={(e) => updateForm("venueName", e.target.value)}
-            placeholder="Nom"
-            className={inputCls}
+            disabled
+            className={`${inputCls} opacity-40 cursor-not-allowed`}
           />
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className={labelCls}>Type</label>
-            <div className="relative">
-              <select
-                value={form.venueType}
-                onChange={(e) => updateForm("venueType", e.target.value)}
-                className={selectCls}
-              >
-                <option value="restaurant" className={optionBg}>
-                  Restaurant
-                </option>
-                <option value="bar" className={optionBg}>
-                  Bar
-                </option>
-                <option value="club" className={optionBg}>
-                  Club
-                </option>
-                <option value="restaurant-bar" className={optionBg}>
-                  Restaurant-Bar
-                </option>
-                <option value="lounge" className={optionBg}>
-                  Lounge
-                </option>
-              </select>
-              <ChevronDown
-                size={14}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none"
-              />
-            </div>
+            <input
+              type="text"
+              value={VENUE_TYPE_LABELS[form.venueType] ?? form.venueType}
+              disabled
+              className={`${inputCls} opacity-40 cursor-not-allowed`}
+            />
           </div>
           <div>
             <label className={labelCls}>Capacité</label>
@@ -614,105 +589,6 @@ export default function SettingsPage() {
     </div>
   );
 
-  /* ---- Facturation tab ---- */
-  const renderFacturation = () => (
-    <div className="space-y-6">
-      {/* Current plan */}
-      <div className={`${glassCard} p-6`}>
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm text-white/40">Plan actuel</p>
-            <p className="text-xl font-bold text-white font-[family-name:var(--font-manrope)] mt-1">
-              Pro
-            </p>
-            <p className="text-xs text-white/30 mt-1">
-              149 &euro; / mois &middot; Renouvellement le 1er mai 2026
-            </p>
-          </div>
-          <button className="px-4 py-2 border border-white/[0.12] rounded-xl text-sm text-white hover:bg-white/[0.05] transition-colors">
-            Changer de plan
-          </button>
-        </div>
-      </div>
-
-      {/* Payment method */}
-      <div className={`${glassCard} p-6`}>
-        <h3 className="text-sm font-semibold text-white font-[family-name:var(--font-manrope)] mb-4">
-          Moyen de paiement
-        </h3>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-7 rounded-lg bg-white/[0.05] border border-white/[0.1] flex items-center justify-center">
-              <CreditCard size={16} className="text-blue-400" />
-            </div>
-            <div>
-              <p className="text-sm text-white">Visa •••• 4242</p>
-              <p className="text-xs text-white/30">Expire 12/27</p>
-            </div>
-          </div>
-          <button
-            onClick={() => showToast("Modification du moyen de paiement bientôt disponible")}
-            className="text-xs text-blue-400 hover:underline"
-          >
-            Modifier
-          </button>
-        </div>
-      </div>
-
-      {/* Billing history */}
-      <div className={`${glassCard} p-6`}>
-        <h3 className="text-sm font-semibold text-white font-[family-name:var(--font-manrope)] mb-4">
-          Historique de facturation
-        </h3>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left text-[0.625rem] text-white/30 uppercase tracking-wider">
-                <th className="pb-3 font-medium">Date</th>
-                <th className="pb-3 font-medium">Description</th>
-                <th className="pb-3 font-medium text-right">Montant</th>
-                <th className="pb-3 font-medium text-right">Statut</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/[0.06]">
-              {[
-                {
-                  date: "1 avr. 2026",
-                  desc: "Abonnement Pro",
-                  amount: "149 €",
-                  status: "Payé",
-                },
-                {
-                  date: "1 mars 2026",
-                  desc: "Abonnement Pro",
-                  amount: "149 €",
-                  status: "Payé",
-                },
-                {
-                  date: "1 fév. 2026",
-                  desc: "Abonnement Pro",
-                  amount: "149 €",
-                  status: "Payé",
-                },
-              ].map((row, i) => (
-                <tr key={i}>
-                  <td className="py-3 text-white/60">{row.date}</td>
-                  <td className="py-3 text-white">{row.desc}</td>
-                  <td className="py-3 text-white text-right">{row.amount}</td>
-                  <td className="py-3 text-right">
-                    <span className="text-xs text-green-400 bg-green-400/10 px-2 py-0.5 rounded-full">
-                      {row.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  );
-
   /* ---- Tab router ---- */
   const renderTab = () => {
     switch (activeTab) {
@@ -724,8 +600,6 @@ export default function SettingsPage() {
         return renderNotifications();
       case "securite":
         return renderSecurite();
-      case "facturation":
-        return renderFacturation();
       default:
         return null;
     }

@@ -21,7 +21,6 @@ import {
   X,
   Bell,
   Search,
-  Sparkles,
 } from "lucide-react";
 import { useAuthUser } from "@/hooks/use-auth-user";
 import { PRQualityProvider } from "@/contexts/pr-quality-context";
@@ -39,7 +38,6 @@ const toolsNav = [
   { icon: CreditCard, label: "Commissions", href: "/dashboard/commissions" },
   { icon: MessageSquare, label: "Messages", href: "/dashboard/messages" },
   { icon: BarChart3, label: "Analyses", href: "/dashboard/analytics" },
-  { icon: Sparkles, label: "Assistant IA", href: "/dashboard/ai" },
 ];
 
 const adminNav = [
