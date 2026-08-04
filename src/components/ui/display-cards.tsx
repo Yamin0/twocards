@@ -99,11 +99,20 @@ function useViewportProgress(
     let top = 0;
     let span = 1;
     let frame = 0;
+    let last = -1;
 
     const update = () => {
       frame = 0;
-      const p = (window.scrollY + window.innerHeight - top) / span;
-      progress.set(Math.min(1, Math.max(0, p)));
+      const p = Math.min(
+        1,
+        Math.max(0, (window.scrollY + window.innerHeight - top) / span)
+      );
+      /* Sous ce seuil (~2 px de scroll), inutile de re-cibler les ressorts :
+         chaque set() les relance et entretient des écritures de style qui
+         concurrencent le décodage vidéo pendant le défilement. */
+      if (Math.abs(p - last) < 0.002) return;
+      last = p;
+      progress.set(p);
     };
     const onScroll = () => {
       if (!frame) frame = requestAnimationFrame(update);

@@ -119,6 +119,16 @@ export function ScrollVideoHero({ children }: { children?: React.ReactNode }) {
       "(prefers-reduced-motion: reduce)"
     ).matches;
 
+    /* Chaque affectation de currentTime décode une frame (encodage
+       all-intra). Au seuil de 1 ms, le crawl amorti déclenche un décodage à
+       chaque frame d'écran — supportable sur desktop, mais sur mobile cela
+       sature le fil principal et saccade tout le défilement de la section.
+       On quantifie donc le seek mobile au pas d'une frame de la timeline
+       (1/30 s) : moitié moins de décodages, dérive visuelle sous-frame. */
+    const seekEpsilon = window.matchMedia("(max-width: 767px)").matches
+      ? 1 / 30
+      : 0.001;
+
     let raf = 0;
     let current = 0;
     let metaReady = false;
@@ -148,7 +158,10 @@ export function ScrollVideoHero({ children }: { children?: React.ReactNode }) {
         if (Math.abs(target - current) < 0.003) current = target;
 
         // On ne ré-empile pas de seek tant que le précédent n'est pas résolu
-        if (!video.seeking && Math.abs(video.currentTime - current) > 0.001) {
+        if (
+          !video.seeking &&
+          Math.abs(video.currentTime - current) > seekEpsilon
+        ) {
           video.currentTime = current;
         }
       };
