@@ -16,24 +16,24 @@ export default function HotelsPage() {
         titleAccent: "veulent vraiment",
         titleEnd: ".",
         subtitle:
-          "La réservation difficile à obtenir est la première chose que chaque client demande au desk — et la seule que la plupart des établissements ne peuvent pas garantir. TwoCards la met à portée de votre conciergerie, avec une attribution claire à votre établissement sur chaque réservation.",
-        primaryCta: { label: "Équiper mon desk", href: "/signup" },
+          "La table impossible à obtenir est la première chose qu'un client demande au desk, et la seule que la plupart des établissements ne peuvent pas garantir. TwoCards la met à portée de votre équipe sur trois points de contact, avec une attribution claire à votre établissement et une part du revenu généré.",
+        primaryCta: { label: "Équiper mon établissement", href: "/signup" },
         secondaryCta: { label: "Parler à notre équipe", href: "/signup" },
         steps: [
           {
-            title: "Équipez votre desk concierge",
+            title: "Un QR code dans la chambre",
             description:
-              "Dès le check-in, votre équipe voit les disponibilités réelles, les conditions et les zones des restaurants, rooftops et clubs que vos clients recherchent déjà. Sans WhatsApp, sans appels à froid.",
+              "Posé sur le bureau ou le chevet, il ouvre la sélection des restaurants, clubs et expériences que vous recommandez. Le client réserve seul, à toute heure, sans passer par le desk.",
           },
           {
-            title: "Accompagnez tout le séjour",
+            title: "Un message avant l'arrivée",
             description:
-              "Dîner ce soir, brunch demain, Agafay le troisième jour. Une seule plateforme couvre chaque recommandation, chaque réservation et chaque suivi, du premier jour au départ.",
+              "Un lien envoyé par mail ou WhatsApp quelques jours avant le séjour. Le client arrive avec ses tables déjà réservées, et vous connaissez son programme avant qu'il ne franchisse la porte.",
           },
           {
-            title: "L'attribution revient à votre établissement",
+            title: "Le desk réserve pour lui",
             description:
-              "Chaque réservation générée par votre équipe est tracée jusqu'à votre établissement. La rémunération suit votre politique interne : l'hôtel, un fonds d'équipe, un avantage client — ou un simple reporting, sans versement.",
+              "Votre concierge garde la main : disponibilités réelles, réservation au nom du client, suivi de chaque demande. Les trois chemins aboutissent au même tableau de bord.",
           },
         ],
         image:
@@ -45,34 +45,34 @@ export default function HotelsPage() {
         gainsAccent: "y gagne.",
         gains: [
           {
-            title: "Le service n°1 du desk, enfin garanti",
+            title: "Les tables que vos clients n'obtiennent pas seuls",
             description:
-              "Résolvez la première frustration d'un client qui arrive en ville : obtenir la bonne table, au bon moment, sans chasse au WhatsApp.",
+              "Les adresses complètes depuis des semaines gardent des places pour le réseau. Votre équipe y accède directement, sans appeler personne.",
           },
           {
-            title: "Une attribution à votre établissement",
+            title: "Une part du revenu généré",
             description:
-              "Chaque réservation issue de votre conciergerie est rattachée à votre établissement, avec un reporting complet par période et par équipe.",
+              "Chaque réservation issue de votre établissement vous revient, qu'elle soit honorée chez vous ou dans un restaurant de la ville. Rejoindre le réseau ne coûte rien : TwoCards se rémunère côté établissements partenaires.",
           },
           {
             title: "Conforme à votre politique interne",
             description:
-              "Les standards professionnels de conciergerie interdisent souvent les commissions individuelles. TwoCards s'y adapte : rémunération à l'établissement, au fonds d'équipe, en avantage client — ou aucune.",
+              "Les standards professionnels de conciergerie interdisent souvent les commissions individuelles. TwoCards s'y adapte : rémunération à l'établissement, au fonds d'équipe, en avantage client, ou aucune.",
           },
           {
             title: "Une marque blanche à votre image",
             description:
-              "QR en chambre, lien pré-arrivée, sélection de restaurants recommandés : vos clients réservent dans un univers à vos couleurs, attribué à votre établissement.",
+              "QR en chambre, lien avant l'arrivée, sélection de restaurants recommandés : vos clients réservent dans un univers à vos couleurs, attribué à votre établissement.",
+          },
+          {
+            title: "Un suivi auditable de bout en bout",
+            description:
+              "Tableau de bord en temps réel, réservations modifiables, historique horodaté de chaque demande et versements à échéance fixe. Votre direction peut vérifier chaque ligne.",
           },
           {
             title: "Des partenaires vérifiés",
             description:
               "Tous les établissements du réseau sont vérifiés, avec conditions affichées et réputation transactionnelle. Vous savez où vous envoyez vos clients.",
-          },
-          {
-            title: "Aucun coût d'entrée",
-            description:
-              "Rejoindre le réseau est gratuit. TwoCards se rémunère sur les réservations finalisées côté restaurants — jamais sur votre desk.",
           },
         ],
         faq: [
@@ -90,11 +90,23 @@ export default function HotelsPage() {
           },
           {
             q: "Proposez-vous une marque blanche ?",
-            a: "Oui : portail concierge à vos couleurs, QR en chambre et lien pré-arrivée envoyé au client avant son séjour, avec vos restaurants recommandés en tête de liste.",
+            a: "Oui : portail concierge à vos couleurs, QR en chambre et lien envoyé au client avant son séjour, avec vos restaurants recommandés en tête de liste.",
+          },
+          {
+            q: "Un client peut-il réserver sans passer par le desk ?",
+            a: "Oui, c'est même l'intérêt du QR en chambre et du message avant l'arrivée. La réservation reste attribuée à votre établissement, et votre équipe la voit apparaître dans son tableau de bord.",
+          },
+          {
+            q: "Quand et comment sommes-nous rémunérés ?",
+            a: "Les versements suivent un calendrier fixe, sur la base des factures vérifiées. Chaque ligne est justifiée par une réservation horodatée et un check-in confirmé, exportable pour votre comptabilité.",
+          },
+          {
+            q: "Que se passe-t-il si le client modifie ou annule ?",
+            a: "La réservation reste modifiable jusqu'aux conditions fixées par l'établissement. Toute modification est horodatée et visible des deux côtés, ce qui évite les litiges sur ce qui a réellement été honoré.",
           },
           {
             q: "Combien de temps pour être opérationnel ?",
-            a: "Un desk est équipé en moins d'une journée : comptes vérifiés, inventaire visible, premières réservations le soir même.",
+            a: "Un établissement est équipé en moins d'une journée : comptes vérifiés, inventaire visible, QR imprimés, premières réservations le soir même.",
           },
         ],
         finalTitle: "Donnez la table à vos clients.",

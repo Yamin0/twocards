@@ -221,7 +221,7 @@ export function Differentiators({
             >
               <div>
                 <h3
-                  className={`mb-4 font-title text-xl font-normal ${
+                  className={`mb-4 font-title text-[23px] font-normal md:text-[28px] md:leading-[1.2] ${
                     onVideo
                       ? "text-on-video text-white"
                       : "text-[var(--landing-ink)]"
@@ -230,7 +230,7 @@ export function Differentiators({
                   {f.title}
                 </h3>
                 <p
-                  className={`text-[14px] font-normal leading-relaxed ${
+                  className={`text-[16px] font-normal leading-relaxed md:text-[17px] ${
                     onVideo
                       ? "text-on-video text-white"
                       : "text-[var(--landing-ink)]/70"

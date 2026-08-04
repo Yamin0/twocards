@@ -200,9 +200,9 @@ export function ScrollVideoHero({ children }: { children?: React.ReactNode }) {
         <div className="flex h-dvh flex-col font-body">
           <div className="flex flex-1 flex-col items-center justify-center px-6 text-center">
             <h1 className="mb-8 max-w-4xl font-title text-[38px] font-normal leading-[1.12] tracking-[-0.02em] text-white md:text-[64px]">
-              Chaque recommandation
+              Ils vous amènent des clients.
               <br />
-              devient une réservation <em className="italic">traçable</em>.
+              Vous les payez au <em className="italic">résultat</em>.
             </h1>
             <p className="mb-10 max-w-xl text-[15px] font-normal leading-relaxed text-white/75">
               TwoCards connecte les établissements aux concierges et RP

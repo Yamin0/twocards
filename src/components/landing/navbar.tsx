@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 
@@ -55,13 +56,26 @@ export function LandingNavbar({
       >
         <Link
           href="/"
-          className={`font-title text-[26px] font-medium leading-none tracking-tight ${
+          className={`flex items-center gap-2.5 font-title text-[26px] font-medium leading-none tracking-tight ${
             onDark ? "text-white" : ""
           }`}
         >
-          twocards
-          <span className={onDark ? "text-white/50" : "text-[var(--landing-mute)]"}>
-            .
+          {/* Décoratif : le mot-symbole juste à côté porte déjà le nom */}
+          <Image
+            src="/logo-cards-transp.png"
+            alt=""
+            width={64}
+            height={64}
+            priority
+            className="h-7 w-auto"
+          />
+          <span>
+            twocards
+            <span
+              className={onDark ? "text-white/50" : "text-[var(--landing-mute)]"}
+            >
+              .
+            </span>
           </span>
         </Link>
 
