@@ -201,12 +201,18 @@ export default function CommissionsPage() {
   const { isDemoVenue, isLoading } = useAuthUser();
   const { toast, showToast } = useInlineToast();
 
-  const [commissions, setCommissions] = useState<Commission[]>([]);
+  /* Données dérivées plutôt qu'un état synchronisé par effet : la liste de
+     base découle du compte, et seuls les paiements effectués par
+     l'utilisateur sont retenus en état. */
+  const [paidIds, setPaidIds] = useState<ReadonlySet<number>>(new Set());
   const [filter, setFilter] = useState<(typeof FILTER_OPTIONS)[number]>("Tous");
 
-  useEffect(() => {
-    setCommissions(isDemoVenue ? INITIAL_COMMISSIONS : []);
-  }, [isDemoVenue]);
+  const commissions: Commission[] = (isDemoVenue ? INITIAL_COMMISSIONS : []).map(
+    (c) =>
+      paidIds.has(c.id)
+        ? { ...c, statut: "Payé" as const, variant: "success" as const }
+        : c,
+  );
 
   const stats = isDemoVenue ? DEMO_STATS : EMPTY_STATS;
 
@@ -217,13 +223,7 @@ export default function CommissionsPage() {
 
   /* ---- Mark as paid ---- */
   const handleMarkPaid = (id: number) => {
-    setCommissions((prev) =>
-      prev.map((c) =>
-        c.id === id
-          ? { ...c, statut: "Payé" as const, variant: "success" as const }
-          : c,
-      ),
-    );
+    setPaidIds((prev) => new Set(prev).add(id));
     showToast("Commission marquée comme payée");
   };
 

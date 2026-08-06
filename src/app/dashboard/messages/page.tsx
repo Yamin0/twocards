@@ -13,7 +13,6 @@ import {
   Send,
   ArrowLeft,
   MessageSquare,
-  Check,
   CheckCheck,
 } from "lucide-react";
 

@@ -43,20 +43,20 @@ const DEMO_BAR_CHART_REVENUS = [
 
 const DEMO_TOP_EVENTS = [
   { name: "Nuit Blanche VIP", revenue: "82 000 MAD", couverts: 18 },
-  { name: "Soiree Privee Champagne", revenue: "67 500 MAD", couverts: 12 },
+  { name: "Soirée privée Champagne", revenue: "67 500 MAD", couverts: 12 },
   { name: "DJ Set International", revenue: "54 000 MAD", couverts: 15 },
 ];
 
 const DEMO_DONUT_SEGMENTS = [
   { label: "Tables VIP", pct: 64, color: "bg-blue-400" },
-  { label: "Tables Standard", pct: 22, color: "bg-blue-400/50" },
+  { label: "Tables standard", pct: 22, color: "bg-blue-400/50" },
   { label: "Bar", pct: 14, color: "bg-white/20" },
 ];
 
 const DEMO_STATS = [
-  { label: "Total Couverts", value: "134" },
-  { label: "Chiffre d'Affaires", value: "402 500 MAD" },
-  { label: "Taille Moy. Groupe", value: "6,2" },
+  { label: "Total couverts", value: "134" },
+  { label: "Chiffre d'affaires", value: "402 500 MAD" },
+  { label: "Taille moy. groupe", value: "6,2" },
   { label: "Meilleur RP", value: "LIAM H." },
 ];
 
@@ -84,19 +84,19 @@ const EMPTY_BAR_CHART_REVENUS = [
 ];
 
 const EMPTY_STATS = [
-  { label: "Total Couverts", value: "0" },
-  { label: "Chiffre d'Affaires", value: "0 MAD" },
-  { label: "Taille Moy. Groupe", value: "0" },
-  { label: "Meilleur RP", value: "\u2014" },
+  { label: "Total couverts", value: "0" },
+  { label: "Chiffre d'affaires", value: "0 MAD" },
+  { label: "Taille moy. groupe", value: "0" },
+  { label: "Meilleur RP", value: "—" },
 ];
 
 const EMPTY_DONUT_SEGMENTS = [
   { label: "Tables VIP", pct: 0, color: "bg-blue-400" },
-  { label: "Tables Standard", pct: 0, color: "bg-blue-400/50" },
+  { label: "Tables standard", pct: 0, color: "bg-blue-400/50" },
   { label: "Bar", pct: 0, color: "bg-white/20" },
 ];
 
-const periodTabs = ["Cette semaine", "Ce mois", "Cette ann\u00e9e"];
+const periodTabs = ["Cette semaine", "Ce mois", "Cette année"];
 
 function downloadCSV(data: Record<string, string | number>[], filename: string) {
   if (data.length === 0) return;
@@ -138,17 +138,17 @@ export default function AnalyticsPage() {
         Rang: rp.rang,
         Nom: rp.nom,
         Couverts: rp.couverts,
-        "CA G\u00e9n\u00e9r\u00e9": rp.ca,
+        "CA généré": rp.ca,
         Commissions: rp.commissions,
-        "Taille Moy.": rp.taille,
+        "Taille moy.": rp.taille,
       })),
       `analytics-${today}.csv`
     );
-    showToast("CSV t\u00e9l\u00e9charg\u00e9");
+    showToast("CSV téléchargé");
   }, [isDemoVenue, showToast]);
 
   const handleExportReport = useCallback(() => {
-    showToast("Rapport export\u00e9 (PDF bient\u00f4t disponible)");
+    showToast("Rapport exporté (PDF bientôt disponible)");
   }, [showToast]);
 
   if (isLoading) return <DashboardSkeleton />;
@@ -164,7 +164,7 @@ export default function AnalyticsPage() {
                 Analyses
               </h1>
               <p className="text-white/50 text-sm mt-2">
-                Suivez les performances de votre venue en temps r\u00e9el.
+                Suivez les performances de votre établissement en temps réel.
               </p>
             </div>
 
@@ -288,7 +288,7 @@ export default function AnalyticsPage() {
                     Commissions
                   </th>
                   <th className="hidden md:table-cell text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-white/40">
-                    Taille Moy.
+                    Taille moy.
                   </th>
                 </tr>
               </thead>
@@ -296,7 +296,7 @@ export default function AnalyticsPage() {
                 {rpData.length === 0 && (
                   <tr>
                     <td colSpan={6} className="px-6 py-8 text-center text-sm text-white/40">
-                      Aucune donn\u00e9e disponible
+                      Aucune donnée disponible
                     </td>
                   </tr>
                 )}
@@ -331,11 +331,11 @@ export default function AnalyticsPage() {
         {/* Meilleurs Evenements */}
         <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
           <h3 className="text-white font-[family-name:var(--font-manrope)] font-bold text-sm mb-5">
-            Meilleurs \u00c9v\u00e9nements
+            Meilleurs événements
           </h3>
           <div className="space-y-4">
             {topEvents.length === 0 && (
-              <p className="text-sm text-white/40 text-center py-4">Aucun \u00e9v\u00e9nement</p>
+              <p className="text-sm text-white/40 text-center py-4">Aucun événement</p>
             )}
             {topEvents.map((event, i) => (
               <div key={i} className="flex items-center gap-4">
@@ -358,7 +358,7 @@ export default function AnalyticsPage() {
         {/* Repartition des Reservations */}
         <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
           <h3 className="text-white font-[family-name:var(--font-manrope)] font-bold text-sm mb-5">
-            R\u00e9partition des R\u00e9servations
+            Répartition des réservations
           </h3>
           <div className="flex items-center gap-8">
             {/* Donut Chart SVG */}
@@ -433,7 +433,7 @@ export default function AnalyticsPage() {
           className="flex items-center gap-2 px-5 py-2.5 backdrop-blur-2xl bg-black/45 border border-white/[0.12] text-white/80 rounded-xl text-sm font-medium hover:bg-white/[0.12] hover:text-white transition-colors"
         >
           <Download size={16} strokeWidth={1.5} />
-          T\u00e9l\u00e9charger CSV
+          Télécharger CSV
         </button>
       </div>
 

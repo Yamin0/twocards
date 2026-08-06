@@ -58,6 +58,9 @@ const DEMO_PR_CARDS: PRCard[] = [
   { id: 8, initials: "MF", name: "Mehdi Fassi-Fihri", agency: "Independent", status: "Inactif", location: "Casablanca", phone: "+212 6 99 88 77 66", email: "mehdi@gmail.com", couverts: 7, ca: "3 200 MAD", caNum: 3200, commission: "320 MAD", quality: 2, events: 2 },
 ];
 
+/* Identité stable : un [] recréé à chaque rendu invaliderait le useMemo. */
+const NO_PR_CARDS: typeof DEMO_PR_CARDS = [];
+
 const MONTHLY_CA = [
   { month: "Oct", value: 62 },
   { month: "Nov", value: 71 },
@@ -97,7 +100,7 @@ export default function NetworkPage() {
     setTimeout(() => setToast(null), 2500);
   }, []);
 
-  const prCards = isDemoVenue ? DEMO_PR_CARDS : [];
+  const prCards = isDemoVenue ? DEMO_PR_CARDS : NO_PR_CARDS;
 
   const filteredPRs = useMemo(() => {
     let result = prCards.filter((pr) => {

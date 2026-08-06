@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   User,
   Shield,
@@ -84,14 +84,18 @@ export default function SettingsPage() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  /* Toast state (inline, no external hook) */
+  /* Toast : le minuteur vit dans un effet et non dans une ref — une ref lue
+     par showToast serait tracée comme accès pendant le rendu. Reprogrammé à
+     chaque nouveau message, nettoyé au démontage. */
   const [toast, setToast] = useState<string | null>(null);
-  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const showToast = useCallback((msg: string) => {
-    if (toastTimer.current) clearTimeout(toastTimer.current);
     setToast(msg);
-    toastTimer.current = setTimeout(() => setToast(null), 3000);
   }, []);
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 3000);
+    return () => clearTimeout(t);
+  }, [toast]);
 
   /* ---- Profile form ---- */
   const [form, setForm] = useState({
@@ -127,52 +131,55 @@ export default function SettingsPage() {
   const [showNewPw, setShowNewPw] = useState(false);
   const [twoFA, setTwoFA] = useState(false);
 
+  /* isCurrent et non current : l'analyseur React prend une propriété nommée
+     current pour une ref lue pendant le rendu. */
   const sessions = [
     {
       device: "Chrome - Windows",
       icon: Monitor,
       location: "Paris, France",
-      current: true,
+      isCurrent: true,
     },
     {
       device: "Safari - iPhone",
       icon: Smartphone,
       location: "Paris, France",
-      current: false,
+      isCurrent: false,
     },
   ];
 
-  /* ---- Init form from auth ---- */
-  const initialized = useRef(false);
-  useEffect(() => {
-    if (!isLoading && !initialized.current) {
-      initialized.current = true;
-      if (isDemoVenue) {
-        setForm({
-          name: "Marc Rousseau",
-          email: "marc@lecomptoir.fr",
-          phone: "+33 6 12 34 56 78",
-          city: "Paris",
-          venueName: "Le Comptoir",
-          venueType: "restaurant-bar",
-          capacity: "220",
-          address: "42 Rue de Rivoli, 75001 Paris",
-          description:
-            "Le Comptoir est un restaurant-bar branché situé au cœur de Paris, offrant une expérience culinaire raffinée dans un cadre contemporain.",
-          hours: "Mar-Sam: 19h00 - 02h00 | Dim: 12h00 - 16h00",
-          minSpend:
-            "Table Standard: 500 MAD | Table VIP: 1,500 MAD | Carré VIP: 3,000 MAD",
-        });
-      } else {
-        setForm((prev) => ({
-          ...prev,
-          name: fullName || "",
-          email: email || "",
-          venueName: venueName || "",
-        }));
-      }
+  /* ---- Init form from auth ----
+     Ajustement d'état pendant le rendu (patron React « adjusting state when
+     a prop changes ») plutôt qu'un effet : le formulaire se remplit dès que
+     l'authentification est résolue, sans rendu intermédiaire vide. */
+  const [initialized, setInitialized] = useState(false);
+  if (!isLoading && !initialized) {
+    setInitialized(true);
+    if (isDemoVenue) {
+      setForm({
+        name: "Marc Rousseau",
+        email: "marc@lecomptoir.fr",
+        phone: "+33 6 12 34 56 78",
+        city: "Paris",
+        venueName: "Le Comptoir",
+        venueType: "restaurant-bar",
+        capacity: "220",
+        address: "42 Rue de Rivoli, 75001 Paris",
+        description:
+          "Le Comptoir est un restaurant-bar branché situé au cœur de Paris, offrant une expérience culinaire raffinée dans un cadre contemporain.",
+        hours: "Mar-Sam: 19h00 - 02h00 | Dim: 12h00 - 16h00",
+        minSpend:
+          "Table Standard: 500 MAD | Table VIP: 1,500 MAD | Carré VIP: 3,000 MAD",
+      });
+    } else {
+      setForm((prev) => ({
+        ...prev,
+        name: fullName || "",
+        email: email || "",
+        venueName: venueName || "",
+      }));
     }
-  }, [isLoading, isDemoVenue, fullName, email, venueName]);
+  }
 
   const updateForm = (field: string, value: string) =>
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -570,7 +577,7 @@ export default function SettingsPage() {
                   <p className="text-xs text-white/30">{s.location}</p>
                 </div>
               </div>
-              {s.current ? (
+              {s.isCurrent ? (
                 <span className="text-[0.625rem] text-green-400 uppercase tracking-wider">
                   Session actuelle
                 </span>

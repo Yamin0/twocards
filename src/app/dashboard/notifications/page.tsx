@@ -37,9 +37,9 @@ const TYPE_CONFIG: Record<
 const FILTER_TABS = [
   { key: "all", label: "Toutes" },
   { key: "unread", label: "Non lues" },
-  { key: "reservation", label: "R\u00e9servations" },
+  { key: "reservation", label: "Réservations" },
   { key: "commission", label: "Commissions" },
-  { key: "network", label: "R\u00e9seau" },
+  { key: "network", label: "Réseau" },
 ] as const;
 
 type FilterKey = (typeof FILTER_TABS)[number]["key"];
@@ -48,16 +48,16 @@ const DEMO_NOTIFICATIONS: Notification[] = [
   {
     id: "1",
     type: "reservation",
-    title: "Nouvelle r\u00e9servation",
-    description: "Liam Hamza a r\u00e9serv\u00e9 une table VIP pour vendredi soir (8 personnes).",
+    title: "Nouvelle réservation",
+    description: "Liam Hamza a réservé une table VIP pour vendredi soir (8 personnes).",
     timestamp: "il y a 5 min",
     read: false,
   },
   {
     id: "2",
     type: "commission",
-    title: "Commission cr\u00e9dit\u00e9e",
-    description: "Vous avez re\u00e7u 480 MAD de commission pour la r\u00e9servation de Karim Bennani.",
+    title: "Commission créditée",
+    description: "Vous avez reçu 480 MAD de commission pour la réservation de Karim Bennani.",
     timestamp: "il y a 23 min",
     read: false,
   },
@@ -65,15 +65,15 @@ const DEMO_NOTIFICATIONS: Notification[] = [
     id: "3",
     type: "network",
     title: "Nouveau RP rejoint",
-    description: "Youssef El Idrissi a rejoint votre r\u00e9seau en tant que RP.",
+    description: "Youssef El Idrissi a rejoint votre réseau en tant que RP.",
     timestamp: "il y a 1h",
     read: false,
   },
   {
     id: "4",
     type: "reservation",
-    title: "R\u00e9servation modifi\u00e9e",
-    description: "Sofia Alaoui a modifi\u00e9 sa r\u00e9servation de samedi \u2014 passage de 4 \u00e0 6 personnes.",
+    title: "Réservation modifiée",
+    description: "Sofia Alaoui a modifié sa réservation de samedi — passage de 4 à 6 personnes.",
     timestamp: "il y a 2h",
     read: true,
   },
@@ -88,16 +88,16 @@ const DEMO_NOTIFICATIONS: Notification[] = [
   {
     id: "6",
     type: "system",
-    title: "Mise \u00e0 jour du syst\u00e8me",
-    description: "Le tableau de bord a \u00e9t\u00e9 mis \u00e0 jour avec de nouvelles fonctionnalit\u00e9s analytics.",
+    title: "Mise à jour du système",
+    description: "Le tableau de bord a été mis à jour avec de nouvelles fonctionnalités analytics.",
     timestamp: "il y a 5h",
     read: true,
   },
   {
     id: "7",
     type: "reservation",
-    title: "Annulation de r\u00e9servation",
-    description: "Karim Bennani a annul\u00e9 sa r\u00e9servation pour dimanche midi.",
+    title: "Annulation de réservation",
+    description: "Karim Bennani a annulé sa réservation pour dimanche midi.",
     timestamp: "il y a 1 jour",
     read: true,
   },
@@ -105,15 +105,15 @@ const DEMO_NOTIFICATIONS: Notification[] = [
     id: "8",
     type: "network",
     title: "Performance RP",
-    description: "Liam Hamza a g\u00e9n\u00e9r\u00e9 12 r\u00e9servations ce mois \u2014 meilleur RP du r\u00e9seau.",
+    description: "Liam Hamza a généré 12 réservations ce mois — meilleur RP du réseau.",
     timestamp: "il y a 1 jour",
     read: false,
   },
   {
     id: "9",
     type: "commission",
-    title: "Commission valid\u00e9e",
-    description: "La commission de 1 870 MAD pour Sofia Alaoui a \u00e9t\u00e9 valid\u00e9e et pay\u00e9e.",
+    title: "Commission validée",
+    description: "La commission de 1 870 MAD pour Sofia Alaoui a été validée et payée.",
     timestamp: "il y a 2 jours",
     read: true,
   },
@@ -121,7 +121,7 @@ const DEMO_NOTIFICATIONS: Notification[] = [
     id: "10",
     type: "system",
     title: "Rappel de configuration",
-    description: "Ajoutez votre logo et personnalisez votre page de r\u00e9servation pour un meilleur taux de conversion.",
+    description: "Ajoutez votre logo et personnalisez votre page de réservation pour un meilleur taux de conversion.",
     timestamp: "il y a 3 jours",
     read: true,
   },
@@ -159,12 +159,12 @@ export default function NotificationsPage() {
 
   const markAllRead = useCallback(() => {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-    showToast("Toutes les notifications ont \u00e9t\u00e9 marqu\u00e9es comme lues");
+    showToast("Toutes les notifications ont été marquées comme lues");
   }, [showToast]);
 
   const clearAll = useCallback(() => {
     setNotifications([]);
-    showToast("Toutes les notifications ont \u00e9t\u00e9 supprim\u00e9es");
+    showToast("Toutes les notifications ont été supprimées");
   }, [showToast]);
 
   if (isLoading) return <DashboardSkeleton />;
@@ -234,8 +234,8 @@ export default function NotificationsPage() {
             </p>
             <p className="text-xs text-white/30 mt-1 max-w-xs">
               {activeFilter === "all"
-                ? "Vous n\u2019avez aucune notification pour le moment."
-                : "Aucune notification ne correspond \u00e0 ce filtre."}
+                ? "Vous n’avez aucune notification pour le moment."
+                : "Aucune notification ne correspond à ce filtre."}
             </p>
           </div>
         ) : (

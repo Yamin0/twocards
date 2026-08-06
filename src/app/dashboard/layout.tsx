@@ -20,7 +20,6 @@ import {
   Menu,
   X,
   Bell,
-  Search,
 } from "lucide-react";
 import { useAuthUser } from "@/hooks/use-auth-user";
 import { PRQualityProvider } from "@/contexts/pr-quality-context";
@@ -45,37 +44,21 @@ const adminNav = [
   { icon: Bell, label: "Notifications", href: "/dashboard/notifications" },
 ];
 
-export default function DashboardLayout({
-  children,
+/* Au niveau module et non dans le layout : un composant recréé à chaque
+   rendu perd son état et son DOM à chaque frappe ou navigation. */
+function NavSection({
+  items,
+  pathname,
+  onNavigate,
 }: {
-  children: React.ReactNode;
+  items: typeof mainNav;
+  pathname: string;
+  onNavigate: () => void;
 }) {
-  const { fullName, initials, isLoading } = useAuthUser();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const pathname = usePathname();
+  const isActive = (href: string) =>
+    href === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(href);
 
-  useEffect(() => {
-    if (sidebarOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [sidebarOpen]);
-
-  const isActive = (href: string) => {
-    if (href === "/dashboard") return pathname === "/dashboard";
-    return pathname.startsWith(href);
-  };
-
-  const NavSection = ({
-    items,
-  }: {
-    title?: string;
-    items: typeof mainNav;
-  }) => (
+  return (
     <nav className="space-y-0.5">
       {items.map((item) => {
         const Icon = item.icon;
@@ -84,7 +67,7 @@ export default function DashboardLayout({
           <Link
             key={item.href}
             href={item.href}
-            onClick={() => setSidebarOpen(false)}
+            onClick={onNavigate}
             className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 hover:scale-[1.01] font-[family-name:var(--font-manrope)] ${
               active
                 ? "bg-white/20 text-white border border-white/20"
@@ -98,6 +81,28 @@ export default function DashboardLayout({
       })}
     </nav>
   );
+}
+
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const { fullName, initials, isLoading } = useAuthUser();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const pathname = usePathname();
+  const closeSidebar = () => setSidebarOpen(false);
+
+  useEffect(() => {
+    if (sidebarOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [sidebarOpen]);
 
   return (
     <PRQualityProvider>
@@ -142,9 +147,9 @@ export default function DashboardLayout({
                 onClick={() => setSidebarOpen(false)}
               />
               <div className="fixed top-20 left-4 right-4 z-50 lg:hidden backdrop-blur-2xl bg-black/60 border border-white/10 rounded-3xl p-5 space-y-5 max-h-[70vh] overflow-y-auto">
-                <NavSection title="Menu principal" items={mainNav} />
-                <NavSection title="Outils" items={toolsNav} />
-                <NavSection title="Administration" items={adminNav} />
+                <NavSection items={mainNav} pathname={pathname} onNavigate={closeSidebar} />
+                <NavSection items={toolsNav} pathname={pathname} onNavigate={closeSidebar} />
+                <NavSection items={adminNav} pathname={pathname} onNavigate={closeSidebar} />
                 <div className="pt-3 border-t border-white/10">
                   <form action="/auth/signout" method="post">
                     <button
@@ -175,9 +180,9 @@ export default function DashboardLayout({
 
             {/* Navigation */}
             <div className="flex-1 overflow-y-auto space-y-5 scrollbar-thin">
-              <NavSection title="Menu principal" items={mainNav} />
-              <NavSection title="Outils" items={toolsNav} />
-              <NavSection title="Administration" items={adminNav} />
+              <NavSection items={mainNav} pathname={pathname} onNavigate={closeSidebar} />
+              <NavSection items={toolsNav} pathname={pathname} onNavigate={closeSidebar} />
+              <NavSection items={adminNav} pathname={pathname} onNavigate={closeSidebar} />
             </div>
 
             {/* Bottom */}

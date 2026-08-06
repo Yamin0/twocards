@@ -11,16 +11,12 @@ import {
   TrendingUp,
   Plus,
   Search,
-  Filter,
   Download,
-  MoreHorizontal,
   ChevronRight,
   CheckCircle2,
   XCircle,
   ArrowUpRight,
   ArrowDownRight,
-  MapPin,
-  Ticket,
 } from "lucide-react";
 
 /* ── demo data ──────────────────────────────────────────── */

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import {
   Phone,
@@ -12,14 +11,12 @@ import {
   StickyNote,
   CalendarDays,
   Music,
-  UtensilsCrossed,
   AlertTriangle,
   Clock,
   Users,
   Check,
   X,
 } from "lucide-react";
-import Link from "next/link";
 import { useAuthUser } from "@/hooks/use-auth-user";
 import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
 
@@ -107,7 +104,6 @@ const DEMO_TAGS = [
 ];
 
 export default function GuestProfilePage() {
-  const params = useParams();
   const { isDemoVenue, isLoading } = useAuthUser();
   const [notes, setNotes] = useState(DEMO_INITIAL_NOTES);
   const [showNoteModal, setShowNoteModal] = useState(false);

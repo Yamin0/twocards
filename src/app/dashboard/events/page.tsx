@@ -421,27 +421,6 @@ export default function EventsPage() {
   const panelEvent = panelEventId !== null ? events.find((e) => e.id === panelEventId) : null;
   const PanelIcon = panelEvent ? ICONS[panelEvent.iconIdx] ?? Sparkles : Sparkles;
 
-  /* ── Render cover (gradient or image) ── */
-  const renderCover = (ev: DemoEvent, className: string, showOverlay = true) => {
-    const Icon = ICONS[ev.iconIdx] ?? Sparkles;
-    if (ev.coverImage) {
-      return (
-        <div className={`relative overflow-hidden ${className}`}>
-          <Image src={ev.coverImage} alt={ev.title} fill className="object-cover" unoptimized />
-          {showOverlay && <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />}
-        </div>
-      );
-    }
-    return (
-      <div className={`relative overflow-hidden bg-gradient-to-br ${ev.gradient} ${className}`}>
-        <div className="absolute inset-0">
-          <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-32 h-32 rounded-full bg-white/5 blur-2xl" />
-          <Icon size={80} strokeWidth={0.5} className="absolute bottom-2 right-4 text-white/[0.08]" />
-        </div>
-      </div>
-    );
-  };
-
   const renderPanel = () => {
     if (panel === "none") return null;
 

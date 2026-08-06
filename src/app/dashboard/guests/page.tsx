@@ -80,6 +80,9 @@ const DEMO_GUESTS = [
   },
 ];
 
+/* Identité stable : un [] recréé à chaque rendu invaliderait le useMemo. */
+const NO_GUESTS: typeof DEMO_GUESTS = [];
+
 function vipBadge(vip: string | null) {
   if (!vip) return null;
   const colorMap: Record<string, string> = {
@@ -123,7 +126,7 @@ export default function GuestsPage() {
     }
   }, [showAddModal]);
 
-  const guests = isDemoVenue ? DEMO_GUESTS : [];
+  const guests = isDemoVenue ? DEMO_GUESTS : NO_GUESTS;
 
   const filteredGuests = useMemo(() => {
     let result = guests.filter((g) => {

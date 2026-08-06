@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search,
@@ -8,7 +9,6 @@ import {
   LayoutGrid,
   List,
   ChevronDown,
-  Maximize2,
   QrCode,
   X,
   Check,
@@ -121,15 +121,25 @@ function timelineIndex(etat: Reservation["etat"]) {
 
 /* ── composants ─────────────────────────────────────────── */
 
+/* useSyncExternalStore plutôt qu'un setState dans un effet : le serveur rend
+   « --:-- » (pas d'heure fiable côté serveur), le client affiche l'heure dès
+   l'hydratation, et l'intervalle ne déclenche un rendu qu'au changement de
+   minute. */
+function clockSubscribe(onTick: () => void) {
+  const id = setInterval(onTick, 30_000);
+  return () => clearInterval(id);
+}
+
+function clockSnapshot() {
+  const d = new Date();
+  return `${String(d.getHours()).padStart(2, "0")}:${String(
+    d.getMinutes()
+  ).padStart(2, "0")}`;
+}
+
 function Clock() {
-  const [now, setNow] = useState<Date | null>(null);
-  useEffect(() => {
-    setNow(new Date());
-    const id = setInterval(() => setNow(new Date()), 30_000);
-    return () => clearInterval(id);
-  }, []);
-  const h = now ? String(now.getHours()).padStart(2, "0") : "--";
-  const m = now ? String(now.getMinutes()).padStart(2, "0") : "--";
+  const time = useSyncExternalStore(clockSubscribe, clockSnapshot, () => null);
+  const [h, m] = time ? time.split(":") : ["--", "--"];
   return (
     <span className="tabular-nums text-xl font-medium text-white">
       {h}
@@ -196,7 +206,12 @@ export default function DashboardPage() {
             </div>
           </div>
           <span className="hidden h-8 w-px bg-white/10 sm:block" />
-          <button className="flex items-center gap-2 rounded-full bg-white/5 px-3 py-1.5 transition-colors hover:bg-white/10">
+          {/* Renvoie aux paramètres de l'établissement : un faux menu déroulant
+              qui ne fait rien serait pire qu'un lien honnête. */}
+          <Link
+            href="/dashboard/settings"
+            className="flex items-center gap-2 rounded-full bg-white/5 px-3 py-1.5 transition-colors hover:bg-white/10"
+          >
             <span className="flex h-6 w-6 items-center justify-center rounded-md bg-white/10 text-[10px] font-semibold text-white">
               {(venueName || "Mon établissement").slice(0, 2).toUpperCase()}
             </span>
@@ -204,7 +219,7 @@ export default function DashboardPage() {
               {venueName || "Mon établissement"}
             </span>
             <ChevronDown size={14} className="text-white/50" />
-          </button>
+          </Link>
           <span className="hidden h-8 w-px bg-white/10 sm:block" />
           <Clock />
         </div>
@@ -421,9 +436,6 @@ export default function DashboardPage() {
                 </button>
               ))}
             </div>
-            <button className="hidden h-8 w-8 items-center justify-center rounded-lg bg-white/[0.06] text-white/60 transition-colors hover:text-white sm:flex">
-              <Maximize2 size={14} />
-            </button>
           </div>
         </div>
 
@@ -685,9 +697,12 @@ export default function DashboardPage() {
                     </>
                   )}
                 </button>
-                <button className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-white/[0.07] py-3 text-[13px] font-semibold text-white transition-colors hover:bg-white/15">
+                <Link
+                  href="/dashboard/messages"
+                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-white/[0.07] py-3 text-[13px] font-semibold text-white transition-colors hover:bg-white/15"
+                >
                   <MessageSquare size={15} /> Contacter l&apos;apporteur
-                </button>
+                </Link>
               </div>
               <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-[11px] text-white/35">
                 <CalendarCheck size={11} />
