@@ -7,6 +7,7 @@ const DEMO_VENUE_EMAILS = ["yaminbenhamou@gmail.com", "test@twocardspro.com"];
 const DEMO_CONCIERGE_EMAIL = "adminconcierge@twocardspro.com";
 
 type AuthSnapshot = {
+  id: string | null;
   email: string | null;
   fullName: string | null;
   role: string | null;
@@ -25,6 +26,7 @@ const listeners = new Set<() => void>();
 
 function toSnapshot(
   user: {
+    id?: string;
     email?: string;
     user_metadata?: Record<string, unknown>;
     app_metadata?: Record<string, unknown>;
@@ -32,6 +34,7 @@ function toSnapshot(
 ): AuthSnapshot | null {
   if (!user) return null;
   return {
+    id: user.id ?? null,
     email: user.email ?? null,
     fullName: (user.user_metadata?.full_name as string) ?? null,
     role:
@@ -97,6 +100,7 @@ export function useAuthUser() {
   const isDemoConcierge = email === DEMO_CONCIERGE_EMAIL;
 
   return {
+    userId: snap?.id ?? null,
     email,
     fullName,
     role: snap?.role ?? null,
