@@ -32,6 +32,8 @@ import {
   BarChart3,
   UserCheck,
   Upload,
+  Check,
+  Images as ImageIcon,
   Wine,
   Mic2,
   Headphones,
@@ -168,6 +170,42 @@ interface FormState {
   coverImage: string | null;
 }
 
+/* Banque d'images Unsplash. Les identifiants sont ceux de photos réelles
+   (chacun vérifié en HTTP 200) servies par le CDN images.unsplash.com, déjà
+   autorisé dans next.config.ts. Pas d'appel d'API : la recherche Unsplash
+   exigerait une clé d'application, absente du projet. Ajouter une entrée ici
+   suffit à enrichir la galerie. */
+const UNSPLASH_PHOTOS: { id: string; alt: string }[] = [
+  { id: "photo-1493225457124-a3eb161ffa5f", alt: "Club, jeux de lumière" },
+  { id: "photo-1516450360452-9312f5e86fc7", alt: "Foule en concert" },
+  { id: "photo-1519671482749-fd09be7ccebf", alt: "Scène et public" },
+  { id: "photo-1424298397478-4bd87a6a0f0c", alt: "DJ aux platines" },
+  { id: "photo-1470224114660-3f6686c562eb", alt: "Set DJ en soirée" },
+  { id: "photo-1555396273-367ea4eb4db5", alt: "Ambiance de club" },
+  { id: "photo-1514933651103-005eec06c04b", alt: "Bar de nuit" },
+  { id: "photo-1566737236500-c8ac43014a67", alt: "Cocktails au bar" },
+  { id: "photo-1533174072545-7a4b6ad7a6c3", alt: "Cocktail signature" },
+  { id: "photo-1492684223066-81342ee5ff30", alt: "Confettis et fête" },
+  { id: "photo-1530103862676-de8c9debad1d", alt: "Soirée dansante" },
+  { id: "photo-1544148103-0773bf10d330", alt: "Célébration" },
+  { id: "photo-1517457373958-b7bdd4587205", alt: "Dîner entre convives" },
+  { id: "photo-1528605248644-14dd04022da1", alt: "Table dressée" },
+  { id: "photo-1414235077428-338989a2e8c0", alt: "Salle gastronomique" },
+  { id: "photo-1517248135467-4c7edcad34c4", alt: "Restaurant chaleureux" },
+  { id: "photo-1552566626-52f8b828add9", alt: "Intérieur de restaurant" },
+  { id: "photo-1559339352-11d035aa65de", alt: "Service en salle" },
+  { id: "photo-1592861956120-e524fc739696", alt: "Terrasse" },
+  { id: "photo-1551632436-cbf8dd35adfa", alt: "Rooftop au crépuscule" },
+  { id: "photo-1574391884720-bbc3740c59d1", alt: "Piscine et transats" },
+  { id: "photo-1470337458703-46ad1756a187", alt: "Verre au comptoir" },
+];
+
+/* Vignette légère pour la grille, rendu large pour la couverture retenue. */
+const unsplashThumb = (id: string) =>
+  `https://images.unsplash.com/${id}?q=60&w=240&h=160&auto=format&fit=crop`;
+const unsplashFull = (id: string) =>
+  `https://images.unsplash.com/${id}?q=80&w=1600&auto=format&fit=crop`;
+
 function parseTime(time: string): { open: string; close: string } {
   const parts = time.split(" - ");
   return { open: parts[0] || "", close: parts[1] || "" };
@@ -290,6 +328,7 @@ export default function EventsPage() {
   const [openDropdownOpen, setOpenDropdownOpen] = useState(false);
   const [closeDropdownOpen, setCloseDropdownOpen] = useState(false);
   const [iconDropdownOpen, setIconDropdownOpen] = useState(false);
+  const [galleryOpen, setGalleryOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const showToast = useCallback((msg: string) => {
@@ -327,7 +366,7 @@ export default function EventsPage() {
     setForm(eventToForm(ev)); setPanelEventId(id); setPanel("edit"); setOpenMenu(null);
   };
   const openCreate = () => { setForm(emptyForm()); setPanelEventId(null); setPanel("create"); };
-  const closePanel = () => { setPanel("none"); setPanelEventId(null); setOpenDropdownOpen(false); setCloseDropdownOpen(false); setIconDropdownOpen(false); };
+  const closePanel = () => { setPanel("none"); setPanelEventId(null); setOpenDropdownOpen(false); setCloseDropdownOpen(false); setIconDropdownOpen(false); setGalleryOpen(false); };
 
   const duplicateEvent = (id: number) => {
     const ev = events.find((e) => e.id === id);
@@ -570,6 +609,82 @@ export default function EventsPage() {
               )}
               <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
             </div>
+
+            {/* Deux voies explicites vers une couverture. En boutons et non en
+                survol de l'aperçu : ce dernier n'existe pas au toucher. */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-white/[0.12] bg-white/[0.06] px-3 py-2.5 text-xs font-medium text-white/70 transition-colors hover:bg-white/[0.12] hover:text-white"
+              >
+                <Upload size={14} strokeWidth={1.5} />
+                Importer une image
+              </button>
+              <button
+                onClick={() => setGalleryOpen((v) => !v)}
+                aria-expanded={galleryOpen}
+                className={`flex flex-1 items-center justify-center gap-2 rounded-xl border px-3 py-2.5 text-xs font-medium transition-colors ${
+                  galleryOpen
+                    ? "border-blue-400/30 bg-blue-500/20 text-blue-300"
+                    : "border-white/[0.12] bg-white/[0.06] text-white/70 hover:bg-white/[0.12] hover:text-white"
+                }`}
+              >
+                <ImageIcon size={14} strokeWidth={1.5} />
+                Photo Unsplash
+              </button>
+            </div>
+
+            {galleryOpen && (
+              <div className="rounded-2xl border border-white/[0.12] bg-black/30 p-3">
+                <div className="grid max-h-56 grid-cols-4 gap-2 overflow-y-auto scrollbar-thin">
+                  {UNSPLASH_PHOTOS.map((photo) => {
+                    const full = unsplashFull(photo.id);
+                    const active = form.coverImage === full;
+                    return (
+                      <button
+                        key={photo.id}
+                        onClick={() => setForm({ ...form, coverImage: full })}
+                        title={photo.alt}
+                        aria-label={photo.alt}
+                        aria-pressed={active}
+                        className={`relative aspect-[3/2] overflow-hidden rounded-lg border transition-all ${
+                          active
+                            ? "border-blue-400 ring-2 ring-blue-400/40"
+                            : "border-white/10 hover:border-white/40"
+                        }`}
+                      >
+                        <Image
+                          src={unsplashThumb(photo.id)}
+                          alt={photo.alt}
+                          fill
+                          sizes="120px"
+                          className="object-cover"
+                          unoptimized
+                        />
+                        {active && (
+                          <span className="absolute inset-0 flex items-center justify-center bg-blue-500/30">
+                            <Check size={16} strokeWidth={2.5} className="text-white" />
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+                {/* Crédit : Unsplash demande d'attribuer la source. */}
+                <p className="mt-2.5 text-[10px] text-white/30">
+                  Photos{" "}
+                  <a
+                    href="https://unsplash.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline underline-offset-2 hover:text-white/60"
+                  >
+                    Unsplash
+                  </a>
+                  , libres d&apos;utilisation.
+                </p>
+              </div>
+            )}
 
             {/* Gradient picker (hidden if cover image) */}
             {!form.coverImage && (
