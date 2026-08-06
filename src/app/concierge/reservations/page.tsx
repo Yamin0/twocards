@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   Plus,
   CheckCircle,
@@ -35,7 +36,17 @@ const statusBadge = (s: string) => {
   return "bg-red-100 text-red-800";
 };
 
-export default function ConciergeReservationsPage() {
+function ConciergeReservations() {
+  /* Arrivee depuis l'annuaire de l'accueil : ?new=1 ouvre le modal,
+     ?venue= preselectionne l'etablissement (ajoute aux choix s'il n'y
+     figure pas — l'annuaire reel deborde de la liste de demonstration). */
+  const params = useSearchParams();
+  const requestedVenue = params.get("venue");
+  const venueOptions =
+    requestedVenue && !venues.includes(requestedVenue)
+      ? [requestedVenue, ...venues]
+      : venues;
+
   const { isDemoConcierge, isLoading } = useAuthUser();
   const [reservations, setReservations] = useState<typeof DEMO_RESERVATIONS>([]);
   const [filter, setFilter] = useState("toutes");
@@ -48,7 +59,7 @@ export default function ConciergeReservationsPage() {
     setInitialized(true);
     if (isDemoConcierge) setReservations(DEMO_RESERVATIONS);
   }
-  const [showModal, setShowModal] = useState(false);
+  const [showModal, setShowModal] = useState(params.get("new") === "1");
 
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
@@ -61,7 +72,7 @@ export default function ConciergeReservationsPage() {
   }, [showModal]);
 
   const [newClient, setNewClient] = useState("");
-  const [newVenue, setNewVenue] = useState(venues[0]);
+  const [newVenue, setNewVenue] = useState(requestedVenue ?? venues[0]);
   const [newGuests, setNewGuests] = useState("");
   const [newDate, setNewDate] = useState("");
   const [newTime, setNewTime] = useState("");
@@ -229,9 +240,9 @@ export default function ConciergeReservationsPage() {
                     setNewVenue(e.target.value);
                     clearError("venue");
                   }}
-                  className="w-full px-3 py-2 text-sm bg-white/[0.05] border-none rounded-lg text-white font-[family-name:var(--font-inter)] focus:ring-1 focus:ring-white/30/30 focus:outline-none"
+                  className="w-full px-3 py-2 text-sm bg-white/[0.05] border-none rounded-lg text-white font-[family-name:var(--font-inter)] focus:ring-1 focus:ring-white/30 focus:outline-none"
                 >
-                  {venues.map((v) => (
+                  {venueOptions.map((v) => (
                     <option key={v} value={v}>{v}</option>
                   ))}
                 </select>
@@ -249,7 +260,7 @@ export default function ConciergeReservationsPage() {
                     clearError("client");
                   }}
                   placeholder="Ex: Mohamed Tazi"
-                  className="w-full px-3 py-2 text-sm bg-white/[0.05] border-none rounded-lg text-white placeholder:text-white/60/50 font-[family-name:var(--font-inter)] focus:ring-1 focus:ring-white/30/30 focus:outline-none"
+                  className="w-full px-3 py-2 text-sm bg-white/[0.05] border-none rounded-lg text-white placeholder:text-white/60/50 font-[family-name:var(--font-inter)] focus:ring-1 focus:ring-white/30 focus:outline-none"
                 />
                 {errors.client && <p className="text-xs text-red-500 mt-1">{errors.client}</p>}
               </div>
@@ -267,7 +278,7 @@ export default function ConciergeReservationsPage() {
                     }}
                     placeholder="4"
                     min="1"
-                    className="w-full px-3 py-2 text-sm bg-white/[0.05] border-none rounded-lg text-white placeholder:text-white/60/50 font-[family-name:var(--font-inter)] focus:ring-1 focus:ring-white/30/30 focus:outline-none"
+                    className="w-full px-3 py-2 text-sm bg-white/[0.05] border-none rounded-lg text-white placeholder:text-white/60/50 font-[family-name:var(--font-inter)] focus:ring-1 focus:ring-white/30 focus:outline-none"
                   />
                   {errors.guests && <p className="text-xs text-red-500 mt-1">{errors.guests}</p>}
                 </div>
@@ -283,7 +294,7 @@ export default function ConciergeReservationsPage() {
                       clearError("date");
                     }}
                     placeholder="12 Avr."
-                    className="w-full px-3 py-2 text-sm bg-white/[0.05] border-none rounded-lg text-white placeholder:text-white/60/50 font-[family-name:var(--font-inter)] focus:ring-1 focus:ring-white/30/30 focus:outline-none"
+                    className="w-full px-3 py-2 text-sm bg-white/[0.05] border-none rounded-lg text-white placeholder:text-white/60/50 font-[family-name:var(--font-inter)] focus:ring-1 focus:ring-white/30 focus:outline-none"
                   />
                   {errors.date && <p className="text-xs text-red-500 mt-1">{errors.date}</p>}
                 </div>
@@ -296,7 +307,7 @@ export default function ConciergeReservationsPage() {
                     value={newTime}
                     onChange={(e) => setNewTime(e.target.value)}
                     placeholder="22:00"
-                    className="w-full px-3 py-2 text-sm bg-white/[0.05] border-none rounded-lg text-white placeholder:text-white/60/50 font-[family-name:var(--font-inter)] focus:ring-1 focus:ring-white/30/30 focus:outline-none"
+                    className="w-full px-3 py-2 text-sm bg-white/[0.05] border-none rounded-lg text-white placeholder:text-white/60/50 font-[family-name:var(--font-inter)] focus:ring-1 focus:ring-white/30 focus:outline-none"
                   />
                 </div>
               </div>
@@ -319,5 +330,14 @@ export default function ConciergeReservationsPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function ConciergeReservationsPage() {
+  /* useSearchParams exige une frontiere Suspense au prerendu. */
+  return (
+    <Suspense fallback={<TableSkeleton />}>
+      <ConciergeReservations />
+    </Suspense>
   );
 }

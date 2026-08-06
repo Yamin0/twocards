@@ -32,7 +32,14 @@ export type MessengerLabels = {
   directoryEmpty: string;
 };
 
-export function Messenger({ labels }: { labels: MessengerLabels }) {
+export function Messenger({
+  labels,
+  initialCounterpartId = null,
+}: {
+  labels: MessengerLabels;
+  /* Profil dont la conversation s'ouvre d'office (lien « Message »). */
+  initialCounterpartId?: string | null;
+}) {
   const {
     isLoading,
     userId,
@@ -47,7 +54,7 @@ export function Messenger({ labels }: { labels: MessengerLabels }) {
     startConversation,
     error,
     dismissError,
-  } = useMessaging();
+  } = useMessaging({ openWith: initialCounterpartId });
 
   const [input, setInput] = useState("");
   const [search, setSearch] = useState("");

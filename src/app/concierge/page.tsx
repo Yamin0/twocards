@@ -1,11 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuthUser } from "@/hooks/use-auth-user";
 import { ConciergeSkeleton } from "@/components/shared/loading-skeleton";
+import { createClient } from "@/lib/supabase/client";
+import {
+  displayName,
+  initialsOf,
+  type Profile,
+} from "@/hooks/use-messaging";
 import Link from "next/link";
 import {
   CalendarDays,
+  CalendarPlus,
   Users,
   CreditCard,
   BarChart3,
@@ -18,6 +25,13 @@ import {
   Plus,
   Sparkles,
 } from "lucide-react";
+
+const VENUE_ROLES = ["etablissement", "hotel"];
+
+const ROLE_LABELS: Record<string, string> = {
+  etablissement: "Établissement",
+  hotel: "Hôtel",
+};
 
 const folders = [
   {
@@ -112,6 +126,48 @@ const DEMO_STATS = [
 export default function ConciergePage() {
   const { isDemoConcierge, isLoading, fullName } = useAuthUser();
   const [query, setQuery] = useState("");
+  /* Annuaire réel des établissements (table profiles), tenu à jour en
+     direct : chaque nouveau compte apparaît dès sa création, sans
+     recharger la page. */
+  const [venues, setVenues] = useState<Profile[] | null>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+    let cancelled = false;
+
+    supabase
+      .from("profiles")
+      .select("id, full_name, role, venue_name, city")
+      .in("role", VENUE_ROLES)
+      .order("venue_name", { ascending: true })
+      .then(({ data }) => {
+        if (!cancelled) setVenues((data ?? []) as Profile[]);
+      });
+
+    const channel = supabase
+      .channel("profiles-directory")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "profiles" },
+        (payload) => {
+          const p = payload.new as Profile;
+          if (!VENUE_ROLES.includes(p.role)) return;
+          setVenues((prev) =>
+            !prev || prev.some((v) => v.id === p.id)
+              ? prev
+              : [...prev, p].sort((a, b) =>
+                  displayName(a).localeCompare(displayName(b), "fr")
+                )
+          );
+        }
+      )
+      .subscribe();
+
+    return () => {
+      cancelled = true;
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   if (isLoading) return <ConciergeSkeleton />;
 
@@ -192,6 +248,70 @@ export default function ConciergePage() {
           })}
         </div>
       )}
+
+      {/* ── Le réseau : tous les établissements référencés ── */}
+      <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
+        <div className="mb-5 flex items-center justify-between">
+          <div>
+            <h2 className="text-xl font-semibold text-white font-[family-name:var(--font-manrope)]">
+              Établissements du réseau
+            </h2>
+            <p className="text-white/40 text-sm mt-0.5">
+              {venues === null
+                ? "Chargement de l'annuaire…"
+                : `${venues.length} établissement${venues.length > 1 ? "s" : ""} référencé${venues.length > 1 ? "s" : ""} — mis à jour en direct`}
+            </p>
+          </div>
+        </div>
+
+        {venues !== null && venues.length === 0 && (
+          <p className="py-8 text-center text-sm text-white/40">
+            Aucun établissement inscrit pour le moment. Ils apparaîtront ici
+            dès la création de leur compte.
+          </p>
+        )}
+
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          {(venues ?? []).map((v) => (
+            <div
+              key={v.id}
+              className="flex flex-col gap-3 rounded-2xl border border-white/[0.08] bg-white/5 p-4 transition-colors hover:bg-white/[0.08]"
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/10 text-xs font-bold text-white">
+                  {initialsOf(v)}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold text-white">
+                    {displayName(v)}
+                  </p>
+                  <p className="truncate text-xs text-white/40">
+                    {[ROLE_LABELS[v.role] ?? v.role, v.city]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Link
+                  href={`/concierge/reservations?new=1&venue=${encodeURIComponent(displayName(v))}`}
+                  className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-white/15 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-white/25"
+                >
+                  <CalendarPlus size={13} strokeWidth={2} />
+                  Réserver
+                </Link>
+                <Link
+                  href={`/concierge/messages?to=${v.id}`}
+                  className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-xs font-semibold text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+                >
+                  <MessageSquare size={13} strokeWidth={2} />
+                  Message
+                </Link>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
 
       {/* Recent Activity */}
       {isDemoConcierge && (

@@ -79,6 +79,34 @@ type ConversationRow = {
   concierge: Profile | null;
 };
 
+/* Crée la conversation avec un interlocuteur, ou retrouve l'existante
+   (contrainte d'unicité sur la paire). Renvoie son id, ou null en échec. */
+async function createConversation(
+  userId: string,
+  side: "venue" | "concierge",
+  counterpartId: string
+): Promise<string | null> {
+  const venue_id = side === "venue" ? userId : counterpartId;
+  const concierge_id = side === "venue" ? counterpartId : userId;
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .from("conversations")
+    .insert({ venue_id, concierge_id })
+    .select("id")
+    .single();
+  if (!error && data) return data.id as string;
+
+  /* Conflit d'unicité : elle existe déjà. */
+  const { data: existing } = await supabase
+    .from("conversations")
+    .select("id")
+    .eq("venue_id", venue_id)
+    .eq("concierge_id", concierge_id)
+    .maybeSingle();
+  return (existing?.id as string) ?? null;
+}
+
 /* Récupération pure (aucun setState) : les conversations de l'utilisateur,
    chacune résumée avec le profil d'en face, son dernier message et le
    nombre de non-lus. Renvoie null en cas d'échec réseau. */
@@ -142,7 +170,10 @@ async function fetchSummaries(
   return summaries;
 }
 
-export function useMessaging() {
+export function useMessaging(options?: { openWith?: string | null }) {
+  /* Profil à ouvrir d'office (lien « Message » de l'annuaire) : consommé une
+     seule fois, au premier chargement des conversations. */
+  const openWith = options?.openWith ?? null;
   const { userId, role, isLoading: authLoading } = useAuthUser();
   /* Un établissement parle à des concierges, et réciproquement. */
   const side: "venue" | "concierge" =
@@ -165,7 +196,7 @@ export function useMessaging() {
   useEffect(() => {
     if (authLoading || !userId) return;
     let cancelled = false;
-    fetchSummaries(userId, side).then((summaries) => {
+    fetchSummaries(userId, side).then(async (summaries) => {
       if (cancelled) return;
       if (summaries === null) {
         setError("Impossible de charger les conversations.");
@@ -173,12 +204,31 @@ export function useMessaging() {
         return;
       }
       setConversations(summaries);
+
+      /* Ouverture ciblée : la conversation avec ce profil si elle existe,
+         sinon on la crée puis on recharge la liste. */
+      if (openWith) {
+        const existing = summaries.find((c) => c.counterpart.id === openWith);
+        if (existing) {
+          setActiveId(existing.id);
+          return;
+        }
+        const created = await createConversation(userId, side, openWith);
+        if (cancelled) return;
+        if (created) {
+          const fresh = await fetchSummaries(userId, side);
+          if (cancelled) return;
+          if (fresh) setConversations(fresh);
+          setActiveId(created);
+          return;
+        }
+      }
       setActiveId((prev) => prev ?? summaries[0]?.id ?? null);
     });
     return () => {
       cancelled = true;
     };
-  }, [authLoading, userId, side]);
+  }, [authLoading, userId, side, openWith]);
 
   /* Marque lus les messages reçus d'une conversation, en base et en local. */
   const markRead = useCallback(
@@ -310,29 +360,11 @@ export function useMessaging() {
   const startConversation = useCallback(
     async (counterpartId: string) => {
       if (!userId) return;
-      const venue_id = side === "venue" ? userId : counterpartId;
-      const concierge_id = side === "venue" ? counterpartId : userId;
-      const supabase = createClient();
-
-      const { data, error: insertError } = await supabase
-        .from("conversations")
-        .insert({ venue_id, concierge_id })
-        .select("id")
-        .single();
-
-      let conversationId = data?.id as string | undefined;
-
-      /* Conflit d'unicité : la conversation existe déjà, on la retrouve. */
-      if (insertError) {
-        const { data: existing } = await supabase
-          .from("conversations")
-          .select("id")
-          .eq("venue_id", venue_id)
-          .eq("concierge_id", concierge_id)
-          .maybeSingle();
-        conversationId = existing?.id;
-      }
-
+      const conversationId = await createConversation(
+        userId,
+        side,
+        counterpartId
+      );
       if (!conversationId) {
         setError("Impossible d'ouvrir la conversation.");
         return;
