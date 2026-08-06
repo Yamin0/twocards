@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Plus, Star, Search, Phone, MoreHorizontal, X, Check } from "lucide-react";
 import { useAuthUser } from "@/hooks/use-auth-user";
 import { ConciergeSkeleton } from "@/components/shared/loading-skeleton";
@@ -20,16 +20,15 @@ const DEMO_CLIENTS = [
 export default function ConciergeClientsPage() {
   const { isDemoConcierge, isLoading } = useAuthUser();
   const [clients, setClients] = useState<typeof DEMO_CLIENTS>([]);
-  const initialized = useRef(false);
 
-  useEffect(() => {
-    if (!isLoading && !initialized.current) {
-      initialized.current = true;
-      if (isDemoConcierge) {
-        setClients(DEMO_CLIENTS);
-      }
-    }
-  }, [isLoading, isDemoConcierge]);
+  /* Ajustement d'état pendant le rendu (patron React documenté) plutôt qu'un
+     effet : la liste se remplit dès que l'authentification est résolue. */
+  const [initialized, setInitialized] = useState(false);
+  if (!isLoading && !initialized) {
+    setInitialized(true);
+    if (isDemoConcierge) setClients(DEMO_CLIENTS);
+  }
+
   const [searchQuery, setSearchQuery] = useState("");
   const [filterTag, setFilterTag] = useState("tous");
   const [showNewClient, setShowNewClient] = useState(false);
@@ -131,14 +130,14 @@ export default function ConciergeClientsPage() {
           <Search
             size={16}
             strokeWidth={1.5}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60/50"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40"
           />
           <input
             type="text"
             placeholder="Rechercher par nom ou téléphone..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 text-sm bg-white/[0.07] border border-white/10/20 rounded-lg text-white placeholder:text-white/60/50 font-[family-name:var(--font-inter)] focus:ring-1 focus:ring-white/30/30 focus:border-primary/30 focus:outline-none transition-colors"
+            className="w-full pl-9 pr-4 py-2 text-sm bg-white/[0.07] border border-white/10 rounded-lg text-white placeholder:text-white/40 font-[family-name:var(--font-inter)] focus:ring-1 focus:ring-white/30 focus:border-primary/30 focus:outline-none transition-colors"
           />
         </div>
         <div className="flex items-center gap-2 overflow-x-auto">
@@ -149,7 +148,7 @@ export default function ConciergeClientsPage() {
               className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors font-[family-name:var(--font-inter)] ${
                 filterTag === tag
                   ? "bg-white/15 text-white"
-                  : "bg-white/[0.07] border border-white/10/20 text-white/60 hover:bg-white/[0.05]"
+                  : "bg-white/[0.07] border border-white/10 text-white/60 hover:bg-white/[0.05]"
               }`}
             >
               {tag === "tous" ? "Tous" : tag}
@@ -342,7 +341,7 @@ export default function ConciergeClientsPage() {
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
                   placeholder="Ex: Mohamed Tazi"
-                  className="w-full px-3 py-2 text-sm bg-white/[0.05] border-none rounded-lg text-white placeholder:text-white/60/50 font-[family-name:var(--font-inter)] focus:ring-1 focus:ring-white/30/30 focus:outline-none"
+                  className="w-full px-3 py-2 text-sm bg-white/[0.05] border-none rounded-lg text-white placeholder:text-white/40 font-[family-name:var(--font-inter)] focus:ring-1 focus:ring-white/30 focus:outline-none"
                   required
                 />
               </div>
@@ -355,7 +354,7 @@ export default function ConciergeClientsPage() {
                   value={newPhone}
                   onChange={(e) => setNewPhone(e.target.value)}
                   placeholder="+212 6 XX XX XX XX"
-                  className="w-full px-3 py-2 text-sm bg-white/[0.05] border-none rounded-lg text-white placeholder:text-white/60/50 font-[family-name:var(--font-inter)] focus:ring-1 focus:ring-white/30/30 focus:outline-none"
+                  className="w-full px-3 py-2 text-sm bg-white/[0.05] border-none rounded-lg text-white placeholder:text-white/40 font-[family-name:var(--font-inter)] focus:ring-1 focus:ring-white/30 focus:outline-none"
                 />
               </div>
               <div>
@@ -367,7 +366,7 @@ export default function ConciergeClientsPage() {
                   value={newEmail}
                   onChange={(e) => setNewEmail(e.target.value)}
                   placeholder="email@example.com"
-                  className="w-full px-3 py-2 text-sm bg-white/[0.05] border-none rounded-lg text-white placeholder:text-white/60/50 font-[family-name:var(--font-inter)] focus:ring-1 focus:ring-white/30/30 focus:outline-none"
+                  className="w-full px-3 py-2 text-sm bg-white/[0.05] border-none rounded-lg text-white placeholder:text-white/40 font-[family-name:var(--font-inter)] focus:ring-1 focus:ring-white/30 focus:outline-none"
                 />
               </div>
               <button

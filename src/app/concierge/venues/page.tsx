@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { MapPin, Star, ArrowRight, X, Phone, Mail, Globe, Building2 } from "lucide-react";
+import { MapPin, Star, ArrowRight, Phone, Mail, Globe, Building2 } from "lucide-react";
 import { useAuthUser } from "@/hooks/use-auth-user";
 import { ConciergeSkeleton } from "@/components/shared/loading-skeleton";
 

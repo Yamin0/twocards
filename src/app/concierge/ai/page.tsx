@@ -67,36 +67,24 @@ export default function ConciergeAIPage() {
     scrollToBottom();
   }, [messages, scrollToBottom]);
 
-  const sendMessage = (text: string) => {
-    if (!text.trim()) return;
-
-    const now = new Date().toLocaleTimeString("fr-FR", {
+  /* Identifiant dérivé du dernier message plutôt que Date.now() : stable,
+     sans appel impur, et deux messages ne peuvent pas partager un id. */
+  const appendMessage = (role: Message["role"], text: string) => {
+    const time = new Date().toLocaleTimeString("fr-FR", {
       hour: "2-digit",
       minute: "2-digit",
     });
+    setMessages((prev) => [
+      ...prev,
+      { id: (prev[prev.length - 1]?.id ?? 0) + 1, role, text, time },
+    ]);
+  };
 
-    const userMsg: Message = {
-      id: Date.now(),
-      role: "user",
-      text: text.trim(),
-      time: now,
-    };
-
-    setMessages((prev) => [...prev, userMsg]);
+  const sendMessage = (text: string) => {
+    if (!text.trim()) return;
+    appendMessage("user", text.trim());
     setInput("");
-
-    setTimeout(() => {
-      const aiMsg: Message = {
-        id: Date.now() + 1,
-        role: "ai",
-        text: getAIResponse(text),
-        time: new Date().toLocaleTimeString("fr-FR", {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      };
-      setMessages((prev) => [...prev, aiMsg]);
-    }, 600);
+    setTimeout(() => appendMessage("ai", getAIResponse(text)), 600);
   };
 
   return (

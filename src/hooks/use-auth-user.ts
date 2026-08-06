@@ -1,36 +1,97 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useSyncExternalStore } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 const DEMO_VENUE_EMAILS = ["yaminbenhamou@gmail.com", "test@twocardspro.com"];
 const DEMO_CONCIERGE_EMAIL = "adminconcierge@twocardspro.com";
 
-export function useAuthUser() {
-  const [email, setEmail] = useState<string | null>(null);
-  const [fullName, setFullName] = useState<string | null>(null);
-  const [role, setRole] = useState<string | null>(null);
-  const [venueName, setVenueName] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+type AuthSnapshot = {
+  email: string | null;
+  fullName: string | null;
+  role: string | null;
+  venueName: string | null;
+};
 
-  useEffect(() => {
-    const supabase = createClient();
-    supabase.auth.getUser().then(({ data }) => {
-      if (data.user) {
-        setEmail(data.user.email ?? null);
-        setFullName(data.user.user_metadata?.full_name ?? null);
-        setRole(
-          data.user.app_metadata?.role ??
-            data.user.user_metadata?.role ??
-            null
-        );
-        setVenueName(data.user.user_metadata?.venue_name ?? null);
-      }
-      setIsLoading(false);
-    }).catch(() => {
-      setIsLoading(false);
+/* Cache de module : l'utilisateur est demandé UNE fois au serveur Supabase,
+   puis chaque page le lit de façon synchrone. Auparavant, chaque montage de
+   page refaisait l'aller-retour réseau — d'où un squelette de chargement et
+   une latence sensible à chaque clic de navigation.
+
+   undefined = pas encore chargé (isLoading), null = non connecté. */
+let snapshot: AuthSnapshot | null | undefined = undefined;
+let started = false;
+const listeners = new Set<() => void>();
+
+function toSnapshot(
+  user: {
+    email?: string;
+    user_metadata?: Record<string, unknown>;
+    app_metadata?: Record<string, unknown>;
+  } | null
+): AuthSnapshot | null {
+  if (!user) return null;
+  return {
+    email: user.email ?? null,
+    fullName: (user.user_metadata?.full_name as string) ?? null,
+    role:
+      (user.app_metadata?.role as string) ??
+      (user.user_metadata?.role as string) ??
+      null,
+    venueName: (user.user_metadata?.venue_name as string) ?? null,
+  };
+}
+
+function notify() {
+  for (const l of listeners) l();
+}
+
+function ensureStarted() {
+  if (started) return;
+  started = true;
+  const supabase = createClient();
+
+  supabase.auth
+    .getUser()
+    .then(({ data }) => {
+      snapshot = toSnapshot(data.user ?? null);
+      notify();
+    })
+    .catch(() => {
+      snapshot = null;
+      notify();
     });
-  }, []);
+
+  /* Connexion et déconnexion côté client invalident le cache sans recharger
+     la page : on suit les changements de session. */
+  supabase.auth.onAuthStateChange((_event, session) => {
+    const next = toSnapshot(session?.user ?? null);
+    const changed = JSON.stringify(next) !== JSON.stringify(snapshot ?? null);
+    if (snapshot === undefined || changed) {
+      snapshot = next;
+      notify();
+    }
+  });
+}
+
+function subscribe(listener: () => void) {
+  ensureStarted();
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+}
+
+const getSnapshot = () => snapshot;
+/* Côté serveur : toujours « en chargement », comme avant. */
+const getServerSnapshot = () => undefined;
+
+export function useAuthUser() {
+  const snap = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+
+  const isLoading = snap === undefined;
+  const email = snap?.email ?? null;
+  const fullName = snap?.fullName ?? null;
 
   const isDemoVenue = email !== null && DEMO_VENUE_EMAILS.includes(email);
   const isDemoConcierge = email === DEMO_CONCIERGE_EMAIL;
@@ -38,8 +99,8 @@ export function useAuthUser() {
   return {
     email,
     fullName,
-    role,
-    venueName,
+    role: snap?.role ?? null,
+    venueName: snap?.venueName ?? null,
     isLoading,
     isDemoVenue,
     isDemoConcierge,

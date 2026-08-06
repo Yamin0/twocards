@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useAuthUser } from "@/hooks/use-auth-user";
 import { ConciergeSkeleton } from "@/components/shared/loading-skeleton";
 import Link from "next/link";
@@ -14,7 +15,6 @@ import {
   ArrowRight,
   TrendingUp,
   Search,
-  Bell,
   Plus,
   Sparkles,
 } from "lucide-react";
@@ -111,10 +111,22 @@ const DEMO_STATS = [
 
 export default function ConciergePage() {
   const { isDemoConcierge, isLoading, fullName } = useAuthUser();
+  const [query, setQuery] = useState("");
 
   if (isLoading) return <ConciergeSkeleton />;
 
   const stats = isDemoConcierge ? DEMO_STATS : [];
+
+  /* La recherche filtre les espaces : c'est la seule chose cherchable ici,
+     et le champ ne filtrait rien du tout. */
+  const q = query.trim().toLowerCase();
+  const visibleFolders = q
+    ? folders.filter(
+        (f) =>
+          f.label.toLowerCase().includes(q) ||
+          f.description.toLowerCase().includes(q)
+      )
+    : folders;
 
   return (
     <div className="space-y-6">
@@ -133,17 +145,22 @@ export default function ConciergePage() {
             <div className="relative hidden sm:block">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30 h-4 w-4" />
               <input
-                placeholder="Rechercher..."
+                placeholder="Rechercher un espace..."
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
                 className="pl-10 pr-4 py-2.5 bg-white/5 border border-white/15 rounded-xl text-sm text-white placeholder:text-white/30 focus:border-white/30 focus:bg-white/10 focus:outline-none transition-all w-48"
               />
             </div>
-            <button className="p-2.5 rounded-xl text-white/60 hover:bg-white/10 hover:text-white transition-all">
-              <Bell size={18} strokeWidth={1.5} />
-            </button>
-            <button className="flex items-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-white/15 border border-white/15 hover:border-white/25 text-white rounded-xl text-sm font-medium transition-all duration-300 hover:scale-[1.02]">
+            {/* La cloche décorative a disparu : aucune page de notifications
+                n'existe côté concierge. « Nouvelle liste » désignait une
+                notion absente de l'app — l'action réelle est la réservation. */}
+            <Link
+              href="/concierge/reservations"
+              className="flex items-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-white/15 border border-white/15 hover:border-white/25 text-white rounded-xl text-sm font-medium transition-all duration-300 hover:scale-[1.02]"
+            >
               <Plus size={16} strokeWidth={1.5} />
-              <span className="hidden sm:inline">Nouvelle liste</span>
-            </button>
+              <span className="hidden sm:inline">Nouvelle réservation</span>
+            </Link>
           </div>
         </div>
       </div>
@@ -211,7 +228,12 @@ export default function ConciergePage() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-          {folders.map((folder) => {
+          {visibleFolders.length === 0 && (
+            <p className="col-span-full py-8 text-center text-sm text-white/40">
+              Aucun espace ne correspond à « {query} ».
+            </p>
+          )}
+          {visibleFolders.map((folder) => {
             const Icon = folder.icon;
             return (
               <Link

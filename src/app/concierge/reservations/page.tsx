@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import {
   Plus,
   CheckCircle,
@@ -38,17 +38,16 @@ const statusBadge = (s: string) => {
 export default function ConciergeReservationsPage() {
   const { isDemoConcierge, isLoading } = useAuthUser();
   const [reservations, setReservations] = useState<typeof DEMO_RESERVATIONS>([]);
-  const initialized = useRef(false);
   const [filter, setFilter] = useState("toutes");
 
-  useEffect(() => {
-    if (!isLoading && !initialized.current) {
-      initialized.current = true;
-      if (isDemoConcierge) {
-        setReservations(DEMO_RESERVATIONS);
-      }
-    }
-  }, [isLoading, isDemoConcierge]);
+  /* Ajustement d'etat pendant le rendu (patron React documente) plutot
+     qu'un effet : la liste se remplit des que l'authentification est
+     resolue, sans rendu intermediaire vide. */
+  const [initialized, setInitialized] = useState(false);
+  if (!isLoading && !initialized) {
+    setInitialized(true);
+    if (isDemoConcierge) setReservations(DEMO_RESERVATIONS);
+  }
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {

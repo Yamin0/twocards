@@ -72,18 +72,17 @@ export default function ConciergeMessagesPage() {
   const [inputValue, setInputValue] = useState("");
   const { toast, showToast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const initialized = useRef(false);
 
   const conversations = isDemoConcierge ? DEMO_CONVERSATIONS : [];
 
-  useEffect(() => {
-    if (!isLoading && !initialized.current) {
-      initialized.current = true;
-      if (isDemoConcierge && DEMO_CONVERSATIONS.length > 0) {
-        setActiveConv(DEMO_CONVERSATIONS[0].id);
-      }
+  /* Ajustement d'etat pendant le rendu plutot qu'un effet. */
+  const [initialized, setInitialized] = useState(false);
+  if (!isLoading && !initialized) {
+    setInitialized(true);
+    if (isDemoConcierge && DEMO_CONVERSATIONS.length > 0) {
+      setActiveConv(DEMO_CONVERSATIONS[0].id);
     }
-  }, [isLoading, isDemoConcierge]);
+  }
 
   const activeConvData = activeConv !== null ? conversations.find((c) => c.id === activeConv) : undefined;
   const allMessages = [
@@ -97,6 +96,7 @@ export default function ConciergeMessagesPage() {
 
   const handleSend = () => {
     if (!inputValue.trim() || activeConv === null) return;
+    const conv = activeConv;
     const now = new Date();
     const timeStr = `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`;
     const newMsg: Message = {
@@ -107,9 +107,30 @@ export default function ConciergeMessagesPage() {
     };
     setLocalMessages((prev) => ({
       ...prev,
-      [activeConv]: [...(prev[activeConv] || []), newMsg],
+      [conv]: [...(prev[conv] || []), newMsg],
     }));
     setInputValue("");
+
+    /* Accusé de réception simulé : sans lui, la conversation démo reste
+       muette et la messagerie semble cassée. `conv` est figé au moment de
+       l'envoi — la réponse atterrit dans la bonne conversation même si
+       l'utilisateur en change entre-temps. */
+    showToast("Message envoyé");
+    setTimeout(() => {
+      const t = new Date();
+      setLocalMessages((prev) => ({
+        ...prev,
+        [conv]: [
+          ...(prev[conv] || []),
+          {
+            id: Date.now(),
+            from: "venue" as const,
+            text: "Bien reçu ! On revient vers vous très vite pour confirmer.",
+            time: `${t.getHours().toString().padStart(2, "0")}:${t.getMinutes().toString().padStart(2, "0")}`,
+          },
+        ],
+      }));
+    }, 1400);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {

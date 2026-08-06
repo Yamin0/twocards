@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useAuthUser } from "@/hooks/use-auth-user";
 import { ConciergeSkeleton } from "@/components/shared/loading-skeleton";
 import { User, Mail, Phone, MapPin, Save, CheckCircle, Loader2 } from "lucide-react";
@@ -23,17 +23,16 @@ export default function ConciergeSettingsPage() {
     }
   }, [success]);
 
-  const initialized = useRef(false);
-  useEffect(() => {
-    if (!isLoading && !initialized.current) {
-      initialized.current = true;
-      if (isDemoConcierge) {
-        setForm({ fullname: "Karim Bennani", email: "karim@prestige-marrakech.com", phone: "+212 6 12 34 56 78", city: "Marrakech" });
-      } else {
-        setForm({ fullname: fullName || "", email: email || "", phone: "", city: "" });
-      }
+  /* Ajustement d'etat pendant le rendu plutot qu'un effet. */
+  const [initialized, setInitialized] = useState(false);
+  if (!isLoading && !initialized) {
+    setInitialized(true);
+    if (isDemoConcierge) {
+      setForm({ fullname: "Karim Bennani", email: "karim@prestige-marrakech.com", phone: "+212 6 12 34 56 78", city: "Marrakech" });
+    } else {
+      setForm({ fullname: fullName || "", email: email || "", phone: "", city: "" });
     }
-  }, [isLoading, isDemoConcierge, fullName, email]);
+  }
 
   const updateForm = (field: string, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -85,12 +84,12 @@ export default function ConciergeSettingsPage() {
                   Nom complet
                 </label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60/60" size={16} strokeWidth={1.5} />
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={16} strokeWidth={1.5} />
                   <input
                     type="text"
                     value={form.fullname}
                     onChange={(e) => updateForm("fullname", e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-white/[0.05] border-none rounded-sm text-sm text-white font-[family-name:var(--font-inter)] focus:bg-white/[0.07] focus:ring-1 focus:ring-white/30/30 focus:outline-none transition-colors"
+                    className="w-full pl-10 pr-4 py-2.5 bg-white/[0.05] border-none rounded-sm text-sm text-white font-[family-name:var(--font-inter)] focus:bg-white/[0.07] focus:ring-1 focus:ring-white/30 focus:outline-none transition-colors"
                   />
                 </div>
               </div>
@@ -100,12 +99,12 @@ export default function ConciergeSettingsPage() {
                   Email
                 </label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60/60" size={16} strokeWidth={1.5} />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={16} strokeWidth={1.5} />
                   <input
                     type="email"
                     value={form.email}
                     onChange={(e) => updateForm("email", e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-white/[0.05] border-none rounded-sm text-sm text-white font-[family-name:var(--font-inter)] focus:bg-white/[0.07] focus:ring-1 focus:ring-white/30/30 focus:outline-none transition-colors"
+                    className="w-full pl-10 pr-4 py-2.5 bg-white/[0.05] border-none rounded-sm text-sm text-white font-[family-name:var(--font-inter)] focus:bg-white/[0.07] focus:ring-1 focus:ring-white/30 focus:outline-none transition-colors"
                   />
                 </div>
               </div>
@@ -115,12 +114,12 @@ export default function ConciergeSettingsPage() {
                   Téléphone
                 </label>
                 <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60/60" size={16} strokeWidth={1.5} />
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={16} strokeWidth={1.5} />
                   <input
                     type="tel"
                     value={form.phone}
                     onChange={(e) => updateForm("phone", e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-white/[0.05] border-none rounded-sm text-sm text-white font-[family-name:var(--font-inter)] focus:bg-white/[0.07] focus:ring-1 focus:ring-white/30/30 focus:outline-none transition-colors"
+                    className="w-full pl-10 pr-4 py-2.5 bg-white/[0.05] border-none rounded-sm text-sm text-white font-[family-name:var(--font-inter)] focus:bg-white/[0.07] focus:ring-1 focus:ring-white/30 focus:outline-none transition-colors"
                   />
                 </div>
               </div>
@@ -130,12 +129,12 @@ export default function ConciergeSettingsPage() {
                   Ville
                 </label>
                 <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60/60" size={16} strokeWidth={1.5} />
+                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={16} strokeWidth={1.5} />
                   <input
                     type="text"
                     value={form.city}
                     onChange={(e) => updateForm("city", e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-white/[0.05] border-none rounded-sm text-sm text-white font-[family-name:var(--font-inter)] focus:bg-white/[0.07] focus:ring-1 focus:ring-white/30/30 focus:outline-none transition-colors"
+                    className="w-full pl-10 pr-4 py-2.5 bg-white/[0.05] border-none rounded-sm text-sm text-white font-[family-name:var(--font-inter)] focus:bg-white/[0.07] focus:ring-1 focus:ring-white/30 focus:outline-none transition-colors"
                   />
                 </div>
               </div>

@@ -13,7 +13,6 @@ import {
   MessageSquare,
   Building2,
   Settings,
-  User,
   LogOut,
   HelpCircle,
   Menu,
@@ -37,10 +36,58 @@ const toolsNav = [
   { icon: Sparkles, label: "Assistant IA", href: "/concierge/ai" },
 ];
 
+/* Une seule entrée : « Profil » pointait aussi vers /concierge/settings, ce
+   qui dupliquait la clé React (les liens sont indexés par href) et mettait
+   deux entrées du menu en surbrillance à la fois. */
 const adminNav = [
   { icon: Settings, label: "Paramètres", href: "/concierge/settings" },
-  { icon: User, label: "Profil", href: "/concierge/settings" },
 ];
+
+/* Au niveau module et non dans le layout : un composant recréé à chaque
+   rendu perd son état et son DOM à chaque navigation. */
+function NavSection({
+  title,
+  items,
+  pathname,
+  onNavigate,
+}: {
+  title: string;
+  items: typeof mainNav;
+  pathname: string;
+  onNavigate: () => void;
+}) {
+  const isActive = (href: string) =>
+    href === "/concierge" ? pathname === "/concierge" : pathname.startsWith(href);
+
+  return (
+    <div>
+      <h4 className="text-white/50 text-[0.6875rem] font-semibold uppercase tracking-wider mb-2 px-3">
+        {title}
+      </h4>
+      <nav className="space-y-0.5">
+        {items.map((item) => {
+          const Icon = item.icon;
+          const active = isActive(item.href);
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              onClick={onNavigate}
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 hover:scale-[1.01] font-[family-name:var(--font-manrope)] ${
+                active
+                  ? "bg-white/20 text-white border border-white/20"
+                  : "text-white/60 hover:bg-white/10 hover:text-white"
+              }`}
+            >
+              <Icon size={18} strokeWidth={1.5} />
+              {item.label}
+            </Link>
+          );
+        })}
+      </nav>
+    </div>
+  );
+}
 
 const demoVenues = [
   "Tous les établissements",
@@ -74,45 +121,7 @@ export default function ConciergeLayout({
     };
   }, [sidebarOpen]);
 
-  const isActive = (href: string) => {
-    if (href === "/concierge") return pathname === "/concierge";
-    return pathname.startsWith(href);
-  };
-
-  const NavSection = ({
-    title,
-    items,
-  }: {
-    title: string;
-    items: typeof mainNav;
-  }) => (
-    <div>
-      <h4 className="text-white/50 text-[0.6875rem] font-semibold uppercase tracking-wider mb-2 px-3">
-        {title}
-      </h4>
-      <nav className="space-y-0.5">
-        {items.map((item) => {
-          const Icon = item.icon;
-          const active = isActive(item.href);
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={() => setSidebarOpen(false)}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 hover:scale-[1.01] font-[family-name:var(--font-manrope)] ${
-                active
-                  ? "bg-white/20 text-white border border-white/20"
-                  : "text-white/60 hover:bg-white/10 hover:text-white"
-              }`}
-            >
-              <Icon size={18} strokeWidth={1.5} />
-              {item.label}
-            </Link>
-          );
-        })}
-      </nav>
-    </div>
-  );
+  const closeSidebar = () => setSidebarOpen(false);
 
   return (
     <div className="min-h-screen lg:h-screen relative lg:overflow-hidden bg-[#141210]">
@@ -155,9 +164,9 @@ export default function ConciergeLayout({
               onClick={() => setSidebarOpen(false)}
             />
             <div className="fixed top-20 left-4 right-4 z-50 lg:hidden backdrop-blur-xl bg-white/10 border border-white/15 rounded-3xl p-5 space-y-5 max-h-[70vh] overflow-y-auto">
-              <NavSection title="Navigation" items={mainNav} />
-              <NavSection title="Outils" items={toolsNav} />
-              <NavSection title="Compte" items={adminNav} />
+              <NavSection title="Navigation" items={mainNav} pathname={pathname} onNavigate={closeSidebar} />
+              <NavSection title="Outils" items={toolsNav} pathname={pathname} onNavigate={closeSidebar} />
+              <NavSection title="Compte" items={adminNav} pathname={pathname} onNavigate={closeSidebar} />
               <div className="pt-3 border-t border-white/10">
                 <form action="/auth/signout" method="post">
                   <button
@@ -233,9 +242,9 @@ export default function ConciergeLayout({
 
           {/* Navigation */}
           <div className="flex-1 overflow-y-auto space-y-5 scrollbar-thin">
-            <NavSection title="Navigation" items={mainNav} />
-            <NavSection title="Outils" items={toolsNav} />
-            <NavSection title="Compte" items={adminNav} />
+            <NavSection title="Navigation" items={mainNav} pathname={pathname} onNavigate={closeSidebar} />
+            <NavSection title="Outils" items={toolsNav} pathname={pathname} onNavigate={closeSidebar} />
+            <NavSection title="Compte" items={adminNav} pathname={pathname} onNavigate={closeSidebar} />
           </div>
 
           {/* Bottom */}
