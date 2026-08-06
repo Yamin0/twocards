@@ -18,27 +18,30 @@ const DEMO_RP_DATA = [
   { rang: 4, nom: "Sofia Alaoui", couverts: 22, ca: "76 500 MAD", commissions: "7 650 MAD", taille: "5,4" },
 ];
 
+/* Les barres portent désormais une valeur réelle, pas seulement une hauteur :
+   sans elle, le survol n'aurait rien à révéler. Les totaux concordent avec la
+   bande de statistiques — 134 couverts et 402 500 MAD. */
 const DEMO_BAR_CHART_COUVERTS = [
-  { label: "Lun", height: 45 },
-  { label: "Mar", height: 65 },
-  { label: "Mer", height: 55 },
-  { label: "Jeu", height: 80 },
-  { label: "Ven", height: 95 },
-  { label: "Sam", height: 100 },
-  { label: "Dim", height: 35 },
+  { label: "Lun", value: 13 },
+  { label: "Mar", value: 18 },
+  { label: "Mer", value: 16 },
+  { label: "Jeu", value: 23 },
+  { label: "Ven", value: 27 },
+  { label: "Sam", value: 28 },
+  { label: "Dim", value: 9 },
 ];
 
 const DEMO_BAR_CHART_REVENUS = [
-  { label: "S1", height: 50 },
-  { label: "S2", height: 65 },
-  { label: "S3", height: 45 },
-  { label: "S4", height: 78 },
-  { label: "S5", height: 90 },
-  { label: "S6", height: 70 },
-  { label: "S7", height: 85 },
-  { label: "S8", height: 95 },
-  { label: "S9", height: 60 },
-  { label: "S10", height: 100 },
+  { label: "S1", value: 27000 },
+  { label: "S2", value: 35500 },
+  { label: "S3", value: 24500 },
+  { label: "S4", value: 42500 },
+  { label: "S5", value: 49000 },
+  { label: "S6", value: 38000 },
+  { label: "S7", value: 46500 },
+  { label: "S8", value: 52000 },
+  { label: "S9", value: 32500 },
+  { label: "S10", value: 55000 },
 ];
 
 const DEMO_TOP_EVENTS = [
@@ -60,28 +63,15 @@ const DEMO_STATS = [
   { label: "Meilleur RP", value: "LIAM H." },
 ];
 
-const EMPTY_BAR_CHART_COUVERTS = [
-  { label: "Lun", height: 0 },
-  { label: "Mar", height: 0 },
-  { label: "Mer", height: 0 },
-  { label: "Jeu", height: 0 },
-  { label: "Ven", height: 0 },
-  { label: "Sam", height: 0 },
-  { label: "Dim", height: 0 },
-];
+const EMPTY_BAR_CHART_COUVERTS = DEMO_BAR_CHART_COUVERTS.map((b) => ({
+  ...b,
+  value: 0,
+}));
 
-const EMPTY_BAR_CHART_REVENUS = [
-  { label: "S1", height: 0 },
-  { label: "S2", height: 0 },
-  { label: "S3", height: 0 },
-  { label: "S4", height: 0 },
-  { label: "S5", height: 0 },
-  { label: "S6", height: 0 },
-  { label: "S7", height: 0 },
-  { label: "S8", height: 0 },
-  { label: "S9", height: 0 },
-  { label: "S10", height: 0 },
-];
+const EMPTY_BAR_CHART_REVENUS = DEMO_BAR_CHART_REVENUS.map((b) => ({
+  ...b,
+  value: 0,
+}));
 
 const EMPTY_STATS = [
   { label: "Total couverts", value: "0" },
@@ -97,6 +87,71 @@ const EMPTY_DONUT_SEGMENTS = [
 ];
 
 const periodTabs = ["Cette semaine", "Ce mois", "Cette année"];
+
+/* Un seul histogramme, employé pour les couverts comme pour les revenus.
+   Les hauteurs se déduisent de la plus grande valeur au lieu d'être saisies
+   à la main : impossible qu'elles contredisent les chiffres.
+
+   Au survol, la barre s'éclaircit et une infobulle donne la valeur exacte.
+   Le titre natif prend le relais au toucher et pour les lecteurs d'écran,
+   où l'infobulle visuelle ne se déclenche pas. */
+function BarChart({
+  bars,
+  format,
+  barWidth,
+  gap,
+}: {
+  bars: { label: string; value: number }[];
+  format: (v: number) => string;
+  barWidth: string;
+  gap: string;
+}) {
+  const max = Math.max(...bars.map((b) => b.value), 1);
+
+  return (
+    <div className={`flex items-end justify-between ${gap} h-40`}>
+      {bars.map((bar) => {
+        const pct = (bar.value / max) * 100;
+        const legend = `${bar.label} · ${format(bar.value)}`;
+        return (
+          <div
+            key={bar.label}
+            className="group relative flex flex-1 flex-col items-center gap-2"
+          >
+            <div
+              role="img"
+              aria-label={legend}
+              title={legend}
+              className="flex w-full justify-center"
+            >
+              <div
+                className={`${barWidth} relative overflow-hidden rounded-lg transition-all`}
+                style={{ height: `${Math.max(pct * 1.4, 4)}px` }}
+              >
+                <div className="absolute inset-0 bg-blue-400/30" />
+                <div
+                  className="absolute bottom-0 left-0 right-0 rounded-lg bg-blue-400 transition-colors group-hover:bg-blue-300"
+                  style={{ height: `${pct}%` }}
+                />
+              </div>
+            </div>
+            <span className="text-[10px] text-white/40 transition-colors group-hover:text-white">
+              {bar.label}
+            </span>
+
+            <span className="pointer-events-none absolute -top-1 left-1/2 z-20 -translate-x-1/2 whitespace-nowrap rounded-lg border border-white/15 bg-[#151515] px-2.5 py-1 text-[11px] font-semibold text-white opacity-0 shadow-xl transition-opacity group-hover:opacity-100">
+              {format(bar.value)}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+const formatCouverts = (v: number) => `${v} couvert${v > 1 ? "s" : ""}`;
+const formatMAD = (v: number) =>
+  `${v.toLocaleString("fr-FR").replace(/ | /g, " ")} MAD`;
 
 function downloadCSV(data: Record<string, string | number>[], filename: string) {
   if (data.length === 0) return;
@@ -212,25 +267,12 @@ export default function AnalyticsPage() {
           <h3 className="text-white font-[family-name:var(--font-manrope)] font-bold text-sm mb-6">
             Couverts par jour
           </h3>
-          <div className="flex items-end justify-between gap-2 h-40">
-            {barChartCouverts.map((bar) => (
-              <div key={bar.label} className="flex-1 flex flex-col items-center gap-2">
-                <div className="w-full flex justify-center">
-                  <div
-                    className="w-8 rounded-lg transition-all relative overflow-hidden"
-                    style={{ height: `${Math.max(bar.height * 1.4, 4)}px` }}
-                  >
-                    <div className="absolute inset-0 bg-blue-400/30" />
-                    <div
-                      className="absolute bottom-0 left-0 right-0 bg-blue-400 rounded-lg"
-                      style={{ height: `${bar.height}%` }}
-                    />
-                  </div>
-                </div>
-                <span className="text-[10px] text-white/40">{bar.label}</span>
-              </div>
-            ))}
-          </div>
+          <BarChart
+            bars={barChartCouverts}
+            format={formatCouverts}
+            barWidth="w-8"
+            gap="gap-2"
+          />
         </div>
 
         {/* Revenus par semaine */}
@@ -238,25 +280,12 @@ export default function AnalyticsPage() {
           <h3 className="text-white font-[family-name:var(--font-manrope)] font-bold text-sm mb-6">
             Revenus par semaine
           </h3>
-          <div className="flex items-end justify-between gap-1.5 h-40">
-            {barChartRevenus.map((bar) => (
-              <div key={bar.label} className="flex-1 flex flex-col items-center gap-2">
-                <div className="w-full flex justify-center">
-                  <div
-                    className="w-6 rounded-lg transition-all relative overflow-hidden"
-                    style={{ height: `${Math.max(bar.height * 1.4, 4)}px` }}
-                  >
-                    <div className="absolute inset-0 bg-blue-400/30" />
-                    <div
-                      className="absolute bottom-0 left-0 right-0 bg-blue-400 rounded-lg"
-                      style={{ height: `${bar.height}%` }}
-                    />
-                  </div>
-                </div>
-                <span className="text-[10px] text-white/40">{bar.label}</span>
-              </div>
-            ))}
-          </div>
+          <BarChart
+            bars={barChartRevenus}
+            format={formatMAD}
+            barWidth="w-6"
+            gap="gap-1.5"
+          />
         </div>
       </div>
 

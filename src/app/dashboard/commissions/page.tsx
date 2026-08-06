@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import {
   Download,
   Check,
+  Undo2,
   Wallet,
   TrendingUp,
   Clock,
@@ -134,6 +135,14 @@ const INITIAL_COMMISSIONS: Commission[] = [
 
 const FILTER_OPTIONS = ["Tous", "Payé", "En cours", "En attente"] as const;
 
+/* La pastille suit le statut : changer l'un sans l'autre afficherait un
+   « Payé » en gris ou un « En attente » en vert. */
+const VARIANTS: Record<Commission["statut"], Commission["variant"]> = {
+  "Payé": "success",
+  "En cours": "warning",
+  "En attente": "default",
+};
+
 /* « 1 870 MAD » → 1870, et retour. Les montants sont stockés en texte
    formaté ; les totaliser suppose de les relire. */
 const parseMAD = (s: string) => Number(s.replace(/[^\d]/g, "")) || 0;
@@ -188,16 +197,19 @@ export default function CommissionsPage() {
   const { toast, showToast } = useInlineToast();
 
   /* Données dérivées plutôt qu'un état synchronisé par effet : la liste de
-     base découle du compte, et seuls les paiements effectués par
-     l'utilisateur sont retenus en état. */
-  const [paidIds, setPaidIds] = useState<ReadonlySet<number>>(new Set());
+     base découle du compte, et seules les corrections de statut faites par
+     l'utilisateur sont retenues en état. Une table plutôt qu'un ensemble
+     d'identifiants payés : le statut doit pouvoir repartir en arrière. */
+  const [overrides, setOverrides] = useState<
+    Record<number, Commission["statut"]>
+  >({});
   const [filter, setFilter] = useState<(typeof FILTER_OPTIONS)[number]>("Tous");
 
   const commissions: Commission[] = (isDemoVenue ? INITIAL_COMMISSIONS : []).map(
-    (c) =>
-      paidIds.has(c.id)
-        ? { ...c, statut: "Payé" as const, variant: "success" as const }
-        : c,
+    (c) => {
+      const statut = overrides[c.id] ?? c.statut;
+      return statut === c.statut ? c : { ...c, statut, variant: VARIANTS[statut] };
+    },
   );
 
   const stats = buildStats(commissions, isDemoVenue);
@@ -207,10 +219,15 @@ export default function CommissionsPage() {
       ? commissions
       : commissions.filter((c) => c.statut === filter);
 
-  /* ---- Mark as paid ---- */
+  /* ---- Changement de statut, réversible ---- */
   const handleMarkPaid = (id: number) => {
-    setPaidIds((prev) => new Set(prev).add(id));
+    setOverrides((prev) => ({ ...prev, [id]: "Payé" }));
     showToast("Commission marquée comme payée");
+  };
+
+  const handleSetPending = (id: number) => {
+    setOverrides((prev) => ({ ...prev, [id]: "En attente" }));
+    showToast("Commission remise en attente de paiement");
   };
 
   /* ---- CSV export ---- */
@@ -383,9 +400,18 @@ export default function CommissionsPage() {
                       variant={row.variant}
                     />
                   </td>
+                  {/* Le paiement se rectifie dans les deux sens : marquer
+                      payé par erreur ne doit pas être définitif. */}
                   <td className="px-6 py-3.5 text-right">
-                    {(row.statut === "En attente" ||
-                      row.statut === "En cours") && (
+                    {row.statut === "Payé" ? (
+                      <button
+                        onClick={() => handleSetPending(row.id)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium bg-white/[0.06] text-white/60 border border-white/15 hover:bg-white/[0.12] hover:text-white transition-colors"
+                      >
+                        <Undo2 size={12} strokeWidth={2} />
+                        Remettre en attente
+                      </button>
+                    ) : (
                       <button
                         onClick={() => handleMarkPaid(row.id)}
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium bg-green-400/10 text-green-400 border border-green-400/20 hover:bg-green-400/20 transition-colors"
