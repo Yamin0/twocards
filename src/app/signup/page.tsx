@@ -11,6 +11,7 @@ import {
   Lock,
   Phone,
   User,
+  AtSign,
   MapPin,
   Eye,
   EyeOff,
@@ -35,6 +36,20 @@ const inputClass =
 const labelClass =
   "block text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--landing-mute)]";
 
+/* Ramène toute saisie à l'identifiant seul : « @Karim », « Karim » ou une URL
+   de profil collée donnent tous « karim ». Normaliser à l'envoi plutôt qu'à
+   la frappe évite de déplacer le curseur pendant que l'utilisateur écrit.
+   Renvoie null si le champ est vide, laissé facultatif. */
+function normalizeInstagram(raw: string): string | null {
+  const handle = raw
+    .trim()
+    .replace(/^(https?:\/\/)?(www\.)?instagram\.com\//i, "")
+    .replace(/[/?#].*$/, "")
+    .replace(/^@+/, "")
+    .toLowerCase();
+  return handle || null;
+}
+
 function SignupForm() {
   const searchParams = useSearchParams();
   const [role, setRole] = useState<Role>(
@@ -51,6 +66,7 @@ function SignupForm() {
     email: "",
     password: "",
     phone: "",
+    instagram: "",
     venueName: "",
     city: "",
   });
@@ -79,6 +95,7 @@ function SignupForm() {
         data: {
           full_name: form.fullname,
           phone: form.phone,
+          instagram: normalizeInstagram(form.instagram),
           role: role,
           venue_name: role === "etablissement" ? form.venueName : null,
           venue_type: role === "etablissement" ? venueType : null,
@@ -316,6 +333,36 @@ function SignupForm() {
                       className={inputClass}
                     />
                   </div>
+                </div>
+
+                {/* Pleine largeur : cinquième champ d'une grille à deux
+                    colonnes, il paraîtrait orphelin sur une demi-ligne. */}
+                <div className="space-y-2 sm:col-span-2">
+                  <label htmlFor="instagram" className={labelClass}>
+                    Instagram
+                  </label>
+                  <div className="relative">
+                    <AtSign
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-black/30"
+                      size={16}
+                      strokeWidth={1.5}
+                    />
+                    <input
+                      id="instagram"
+                      type="text"
+                      inputMode="text"
+                      autoCapitalize="none"
+                      autoCorrect="off"
+                      spellCheck={false}
+                      placeholder="@nom_du_compte"
+                      value={form.instagram}
+                      onChange={(e) => updateForm("instagram", e.target.value)}
+                      className={inputClass}
+                    />
+                  </div>
+                  <p className="text-xs text-[var(--landing-ink)]/45">
+                    Facultatif. Un lien de profil complet fonctionne aussi.
+                  </p>
                 </div>
               </div>
             </div>
