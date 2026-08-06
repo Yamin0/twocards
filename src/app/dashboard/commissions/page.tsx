@@ -130,69 +130,55 @@ const INITIAL_COMMISSIONS: Commission[] = [
   },
 ];
 
-const DEMO_STATS = [
-  {
-    label: "Total Commissions",
-    value: "7 600 MAD",
-    icon: TrendingUp,
-    color: "text-blue-400",
-    bgColor: "bg-blue-400/10",
-  },
-  {
-    label: "En attente",
-    value: "1 300 MAD",
-    icon: Clock,
-    color: "text-amber-400",
-    bgColor: "bg-amber-400/10",
-  },
-  {
-    label: "Payées ce mois",
-    value: "4 820 MAD",
-    icon: CreditCard,
-    color: "text-green-400",
-    bgColor: "bg-green-400/10",
-  },
-  {
-    label: "Prochain paiement",
-    value: "01/05",
-    icon: CalendarCheck,
-    color: "text-purple-400",
-    bgColor: "bg-purple-400/10",
-  },
-];
 
-const EMPTY_STATS = [
-  {
-    label: "Total Commissions",
-    value: "0 MAD",
-    icon: TrendingUp,
-    color: "text-blue-400",
-    bgColor: "bg-blue-400/10",
-  },
-  {
-    label: "En attente",
-    value: "0 MAD",
-    icon: Clock,
-    color: "text-amber-400",
-    bgColor: "bg-amber-400/10",
-  },
-  {
-    label: "Payées ce mois",
-    value: "0 MAD",
-    icon: CreditCard,
-    color: "text-green-400",
-    bgColor: "bg-green-400/10",
-  },
-  {
-    label: "Prochain paiement",
-    value: "—",
-    icon: CalendarCheck,
-    color: "text-purple-400",
-    bgColor: "bg-purple-400/10",
-  },
-];
 
 const FILTER_OPTIONS = ["Tous", "Payé", "En cours", "En attente"] as const;
+
+/* « 1 870 MAD » → 1870, et retour. Les montants sont stockés en texte
+   formaté ; les totaliser suppose de les relire. */
+const parseMAD = (s: string) => Number(s.replace(/[^\d]/g, "")) || 0;
+const formatMAD = (n: number) =>
+  `${n.toLocaleString("fr-FR").replace(/ | /g, " ")} MAD`;
+
+/* Totaux recalculés à chaque rendu : marquer une commission payée déplace
+   aussitôt le montant de « En attente » vers « Payées ». Auparavant les
+   quatre cartes étaient des constantes, justes au premier affichage puis
+   figées quoi que fasse l'utilisateur. */
+function buildStats(rows: Commission[], isDemoVenue: boolean) {
+  const sum = (filter: (c: Commission) => boolean) =>
+    formatMAD(rows.filter(filter).reduce((t, c) => t + parseMAD(c.montant), 0));
+
+  return [
+    {
+      label: "Total commissions",
+      value: sum(() => true),
+      icon: TrendingUp,
+      color: "text-blue-400",
+      bgColor: "bg-blue-400/10",
+    },
+    {
+      label: "En attente",
+      value: sum((c) => c.statut === "En attente"),
+      icon: Clock,
+      color: "text-amber-400",
+      bgColor: "bg-amber-400/10",
+    },
+    {
+      label: "Payées",
+      value: sum((c) => c.statut === "Payé"),
+      icon: CreditCard,
+      color: "text-green-400",
+      bgColor: "bg-green-400/10",
+    },
+    {
+      label: "Prochain paiement",
+      value: isDemoVenue ? "01/05" : "—",
+      icon: CalendarCheck,
+      color: "text-purple-400",
+      bgColor: "bg-purple-400/10",
+    },
+  ];
+}
 
 /* ------------------------------------------------------------------ */
 /*  Page component                                                     */
@@ -214,7 +200,7 @@ export default function CommissionsPage() {
         : c,
   );
 
-  const stats = isDemoVenue ? DEMO_STATS : EMPTY_STATS;
+  const stats = buildStats(commissions, isDemoVenue);
 
   const filtered =
     filter === "Tous"

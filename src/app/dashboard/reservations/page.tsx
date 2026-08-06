@@ -15,18 +15,40 @@ import {
   ChevronRight,
   CheckCircle2,
   XCircle,
-  ArrowUpRight,
-  ArrowDownRight,
 } from "lucide-react";
 
 /* ── demo data ──────────────────────────────────────────── */
 
-const DEMO_STATS = [
-  { label: "Réservations totales", value: "148", change: "+12%", positive: true, icon: CalendarDays },
-  { label: "En attente", value: "24", change: "+3", positive: false, icon: Clock },
-  { label: "Couverts ce mois", value: "1 247", change: "+18%", positive: true, icon: Users },
-  { label: "Taux de confirmation", value: "87%", change: "+5%", positive: true, icon: TrendingUp },
-];
+/* Les compteurs se calculent depuis la liste et son état courant : ils
+   suivent chaque acceptation ou refus. Aucune valeur figée — les anciennes
+   annonçaient 148 réservations et 24 en attente au-dessus d'une liste qui en
+   comptait 8 et 3. */
+function buildStats(rows: { covers: number; currentStatus: ResStatus }[]) {
+  const confirmed = rows.filter((r) => r.currentStatus === "confirmed");
+  const pending = rows.filter((r) => r.currentStatus === "pending");
+  const rejected = rows.filter((r) => r.currentStatus === "rejected");
+
+  /* Taux calculé sur les demandes tranchées : les réservations encore en
+     attente ne sont pas des refus et ne doivent pas peser dessus. */
+  const decided = confirmed.length + rejected.length;
+  const rate = decided
+    ? `${Math.round((confirmed.length / decided) * 100)} %`
+    : "—";
+
+  return [
+    { label: "Réservations totales", value: String(rows.length), icon: CalendarDays },
+    { label: "En attente", value: String(pending.length), icon: Clock },
+    {
+      label: "Couverts confirmés",
+      value: confirmed
+        .reduce((sum, r) => sum + r.covers, 0)
+        .toLocaleString("fr-FR")
+        .replace(/ | /g, " "),
+      icon: Users,
+    },
+    { label: "Taux de confirmation", value: rate, icon: TrendingUp },
+  ];
+}
 
 const DEMO_RESERVATIONS = [
   {
@@ -153,16 +175,20 @@ export default function ReservationsPage() {
 
   const reservations = isDemoVenue ? DEMO_RESERVATIONS : [];
   const events = isDemoVenue ? DEMO_UPCOMING_EVENTS : [];
-  const stats = isDemoVenue ? DEMO_STATS : [];
 
-  const pendingRequests = isDemoVenue
-    ? reservations
-        .map((r, i) => ({ ...r, idx: i }))
-        .filter((r) => statuses[r.idx] === "pending")
-    : [];
+  /* Source unique : la liste augmentée de son statut courant. Compteurs,
+     demandes en attente et tableau filtré en découlent tous. */
+  const rows = reservations.map((r, i) => ({
+    ...r,
+    idx: i,
+    currentStatus: statuses[i] ?? r.status,
+  }));
 
-  const filteredReservations = reservations
-    .map((r, i) => ({ ...r, idx: i, currentStatus: statuses[i] ?? r.status }))
+  const stats = isDemoVenue ? buildStats(rows) : [];
+
+  const pendingRequests = rows.filter((r) => r.currentStatus === "pending");
+
+  const filteredReservations = rows
     .filter((r) => {
       const matchSearch = searchQuery
         ? r.guest.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -215,22 +241,13 @@ export default function ReservationsPage() {
                 key={stat.label}
                 className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl p-5 transition-all duration-500 hover:bg-white/[0.1]"
               >
-                <div className="flex items-center justify-between mb-3">
+                {/* Pas d'indicateur de tendance : il n'existe aucun
+                    historique pour le calculer. L'ancien affichait « +3 »
+                    sous une flèche descendante rouge. */}
+                <div className="flex items-center mb-3">
                   <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
                     <Icon size={20} strokeWidth={1.5} className="text-blue-400" />
                   </div>
-                  <span
-                    className={`inline-flex items-center gap-0.5 text-xs font-medium ${
-                      stat.positive ? "text-green-400" : "text-red-400"
-                    }`}
-                  >
-                    {stat.positive ? (
-                      <ArrowUpRight size={12} strokeWidth={2} />
-                    ) : (
-                      <ArrowDownRight size={12} strokeWidth={2} />
-                    )}
-                    {stat.change}
-                  </span>
                 </div>
                 <p className="text-2xl font-bold text-white font-[family-name:var(--font-manrope)]">
                   {stat.value}
