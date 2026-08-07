@@ -21,6 +21,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { useAuthUser } from "@/hooks/use-auth-user";
+import { useUnreadMessages } from "@/hooks/use-unread-messages";
 
 const mainNav = [
   { icon: Home, label: "Accueil", href: "/concierge" },
@@ -50,11 +51,14 @@ function NavSection({
   items,
   pathname,
   onNavigate,
+  badges,
 }: {
   title: string;
   items: typeof mainNav;
   pathname: string;
   onNavigate: () => void;
+  /* Pastilles par lien (ex. messages non lus), masquees a zero. */
+  badges?: Record<string, number>;
 }) {
   const isActive = (href: string) =>
     href === "/concierge" ? pathname === "/concierge" : pathname.startsWith(href);
@@ -81,6 +85,11 @@ function NavSection({
             >
               <Icon size={18} strokeWidth={1.5} />
               {item.label}
+              {(badges?.[item.href] ?? 0) > 0 && (
+                <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-blue-500 px-1.5 text-[10px] font-bold text-white">
+                  {(badges?.[item.href] ?? 0) > 99 ? "99+" : badges?.[item.href]}
+                </span>
+              )}
             </Link>
           );
         })}
@@ -122,6 +131,8 @@ export default function ConciergeLayout({
   }, [sidebarOpen]);
 
   const closeSidebar = () => setSidebarOpen(false);
+  const unreadMessages = useUnreadMessages();
+  const badges = { "/concierge/messages": unreadMessages };
 
   return (
     <div className="min-h-screen lg:h-screen relative lg:overflow-hidden bg-[#141210]">
@@ -164,9 +175,9 @@ export default function ConciergeLayout({
               onClick={() => setSidebarOpen(false)}
             />
             <div className="fixed top-20 left-4 right-4 z-50 lg:hidden backdrop-blur-xl bg-white/10 border border-white/15 rounded-3xl p-5 space-y-5 max-h-[70vh] overflow-y-auto">
-              <NavSection title="Navigation" items={mainNav} pathname={pathname} onNavigate={closeSidebar} />
-              <NavSection title="Outils" items={toolsNav} pathname={pathname} onNavigate={closeSidebar} />
-              <NavSection title="Compte" items={adminNav} pathname={pathname} onNavigate={closeSidebar} />
+              <NavSection title="Navigation" items={mainNav} pathname={pathname} onNavigate={closeSidebar} badges={badges} />
+              <NavSection title="Outils" items={toolsNav} pathname={pathname} onNavigate={closeSidebar} badges={badges} />
+              <NavSection title="Compte" items={adminNav} pathname={pathname} onNavigate={closeSidebar} badges={badges} />
               <div className="pt-3 border-t border-white/10">
                 <form action="/auth/signout" method="post">
                   <button
@@ -242,9 +253,9 @@ export default function ConciergeLayout({
 
           {/* Navigation */}
           <div className="flex-1 overflow-y-auto space-y-5 scrollbar-thin">
-            <NavSection title="Navigation" items={mainNav} pathname={pathname} onNavigate={closeSidebar} />
-            <NavSection title="Outils" items={toolsNav} pathname={pathname} onNavigate={closeSidebar} />
-            <NavSection title="Compte" items={adminNav} pathname={pathname} onNavigate={closeSidebar} />
+            <NavSection title="Navigation" items={mainNav} pathname={pathname} onNavigate={closeSidebar} badges={badges} />
+            <NavSection title="Outils" items={toolsNav} pathname={pathname} onNavigate={closeSidebar} badges={badges} />
+            <NavSection title="Compte" items={adminNav} pathname={pathname} onNavigate={closeSidebar} badges={badges} />
           </div>
 
           {/* Bottom */}

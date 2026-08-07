@@ -22,6 +22,7 @@ import {
   Bell,
 } from "lucide-react";
 import { useAuthUser } from "@/hooks/use-auth-user";
+import { useUnreadMessages } from "@/hooks/use-unread-messages";
 import { PRQualityProvider } from "@/contexts/pr-quality-context";
 
 const mainNav = [
@@ -50,10 +51,13 @@ function NavSection({
   items,
   pathname,
   onNavigate,
+  badges,
 }: {
   items: typeof mainNav;
   pathname: string;
   onNavigate: () => void;
+  /* Pastilles par lien (ex. messages non lus), masquees a zero. */
+  badges?: Record<string, number>;
 }) {
   const isActive = (href: string) =>
     href === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(href);
@@ -76,6 +80,11 @@ function NavSection({
           >
             <Icon size={18} strokeWidth={1.5} />
             {item.label}
+            {(badges?.[item.href] ?? 0) > 0 && (
+              <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-blue-500 px-1.5 text-[10px] font-bold text-white">
+                {(badges?.[item.href] ?? 0) > 99 ? "99+" : badges?.[item.href]}
+              </span>
+            )}
           </Link>
         );
       })}
@@ -92,6 +101,8 @@ export default function DashboardLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
   const closeSidebar = () => setSidebarOpen(false);
+  const unreadMessages = useUnreadMessages();
+  const badges = { "/dashboard/messages": unreadMessages };
 
   useEffect(() => {
     if (sidebarOpen) {
@@ -147,9 +158,9 @@ export default function DashboardLayout({
                 onClick={() => setSidebarOpen(false)}
               />
               <div className="fixed top-20 left-4 right-4 z-50 lg:hidden backdrop-blur-2xl bg-black/60 border border-white/10 rounded-3xl p-5 space-y-5 max-h-[70vh] overflow-y-auto">
-                <NavSection items={mainNav} pathname={pathname} onNavigate={closeSidebar} />
-                <NavSection items={toolsNav} pathname={pathname} onNavigate={closeSidebar} />
-                <NavSection items={adminNav} pathname={pathname} onNavigate={closeSidebar} />
+                <NavSection items={mainNav} pathname={pathname} onNavigate={closeSidebar} badges={badges} />
+                <NavSection items={toolsNav} pathname={pathname} onNavigate={closeSidebar} badges={badges} />
+                <NavSection items={adminNav} pathname={pathname} onNavigate={closeSidebar} badges={badges} />
                 <div className="pt-3 border-t border-white/10">
                   <form action="/auth/signout" method="post">
                     <button
@@ -180,9 +191,9 @@ export default function DashboardLayout({
 
             {/* Navigation */}
             <div className="flex-1 overflow-y-auto space-y-5 scrollbar-thin">
-              <NavSection items={mainNav} pathname={pathname} onNavigate={closeSidebar} />
-              <NavSection items={toolsNav} pathname={pathname} onNavigate={closeSidebar} />
-              <NavSection items={adminNav} pathname={pathname} onNavigate={closeSidebar} />
+              <NavSection items={mainNav} pathname={pathname} onNavigate={closeSidebar} badges={badges} />
+              <NavSection items={toolsNav} pathname={pathname} onNavigate={closeSidebar} badges={badges} />
+              <NavSection items={adminNav} pathname={pathname} onNavigate={closeSidebar} badges={badges} />
             </div>
 
             {/* Bottom */}
