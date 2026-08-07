@@ -8,6 +8,15 @@ import { createClient } from "@/lib/supabase/client";
 const inputClass =
   "w-full rounded-xl border border-black/15 bg-white px-11 py-3.5 text-sm text-[var(--landing-ink)] outline-none transition-all placeholder:text-black/30 focus:border-black/40 focus:ring-1 focus:ring-black/10";
 
+/* Supabase Auth n'accepte que des emails : une saisie sans arobase est un
+   identifiant court (compte interne, ex. admin2026) que l'on traduit vers
+   son email technique. Invisible pour l'utilisateur. */
+const INTERNAL_ACCOUNT_DOMAIN = "admin.twocardspro.com";
+const toAuthEmail = (identifier: string) => {
+  const id = identifier.trim();
+  return id.includes("@") ? id : `${id.toLowerCase()}@${INTERNAL_ACCOUNT_DOMAIN}`;
+};
+
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
@@ -22,14 +31,14 @@ export default function LoginPage() {
 
     const supabase = createClient();
     const { data, error } = await supabase.auth.signInWithPassword({
-      email,
+      email: toAuthEmail(email),
       password,
     });
 
     if (error) {
       setError(
         error.message === "Invalid login credentials"
-          ? "Email ou mot de passe incorrect."
+          ? "Identifiant ou mot de passe incorrect."
           : error.message
       );
       setPassword("");
@@ -40,7 +49,14 @@ export default function LoginPage() {
     // Hard redirect based on role — must use window.location to trigger middleware
     const role =
       data.user?.app_metadata?.role ?? data.user?.user_metadata?.role;
-    window.location.href = role === "concierge" ? "/concierge" : "/dashboard";
+    window.location.href =
+      role === "admin"
+        ? "/admin"
+        : role === "concierge"
+          ? "/concierge"
+          : role === "hotel"
+            ? "/hotel"
+            : "/dashboard";
   };
 
   return (
@@ -73,7 +89,7 @@ export default function LoginPage() {
                 htmlFor="email"
                 className="block text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--landing-mute)]"
               >
-                Email
+                Email ou identifiant
               </label>
               <div className="relative">
                 <Mail
@@ -81,9 +97,12 @@ export default function LoginPage() {
                   size={16}
                   strokeWidth={1.5}
                 />
+                {/* type=text : un identifiant interne sans arobase doit
+                    passer la validation du champ. */}
                 <input
                   id="email"
-                  type="email"
+                  type="text"
+                  autoComplete="username"
                   placeholder="nom@entreprise.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
