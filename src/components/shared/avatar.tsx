@@ -25,11 +25,16 @@ export function Avatar({
       style={{ width: size, height: size }}
     >
       {url ? (
+        /* unoptimized : l'image envoyée est déjà une vignette carrée de 512 px
+           (~30 Ko). L'optimiseur ne gagnerait que quelques kilo-octets au prix
+           d'un aller-retour serveur, et la source Supabase n'a alors pas à
+           figurer dans les domaines autorisés de next.config. */
         <Image
           src={url}
           alt="Photo de profil"
           fill
           sizes={`${size}px`}
+          unoptimized
           className="object-cover"
         />
       ) : (

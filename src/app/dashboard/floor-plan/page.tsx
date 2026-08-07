@@ -172,7 +172,9 @@ export default function FloorPlanPage() {
 
   if (isLoading) return <DashboardSkeleton />;
 
-  const currentEvent = DEMO_EVENTS.find((e) => e.id === selectedEvent)!;
+  /* Les événements démo n'existent que sur le compte de démonstration. */
+  const events = isDemoVenue ? DEMO_EVENTS : [];
+  const currentEvent = events.find((e) => e.id === selectedEvent);
   const currentTables = isDemoVenue ? (tables[selectedEvent] ?? []) : [];
   const selected = currentTables.find((t) => t.id === selectedTable);
 
@@ -343,15 +345,24 @@ export default function FloorPlanPage() {
                 className="flex items-center gap-2 px-4 py-2.5 backdrop-blur-2xl bg-black/45 border border-white/[0.15] rounded-xl text-sm text-white hover:bg-white/[0.1] transition-all"
               >
                 <CalendarDays size={16} strokeWidth={1.5} className="text-blue-400" />
-                <span className="font-medium">{currentEvent.name}</span>
-                <span className="text-white/40">— {currentEvent.date}</span>
+                <span className="font-medium">
+                  {currentEvent ? currentEvent.name : "Aucun événement"}
+                </span>
+                {currentEvent && (
+                  <span className="text-white/40">— {currentEvent.date}</span>
+                )}
                 <ChevronDown size={14} strokeWidth={1.5} className="text-white/40" />
               </button>
               {eventDropdownOpen && (
                 <>
                   <div className="fixed inset-0 z-[70]" onClick={() => setEventDropdownOpen(false)} />
                   <div className="absolute right-0 top-full mt-2 z-[80] backdrop-blur-xl bg-[#1a1a2e] border border-white/15 rounded-xl p-1.5 shadow-xl min-w-[280px]">
-                    {DEMO_EVENTS.map((ev) => (
+                    {events.length === 0 && (
+                      <p className="px-3.5 py-2.5 text-sm text-white/40">
+                        Vos événements apparaîtront ici.
+                      </p>
+                    )}
+                    {events.map((ev) => (
                       <button
                         key={ev.id}
                         onClick={() => {

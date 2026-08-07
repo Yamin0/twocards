@@ -19,6 +19,7 @@ import {
   MessageSquare,
 } from "lucide-react";
 import { useAuthUser } from "@/hooks/use-auth-user";
+import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
 
 /* ── palette niveaux de service ─────────────────────────── */
 
@@ -152,15 +153,23 @@ function Clock() {
 const panel =
   "backdrop-blur-2xl bg-black/45 border border-white/10 rounded-3xl shadow-[0_20px_60px_-20px_rgba(0,0,0,0.6)]";
 
-const STATS = [
+const DEMO_STATS = [
   { icon: Users, label: "Couverts ce soir", value: "44" },
   { icon: CircleDollarSign, label: "CA attendu", value: "57 500 MAD" },
   { icon: Percent, label: "Commissions en attente", value: "4 320 MAD" },
   { icon: UserCheck, label: "Présence sur 30 jours", value: "94 %" },
 ];
 
+/* Compte réel sans historique : tout démarre à zéro. */
+const EMPTY_STATS = [
+  { icon: Users, label: "Couverts ce soir", value: "0" },
+  { icon: CircleDollarSign, label: "CA attendu", value: "0 MAD" },
+  { icon: Percent, label: "Commissions en attente", value: "0 MAD" },
+  { icon: UserCheck, label: "Présence sur 30 jours", value: "—" },
+];
+
 export default function DashboardPage() {
-  const { venueName } = useAuthUser();
+  const { venueName, isDemoVenue, isLoading } = useAuthUser();
   const [view, setView] = useState<"grid" | "list">("grid");
   const [calView, setCalView] = useState<"Jour" | "Semaine" | "Mois">("Semaine");
   const [calDay, setCalDay] = useState(4); // Vendredi
@@ -170,19 +179,31 @@ export default function DashboardPage() {
   const [selected, setSelected] = useState<Reservation | null>(null);
   const [checkedIn, setCheckedIn] = useState<Record<string, boolean>>({});
 
+  /* Les données démo n'existent que pour le compte de démonstration ;
+     un compte fraîchement créé démarre vierge. */
+  const reservations = useMemo(
+    () => (isDemoVenue ? RESERVATIONS : []),
+    [isDemoVenue]
+  );
+  const stats = isDemoVenue ? DEMO_STATS : EMPTY_STATS;
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return RESERVATIONS;
-    return RESERVATIONS.filter((r) =>
+    if (!q) return reservations;
+    return reservations.filter((r) =>
       [r.name, r.apporteur, r.zone, r.level].join(" ").toLowerCase().includes(q)
     );
-  }, [query]);
+  }, [query, reservations]);
 
   const visibleBlocks = useMemo(
     () =>
-      BLOCKS.filter((b) => zone === "Toutes zones" || b.zone === zone),
-    [zone]
+      (isDemoVenue ? BLOCKS : []).filter(
+        (b) => zone === "Toutes zones" || b.zone === zone
+      ),
+    [zone, isDemoVenue]
   );
+
+  if (isLoading) return <DashboardSkeleton />;
 
   const dayCount = (d: number) => visibleBlocks.filter((b) => b.day === d).length;
 
@@ -232,7 +253,7 @@ export default function DashboardPage() {
         transition={{ duration: 0.5, delay: 0.05 }}
         className="grid grid-cols-2 gap-3 xl:grid-cols-4"
       >
-        {STATS.map((s) => (
+        {stats.map((s) => (
           <div key={s.label} className={`${panel} flex items-center gap-3.5 rounded-2xl px-4 py-3.5`}>
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/[0.08] text-white/70">
               <s.icon size={16} strokeWidth={1.5} />
@@ -300,7 +321,15 @@ export default function DashboardPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.16 }}
       >
-        {filtered.length === 0 ? (
+        {reservations.length === 0 ? (
+          <div className={`${panel} flex flex-col items-center gap-2 px-6 py-14 text-center`}>
+            <p className="text-sm font-medium text-white">Aucune réservation à venir</p>
+            <p className="text-[13px] text-white/50">
+              Les réservations envoyées par les concierges et apporteurs du
+              réseau apparaîtront ici.
+            </p>
+          </div>
+        ) : filtered.length === 0 ? (
           <div className={`${panel} flex flex-col items-center gap-2 px-6 py-14 text-center`}>
             <p className="text-sm font-medium text-white">Aucune réservation ne correspond à « {query} »</p>
             <p className="text-[13px] text-white/50">Essayez un nom de client, d&apos;apporteur ou une zone.</p>

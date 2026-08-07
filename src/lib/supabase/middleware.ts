@@ -39,40 +39,39 @@ export async function updateSession(request: NextRequest) {
   const inSection = (section: string) =>
     pathname === section || pathname.startsWith(`${section}/`);
 
+  // Espace privé de chaque rôle ; tout autre rôle est renvoyé vers le sien
+  const roleHome: Record<string, string> = {
+    concierge: "/concierge",
+    hotel: "/hotel",
+    etablissement: "/dashboard",
+  };
+  const protectedSections = Object.values(roleHome);
+
   // Protected routes: redirect to login if not authenticated
-  if (!user && (inSection("/dashboard") || inSection("/concierge"))) {
+  if (!user && protectedSections.some(inSection)) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
   }
 
-  // Redirect authenticated users away from login/signup to their role-specific dashboard
-  if (
-    user &&
-    (pathname === "/login" || pathname === "/signup")
-  ) {
-    const role = (user.app_metadata?.role ?? user.user_metadata?.role);
-    const url = request.nextUrl.clone();
-    url.pathname = role === "concierge" ? "/concierge" : "/dashboard";
-    return NextResponse.redirect(url);
-  }
+  if (user) {
+    const role = (user.app_metadata?.role ?? user.user_metadata?.role) as
+      | string
+      | undefined;
+    const home = roleHome[role ?? ""] ?? "/dashboard";
 
-  // Redirect concierge users away from /dashboard to /concierge
-  if (user && inSection("/dashboard")) {
-    const role = (user.app_metadata?.role ?? user.user_metadata?.role);
-    if (role === "concierge") {
+    // Redirect authenticated users away from login/signup to their role-specific dashboard
+    if (pathname === "/login" || pathname === "/signup") {
       const url = request.nextUrl.clone();
-      url.pathname = "/concierge";
+      url.pathname = home;
       return NextResponse.redirect(url);
     }
-  }
 
-  // Redirect etablissement users away from /concierge to /dashboard
-  if (user && inSection("/concierge")) {
-    const role = (user.app_metadata?.role ?? user.user_metadata?.role);
-    if (role !== "concierge") {
+    // Redirect users landing in another role's section to their own
+    const currentSection = protectedSections.find(inSection);
+    if (currentSection && currentSection !== home) {
       const url = request.nextUrl.clone();
-      url.pathname = "/dashboard";
+      url.pathname = home;
       return NextResponse.redirect(url);
     }
   }

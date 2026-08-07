@@ -19,8 +19,8 @@ export default function HotelsPage() {
         titleMiddle: "qu'ils",
         titleAccent: "veulent vraiment",
         titleEnd: ".",
-        primaryCta: { label: "Équiper mon établissement", href: "/signup" },
-        secondaryCta: { label: "Parler à notre équipe", href: "/signup" },
+        primaryCta: { label: "Équiper mon établissement", href: "/signup?role=hotel" },
+        secondaryCta: { label: "Parler à notre équipe", href: "/signup?role=hotel" },
         stepsTitle: "Deux chemins.",
         stepsAccent: "Un seul suivi.",
         steps: [

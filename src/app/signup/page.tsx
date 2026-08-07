@@ -7,6 +7,8 @@ import { createClient } from "@/lib/supabase/client";
 import {
   Building2,
   UserCheck,
+  Hotel,
+  BedDouble,
   Mail,
   Lock,
   Phone,
@@ -20,7 +22,7 @@ import {
   CheckCircle,
 } from "lucide-react";
 
-type Role = "etablissement" | "concierge";
+type Role = "etablissement" | "concierge" | "hotel";
 type VenueType =
   | "club"
   | "restaurant"
@@ -52,8 +54,11 @@ function normalizeInstagram(raw: string): string | null {
 
 function SignupForm() {
   const searchParams = useSearchParams();
+  const roleParam = searchParams.get("role");
   const [role, setRole] = useState<Role>(
-    searchParams.get("role") === "concierge" ? "concierge" : "etablissement"
+    roleParam === "concierge" || roleParam === "hotel"
+      ? roleParam
+      : "etablissement"
   );
   const [venueType, setVenueType] = useState<VenueType>("restaurant");
   const [showPassword, setShowPassword] = useState(false);
@@ -69,6 +74,7 @@ function SignupForm() {
     instagram: "",
     venueName: "",
     city: "",
+    rooms: "",
   });
 
   const updateForm = (field: string, value: string) => {
@@ -97,9 +103,11 @@ function SignupForm() {
           phone: form.phone,
           instagram: normalizeInstagram(form.instagram),
           role: role,
-          venue_name: role === "etablissement" ? form.venueName : null,
+          venue_name: role === "concierge" ? null : form.venueName,
           venue_type: role === "etablissement" ? venueType : null,
-          city: role === "etablissement" ? form.city : null,
+          city: role === "concierge" ? null : form.city,
+          rooms_count:
+            role === "hotel" && form.rooms ? Number(form.rooms) : null,
         },
         emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
@@ -178,50 +186,54 @@ function SignupForm() {
             {/* Role selector */}
             <fieldset className="space-y-3">
               <legend className={`${labelClass} mb-1`}>Je suis</legend>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <label className="relative cursor-pointer">
-                  <input
-                    type="radio"
-                    name="role"
-                    value="etablissement"
-                    checked={role === "etablissement"}
-                    onChange={() => setRole("etablissement")}
-                    className="peer sr-only"
-                  />
-                  <div className="flex items-center gap-3 rounded-xl border border-black/10 bg-white p-4 transition-all peer-checked:border-black peer-checked:ring-1 peer-checked:ring-black">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[var(--landing-ink)] text-[var(--landing-ivory)]">
-                      <Building2 size={18} strokeWidth={1.5} />
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold">Établissement</p>
-                      <p className="text-xs text-[var(--landing-mute)]">
-                        Restaurant, rooftop, club, hôtel
-                      </p>
-                    </div>
-                  </div>
-                </label>
-
-                <label className="relative cursor-pointer">
-                  <input
-                    type="radio"
-                    name="role"
-                    value="concierge"
-                    checked={role === "concierge"}
-                    onChange={() => setRole("concierge")}
-                    className="peer sr-only"
-                  />
-                  <div className="flex items-center gap-3 rounded-xl border border-black/10 bg-white p-4 transition-all peer-checked:border-black peer-checked:ring-1 peer-checked:ring-black">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[var(--landing-ink)] text-[var(--landing-ivory)]">
-                      <UserCheck size={18} strokeWidth={1.5} />
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold">Concierge / RP</p>
-                      <p className="text-xs text-[var(--landing-mute)]">
-                        Conciergerie, promoteur, influenceur
-                      </p>
-                    </div>
-                  </div>
-                </label>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                {(
+                  [
+                    {
+                      value: "etablissement",
+                      icon: Building2,
+                      title: "Établissement",
+                      subtitle: "Restaurant, rooftop, club",
+                    },
+                    {
+                      value: "concierge",
+                      icon: UserCheck,
+                      title: "Concierge / RP",
+                      subtitle: "Conciergerie, promoteur, influenceur",
+                    },
+                    {
+                      value: "hotel",
+                      icon: Hotel,
+                      title: "Hôtel",
+                      subtitle: "QR codes en chambre pour vos clients",
+                    },
+                  ] as const
+                ).map((option) => {
+                  const Icon = option.icon;
+                  return (
+                    <label key={option.value} className="relative cursor-pointer">
+                      <input
+                        type="radio"
+                        name="role"
+                        value={option.value}
+                        checked={role === option.value}
+                        onChange={() => setRole(option.value)}
+                        className="peer sr-only"
+                      />
+                      <div className="flex h-full items-center gap-3 rounded-xl border border-black/10 bg-white p-4 transition-all peer-checked:border-black peer-checked:ring-1 peer-checked:ring-black">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[var(--landing-ink)] text-[var(--landing-ivory)]">
+                          <Icon size={18} strokeWidth={1.5} />
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold">{option.title}</p>
+                          <p className="text-xs text-[var(--landing-mute)]">
+                            {option.subtitle}
+                          </p>
+                        </div>
+                      </div>
+                    </label>
+                  );
+                })}
               </div>
             </fieldset>
 
@@ -450,6 +462,87 @@ function SignupForm() {
                       </label>
                     ))}
                   </div>
+                </div>
+              </div>
+            )}
+
+            {/* Hotel details */}
+            {role === "hotel" && (
+              <div className="space-y-4">
+                <h2 className="text-sm font-semibold text-[var(--landing-ink)]/80">
+                  Détails de l&apos;hôtel
+                </h2>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <label htmlFor="hotel-name" className={labelClass}>
+                      Nom de l&apos;hôtel
+                    </label>
+                    <div className="relative">
+                      <Hotel
+                        className="absolute left-4 top-1/2 -translate-y-1/2 text-black/30"
+                        size={16}
+                        strokeWidth={1.5}
+                      />
+                      <input
+                        id="hotel-name"
+                        type="text"
+                        placeholder="Riad Palais Bleu"
+                        value={form.venueName}
+                        onChange={(e) =>
+                          updateForm("venueName", e.target.value)
+                        }
+                        required
+                        className={inputClass}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label htmlFor="hotel-city" className={labelClass}>
+                      Ville
+                    </label>
+                    <div className="relative">
+                      <MapPin
+                        className="absolute left-4 top-1/2 -translate-y-1/2 text-black/30"
+                        size={16}
+                        strokeWidth={1.5}
+                      />
+                      <input
+                        id="hotel-city"
+                        type="text"
+                        placeholder="Marrakech"
+                        value={form.city}
+                        onChange={(e) => updateForm("city", e.target.value)}
+                        required
+                        className={inputClass}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="rooms" className={labelClass}>
+                    Nombre de chambres
+                  </label>
+                  <div className="relative">
+                    <BedDouble
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-black/30"
+                      size={16}
+                      strokeWidth={1.5}
+                    />
+                    <input
+                      id="rooms"
+                      type="number"
+                      min={1}
+                      placeholder="45"
+                      value={form.rooms}
+                      onChange={(e) => updateForm("rooms", e.target.value)}
+                      className={inputClass}
+                    />
+                  </div>
+                  <p className="text-xs text-[var(--landing-ink)]/45">
+                    Facultatif. Sert à préparer vos QR codes par chambre.
+                  </p>
                 </div>
               </div>
             )}

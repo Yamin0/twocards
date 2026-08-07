@@ -2,17 +2,29 @@
 
 import { useState, useEffect } from "react";
 import { useAuthUser } from "@/hooks/use-auth-user";
-import { ConciergeSkeleton } from "@/components/shared/loading-skeleton";
+import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
 import { AvatarUploader } from "@/components/shared/avatar-uploader";
-import { User, Mail, Phone, MapPin, Save, CheckCircle, Loader2 } from "lucide-react";
+import {
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  Hotel,
+  BedDouble,
+  Save,
+  CheckCircle,
+  Loader2,
+} from "lucide-react";
 
-export default function ConciergeSettingsPage() {
-  const { fullName, email, isDemoConcierge, isLoading } = useAuthUser();
+export default function HotelSettingsPage() {
+  const { fullName, email, venueName, isLoading } = useAuthUser();
   const [form, setForm] = useState({
     fullname: "",
     email: "",
     phone: "",
+    hotelName: "",
     city: "",
+    rooms: "",
   });
   const [saving, setSaving] = useState(false);
   /* Message plutôt que booléen : le formulaire et l'envoi de photo n'ont pas
@@ -26,15 +38,18 @@ export default function ConciergeSettingsPage() {
     }
   }, [notice]);
 
-  /* Ajustement d'etat pendant le rendu plutot qu'un effet. */
+  /* Ajustement d'état pendant le rendu plutôt qu'un effet. */
   const [initialized, setInitialized] = useState(false);
   if (!isLoading && !initialized) {
     setInitialized(true);
-    if (isDemoConcierge) {
-      setForm({ fullname: "Karim Bennani", email: "karim@prestige-marrakech.com", phone: "+212 6 12 34 56 78", city: "Marrakech" });
-    } else {
-      setForm({ fullname: fullName || "", email: email || "", phone: "", city: "" });
-    }
+    setForm({
+      fullname: fullName || "",
+      email: email || "",
+      phone: "",
+      hotelName: venueName || "",
+      city: "",
+      rooms: "",
+    });
   }
 
   const updateForm = (field: string, value: string) => {
@@ -54,7 +69,13 @@ export default function ConciergeSettingsPage() {
     setNotice("Vos informations ont été enregistrées avec succès.");
   };
 
-  if (isLoading) return <ConciergeSkeleton />;
+  if (isLoading) return <DashboardSkeleton />;
+
+  const inputClass =
+    "w-full pl-10 pr-4 py-2.5 bg-white/[0.05] border-none rounded-sm text-sm text-white font-[family-name:var(--font-inter)] focus:bg-white/[0.07] focus:ring-1 focus:ring-white/30 focus:outline-none transition-colors";
+  const fieldLabelClass =
+    "block font-[family-name:var(--font-inter)] text-xs uppercase tracking-wider text-white/60";
+  const iconClass = "absolute left-3 top-1/2 -translate-y-1/2 text-white/40";
 
   return (
     <div className="bg-transparent min-h-screen">
@@ -63,7 +84,7 @@ export default function ConciergeSettingsPage() {
           Paramètres
         </h1>
         <p className="text-white/60 mt-1 text-sm">
-          Gérez votre profil et vos préférences.
+          Gérez le profil de votre hôtel et vos préférences.
         </p>
       </div>
 
@@ -76,72 +97,91 @@ export default function ConciergeSettingsPage() {
         )}
 
         <div className="bg-white/[0.07] rounded-md editorial-shadow p-8">
-          <AvatarUploader onMessage={setNotice} />
+          <AvatarUploader onMessage={setNotice} label="Photo de l'hôtel" />
         </div>
 
         <div className="bg-white/[0.07] rounded-md editorial-shadow p-8">
           <h2 className="text-sm font-semibold text-white font-[family-name:var(--font-manrope)] mb-6">
-            Informations personnelles
+            Profil de l&apos;hôtel
           </h2>
 
           <form className="space-y-5" onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="block font-[family-name:var(--font-inter)] text-xs uppercase tracking-wider text-white/60">
-                  Nom complet
-                </label>
+                <label className={fieldLabelClass}>Nom de l&apos;hôtel</label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={16} strokeWidth={1.5} />
+                  <Hotel className={iconClass} size={16} strokeWidth={1.5} />
                   <input
                     type="text"
-                    value={form.fullname}
-                    onChange={(e) => updateForm("fullname", e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-white/[0.05] border-none rounded-sm text-sm text-white font-[family-name:var(--font-inter)] focus:bg-white/[0.07] focus:ring-1 focus:ring-white/30 focus:outline-none transition-colors"
+                    value={form.hotelName}
+                    onChange={(e) => updateForm("hotelName", e.target.value)}
+                    className={inputClass}
                   />
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <label className="block font-[family-name:var(--font-inter)] text-xs uppercase tracking-wider text-white/60">
-                  Email
-                </label>
+                <label className={fieldLabelClass}>Ville</label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={16} strokeWidth={1.5} />
-                  <input
-                    type="email"
-                    value={form.email}
-                    onChange={(e) => updateForm("email", e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-white/[0.05] border-none rounded-sm text-sm text-white font-[family-name:var(--font-inter)] focus:bg-white/[0.07] focus:ring-1 focus:ring-white/30 focus:outline-none transition-colors"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="block font-[family-name:var(--font-inter)] text-xs uppercase tracking-wider text-white/60">
-                  Téléphone
-                </label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={16} strokeWidth={1.5} />
-                  <input
-                    type="tel"
-                    value={form.phone}
-                    onChange={(e) => updateForm("phone", e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-white/[0.05] border-none rounded-sm text-sm text-white font-[family-name:var(--font-inter)] focus:bg-white/[0.07] focus:ring-1 focus:ring-white/30 focus:outline-none transition-colors"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="block font-[family-name:var(--font-inter)] text-xs uppercase tracking-wider text-white/60">
-                  Ville
-                </label>
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={16} strokeWidth={1.5} />
+                  <MapPin className={iconClass} size={16} strokeWidth={1.5} />
                   <input
                     type="text"
                     value={form.city}
                     onChange={(e) => updateForm("city", e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-white/[0.05] border-none rounded-sm text-sm text-white font-[family-name:var(--font-inter)] focus:bg-white/[0.07] focus:ring-1 focus:ring-white/30 focus:outline-none transition-colors"
+                    className={inputClass}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className={fieldLabelClass}>Nombre de chambres</label>
+                <div className="relative">
+                  <BedDouble className={iconClass} size={16} strokeWidth={1.5} />
+                  <input
+                    type="number"
+                    min={1}
+                    value={form.rooms}
+                    onChange={(e) => updateForm("rooms", e.target.value)}
+                    className={inputClass}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className={fieldLabelClass}>Nom du contact</label>
+                <div className="relative">
+                  <User className={iconClass} size={16} strokeWidth={1.5} />
+                  <input
+                    type="text"
+                    value={form.fullname}
+                    onChange={(e) => updateForm("fullname", e.target.value)}
+                    className={inputClass}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className={fieldLabelClass}>Email</label>
+                <div className="relative">
+                  <Mail className={iconClass} size={16} strokeWidth={1.5} />
+                  <input
+                    type="email"
+                    value={form.email}
+                    onChange={(e) => updateForm("email", e.target.value)}
+                    className={inputClass}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className={fieldLabelClass}>Téléphone</label>
+                <div className="relative">
+                  <Phone className={iconClass} size={16} strokeWidth={1.5} />
+                  <input
+                    type="tel"
+                    value={form.phone}
+                    onChange={(e) => updateForm("phone", e.target.value)}
+                    className={inputClass}
                   />
                 </div>
               </div>

@@ -2,6 +2,8 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Bot, Send, Sparkles } from "lucide-react";
+import { useAuthUser } from "@/hooks/use-auth-user";
+import { ConciergeSkeleton } from "@/components/shared/loading-skeleton";
 
 interface Message {
   id: number;
@@ -10,13 +12,15 @@ interface Message {
   time: string;
 }
 
+const WELCOME_MESSAGE: Message = {
+  id: 1,
+  role: "ai",
+  text: "Bonjour ! Je suis votre assistant IA twocards. Je peux vous aider à gérer vos réservations, clients, commissions et établissements. Que souhaitez-vous faire ?",
+  time: "20:00",
+};
+
 const DEMO_MESSAGES: Message[] = [
-  {
-    id: 1,
-    role: "ai",
-    text: "Bonjour ! Je suis votre assistant IA twocards. Je peux vous aider à gérer vos réservations, clients, commissions et établissements. Que souhaitez-vous faire ?",
-    time: "20:00",
-  },
+  WELCOME_MESSAGE,
   {
     id: 2,
     role: "user",
@@ -39,25 +43,42 @@ const SUGGESTED_ACTIONS = [
   "Contacter un établissement",
 ];
 
-function getAIResponse(input: string): string {
+function getAIResponse(input: string, isDemo: boolean): string {
   const lower = input.toLowerCase();
   if (lower.includes("réservation") || lower.includes("reservation") || lower.includes("nouvelle"))
     return "Pour créer une réservation, j'ai besoin de l'établissement, du nom du client, du nombre de couverts et de la date. Quel établissement souhaitez-vous ?";
+  /* Les chiffres ne sont cités que sur le compte de démonstration : un
+     compte réel n'a pas encore de données, l'assistant ne doit rien inventer. */
   if (lower.includes("commission") || lower.includes("gain"))
-    return "Ce mois, vous avez généré 24 850 MAD de commissions. 16 430 MAD ont été versés, 8 420 MAD sont en attente de validation. Votre meilleur établissement est Le Comptoir avec 12 400 MAD.";
+    return isDemo
+      ? "Ce mois, vous avez généré 24 850 MAD de commissions. 16 430 MAD ont été versés, 8 420 MAD sont en attente de validation. Votre meilleur établissement est Le Comptoir avec 12 400 MAD."
+      : "Vous n'avez pas encore de commissions enregistrées. Elles apparaîtront ici dès votre première réservation confirmée.";
   if (lower.includes("client") || lower.includes("vip"))
-    return "Vous avez 45 clients actifs dont 12 VIP. Les plus réguliers : Famille Tazi (8 visites), M. Alaoui (6 visites), Sarah Bennis (5 visites). Voulez-vous créer une réservation pour l'un d'eux ?";
+    return isDemo
+      ? "Vous avez 45 clients actifs dont 12 VIP. Les plus réguliers : Famille Tazi (8 visites), M. Alaoui (6 visites), Sarah Bennis (5 visites). Voulez-vous créer une réservation pour l'un d'eux ?"
+      : "Votre base clients est encore vide. Ajoutez vos premiers clients depuis l'onglet CRM Clients.";
   if (lower.includes("événement") || lower.includes("evenement") || lower.includes("semaine"))
-    return "Cette semaine : Soirée VIP au Comptoir (Ven. 18), Opening Night chez Nobu (Sam. 19), Brunch Jazz à L'Éclipse (Dim. 20). Voulez-vous réserver des tables ?";
+    return isDemo
+      ? "Cette semaine : Soirée VIP au Comptoir (Ven. 18), Opening Night chez Nobu (Sam. 19), Brunch Jazz à L'Éclipse (Dim. 20). Voulez-vous réserver des tables ?"
+      : "Aucun événement à venir pour le moment. Les événements de vos établissements partenaires apparaîtront ici.";
   if (lower.includes("contacter") || lower.includes("établissement") || lower.includes("etablissement"))
-    return "Vos établissements partenaires : Le Comptoir (Marrakech), Sky Bar (Casablanca), L'Éclipse (Paris), Nobu (Marrakech). Lequel souhaitez-vous contacter ?";
+    return isDemo
+      ? "Vos établissements partenaires : Le Comptoir (Marrakech), Sky Bar (Casablanca), L'Éclipse (Paris), Nobu (Marrakech). Lequel souhaitez-vous contacter ?"
+      : "Vous n'avez pas encore d'établissement partenaire. Explorez le réseau depuis l'onglet Établissements.";
   return "Bien sûr, je peux vous aider avec ça. Pourriez-vous me donner plus de détails ?";
 }
 
 export default function ConciergeAIPage() {
-  const [messages, setMessages] = useState<Message[]>(DEMO_MESSAGES);
+  const { isDemoConcierge, isLoading } = useAuthUser();
+  const [messages, setMessages] = useState<Message[] | null>(null);
   const [input, setInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  /* Ajustement d'état pendant le rendu plutôt qu'un effet : la conversation
+     pré-remplie n'existe que sur le compte de démonstration. */
+  if (!isLoading && messages === null) {
+    setMessages(isDemoConcierge ? DEMO_MESSAGES : [WELCOME_MESSAGE]);
+  }
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -75,8 +96,8 @@ export default function ConciergeAIPage() {
       minute: "2-digit",
     });
     setMessages((prev) => [
-      ...prev,
-      { id: (prev[prev.length - 1]?.id ?? 0) + 1, role, text, time },
+      ...(prev ?? []),
+      { id: ((prev ?? [])[(prev ?? []).length - 1]?.id ?? 0) + 1, role, text, time },
     ]);
   };
 
@@ -84,8 +105,13 @@ export default function ConciergeAIPage() {
     if (!text.trim()) return;
     appendMessage("user", text.trim());
     setInput("");
-    setTimeout(() => appendMessage("ai", getAIResponse(text)), 600);
+    setTimeout(
+      () => appendMessage("ai", getAIResponse(text, isDemoConcierge)),
+      600
+    );
   };
+
+  if (isLoading || messages === null) return <ConciergeSkeleton />;
 
   return (
     <div className="h-[calc(100vh-80px)] lg:h-[calc(100vh-48px)] flex flex-col">

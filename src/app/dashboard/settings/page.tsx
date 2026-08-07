@@ -6,7 +6,6 @@ import {
   Shield,
   Bell,
   Lock,
-  Camera,
   Check,
   Loader2,
   Building2,
@@ -18,6 +17,7 @@ import {
 } from "lucide-react";
 import { useAuthUser } from "@/hooks/use-auth-user";
 import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
+import { AvatarUploader } from "@/components/shared/avatar-uploader";
 
 /* ------------------------------------------------------------------ */
 /*  Nav items                                                          */
@@ -77,8 +77,7 @@ function Toggle({
 /*  Main page                                                          */
 /* ------------------------------------------------------------------ */
 export default function SettingsPage() {
-  const { isDemoVenue, isLoading, fullName, email, venueName, initials } =
-    useAuthUser();
+  const { isDemoVenue, isLoading, fullName, email, venueName } = useAuthUser();
 
   const [activeTab, setActiveTab] = useState("profil");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -205,8 +204,6 @@ export default function SettingsPage() {
 
   if (isLoading) return <DashboardSkeleton />;
 
-  const displayInitials = isDemoVenue ? "MR" : initials;
-
   /* ---------------------------------------------------------------- */
   /*  Tab headers                                                      */
   /* ---------------------------------------------------------------- */
@@ -250,30 +247,7 @@ export default function SettingsPage() {
     <div className="space-y-6">
       {/* Avatar */}
       <div className={`${glassCard} p-6`}>
-        <div className="flex items-center gap-6">
-          <div className="relative">
-            <div className="w-20 h-20 rounded-full bg-blue-500/20 border border-blue-400/30 flex items-center justify-center">
-              <span className="text-2xl font-bold text-blue-400">
-                {displayInitials}
-              </span>
-            </div>
-            <button
-              onClick={() => showToast("Upload photo bientôt disponible")}
-              className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-blue-500 text-white flex items-center justify-center shadow-lg hover:bg-blue-600 transition-colors"
-            >
-              <Camera size={14} strokeWidth={1.5} />
-            </button>
-          </div>
-          <div>
-            <p className="text-sm font-medium text-white">Photo de profil</p>
-            <button
-              onClick={() => showToast("Upload photo bientôt disponible")}
-              className="text-xs text-blue-400 font-medium mt-1 hover:underline"
-            >
-              Modifier la photo
-            </button>
-          </div>
-        </div>
+        <AvatarUploader onMessage={showToast} />
       </div>
 
       {/* Fields */}
