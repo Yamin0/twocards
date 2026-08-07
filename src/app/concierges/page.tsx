@@ -17,6 +17,7 @@ export default function ConciergesPage() {
         titleEnd: ".",
         subtitle:
           "Les réservations ont toujours circulé par relations, WhatsApp et faveurs discrètes. TwoCards transforme ces faveurs en transactions traçables : conditions connues à l'avance, apport prouvé au check-in, commission suivie jusqu'au paiement.",
+        heroImage: "/images/concierges-hero.jpg",
         primaryCta: { label: "Rejoindre le réseau", href: "/signup?role=concierge" },
         secondaryCta: { label: "Voir comment ça marche", href: "/" },
         steps: [

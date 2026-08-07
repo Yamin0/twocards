@@ -17,7 +17,11 @@ export default function RestaurantsPage() {
         titleEnd: ".",
         subtitle:
           "TwoCards transforme les réservations que vous recevez déjà sur WhatsApp en un canal géré : votre inventaire est distribué aux concierges et RP vérifiés, chaque client est attribué, et les commissions se calculent sur du revenu vérifié — pas sur des promesses.",
-        heroImage: "/images/etablissements-hero.jpg",
+        scrollVideo: {
+          desktop: "/videos/etablissements-hero.mp4",
+          mobile: "/videos/etablissements-hero-480.mp4",
+          poster: "/videos/etablissements-hero-poster.jpg",
+        },
         primaryCta: { label: "Devenir partenaire", href: "/signup" },
         secondaryCta: { label: "Parler à notre équipe", href: "/signup" },
         steps: [

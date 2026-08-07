@@ -20,11 +20,29 @@ import { LandingNavbar } from "@/components/landing/navbar";
    même encodage all-intra, seul le poids du préchargement change. */
 const VIDEO_SRC_DESKTOP = "/videos/hero-doors.mp4";
 const VIDEO_SRC_MOBILE = "/videos/hero-doors-720.mp4";
+const VIDEO_POSTER = "/videos/hero-doors-poster.jpg";
 const DAMPING = 0.14;
 /* Respiration finale : la cour se révèle seule avant le pied de page. */
 const TAIL_VH = 40;
 
-export function ScrollVideoHero({ children }: { children?: React.ReactNode }) {
+export function ScrollVideoHero({
+  children,
+  videoDesktop = VIDEO_SRC_DESKTOP,
+  videoMobile = VIDEO_SRC_MOBILE,
+  poster = VIDEO_POSTER,
+  hero,
+}: {
+  children?: React.ReactNode;
+  /* Toute autre scène que les portes doit fournir ses deux encodages
+     all-intra : le scrub décode une image par frame et saccaderait sur un
+     encodage classique. */
+  videoDesktop?: string;
+  videoMobile?: string;
+  poster?: string;
+  /* Remplace l'accroche par défaut. Sans lui, l'écran 1 reste celui de la
+     page d'accueil. */
+  hero?: React.ReactNode;
+}) {
   const sectionRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -43,8 +61,8 @@ export function ScrollVideoHero({ children }: { children?: React.ReactNode }) {
     let objectUrl: string | null = null;
 
     const src = window.matchMedia("(max-width: 767px)").matches
-      ? VIDEO_SRC_MOBILE
-      : VIDEO_SRC_DESKTOP;
+      ? videoMobile
+      : videoDesktop;
 
     (async () => {
       try {
@@ -86,7 +104,7 @@ export function ScrollVideoHero({ children }: { children?: React.ReactNode }) {
       cancelled = true;
       if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
-  }, []);
+  }, [videoDesktop, videoMobile]);
 
   /* Pas de défilement tant que le chargement couvre l'écran. */
   useEffect(() => {
@@ -212,7 +230,7 @@ export function ScrollVideoHero({ children }: { children?: React.ReactNode }) {
         <video
           ref={videoRef}
           src={videoUrl ?? undefined}
-          poster="/videos/hero-doors-poster.jpg"
+          poster={poster}
           muted
           playsInline
           preload="auto"
@@ -230,25 +248,26 @@ export function ScrollVideoHero({ children }: { children?: React.ReactNode }) {
       <div className="relative z-10" style={{ marginTop: "-100dvh" }}>
         {/* Écran 1 — accroche */}
         <div className="flex h-dvh flex-col font-body">
-          <div className="flex flex-1 flex-col items-center justify-center px-6 text-center">
-            <h1 className="mb-8 max-w-4xl font-title text-[38px] font-normal leading-[1.12] tracking-[-0.02em] text-white md:text-[64px]">
-              Ils vous amènent des clients.
-              <br />
-              Vous les payez au <em className="italic">résultat</em>.
-            </h1>
-            <p className="mb-10 max-w-xl text-[15px] font-normal leading-relaxed text-white/75">
-              TwoCards connecte les établissements aux concierges et RP
-              vérifiés, synchronise les disponibilités et automatise
-              l&apos;attribution, les acomptes et les commissions.
-            </p>
-            <Link
-              href="/signup"
-              className="rounded-full bg-white px-8 py-3.5 text-[14px] font-medium text-black transition-opacity hover:opacity-85"
-            >
-              Commencer gratuitement
-            </Link>
-          </div>
-
+          {hero ?? (
+            <div className="flex flex-1 flex-col items-center justify-center px-6 text-center">
+              <h1 className="mb-8 max-w-4xl font-title text-[38px] font-normal leading-[1.12] tracking-[-0.02em] text-white md:text-[64px]">
+                Ils vous amènent des clients.
+                <br />
+                Vous les payez au <em className="italic">résultat</em>.
+              </h1>
+              <p className="mb-10 max-w-xl text-[15px] font-normal leading-relaxed text-white/75">
+                TwoCards connecte les établissements aux concierges et RP
+                vérifiés, synchronise les disponibilités et automatise
+                l&apos;attribution, les acomptes et les commissions.
+              </p>
+              <Link
+                href="/signup"
+                className="rounded-full bg-white px-8 py-3.5 text-[14px] font-medium text-black transition-opacity hover:opacity-85"
+              >
+                Commencer gratuitement
+              </Link>
+            </div>
+          )}
         </div>
 
         {/* Écrans suivants — sections transmises, en transparence sur la vidéo */}
