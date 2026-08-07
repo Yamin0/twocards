@@ -25,6 +25,10 @@ export interface AudiencePageData {
   /* Fond vidéo du héros (autoplay muet en boucle). À défaut, fond shader. */
   heroVideo?: string;
   heroPoster?: string;
+  /* Fond photo du héros, alternative fixe à la vidéo. Même traitement :
+     voile sombre, navbar claire, titre blanc. La vidéo prime si les deux
+     sont renseignées. */
+  heroImage?: string;
   primaryCta: { label: string; href: string };
   secondaryCta: { label: string; href: string };
   /* icon remplace le numéro d'étape. Clé et non composant : les données
@@ -172,7 +176,11 @@ function RotatingTitleWord({ words }: { words: string[] }) {
 }
 
 export function AudiencePage({ data }: { data: AudiencePageData }) {
-  const onVideo = Boolean(data.heroVideo);
+  /* Le héros a trois fonds possibles : vidéo, photo, ou shader par défaut.
+     Les deux premiers partagent le même habillage sombre — d'où `onMedia`,
+     qui pilote la mise en page, tandis que `data.heroVideo` ne décide plus
+     que du média rendu. */
+  const onMedia = Boolean(data.heroVideo || data.heroImage);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   /* playbackRate n'existe pas en attribut HTML, et il est réinitialisé à
@@ -192,22 +200,35 @@ export function AudiencePage({ data }: { data: AudiencePageData }) {
     <div className="min-h-screen bg-[var(--landing-ivory)] text-[var(--landing-ink)] font-body">
       <GlassFilter />
 
-      {/* Héros : fond vidéo si fourni, sinon fond shader */}
+      {/* Héros : fond vidéo ou photo si fourni, sinon fond shader */}
       <div className="relative overflow-hidden">
-        {onVideo ? (
+        {onMedia ? (
           <>
-            <video
-              ref={videoRef}
-              src={data.heroVideo}
-              poster={data.heroPoster}
-              autoPlay
-              loop
-              muted
-              playsInline
-              disablePictureInPicture
-              aria-hidden
-              className="absolute inset-0 h-full w-full object-cover"
-            />
+            {data.heroVideo ? (
+              <video
+                ref={videoRef}
+                src={data.heroVideo}
+                poster={data.heroPoster}
+                autoPlay
+                loop
+                muted
+                playsInline
+                disablePictureInPicture
+                aria-hidden
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+            ) : (
+              /* Décoratif : le sens est porté par le titre, pas par la photo.
+                 <img> plutôt que next/image — le fond couvre le héros entier,
+                 sans dimensions connues à la compilation. */
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={data.heroImage}
+                alt=""
+                aria-hidden
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+            )}
             {/* Voile : la scène est lumineuse, le texte blanc a besoin d'assise */}
             <div className="pointer-events-none absolute inset-0 bg-black/45" />
             <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-black/50 to-transparent" />
@@ -215,18 +236,18 @@ export function AudiencePage({ data }: { data: AudiencePageData }) {
         ) : (
           <WarpBackground speed={0.3} />
         )}
-        <LandingNavbar variant={onVideo ? "dark" : "light"} />
+        <LandingNavbar variant={onMedia ? "dark" : "light"} />
 
         {/* Sur fond vidéo : pas de sur-titre, et le paragraphe descend en
             pied de héros pour laisser la scène respirer sous le titre. */}
         <div
           className={`relative z-10 mx-auto flex max-w-4xl flex-col items-center px-6 text-center ${
-            onVideo
+            onMedia
               ? "min-h-[82vh] pb-12 pt-10 md:min-h-[88vh] md:pb-16"
               : "pb-20 pt-16 md:pb-28 md:pt-24"
           }`}
         >
-          {!onVideo && (
+          {!onMedia && (
             <motion.p
               {...fadeUp}
               transition={{ duration: 0.6 }}
@@ -238,14 +259,14 @@ export function AudiencePage({ data }: { data: AudiencePageData }) {
 
           <div
             className={
-              onVideo ? "flex flex-1 flex-col items-center justify-center" : ""
+              onMedia ? "flex flex-1 flex-col items-center justify-center" : ""
             }
           >
             <motion.h1
               {...fadeUp}
               transition={{ duration: 0.7, delay: 0.1 }}
               className={`mb-8 font-title text-[34px] font-normal leading-[1.15] tracking-[-0.02em] md:text-[56px] ${
-                onVideo ? "text-white" : ""
+                onMedia ? "text-white" : ""
               }`}
             >
               {data.titleStart}{" "}
@@ -259,7 +280,7 @@ export function AudiencePage({ data }: { data: AudiencePageData }) {
               {data.titleEnd}
             </motion.h1>
 
-            {!onVideo && data.subtitle && (
+            {!onMedia && data.subtitle && (
               <motion.p
                 {...fadeUp}
                 transition={{ duration: 0.7, delay: 0.2 }}
@@ -277,7 +298,7 @@ export function AudiencePage({ data }: { data: AudiencePageData }) {
             <Link
               href={data.primaryCta.href}
               className={`rounded-full px-8 py-3.5 text-[14px] font-medium transition-opacity hover:opacity-80 ${
-                onVideo
+                onMedia
                   ? "bg-white text-black"
                   : "bg-[var(--landing-ink)] text-[var(--landing-ivory)]"
               }`}
@@ -287,7 +308,7 @@ export function AudiencePage({ data }: { data: AudiencePageData }) {
               <Link
                 href={data.secondaryCta.href}
                 className={`text-[11px] font-medium uppercase tracking-[0.18em] underline underline-offset-4 transition-colors ${
-                  onVideo
+                  onMedia
                     ? "text-white/70 decoration-white/30 hover:text-white"
                     : "text-[var(--landing-ink)]/60 decoration-black/20 hover:text-[var(--landing-ink)]"
                 }`}
@@ -309,7 +330,7 @@ export function AudiencePage({ data }: { data: AudiencePageData }) {
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.6 }}
             className={`text-center font-title text-3xl font-normal leading-tight md:text-4xl ${
-              onVideo && data.subtitle ? "mb-6" : "mb-16"
+              onMedia && data.subtitle ? "mb-6" : "mb-16"
             }`}
           >
             {data.stepsTitle ?? "Trois étapes."}{" "}
@@ -318,7 +339,7 @@ export function AudiencePage({ data }: { data: AudiencePageData }) {
 
           {/* Sorti du héros : le propos introduit les trois points de contact
               plutôt que de charger la scène vidéo. */}
-          {onVideo && data.subtitle && (
+          {onMedia && data.subtitle && (
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
