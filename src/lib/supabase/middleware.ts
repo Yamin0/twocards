@@ -44,6 +44,7 @@ export async function updateSession(request: NextRequest) {
     concierge: "/concierge",
     hotel: "/hotel",
     etablissement: "/dashboard",
+    admin: "/admin",
   };
   const protectedSections = Object.values(roleHome);
 
@@ -59,6 +60,18 @@ export async function updateSession(request: NextRequest) {
       | string
       | undefined;
     const home = roleHome[role ?? ""] ?? "/dashboard";
+
+    /* L'administrateur circule dans tous les espaces : c'est le sens même
+       du rôle. Seule la page de connexion le renvoie chez lui. */
+    const isAdmin = user.app_metadata?.is_admin === true;
+    if (isAdmin) {
+      if (pathname === "/login" || pathname === "/signup") {
+        const url = request.nextUrl.clone();
+        url.pathname = "/admin";
+        return NextResponse.redirect(url);
+      }
+      return supabaseResponse;
+    }
 
     // Redirect authenticated users away from login/signup to their role-specific dashboard
     if (pathname === "/login" || pathname === "/signup") {
