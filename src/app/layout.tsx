@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Manrope, Inter, Nunito } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
+import { ImpersonationBanner } from "@/components/shared/impersonation-banner";
 
 const manrope = Manrope({
   variable: "--font-manrope",
@@ -84,7 +85,10 @@ export default function RootLayout({
       lang="fr"
       className={`${manrope.variable} ${inter.variable} ${nunito.variable} ${gotham.variable} ${suisse.variable} scroll-smooth`}
     >
-      <body>{children}</body>
+      <body>
+        <ImpersonationBanner />
+        {children}
+      </body>
     </html>
   );
 }

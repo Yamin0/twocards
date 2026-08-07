@@ -8,6 +8,7 @@ import {
   ChevronDown,
   Hotel,
   Loader2,
+  LogIn,
   MessageSquare,
   RefreshCw,
   Shield,
@@ -17,6 +18,7 @@ import {
 import { createClient } from "@/lib/supabase/client";
 import { useAuthUser } from "@/hooks/use-auth-user";
 import { formatTimestamp } from "@/hooks/use-messaging";
+import { startImpersonation } from "@/lib/impersonation";
 
 /* Console d'administration : tous les comptes de la plateforme, leur
    activité réelle et leurs échanges. La garde est en base — policies et
@@ -75,16 +77,36 @@ const initialsOfAccount = (a: Account) =>
 
 function AccountRow({
   account,
+  selfId,
   onSaved,
   onError,
 }: {
   account: Account;
+  selfId: string | null;
   onSaved: (msg: string) => void;
   onError: (msg: string) => void;
 }) {
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [thread, setThread] = useState<ThreadMessage[] | null>(null);
+  const [entering, setEntering] = useState(false);
+
+  const canImpersonate = selfId !== null && account.id !== selfId;
+
+  const impersonate = async () => {
+    setEntering(true);
+    const message = await startImpersonation({
+      id: account.id,
+      email: account.email,
+      role: account.role,
+    });
+    /* Succès : la page est déjà en train de basculer, on ne réactive pas
+       le bouton. Échec : on affiche l'erreur et on rend la main. */
+    if (message) {
+      onError(message);
+      setEntering(false);
+    }
+  };
   const [form, setForm] = useState({
     full_name: account.full_name ?? "",
     venue_name: account.venue_name ?? "",
@@ -239,20 +261,36 @@ function AccountRow({
             </label>
           </div>
 
-          {dirty && (
-            <button
-              onClick={() => void save()}
-              disabled={saving}
-              className="flex items-center gap-2 rounded-lg bg-blue-500 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-blue-600 disabled:opacity-50"
-            >
-              {saving ? (
-                <Loader2 size={13} className="animate-spin" />
-              ) : (
-                <Check size={13} strokeWidth={2} />
-              )}
-              Enregistrer
-            </button>
-          )}
+          <div className="flex flex-wrap items-center gap-2">
+            {dirty && (
+              <button
+                onClick={() => void save()}
+                disabled={saving}
+                className="flex items-center gap-2 rounded-lg bg-blue-500 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-blue-600 disabled:opacity-50"
+              >
+                {saving ? (
+                  <Loader2 size={13} className="animate-spin" />
+                ) : (
+                  <Check size={13} strokeWidth={2} />
+                )}
+                Enregistrer
+              </button>
+            )}
+            {canImpersonate && (
+              <button
+                onClick={() => void impersonate()}
+                disabled={entering}
+                className="flex items-center gap-2 rounded-lg border border-amber-400/30 bg-amber-500/15 px-4 py-2 text-xs font-semibold text-amber-200 transition-colors hover:bg-amber-500/25 disabled:opacity-50"
+              >
+                {entering ? (
+                  <Loader2 size={13} className="animate-spin" />
+                ) : (
+                  <LogIn size={13} strokeWidth={2} />
+                )}
+                Se connecter en tant que ce compte
+              </button>
+            )}
+          </div>
 
           {/* Échanges du compte */}
           <div className="rounded-xl border border-white/[0.08] bg-black/30 p-3">
@@ -301,7 +339,7 @@ function AccountRow({
 }
 
 export default function AdminPage() {
-  const { isAdmin, isLoading, email } = useAuthUser();
+  const { isAdmin, isLoading, email, userId } = useAuthUser();
   const [accounts, setAccounts] = useState<Account[] | null>(null);
   const [toast, setToast] = useState<{ kind: "ok" | "error"; msg: string } | null>(
     null
@@ -459,6 +497,7 @@ export default function AdminPage() {
                     <AccountRow
                       key={`${a.id}-${a.role}-${a.venue_name}-${a.full_name}-${a.city}`}
                       account={a}
+                      selfId={userId}
                       onSaved={notifyOk}
                       onError={notifyError}
                     />
