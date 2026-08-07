@@ -333,13 +333,17 @@ export default function AdminPage() {
                       </p>
                     </div>
                   </div>
-                  <Link
+                  {/* Balise <a> et non <Link> : /hotel n'existe pas encore
+                      dans l'arbre déployé (travail en cours d'une autre
+                      branche) et les routes typées feraient échouer le
+                      build sur un Link vers une route inconnue. */}
+                  <a
                     href={section.home}
                     className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wider text-white/40 transition-colors hover:text-white"
                   >
                     Ouvrir cet espace
                     <ArrowUpRight size={12} />
-                  </Link>
+                  </a>
                 </div>
 
                 {profiles !== null && accounts.length === 0 && (
