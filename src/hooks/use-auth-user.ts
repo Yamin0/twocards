@@ -12,6 +12,8 @@ type AuthSnapshot = {
   fullName: string | null;
   role: string | null;
   venueName: string | null;
+  avatarUrl: string | null;
+  isAdmin: boolean;
 };
 
 /* Cache de module : l'utilisateur est demandé UNE fois au serveur Supabase,
@@ -42,6 +44,9 @@ function toSnapshot(
       (user.user_metadata?.role as string) ??
       null,
     venueName: (user.user_metadata?.venue_name as string) ?? null,
+    avatarUrl: (user.user_metadata?.avatar_url as string) ?? null,
+    /* app_metadata uniquement : cette zone n'est pas modifiable côté client. */
+    isAdmin: user.app_metadata?.is_admin === true,
   };
 }
 
@@ -105,6 +110,8 @@ export function useAuthUser() {
     fullName,
     role: snap?.role ?? null,
     venueName: snap?.venueName ?? null,
+    avatarUrl: snap?.avatarUrl ?? null,
+    isAdmin: snap?.isAdmin ?? false,
     isLoading,
     isDemoVenue,
     isDemoConcierge,

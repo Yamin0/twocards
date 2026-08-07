@@ -20,10 +20,12 @@ import {
   Menu,
   X,
   Bell,
+  Shield,
 } from "lucide-react";
 import { useAuthUser } from "@/hooks/use-auth-user";
 import { useUnreadMessages } from "@/hooks/use-unread-messages";
 import { PRQualityProvider } from "@/contexts/pr-quality-context";
+import { Avatar } from "@/components/shared/avatar";
 
 const mainNav = [
   { icon: LayoutDashboard, label: "Tableau de bord", href: "/dashboard" },
@@ -97,12 +99,17 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { fullName, initials, isLoading } = useAuthUser();
+  const { fullName, initials, avatarUrl, isLoading, isAdmin } = useAuthUser();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
   const closeSidebar = () => setSidebarOpen(false);
   const unreadMessages = useUnreadMessages();
   const badges = { "/dashboard/messages": unreadMessages };
+  /* L'entrée Administration n'existe que pour le compte porteur du drapeau
+     admin ; la garde réelle est en base, ceci n'est que de l'affichage. */
+  const adminItems = isAdmin
+    ? [...adminNav, { icon: Shield, label: "Administration", href: "/admin" }]
+    : adminNav;
 
   useEffect(() => {
     if (sidebarOpen) {
@@ -143,11 +150,12 @@ export default function DashboardLayout({
                 twocards<span className="text-blue-400">.</span>
               </span>
             </Link>
-            <div className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center">
-              <span className="text-xs font-semibold text-white font-[family-name:var(--font-manrope)]">
-                {initials || "U"}
-              </span>
-            </div>
+            <Avatar
+              url={avatarUrl}
+              initials={initials || "U"}
+              size={32}
+              textClassName="text-xs font-semibold text-white font-[family-name:var(--font-manrope)]"
+            />
           </div>
 
           {/* Mobile sidebar overlay */}
@@ -160,7 +168,7 @@ export default function DashboardLayout({
               <div className="fixed top-20 left-4 right-4 z-50 lg:hidden backdrop-blur-2xl bg-black/60 border border-white/10 rounded-3xl p-5 space-y-5 max-h-[70vh] overflow-y-auto">
                 <NavSection items={mainNav} pathname={pathname} onNavigate={closeSidebar} badges={badges} />
                 <NavSection items={toolsNav} pathname={pathname} onNavigate={closeSidebar} badges={badges} />
-                <NavSection items={adminNav} pathname={pathname} onNavigate={closeSidebar} badges={badges} />
+                <NavSection items={adminItems} pathname={pathname} onNavigate={closeSidebar} badges={badges} />
                 <div className="pt-3 border-t border-white/10">
                   <form action="/auth/signout" method="post">
                     <button
@@ -193,22 +201,23 @@ export default function DashboardLayout({
             <div className="flex-1 overflow-y-auto space-y-5 scrollbar-thin">
               <NavSection items={mainNav} pathname={pathname} onNavigate={closeSidebar} badges={badges} />
               <NavSection items={toolsNav} pathname={pathname} onNavigate={closeSidebar} badges={badges} />
-              <NavSection items={adminNav} pathname={pathname} onNavigate={closeSidebar} badges={badges} />
+              <NavSection items={adminItems} pathname={pathname} onNavigate={closeSidebar} badges={badges} />
             </div>
 
             {/* Bottom */}
             <div className="pt-4 mt-4 border-t border-white/10 space-y-2">
               {/* User info */}
               <div className="flex items-center gap-3 px-3 py-2">
-                <div className="w-9 h-9 rounded-full bg-white/15 flex items-center justify-center shrink-0">
-                  {isLoading ? (
-                    <div className="w-9 h-9 rounded-full bg-white/10 animate-pulse" />
-                  ) : (
-                    <span className="text-sm font-semibold text-white font-[family-name:var(--font-manrope)]">
-                      {initials || "U"}
-                    </span>
-                  )}
-                </div>
+                {isLoading ? (
+                  <div className="w-9 h-9 rounded-full bg-white/10 animate-pulse shrink-0" />
+                ) : (
+                  <Avatar
+                    url={avatarUrl}
+                    initials={initials || "U"}
+                    size={36}
+                    textClassName="text-sm font-semibold text-white font-[family-name:var(--font-manrope)]"
+                  />
+                )}
                 <div className="min-w-0">
                   {isLoading ? (
                     <div className="h-3 w-20 bg-white/10 rounded animate-pulse" />
