@@ -17,11 +17,12 @@ export default function RestaurantsPage() {
         titleEnd: ".",
         subtitle:
           "TwoCards transforme les réservations que vous recevez déjà sur WhatsApp en un canal géré : votre inventaire est distribué aux concierges et RP vérifiés, chaque client est attribué, et les commissions se calculent sur du revenu vérifié — pas sur des promesses.",
-        scrollVideo: {
-          desktop: "/videos/etablissements-hero.mp4",
-          mobile: "/videos/etablissements-hero-480.mp4",
-          poster: "/videos/etablissements-hero-poster.jpg",
-        },
+        heroVideo: "/videos/etablissements-hero-60.mp4",
+        heroPoster: "/videos/etablissements-hero-poster.jpg",
+        /* La séquence va de la salle au zellige fermé : elle se joue une fois
+           et reste sur le mur clos. En boucle, le retour brutal à la salle
+           se verrait à chaque tour. */
+        heroVideoLoop: false,
         primaryCta: { label: "Devenir partenaire", href: "/signup" },
         secondaryCta: { label: "Parler à notre équipe", href: "/signup" },
         steps: [

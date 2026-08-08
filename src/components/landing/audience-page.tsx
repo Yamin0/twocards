@@ -26,6 +26,10 @@ export interface AudiencePageData {
   /* Fond vidéo du héros (autoplay muet en boucle). À défaut, fond shader. */
   heroVideo?: string;
   heroPoster?: string;
+  /* Par défaut la scène tourne en boucle. À false, elle se joue une fois et
+     se fige sur sa dernière image — utile quand la séquence raconte quelque
+     chose qui se termine, et dont le raccord de bouclage se verrait. */
+  heroVideoLoop?: boolean;
   /* Fond photo du héros, alternative fixe à la vidéo. Même traitement :
      voile sombre, navbar claire, titre blanc. La vidéo prime si les deux
      sont renseignées. */
@@ -283,7 +287,7 @@ export function AudiencePage({ data }: { data: AudiencePageData }) {
               src={data.heroVideo}
               poster={data.heroPoster}
               autoPlay
-              loop
+              loop={data.heroVideoLoop ?? true}
               muted
               playsInline
               disablePictureInPicture
