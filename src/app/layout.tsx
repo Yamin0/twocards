@@ -3,6 +3,7 @@ import { Manrope, Inter, Nunito } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 import { ImpersonationBanner } from "@/components/shared/impersonation-banner";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const manrope = Manrope({
   variable: "--font-manrope",
@@ -88,6 +89,7 @@ export default function RootLayout({
       <body>
         <ImpersonationBanner />
         {children}
+        <SpeedInsights />
       </body>
     </html>
   );
