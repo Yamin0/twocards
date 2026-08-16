@@ -77,7 +77,7 @@ export function GuestExperience({
       <div className="fixed inset-0 bg-black/55" />
       <div className="fixed inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/70" />
 
-      <div className="relative z-10 mx-auto max-w-md px-4 pb-10 pt-8 sm:pt-12">
+      <div className="relative z-10 mx-auto w-full max-w-md px-4 pb-10 pt-8 sm:max-w-3xl sm:px-8 sm:pt-14 lg:max-w-6xl lg:pt-20">
         {category === null ? (
           <MenuView hotelName={hotelName} onPick={setCategory} />
         ) : (
@@ -88,7 +88,7 @@ export function GuestExperience({
           />
         )}
 
-        <footer className="mt-10 flex items-center justify-center gap-2 text-white/40">
+        <footer className="mt-10 flex items-center justify-center gap-2 text-white/40 sm:mt-16">
           <span className="text-xs font-[family-name:var(--font-inter)]">
             Propulsé par
           </span>
@@ -125,42 +125,45 @@ function MenuView({
 }) {
   return (
     <div>
-      <p className="text-center text-[11px] font-bold uppercase tracking-[0.25em] text-white/50 font-[family-name:var(--font-inter)]">
+      <p className="text-center text-[11px] font-bold uppercase tracking-[0.25em] text-white/50 font-[family-name:var(--font-inter)] sm:text-xs lg:text-sm">
         Votre conciergerie
       </p>
-      <h1 className="mt-2 text-center text-3xl font-extrabold text-white font-[family-name:var(--font-manrope)]">
+      <h1 className="mt-2 text-center text-3xl font-extrabold text-white font-[family-name:var(--font-manrope)] sm:mt-3 sm:text-5xl lg:text-6xl">
         {hotelName ?? "Bienvenue"}
       </h1>
-      <p className="mx-auto mt-2 max-w-xs text-center text-sm leading-relaxed text-white/60 font-[family-name:var(--font-inter)]">
+      <p className="mx-auto mt-2 max-w-xs text-center text-sm leading-relaxed text-white/60 font-[family-name:var(--font-inter)] sm:mt-4 sm:max-w-lg sm:text-base lg:text-lg">
         Réservez vos plus belles sorties en quelques secondes — l&apos;hôtel
         s&apos;occupe du reste.
       </p>
 
-      <div className="mt-8 grid grid-cols-2 gap-3">
+      <div className="mt-8 grid grid-cols-2 gap-3 sm:mt-12 sm:gap-5 lg:grid-cols-4 lg:gap-6">
         {GUEST_CATEGORIES.map((cat) => {
           const Icon = CATEGORY_ICONS[cat.key];
           return (
             <button
               key={cat.key}
               onClick={() => onPick(cat)}
-              className="group relative aspect-[4/5] overflow-hidden rounded-3xl border border-white/15 text-left shadow-lg shadow-black/30 transition-transform active:scale-[0.97]"
+              className="group relative aspect-[4/5] overflow-hidden rounded-3xl border border-white/15 text-left shadow-lg shadow-black/30 transition-transform hover:-translate-y-1 active:scale-[0.97] sm:rounded-[2rem]"
             >
               <Image
                 src={cat.image}
                 alt=""
                 fill
-                sizes="(max-width: 448px) 50vw, 224px"
+                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 45vw, 300px"
                 className="object-cover transition-transform duration-500 group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/10" />
-              <div className="absolute inset-x-0 bottom-0 p-4">
-                <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-xl bg-white/15 backdrop-blur-md">
-                  <Icon size={18} strokeWidth={1.5} className="text-white" />
+              <div className="absolute inset-x-0 bottom-0 p-4 sm:p-6">
+                <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-xl bg-white/15 backdrop-blur-md sm:mb-3 sm:h-12 sm:w-12 sm:rounded-2xl">
+                  <Icon
+                    strokeWidth={1.5}
+                    className="h-[18px] w-[18px] text-white sm:h-6 sm:w-6"
+                  />
                 </div>
-                <p className="text-lg font-bold text-white font-[family-name:var(--font-manrope)]">
+                <p className="text-lg font-bold text-white font-[family-name:var(--font-manrope)] sm:text-2xl">
                   {cat.label}
                 </p>
-                <p className="mt-0.5 text-[11px] leading-snug text-white/60 font-[family-name:var(--font-inter)]">
+                <p className="mt-0.5 text-[11px] leading-snug text-white/60 font-[family-name:var(--font-inter)] sm:mt-1 sm:text-sm">
                   {cat.tagline}
                 </p>
               </div>
@@ -186,38 +189,41 @@ function CategoryView({
   const Icon = CATEGORY_ICONS[category.key];
   return (
     <div>
-      <div className="mb-6 flex items-center gap-3">
+      <div className="mb-6 flex items-center gap-3 sm:mb-10 sm:gap-5">
         <button
           onClick={onBack}
           aria-label="Retour au menu"
-          className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/10 text-white backdrop-blur-md transition-colors hover:bg-white/20"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/10 text-white backdrop-blur-md transition-colors hover:bg-white/20 sm:h-14 sm:w-14"
         >
-          <ArrowLeft size={18} strokeWidth={1.5} />
+          <ArrowLeft strokeWidth={1.5} className="h-[18px] w-[18px] sm:h-6 sm:w-6" />
         </button>
         <div>
-          <h2 className="flex items-center gap-2 text-xl font-extrabold text-white font-[family-name:var(--font-manrope)]">
-            <Icon size={18} strokeWidth={1.5} className="text-white/70" />
+          <h2 className="flex items-center gap-2 text-xl font-extrabold text-white font-[family-name:var(--font-manrope)] sm:gap-3 sm:text-4xl lg:text-5xl">
+            <Icon
+              strokeWidth={1.5}
+              className="h-[18px] w-[18px] text-white/70 sm:h-8 sm:w-8"
+            />
             {category.label}
           </h2>
-          <p className="text-xs text-white/50 font-[family-name:var(--font-inter)]">
+          <p className="text-xs text-white/50 font-[family-name:var(--font-inter)] sm:mt-1 sm:text-base">
             {category.tagline}
           </p>
         </div>
       </div>
 
-      <div className="flex flex-col gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 lg:gap-6">
         {category.offers.map((o) => (
           <button
             key={o.id}
             onClick={() => onReserve(o)}
-            className="group overflow-hidden rounded-3xl border border-white/12 bg-black/40 text-left backdrop-blur-xl transition-transform active:scale-[0.98]"
+            className="group flex h-full flex-col overflow-hidden rounded-3xl border border-white/12 bg-black/40 text-left backdrop-blur-xl transition-transform hover:-translate-y-1 active:scale-[0.98]"
           >
-            <div className="relative h-36">
+            <div className="relative h-36 shrink-0 sm:h-48 lg:h-52">
               <Image
                 src={o.image}
                 alt=""
                 fill
-                sizes="(max-width: 448px) 100vw, 448px"
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 380px"
                 className="object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
@@ -230,22 +236,22 @@ function CategoryView({
                 </span>
               )}
             </div>
-            <div className="flex items-center justify-between gap-3 p-4">
+            <div className="flex flex-1 items-center justify-between gap-3 p-4 sm:p-5">
               <div className="min-w-0">
-                <p className="truncate text-base font-bold text-white font-[family-name:var(--font-manrope)]">
+                <p className="line-clamp-2 text-base font-bold text-white font-[family-name:var(--font-manrope)] sm:text-lg">
                   {o.name}
                 </p>
                 {o.city && (
-                  <p className="mt-0.5 flex items-center gap-1 text-[11px] text-white/50 font-[family-name:var(--font-inter)]">
+                  <p className="mt-0.5 flex items-center gap-1 text-[11px] text-white/50 font-[family-name:var(--font-inter)] sm:text-xs">
                     <MapPin size={11} strokeWidth={1.5} />
                     {o.city}
                   </p>
                 )}
-                <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-white/60 font-[family-name:var(--font-inter)]">
+                <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-white/60 font-[family-name:var(--font-inter)] sm:text-sm">
                   {o.description}
                 </p>
               </div>
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-black transition-transform group-hover:translate-x-0.5">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-black transition-transform group-hover:translate-x-0.5 sm:h-11 sm:w-11">
                 <ChevronRight size={16} strokeWidth={2} />
               </span>
             </div>
@@ -322,7 +328,7 @@ function ReservationSheet({
         className="absolute inset-0 bg-black/70 backdrop-blur-sm"
         onClick={onClose}
       />
-      <div className="relative z-10 max-h-[92dvh] w-full max-w-md overflow-y-auto rounded-t-3xl border border-white/15 bg-[#10131f]/95 backdrop-blur-2xl sm:rounded-3xl">
+      <div className="relative z-10 max-h-[92dvh] w-full max-w-md overflow-y-auto rounded-t-3xl border border-white/15 bg-[#10131f]/95 backdrop-blur-2xl sm:max-w-lg sm:rounded-3xl">
         {state === "done" ? (
           <div className="px-6 py-12 text-center">
             <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/15 border border-emerald-400/30">
