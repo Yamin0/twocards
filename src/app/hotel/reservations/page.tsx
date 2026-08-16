@@ -2,6 +2,10 @@
 
 import { useState } from "react";
 import { useAuthUser } from "@/hooks/use-auth-user";
+import {
+  useHotelReservations,
+  type HotelReservation,
+} from "@/hooks/use-hotel-reservations";
 import { TableSkeleton } from "@/components/shared/loading-skeleton";
 import {
   CalendarDays,
@@ -10,36 +14,38 @@ import {
   CheckCircle2,
   Search,
   QrCode,
+  Info,
 } from "lucide-react";
-
-type HotelReservation = {
-  id: string;
-  guest: string;
-  venue: string;
-  qrLabel: string;
-  date: string;
-  partySize: number;
-  status: "confirmée" | "en attente" | "annulée";
-};
 
 const FILTERS = ["toutes", "confirmée", "en attente", "annulée"] as const;
 
+const STATUS_STYLES: Record<HotelReservation["status"], string> = {
+  confirmée: "bg-emerald-500/15 text-emerald-400",
+  "en attente": "bg-amber-500/15 text-amber-400",
+  annulée: "bg-red-500/15 text-red-400",
+};
+
+const formatDate = (r: HotelReservation) =>
+  new Date(r.reservation_date + "T00:00:00").toLocaleDateString("fr-FR") +
+  (r.reservation_time ? ` · ${r.reservation_time}` : "");
+
 export default function HotelReservationsPage() {
   const { isLoading } = useAuthUser();
+  const { reservations, isLoading: loadingData } = useHotelReservations();
   const [filter, setFilter] = useState<(typeof FILTERS)[number]>("toutes");
   const [search, setSearch] = useState("");
 
-  if (isLoading) return <TableSkeleton />;
+  if (isLoading || loadingData || reservations === null)
+    return <TableSkeleton />;
 
-  /* Les réservations arriveront des scans réels ; aucune donnée décorative. */
-  const reservations: HotelReservation[] = [];
   const searchLower = search.toLowerCase();
   const filtered = reservations.filter((r) => {
     const matchesFilter = filter === "toutes" || r.status === filter;
     const matchesSearch =
       !search ||
-      r.guest.toLowerCase().includes(searchLower) ||
-      r.venue.toLowerCase().includes(searchLower);
+      r.guest_name.toLowerCase().includes(searchLower) ||
+      r.venue_name.toLowerCase().includes(searchLower) ||
+      (r.qr_label ?? "").toLowerCase().includes(searchLower);
     return matchesFilter && matchesSearch;
   });
 
@@ -55,7 +61,8 @@ export default function HotelReservationsPage() {
             Réservations
           </h1>
           <p className="text-sm text-white/60 font-[family-name:var(--font-inter)] mt-0.5">
-            Sorties réservées par vos clients après un scan
+            Sorties réservées par vos clients après un scan — mise à jour en
+            temps réel
           </p>
         </div>
         <div className="relative">
@@ -66,10 +73,10 @@ export default function HotelReservationsPage() {
           />
           <input
             type="text"
-            placeholder="Rechercher..."
+            placeholder="Client, sortie, chambre..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-10 pr-4 py-2 bg-white/[0.05] rounded-full text-sm text-white font-[family-name:var(--font-inter)] placeholder:text-white/30 focus:ring-1 focus:ring-white/30 focus:outline-none w-48"
+            className="pl-10 pr-4 py-2 bg-white/[0.05] rounded-full text-sm text-white font-[family-name:var(--font-inter)] placeholder:text-white/30 focus:ring-1 focus:ring-white/30 focus:outline-none w-56"
           />
         </div>
       </div>
@@ -135,19 +142,21 @@ export default function HotelReservationsPage() {
       </div>
 
       {/* Table / empty state */}
-      <div className="px-4 sm:px-6 pb-8">
+      <div className="px-4 sm:px-6 pb-4">
         {filtered.length === 0 ? (
           <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl p-12 text-center">
             <div className="w-14 h-14 rounded-2xl bg-blue-500/15 border border-blue-400/20 flex items-center justify-center mx-auto mb-5">
               <QrCode size={26} strokeWidth={1.5} className="text-blue-400" />
             </div>
             <h2 className="text-lg font-bold text-white font-[family-name:var(--font-manrope)] mb-2">
-              Aucune réservation pour le moment
+              {reservations.length === 0
+                ? "Aucune réservation pour le moment"
+                : "Aucune réservation ne correspond"}
             </h2>
             <p className="text-sm text-white/50 font-[family-name:var(--font-inter)] max-w-md mx-auto">
-              Dès qu&apos;un client scanne l&apos;un de vos QR codes et réserve
-              une table chez un partenaire, la réservation apparaît ici avec
-              l&apos;emplacement du scan.
+              {reservations.length === 0
+                ? "Dès qu'un client scanne l'un de vos QR codes et réserve une sortie, elle apparaît ici instantanément avec la chambre d'origine."
+                : "Essayez un autre filtre ou une autre recherche."}
             </p>
           </div>
         ) : (
@@ -155,7 +164,7 @@ export default function HotelReservationsPage() {
             <table className="w-full text-left">
               <thead>
                 <tr className="border-b border-white/10">
-                  {["Client", "Établissement", "QR scanné", "Date", "Pers.", "Statut"].map(
+                  {["Client", "Chambre", "Sortie", "Date", "Pers.", "Statut", "Commission"].map(
                     (h) => (
                       <th
                         key={h}
@@ -170,36 +179,45 @@ export default function HotelReservationsPage() {
               <tbody>
                 {filtered.map((r) => (
                   <tr key={r.id} className="border-b border-white/[0.06] last:border-0">
-                    <td className="px-4 py-3 text-sm text-white font-[family-name:var(--font-manrope)]">
-                      {r.guest}
+                    <td className="px-4 py-3">
+                      <p className="text-sm text-white font-[family-name:var(--font-manrope)]">
+                        {r.guest_name}
+                      </p>
+                      <p className="text-xs text-white/40 font-[family-name:var(--font-inter)]">
+                        {r.guest_phone}
+                      </p>
                     </td>
                     <td className="px-4 py-3 text-sm text-white/70 font-[family-name:var(--font-inter)]">
-                      {r.venue}
+                      {r.qr_label ?? "—"}
                     </td>
-                    <td className="px-4 py-3 text-sm text-white/70 font-[family-name:var(--font-inter)]">
-                      {r.qrLabel}
+                    <td className="px-4 py-3">
+                      <p className="text-sm text-white/80 font-[family-name:var(--font-inter)]">
+                        {r.venue_name}
+                      </p>
+                      <p className="text-xs text-white/40 font-[family-name:var(--font-inter)]">
+                        {r.category}
+                      </p>
                     </td>
-                    <td className="px-4 py-3 text-sm text-white/70 font-[family-name:var(--font-inter)]">
-                      {r.date}
+                    <td className="px-4 py-3 text-sm text-white/70 font-[family-name:var(--font-inter)] whitespace-nowrap">
+                      {formatDate(r)}
                     </td>
                     <td className="px-4 py-3 text-sm text-white/70 font-[family-name:var(--font-inter)]">
                       <span className="inline-flex items-center gap-1">
                         <Users size={12} strokeWidth={1.5} />
-                        {r.partySize}
+                        {r.party_size}
                       </span>
                     </td>
                     <td className="px-4 py-3">
                       <span
-                        className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider font-[family-name:var(--font-inter)] ${
-                          r.status === "confirmée"
-                            ? "bg-emerald-500/15 text-emerald-400"
-                            : r.status === "en attente"
-                              ? "bg-amber-500/15 text-amber-400"
-                              : "bg-red-500/15 text-red-400"
-                        }`}
+                        className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider font-[family-name:var(--font-inter)] whitespace-nowrap ${STATUS_STYLES[r.status]}`}
                       >
                         {r.status}
                       </span>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-white/70 font-[family-name:var(--font-inter)] whitespace-nowrap">
+                      {r.commission > 0
+                        ? `${r.commission.toLocaleString()} MAD`
+                        : "—"}
                     </td>
                   </tr>
                 ))}
@@ -207,6 +225,17 @@ export default function HotelReservationsPage() {
             </table>
           </div>
         )}
+      </div>
+
+      {/* Modèle en lecture seule, assumé */}
+      <div className="px-4 sm:px-6 pb-8">
+        <p className="flex items-start gap-2 text-xs text-white/40 font-[family-name:var(--font-inter)] max-w-2xl">
+          <Info size={13} strokeWidth={1.5} className="shrink-0 mt-0.5" />
+          La confirmation se fait directement entre le client et
+          l&apos;établissement. Statut et montant dépensé sont mis à jour par
+          twocards — votre commission (10&nbsp;% du montant dépensé) se calcule
+          automatiquement dès que le montant est renseigné.
+        </p>
       </div>
     </div>
   );

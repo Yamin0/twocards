@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
 import { useAuthUser } from "@/hooks/use-auth-user";
 import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
 import { AvatarUploader } from "@/components/shared/avatar-uploader";
@@ -17,7 +18,8 @@ import {
 } from "lucide-react";
 
 export default function HotelSettingsPage() {
-  const { fullName, email, venueName, isLoading } = useAuthUser();
+  const { fullName, email, venueName, city, phone, roomsCount, isLoading } =
+    useAuthUser();
   const [form, setForm] = useState({
     fullname: "",
     email: "",
@@ -30,6 +32,7 @@ export default function HotelSettingsPage() {
   /* Message plutôt que booléen : le formulaire et l'envoi de photo n'ont pas
      la même confirmation à afficher. */
   const [notice, setNotice] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (notice) {
@@ -45,27 +48,42 @@ export default function HotelSettingsPage() {
     setForm({
       fullname: fullName || "",
       email: email || "",
-      phone: "",
+      phone: phone || "",
       hotelName: venueName || "",
-      city: "",
-      rooms: "",
+      city: city || "",
+      rooms: roomsCount ? String(roomsCount) : "",
     });
   }
 
   const updateForm = (field: string, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
     setNotice(null);
+    setError(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     setNotice(null);
+    setError(null);
 
-    // Simulate save (replace with actual API call)
-    await new Promise((resolve) => setTimeout(resolve, 600));
+    /* Métadonnées utilisateur : la même source que le signup. La ville pilote
+       le catalogue proposé aux clients et l'URL des QR codes. */
+    const { error: saveError } = await createClient().auth.updateUser({
+      data: {
+        full_name: form.fullname.trim(),
+        phone: form.phone.trim(),
+        venue_name: form.hotelName.trim(),
+        city: form.city.trim(),
+        rooms_count: form.rooms ? Number(form.rooms) : null,
+      },
+    });
 
     setSaving(false);
+    if (saveError) {
+      setError("Impossible d'enregistrer. Réessayez dans un instant.");
+      return;
+    }
     setNotice("Vos informations ont été enregistrées avec succès.");
   };
 
@@ -93,6 +111,11 @@ export default function HotelSettingsPage() {
           <div className="flex items-center gap-2 rounded-sm bg-emerald-50 p-3 text-sm text-emerald-700">
             <CheckCircle size={16} strokeWidth={1.5} />
             {notice}
+          </div>
+        )}
+        {error && (
+          <div className="flex items-center gap-2 rounded-sm bg-red-500/15 border border-red-400/20 p-3 text-sm text-red-300">
+            {error}
           </div>
         )}
 
@@ -128,9 +151,13 @@ export default function HotelSettingsPage() {
                     type="text"
                     value={form.city}
                     onChange={(e) => updateForm("city", e.target.value)}
+                    placeholder="Marrakech"
                     className={inputClass}
                   />
                 </div>
+                <p className="text-[11px] text-white/40 font-[family-name:var(--font-inter)]">
+                  Détermine le catalogue de sorties proposé à vos clients.
+                </p>
               </div>
 
               <div className="space-y-1.5">
@@ -167,10 +194,13 @@ export default function HotelSettingsPage() {
                   <input
                     type="email"
                     value={form.email}
-                    onChange={(e) => updateForm("email", e.target.value)}
-                    className={inputClass}
+                    disabled
+                    className={`${inputClass} opacity-50 cursor-not-allowed`}
                   />
                 </div>
+                <p className="text-[11px] text-white/40 font-[family-name:var(--font-inter)]">
+                  L&apos;email de connexion ne se change pas ici.
+                </p>
               </div>
 
               <div className="space-y-1.5">

@@ -1,73 +1,107 @@
 "use client";
 
-import { useState } from "react";
 import { useAuthUser } from "@/hooks/use-auth-user";
-import { TableSkeleton } from "@/components/shared/loading-skeleton";
-import { useToast } from "@/hooks/use-toast";
 import {
-  Download,
+  useHotelReservations,
+  type HotelReservation,
+} from "@/hooks/use-hotel-reservations";
+import { TableSkeleton } from "@/components/shared/loading-skeleton";
+import {
+  Coins,
   TrendingUp,
-  Wallet,
+  HelpCircle,
+  Download,
+  Percent,
   Clock,
-  Search,
-  Check,
-  QrCode,
 } from "lucide-react";
 
-type HotelCommission = {
-  id: string;
-  venue: string;
-  guest: string;
-  qrLabel: string;
-  date: string;
-  montant: string;
-  status: "versé" | "en attente";
+/* Une ligne de commission = une réservation dont le montant dépensé est
+   renseigné. Avant cela, la sortie n'a pas encore eu lieu (ou le montant
+   n'est pas remonté) : elle compte comme « en attente de montant ». */
+const hasCommission = (r: HotelReservation) =>
+  r.amount_spent !== null && r.status !== "annulée";
+
+const sameMonth = (iso: string) => {
+  const d = new Date(iso);
+  const now = new Date();
+  return (
+    d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth()
+  );
 };
+
+function exportCsv(rows: HotelReservation[]) {
+  const header = [
+    "Date sortie",
+    "Client",
+    "Sortie",
+    "Catégorie",
+    "Chambre",
+    "Montant dépensé (MAD)",
+    "Taux",
+    "Commission (MAD)",
+  ];
+  const lines = rows.map((r) =>
+    [
+      r.reservation_date,
+      r.guest_name,
+      r.venue_name,
+      r.category,
+      r.qr_label ?? "",
+      r.amount_spent ?? "",
+      `${Math.round(r.commission_rate * 100)}%`,
+      r.commission,
+    ]
+      .map((v) => `"${String(v).replace(/"/g, '""')}"`)
+      .join(";")
+  );
+  const blob = new Blob(["﻿" + [header.join(";"), ...lines].join("\n")], {
+    type: "text/csv;charset=utf-8",
+  });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  const today = new Date().toISOString().slice(0, 10);
+  a.href = url;
+  a.download = `commissions-hotel-${today}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
 
 export default function HotelCommissionsPage() {
   const { isLoading } = useAuthUser();
-  const [filter, setFilter] = useState("tous");
-  const [search, setSearch] = useState("");
-  const { toast, showToast } = useToast();
+  const { reservations, isLoading: loadingData } = useHotelReservations();
 
-  if (isLoading) return <TableSkeleton />;
+  if (isLoading || loadingData || reservations === null)
+    return <TableSkeleton />;
 
-  /* Les commissions découlent des réservations réelles ; zéro par défaut. */
-  const commissions: HotelCommission[] = [];
-  const searchLower = search.toLowerCase();
-  const filtered = commissions.filter((c) => {
-    const matchesFilter = filter === "tous" || c.status === filter;
-    const matchesSearch =
-      !search ||
-      c.venue.toLowerCase().includes(searchLower) ||
-      c.guest.toLowerCase().includes(searchLower);
-    return matchesFilter && matchesSearch;
-  });
+  const rows = reservations.filter(hasCommission);
+  const total = rows.reduce((sum, r) => sum + r.commission, 0);
+  const totalMonth = rows
+    .filter((r) => sameMonth(r.created_at))
+    .reduce((sum, r) => sum + r.commission, 0);
+  const awaitingAmount = reservations.filter(
+    (r) => r.amount_spent === null && r.status !== "annulée"
+  ).length;
 
-  const totalMonth = 0;
-  const pending = 0;
-  const paid = 0;
-
-  const handleExport = () => {
-    const today = new Date().toISOString().split("T")[0];
-    const headers = ["Établissement", "Client", "QR scanné", "Date", "Montant", "Statut"];
-    const csv = [
-      headers.join(","),
-      ...commissions.map((c) =>
-        [c.venue, c.guest, c.qrLabel, c.date, c.montant, c.status]
-          .map((v) => `"${v}"`)
-          .join(",")
-      ),
-    ].join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `commissions-hotel-${today}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-    showToast("CSV téléchargé");
-  };
+  const stats = [
+    {
+      label: "Commissions cumulées",
+      value: `${total.toLocaleString()} MAD`,
+      icon: Coins,
+      color: "text-amber-400",
+    },
+    {
+      label: "Ce mois-ci",
+      value: `${totalMonth.toLocaleString()} MAD`,
+      icon: TrendingUp,
+      color: "text-emerald-400",
+    },
+    {
+      label: "En attente de montant",
+      value: String(awaitingAmount),
+      icon: Clock,
+      color: "text-blue-400",
+    },
+  ] as const;
 
   return (
     <div className="bg-transparent min-h-screen">
@@ -78,108 +112,69 @@ export default function HotelCommissionsPage() {
             Commissions
           </h1>
           <p className="text-sm text-white/60 font-[family-name:var(--font-inter)] mt-0.5">
-            Vos gains sur les réservations issues de vos QR codes
+            Vos gains sur chaque sortie réservée via vos QR codes
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <Search
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40"
-              size={16}
-              strokeWidth={1.5}
-            />
-            <input
-              type="text"
-              placeholder="Rechercher..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-10 pr-4 py-2 bg-white/[0.05] rounded-full text-sm text-white font-[family-name:var(--font-inter)] placeholder:text-white/30 focus:ring-1 focus:ring-white/30 focus:outline-none w-48"
-            />
-          </div>
+        {rows.length > 0 && (
           <button
-            onClick={handleExport}
-            className="flex items-center gap-2 bg-white/[0.07] border border-white/10 text-white/60 text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-white/[0.1] transition-colors font-[family-name:var(--font-inter)]"
+            onClick={() => exportCsv(rows)}
+            className="flex items-center gap-2 bg-white/10 hover:bg-white/15 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors font-[family-name:var(--font-manrope)]"
           >
             <Download size={16} strokeWidth={1.5} />
-            Exporter CSV
+            Exporter en CSV
           </button>
-        </div>
+        )}
       </div>
 
       {/* Stats cards */}
       <div className="px-4 sm:px-6 pb-6 grid grid-cols-3 gap-3">
-        <div className="bg-white/[0.07] rounded-xl border border-white/10 p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
-              <Wallet size={16} strokeWidth={1.5} className="text-white" />
+        {stats.map((s) => (
+          <div
+            key={s.label}
+            className="bg-white/[0.07] rounded-xl border border-white/10 p-4"
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
+                <s.icon size={16} strokeWidth={1.5} className={s.color} />
+              </div>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-white/60 font-[family-name:var(--font-inter)]">
+                {s.label}
+              </span>
             </div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-white/60 font-[family-name:var(--font-inter)]">
-              Total ce mois
-            </span>
+            <p className="text-xl font-extrabold text-white font-[family-name:var(--font-manrope)]">
+              {s.value}
+            </p>
           </div>
-          <p className="text-xl font-extrabold text-white font-[family-name:var(--font-manrope)]">
-            {totalMonth.toLocaleString()} MAD
-          </p>
-        </div>
-        <div className="bg-white/[0.07] rounded-xl border border-white/10 p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
-              <Clock size={16} strokeWidth={1.5} className="text-amber-400" />
-            </div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-white/60 font-[family-name:var(--font-inter)]">
-              En attente
-            </span>
-          </div>
-          <p className="text-xl font-extrabold text-white font-[family-name:var(--font-manrope)]">
-            {pending.toLocaleString()} MAD
-          </p>
-        </div>
-        <div className="bg-white/[0.07] rounded-xl border border-white/10 p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-              <TrendingUp size={16} strokeWidth={1.5} className="text-emerald-400" />
-            </div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-white/60 font-[family-name:var(--font-inter)]">
-              Versé
-            </span>
-          </div>
-          <p className="text-xl font-extrabold text-white font-[family-name:var(--font-manrope)]">
-            {paid.toLocaleString()} MAD
-          </p>
-        </div>
+        ))}
       </div>
 
-      {/* Filters */}
-      <div className="px-4 sm:px-6 pb-4 flex flex-wrap gap-2">
-        {["tous", "versé", "en attente"].map((f) => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className={`px-4 py-1.5 rounded-full text-xs font-medium capitalize transition-colors font-[family-name:var(--font-inter)] ${
-              filter === f
-                ? "bg-white/20 text-white border border-white/20"
-                : "bg-white/[0.05] text-white/50 border border-white/10 hover:bg-white/10 hover:text-white"
-            }`}
-          >
-            {f}
-          </button>
-        ))}
+      {/* Règle de calcul, énoncée plutôt que devinée */}
+      <div className="px-4 sm:px-6 pb-6">
+        <div className="flex items-start gap-3 rounded-2xl border border-amber-400/15 bg-amber-500/[0.07] p-4">
+          <Percent size={16} strokeWidth={1.5} className="text-amber-400 shrink-0 mt-0.5" />
+          <p className="text-xs leading-relaxed text-white/60 font-[family-name:var(--font-inter)] max-w-2xl">
+            Votre commission est un pourcentage du montant réellement dépensé
+            par le client — 10&nbsp;% par défaut, le taux peut varier selon
+            l&apos;établissement. Elle est calculée automatiquement dès que le
+            montant de la sortie est renseigné par twocards, après la sortie.
+          </p>
+        </div>
       </div>
 
       {/* Table / empty state */}
       <div className="px-4 sm:px-6 pb-8">
-        {filtered.length === 0 ? (
+        {rows.length === 0 ? (
           <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl p-12 text-center">
             <div className="w-14 h-14 rounded-2xl bg-amber-500/15 border border-amber-400/20 flex items-center justify-center mx-auto mb-5">
-              <QrCode size={26} strokeWidth={1.5} className="text-amber-400" />
+              <Coins size={26} strokeWidth={1.5} className="text-amber-400" />
             </div>
             <h2 className="text-lg font-bold text-white font-[family-name:var(--font-manrope)] mb-2">
               Aucune commission pour le moment
             </h2>
             <p className="text-sm text-white/50 font-[family-name:var(--font-inter)] max-w-md mx-auto">
-              Chaque réservation confirmée après un scan de vos QR codes vous
-              rapporte une commission. Elles apparaîtront ici avec leur statut
-              de versement.
+              {awaitingAmount > 0
+                ? `${awaitingAmount} réservation${awaitingAmount > 1 ? "s" : ""} en attente de montant — vos commissions apparaîtront ici dès que les montants des sorties seront renseignés.`
+                : "Chaque sortie réservée via vos QR codes vous rapporte un pourcentage du montant dépensé. Tout apparaîtra ici, exportable en CSV."}
             </p>
           </div>
         ) : (
@@ -187,7 +182,7 @@ export default function HotelCommissionsPage() {
             <table className="w-full text-left">
               <thead>
                 <tr className="border-b border-white/10">
-                  {["Établissement", "Client", "QR scanné", "Date", "Montant", "Statut"].map(
+                  {["Date", "Client", "Sortie", "Chambre", "Montant", "Taux", "Commission"].map(
                     (h) => (
                       <th
                         key={h}
@@ -200,33 +195,33 @@ export default function HotelCommissionsPage() {
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((c) => (
-                  <tr key={c.id} className="border-b border-white/[0.06] last:border-0">
-                    <td className="px-4 py-3 text-sm text-white font-[family-name:var(--font-manrope)]">
-                      {c.venue}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-white/70 font-[family-name:var(--font-inter)]">
-                      {c.guest}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-white/70 font-[family-name:var(--font-inter)]">
-                      {c.qrLabel}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-white/70 font-[family-name:var(--font-inter)]">
-                      {c.date}
+                {rows.map((r) => (
+                  <tr key={r.id} className="border-b border-white/[0.06] last:border-0">
+                    <td className="px-4 py-3 text-sm text-white/70 font-[family-name:var(--font-inter)] whitespace-nowrap">
+                      {new Date(r.reservation_date + "T00:00:00").toLocaleDateString("fr-FR")}
                     </td>
                     <td className="px-4 py-3 text-sm text-white font-[family-name:var(--font-manrope)]">
-                      {c.montant}
+                      {r.guest_name}
                     </td>
                     <td className="px-4 py-3">
-                      <span
-                        className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider font-[family-name:var(--font-inter)] ${
-                          c.status === "versé"
-                            ? "bg-emerald-500/15 text-emerald-400"
-                            : "bg-amber-500/15 text-amber-400"
-                        }`}
-                      >
-                        {c.status}
-                      </span>
+                      <p className="text-sm text-white/80 font-[family-name:var(--font-inter)]">
+                        {r.venue_name}
+                      </p>
+                      <p className="text-xs text-white/40 font-[family-name:var(--font-inter)]">
+                        {r.category}
+                      </p>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-white/70 font-[family-name:var(--font-inter)]">
+                      {r.qr_label ?? "—"}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-white/70 font-[family-name:var(--font-inter)] whitespace-nowrap">
+                      {(r.amount_spent ?? 0).toLocaleString()} MAD
+                    </td>
+                    <td className="px-4 py-3 text-sm text-white/70 font-[family-name:var(--font-inter)]">
+                      {Math.round(r.commission_rate * 100)}%
+                    </td>
+                    <td className="px-4 py-3 text-sm font-bold text-amber-400 font-[family-name:var(--font-manrope)] whitespace-nowrap">
+                      {r.commission.toLocaleString()} MAD
                     </td>
                   </tr>
                 ))}
@@ -236,13 +231,14 @@ export default function HotelCommissionsPage() {
         )}
       </div>
 
-      {/* Toast */}
-      {toast && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-black/70 backdrop-blur-xl border border-white/15 text-white px-4 py-3 rounded-xl shadow-lg">
-          <Check size={16} strokeWidth={2} />
-          <span className="text-sm font-medium">{toast}</span>
-        </div>
-      )}
+      {/* Note versements */}
+      <div className="px-4 sm:px-6 pb-8 -mt-4">
+        <p className="flex items-start gap-2 text-xs text-white/40 font-[family-name:var(--font-inter)] max-w-2xl">
+          <HelpCircle size={13} strokeWidth={1.5} className="shrink-0 mt-0.5" />
+          Les commissions sont versées mensuellement. Pour toute question sur un
+          montant, contactez votre référent twocards.
+        </p>
+      </div>
     </div>
   );
 }

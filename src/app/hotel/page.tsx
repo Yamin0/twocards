@@ -4,6 +4,10 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useAuthUser } from "@/hooks/use-auth-user";
+import {
+  useHotelReservations,
+  type HotelReservation,
+} from "@/hooks/use-hotel-reservations";
 import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
 import {
   QrCode,
@@ -37,7 +41,7 @@ const folders = [
     iconColor: "text-green-400",
     preview: [
       "Suivi en temps réel des demandes",
-      "Restaurants, rooftops et clubs partenaires",
+      "Restaurants, activités, clubs et services",
     ],
   },
   {
@@ -47,8 +51,8 @@ const folders = [
     icon: CreditCard,
     iconColor: "text-amber-400",
     preview: [
-      "Commission sur chaque sortie réservée",
-      "Versements mensuels",
+      "10 % du montant dépensé par le client",
+      "Export CSV, versements mensuels",
     ],
   },
   {
@@ -57,13 +61,30 @@ const folders = [
     href: "/hotel/settings",
     icon: Settings,
     iconColor: "text-purple-400",
-    preview: ["Informations de l'hôtel", "Nombre de chambres"],
+    preview: ["Ville et catalogue proposé", "Informations de l'hôtel"],
   },
 ];
 
+const STATUS_STYLES: Record<HotelReservation["status"], string> = {
+  confirmée: "bg-emerald-500/15 text-emerald-400",
+  "en attente": "bg-amber-500/15 text-amber-400",
+  annulée: "bg-red-500/15 text-red-400",
+};
+
+const sameMonth = (iso: string) => {
+  const d = new Date();
+  const x = new Date(iso);
+  return x.getFullYear() === d.getFullYear() && x.getMonth() === d.getMonth();
+};
+
 export default function HotelPage() {
   const { isLoading, fullName, venueName } = useAuthUser();
-  const [qr, setQr] = useState({ active: 0, scans: 0 });
+  const { reservations } = useHotelReservations();
+  const [qr, setQr] = useState<{
+    total: number;
+    active: number;
+    scans: number;
+  } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -73,6 +94,7 @@ export default function HotelPage() {
       .then(({ data }) => {
         if (cancelled || !data) return;
         setQr({
+          total: data.length,
           active: data.filter((row) => row.active).length,
           scans: data.reduce((sum, row) => sum + row.scans, 0),
         });
@@ -82,17 +104,45 @@ export default function HotelPage() {
     };
   }, []);
 
-  if (isLoading) return <DashboardSkeleton />;
+  if (isLoading || qr === null || reservations === null)
+    return <DashboardSkeleton />;
 
-  /* Réservations et commissions restent à zéro tant qu'aucun scan n'est
-     remonté : les valeurs viendront des données réelles, pas de chiffres
-     décoratifs. */
+  const pending = reservations.filter((r) => r.status === "en attente").length;
+  const commissionsMonth = reservations
+    .filter((r) => r.status !== "annulée" && sameMonth(r.created_at))
+    .reduce((sum, r) => sum + r.commission, 0);
+
   const stats = [
-    { label: "Scans ce mois", value: String(qr.scans), icon: ScanLine, color: "text-blue-400" },
-    { label: "Réservations via QR", value: "0", icon: Users, color: "text-green-400" },
-    { label: "Commissions du mois", value: "0 MAD", icon: TrendingUp, color: "text-amber-400" },
-    { label: "QR codes actifs", value: String(qr.active), icon: QrCode, color: "text-purple-400" },
+    {
+      label: "Scans totaux",
+      value: String(qr.scans),
+      icon: ScanLine,
+      color: "text-blue-400",
+    },
+    {
+      label:
+        pending > 0
+          ? `Réservations (${pending} en attente)`
+          : "Réservations reçues",
+      value: String(reservations.length),
+      icon: Users,
+      color: "text-green-400",
+    },
+    {
+      label: "Commissions du mois",
+      value: `${commissionsMonth.toLocaleString()} MAD`,
+      icon: TrendingUp,
+      color: "text-amber-400",
+    },
+    {
+      label: "Chambres actives",
+      value: String(qr.active),
+      icon: QrCode,
+      color: "text-purple-400",
+    },
   ];
+
+  const latest = reservations.slice(0, 5);
 
   return (
     <div className="space-y-6">
@@ -130,31 +180,89 @@ export default function HotelPage() {
         })}
       </div>
 
-      {/* Getting started banner */}
-      <div className="backdrop-blur-xl bg-blue-500/10 border border-blue-400/20 rounded-3xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-start gap-4">
-          <div className="w-11 h-11 rounded-2xl bg-blue-500/20 border border-blue-400/20 flex items-center justify-center shrink-0">
-            <QrCode size={20} strokeWidth={1.5} className="text-blue-400" />
+      {/* Premier pas : uniquement tant qu'aucune chambre n'existe */}
+      {qr.total === 0 && (
+        <div className="backdrop-blur-xl bg-blue-500/10 border border-blue-400/20 rounded-3xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-start gap-4">
+            <div className="w-11 h-11 rounded-2xl bg-blue-500/20 border border-blue-400/20 flex items-center justify-center shrink-0">
+              <QrCode size={20} strokeWidth={1.5} className="text-blue-400" />
+            </div>
+            <div>
+              <h2 className="text-sm font-bold text-white font-[family-name:var(--font-manrope)]">
+                Commencez par créer vos chambres
+              </h2>
+              <p className="text-sm text-white/60 font-[family-name:var(--font-inter)] mt-0.5 max-w-xl">
+                Générez un QR code par chambre ou par zone (lobby, spa,
+                piscine), choisissez les sorties proposées, imprimez-le — vos
+                clients accèdent aux meilleures adresses de la ville en un scan.
+              </p>
+            </div>
           </div>
-          <div>
-            <h2 className="text-sm font-bold text-white font-[family-name:var(--font-manrope)]">
-              Commencez par créer vos chambres
-            </h2>
-            <p className="text-sm text-white/60 font-[family-name:var(--font-inter)] mt-0.5 max-w-xl">
-              Générez un QR code par chambre ou par zone (lobby, spa, piscine),
-              choisissez les sorties proposées, imprimez-le — vos clients
-              accèdent aux meilleures adresses de la ville en un scan.
-            </p>
-          </div>
+          <Link
+            href="/hotel/chambres"
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-500 hover:bg-blue-400 text-white rounded-xl text-sm font-medium transition-all shrink-0 font-[family-name:var(--font-manrope)]"
+          >
+            Créer une chambre
+            <ArrowRight size={16} strokeWidth={1.5} />
+          </Link>
         </div>
-        <Link
-          href="/hotel/chambres"
-          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-500 hover:bg-blue-400 text-white rounded-xl text-sm font-medium transition-all shrink-0 font-[family-name:var(--font-manrope)]"
-        >
-          Créer une chambre
-          <ArrowRight size={16} strokeWidth={1.5} />
-        </Link>
-      </div>
+      )}
+
+      {/* Dernières réservations : le pouls de l'activité, en temps réel */}
+      {latest.length > 0 && (
+        <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-bold text-white font-[family-name:var(--font-manrope)]">
+              Dernières réservations
+            </h2>
+            <Link
+              href="/hotel/reservations"
+              className="flex items-center gap-1 text-xs font-medium text-blue-400 hover:text-blue-300 transition-colors font-[family-name:var(--font-inter)]"
+            >
+              Tout voir
+              <ArrowRight size={13} strokeWidth={1.5} />
+            </Link>
+          </div>
+          <ul className="divide-y divide-white/[0.06]">
+            {latest.map((r) => (
+              <li
+                key={r.id}
+                className="py-3 flex items-center justify-between gap-4"
+              >
+                <div className="min-w-0">
+                  <p className="text-sm text-white font-[family-name:var(--font-manrope)] truncate">
+                    {r.guest_name}
+                    <span className="text-white/40 font-normal font-[family-name:var(--font-inter)]">
+                      {" "}
+                      · {r.venue_name}
+                    </span>
+                  </p>
+                  <p className="text-xs text-white/40 font-[family-name:var(--font-inter)]">
+                    {r.qr_label ? `${r.qr_label} · ` : ""}
+                    {new Date(
+                      r.reservation_date + "T00:00:00"
+                    ).toLocaleDateString("fr-FR")}
+                    {r.reservation_time ? ` · ${r.reservation_time}` : ""} ·{" "}
+                    {r.party_size} pers.
+                  </p>
+                </div>
+                <div className="flex items-center gap-3 shrink-0">
+                  {r.commission > 0 && (
+                    <span className="text-xs font-bold text-amber-400 font-[family-name:var(--font-manrope)]">
+                      +{r.commission.toLocaleString()} MAD
+                    </span>
+                  )}
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider font-[family-name:var(--font-inter)] whitespace-nowrap ${STATUS_STYLES[r.status]}`}
+                  >
+                    {r.status}
+                  </span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {/* Folders */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

@@ -27,6 +27,8 @@ type QrItem = {
   code: string;
   active: boolean;
   scans: number;
+  /* Agrégat PostgREST : nombre de réservations rattachées à ce QR. */
+  qr_reservations?: { count: number }[];
 };
 
 const SUGGESTED_LABELS = ["Lobby", "Réception", "Spa", "Piscine", "Chambre 101"];
@@ -43,7 +45,7 @@ export default function HotelChambresPage() {
     let cancelled = false;
     supabase
       .from("hotel_qr_codes")
-      .select("id, label, code, active, scans")
+      .select("id, label, code, active, scans, qr_reservations(count)")
       .order("created_at", { ascending: true })
       .then(({ data, error }) => {
         if (cancelled) return;
@@ -279,7 +281,10 @@ export default function HotelChambresPage() {
                       {item.label}
                     </h3>
                     <p className="text-xs text-white/40 font-[family-name:var(--font-inter)] mt-0.5">
-                      Code {item.code} · {item.scans} scan{item.scans > 1 ? "s" : ""}
+                      Code {item.code} · {item.scans} scan
+                      {item.scans > 1 ? "s" : ""} ·{" "}
+                      {item.qr_reservations?.[0]?.count ?? 0} résa
+                      {(item.qr_reservations?.[0]?.count ?? 0) > 1 ? "s" : ""}
                     </p>
                   </div>
                   <span
