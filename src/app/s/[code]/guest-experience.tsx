@@ -332,6 +332,9 @@ function ReservationSheet({
       p_time: time || null,
       p_party_size: partySize,
       p_notes: notes || null,
+      /* Slug du catalogue : relie la réservation au compte de
+         l'établissement, qui saisira le montant dépensé. */
+      p_venue_slug: offer.id,
     });
     if (error) {
       setErrorMsg(
