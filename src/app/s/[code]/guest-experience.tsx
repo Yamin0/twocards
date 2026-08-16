@@ -93,11 +93,11 @@ export function GuestExperience({
             Propulsé par
           </span>
           <Image
-            src="/logo-white.png"
+            src="/logo-header.png"
             alt="twocards."
-            width={84}
-            height={20}
-            className="h-4 w-auto opacity-70"
+            width={24}
+            height={24}
+            className="h-6 w-auto opacity-70 brightness-0 invert"
           />
         </footer>
       </div>
