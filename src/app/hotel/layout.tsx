@@ -6,7 +6,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   Home,
-  QrCode,
+  BedDouble,
   CalendarDays,
   CreditCard,
   Settings,
@@ -21,7 +21,7 @@ import { Avatar } from "@/components/shared/avatar";
 
 const mainNav = [
   { icon: Home, label: "Accueil", href: "/hotel" },
-  { icon: QrCode, label: "QR codes", href: "/hotel/qr-codes" },
+  { icon: BedDouble, label: "Chambres", href: "/hotel/chambres" },
   { icon: CalendarDays, label: "Réservations", href: "/hotel/reservations" },
   { icon: CreditCard, label: "Commissions", href: "/hotel/commissions" },
 ];

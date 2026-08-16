@@ -104,7 +104,7 @@ export const GUEST_CATEGORIES: GuestCategory[] = [
       {
         id: "act-5",
         name: "Excursion vallée de l'Ourika",
-        city: "Atlas",
+        city: "Marrakech",
         description:
           "Villages berbères, cascades et déjeuner au bord de l'oued, transport privé.",
         tag: "Excursion",
@@ -162,3 +162,41 @@ export const GUEST_CATEGORIES: GuestCategory[] = [
     ],
   },
 ];
+
+/* Comparaison de villes tolérante : la ville de l'hôtel est saisie librement
+   au signup (« marrakech », « Marrakech  »…). */
+const normalizeCity = (c: string) =>
+  c
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .toLowerCase();
+
+/* Catalogue vu par un client donné : les offres d'une autre ville que celle
+   de l'hôtel sont écartées (celles sans ville sont disponibles partout),
+   puis l'hôtel retire ce qu'il ne veut pas proposer sur ce QR précis.
+   Les catégories vidées disparaissent du menu. */
+export function buildGuestMenu({
+  city,
+  hidden,
+}: {
+  city: string | null;
+  hidden: string[];
+}): GuestCategory[] {
+  const hiddenSet = new Set(hidden);
+  const hotelCity = city ? normalizeCity(city) : null;
+  return GUEST_CATEGORIES.map((cat) => ({
+    ...cat,
+    offers: cat.offers.filter(
+      (o) =>
+        !hiddenSet.has(o.id) &&
+        (!o.city || !hotelCity || normalizeCity(o.city) === hotelCity)
+    ),
+  })).filter((cat) => cat.offers.length > 0);
+}
+
+/* Côté hôtel : le catalogue configurable est celui de sa ville, offres
+   masquées comprises — c'est là qu'il coche/décoche. */
+export function cityCatalog(city: string | null): GuestCategory[] {
+  return buildGuestMenu({ city, hidden: [] });
+}

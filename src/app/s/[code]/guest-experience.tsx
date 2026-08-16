@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import {
-  GUEST_CATEGORIES,
+  buildGuestMenu,
   type GuestCategory,
   type GuestOffer,
 } from "@/lib/guest-catalog";
@@ -50,16 +50,40 @@ function trackScanOnce(code: string) {
 export function GuestExperience({
   code,
   hotelName,
+  city,
 }: {
   code: string;
   hotelName: string | null;
+  city: string | null;
 }) {
   const [category, setCategory] = useState<GuestCategory | null>(null);
   const [offer, setOffer] = useState<GuestOffer | null>(null);
+  /* Offres retirées par l'hôtel pour ce QR précis. Vide tant que la
+     réponse n'est pas là (ou si la RPC n'existe pas) : le catalogue
+     complet de la ville reste le comportement par défaut. */
+  const [hidden, setHidden] = useState<string[]>([]);
 
   useEffect(() => {
     trackScanOnce(code);
+    let cancelled = false;
+    createClient()
+      .rpc("qr_get_menu", { p_code: code })
+      .then(({ data }) => {
+        const row = Array.isArray(data) ? data[0] : data;
+        if (!cancelled && row?.hidden_offers) setHidden(row.hidden_offers);
+      }, () => undefined);
+    return () => {
+      cancelled = true;
+    };
   }, [code]);
+
+  const menu = useMemo(() => buildGuestMenu({ city, hidden }), [city, hidden]);
+
+  /* La catégorie affichée suit le menu : si l'hôtel vient de masquer des
+     offres, on ne montre pas une liste périmée. */
+  const currentCategory = category
+    ? (menu.find((c) => c.key === category.key) ?? null)
+    : null;
 
   /* Retour en haut à chaque changement de vue : sur mobile, la liste
      précédente peut laisser un scroll profond. */
@@ -78,11 +102,11 @@ export function GuestExperience({
       <div className="fixed inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/70" />
 
       <div className="relative z-10 mx-auto w-full max-w-md px-4 pb-10 pt-8 sm:max-w-3xl sm:px-8 sm:pt-14 lg:max-w-6xl lg:pt-20">
-        {category === null ? (
-          <MenuView hotelName={hotelName} onPick={setCategory} />
+        {currentCategory === null ? (
+          <MenuView menu={menu} hotelName={hotelName} onPick={setCategory} />
         ) : (
           <CategoryView
-            category={category}
+            category={currentCategory}
             onBack={() => setCategory(null)}
             onReserve={setOffer}
           />
@@ -117,9 +141,11 @@ export function GuestExperience({
 /* ─── Menu principal ─────────────────────────────────────────────────────── */
 
 function MenuView({
+  menu,
   hotelName,
   onPick,
 }: {
+  menu: GuestCategory[];
   hotelName: string | null;
   onPick: (c: GuestCategory) => void;
 }) {
@@ -137,7 +163,7 @@ function MenuView({
       </p>
 
       <div className="mt-8 grid grid-cols-2 gap-3 sm:mt-12 sm:gap-5 lg:grid-cols-4 lg:gap-6">
-        {GUEST_CATEGORIES.map((cat) => {
+        {menu.map((cat) => {
           const Icon = CATEGORY_ICONS[cat.key];
           return (
             <button

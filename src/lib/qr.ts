@@ -14,10 +14,15 @@ export function downloadSvg(id: string, label: string) {
   return true;
 }
 
-/* URL publique encodée dans le QR : identifie le code, et porte le nom de
-   l'hôtel en secours d'affichage si la base est injoignable. */
-export function guestUrl(code: string, hotelName: string | null | undefined) {
-  return `${window.location.origin}/s/${code}?h=${encodeURIComponent(
-    hotelName ?? ""
-  )}`;
+/* URL publique encodée dans le QR : identifie le code, et porte le nom et la
+   ville de l'hôtel — le nom en secours d'affichage si la base est
+   injoignable, la ville pour restreindre le catalogue à celle de l'hôtel. */
+export function guestUrl(
+  code: string,
+  hotelName: string | null | undefined,
+  city?: string | null
+) {
+  const params = new URLSearchParams({ h: hotelName ?? "" });
+  if (city) params.set("c", city);
+  return `${window.location.origin}/s/${code}?${params.toString()}`;
 }

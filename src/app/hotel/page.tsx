@@ -7,6 +7,7 @@ import { useAuthUser } from "@/hooks/use-auth-user";
 import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
 import {
   QrCode,
+  BedDouble,
   CalendarDays,
   CreditCard,
   Settings,
@@ -18,14 +19,14 @@ import {
 
 const folders = [
   {
-    label: "QR codes",
-    description: "Créez et gérez vos QR codes par emplacement",
-    href: "/hotel/qr-codes",
-    icon: QrCode,
+    label: "Chambres",
+    description: "Un QR code et un menu de sorties par chambre",
+    href: "/hotel/chambres",
+    icon: BedDouble,
     iconColor: "text-blue-400",
     preview: [
       "Un QR par chambre, lobby ou spa",
-      "Téléchargeables et imprimables",
+      "Menu personnalisable par client",
     ],
   },
   {
@@ -137,20 +138,20 @@ export default function HotelPage() {
           </div>
           <div>
             <h2 className="text-sm font-bold text-white font-[family-name:var(--font-manrope)]">
-              Commencez par créer vos QR codes
+              Commencez par créer vos chambres
             </h2>
             <p className="text-sm text-white/60 font-[family-name:var(--font-inter)] mt-0.5 max-w-xl">
               Générez un QR code par chambre ou par zone (lobby, spa, piscine),
-              imprimez-le, et vos clients accèdent aux meilleures adresses de la
-              ville en un scan.
+              choisissez les sorties proposées, imprimez-le — vos clients
+              accèdent aux meilleures adresses de la ville en un scan.
             </p>
           </div>
         </div>
         <Link
-          href="/hotel/qr-codes"
+          href="/hotel/chambres"
           className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-500 hover:bg-blue-400 text-white rounded-xl text-sm font-medium transition-all shrink-0 font-[family-name:var(--font-manrope)]"
         >
-          Créer un QR code
+          Créer une chambre
           <ArrowRight size={16} strokeWidth={1.5} />
         </Link>
       </div>

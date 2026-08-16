@@ -12,6 +12,7 @@ type AuthSnapshot = {
   fullName: string | null;
   role: string | null;
   venueName: string | null;
+  city: string | null;
   avatarUrl: string | null;
   isAdmin: boolean;
 };
@@ -44,6 +45,7 @@ function toSnapshot(
       (user.user_metadata?.role as string) ??
       null,
     venueName: (user.user_metadata?.venue_name as string) ?? null,
+    city: (user.user_metadata?.city as string) ?? null,
     avatarUrl: (user.user_metadata?.avatar_url as string) ?? null,
     /* app_metadata uniquement : cette zone n'est pas modifiable côté client. */
     isAdmin: user.app_metadata?.is_admin === true,
@@ -110,6 +112,7 @@ export function useAuthUser() {
     fullName,
     role: snap?.role ?? null,
     venueName: snap?.venueName ?? null,
+    city: snap?.city ?? null,
     avatarUrl: snap?.avatarUrl ?? null,
     isAdmin: snap?.isAdmin ?? false,
     isLoading,

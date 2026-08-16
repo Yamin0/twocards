@@ -15,9 +15,15 @@ export default async function GuestScanPage({
   searchParams,
 }: {
   params: Promise<{ code: string }>;
-  searchParams: Promise<{ h?: string }>;
+  searchParams: Promise<{ h?: string; c?: string }>;
 }) {
   const { code } = await params;
-  const { h } = await searchParams;
-  return <GuestExperience code={code} hotelName={h?.trim() || null} />;
+  const { h, c } = await searchParams;
+  return (
+    <GuestExperience
+      code={code}
+      hotelName={h?.trim() || null}
+      city={c?.trim() || null}
+    />
+  );
 }
