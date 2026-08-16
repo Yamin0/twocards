@@ -48,6 +48,104 @@ export default function HotelsPage() {
             { name: "Shangri-La", logo: "/logos/shangri-la.png", scale: 1.5 },
           ],
         },
+        features: {
+          title: "Tout ce que twocards apporte",
+          accent: "à votre hôtel.",
+          intro:
+            "De la chambre au versement de la commission, chaque étape est outillée, mesurée et traçable — sans changer vos habitudes ni celles de vos équipes.",
+          items: [
+            {
+              id: "chambres",
+              nav: "QR par chambre",
+              kicker: "Traçabilité",
+              title: "Un QR code par chambre, chaque scan attribué",
+              description:
+                "Chaque chambre, le lobby, le spa ou la piscine reçoit son propre QR code. Quand un client le scanne, le scan est compté et toute réservation qui en découle est rattachée à cet emplacement précis — vous savez exactement d'où vient chaque sortie, et donc chaque commission.",
+              bullets: [
+                {
+                  title: "Génération en un clic",
+                  text: "Créez « Chambre 204 » ou « Rooftop » depuis votre dashboard : le QR est prêt à imprimer en SVG haute définition, activable et désactivable à tout moment.",
+                },
+                {
+                  title: "Lien unique par emplacement",
+                  text: "Chaque QR porte son propre lien de suivi : scans, réservations et commissions de cet emplacement, isolés du reste.",
+                },
+                {
+                  title: "Sans application à installer",
+                  text: "Le client scanne avec son appareil photo et réserve en moins d'une minute. Aucun compte, aucune friction.",
+                },
+              ],
+              stat: { value: "< 60 s", label: "du scan à la demande de réservation" },
+            },
+            {
+              id: "curation",
+              nav: "Menu par client",
+              kicker: "Curation",
+              title: "Vous décidez ce que chaque client peut voir",
+              description:
+                "Le menu qui s'ouvre au scan n'est pas un annuaire : c'est votre sélection. Restaurants, activités, clubs et services du catalogue twocards de votre ville — et pour chaque chambre, vous retirez ou proposez chaque adresse individuellement. Un VIP ne voit pas la même sélection qu'une famille.",
+              bullets: [
+                {
+                  title: "Catalogue de votre ville uniquement",
+                  text: "Un hôtel de Marrakech ne proposera jamais une table à Casablanca : le catalogue est filtré par votre ville, automatiquement.",
+                },
+                {
+                  title: "Personnalisation par chambre",
+                  text: "Cochez, décochez : le menu de la suite 12 peut différer de celui du lobby. Idéal pour adapter la sélection à un client précis.",
+                },
+                {
+                  title: "Toujours à jour",
+                  text: "Une adresse retirée disparaît immédiatement de tous les téléphones — aucun support imprimé à refaire.",
+                },
+              ],
+            },
+            {
+              id: "commissions",
+              nav: "Commissions",
+              kicker: "Revenus",
+              title: "Une commission claire sur chaque sortie",
+              description:
+                "Votre hôtel touche un pourcentage du montant réellement dépensé par le client — 10 % par défaut. Le montant est saisi par l'établissement après la sortie, la commission est calculée automatiquement, sans déclaratif ni discussion. Vous suivez tout, exportez tout.",
+              bullets: [
+                {
+                  title: "Calcul automatique, jamais manuel",
+                  text: "La commission est dérivée en base de données du montant saisi par l'établissement. Personne ne peut la modifier à la main — ni eux, ni nous.",
+                },
+                {
+                  title: "Export comptable",
+                  text: "Un CSV par période, avec montant, taux et commission par réservation, prêt pour votre comptabilité.",
+                },
+                {
+                  title: "Versement mensuel",
+                  text: "Les commissions sont consolidées et versées chaque mois, avec le détail réservation par réservation.",
+                },
+              ],
+              stat: { value: "10 %", label: "du montant dépensé, reversés à l'hôtel" },
+            },
+            {
+              id: "suivi",
+              nav: "Suivi & satisfaction",
+              kicker: "Pilotage",
+              title: "Un dashboard en temps réel, satisfaction comprise",
+              description:
+                "Chaque réservation apparaît dans votre espace à la seconde où le client la fait, rattachée à sa chambre. Vous suivez la demande semaine par semaine, la répartition par type de sortie, et la satisfaction de vos clients — qui notent leur soirée après coup.",
+              bullets: [
+                {
+                  title: "Temps réel, vraiment",
+                  text: "Pas de rafraîchissement, pas d'email le lendemain : la réservation s'affiche pendant que le client la confirme.",
+                },
+                {
+                  title: "Satisfaction mesurée",
+                  text: "Après chaque sortie, le client peut noter son expérience sur 5. Vous voyez la moyenne et les commentaires — la qualité de vos recommandations devient un chiffre.",
+                },
+                {
+                  title: "Vos données vous appartiennent",
+                  text: "Scans, réservations, commissions, avis : tout est consultable et exportable à tout moment.",
+                },
+              ],
+            },
+          ],
+        },
         image: "/images/hotels-beach.jpg",
         imageAlt:
           "Piscine d'un hôtel en bord de mer, transats et parasols rayés face à la plage",

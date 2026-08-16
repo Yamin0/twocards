@@ -10,6 +10,12 @@ import {
 } from "@/hooks/use-hotel-reservations";
 import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
 import {
+  MiniBars,
+  RatingStars,
+  SplitBar,
+  weeklySeries,
+} from "@/components/shared/mini-charts";
+import {
   QrCode,
   BedDouble,
   CalendarDays,
@@ -108,6 +114,19 @@ export default function HotelPage() {
     return <DashboardSkeleton />;
 
   const pending = reservations.filter((r) => r.status === "en attente").length;
+  const rated = reservations.filter((r) => r.rating !== null);
+  const avgRating =
+    rated.length > 0
+      ? rated.reduce((s, r) => s + (r.rating ?? 0), 0) / rated.length
+      : null;
+  const weekly = weeklySeries(reservations.map((r) => r.created_at));
+  const byCategory = ["Restaurants", "Activités", "Clubs", "Services"].map(
+    (label, i) => ({
+      label,
+      value: reservations.filter((r) => r.category === label).length,
+      color: ["bg-blue-400", "bg-emerald-400", "bg-purple-400", "bg-amber-400"][i],
+    })
+  );
   const commissionsMonth = reservations
     .filter((r) => r.status !== "annulée" && sameMonth(r.created_at))
     .reduce((sum, r) => sum + r.commission, 0);
@@ -205,6 +224,53 @@ export default function HotelPage() {
             Créer une chambre
             <ArrowRight size={16} strokeWidth={1.5} />
           </Link>
+        </div>
+      )}
+
+      {/* Analyses : demande, satisfaction, mix — le trio SevenRooms */}
+      {reservations.length > 0 && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl p-6">
+            <h2 className="text-sm font-bold text-white font-[family-name:var(--font-manrope)] mb-1">
+              Réservations par semaine
+            </h2>
+            <p className="text-xs text-white/40 font-[family-name:var(--font-inter)] mb-5">
+              8 dernières semaines
+            </p>
+            <MiniBars data={weekly} />
+          </div>
+          <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl p-6 flex flex-col gap-5">
+            <div>
+              <h2 className="text-sm font-bold text-white font-[family-name:var(--font-manrope)] mb-3">
+                Satisfaction client
+              </h2>
+              {avgRating !== null ? (
+                <div className="flex items-center gap-3">
+                  <p className="text-3xl font-extrabold text-white font-[family-name:var(--font-manrope)]">
+                    {avgRating.toFixed(1).replace(".", ",")}
+                    <span className="text-base text-white/40">/5</span>
+                  </p>
+                  <div>
+                    <RatingStars value={avgRating} />
+                    <p className="text-[10px] text-white/40 font-[family-name:var(--font-inter)] mt-0.5">
+                      {rated.length} avis client{rated.length > 1 ? "s" : ""}
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-xs text-white/40 font-[family-name:var(--font-inter)]">
+                  Aucun avis pour le moment — chaque client peut noter sa
+                  sortie après coup, la moyenne s&apos;affichera ici.
+                </p>
+              )}
+            </div>
+            <div>
+              <h3 className="text-[10px] font-bold uppercase tracking-wider text-white/50 font-[family-name:var(--font-inter)] mb-2">
+                Répartition par catégorie
+              </h3>
+              <SplitBar segments={byCategory} />
+            </div>
+          </div>
         </div>
       )}
 

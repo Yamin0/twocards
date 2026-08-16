@@ -10,6 +10,11 @@ import {
 import { TableSkeleton } from "@/components/shared/loading-skeleton";
 import { useToast } from "@/hooks/use-toast";
 import {
+  MiniBars,
+  RatingStars,
+  weeklySeries,
+} from "@/components/shared/mini-charts";
+import {
   QrCode,
   Users,
   Clock,
@@ -19,6 +24,7 @@ import {
   Pencil,
   Loader2,
   Info,
+  Link2,
 } from "lucide-react";
 
 const STATUS_STYLES: Record<VenueQrReservation["status"], string> = {
@@ -51,6 +57,24 @@ export default function VenueQrReservationsPage() {
   const commissions = rows
     .filter((r) => r.status !== "annulée")
     .reduce((sum, r) => sum + r.commission, 0);
+  const rated = rows.filter((r) => r.rating !== null);
+  const avgRating =
+    rated.length > 0
+      ? rated.reduce((s, r) => s + (r.rating ?? 0), 0) / rated.length
+      : null;
+  const lastComments = rated
+    .filter((r) => r.rating_comment)
+    .slice(0, 2);
+  const weekly = weeklySeries(rows.map((r) => r.created_at));
+
+  const copyRatingLink = async (id: string) => {
+    try {
+      await navigator.clipboard.writeText(`${window.location.origin}/avis/${id}`);
+      showToast("Lien d'avis copié — envoyez-le au client");
+    } catch {
+      showToast("Impossible de copier le lien");
+    }
+  };
 
   const saveAmount = async (r: VenueQrReservation) => {
     const raw = (editing[r.id] ?? "").replace(",", ".").trim();
@@ -144,6 +168,56 @@ export default function VenueQrReservationsPage() {
         ))}
       </div>
 
+      {/* Analyses : demande et satisfaction, à la SevenRooms */}
+      {rows.length > 0 && (
+        <div className="px-4 sm:px-6 pb-6 grid grid-cols-1 lg:grid-cols-2 gap-3">
+          <div className="bg-white/[0.07] rounded-xl border border-white/10 p-5">
+            <h2 className="text-sm font-bold text-white font-[family-name:var(--font-manrope)] mb-1">
+              Sorties par semaine
+            </h2>
+            <p className="text-xs text-white/40 font-[family-name:var(--font-inter)] mb-4">
+              8 dernières semaines
+            </p>
+            <MiniBars data={weekly} color="bg-purple-400/70" />
+          </div>
+          <div className="bg-white/[0.07] rounded-xl border border-white/10 p-5">
+            <h2 className="text-sm font-bold text-white font-[family-name:var(--font-manrope)] mb-3">
+              Satisfaction client
+            </h2>
+            {avgRating !== null ? (
+              <>
+                <div className="flex items-center gap-3">
+                  <p className="text-3xl font-extrabold text-white font-[family-name:var(--font-manrope)]">
+                    {avgRating.toFixed(1).replace(".", ",")}
+                    <span className="text-base text-white/40">/5</span>
+                  </p>
+                  <div>
+                    <RatingStars value={avgRating} />
+                    <p className="text-[10px] text-white/40 font-[family-name:var(--font-inter)] mt-0.5">
+                      {rated.length} avis client{rated.length > 1 ? "s" : ""}
+                    </p>
+                  </div>
+                </div>
+                {lastComments.map((r) => (
+                  <p
+                    key={r.id}
+                    className="mt-3 text-xs italic text-white/50 font-[family-name:var(--font-inter)] border-l-2 border-white/15 pl-3"
+                  >
+                    « {r.rating_comment} » — {r.guest_name}
+                  </p>
+                ))}
+              </>
+            ) : (
+              <p className="text-xs text-white/40 font-[family-name:var(--font-inter)]">
+                Aucun avis pour le moment. Après la sortie, copiez le lien
+                d&apos;avis depuis le tableau et envoyez-le au client par
+                WhatsApp — sa note apparaîtra ici.
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Table / empty state */}
       <div className="px-4 sm:px-6 pb-4">
         {rows.length === 0 ? (
@@ -164,7 +238,7 @@ export default function VenueQrReservationsPage() {
             <table className="w-full text-left">
               <thead>
                 <tr className="border-b border-white/10">
-                  {["Client", "Date", "Pers.", "Note", "Statut", "Montant dépensé", "Commission"].map(
+                  {["Client", "Date", "Pers.", "Note", "Statut", "Montant dépensé", "Commission", "Avis"].map(
                     (h) => (
                       <th
                         key={h}
@@ -278,6 +352,23 @@ export default function VenueQrReservationsPage() {
                         {r.commission > 0
                           ? `${r.commission.toLocaleString()} MAD`
                           : "—"}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        {r.rating !== null ? (
+                          <span title={r.rating_comment ?? undefined}>
+                            <RatingStars value={r.rating} size={12} />
+                          </span>
+                        ) : r.status === "confirmée" ? (
+                          <button
+                            onClick={() => copyRatingLink(r.id)}
+                            className="flex items-center gap-1.5 text-[11px] font-medium text-blue-400 hover:text-blue-300 transition-colors font-[family-name:var(--font-inter)]"
+                          >
+                            <Link2 size={12} strokeWidth={1.5} />
+                            Lien d&apos;avis
+                          </button>
+                        ) : (
+                          <span className="text-sm text-white/30">—</span>
+                        )}
                       </td>
                     </tr>
                   );

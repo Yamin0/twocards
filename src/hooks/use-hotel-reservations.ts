@@ -17,6 +17,7 @@ export type HotelReservation = {
   commission: number;
   commission_rate: number;
   amount_spent: number | null;
+  rating: number | null;
   created_at: string;
   /* Libellé du QR scanné (« Chambre 101 »). Null si le QR a été supprimé. */
   qr_label: string | null;
@@ -25,7 +26,7 @@ export type HotelReservation = {
 const SELECT =
   "id, category, venue_name, guest_name, guest_phone, reservation_date, " +
   "reservation_time, party_size, notes, status, commission, commission_rate, " +
-  "amount_spent, created_at, hotel_qr_codes(label)";
+  "amount_spent, rating, created_at, hotel_qr_codes(label)";
 
 type Row = Omit<HotelReservation, "qr_label"> & {
   hotel_qr_codes: { label: string } | { label: string }[] | null;

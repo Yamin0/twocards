@@ -42,6 +42,22 @@ export interface AudiencePageData {
   /* Titre de la section étapes. Par défaut « Trois étapes. Un seul réseau. » */
   stepsTitle?: string;
   stepsAccent?: string;
+  /* Sections produit détaillées, façon pages SevenRooms : une sous-navigation
+     ancrée sous les étapes, puis une section approfondie par capacité. */
+  features?: {
+    title: string;
+    accent: string;
+    intro?: string;
+    items: {
+      id: string;
+      nav: string;
+      kicker: string;
+      title: string;
+      description: string;
+      bullets: { title: string; text: string }[];
+      stat?: { value: string; label: string };
+    }[];
+  };
   /* Carrousel en éventail, sous les bénéfices. */
   carousel?: { label?: string; cards: CardItem[] };
   /* Bandeau défilant, au-dessus des bénéfices. Chaque entrée affiche son
@@ -510,6 +526,135 @@ export function AudiencePage({ data }: { data: AudiencePageData }) {
           </div>
         </div>
       </section>
+
+      {/* Sections produit détaillées : sous-navigation ancrée + une section
+          par capacité, dans l'esprit des pages produit SevenRooms. */}
+      {data.features && (
+        <>
+          <nav
+            aria-label="Sections produit"
+            className={`sticky top-0 z-30 border-y backdrop-blur-xl ${
+              onScroll
+                ? "border-white/10 bg-black/30"
+                : "border-black/[0.06] bg-[var(--landing-ivory)]/90"
+            }`}
+          >
+            <div className="mx-auto flex max-w-6xl items-center gap-1 overflow-x-auto px-4 py-3 md:justify-center">
+              {data.features.items.map((f) => (
+                <a
+                  key={f.id}
+                  href={`#${f.id}`}
+                  className={`whitespace-nowrap rounded-full px-4 py-1.5 text-[13px] font-medium transition-colors ${
+                    onScroll
+                      ? "text-white/70 hover:bg-white/10 hover:text-white"
+                      : "text-[var(--landing-ink)]/60 hover:bg-black/[0.05] hover:text-[var(--landing-ink)]"
+                  }`}
+                >
+                  {f.nav}
+                </a>
+              ))}
+            </div>
+          </nav>
+
+          <section className={`px-6 pt-24 md:px-16 ${onScroll ? "" : ""}`}>
+            <div className="mx-auto max-w-6xl">
+              <motion.h2
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.6 }}
+                className={`text-center font-title text-3xl font-normal leading-tight md:text-4xl ${lead}`}
+              >
+                {data.features.title}{" "}
+                <em className="italic">{data.features.accent}</em>
+              </motion.h2>
+              {data.features.intro && (
+                <motion.p
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-100px" }}
+                  transition={{ duration: 0.6, delay: 0.1 }}
+                  className={`mx-auto mt-6 max-w-2xl text-center text-[15px] font-normal leading-relaxed ${body}`}
+                >
+                  {data.features.intro}
+                </motion.p>
+              )}
+            </div>
+          </section>
+
+          {data.features.items.map((f, idx) => (
+            <section
+              key={f.id}
+              id={f.id}
+              className={`scroll-mt-20 px-6 py-20 md:px-16 md:py-24 ${
+                onScroll ? "" : idx > 0 ? `border-t ${rule}` : ""
+              }`}
+            >
+              <div
+                className={`mx-auto grid max-w-6xl items-start gap-10 md:grid-cols-2 md:gap-16`}
+              >
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-80px" }}
+                  transition={{ duration: 0.6 }}
+                  className={idx % 2 === 1 ? "md:order-2" : ""}
+                >
+                  <span
+                    className={`text-[11px] font-semibold uppercase tracking-[0.2em] ${mute}`}
+                  >
+                    {f.kicker}
+                  </span>
+                  <h3
+                    className={`mt-3 font-title text-2xl font-normal leading-tight md:text-3xl ${lead}`}
+                  >
+                    {f.title}
+                  </h3>
+                  <p
+                    className={`mt-5 text-[15px] font-normal leading-relaxed ${body}`}
+                  >
+                    {f.description}
+                  </p>
+                  {f.stat && (
+                    <div className={`mt-8 border-l pl-5 ${line}`}>
+                      <p className={`font-title text-4xl font-normal ${lead}`}>
+                        {f.stat.value}
+                      </p>
+                      <p className={`mt-1 text-[13px] ${mute}`}>
+                        {f.stat.label}
+                      </p>
+                    </div>
+                  )}
+                </motion.div>
+
+                <div className={idx % 2 === 1 ? "md:order-1" : ""}>
+                  {f.bullets.map((b, i) => (
+                    <motion.div
+                      key={b.title}
+                      initial={{ opacity: 0, y: 16 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true, margin: "-60px" }}
+                      transition={{ duration: 0.5, delay: i * 0.08 }}
+                      className={`border-t py-6 ${line} ${
+                        i === f.bullets.length - 1 ? `border-b` : ""
+                      }`}
+                    >
+                      <h4 className={`text-[15px] font-medium ${lead}`}>
+                        {b.title}
+                      </h4>
+                      <p
+                        className={`mt-2 text-[13.5px] font-normal leading-relaxed ${body}`}
+                      >
+                        {b.text}
+                      </p>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+            </section>
+          ))}
+        </>
+      )}
 
       {/* Bande photo + statement. Sur la vidéo, la photo de fond et le shader
           tombent : le propos se pose directement sur la scène épinglée. */}

@@ -37,6 +37,81 @@ export default function ConciergesPage() {
               "Le check-in QR prouve votre apport. La facture est vérifiée, la commission calculée selon les règles acceptées d'avance et payée selon un calendrier fixe. Sans relance.",
           },
         ],
+        features: {
+          title: "Votre carnet d'adresses,",
+          accent: "enfin rémunéré.",
+          intro:
+            "Vous recommandez déjà les meilleures tables de la ville. twocards trace chaque recommandation, la transforme en réservation confirmée et vous reverse une commission sur ce que dépense votre client.",
+          items: [
+            {
+              id: "lien",
+              nav: "Votre lien unique",
+              kicker: "Attribution",
+              title: "Un lien à votre nom, chaque client tracé",
+              description:
+                "Votre lien personnel ouvre la sélection des meilleures adresses de la ville. Envoyez-le par WhatsApp, affichez-le en QR : chaque client qui réserve par ce lien vous est attribué, sans ambiguïté, sans avoir à prévenir qui que ce soit.",
+              bullets: [
+                {
+                  title: "Partage sans friction",
+                  text: "WhatsApp, SMS, email ou QR imprimé sur votre carte : le lien fonctionne partout, le client réserve en une minute.",
+                },
+                {
+                  title: "Attribution incontestable",
+                  text: "La réservation porte votre identifiant de bout en bout — l'établissement sait qu'elle vient de vous, la commission aussi.",
+                },
+                {
+                  title: "Vos clients restent les vôtres",
+                  text: "Vous voyez l'historique de chaque client que vous avez envoyé : où il est sorti, quand, et ce que cela vous a rapporté.",
+                },
+              ],
+            },
+            {
+              id: "catalogue",
+              nav: "Catalogue",
+              kicker: "Sélection",
+              title: "Les adresses qui font votre réputation",
+              description:
+                "Clubs, restaurants, activités, services de conciergerie : le catalogue twocards réunit les établissements partenaires de votre ville, avec les vraies disponibilités. Vous recommandez sereinement — la table sera là.",
+              bullets: [
+                {
+                  title: "Restaurants, clubs, activités, services",
+                  text: "Quatre univers dans une seule sélection, du dîner gastronomique au transfert aéroport.",
+                },
+                {
+                  title: "Demandes qualifiées",
+                  text: "Nom, téléphone, date, nombre de personnes, occasion : l'établissement reçoit tout ce qu'il faut pour bien recevoir.",
+                },
+                {
+                  title: "Confirmation rapide",
+                  text: "Le client est recontacté pour confirmation — vous n'avez plus à courir après les réponses.",
+                },
+              ],
+            },
+            {
+              id: "commissions",
+              nav: "Commissions",
+              kicker: "Revenus",
+              title: "Un pourcentage de ce que dépensent vos clients",
+              description:
+                "Fini les arrangements informels : votre commission est un pourcentage du montant réellement dépensé, calculé automatiquement quand l'établissement saisit l'addition. Vous suivez vos gains en temps réel et recevez un versement mensuel documenté.",
+              bullets: [
+                {
+                  title: "Transparent par construction",
+                  text: "Montant, taux, commission : chaque ligne est visible dans votre espace, calculée en base, impossible à trafiquer.",
+                },
+                {
+                  title: "Suivi en temps réel",
+                  text: "La sortie de votre client apparaît dans votre dashboard à la seconde — la commission dès que l'addition est saisie.",
+                },
+                {
+                  title: "Versements mensuels",
+                  text: "Un récapitulatif clair chaque mois, exportable, avec le détail par client et par établissement.",
+                },
+              ],
+              stat: { value: "0 papier", label: "tout est tracé, calculé et versé automatiquement" },
+            },
+          ],
+        },
         image:
           "https://images.unsplash.com/photo-1470337458703-46ad1756a187?q=80&w=2000&auto=format&fit=crop",
         imageAlt: "Cocktail servi au bar",
