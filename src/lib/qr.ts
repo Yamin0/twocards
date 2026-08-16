@@ -1,0 +1,23 @@
+/* Le SVG rendu par react-qr-code est sérialisé tel quel : le fichier
+   téléchargé est identique au QR affiché. */
+export function downloadSvg(id: string, label: string) {
+  const svg = document.getElementById(id)?.querySelector("svg");
+  if (!svg) return false;
+  const source = new XMLSerializer().serializeToString(svg);
+  const blob = new Blob([source], { type: "image/svg+xml;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `qr-${label.toLowerCase().replace(/\s+/g, "-")}.svg`;
+  a.click();
+  URL.revokeObjectURL(url);
+  return true;
+}
+
+/* URL publique encodée dans le QR : identifie le code, et porte le nom de
+   l'hôtel en secours d'affichage si la base est injoignable. */
+export function guestUrl(code: string, hotelName: string | null | undefined) {
+  return `${window.location.origin}/s/${code}?h=${encodeURIComponent(
+    hotelName ?? ""
+  )}`;
+}

@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import QRCode from "react-qr-code";
 import { createClient } from "@/lib/supabase/client";
 import { useAuthUser } from "@/hooks/use-auth-user";
 import { TableSkeleton } from "@/components/shared/loading-skeleton";
 import { useToast } from "@/hooks/use-toast";
+import { downloadSvg, guestUrl } from "@/lib/qr";
 import {
   QrCode,
   Plus,
@@ -16,6 +18,7 @@ import {
   Power,
   X,
   Check,
+  ChartLine,
 } from "lucide-react";
 
 type QrItem = {
@@ -27,22 +30,6 @@ type QrItem = {
 };
 
 const SUGGESTED_LABELS = ["Lobby", "Réception", "Spa", "Piscine", "Chambre 101"];
-
-/* Le SVG rendu par react-qr-code est sérialisé tel quel : le fichier
-   téléchargé est identique au QR affiché. */
-function downloadSvg(id: string, label: string) {
-  const svg = document.getElementById(id)?.querySelector("svg");
-  if (!svg) return false;
-  const source = new XMLSerializer().serializeToString(svg);
-  const blob = new Blob([source], { type: "image/svg+xml;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `qr-${label.toLowerCase().replace(/\s+/g, "-")}.svg`;
-  a.click();
-  URL.revokeObjectURL(url);
-  return true;
-}
 
 export default function HotelQrCodesPage() {
   const { isLoading, venueName } = useAuthUser();
@@ -74,13 +61,10 @@ export default function HotelQrCodesPage() {
 
   if (isLoading || items === null) return <TableSkeleton />;
 
-  /* URL encodée dans le QR : trace le code et l'hôtel à l'origine du scan.
-     Dérivée au rendu (jamais côté serveur : la grille n'apparaît qu'une fois
-     l'auth chargée, donc côté client uniquement). */
-  const qrUrl = (code: string) =>
-    `${window.location.origin}/?qr=${code}&hotel=${encodeURIComponent(
-      venueName ?? ""
-    )}`;
+  /* URL encodée dans le QR : ouvre l'expérience client /s/[code], tracée
+     par ce code. Dérivée au rendu (jamais côté serveur : la grille
+     n'apparaît qu'une fois l'auth chargée, donc côté client uniquement). */
+  const qrUrl = (code: string) => guestUrl(code, venueName);
 
   const addQr = async (rawLabel: string) => {
     const trimmed = rawLabel.trim();
@@ -317,23 +301,30 @@ export default function HotelQrCodesPage() {
                 </div>
 
                 <div className="flex items-center gap-2">
+                  <Link
+                    href={`/hotel/qr-codes/${item.id}`}
+                    className="flex-1 flex items-center justify-center gap-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 hover:text-blue-200 text-xs font-medium px-3 py-2 rounded-lg transition-colors font-[family-name:var(--font-manrope)]"
+                  >
+                    <ChartLine size={14} strokeWidth={1.5} />
+                    Suivi
+                  </Link>
                   <button
                     onClick={() => {
                       if (downloadSvg(`qr-${item.id}`, item.label)) {
                         showToast("QR code téléchargé");
                       }
                     }}
-                    className="flex-1 flex items-center justify-center gap-2 bg-white/10 hover:bg-white/15 text-white text-xs font-medium px-3 py-2 rounded-lg transition-colors font-[family-name:var(--font-manrope)]"
+                    className="flex items-center justify-center gap-2 bg-white/10 hover:bg-white/15 text-white text-xs font-medium px-3 py-2 rounded-lg transition-colors font-[family-name:var(--font-manrope)]"
                   >
                     <Download size={14} strokeWidth={1.5} />
                     SVG
                   </button>
                   <button
                     onClick={() => toggleActive(item.id)}
-                    className="flex items-center justify-center gap-2 bg-white/[0.05] hover:bg-white/10 text-white/60 hover:text-white text-xs font-medium px-3 py-2 rounded-lg transition-colors font-[family-name:var(--font-manrope)]"
+                    aria-label={item.active ? `Désactiver ${item.label}` : `Activer ${item.label}`}
+                    className="flex items-center justify-center bg-white/[0.05] hover:bg-white/10 text-white/60 hover:text-white px-3 py-2 rounded-lg transition-colors"
                   >
                     <Power size={14} strokeWidth={1.5} />
-                    {item.active ? "Désactiver" : "Activer"}
                   </button>
                   <button
                     onClick={() => removeQr(item.id)}
