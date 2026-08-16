@@ -1,0 +1,9 @@
+-- Espace réservé : cette migration a été appliquée directement sur la base
+-- distante (dashboard/MCP) avant que le dossier supabase/migrations ne serve
+-- de source de vérité. Son SQL réel n'est pas dans le repo.
+--
+-- Le fichier existe uniquement pour que l'historique local couvre le distant :
+-- sans lui, « supabase db push » refuse de tourner. Il n'est jamais rejoué sur
+-- la base distante, qui a déjà cette version enregistrée.
+--
+-- À remplacer par le vrai schéma via « supabase db pull » (nécessite Docker).
