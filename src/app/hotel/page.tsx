@@ -4,11 +4,10 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useAuthUser } from "@/hooks/use-auth-user";
-import {
-  useHotelReservations,
-  type HotelReservation,
-} from "@/hooks/use-hotel-reservations";
+import { useHotelReservations } from "@/hooks/use-hotel-reservations";
 import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
+import { StatStrip } from "@/components/shared/stat-strip";
+import { StatusBadge } from "@/components/shared/status-badge";
 import {
   MiniBars,
   RatingStars,
@@ -22,9 +21,6 @@ import {
   CreditCard,
   Settings,
   ArrowRight,
-  ScanLine,
-  Users,
-  TrendingUp,
 } from "lucide-react";
 
 const folders = [
@@ -70,12 +66,6 @@ const folders = [
     preview: ["Ville et catalogue proposé", "Informations de l'hôtel"],
   },
 ];
-
-const STATUS_STYLES: Record<HotelReservation["status"], string> = {
-  confirmée: "bg-emerald-500/15 text-emerald-400",
-  "en attente": "bg-amber-500/15 text-amber-400",
-  annulée: "bg-red-500/15 text-red-400",
-};
 
 const sameMonth = (iso: string) => {
   const d = new Date();
@@ -132,33 +122,17 @@ export default function HotelPage() {
     .reduce((sum, r) => sum + r.commission, 0);
 
   const stats = [
+    { label: "Scans totaux", value: qr.scans },
     {
-      label: "Scans totaux",
-      value: String(qr.scans),
-      icon: ScanLine,
-      color: "text-blue-400",
-    },
-    {
-      label:
-        pending > 0
-          ? `Réservations (${pending} en attente)`
-          : "Réservations reçues",
-      value: String(reservations.length),
-      icon: Users,
-      color: "text-green-400",
+      label: "Réservations",
+      value: reservations.length,
+      hint: pending > 0 ? `dont ${pending} en attente` : undefined,
     },
     {
       label: "Commissions du mois",
       value: `${commissionsMonth.toLocaleString()} MAD`,
-      icon: TrendingUp,
-      color: "text-amber-400",
     },
-    {
-      label: "Chambres actives",
-      value: String(qr.active),
-      icon: QrCode,
-      color: "text-purple-400",
-    },
+    { label: "Chambres actives", value: qr.active },
   ];
 
   const latest = reservations.slice(0, 5);
@@ -167,37 +141,17 @@ export default function HotelPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl p-6">
-        <h1 className="text-xl font-bold text-white font-[family-name:var(--font-manrope)]">
+        <h1 className="font-display text-3xl font-light text-white">
           Bienvenue{fullName ? `, ${fullName.split(" ")[0]}` : ""}
         </h1>
-        <p className="text-sm text-white/60 font-[family-name:var(--font-inter)] mt-1">
+        <p className="font-ui text-sm text-white/60 mt-2">
           {venueName ? `${venueName} — ` : ""}vos clients scannent, sortent, et
           vous touchez une commission sur chaque réservation.
         </p>
       </div>
 
-      {/* Stats strip */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((stat) => {
-          const Icon = stat.icon;
-          return (
-            <div
-              key={stat.label}
-              className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-2xl p-5"
-            >
-              <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center mb-3">
-                <Icon size={18} strokeWidth={1.5} className={stat.color} />
-              </div>
-              <p className="text-2xl font-extrabold text-white font-[family-name:var(--font-manrope)]">
-                {stat.value}
-              </p>
-              <p className="text-xs text-white/50 font-[family-name:var(--font-inter)] mt-0.5">
-                {stat.label}
-              </p>
-            </div>
-          );
-        })}
-      </div>
+      {/* Bandeau KPI */}
+      <StatStrip stats={stats} />
 
       {/* Premier pas : uniquement tant qu'aucune chambre n'existe */}
       {qr.total === 0 && (
@@ -231,7 +185,7 @@ export default function HotelPage() {
       {reservations.length > 0 && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl p-6">
-            <h2 className="text-sm font-bold text-white font-[family-name:var(--font-manrope)] mb-1">
+            <h2 className="font-display text-lg font-normal text-white mb-1">
               Réservations par semaine
             </h2>
             <p className="text-xs text-white/40 font-[family-name:var(--font-inter)] mb-5">
@@ -241,14 +195,14 @@ export default function HotelPage() {
           </div>
           <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl p-6 flex flex-col gap-5">
             <div>
-              <h2 className="text-sm font-bold text-white font-[family-name:var(--font-manrope)] mb-3">
+              <h2 className="font-display text-lg font-normal text-white mb-3">
                 Satisfaction client
               </h2>
               {avgRating !== null ? (
                 <div className="flex items-center gap-3">
-                  <p className="text-3xl font-extrabold text-white font-[family-name:var(--font-manrope)]">
+                  <p className="font-display text-4xl font-light text-white">
                     {avgRating.toFixed(1).replace(".", ",")}
-                    <span className="text-base text-white/40">/5</span>
+                    <span className="text-lg text-white/40">/5</span>
                   </p>
                   <div>
                     <RatingStars value={avgRating} />
@@ -278,7 +232,7 @@ export default function HotelPage() {
       {latest.length > 0 && (
         <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-bold text-white font-[family-name:var(--font-manrope)]">
+            <h2 className="font-display text-lg font-normal text-white">
               Dernières réservations
             </h2>
             <Link
@@ -318,11 +272,7 @@ export default function HotelPage() {
                       +{r.commission.toLocaleString()} MAD
                     </span>
                   )}
-                  <span
-                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider font-[family-name:var(--font-inter)] whitespace-nowrap ${STATUS_STYLES[r.status]}`}
-                  >
-                    {r.status}
-                  </span>
+                  <StatusBadge status={r.status} />
                 </div>
               </li>
             ))}

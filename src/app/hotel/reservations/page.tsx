@@ -7,23 +7,12 @@ import {
   type HotelReservation,
 } from "@/hooks/use-hotel-reservations";
 import { TableSkeleton } from "@/components/shared/loading-skeleton";
-import {
-  CalendarDays,
-  Users,
-  Clock,
-  CheckCircle2,
-  Search,
-  QrCode,
-  Info,
-} from "lucide-react";
+import { StatStripThree } from "@/components/shared/stat-strip";
+import { StatusBadge } from "@/components/shared/status-badge";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Users, Search, QrCode, Info } from "lucide-react";
 
 const FILTERS = ["toutes", "confirmée", "en attente", "annulée"] as const;
-
-const STATUS_STYLES: Record<HotelReservation["status"], string> = {
-  confirmée: "bg-emerald-500/15 text-emerald-400",
-  "en attente": "bg-amber-500/15 text-amber-400",
-  annulée: "bg-red-500/15 text-red-400",
-};
 
 const formatDate = (r: HotelReservation) =>
   new Date(r.reservation_date + "T00:00:00").toLocaleDateString("fr-FR") +
@@ -57,10 +46,10 @@ export default function HotelReservationsPage() {
       {/* Header */}
       <div className="px-4 sm:px-6 pt-6 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold text-white font-[family-name:var(--font-manrope)]">
+          <h1 className="font-display text-3xl font-light text-white">
             Réservations
           </h1>
-          <p className="text-sm text-white/60 font-[family-name:var(--font-inter)] mt-0.5">
+          <p className="font-ui text-sm text-white/60 mt-1.5">
             Sorties réservées par vos clients après un scan — mise à jour en
             temps réel
           </p>
@@ -81,64 +70,35 @@ export default function HotelReservationsPage() {
         </div>
       </div>
 
-      {/* Stats cards */}
-      <div className="px-4 sm:px-6 pb-6 grid grid-cols-3 gap-3">
-        <div className="bg-white/[0.07] rounded-xl border border-white/10 p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
-              <CalendarDays size={16} strokeWidth={1.5} className="text-blue-400" />
-            </div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-white/60 font-[family-name:var(--font-inter)]">
-              Total
-            </span>
-          </div>
-          <p className="text-xl font-extrabold text-white font-[family-name:var(--font-manrope)]">
-            {reservations.length}
-          </p>
-        </div>
-        <div className="bg-white/[0.07] rounded-xl border border-white/10 p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-              <CheckCircle2 size={16} strokeWidth={1.5} className="text-emerald-400" />
-            </div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-white/60 font-[family-name:var(--font-inter)]">
-              Confirmées
-            </span>
-          </div>
-          <p className="text-xl font-extrabold text-white font-[family-name:var(--font-manrope)]">
-            {confirmed}
-          </p>
-        </div>
-        <div className="bg-white/[0.07] rounded-xl border border-white/10 p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
-              <Clock size={16} strokeWidth={1.5} className="text-amber-400" />
-            </div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-white/60 font-[family-name:var(--font-inter)]">
-              En attente
-            </span>
-          </div>
-          <p className="text-xl font-extrabold text-white font-[family-name:var(--font-manrope)]">
-            {pending}
-          </p>
-        </div>
+      {/* Bandeau KPI */}
+      <div className="px-4 sm:px-6 pb-6">
+        <StatStripThree
+          stats={[
+            { label: "Total", value: reservations.length },
+            { label: "Confirmées", value: confirmed },
+            { label: "En attente", value: pending },
+          ]}
+        />
       </div>
 
-      {/* Filters */}
-      <div className="px-4 sm:px-6 pb-4 flex flex-wrap gap-2">
-        {FILTERS.map((f) => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className={`px-4 py-1.5 rounded-full text-xs font-medium capitalize transition-colors font-[family-name:var(--font-inter)] ${
-              filter === f
-                ? "bg-white/20 text-white border border-white/20"
-                : "bg-white/[0.05] text-white/50 border border-white/10 hover:bg-white/10 hover:text-white"
-            }`}
-          >
-            {f}
-          </button>
-        ))}
+      {/* Filtres */}
+      <div className="px-4 sm:px-6 pb-4">
+        <Tabs
+          value={filter}
+          onValueChange={(v) => setFilter(v as (typeof FILTERS)[number])}
+        >
+          <TabsList className="bg-black/30 border border-white/10 backdrop-blur-xl">
+            {FILTERS.map((f) => (
+              <TabsTrigger
+                key={f}
+                value={f}
+                className="font-ui capitalize text-white/55 data-[selected]:bg-white/15 data-[selected]:text-white"
+              >
+                {f}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
       </div>
 
       {/* Table / empty state */}
@@ -208,11 +168,7 @@ export default function HotelReservationsPage() {
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      <span
-                        className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider font-[family-name:var(--font-inter)] whitespace-nowrap ${STATUS_STYLES[r.status]}`}
-                      >
-                        {r.status}
-                      </span>
+                      <StatusBadge status={r.status} />
                     </td>
                     <td className="px-4 py-3 text-sm text-white/70 font-[family-name:var(--font-inter)] whitespace-nowrap">
                       {r.commission > 0

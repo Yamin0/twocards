@@ -154,7 +154,7 @@ function MenuView({
       <p className="text-center text-[11px] font-bold uppercase tracking-[0.25em] text-white/50 font-[family-name:var(--font-inter)] sm:text-xs lg:text-sm">
         Votre conciergerie
       </p>
-      <h1 className="mt-2 text-center text-3xl font-extrabold text-white font-[family-name:var(--font-manrope)] sm:mt-3 sm:text-5xl lg:text-6xl">
+      <h1 className="font-display mt-2 text-center text-4xl font-light text-white sm:mt-4 sm:text-6xl lg:text-7xl">
         {hotelName ?? "Bienvenue"}
       </h1>
       <p className="mx-auto mt-2 max-w-xs text-center text-sm leading-relaxed text-white/60 font-[family-name:var(--font-inter)] sm:mt-4 sm:max-w-lg sm:text-base lg:text-lg">
@@ -186,7 +186,7 @@ function MenuView({
                     className="h-[18px] w-[18px] text-white sm:h-6 sm:w-6"
                   />
                 </div>
-                <p className="text-lg font-bold text-white font-[family-name:var(--font-manrope)] sm:text-2xl">
+                <p className="font-display text-xl font-normal text-white sm:text-3xl">
                   {cat.label}
                 </p>
                 <p className="mt-0.5 text-[11px] leading-snug text-white/60 font-[family-name:var(--font-inter)] sm:mt-1 sm:text-sm">
@@ -224,7 +224,7 @@ function CategoryView({
           <ArrowLeft strokeWidth={1.5} className="h-[18px] w-[18px] sm:h-6 sm:w-6" />
         </button>
         <div>
-          <h2 className="flex items-center gap-2 text-xl font-extrabold text-white font-[family-name:var(--font-manrope)] sm:gap-3 sm:text-4xl lg:text-5xl">
+          <h2 className="font-display flex items-center gap-2 text-2xl font-light text-white sm:gap-3 sm:text-5xl lg:text-6xl">
             <Icon
               strokeWidth={1.5}
               className="h-[18px] w-[18px] text-white/70 sm:h-8 sm:w-8"
@@ -264,7 +264,7 @@ function CategoryView({
             </div>
             <div className="flex flex-1 items-center justify-between gap-3 p-4 sm:p-5">
               <div className="min-w-0">
-                <p className="line-clamp-2 text-base font-bold text-white font-[family-name:var(--font-manrope)] sm:text-lg">
+                <p className="font-display line-clamp-2 text-lg font-normal text-white sm:text-xl">
                   {o.name}
                 </p>
                 {o.city && (
@@ -363,7 +363,7 @@ function ReservationSheet({
             <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/15 border border-emerald-400/30">
               <Check size={30} strokeWidth={2} className="text-emerald-400" />
             </div>
-            <h3 className="text-xl font-extrabold text-white font-[family-name:var(--font-manrope)]">
+            <h3 className="font-display text-3xl font-light text-white">
               Demande envoyée
             </h3>
             <p className="mx-auto mt-2 max-w-xs text-sm leading-relaxed text-white/60 font-[family-name:var(--font-inter)]">
@@ -386,7 +386,7 @@ function ReservationSheet({
                 <p className="text-[10px] font-bold uppercase tracking-wider text-white/50 font-[family-name:var(--font-inter)]">
                   {category.label}
                 </p>
-                <h3 className="mt-0.5 text-lg font-extrabold text-white font-[family-name:var(--font-manrope)]">
+                <h3 className="font-display mt-0.5 text-2xl font-light text-white">
                   {offer.name}
                 </h3>
               </div>

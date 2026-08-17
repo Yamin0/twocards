@@ -84,7 +84,7 @@ export function RatingExperience({
 
         {phase === "invalid" && (
           <>
-            <h1 className="text-xl font-extrabold text-white font-[family-name:var(--font-manrope)]">
+            <h1 className="font-display text-3xl font-light text-white">
               Lien invalide
             </h1>
             <p className="mt-2 text-sm text-white/60 font-[family-name:var(--font-inter)]">
@@ -98,8 +98,8 @@ export function RatingExperience({
             <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-white/50 font-[family-name:var(--font-inter)]">
               Votre avis compte
             </p>
-            <h1 className="mt-2 text-2xl font-extrabold text-white font-[family-name:var(--font-manrope)]">
-              Comment était votre sortie chez {context.venue_name} ?
+            <h1 className="font-display mt-3 text-3xl font-light leading-snug text-white">
+              Comment était votre sortie chez {context.venue_name}&nbsp;?
             </h1>
             <p className="mt-1 text-xs text-white/40 font-[family-name:var(--font-inter)]">
               {new Date(
@@ -164,7 +164,7 @@ export function RatingExperience({
             <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/15 border border-emerald-400/30">
               <Check size={30} strokeWidth={2} className="text-emerald-400" />
             </div>
-            <h1 className="text-xl font-extrabold text-white font-[family-name:var(--font-manrope)]">
+            <h1 className="font-display text-3xl font-light text-white">
               Merci pour votre avis
             </h1>
             <p className="mt-2 text-sm text-white/60 font-[family-name:var(--font-inter)]">

@@ -6,14 +6,8 @@ import {
   type HotelReservation,
 } from "@/hooks/use-hotel-reservations";
 import { TableSkeleton } from "@/components/shared/loading-skeleton";
-import {
-  Coins,
-  TrendingUp,
-  HelpCircle,
-  Download,
-  Percent,
-  Clock,
-} from "lucide-react";
+import { StatStripThree } from "@/components/shared/stat-strip";
+import { Coins, HelpCircle, Download, Percent } from "lucide-react";
 
 /* Une ligne de commission = une réservation dont le montant dépensé est
    renseigné. Avant cela, la sortie n'a pas encore eu lieu (ou le montant
@@ -83,35 +77,20 @@ export default function HotelCommissionsPage() {
   ).length;
 
   const stats = [
-    {
-      label: "Commissions cumulées",
-      value: `${total.toLocaleString()} MAD`,
-      icon: Coins,
-      color: "text-amber-400",
-    },
-    {
-      label: "Ce mois-ci",
-      value: `${totalMonth.toLocaleString()} MAD`,
-      icon: TrendingUp,
-      color: "text-emerald-400",
-    },
-    {
-      label: "En attente de montant",
-      value: String(awaitingAmount),
-      icon: Clock,
-      color: "text-blue-400",
-    },
-  ] as const;
+    { label: "Commissions cumulées", value: `${total.toLocaleString()} MAD` },
+    { label: "Ce mois-ci", value: `${totalMonth.toLocaleString()} MAD` },
+    { label: "En attente de montant", value: awaitingAmount },
+  ];
 
   return (
     <div className="bg-transparent min-h-screen">
       {/* Header */}
       <div className="px-4 sm:px-6 pt-6 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold text-white font-[family-name:var(--font-manrope)]">
+          <h1 className="font-display text-3xl font-light text-white">
             Commissions
           </h1>
-          <p className="text-sm text-white/60 font-[family-name:var(--font-inter)] mt-0.5">
+          <p className="font-ui text-sm text-white/60 mt-1.5">
             Vos gains sur chaque sortie réservée via vos QR codes
           </p>
         </div>
@@ -126,26 +105,9 @@ export default function HotelCommissionsPage() {
         )}
       </div>
 
-      {/* Stats cards */}
-      <div className="px-4 sm:px-6 pb-6 grid grid-cols-3 gap-3">
-        {stats.map((s) => (
-          <div
-            key={s.label}
-            className="bg-white/[0.07] rounded-xl border border-white/10 p-4"
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
-                <s.icon size={16} strokeWidth={1.5} className={s.color} />
-              </div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-white/60 font-[family-name:var(--font-inter)]">
-                {s.label}
-              </span>
-            </div>
-            <p className="text-xl font-extrabold text-white font-[family-name:var(--font-manrope)]">
-              {s.value}
-            </p>
-          </div>
-        ))}
+      {/* Bandeau KPI */}
+      <div className="px-4 sm:px-6 pb-6">
+        <StatStripThree stats={stats} />
       </div>
 
       {/* Règle de calcul, énoncée plutôt que devinée */}

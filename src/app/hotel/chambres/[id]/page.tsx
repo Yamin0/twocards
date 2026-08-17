@@ -235,7 +235,7 @@ export default function HotelQrDetailPage({
           <ArrowLeft size={16} strokeWidth={1.5} />
         </Link>
         <div className="min-w-0">
-          <h1 className="flex items-center gap-2 text-xl font-bold text-white font-[family-name:var(--font-manrope)]">
+          <h1 className="flex items-center gap-2 font-display text-2xl font-light text-white">
             <span className="truncate">{qr.label}</span>
             <span
               className={`shrink-0 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider font-[family-name:var(--font-inter)] ${

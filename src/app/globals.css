@@ -121,6 +121,17 @@
   font-family: var(--font-suisse), var(--font-inter), sans-serif;
 }
 
+/* Pile display des dashboards et pages client : serif éditoriale pour les
+   titres et les chiffres, Suisse Int'l pour l'interface. */
+.font-display {
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-optical-sizing: auto;
+  letter-spacing: -0.01em;
+}
+.font-ui {
+  font-family: var(--font-suisse), var(--font-inter), sans-serif;
+}
+
 @keyframes moveBackground {
   from {
     background-position: 0% 0%;

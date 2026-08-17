@@ -8,6 +8,8 @@ import {
   type VenueQrReservation,
 } from "@/hooks/use-venue-qr-reservations";
 import { TableSkeleton } from "@/components/shared/loading-skeleton";
+import { StatStrip } from "@/components/shared/stat-strip";
+import { StatusBadge } from "@/components/shared/status-badge";
 import { useToast } from "@/hooks/use-toast";
 import {
   MiniBars,
@@ -17,21 +19,12 @@ import {
 import {
   QrCode,
   Users,
-  Clock,
-  Coins,
-  Banknote,
   Check,
   Pencil,
   Loader2,
   Info,
   Link2,
 } from "lucide-react";
-
-const STATUS_STYLES: Record<VenueQrReservation["status"], string> = {
-  confirmée: "bg-emerald-500/15 text-emerald-400",
-  "en attente": "bg-amber-500/15 text-amber-400",
-  annulée: "bg-red-500/15 text-red-400",
-};
 
 export default function VenueQrReservationsPage() {
   const { isLoading } = useAuthUser();
@@ -107,72 +100,38 @@ export default function VenueQrReservationsPage() {
   };
 
   const stats = [
-    {
-      label: "Sorties reçues",
-      value: String(rows.length),
-      icon: QrCode,
-      color: "text-blue-400",
-    },
-    {
-      label: "En attente de montant",
-      value: String(awaiting),
-      icon: Clock,
-      color: "text-amber-400",
-    },
-    {
-      label: "CA saisi",
-      value: `${revenue.toLocaleString()} MAD`,
-      icon: Banknote,
-      color: "text-emerald-400",
-    },
+    { label: "Sorties reçues", value: rows.length },
+    { label: "En attente de montant", value: awaiting },
+    { label: "CA saisi", value: `${revenue.toLocaleString()} MAD` },
     {
       label: "Commissions reversées",
       value: `${commissions.toLocaleString()} MAD`,
-      icon: Coins,
-      color: "text-purple-400",
     },
-  ] as const;
+  ];
 
   return (
     <div className="bg-transparent min-h-screen">
       {/* Header */}
       <div className="px-4 sm:px-6 pt-6 pb-4">
-        <h1 className="text-xl font-bold text-white font-[family-name:var(--font-manrope)]">
+        <h1 className="font-display text-3xl font-light text-white">
           Réservations QR
         </h1>
-        <p className="text-sm text-white/60 font-[family-name:var(--font-inter)] mt-0.5">
+        <p className="font-ui text-sm text-white/60 mt-1.5">
           Clients envoyés par les hôtels partenaires — saisissez le montant en
           fin de sortie
         </p>
       </div>
 
-      {/* Stats */}
-      <div className="px-4 sm:px-6 pb-6 grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {stats.map((s) => (
-          <div
-            key={s.label}
-            className="bg-white/[0.07] rounded-xl border border-white/10 p-4"
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
-                <s.icon size={16} strokeWidth={1.5} className={s.color} />
-              </div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-white/60 font-[family-name:var(--font-inter)]">
-                {s.label}
-              </span>
-            </div>
-            <p className="text-xl font-extrabold text-white font-[family-name:var(--font-manrope)]">
-              {s.value}
-            </p>
-          </div>
-        ))}
+      {/* Bandeau KPI */}
+      <div className="px-4 sm:px-6 pb-6">
+        <StatStrip stats={stats} />
       </div>
 
       {/* Analyses : demande et satisfaction, à la SevenRooms */}
       {rows.length > 0 && (
         <div className="px-4 sm:px-6 pb-6 grid grid-cols-1 lg:grid-cols-2 gap-3">
           <div className="bg-white/[0.07] rounded-xl border border-white/10 p-5">
-            <h2 className="text-sm font-bold text-white font-[family-name:var(--font-manrope)] mb-1">
+            <h2 className="font-display text-lg font-normal text-white mb-1">
               Sorties par semaine
             </h2>
             <p className="text-xs text-white/40 font-[family-name:var(--font-inter)] mb-4">
@@ -181,15 +140,15 @@ export default function VenueQrReservationsPage() {
             <MiniBars data={weekly} color="bg-purple-400/70" />
           </div>
           <div className="bg-white/[0.07] rounded-xl border border-white/10 p-5">
-            <h2 className="text-sm font-bold text-white font-[family-name:var(--font-manrope)] mb-3">
+            <h2 className="font-display text-lg font-normal text-white mb-3">
               Satisfaction client
             </h2>
             {avgRating !== null ? (
               <>
                 <div className="flex items-center gap-3">
-                  <p className="text-3xl font-extrabold text-white font-[family-name:var(--font-manrope)]">
+                  <p className="font-display text-4xl font-light text-white">
                     {avgRating.toFixed(1).replace(".", ",")}
-                    <span className="text-base text-white/40">/5</span>
+                    <span className="text-lg text-white/40">/5</span>
                   </p>
                   <div>
                     <RatingStars value={avgRating} />
@@ -283,11 +242,7 @@ export default function VenueQrReservationsPage() {
                         {r.notes ?? "—"}
                       </td>
                       <td className="px-4 py-3">
-                        <span
-                          className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider font-[family-name:var(--font-inter)] whitespace-nowrap ${STATUS_STYLES[r.status]}`}
-                        >
-                          {r.status}
-                        </span>
+                        <StatusBadge status={r.status} />
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
                         {r.status === "annulée" ? (

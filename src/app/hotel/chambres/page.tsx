@@ -126,10 +126,10 @@ export default function HotelChambresPage() {
       {/* Header */}
       <div className="px-4 sm:px-6 pt-6 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold text-white font-[family-name:var(--font-manrope)]">
+          <h1 className="font-display text-3xl font-light text-white">
             Chambres
           </h1>
-          <p className="text-sm text-white/60 font-[family-name:var(--font-inter)] mt-0.5">
+          <p className="font-ui text-sm text-white/60 mt-1.5">
             Un QR code par chambre — chaque client scanne, découvre votre
             sélection et réserve ses sorties
           </p>
