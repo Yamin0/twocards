@@ -108,7 +108,7 @@ export default function ConciergeClientsPage() {
       {/* Header */}
       <div className="px-4 sm:px-6 pt-6 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold text-white font-ui">
+          <h1 className="text-xl font-bold text-white">
             Carnet de contacts
           </h1>
           <p className="text-sm text-white/60 font-ui mt-0.5">
@@ -321,7 +321,7 @@ export default function ConciergeClientsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="bg-white/[0.07] rounded-xl shadow-xl w-full max-w-md mx-4 p-6">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-lg font-bold text-white font-ui">
+              <h2 className="text-lg font-bold text-white">
                 Nouveau client
               </h2>
               <button

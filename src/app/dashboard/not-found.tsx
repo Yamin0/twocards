@@ -9,7 +9,7 @@ export default function DashboardNotFound() {
           404
         </p>
         <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-10 -mt-10">
-          <h1 className="text-xl font-bold text-white font-ui mb-2">
+          <h1 className="text-xl font-bold text-white mb-2">
             Page introuvable
           </h1>
           <p className="text-sm text-white/40 font-ui mb-6">

@@ -161,7 +161,7 @@ export default function HotelPage() {
               <QrCode size={20} strokeWidth={1.5} className="text-blue-400" />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-white font-ui">
+              <h2 className="text-sm font-bold text-white">
                 Commencez par créer vos chambres
               </h2>
               <p className="text-sm text-white/60 font-ui mt-0.5 max-w-xl">
@@ -219,7 +219,7 @@ export default function HotelPage() {
               )}
             </div>
             <div>
-              <h3 className="text-[10px] font-bold uppercase tracking-wider text-white/50 font-ui mb-2">
+              <h3 className="text-[10px] font-bold uppercase tracking-wider text-white/50 mb-2">
                 Répartition par catégorie
               </h3>
               <SplitBar segments={byCategory} />
@@ -300,7 +300,7 @@ export default function HotelPage() {
                   className="text-white/30 group-hover:text-white/70 group-hover:translate-x-0.5 transition-all"
                 />
               </div>
-              <h3 className="text-sm font-bold text-white font-ui">
+              <h3 className="text-sm font-bold text-white">
                 {folder.label}
               </h3>
               <p className="text-xs text-white/50 font-ui mt-0.5 mb-3">

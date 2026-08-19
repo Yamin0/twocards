@@ -215,7 +215,7 @@ export default function AnalyticsPage() {
         <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-8">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
             <div>
-              <h1 className="text-white font-ui font-extrabold text-3xl tracking-tight">
+              <h1 className="text-white font-extrabold text-3xl tracking-tight">
                 Analyses
               </h1>
               <p className="text-white/50 text-sm mt-2">
@@ -264,7 +264,7 @@ export default function AnalyticsPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Couverts par jour */}
         <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
-          <h3 className="text-white font-ui font-bold text-sm mb-6">
+          <h3 className="text-white font-bold text-sm mb-6">
             Couverts par jour
           </h3>
           <BarChart
@@ -277,7 +277,7 @@ export default function AnalyticsPage() {
 
         {/* Revenus par semaine */}
         <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
-          <h3 className="text-white font-ui font-bold text-sm mb-6">
+          <h3 className="text-white font-bold text-sm mb-6">
             Revenus par semaine
           </h3>
           <BarChart
@@ -293,7 +293,7 @@ export default function AnalyticsPage() {
       <div>
         <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl overflow-hidden">
           <div className="px-6 py-5">
-            <h3 className="text-white font-ui font-bold text-sm">
+            <h3 className="text-white font-bold text-sm">
               Performance des RP
             </h3>
           </div>
@@ -359,7 +359,7 @@ export default function AnalyticsPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Meilleurs Evenements */}
         <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
-          <h3 className="text-white font-ui font-bold text-sm mb-5">
+          <h3 className="text-white font-bold text-sm mb-5">
             Meilleurs événements
           </h3>
           <div className="space-y-4">
@@ -386,7 +386,7 @@ export default function AnalyticsPage() {
 
         {/* Repartition des Reservations */}
         <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
-          <h3 className="text-white font-ui font-bold text-sm mb-5">
+          <h3 className="text-white font-bold text-sm mb-5">
             Répartition des réservations
           </h3>
           <div className="flex items-center gap-8">

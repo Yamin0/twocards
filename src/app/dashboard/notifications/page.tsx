@@ -175,7 +175,7 @@ export default function NotificationsPage() {
       <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-extrabold font-ui text-white">
+            <h1 className="text-2xl font-extrabold text-white">
               Notifications
             </h1>
             {unreadCount > 0 && (

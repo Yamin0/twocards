@@ -122,7 +122,7 @@ export default function ConciergeAIPage() {
             <Sparkles size={20} strokeWidth={1.5} className="text-blue-400" />
           </div>
           <div>
-            <h2 className="text-lg font-bold text-white font-ui">
+            <h2 className="text-lg font-bold text-white">
               Assistant IA
             </h2>
             <p className="text-xs text-white/40">

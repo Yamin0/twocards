@@ -134,7 +134,7 @@ function ConciergeReservations() {
     <div className="bg-transparent min-h-screen">
       <div className="px-8 pt-8 pb-4 flex items-center justify-between">
         <div>
-          <h1 className="text-white font-ui text-2xl font-extrabold">
+          <h1 className="text-white text-2xl font-extrabold">
             Mes réservations
           </h1>
           <p className="text-white/60 mt-1 text-sm">
@@ -219,7 +219,7 @@ function ConciergeReservations() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="bg-white/[0.07] rounded-xl shadow-xl w-full max-w-md mx-4 p-6">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-lg font-bold text-white font-ui">
+              <h2 className="text-lg font-bold text-white">
                 Nouvelle réservation
               </h2>
               <button

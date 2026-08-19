@@ -98,7 +98,7 @@ export default function HotelSettingsPage() {
   return (
     <div className="bg-transparent min-h-screen">
       <div className="px-8 pt-8 pb-6">
-        <h1 className="text-white font-ui text-2xl font-extrabold">
+        <h1 className="text-white text-2xl font-extrabold">
           Paramètres
         </h1>
         <p className="text-white/60 mt-1 text-sm">
@@ -124,7 +124,7 @@ export default function HotelSettingsPage() {
         </div>
 
         <div className="bg-white/[0.07] rounded-md editorial-shadow p-8">
-          <h2 className="text-sm font-semibold text-white font-ui mb-6">
+          <h2 className="text-sm font-semibold text-white mb-6">
             Profil de l&apos;hôtel
           </h2>
 

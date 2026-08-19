@@ -197,7 +197,7 @@ export default function HotelChambresPage() {
             className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-2xl p-5"
           >
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-bold text-white font-ui">
+              <h2 className="text-sm font-bold text-white">
                 Nouvelle chambre
               </h2>
               <button
@@ -250,7 +250,7 @@ export default function HotelChambresPage() {
             <div className="w-14 h-14 rounded-2xl bg-blue-500/15 border border-blue-400/20 flex items-center justify-center mx-auto mb-5">
               <QrCode size={26} strokeWidth={1.5} className="text-blue-400" />
             </div>
-            <h2 className="text-lg font-bold text-white font-ui mb-2">
+            <h2 className="text-lg font-bold text-white mb-2">
               Aucune chambre pour le moment
             </h2>
             <p className="text-sm text-white/50 font-ui max-w-md mx-auto mb-6">
@@ -277,7 +277,7 @@ export default function HotelChambresPage() {
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className="min-w-0">
-                    <h3 className="text-sm font-bold text-white font-ui truncate">
+                    <h3 className="text-sm font-bold text-white truncate">
                       {item.label}
                     </h3>
                     <p className="text-xs text-white/40 font-ui mt-0.5">

@@ -285,7 +285,7 @@ export default function HotelQrDetailPage({
             <QRCode value={link} size={120} />
           </div>
           <div className="min-w-0 flex-1">
-            <h2 className="text-sm font-bold text-white font-ui">
+            <h2 className="text-sm font-bold text-white">
               Lien unique de ce QR code
             </h2>
             <p className="text-xs text-white/50 font-ui mt-1">
@@ -337,7 +337,7 @@ export default function HotelQrDetailPage({
         <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-2xl p-5">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-1">
             <div>
-              <h2 className="text-sm font-bold text-white font-ui">
+              <h2 className="text-sm font-bold text-white">
                 Menu proposé sur ce QR
               </h2>
               <p className="text-xs text-white/50 font-ui mt-1">
@@ -465,7 +465,7 @@ export default function HotelQrDetailPage({
             <div className="w-14 h-14 rounded-2xl bg-blue-500/15 border border-blue-400/20 flex items-center justify-center mx-auto mb-5">
               <QrCode size={26} strokeWidth={1.5} className="text-blue-400" />
             </div>
-            <h2 className="text-lg font-bold text-white font-ui mb-2">
+            <h2 className="text-lg font-bold text-white mb-2">
               Aucune réservation via ce QR
             </h2>
             <p className="text-sm text-white/50 font-ui max-w-md mx-auto">

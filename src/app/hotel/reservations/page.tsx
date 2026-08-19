@@ -108,7 +108,7 @@ export default function HotelReservationsPage() {
             <div className="w-14 h-14 rounded-2xl bg-blue-500/15 border border-blue-400/20 flex items-center justify-center mx-auto mb-5">
               <QrCode size={26} strokeWidth={1.5} className="text-blue-400" />
             </div>
-            <h2 className="text-lg font-bold text-white font-ui mb-2">
+            <h2 className="text-lg font-bold text-white mb-2">
               {reservations.length === 0
                 ? "Aucune réservation pour le moment"
                 : "Aucune réservation ne correspond"}

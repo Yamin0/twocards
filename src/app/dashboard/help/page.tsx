@@ -106,7 +106,7 @@ export default function HelpPage() {
       <div>
         <div className="flex items-center gap-3 mb-1">
           <HelpCircle size={28} strokeWidth={1.5} className="text-blue-400" />
-          <h1 className="text-2xl font-extrabold font-ui text-white">
+          <h1 className="text-2xl font-extrabold text-white">
             Centre d&apos;aide
           </h1>
         </div>
@@ -118,7 +118,7 @@ export default function HelpPage() {
 
       {/* FAQ */}
       <section className="space-y-3">
-        <h2 className="text-lg font-bold font-ui text-white">
+        <h2 className="text-lg font-bold text-white">
           Questions frequentes
         </h2>
         <div className={`${glassCard} divide-y divide-white/[0.06]`}>
@@ -152,7 +152,7 @@ export default function HelpPage() {
 
       {/* Contact support */}
       <section className="space-y-3">
-        <h2 className="text-lg font-bold font-ui text-white">
+        <h2 className="text-lg font-bold text-white">
           Contacter le support
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -199,7 +199,7 @@ export default function HelpPage() {
 
       {/* Quick links */}
       <section className="space-y-3">
-        <h2 className="text-lg font-bold font-ui text-white">
+        <h2 className="text-lg font-bold text-white">
           Acces rapide
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">

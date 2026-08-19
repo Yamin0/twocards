@@ -133,7 +133,7 @@ export default function NetworkPage() {
       <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-white font-ui">
+            <h1 className="text-2xl sm:text-3xl font-bold text-white">
               Réseau RP
             </h1>
             <p className="text-white/50 text-sm mt-1">
@@ -326,7 +326,7 @@ export default function NetworkPage() {
                 <div className="w-12 h-12 rounded-full bg-white/[0.06] flex items-center justify-center mb-3">
                   <UserPlus size={20} strokeWidth={1.5} className="text-white/25" />
                 </div>
-                <h3 className="text-sm font-semibold text-white/60 font-ui mb-1">
+                <h3 className="text-sm font-semibold text-white/60 mb-1">
                   Étendre votre réseau
                 </h3>
                 <p className="text-xs text-white/25 max-w-[180px]">
@@ -346,7 +346,7 @@ export default function NetworkPage() {
                 <div className="h-16 w-16 rounded-full bg-blue-400/15 flex items-center justify-center mx-auto mb-3">
                   <span className="text-xl font-bold text-blue-400">{selected.initials}</span>
                 </div>
-                <h2 className="text-lg font-semibold text-white font-ui">{selected.name}</h2>
+                <h2 className="text-lg font-semibold text-white">{selected.name}</h2>
                 <p className="text-xs text-white/40 mt-0.5">{selected.agency}</p>
                 <div className="flex items-center justify-center gap-2 mt-2">
                   <span className={`text-[0.625rem] font-semibold px-2.5 py-0.5 rounded-full ${statusBadge(selected.status)}`}>{selected.status}</span>
@@ -431,7 +431,7 @@ export default function NetworkPage() {
             <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-5 space-y-4">
               <div className="flex items-center gap-2">
                 <Award size={16} strokeWidth={1.5} className="text-amber-400" />
-                <h3 className="text-sm font-semibold text-white font-ui">Meilleur performeur</h3>
+                <h3 className="text-sm font-semibold text-white">Meilleur performeur</h3>
               </div>
 
               <div className="flex items-center gap-3">
@@ -471,7 +471,7 @@ export default function NetworkPage() {
             <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-5">
               <div className="flex items-center gap-2 mb-4">
                 <BarChart3 size={16} strokeWidth={1.5} className="text-white/30" />
-                <h3 className="text-sm font-semibold text-white font-ui">CA mensuel RP</h3>
+                <h3 className="text-sm font-semibold text-white">CA mensuel RP</h3>
               </div>
               <div className="flex items-end gap-2 h-28">
                 {MONTHLY_CA.map((m) => {
@@ -499,7 +499,7 @@ export default function NetworkPage() {
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowInviteModal(false)} />
           <div className="relative z-10 w-full max-w-md mx-4 backdrop-blur-xl bg-[#0e0e1a]/95 border border-white/[0.12] rounded-3xl p-6 space-y-5">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-bold text-white font-ui">Inviter un RP</h2>
+              <h2 className="text-lg font-bold text-white">Inviter un RP</h2>
               <button onClick={() => setShowInviteModal(false)} className="p-1.5 rounded-lg text-white/30 hover:text-white hover:bg-white/[0.08] transition-all">
                 <X size={18} strokeWidth={1.5} />
               </button>

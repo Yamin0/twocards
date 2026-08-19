@@ -625,7 +625,7 @@ export default function EventsPage() {
                 <span className={`text-[0.625rem] font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm ${statusBadge(panelEvent.status)}`}>{panelEvent.status}</span>
               </div>
               <div className="absolute bottom-4 left-4 z-10">
-                <h2 className="text-2xl font-bold text-white font-ui">{panelEvent.title}</h2>
+                <h2 className="text-2xl font-bold text-white">{panelEvent.title}</h2>
                 <p className="text-sm text-white/60 flex items-center gap-1 mt-1"><MapPin size={12} strokeWidth={1.5} />{panelEvent.venue}</p>
               </div>
             </div>
@@ -687,7 +687,7 @@ export default function EventsPage() {
           <div className="relative z-10 w-full max-w-lg h-full overflow-y-auto backdrop-blur-xl bg-[#0e0e1a]/95 border-l border-white/[0.1] p-6 space-y-5">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-bold text-white font-ui">
+                <h2 className="text-xl font-bold text-white">
                   {isEdit ? "Modifier l'événement" : "Nouvel événement"}
                 </h2>
                 <p className="text-xs text-white/30 mt-0.5">{isEdit ? "Modifiez les détails" : "Remplissez les informations"}</p>
@@ -999,7 +999,7 @@ export default function EventsPage() {
       <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-white font-ui">Événements</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-white">Événements</h1>
             <p className="text-white/50 text-sm mt-1">Gérez et planifiez vos événements</p>
           </div>
           <div className="flex items-center gap-3">
@@ -1070,7 +1070,7 @@ export default function EventsPage() {
             <button onClick={() => { if (calMonth === 0) { setCalMonth(11); setCalYear(calYear - 1); } else setCalMonth(calMonth - 1); }} className="p-2 rounded-xl text-white/40 hover:text-white hover:bg-white/[0.08] transition-all">
               <ChevronLeft size={18} strokeWidth={1.5} />
             </button>
-            <h2 className="text-lg font-semibold text-white font-ui">{MONTH_NAMES[calMonth]} {calYear}</h2>
+            <h2 className="text-lg font-semibold text-white">{MONTH_NAMES[calMonth]} {calYear}</h2>
             <button onClick={() => { if (calMonth === 11) { setCalMonth(0); setCalYear(calYear + 1); } else setCalMonth(calMonth + 1); }} className="p-2 rounded-xl text-white/40 hover:text-white hover:bg-white/[0.08] transition-all">
               <ChevronRight size={18} strokeWidth={1.5} />
             </button>
@@ -1193,7 +1193,7 @@ export default function EventsPage() {
                 </div>
                 <div className="p-5 space-y-4">
                   <div>
-                    <h3 className="text-base font-bold text-white font-ui cursor-pointer hover:text-blue-400 transition-colors" onClick={() => openView(event.id)}>{event.title}</h3>
+                    <h3 className="text-base font-bold text-white cursor-pointer hover:text-blue-400 transition-colors" onClick={() => openView(event.id)}>{event.title}</h3>
                     <p className="text-[0.6875rem] text-white/40 flex items-center gap-1 mt-1"><MapPin size={11} strokeWidth={1.5} />{event.venue}</p>
                   </div>
                   <div className="flex items-center gap-3 text-xs text-white/50">

@@ -190,7 +190,7 @@ export default function ConciergePage() {
       <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-white font-ui">
+            <h1 className="text-2xl sm:text-3xl font-bold text-white">
               Bonjour, {fullName || "Concierge"}.
             </h1>
             <p className="text-white/50 text-sm mt-1">
@@ -253,7 +253,7 @@ export default function ConciergePage() {
       <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
         <div className="mb-5 flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-semibold text-white font-ui">
+            <h2 className="text-xl font-semibold text-white">
               Établissements du réseau
             </h2>
             <p className="text-white/40 text-sm mt-0.5">
@@ -316,7 +316,7 @@ export default function ConciergePage() {
       {/* Recent Activity */}
       {isDemoConcierge && (
         <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
-          <h2 className="text-lg font-semibold text-white font-ui mb-4">
+          <h2 className="text-lg font-semibold text-white mb-4">
             Activité récente
           </h2>
           <div className="space-y-3">
@@ -340,7 +340,7 @@ export default function ConciergePage() {
       <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-xl font-semibold text-white font-ui">
+            <h2 className="text-xl font-semibold text-white">
               Vos espaces
             </h2>
             <p className="text-white/40 text-sm mt-0.5">Cliquez pour accéder à un espace</p>
@@ -371,7 +371,7 @@ export default function ConciergePage() {
                     className="text-white/0 group-hover:text-white/60 group-hover:translate-x-1 transition-all duration-300"
                   />
                 </div>
-                <h3 className="font-semibold text-white text-sm font-ui mb-1">
+                <h3 className="font-semibold text-white text-sm mb-1">
                   {folder.label}
                 </h3>
                 <p className="text-xs text-white/40 mb-3">{folder.description}</p>

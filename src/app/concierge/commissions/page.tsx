@@ -64,7 +64,7 @@ export default function ConciergeCommissionsPage() {
       {/* Header */}
       <div className="px-4 sm:px-6 pt-6 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold text-white font-ui">
+          <h1 className="text-xl font-bold text-white">
             Commissions
           </h1>
           <p className="text-sm text-white/60 font-ui mt-0.5">

@@ -289,7 +289,7 @@ export default function VenueDashboardPage() {
                   className="text-white/30 group-hover:text-white/70 group-hover:translate-x-0.5 transition-all"
                 />
               </div>
-              <h3 className="font-ui text-sm font-semibold text-white">
+              <h3 className="text-sm font-semibold text-white">
                 {q.label}
               </h3>
               <p className="font-ui text-xs text-white/50 mt-0.5">

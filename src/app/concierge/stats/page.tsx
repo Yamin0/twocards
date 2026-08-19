@@ -42,7 +42,7 @@ export default function ConciergeStatsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
-        <h1 className="text-2xl font-bold text-white font-ui">
+        <h1 className="text-2xl font-bold text-white">
           Statistiques
         </h1>
         <p className="text-sm text-white/50 font-ui mt-1">
@@ -86,7 +86,7 @@ export default function ConciergeStatsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Chart */}
         <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
-          <h3 className="text-lg font-bold text-white font-ui mb-6">
+          <h3 className="text-lg font-bold text-white mb-6">
             Évolution des couverts
           </h3>
           {barChart.length > 0 ? (
@@ -122,7 +122,7 @@ export default function ConciergeStatsPage() {
 
         {/* Venue breakdown */}
         <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
-          <h3 className="text-lg font-bold text-white font-ui mb-6">
+          <h3 className="text-lg font-bold text-white mb-6">
             Répartition par établissement
           </h3>
           {venueBreakdown.length > 0 ? (
@@ -158,7 +158,7 @@ export default function ConciergeStatsPage() {
 
         {/* Monthly detail table */}
         <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6 lg:col-span-2">
-          <h3 className="text-lg font-bold text-white font-ui mb-4">
+          <h3 className="text-lg font-bold text-white mb-4">
             Détail mensuel
           </h3>
           <div className="overflow-x-auto">

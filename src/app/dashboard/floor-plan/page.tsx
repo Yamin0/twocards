@@ -618,7 +618,7 @@ export default function FloorPlanPage() {
               {/* Table info */}
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <h2 className="text-lg font-semibold text-white font-ui">
+                  <h2 className="text-lg font-semibold text-white">
                     Table {selected.label}
                   </h2>
                   {selected.vip && (

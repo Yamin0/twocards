@@ -130,7 +130,7 @@ export default function HotelCommissionsPage() {
             <div className="w-14 h-14 rounded-2xl bg-amber-500/15 border border-amber-400/20 flex items-center justify-center mx-auto mb-5">
               <Coins size={26} strokeWidth={1.5} className="text-amber-400" />
             </div>
-            <h2 className="text-lg font-bold text-white font-ui mb-2">
+            <h2 className="text-lg font-bold text-white mb-2">
               Aucune commission pour le moment
             </h2>
             <p className="text-sm text-white/50 font-ui max-w-md mx-auto">
