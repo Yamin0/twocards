@@ -87,7 +87,7 @@ export function RatingExperience({
             <h1 className="font-display text-3xl font-light text-white">
               Lien invalide
             </h1>
-            <p className="mt-2 text-sm text-white/60 font-[family-name:var(--font-inter)]">
+            <p className="mt-2 text-sm text-white/60 font-ui">
               Cette réservation est introuvable ou a été annulée.
             </p>
           </>
@@ -95,13 +95,13 @@ export function RatingExperience({
 
         {(phase === "form" || phase === "sending") && context && (
           <>
-            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-white/50 font-[family-name:var(--font-inter)]">
+            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-white/50 font-ui">
               Votre avis compte
             </p>
             <h1 className="font-display mt-3 text-3xl font-light leading-snug text-white">
               Comment était votre sortie chez {context.venue_name}&nbsp;?
             </h1>
-            <p className="mt-1 text-xs text-white/40 font-[family-name:var(--font-inter)]">
+            <p className="mt-1 text-xs text-white/40 font-ui">
               {new Date(
                 context.reservation_date + "T00:00:00"
               ).toLocaleDateString("fr-FR", {
@@ -133,7 +133,7 @@ export function RatingExperience({
                 </button>
               ))}
             </div>
-            <p className="mt-2 h-5 text-sm font-medium text-amber-300 font-[family-name:var(--font-inter)]">
+            <p className="mt-2 h-5 text-sm font-medium text-amber-300 font-ui">
               {active > 0 ? RATING_LABELS[active] : ""}
             </p>
 
@@ -142,13 +142,13 @@ export function RatingExperience({
               onChange={(e) => setComment(e.target.value)}
               maxLength={500}
               placeholder="Un mot sur votre expérience ? (facultatif)"
-              className="mt-4 w-full min-h-24 resize-none rounded-xl bg-white/[0.07] px-4 py-3 text-sm text-white placeholder:text-white/30 focus:bg-white/10 focus:outline-none focus:ring-1 focus:ring-white/40 font-[family-name:var(--font-inter)]"
+              className="mt-4 w-full min-h-24 resize-none rounded-xl bg-white/[0.07] px-4 py-3 text-sm text-white placeholder:text-white/30 focus:bg-white/10 focus:outline-none focus:ring-1 focus:ring-white/40 font-ui"
             />
 
             <button
               onClick={submit}
               disabled={rating === 0 || phase === "sending"}
-              className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-white py-3.5 text-sm font-bold text-black transition-colors hover:bg-white/90 disabled:opacity-40 font-[family-name:var(--font-manrope)]"
+              className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-white py-3.5 text-sm font-bold text-black transition-colors hover:bg-white/90 disabled:opacity-40 font-ui"
             >
               {phase === "sending" ? (
                 <Loader2 size={16} strokeWidth={2} className="animate-spin" />
@@ -167,7 +167,7 @@ export function RatingExperience({
             <h1 className="font-display text-3xl font-light text-white">
               Merci pour votre avis
             </h1>
-            <p className="mt-2 text-sm text-white/60 font-[family-name:var(--font-inter)]">
+            <p className="mt-2 text-sm text-white/60 font-ui">
               Il aide {context?.venue_name ?? "l'établissement"} et votre hôtel
               à rendre chaque sortie meilleure.
             </p>
@@ -175,7 +175,7 @@ export function RatingExperience({
         )}
 
         <div className="mt-8 flex items-center justify-center gap-2 text-white/40">
-          <span className="text-xs font-[family-name:var(--font-inter)]">
+          <span className="text-xs font-ui">
             Propulsé par
           </span>
           <Image

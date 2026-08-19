@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Manrope, Inter, Nunito, Fraunces } from "next/font/google";
+import { Manrope, Inter, Nunito } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 import { ImpersonationBanner } from "@/components/shared/impersonation-banner";
@@ -22,15 +22,6 @@ const nunito = Nunito({
   weight: ["700", "800"],
 });
 
-/* Serif display des dashboards et pages client — grands corps, chiffres et
-   titres. L'axe optique haut donne le dessin fin et incisif des serifs
-   éditoriales (Saol, Canela) sans licence à payer. */
-const fraunces = Fraunces({
-  variable: "--font-fraunces",
-  subsets: ["latin"],
-  weight: "variable",
-  axes: ["opsz"],
-});
 
 // Gotham — licence client. Seul le Book (+ italique) est fourni.
 const gotham = localFont({
@@ -93,7 +84,7 @@ export default function RootLayout({
   return (
     <html
       lang="fr"
-      className={`${manrope.variable} ${inter.variable} ${nunito.variable} ${fraunces.variable} ${gotham.variable} ${suisse.variable} scroll-smooth`}
+      className={`${manrope.variable} ${inter.variable} ${nunito.variable} ${gotham.variable} ${suisse.variable} scroll-smooth`}
     >
       <body>
         <ImpersonationBanner />

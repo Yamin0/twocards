@@ -389,25 +389,25 @@ export default function FloorPlanPage() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl p-4">
             <p className="text-white/40 text-xs">Tables occupées</p>
-            <p className="text-xl font-bold text-white mt-1 font-[family-name:var(--font-manrope)]">
+            <p className="text-xl font-bold text-white mt-1 font-ui">
               {occupiedCount}/{currentTables.length}
             </p>
           </div>
           <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl p-4">
             <p className="text-white/40 text-xs">Disponibles</p>
-            <p className="text-xl font-bold text-green-400 mt-1 font-[family-name:var(--font-manrope)]">
+            <p className="text-xl font-bold text-green-400 mt-1 font-ui">
               {availableCount}
             </p>
           </div>
           <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl p-4">
             <p className="text-white/40 text-xs">Couverts réservés</p>
-            <p className="text-xl font-bold text-white mt-1 font-[family-name:var(--font-manrope)]">
+            <p className="text-xl font-bold text-white mt-1 font-ui">
               {occupiedCapacity}
             </p>
           </div>
           <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl p-4">
             <p className="text-white/40 text-xs">Capacité totale</p>
-            <p className="text-xl font-bold text-white mt-1 font-[family-name:var(--font-manrope)]">
+            <p className="text-xl font-bold text-white mt-1 font-ui">
               {totalCapacity}
             </p>
           </div>
@@ -618,7 +618,7 @@ export default function FloorPlanPage() {
               {/* Table info */}
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <h2 className="text-lg font-semibold text-white font-[family-name:var(--font-manrope)]">
+                  <h2 className="text-lg font-semibold text-white font-ui">
                     Table {selected.label}
                   </h2>
                   {selected.vip && (

@@ -161,10 +161,10 @@ export default function HotelPage() {
               <QrCode size={20} strokeWidth={1.5} className="text-blue-400" />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-white font-[family-name:var(--font-manrope)]">
+              <h2 className="text-sm font-bold text-white font-ui">
                 Commencez par créer vos chambres
               </h2>
-              <p className="text-sm text-white/60 font-[family-name:var(--font-inter)] mt-0.5 max-w-xl">
+              <p className="text-sm text-white/60 font-ui mt-0.5 max-w-xl">
                 Générez un QR code par chambre ou par zone (lobby, spa,
                 piscine), choisissez les sorties proposées, imprimez-le — vos
                 clients accèdent aux meilleures adresses de la ville en un scan.
@@ -173,7 +173,7 @@ export default function HotelPage() {
           </div>
           <Link
             href="/hotel/chambres"
-            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-500 hover:bg-blue-400 text-white rounded-xl text-sm font-medium transition-all shrink-0 font-[family-name:var(--font-manrope)]"
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-500 hover:bg-blue-400 text-white rounded-xl text-sm font-medium transition-all shrink-0 font-ui"
           >
             Créer une chambre
             <ArrowRight size={16} strokeWidth={1.5} />
@@ -188,7 +188,7 @@ export default function HotelPage() {
             <h2 className="font-display text-lg font-normal text-white mb-1">
               Réservations par semaine
             </h2>
-            <p className="text-xs text-white/40 font-[family-name:var(--font-inter)] mb-5">
+            <p className="text-xs text-white/40 font-ui mb-5">
               8 dernières semaines
             </p>
             <MiniBars data={weekly} />
@@ -206,20 +206,20 @@ export default function HotelPage() {
                   </p>
                   <div>
                     <RatingStars value={avgRating} />
-                    <p className="text-[10px] text-white/40 font-[family-name:var(--font-inter)] mt-0.5">
+                    <p className="text-[10px] text-white/40 font-ui mt-0.5">
                       {rated.length} avis client{rated.length > 1 ? "s" : ""}
                     </p>
                   </div>
                 </div>
               ) : (
-                <p className="text-xs text-white/40 font-[family-name:var(--font-inter)]">
+                <p className="text-xs text-white/40 font-ui">
                   Aucun avis pour le moment — chaque client peut noter sa
                   sortie après coup, la moyenne s&apos;affichera ici.
                 </p>
               )}
             </div>
             <div>
-              <h3 className="text-[10px] font-bold uppercase tracking-wider text-white/50 font-[family-name:var(--font-inter)] mb-2">
+              <h3 className="text-[10px] font-bold uppercase tracking-wider text-white/50 font-ui mb-2">
                 Répartition par catégorie
               </h3>
               <SplitBar segments={byCategory} />
@@ -237,7 +237,7 @@ export default function HotelPage() {
             </h2>
             <Link
               href="/hotel/reservations"
-              className="flex items-center gap-1 text-xs font-medium text-blue-400 hover:text-blue-300 transition-colors font-[family-name:var(--font-inter)]"
+              className="flex items-center gap-1 text-xs font-medium text-blue-400 hover:text-blue-300 transition-colors font-ui"
             >
               Tout voir
               <ArrowRight size={13} strokeWidth={1.5} />
@@ -250,14 +250,14 @@ export default function HotelPage() {
                 className="py-3 flex items-center justify-between gap-4"
               >
                 <div className="min-w-0">
-                  <p className="text-sm text-white font-[family-name:var(--font-manrope)] truncate">
+                  <p className="text-sm text-white font-ui truncate">
                     {r.guest_name}
-                    <span className="text-white/40 font-normal font-[family-name:var(--font-inter)]">
+                    <span className="text-white/40 font-normal font-ui">
                       {" "}
                       · {r.venue_name}
                     </span>
                   </p>
-                  <p className="text-xs text-white/40 font-[family-name:var(--font-inter)]">
+                  <p className="text-xs text-white/40 font-ui">
                     {r.qr_label ? `${r.qr_label} · ` : ""}
                     {new Date(
                       r.reservation_date + "T00:00:00"
@@ -268,7 +268,7 @@ export default function HotelPage() {
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
                   {r.commission > 0 && (
-                    <span className="text-xs font-bold text-amber-400 font-[family-name:var(--font-manrope)]">
+                    <span className="text-xs font-bold text-amber-400 font-ui">
                       +{r.commission.toLocaleString()} MAD
                     </span>
                   )}
@@ -300,17 +300,17 @@ export default function HotelPage() {
                   className="text-white/30 group-hover:text-white/70 group-hover:translate-x-0.5 transition-all"
                 />
               </div>
-              <h3 className="text-sm font-bold text-white font-[family-name:var(--font-manrope)]">
+              <h3 className="text-sm font-bold text-white font-ui">
                 {folder.label}
               </h3>
-              <p className="text-xs text-white/50 font-[family-name:var(--font-inter)] mt-0.5 mb-3">
+              <p className="text-xs text-white/50 font-ui mt-0.5 mb-3">
                 {folder.description}
               </p>
               <ul className="space-y-1">
                 {folder.preview.map((line) => (
                   <li
                     key={line}
-                    className="text-xs text-white/40 font-[family-name:var(--font-inter)] flex items-center gap-2"
+                    className="text-xs text-white/40 font-ui flex items-center gap-2"
                   >
                     <span className="w-1 h-1 rounded-full bg-white/30 shrink-0" />
                     {line}

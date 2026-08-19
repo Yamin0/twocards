@@ -170,7 +170,7 @@ export default function VenueQrReservationsPage() {
             <h2 className="font-display text-lg font-normal text-white mb-1">
               Sorties par semaine
             </h2>
-            <p className="text-xs text-white/40 font-[family-name:var(--font-inter)] mb-4">
+            <p className="text-xs text-white/40 font-ui mb-4">
               8 dernières semaines
             </p>
             <MiniBars data={weekly} color="bg-purple-400/70" />
@@ -188,7 +188,7 @@ export default function VenueQrReservationsPage() {
                   </p>
                   <div>
                     <RatingStars value={avgRating} />
-                    <p className="text-[10px] text-white/40 font-[family-name:var(--font-inter)] mt-0.5">
+                    <p className="text-[10px] text-white/40 font-ui mt-0.5">
                       {rated.length} avis client{rated.length > 1 ? "s" : ""}
                     </p>
                   </div>
@@ -196,14 +196,14 @@ export default function VenueQrReservationsPage() {
                 {lastComments.map((r) => (
                   <p
                     key={r.id}
-                    className="mt-3 text-xs italic text-white/50 font-[family-name:var(--font-inter)] border-l-2 border-white/15 pl-3"
+                    className="mt-3 text-xs italic text-white/50 font-ui border-l-2 border-white/15 pl-3"
                   >
                     « {r.rating_comment} » — {r.guest_name}
                   </p>
                 ))}
               </>
             ) : (
-              <p className="text-xs text-white/40 font-[family-name:var(--font-inter)]">
+              <p className="text-xs text-white/40 font-ui">
                 Aucun avis pour le moment. Après la sortie, copiez le lien
                 d&apos;avis depuis le tableau et envoyez-le au client par
                 WhatsApp — sa note apparaîtra ici.
@@ -220,10 +220,10 @@ export default function VenueQrReservationsPage() {
             <div className="w-14 h-14 rounded-2xl bg-blue-500/15 border border-blue-400/20 flex items-center justify-center mx-auto mb-5">
               <QrCode size={26} strokeWidth={1.5} className="text-blue-400" />
             </div>
-            <h2 className="text-lg font-bold text-white font-[family-name:var(--font-manrope)] mb-2">
+            <h2 className="text-lg font-bold text-white font-ui mb-2">
               Aucune réservation QR pour le moment
             </h2>
-            <p className="text-sm text-white/50 font-[family-name:var(--font-inter)] max-w-md mx-auto">
+            <p className="text-sm text-white/50 font-ui max-w-md mx-auto">
               Quand un client d&apos;hôtel réserve chez vous via un QR code
               twocards, la réservation apparaît ici instantanément.
             </p>
@@ -237,7 +237,7 @@ export default function VenueQrReservationsPage() {
                     (h) => (
                       <th
                         key={h}
-                        className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/50 font-[family-name:var(--font-inter)]"
+                        className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/50 font-ui"
                       >
                         {h}
                       </th>
@@ -255,26 +255,26 @@ export default function VenueQrReservationsPage() {
                       className="border-b border-white/[0.06] last:border-0"
                     >
                       <td className="px-4 py-3">
-                        <p className="text-sm text-white font-[family-name:var(--font-manrope)]">
+                        <p className="text-sm text-white font-ui">
                           {r.guest_name}
                         </p>
-                        <p className="text-xs text-white/40 font-[family-name:var(--font-inter)]">
+                        <p className="text-xs text-white/40 font-ui">
                           {r.guest_phone}
                         </p>
                       </td>
-                      <td className="px-4 py-3 text-sm text-white/70 font-[family-name:var(--font-inter)] whitespace-nowrap">
+                      <td className="px-4 py-3 text-sm text-white/70 font-ui whitespace-nowrap">
                         {new Date(
                           r.reservation_date + "T00:00:00"
                         ).toLocaleDateString("fr-FR")}
                         {r.reservation_time ? ` · ${r.reservation_time}` : ""}
                       </td>
-                      <td className="px-4 py-3 text-sm text-white/70 font-[family-name:var(--font-inter)]">
+                      <td className="px-4 py-3 text-sm text-white/70 font-ui">
                         <span className="inline-flex items-center gap-1">
                           <Users size={12} strokeWidth={1.5} />
                           {r.party_size}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-xs text-white/50 font-[family-name:var(--font-inter)] max-w-[180px] truncate">
+                      <td className="px-4 py-3 text-xs text-white/50 font-ui max-w-[180px] truncate">
                         {r.notes ?? "—"}
                       </td>
                       <td className="px-4 py-3">
@@ -324,7 +324,7 @@ export default function VenueQrReservationsPage() {
                               onKeyDown={(e) => {
                                 if (e.key === "Enter") saveAmount(r);
                               }}
-                              className="w-24 px-3 py-1.5 bg-white/[0.07] rounded-lg text-sm text-white text-right font-[family-name:var(--font-inter)] placeholder:text-white/30 focus:ring-1 focus:ring-white/40 focus:outline-none"
+                              className="w-24 px-3 py-1.5 bg-white/[0.07] rounded-lg text-sm text-white text-right font-ui placeholder:text-white/30 focus:ring-1 focus:ring-white/40 focus:outline-none"
                             />
                             <span className="text-xs text-white/40">MAD</span>
                             <button
@@ -346,7 +346,7 @@ export default function VenueQrReservationsPage() {
                           </div>
                         ) : (
                           <div className="flex items-center gap-2">
-                            <span className="text-sm text-white font-[family-name:var(--font-manrope)]">
+                            <span className="text-sm text-white font-ui">
                               {(r.amount_spent ?? 0).toLocaleString()} MAD
                             </span>
                             <button
@@ -364,7 +364,7 @@ export default function VenueQrReservationsPage() {
                           </div>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-sm font-bold text-purple-300 font-[family-name:var(--font-manrope)] whitespace-nowrap">
+                      <td className="px-4 py-3 text-sm font-bold text-purple-300 font-ui whitespace-nowrap">
                         {r.commission > 0
                           ? `${r.commission.toLocaleString()} MAD`
                           : "—"}
@@ -381,7 +381,7 @@ export default function VenueQrReservationsPage() {
                         ) : r.status === "confirmée" ? (
                           <button
                             onClick={() => copyRatingLink(r.id)}
-                            className="flex items-center gap-1.5 text-[11px] font-medium text-blue-400 hover:text-blue-300 transition-colors font-[family-name:var(--font-inter)]"
+                            className="flex items-center gap-1.5 text-[11px] font-medium text-blue-400 hover:text-blue-300 transition-colors font-ui"
                           >
                             <Link2 size={12} strokeWidth={1.5} />
                             Lien d&apos;avis
@@ -401,7 +401,7 @@ export default function VenueQrReservationsPage() {
 
       {/* Modèle énoncé */}
       <div className="px-4 sm:px-6 pb-8">
-        <p className="flex items-start gap-2 text-xs text-white/40 font-[family-name:var(--font-inter)] max-w-2xl">
+        <p className="flex items-start gap-2 text-xs text-white/40 font-ui max-w-2xl">
           <Info size={13} strokeWidth={1.5} className="shrink-0 mt-0.5" />
           Saisir le montant confirme la sortie et calcule automatiquement la
           commission reversée à l&apos;apporteur ({""}

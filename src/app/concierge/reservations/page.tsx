@@ -134,7 +134,7 @@ function ConciergeReservations() {
     <div className="bg-transparent min-h-screen">
       <div className="px-8 pt-8 pb-4 flex items-center justify-between">
         <div>
-          <h1 className="text-white font-[family-name:var(--font-manrope)] text-2xl font-extrabold">
+          <h1 className="text-white font-ui text-2xl font-extrabold">
             Mes réservations
           </h1>
           <p className="text-white/60 mt-1 text-sm">
@@ -219,7 +219,7 @@ function ConciergeReservations() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="bg-white/[0.07] rounded-xl shadow-xl w-full max-w-md mx-4 p-6">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-lg font-bold text-white font-[family-name:var(--font-manrope)]">
+              <h2 className="text-lg font-bold text-white font-ui">
                 Nouvelle réservation
               </h2>
               <button
@@ -240,7 +240,7 @@ function ConciergeReservations() {
                     setNewVenue(e.target.value);
                     clearError("venue");
                   }}
-                  className="w-full px-3 py-2 text-sm bg-white/[0.05] border-none rounded-lg text-white font-[family-name:var(--font-inter)] focus:ring-1 focus:ring-white/30 focus:outline-none"
+                  className="w-full px-3 py-2 text-sm bg-white/[0.05] border-none rounded-lg text-white font-ui focus:ring-1 focus:ring-white/30 focus:outline-none"
                 >
                   {venueOptions.map((v) => (
                     <option key={v} value={v}>{v}</option>
@@ -260,7 +260,7 @@ function ConciergeReservations() {
                     clearError("client");
                   }}
                   placeholder="Ex: Mohamed Tazi"
-                  className="w-full px-3 py-2 text-sm bg-white/[0.05] border-none rounded-lg text-white placeholder:text-white/60/50 font-[family-name:var(--font-inter)] focus:ring-1 focus:ring-white/30 focus:outline-none"
+                  className="w-full px-3 py-2 text-sm bg-white/[0.05] border-none rounded-lg text-white placeholder:text-white/60/50 font-ui focus:ring-1 focus:ring-white/30 focus:outline-none"
                 />
                 {errors.client && <p className="text-xs text-red-500 mt-1">{errors.client}</p>}
               </div>
@@ -278,7 +278,7 @@ function ConciergeReservations() {
                     }}
                     placeholder="4"
                     min="1"
-                    className="w-full px-3 py-2 text-sm bg-white/[0.05] border-none rounded-lg text-white placeholder:text-white/60/50 font-[family-name:var(--font-inter)] focus:ring-1 focus:ring-white/30 focus:outline-none"
+                    className="w-full px-3 py-2 text-sm bg-white/[0.05] border-none rounded-lg text-white placeholder:text-white/60/50 font-ui focus:ring-1 focus:ring-white/30 focus:outline-none"
                   />
                   {errors.guests && <p className="text-xs text-red-500 mt-1">{errors.guests}</p>}
                 </div>
@@ -294,7 +294,7 @@ function ConciergeReservations() {
                       clearError("date");
                     }}
                     placeholder="12 Avr."
-                    className="w-full px-3 py-2 text-sm bg-white/[0.05] border-none rounded-lg text-white placeholder:text-white/60/50 font-[family-name:var(--font-inter)] focus:ring-1 focus:ring-white/30 focus:outline-none"
+                    className="w-full px-3 py-2 text-sm bg-white/[0.05] border-none rounded-lg text-white placeholder:text-white/60/50 font-ui focus:ring-1 focus:ring-white/30 focus:outline-none"
                   />
                   {errors.date && <p className="text-xs text-red-500 mt-1">{errors.date}</p>}
                 </div>
@@ -307,7 +307,7 @@ function ConciergeReservations() {
                     value={newTime}
                     onChange={(e) => setNewTime(e.target.value)}
                     placeholder="22:00"
-                    className="w-full px-3 py-2 text-sm bg-white/[0.05] border-none rounded-lg text-white placeholder:text-white/60/50 font-[family-name:var(--font-inter)] focus:ring-1 focus:ring-white/30 focus:outline-none"
+                    className="w-full px-3 py-2 text-sm bg-white/[0.05] border-none rounded-lg text-white placeholder:text-white/60/50 font-ui focus:ring-1 focus:ring-white/30 focus:outline-none"
                   />
                 </div>
               </div>

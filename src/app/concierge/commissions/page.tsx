@@ -64,10 +64,10 @@ export default function ConciergeCommissionsPage() {
       {/* Header */}
       <div className="px-4 sm:px-6 pt-6 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold text-white font-[family-name:var(--font-manrope)]">
+          <h1 className="text-xl font-bold text-white font-ui">
             Commissions
           </h1>
-          <p className="text-sm text-white/60 font-[family-name:var(--font-inter)] mt-0.5">
+          <p className="text-sm text-white/60 font-ui mt-0.5">
             Suivez vos gains et versements
           </p>
         </div>
@@ -79,12 +79,12 @@ export default function ConciergeCommissionsPage() {
               placeholder="Rechercher..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-10 pr-4 py-2 bg-white/[0.05] rounded-full text-sm text-white font-[family-name:var(--font-inter)] focus:ring-1 focus:ring-white/30/30 focus:outline-none w-48"
+              className="pl-10 pr-4 py-2 bg-white/[0.05] rounded-full text-sm text-white font-ui focus:ring-1 focus:ring-white/30/30 focus:outline-none w-48"
             />
           </div>
           <button
             onClick={handleExport}
-            className="flex items-center gap-2 bg-white/[0.07] border border-white/10/20 text-white/60 text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-white/[0.05] transition-colors font-[family-name:var(--font-inter)]"
+            className="flex items-center gap-2 bg-white/[0.07] border border-white/10/20 text-white/60 text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-white/[0.05] transition-colors font-ui"
           >
             <Download size={16} strokeWidth={1.5} />
             Exporter CSV
@@ -99,11 +99,11 @@ export default function ConciergeCommissionsPage() {
             <div className="w-8 h-8 rounded-lg bg-white/15/10 flex items-center justify-center">
               <Wallet size={16} strokeWidth={1.5} className="text-white" />
             </div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-[family-name:var(--font-inter)]">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-ui">
               Total ce mois
             </span>
           </div>
-          <p className="text-xl font-extrabold text-white font-[family-name:var(--font-manrope)]">
+          <p className="text-xl font-extrabold text-white font-ui">
             {totalMonth.toLocaleString()} MAD
           </p>
         </div>
@@ -112,11 +112,11 @@ export default function ConciergeCommissionsPage() {
             <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
               <Clock size={16} strokeWidth={1.5} className="text-amber-600" />
             </div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-[family-name:var(--font-inter)]">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-ui">
               En attente
             </span>
           </div>
-          <p className="text-xl font-extrabold text-white font-[family-name:var(--font-manrope)]">
+          <p className="text-xl font-extrabold text-white font-ui">
             {pending.toLocaleString()} MAD
           </p>
         </div>
@@ -125,11 +125,11 @@ export default function ConciergeCommissionsPage() {
             <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
               <TrendingUp size={16} strokeWidth={1.5} className="text-emerald-600" />
             </div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-[family-name:var(--font-inter)]">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-ui">
               Versé
             </span>
           </div>
-          <p className="text-xl font-extrabold text-white font-[family-name:var(--font-manrope)]">
+          <p className="text-xl font-extrabold text-white font-ui">
             {paid.toLocaleString()} MAD
           </p>
         </div>
@@ -138,11 +138,11 @@ export default function ConciergeCommissionsPage() {
             <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
               <Percent size={16} strokeWidth={1.5} className="text-blue-600" />
             </div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-[family-name:var(--font-inter)]">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-ui">
               Taux moyen
             </span>
           </div>
-          <p className="text-xl font-extrabold text-white font-[family-name:var(--font-manrope)]">
+          <p className="text-xl font-extrabold text-white font-ui">
             10%
           </p>
         </div>
@@ -158,7 +158,7 @@ export default function ConciergeCommissionsPage() {
           <button
             key={f.key}
             onClick={() => setFilter(f.key)}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors font-[family-name:var(--font-inter)] ${
+            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors font-ui ${
               filter === f.key
                 ? "bg-white/15 text-white"
                 : "bg-white/[0.07] border border-white/10/20 text-white/60 hover:bg-white/[0.05]"
@@ -176,22 +176,22 @@ export default function ConciergeCommissionsPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-white/10/10">
-                  <th className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-[family-name:var(--font-inter)]">
+                  <th className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-ui">
                     Établissement
                   </th>
-                  <th className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-[family-name:var(--font-inter)]">
+                  <th className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-ui">
                     Événement
                   </th>
-                  <th className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-[family-name:var(--font-inter)]">
+                  <th className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-ui">
                     Client
                   </th>
-                  <th className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-[family-name:var(--font-inter)]">
+                  <th className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-ui">
                     Date
                   </th>
-                  <th className="text-right px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-[family-name:var(--font-inter)]">
+                  <th className="text-right px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-ui">
                     Montant
                   </th>
-                  <th className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-[family-name:var(--font-inter)]">
+                  <th className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-ui">
                     Statut
                   </th>
                 </tr>
@@ -204,21 +204,21 @@ export default function ConciergeCommissionsPage() {
                       i % 2 === 0 ? "" : "bg-transparent/30"
                     }`}
                   >
-                    <td className="px-4 py-3.5 text-white font-medium font-[family-name:var(--font-manrope)]">
+                    <td className="px-4 py-3.5 text-white font-medium font-ui">
                       {c.venue}
                     </td>
                     <td className="px-4 py-3.5">
-                      <span className="text-xs font-bold text-white/60/80 font-[family-name:var(--font-inter)]">
+                      <span className="text-xs font-bold text-white/60/80 font-ui">
                         {c.event}
                       </span>
                     </td>
-                    <td className="px-4 py-3.5 text-white font-[family-name:var(--font-inter)]">
+                    <td className="px-4 py-3.5 text-white font-ui">
                       {c.client}
                     </td>
-                    <td className="px-4 py-3.5 text-white/60 font-[family-name:var(--font-inter)]">
+                    <td className="px-4 py-3.5 text-white/60 font-ui">
                       {c.date}
                     </td>
-                    <td className="px-4 py-3.5 text-right text-white font-bold font-[family-name:var(--font-manrope)]">
+                    <td className="px-4 py-3.5 text-right text-white font-bold font-ui">
                       {c.montant}
                     </td>
                     <td className="px-4 py-3.5">
@@ -241,10 +241,10 @@ export default function ConciergeCommissionsPage() {
                         <div className="w-12 h-12 rounded-full bg-white/[0.05] flex items-center justify-center mb-4">
                           <Wallet size={24} strokeWidth={1.5} className="text-white/60/40" />
                         </div>
-                        <p className="text-sm font-medium text-white/60 font-[family-name:var(--font-inter)]">
+                        <p className="text-sm font-medium text-white/60 font-ui">
                           Aucune commission pour le moment
                         </p>
-                        <p className="text-xs text-white/60/60 font-[family-name:var(--font-inter)] mt-1">
+                        <p className="text-xs text-white/60/60 font-ui mt-1">
                           Vos commissions apparaîtront ici
                         </p>
                       </div>

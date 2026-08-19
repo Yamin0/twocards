@@ -65,7 +65,7 @@ export default function HotelReservationsPage() {
             placeholder="Client, sortie, chambre..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-10 pr-4 py-2 bg-white/[0.05] rounded-full text-sm text-white font-[family-name:var(--font-inter)] placeholder:text-white/30 focus:ring-1 focus:ring-white/30 focus:outline-none w-56"
+            className="pl-10 pr-4 py-2 bg-white/[0.05] rounded-full text-sm text-white font-ui placeholder:text-white/30 focus:ring-1 focus:ring-white/30 focus:outline-none w-56"
           />
         </div>
       </div>
@@ -108,12 +108,12 @@ export default function HotelReservationsPage() {
             <div className="w-14 h-14 rounded-2xl bg-blue-500/15 border border-blue-400/20 flex items-center justify-center mx-auto mb-5">
               <QrCode size={26} strokeWidth={1.5} className="text-blue-400" />
             </div>
-            <h2 className="text-lg font-bold text-white font-[family-name:var(--font-manrope)] mb-2">
+            <h2 className="text-lg font-bold text-white font-ui mb-2">
               {reservations.length === 0
                 ? "Aucune réservation pour le moment"
                 : "Aucune réservation ne correspond"}
             </h2>
-            <p className="text-sm text-white/50 font-[family-name:var(--font-inter)] max-w-md mx-auto">
+            <p className="text-sm text-white/50 font-ui max-w-md mx-auto">
               {reservations.length === 0
                 ? "Dès qu'un client scanne l'un de vos QR codes et réserve une sortie, elle apparaît ici instantanément avec la chambre d'origine."
                 : "Essayez un autre filtre ou une autre recherche."}
@@ -128,7 +128,7 @@ export default function HotelReservationsPage() {
                     (h) => (
                       <th
                         key={h}
-                        className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/50 font-[family-name:var(--font-inter)]"
+                        className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/50 font-ui"
                       >
                         {h}
                       </th>
@@ -140,28 +140,28 @@ export default function HotelReservationsPage() {
                 {filtered.map((r) => (
                   <tr key={r.id} className="border-b border-white/[0.06] last:border-0">
                     <td className="px-4 py-3">
-                      <p className="text-sm text-white font-[family-name:var(--font-manrope)]">
+                      <p className="text-sm text-white font-ui">
                         {r.guest_name}
                       </p>
-                      <p className="text-xs text-white/40 font-[family-name:var(--font-inter)]">
+                      <p className="text-xs text-white/40 font-ui">
                         {r.guest_phone}
                       </p>
                     </td>
-                    <td className="px-4 py-3 text-sm text-white/70 font-[family-name:var(--font-inter)]">
+                    <td className="px-4 py-3 text-sm text-white/70 font-ui">
                       {r.qr_label ?? "—"}
                     </td>
                     <td className="px-4 py-3">
-                      <p className="text-sm text-white/80 font-[family-name:var(--font-inter)]">
+                      <p className="text-sm text-white/80 font-ui">
                         {r.venue_name}
                       </p>
-                      <p className="text-xs text-white/40 font-[family-name:var(--font-inter)]">
+                      <p className="text-xs text-white/40 font-ui">
                         {r.category}
                       </p>
                     </td>
-                    <td className="px-4 py-3 text-sm text-white/70 font-[family-name:var(--font-inter)] whitespace-nowrap">
+                    <td className="px-4 py-3 text-sm text-white/70 font-ui whitespace-nowrap">
                       {formatDate(r)}
                     </td>
-                    <td className="px-4 py-3 text-sm text-white/70 font-[family-name:var(--font-inter)]">
+                    <td className="px-4 py-3 text-sm text-white/70 font-ui">
                       <span className="inline-flex items-center gap-1">
                         <Users size={12} strokeWidth={1.5} />
                         {r.party_size}
@@ -170,7 +170,7 @@ export default function HotelReservationsPage() {
                     <td className="px-4 py-3">
                       <StatusBadge status={r.status} />
                     </td>
-                    <td className="px-4 py-3 text-sm text-white/70 font-[family-name:var(--font-inter)] whitespace-nowrap">
+                    <td className="px-4 py-3 text-sm text-white/70 font-ui whitespace-nowrap">
                       {r.commission > 0
                         ? `${r.commission.toLocaleString()} MAD`
                         : "—"}
@@ -185,7 +185,7 @@ export default function HotelReservationsPage() {
 
       {/* Modèle en lecture seule, assumé */}
       <div className="px-4 sm:px-6 pb-8">
-        <p className="flex items-start gap-2 text-xs text-white/40 font-[family-name:var(--font-inter)] max-w-2xl">
+        <p className="flex items-start gap-2 text-xs text-white/40 font-ui max-w-2xl">
           <Info size={13} strokeWidth={1.5} className="shrink-0 mt-0.5" />
           La confirmation se fait directement entre le client et
           l&apos;établissement. Statut et montant dépensé sont mis à jour par

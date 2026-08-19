@@ -132,12 +132,12 @@ export default function HotelQrDetailPage({
   if (qr === null) {
     return (
       <div className="px-4 sm:px-6 py-12 text-center">
-        <p className="text-sm text-white/60 font-[family-name:var(--font-inter)]">
+        <p className="text-sm text-white/60 font-ui">
           Ce QR code n&apos;existe pas ou ne vous appartient pas.
         </p>
         <Link
           href="/hotel/chambres"
-          className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-blue-400 hover:text-blue-300 font-[family-name:var(--font-manrope)]"
+          className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-blue-400 hover:text-blue-300 font-ui"
         >
           <ArrowLeft size={15} strokeWidth={1.5} />
           Retour aux chambres
@@ -238,7 +238,7 @@ export default function HotelQrDetailPage({
           <h1 className="flex items-center gap-2 font-display text-2xl font-light text-white">
             <span className="truncate">{qr.label}</span>
             <span
-              className={`shrink-0 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider font-[family-name:var(--font-inter)] ${
+              className={`shrink-0 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider font-ui ${
                 qr.active
                   ? "bg-emerald-500/15 text-emerald-400"
                   : "bg-white/10 text-white/40"
@@ -247,7 +247,7 @@ export default function HotelQrDetailPage({
               {qr.active ? "Actif" : "Inactif"}
             </span>
           </h1>
-          <p className="text-sm text-white/60 font-[family-name:var(--font-inter)] mt-0.5">
+          <p className="text-sm text-white/60 font-ui mt-0.5">
             Code {qr.code} — suivi des scans, réservations et commissions
           </p>
         </div>
@@ -264,11 +264,11 @@ export default function HotelQrDetailPage({
               <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
                 <s.icon size={16} strokeWidth={1.5} className={s.color} />
               </div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-white/60 font-[family-name:var(--font-inter)]">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-white/60 font-ui">
                 {s.label}
               </span>
             </div>
-            <p className="text-xl font-extrabold text-white font-[family-name:var(--font-manrope)]">
+            <p className="text-xl font-extrabold text-white font-ui">
               {s.value}
             </p>
           </div>
@@ -285,10 +285,10 @@ export default function HotelQrDetailPage({
             <QRCode value={link} size={120} />
           </div>
           <div className="min-w-0 flex-1">
-            <h2 className="text-sm font-bold text-white font-[family-name:var(--font-manrope)]">
+            <h2 className="text-sm font-bold text-white font-ui">
               Lien unique de ce QR code
             </h2>
-            <p className="text-xs text-white/50 font-[family-name:var(--font-inter)] mt-1">
+            <p className="text-xs text-white/50 font-ui mt-1">
               Chaque scan et chaque réservation passée par ce lien est
               rattachée à « {qr.label} ».
             </p>
@@ -298,7 +298,7 @@ export default function HotelQrDetailPage({
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <button
                 onClick={copyLink}
-                className="flex items-center gap-2 bg-white/10 hover:bg-white/15 text-white text-xs font-medium px-3 py-2 rounded-lg transition-colors font-[family-name:var(--font-manrope)]"
+                className="flex items-center gap-2 bg-white/10 hover:bg-white/15 text-white text-xs font-medium px-3 py-2 rounded-lg transition-colors font-ui"
               >
                 {copied ? (
                   <Check size={14} strokeWidth={2} className="text-emerald-400" />
@@ -311,7 +311,7 @@ export default function HotelQrDetailPage({
                 href={link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 bg-white/[0.05] hover:bg-white/10 text-white/60 hover:text-white text-xs font-medium px-3 py-2 rounded-lg transition-colors font-[family-name:var(--font-manrope)]"
+                className="flex items-center gap-2 bg-white/[0.05] hover:bg-white/10 text-white/60 hover:text-white text-xs font-medium px-3 py-2 rounded-lg transition-colors font-ui"
               >
                 <ExternalLink size={14} strokeWidth={1.5} />
                 Ouvrir
@@ -322,7 +322,7 @@ export default function HotelQrDetailPage({
                     showToast("QR code téléchargé");
                   }
                 }}
-                className="flex items-center gap-2 bg-white/[0.05] hover:bg-white/10 text-white/60 hover:text-white text-xs font-medium px-3 py-2 rounded-lg transition-colors font-[family-name:var(--font-manrope)]"
+                className="flex items-center gap-2 bg-white/[0.05] hover:bg-white/10 text-white/60 hover:text-white text-xs font-medium px-3 py-2 rounded-lg transition-colors font-ui"
               >
                 <Download size={14} strokeWidth={1.5} />
                 SVG
@@ -337,10 +337,10 @@ export default function HotelQrDetailPage({
         <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-2xl p-5">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-1">
             <div>
-              <h2 className="text-sm font-bold text-white font-[family-name:var(--font-manrope)]">
+              <h2 className="text-sm font-bold text-white font-ui">
                 Menu proposé sur ce QR
               </h2>
-              <p className="text-xs text-white/50 font-[family-name:var(--font-inter)] mt-1">
+              <p className="text-xs text-white/50 font-ui mt-1">
                 {city ? (
                   <>
                     Catalogue twocards de {city}. Décochez ce que vous ne
@@ -359,7 +359,7 @@ export default function HotelQrDetailPage({
               <button
                 onClick={saveMenu}
                 disabled={savingMenu}
-                className="shrink-0 flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-400 text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors disabled:opacity-60 font-[family-name:var(--font-manrope)]"
+                className="shrink-0 flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-400 text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors disabled:opacity-60 font-ui"
               >
                 {savingMenu ? (
                   <Loader2 size={14} strokeWidth={2} className="animate-spin" />
@@ -392,10 +392,10 @@ export default function HotelQrDetailPage({
                         />
                       </div>
                       <div>
-                        <p className="text-xs font-bold text-white font-[family-name:var(--font-manrope)]">
+                        <p className="text-xs font-bold text-white font-ui">
                           {cat.label}
                         </p>
-                        <p className="text-[10px] text-white/40 font-[family-name:var(--font-inter)]">
+                        <p className="text-[10px] text-white/40 font-ui">
                           {shownCount}/{ids.length} proposée
                           {shownCount > 1 ? "s" : ""}
                         </p>
@@ -403,7 +403,7 @@ export default function HotelQrDetailPage({
                     </div>
                     <button
                       onClick={() => toggleCategory(ids, !allShown)}
-                      className="text-[11px] font-medium text-blue-400 hover:text-blue-300 transition-colors font-[family-name:var(--font-inter)]"
+                      className="text-[11px] font-medium text-blue-400 hover:text-blue-300 transition-colors font-ui"
                     >
                       {allShown ? "Tout retirer" : "Tout proposer"}
                     </button>
@@ -423,10 +423,10 @@ export default function HotelQrDetailPage({
                           }`}
                         >
                           <span className="min-w-0">
-                            <span className="block truncate text-xs font-medium text-white font-[family-name:var(--font-inter)]">
+                            <span className="block truncate text-xs font-medium text-white font-ui">
                               {o.name}
                             </span>
-                            <span className="flex items-center gap-1 text-[10px] text-white/40 font-[family-name:var(--font-inter)]">
+                            <span className="flex items-center gap-1 text-[10px] text-white/40 font-ui">
                               {o.city && (
                                 <>
                                   <MapPin size={9} strokeWidth={1.5} />
@@ -465,10 +465,10 @@ export default function HotelQrDetailPage({
             <div className="w-14 h-14 rounded-2xl bg-blue-500/15 border border-blue-400/20 flex items-center justify-center mx-auto mb-5">
               <QrCode size={26} strokeWidth={1.5} className="text-blue-400" />
             </div>
-            <h2 className="text-lg font-bold text-white font-[family-name:var(--font-manrope)] mb-2">
+            <h2 className="text-lg font-bold text-white font-ui mb-2">
               Aucune réservation via ce QR
             </h2>
-            <p className="text-sm text-white/50 font-[family-name:var(--font-inter)] max-w-md mx-auto">
+            <p className="text-sm text-white/50 font-ui max-w-md mx-auto">
               Dès qu&apos;un client scanne « {qr.label} » et demande une
               réservation, elle apparaît ici avec sa commission.
             </p>
@@ -490,7 +490,7 @@ export default function HotelQrDetailPage({
                   ].map((h) => (
                     <th
                       key={h}
-                      className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/50 font-[family-name:var(--font-inter)]"
+                      className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/50 font-ui"
                     >
                       {h}
                     </th>
@@ -503,25 +503,25 @@ export default function HotelQrDetailPage({
                     key={r.id}
                     className="border-b border-white/[0.06] last:border-0"
                   >
-                    <td className="px-4 py-3 text-sm text-white font-[family-name:var(--font-manrope)]">
+                    <td className="px-4 py-3 text-sm text-white font-ui">
                       {r.guest_name}
                     </td>
-                    <td className="px-4 py-3 text-sm text-white/70 font-[family-name:var(--font-inter)]">
+                    <td className="px-4 py-3 text-sm text-white/70 font-ui">
                       {r.guest_phone}
                     </td>
-                    <td className="px-4 py-3 text-sm text-white/70 font-[family-name:var(--font-inter)]">
+                    <td className="px-4 py-3 text-sm text-white/70 font-ui">
                       {r.category}
                     </td>
-                    <td className="px-4 py-3 text-sm text-white/70 font-[family-name:var(--font-inter)]">
+                    <td className="px-4 py-3 text-sm text-white/70 font-ui">
                       {r.venue_name}
                     </td>
-                    <td className="px-4 py-3 text-sm text-white/70 font-[family-name:var(--font-inter)]">
+                    <td className="px-4 py-3 text-sm text-white/70 font-ui">
                       {new Date(
                         r.reservation_date + "T00:00:00"
                       ).toLocaleDateString("fr-FR")}
                       {r.reservation_time ? ` · ${r.reservation_time}` : ""}
                     </td>
-                    <td className="px-4 py-3 text-sm text-white/70 font-[family-name:var(--font-inter)]">
+                    <td className="px-4 py-3 text-sm text-white/70 font-ui">
                       <span className="inline-flex items-center gap-1">
                         <Users size={12} strokeWidth={1.5} />
                         {r.party_size}
@@ -529,12 +529,12 @@ export default function HotelQrDetailPage({
                     </td>
                     <td className="px-4 py-3">
                       <span
-                        className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider font-[family-name:var(--font-inter)] ${STATUS_STYLES[r.status]}`}
+                        className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider font-ui ${STATUS_STYLES[r.status]}`}
                       >
                         {r.status}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-sm text-white/70 font-[family-name:var(--font-inter)]">
+                    <td className="px-4 py-3 text-sm text-white/70 font-ui">
                       {r.commission > 0
                         ? `${r.commission.toLocaleString()} MAD`
                         : "—"}

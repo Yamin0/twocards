@@ -175,7 +175,7 @@ export default function NotificationsPage() {
       <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-extrabold font-[family-name:var(--font-manrope)] text-white">
+            <h1 className="text-2xl font-extrabold font-ui text-white">
               Notifications
             </h1>
             {unreadCount > 0 && (
@@ -229,7 +229,7 @@ export default function NotificationsPage() {
             <div className="w-14 h-14 rounded-2xl bg-white/[0.06] flex items-center justify-center mb-4">
               <BellOff size={24} strokeWidth={1.5} className="text-white/30" />
             </div>
-            <p className="text-sm font-semibold text-white/60 font-[family-name:var(--font-manrope)]">
+            <p className="text-sm font-semibold text-white/60 font-ui">
               Aucune notification
             </p>
             <p className="text-xs text-white/30 mt-1 max-w-xs">

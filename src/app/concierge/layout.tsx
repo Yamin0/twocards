@@ -78,7 +78,7 @@ function NavSection({
               key={item.href}
               href={item.href}
               onClick={onNavigate}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 hover:scale-[1.01] font-[family-name:var(--font-manrope)] ${
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 hover:scale-[1.01] font-ui ${
                 active
                   ? "bg-white/20 text-white border border-white/20"
                   : "text-white/60 hover:bg-white/10 hover:text-white"
@@ -166,7 +166,7 @@ export default function ConciergeLayout({
             url={avatarUrl}
             initials={initials || "U"}
             size={32}
-            textClassName="text-xs font-semibold text-white font-[family-name:var(--font-manrope)]"
+            textClassName="text-xs font-semibold text-white font-ui"
           />
         </div>
 
@@ -185,7 +185,7 @@ export default function ConciergeLayout({
                 <form action="/auth/signout" method="post">
                   <button
                     type="submit"
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-red-400/80 hover:text-red-400 hover:bg-white/10 transition-all w-full font-[family-name:var(--font-manrope)]"
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-red-400/80 hover:text-red-400 hover:bg-white/10 transition-all w-full font-ui"
                   >
                     <LogOut size={18} strokeWidth={1.5} />
                     Déconnexion
@@ -206,7 +206,7 @@ export default function ConciergeLayout({
                 twocards<span className="text-blue-400">.</span>
               </span>
             </div>
-            <p className="text-white/40 text-xs font-[family-name:var(--font-inter)]">Espace Concierge</p>
+            <p className="text-white/40 text-xs font-ui">Espace Concierge</p>
           </div>
 
           {/* Venue selector */}
@@ -219,7 +219,7 @@ export default function ConciergeLayout({
                 <div className="w-6 h-6 rounded-full bg-white/15 flex items-center justify-center shrink-0">
                   <span className="text-[0.5rem] font-bold text-white">{selectedVenue[0]}</span>
                 </div>
-                <span className="text-sm font-medium text-white truncate font-[family-name:var(--font-manrope)]">
+                <span className="text-sm font-medium text-white truncate font-ui">
                   {selectedVenue}
                 </span>
               </div>
@@ -271,14 +271,14 @@ export default function ConciergeLayout({
                   url={avatarUrl}
                   initials={initials || "U"}
                   size={36}
-                  textClassName="text-sm font-semibold text-white font-[family-name:var(--font-manrope)]"
+                  textClassName="text-sm font-semibold text-white font-ui"
                 />
               )}
               <div className="min-w-0">
                 {isLoading ? (
                   <div className="h-3 w-20 bg-white/10 rounded animate-pulse" />
                 ) : (
-                  <p className="text-sm font-medium text-white truncate font-[family-name:var(--font-manrope)]">
+                  <p className="text-sm font-medium text-white truncate font-ui">
                     {fullName || "Concierge"}
                   </p>
                 )}
@@ -287,7 +287,7 @@ export default function ConciergeLayout({
 
             <Link
               href="/concierge/settings"
-              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-white/40 hover:text-white/70 hover:bg-white/10 transition-all font-[family-name:var(--font-manrope)]"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-white/40 hover:text-white/70 hover:bg-white/10 transition-all font-ui"
             >
               <HelpCircle size={18} strokeWidth={1.5} />
               Aide
@@ -295,7 +295,7 @@ export default function ConciergeLayout({
             <form action="/auth/signout" method="post">
               <button
                 type="submit"
-                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-red-400/70 hover:text-red-400 hover:bg-white/10 transition-all w-full font-[family-name:var(--font-manrope)]"
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-red-400/70 hover:text-red-400 hover:bg-white/10 transition-all w-full font-ui"
               >
                 <LogOut size={18} strokeWidth={1.5} />
                 Déconnexion

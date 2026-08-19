@@ -259,10 +259,10 @@ export default function CommissionsPage() {
   if (isLoading) return <DashboardSkeleton />;
 
   return (
-    <div className="space-y-6 font-[family-name:var(--font-inter)]">
+    <div className="space-y-6 font-ui">
       {/* ---- Header ---- */}
       <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
-        <h1 className="text-2xl font-extrabold font-[family-name:var(--font-manrope)] text-white">
+        <h1 className="text-2xl font-extrabold font-ui text-white">
           Commissions
         </h1>
         <p className="text-sm text-white/50 mt-1">
@@ -284,7 +284,7 @@ export default function CommissionsPage() {
               >
                 <Icon size={20} strokeWidth={1.5} className={s.color} />
               </div>
-              <p className="text-xl font-bold text-white font-[family-name:var(--font-manrope)]">
+              <p className="text-xl font-bold text-white font-ui">
                 {s.value}
               </p>
               <p className="text-xs text-white/40 mt-0.5">{s.label}</p>
@@ -297,7 +297,7 @@ export default function CommissionsPage() {
       <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl overflow-hidden">
         {/* Toolbar */}
         <div className="px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.08]">
-          <h2 className="text-sm font-bold font-[family-name:var(--font-manrope)] text-white">
+          <h2 className="text-sm font-bold font-ui text-white">
             Historique des commissions
           </h2>
 

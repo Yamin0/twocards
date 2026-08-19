@@ -122,7 +122,7 @@ export default function ConciergeAIPage() {
             <Sparkles size={20} strokeWidth={1.5} className="text-blue-400" />
           </div>
           <div>
-            <h2 className="text-lg font-bold text-white font-[family-name:var(--font-manrope)]">
+            <h2 className="text-lg font-bold text-white font-ui">
               Assistant IA
             </h2>
             <p className="text-xs text-white/40">
@@ -157,12 +157,12 @@ export default function ConciergeAIPage() {
                 }`}
               >
                 {msg.role === "ai" && (
-                  <p className="text-[0.625rem] font-semibold text-blue-400/70 mb-1 font-[family-name:var(--font-manrope)]">
+                  <p className="text-[0.625rem] font-semibold text-blue-400/70 mb-1 font-ui">
                     Assistant IA
                   </p>
                 )}
                 <p
-                  className={`text-sm leading-relaxed font-[family-name:var(--font-inter)] ${
+                  className={`text-sm leading-relaxed font-ui ${
                     msg.role === "user" ? "text-white/90" : "text-white/70"
                   }`}
                 >
@@ -188,7 +188,7 @@ export default function ConciergeAIPage() {
               <button
                 key={action}
                 onClick={() => sendMessage(action)}
-                className="px-3.5 py-2 bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.1] hover:border-blue-400/30 rounded-xl text-xs text-white/60 hover:text-white transition-all font-[family-name:var(--font-inter)]"
+                className="px-3.5 py-2 bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.1] hover:border-blue-400/30 rounded-xl text-xs text-white/60 hover:text-white transition-all font-ui"
               >
                 {action}
               </button>
@@ -205,7 +205,7 @@ export default function ConciergeAIPage() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && sendMessage(input)}
-              className="flex-1 px-4 py-2.5 bg-white/[0.05] border border-white/[0.08] rounded-xl text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-blue-400/30 transition-colors font-[family-name:var(--font-inter)]"
+              className="flex-1 px-4 py-2.5 bg-white/[0.05] border border-white/[0.08] rounded-xl text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-blue-400/30 transition-colors font-ui"
             />
             <button
               onClick={() => sendMessage(input)}

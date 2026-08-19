@@ -403,7 +403,7 @@ export default function AdminPage() {
               <Shield size={22} className="text-blue-400" />
             </div>
             <div>
-              <h1 className="text-2xl font-extrabold text-white font-[family-name:var(--font-manrope)]">
+              <h1 className="text-2xl font-extrabold text-white font-ui">
                 Administration
               </h1>
               <p className="text-sm text-white/40">
@@ -464,7 +464,7 @@ export default function AdminPage() {
                       <Icon size={17} className="text-blue-300" />
                     </div>
                     <div>
-                      <h2 className="text-lg font-semibold text-white font-[family-name:var(--font-manrope)]">
+                      <h2 className="text-lg font-semibold text-white font-ui">
                         {section.title}
                       </h2>
                       <p className="text-xs text-white/35">

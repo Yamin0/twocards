@@ -97,7 +97,7 @@ export default function HotelCommissionsPage() {
         {rows.length > 0 && (
           <button
             onClick={() => exportCsv(rows)}
-            className="flex items-center gap-2 bg-white/10 hover:bg-white/15 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors font-[family-name:var(--font-manrope)]"
+            className="flex items-center gap-2 bg-white/10 hover:bg-white/15 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors font-ui"
           >
             <Download size={16} strokeWidth={1.5} />
             Exporter en CSV
@@ -114,7 +114,7 @@ export default function HotelCommissionsPage() {
       <div className="px-4 sm:px-6 pb-6">
         <div className="flex items-start gap-3 rounded-2xl border border-amber-400/15 bg-amber-500/[0.07] p-4">
           <Percent size={16} strokeWidth={1.5} className="text-amber-400 shrink-0 mt-0.5" />
-          <p className="text-xs leading-relaxed text-white/60 font-[family-name:var(--font-inter)] max-w-2xl">
+          <p className="text-xs leading-relaxed text-white/60 font-ui max-w-2xl">
             Votre commission est un pourcentage du montant réellement dépensé
             par le client — 10&nbsp;% par défaut, le taux peut varier selon
             l&apos;établissement. Elle est calculée automatiquement dès que le
@@ -130,10 +130,10 @@ export default function HotelCommissionsPage() {
             <div className="w-14 h-14 rounded-2xl bg-amber-500/15 border border-amber-400/20 flex items-center justify-center mx-auto mb-5">
               <Coins size={26} strokeWidth={1.5} className="text-amber-400" />
             </div>
-            <h2 className="text-lg font-bold text-white font-[family-name:var(--font-manrope)] mb-2">
+            <h2 className="text-lg font-bold text-white font-ui mb-2">
               Aucune commission pour le moment
             </h2>
-            <p className="text-sm text-white/50 font-[family-name:var(--font-inter)] max-w-md mx-auto">
+            <p className="text-sm text-white/50 font-ui max-w-md mx-auto">
               {awaitingAmount > 0
                 ? `${awaitingAmount} réservation${awaitingAmount > 1 ? "s" : ""} en attente de montant — vos commissions apparaîtront ici dès que les montants des sorties seront renseignés.`
                 : "Chaque sortie réservée via vos QR codes vous rapporte un pourcentage du montant dépensé. Tout apparaîtra ici, exportable en CSV."}
@@ -148,7 +148,7 @@ export default function HotelCommissionsPage() {
                     (h) => (
                       <th
                         key={h}
-                        className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/50 font-[family-name:var(--font-inter)]"
+                        className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/50 font-ui"
                       >
                         {h}
                       </th>
@@ -159,30 +159,30 @@ export default function HotelCommissionsPage() {
               <tbody>
                 {rows.map((r) => (
                   <tr key={r.id} className="border-b border-white/[0.06] last:border-0">
-                    <td className="px-4 py-3 text-sm text-white/70 font-[family-name:var(--font-inter)] whitespace-nowrap">
+                    <td className="px-4 py-3 text-sm text-white/70 font-ui whitespace-nowrap">
                       {new Date(r.reservation_date + "T00:00:00").toLocaleDateString("fr-FR")}
                     </td>
-                    <td className="px-4 py-3 text-sm text-white font-[family-name:var(--font-manrope)]">
+                    <td className="px-4 py-3 text-sm text-white font-ui">
                       {r.guest_name}
                     </td>
                     <td className="px-4 py-3">
-                      <p className="text-sm text-white/80 font-[family-name:var(--font-inter)]">
+                      <p className="text-sm text-white/80 font-ui">
                         {r.venue_name}
                       </p>
-                      <p className="text-xs text-white/40 font-[family-name:var(--font-inter)]">
+                      <p className="text-xs text-white/40 font-ui">
                         {r.category}
                       </p>
                     </td>
-                    <td className="px-4 py-3 text-sm text-white/70 font-[family-name:var(--font-inter)]">
+                    <td className="px-4 py-3 text-sm text-white/70 font-ui">
                       {r.qr_label ?? "—"}
                     </td>
-                    <td className="px-4 py-3 text-sm text-white/70 font-[family-name:var(--font-inter)] whitespace-nowrap">
+                    <td className="px-4 py-3 text-sm text-white/70 font-ui whitespace-nowrap">
                       {(r.amount_spent ?? 0).toLocaleString()} MAD
                     </td>
-                    <td className="px-4 py-3 text-sm text-white/70 font-[family-name:var(--font-inter)]">
+                    <td className="px-4 py-3 text-sm text-white/70 font-ui">
                       {Math.round(r.commission_rate * 100)}%
                     </td>
-                    <td className="px-4 py-3 text-sm font-bold text-amber-400 font-[family-name:var(--font-manrope)] whitespace-nowrap">
+                    <td className="px-4 py-3 text-sm font-bold text-amber-400 font-ui whitespace-nowrap">
                       {r.commission.toLocaleString()} MAD
                     </td>
                   </tr>
@@ -195,7 +195,7 @@ export default function HotelCommissionsPage() {
 
       {/* Note versements */}
       <div className="px-4 sm:px-6 pb-8 -mt-4">
-        <p className="flex items-start gap-2 text-xs text-white/40 font-[family-name:var(--font-inter)] max-w-2xl">
+        <p className="flex items-start gap-2 text-xs text-white/40 font-ui max-w-2xl">
           <HelpCircle size={13} strokeWidth={1.5} className="shrink-0 mt-0.5" />
           Les commissions sont versées mensuellement. Pour toute question sur un
           montant, contactez votre référent twocards.

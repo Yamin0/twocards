@@ -6,8 +6,8 @@
 
 @theme inline {
   /* Fonts */
-  --font-sans: var(--font-inter);
-  --font-heading: var(--font-manrope);
+  --font-sans: var(--font-suisse), var(--font-inter);
+  --font-heading: var(--font-gotham), var(--font-inter);
   --font-brand: var(--font-nunito);
 
   /* twocards. Design System Colors */
@@ -83,7 +83,7 @@
     @apply scroll-smooth;
   }
   h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-manrope), sans-serif;
+    font-family: var(--font-gotham), var(--font-inter), sans-serif;
   }
 }
 
@@ -121,11 +121,11 @@
   font-family: var(--font-suisse), var(--font-inter), sans-serif;
 }
 
-/* Pile display des dashboards et pages client : serif éditoriale pour les
-   titres et les chiffres, Suisse Int'l pour l'interface. */
+/* Pile display des dashboards et pages client : Gotham (licence client)
+   pour les titres et les chiffres, Suisse Int'l pour l'interface — les
+   mêmes fontes que le site public, une seule identité. */
 .font-display {
-  font-family: var(--font-fraunces), Georgia, serif;
-  font-optical-sizing: auto;
+  font-family: var(--font-gotham), var(--font-inter), sans-serif;
   letter-spacing: -0.01em;
 }
 .font-ui {

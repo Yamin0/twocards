@@ -168,7 +168,7 @@ export default function GuestProfilePage() {
         <div className="bg-white/[0.07] rounded-md editorial-shadow p-6 flex flex-wrap items-start gap-6">
           {/* Avatar */}
           <div className="h-20 w-20 rounded-full bg-white/15/10 flex items-center justify-center flex-shrink-0">
-            <span className="text-2xl font-semibold text-white font-[family-name:var(--font-manrope)]">
+            <span className="text-2xl font-semibold text-white font-ui">
               HE
             </span>
           </div>
@@ -176,7 +176,7 @@ export default function GuestProfilePage() {
           {/* Info */}
           <div className="flex-1 min-w-0">
             <div className="flex flex-wrap items-center gap-3 mb-2">
-              <h1 className="text-2xl font-semibold text-white font-[family-name:var(--font-manrope)]">
+              <h1 className="text-2xl font-semibold text-white font-ui">
                 {guest.name}
               </h1>
               <span className="inline-flex items-center gap-1 rounded-full bg-on-surface/10 px-2.5 py-0.5 text-[0.6875rem] font-medium text-white">
@@ -231,10 +231,10 @@ export default function GuestProfilePage() {
             { label: "Première Visite", value: guest.premiereVisite },
           ].map((m) => (
             <div key={m.label}>
-              <p className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-white/70">
+              <p className="font-ui text-[0.6875rem] uppercase tracking-[0.05em] text-white/70">
                 {m.label}
               </p>
-              <p className="text-xl font-semibold text-white font-[family-name:var(--font-manrope)] mt-1">
+              <p className="text-xl font-semibold text-white font-ui mt-1">
                 {m.value}
               </p>
             </div>
@@ -249,7 +249,7 @@ export default function GuestProfilePage() {
           {/* Visit History */}
           <div className="bg-white/[0.07] rounded-md editorial-shadow overflow-hidden">
             <div className="px-5 pt-5 pb-3">
-              <h2 className="text-base font-semibold text-white font-[family-name:var(--font-manrope)]">
+              <h2 className="text-base font-semibold text-white font-ui">
                 Historique des visites
               </h2>
             </div>
@@ -258,7 +258,7 @@ export default function GuestProfilePage() {
                 (h) => (
                   <span
                     key={h}
-                    className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-white/60"
+                    className="font-ui text-[0.6875rem] uppercase tracking-[0.05em] text-white/60"
                   >
                     {h}
                   </span>
@@ -282,7 +282,7 @@ export default function GuestProfilePage() {
 
           {/* Upcoming Reservations */}
           <div>
-            <h2 className="text-base font-semibold text-white font-[family-name:var(--font-manrope)] mb-3">
+            <h2 className="text-base font-semibold text-white font-ui mb-3">
               Réservations à venir
             </h2>
             <div className="space-y-3">
@@ -331,35 +331,35 @@ export default function GuestProfilePage() {
         <div className="lg:col-span-2 space-y-6">
           {/* Client Info */}
           <div className="bg-white/[0.07] rounded-md editorial-shadow p-5">
-            <h2 className="text-base font-semibold text-white font-[family-name:var(--font-manrope)] mb-4">
+            <h2 className="text-base font-semibold text-white font-ui mb-4">
               Informations client
             </h2>
             <div className="space-y-3">
               <div className="flex items-start gap-3">
                 <CalendarDays className="h-4 w-4 text-white/60 mt-0.5" strokeWidth={1.5} />
                 <div>
-                  <p className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-white/60">Anniversaire</p>
+                  <p className="font-ui text-[0.6875rem] uppercase tracking-[0.05em] text-white/60">Anniversaire</p>
                   <p className="text-sm text-white">{guest.birthday}</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
                 <Crown className="h-4 w-4 text-white/60 mt-0.5" strokeWidth={1.5} />
                 <div>
-                  <p className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-white/60">Préférence table</p>
+                  <p className="font-ui text-[0.6875rem] uppercase tracking-[0.05em] text-white/60">Préférence table</p>
                   <p className="text-sm text-white">{guest.tablePreference}</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
                 <Music className="h-4 w-4 text-white/60 mt-0.5" strokeWidth={1.5} />
                 <div>
-                  <p className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-white/60">Style musical</p>
+                  <p className="font-ui text-[0.6875rem] uppercase tracking-[0.05em] text-white/60">Style musical</p>
                   <p className="text-sm text-white">{guest.musicStyle}</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
                 <AlertTriangle className="h-4 w-4 text-red-400 mt-0.5" strokeWidth={1.5} />
                 <div>
-                  <p className="font-[family-name:var(--font-inter)] text-[0.6875rem] uppercase tracking-[0.05em] text-white/60">Allergies alimentaires</p>
+                  <p className="font-ui text-[0.6875rem] uppercase tracking-[0.05em] text-white/60">Allergies alimentaires</p>
                   <p className="text-sm text-red-400">{guest.allergies}</p>
                 </div>
               </div>
@@ -368,7 +368,7 @@ export default function GuestProfilePage() {
 
           {/* Notes */}
           <div className="bg-white/[0.07] rounded-md editorial-shadow p-5">
-            <h2 className="text-base font-semibold text-white font-[family-name:var(--font-manrope)] mb-4">
+            <h2 className="text-base font-semibold text-white font-ui mb-4">
               Notes internes
             </h2>
             <div className="space-y-4">
@@ -388,7 +388,7 @@ export default function GuestProfilePage() {
 
           {/* Tags */}
           <div className="bg-white/[0.07] rounded-md editorial-shadow p-5">
-            <h2 className="text-base font-semibold text-white font-[family-name:var(--font-manrope)] mb-3">
+            <h2 className="text-base font-semibold text-white font-ui mb-3">
               Tags
             </h2>
             <div className="flex flex-wrap gap-2">
@@ -407,7 +407,7 @@ export default function GuestProfilePage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="bg-white/[0.07] rounded-md editorial-shadow p-6 w-full max-w-md mx-4">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-white font-[family-name:var(--font-manrope)]">Ajouter une note</h2>
+              <h2 className="text-lg font-bold text-white font-ui">Ajouter une note</h2>
               <button onClick={() => setShowNoteModal(false)} className="text-white/60 hover:text-white">
                 <X size={20} strokeWidth={1.5} />
               </button>
@@ -434,7 +434,7 @@ export default function GuestProfilePage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="bg-white/[0.07] rounded-md editorial-shadow p-6 w-full max-w-md mx-4">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-white font-[family-name:var(--font-manrope)]">Modifier le client</h2>
+              <h2 className="text-lg font-bold text-white font-ui">Modifier le client</h2>
               <button onClick={() => setShowEditModal(false)} className="text-white/60 hover:text-white">
                 <X size={20} strokeWidth={1.5} />
               </button>

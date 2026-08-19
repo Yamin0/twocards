@@ -136,7 +136,7 @@ export default function HotelChambresPage() {
         </div>
         <button
           onClick={() => setFormOpen(true)}
-          className="flex items-center gap-2 bg-blue-500 hover:bg-blue-400 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors font-[family-name:var(--font-manrope)]"
+          className="flex items-center gap-2 bg-blue-500 hover:bg-blue-400 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors font-ui"
         >
           <Plus size={16} strokeWidth={1.5} />
           Nouvelle chambre
@@ -150,11 +150,11 @@ export default function HotelChambresPage() {
             <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
               <QrCode size={16} strokeWidth={1.5} className="text-blue-400" />
             </div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-white/60 font-[family-name:var(--font-inter)]">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-white/60 font-ui">
               QR actifs
             </span>
           </div>
-          <p className="text-xl font-extrabold text-white font-[family-name:var(--font-manrope)]">
+          <p className="text-xl font-extrabold text-white font-ui">
             {activeCount}
           </p>
         </div>
@@ -163,11 +163,11 @@ export default function HotelChambresPage() {
             <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
               <MapPin size={16} strokeWidth={1.5} className="text-purple-400" />
             </div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-white/60 font-[family-name:var(--font-inter)]">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-white/60 font-ui">
               Chambres
             </span>
           </div>
-          <p className="text-xl font-extrabold text-white font-[family-name:var(--font-manrope)]">
+          <p className="text-xl font-extrabold text-white font-ui">
             {items.length}
           </p>
         </div>
@@ -176,11 +176,11 @@ export default function HotelChambresPage() {
             <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
               <ScanLine size={16} strokeWidth={1.5} className="text-green-400" />
             </div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-white/60 font-[family-name:var(--font-inter)]">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-white/60 font-ui">
               Scans totaux
             </span>
           </div>
-          <p className="text-xl font-extrabold text-white font-[family-name:var(--font-manrope)]">
+          <p className="text-xl font-extrabold text-white font-ui">
             {totalScans}
           </p>
         </div>
@@ -197,7 +197,7 @@ export default function HotelChambresPage() {
             className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-2xl p-5"
           >
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-bold text-white font-[family-name:var(--font-manrope)]">
+              <h2 className="text-sm font-bold text-white font-ui">
                 Nouvelle chambre
               </h2>
               <button
@@ -217,11 +217,11 @@ export default function HotelChambresPage() {
                 placeholder="Ex : Chambre 204, Lobby, Rooftop..."
                 autoFocus
                 required
-                className="flex-1 px-4 py-2.5 bg-white/[0.05] rounded-xl text-sm text-white font-[family-name:var(--font-inter)] placeholder:text-white/30 focus:bg-white/[0.07] focus:ring-1 focus:ring-white/30 focus:outline-none transition-colors"
+                className="flex-1 px-4 py-2.5 bg-white/[0.05] rounded-xl text-sm text-white font-ui placeholder:text-white/30 focus:bg-white/[0.07] focus:ring-1 focus:ring-white/30 focus:outline-none transition-colors"
               />
               <button
                 type="submit"
-                className="flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-400 text-white text-sm font-medium px-5 py-2.5 rounded-xl transition-colors font-[family-name:var(--font-manrope)]"
+                className="flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-400 text-white text-sm font-medium px-5 py-2.5 rounded-xl transition-colors font-ui"
               >
                 <Plus size={16} strokeWidth={1.5} />
                 Générer
@@ -233,7 +233,7 @@ export default function HotelChambresPage() {
                   key={suggestion}
                   type="button"
                   onClick={() => addQr(suggestion)}
-                  className="px-3 py-1.5 rounded-full bg-white/[0.05] border border-white/10 text-xs text-white/60 hover:bg-white/10 hover:text-white transition-colors font-[family-name:var(--font-inter)]"
+                  className="px-3 py-1.5 rounded-full bg-white/[0.05] border border-white/10 text-xs text-white/60 hover:bg-white/10 hover:text-white transition-colors font-ui"
                 >
                   {suggestion}
                 </button>
@@ -250,17 +250,17 @@ export default function HotelChambresPage() {
             <div className="w-14 h-14 rounded-2xl bg-blue-500/15 border border-blue-400/20 flex items-center justify-center mx-auto mb-5">
               <QrCode size={26} strokeWidth={1.5} className="text-blue-400" />
             </div>
-            <h2 className="text-lg font-bold text-white font-[family-name:var(--font-manrope)] mb-2">
+            <h2 className="text-lg font-bold text-white font-ui mb-2">
               Aucune chambre pour le moment
             </h2>
-            <p className="text-sm text-white/50 font-[family-name:var(--font-inter)] max-w-md mx-auto mb-6">
+            <p className="text-sm text-white/50 font-ui max-w-md mx-auto mb-6">
               Créez un QR code par chambre ou par zone de l&apos;hôtel. Une fois
               imprimé, chaque scan ouvre le menu de sorties que vous avez
               choisi — et chaque réservation vous rapporte une commission.
             </p>
             <button
               onClick={() => setFormOpen(true)}
-              className="inline-flex items-center gap-2 bg-blue-500 hover:bg-blue-400 text-white text-sm font-medium px-5 py-2.5 rounded-xl transition-colors font-[family-name:var(--font-manrope)]"
+              className="inline-flex items-center gap-2 bg-blue-500 hover:bg-blue-400 text-white text-sm font-medium px-5 py-2.5 rounded-xl transition-colors font-ui"
             >
               <Plus size={16} strokeWidth={1.5} />
               Créer ma première chambre
@@ -277,10 +277,10 @@ export default function HotelChambresPage() {
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className="min-w-0">
-                    <h3 className="text-sm font-bold text-white font-[family-name:var(--font-manrope)] truncate">
+                    <h3 className="text-sm font-bold text-white font-ui truncate">
                       {item.label}
                     </h3>
-                    <p className="text-xs text-white/40 font-[family-name:var(--font-inter)] mt-0.5">
+                    <p className="text-xs text-white/40 font-ui mt-0.5">
                       Code {item.code} · {item.scans} scan
                       {item.scans > 1 ? "s" : ""} ·{" "}
                       {item.qr_reservations?.[0]?.count ?? 0} résa
@@ -288,7 +288,7 @@ export default function HotelChambresPage() {
                     </p>
                   </div>
                   <span
-                    className={`shrink-0 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider font-[family-name:var(--font-inter)] ${
+                    className={`shrink-0 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider font-ui ${
                       item.active
                         ? "bg-emerald-500/15 text-emerald-400"
                         : "bg-white/10 text-white/40"
@@ -308,7 +308,7 @@ export default function HotelChambresPage() {
                 <div className="flex items-center gap-2">
                   <Link
                     href={`/hotel/chambres/${item.id}`}
-                    className="flex-1 flex items-center justify-center gap-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 hover:text-blue-200 text-xs font-medium px-3 py-2 rounded-lg transition-colors font-[family-name:var(--font-manrope)]"
+                    className="flex-1 flex items-center justify-center gap-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 hover:text-blue-200 text-xs font-medium px-3 py-2 rounded-lg transition-colors font-ui"
                   >
                     <ChartLine size={14} strokeWidth={1.5} />
                     Menu &amp; suivi
@@ -319,7 +319,7 @@ export default function HotelChambresPage() {
                         showToast("QR code téléchargé");
                       }
                     }}
-                    className="flex items-center justify-center gap-2 bg-white/10 hover:bg-white/15 text-white text-xs font-medium px-3 py-2 rounded-lg transition-colors font-[family-name:var(--font-manrope)]"
+                    className="flex items-center justify-center gap-2 bg-white/10 hover:bg-white/15 text-white text-xs font-medium px-3 py-2 rounded-lg transition-colors font-ui"
                   >
                     <Download size={14} strokeWidth={1.5} />
                     SVG

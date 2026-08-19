@@ -97,7 +97,7 @@ export function Messenger({
       >
         <div className="border-b border-white/[0.08] p-4">
           <div className="mb-3 flex items-center justify-between">
-            <h1 className="text-lg font-bold text-white font-[family-name:var(--font-manrope)]">
+            <h1 className="text-lg font-bold text-white font-ui">
               Messages
             </h1>
             <button
@@ -298,7 +298,7 @@ export function Messenger({
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
           <div className={`${panel} w-full max-w-sm p-5`}>
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-sm font-bold text-white font-[family-name:var(--font-manrope)]">
+              <h2 className="text-sm font-bold text-white font-ui">
                 Nouvelle conversation
               </h2>
               <button

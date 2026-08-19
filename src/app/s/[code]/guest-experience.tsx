@@ -113,7 +113,7 @@ export function GuestExperience({
         )}
 
         <footer className="mt-10 flex items-center justify-center gap-2 text-white/40 sm:mt-16">
-          <span className="text-xs font-[family-name:var(--font-inter)]">
+          <span className="text-xs font-ui">
             Propulsé par
           </span>
           <Image
@@ -151,13 +151,13 @@ function MenuView({
 }) {
   return (
     <div>
-      <p className="text-center text-[11px] font-bold uppercase tracking-[0.25em] text-white/50 font-[family-name:var(--font-inter)] sm:text-xs lg:text-sm">
+      <p className="text-center text-[11px] font-bold uppercase tracking-[0.25em] text-white/50 font-ui sm:text-xs lg:text-sm">
         Votre conciergerie
       </p>
       <h1 className="font-display mt-2 text-center text-4xl font-light text-white sm:mt-4 sm:text-6xl lg:text-7xl">
         {hotelName ?? "Bienvenue"}
       </h1>
-      <p className="mx-auto mt-2 max-w-xs text-center text-sm leading-relaxed text-white/60 font-[family-name:var(--font-inter)] sm:mt-4 sm:max-w-lg sm:text-base lg:text-lg">
+      <p className="mx-auto mt-2 max-w-xs text-center text-sm leading-relaxed text-white/60 font-ui sm:mt-4 sm:max-w-lg sm:text-base lg:text-lg">
         Réservez vos plus belles sorties en quelques secondes — l&apos;hôtel
         s&apos;occupe du reste.
       </p>
@@ -189,7 +189,7 @@ function MenuView({
                 <p className="font-display text-xl font-normal text-white sm:text-3xl">
                   {cat.label}
                 </p>
-                <p className="mt-0.5 text-[11px] leading-snug text-white/60 font-[family-name:var(--font-inter)] sm:mt-1 sm:text-sm">
+                <p className="mt-0.5 text-[11px] leading-snug text-white/60 font-ui sm:mt-1 sm:text-sm">
                   {cat.tagline}
                 </p>
               </div>
@@ -231,7 +231,7 @@ function CategoryView({
             />
             {category.label}
           </h2>
-          <p className="text-xs text-white/50 font-[family-name:var(--font-inter)] sm:mt-1 sm:text-base">
+          <p className="text-xs text-white/50 font-ui sm:mt-1 sm:text-base">
             {category.tagline}
           </p>
         </div>
@@ -253,11 +253,11 @@ function CategoryView({
                 className="object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-              <span className="absolute left-3 top-3 rounded-full bg-black/50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white/80 backdrop-blur-md font-[family-name:var(--font-inter)]">
+              <span className="absolute left-3 top-3 rounded-full bg-black/50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white/80 backdrop-blur-md font-ui">
                 {o.tag}
               </span>
               {o.price && (
-                <span className="absolute right-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-bold text-black font-[family-name:var(--font-inter)]">
+                <span className="absolute right-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-bold text-black font-ui">
                   {o.price}
                 </span>
               )}
@@ -268,12 +268,12 @@ function CategoryView({
                   {o.name}
                 </p>
                 {o.city && (
-                  <p className="mt-0.5 flex items-center gap-1 text-[11px] text-white/50 font-[family-name:var(--font-inter)] sm:text-xs">
+                  <p className="mt-0.5 flex items-center gap-1 text-[11px] text-white/50 font-ui sm:text-xs">
                     <MapPin size={11} strokeWidth={1.5} />
                     {o.city}
                   </p>
                 )}
-                <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-white/60 font-[family-name:var(--font-inter)] sm:text-sm">
+                <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-white/60 font-ui sm:text-sm">
                   {o.description}
                 </p>
               </div>
@@ -349,7 +349,7 @@ function ReservationSheet({
   };
 
   const field =
-    "w-full rounded-xl bg-white/[0.07] px-4 py-3 text-sm text-white placeholder:text-white/30 focus:bg-white/10 focus:outline-none focus:ring-1 focus:ring-white/40 font-[family-name:var(--font-inter)]";
+    "w-full rounded-xl bg-white/[0.07] px-4 py-3 text-sm text-white placeholder:text-white/30 focus:bg-white/10 focus:outline-none focus:ring-1 focus:ring-white/40 font-ui";
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
@@ -366,7 +366,7 @@ function ReservationSheet({
             <h3 className="font-display text-3xl font-light text-white">
               Demande envoyée
             </h3>
-            <p className="mx-auto mt-2 max-w-xs text-sm leading-relaxed text-white/60 font-[family-name:var(--font-inter)]">
+            <p className="mx-auto mt-2 max-w-xs text-sm leading-relaxed text-white/60 font-ui">
               Votre demande pour <span className="text-white">{offer.name}</span>{" "}
               le {new Date(date + "T00:00:00").toLocaleDateString("fr-FR")} a
               bien été transmise. Vous serez recontacté au{" "}
@@ -374,7 +374,7 @@ function ReservationSheet({
             </p>
             <button
               onClick={onClose}
-              className="mt-8 w-full rounded-xl bg-white py-3 text-sm font-bold text-black transition-colors hover:bg-white/90 font-[family-name:var(--font-manrope)]"
+              className="mt-8 w-full rounded-xl bg-white py-3 text-sm font-bold text-black transition-colors hover:bg-white/90 font-ui"
             >
               Parfait
             </button>
@@ -383,7 +383,7 @@ function ReservationSheet({
           <form onSubmit={submit} className="p-6">
             <div className="mb-5 flex items-start justify-between gap-4">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-wider text-white/50 font-[family-name:var(--font-inter)]">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-white/50 font-ui">
                   {category.label}
                 </p>
                 <h3 className="font-display mt-0.5 text-2xl font-light text-white">
@@ -466,7 +466,7 @@ function ReservationSheet({
               </div>
 
               <div className="flex items-center justify-between rounded-xl bg-white/[0.07] px-4 py-3">
-                <span className="text-sm text-white/70 font-[family-name:var(--font-inter)]">
+                <span className="text-sm text-white/70 font-ui">
                   Personnes
                 </span>
                 <div className="flex items-center gap-4">
@@ -478,7 +478,7 @@ function ReservationSheet({
                   >
                     <Minus size={14} strokeWidth={2} />
                   </button>
-                  <span className="w-6 text-center text-base font-bold text-white font-[family-name:var(--font-manrope)]">
+                  <span className="w-6 text-center text-base font-bold text-white font-ui">
                     {partySize}
                   </span>
                   <button
@@ -502,7 +502,7 @@ function ReservationSheet({
             </div>
 
             {state === "error" && (
-              <p className="mt-3 rounded-xl border border-red-400/20 bg-red-500/10 px-4 py-3 text-xs leading-relaxed text-red-300 font-[family-name:var(--font-inter)]">
+              <p className="mt-3 rounded-xl border border-red-400/20 bg-red-500/10 px-4 py-3 text-xs leading-relaxed text-red-300 font-ui">
                 {errorMsg}
               </p>
             )}
@@ -510,7 +510,7 @@ function ReservationSheet({
             <button
               type="submit"
               disabled={state === "sending"}
-              className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-white py-3.5 text-sm font-bold text-black transition-colors hover:bg-white/90 disabled:opacity-60 font-[family-name:var(--font-manrope)]"
+              className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-white py-3.5 text-sm font-bold text-black transition-colors hover:bg-white/90 disabled:opacity-60 font-ui"
             >
               {state === "sending" ? (
                 <>
@@ -521,7 +521,7 @@ function ReservationSheet({
                 "Demander une réservation"
               )}
             </button>
-            <p className="mt-3 text-center text-[11px] text-white/40 font-[family-name:var(--font-inter)]">
+            <p className="mt-3 text-center text-[11px] text-white/40 font-ui">
               Sans engagement — confirmation par téléphone ou WhatsApp.
             </p>
           </form>

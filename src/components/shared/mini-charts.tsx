@@ -24,7 +24,7 @@ export function MiniBars({
           className="flex-1 flex flex-col items-center gap-1 min-w-0"
           title={`${d.label} : ${format(d.value)}`}
         >
-          <span className="text-[9px] text-white/50 font-[family-name:var(--font-inter)] tabular-nums">
+          <span className="text-[9px] text-white/50 font-ui tabular-nums">
             {d.value > 0 ? format(d.value) : ""}
           </span>
           <div
@@ -33,7 +33,7 @@ export function MiniBars({
               height: `${Math.max((d.value / max) * 72, 3)}px`,
             }}
           />
-          <span className="text-[9px] text-white/40 font-[family-name:var(--font-inter)] truncate max-w-full">
+          <span className="text-[9px] text-white/40 font-ui truncate max-w-full">
             {d.label}
           </span>
         </div>
@@ -97,7 +97,7 @@ export function SplitBar({
         {segments.map((s) => (
           <span
             key={s.label}
-            className="flex items-center gap-1.5 text-[10px] text-white/50 font-[family-name:var(--font-inter)]"
+            className="flex items-center gap-1.5 text-[10px] text-white/50 font-ui"
           >
             <span className={`h-2 w-2 rounded-full ${s.color}`} />
             {s.label} · {s.value}

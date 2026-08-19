@@ -108,16 +108,16 @@ export default function ConciergeClientsPage() {
       {/* Header */}
       <div className="px-4 sm:px-6 pt-6 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold text-white font-[family-name:var(--font-manrope)]">
+          <h1 className="text-xl font-bold text-white font-ui">
             Carnet de contacts
           </h1>
-          <p className="text-sm text-white/60 font-[family-name:var(--font-inter)] mt-0.5">
+          <p className="text-sm text-white/60 font-ui mt-0.5">
             {clients.length} clients &middot; {clients.filter((c) => c.vip).length} VIP
           </p>
         </div>
         <button
           onClick={() => setShowNewClient(true)}
-          className="flex items-center gap-2 bg-white/15 text-white text-sm font-medium px-4 py-2.5 rounded-lg hover:opacity-90 transition-opacity font-[family-name:var(--font-inter)]"
+          className="flex items-center gap-2 bg-white/15 text-white text-sm font-medium px-4 py-2.5 rounded-lg hover:opacity-90 transition-opacity font-ui"
         >
           <Plus size={16} strokeWidth={1.5} />
           Nouveau client
@@ -137,7 +137,7 @@ export default function ConciergeClientsPage() {
             placeholder="Rechercher par nom ou téléphone..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 text-sm bg-white/[0.07] border border-white/10 rounded-lg text-white placeholder:text-white/40 font-[family-name:var(--font-inter)] focus:ring-1 focus:ring-white/30 focus:border-primary/30 focus:outline-none transition-colors"
+            className="w-full pl-9 pr-4 py-2 text-sm bg-white/[0.07] border border-white/10 rounded-lg text-white placeholder:text-white/40 font-ui focus:ring-1 focus:ring-white/30 focus:border-primary/30 focus:outline-none transition-colors"
           />
         </div>
         <div className="flex items-center gap-2 overflow-x-auto">
@@ -145,7 +145,7 @@ export default function ConciergeClientsPage() {
             <button
               key={tag}
               onClick={() => setFilterTag(tag)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors font-[family-name:var(--font-inter)] ${
+              className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors font-ui ${
                 filterTag === tag
                   ? "bg-white/15 text-white"
                   : "bg-white/[0.07] border border-white/10 text-white/60 hover:bg-white/[0.05]"
@@ -164,22 +164,22 @@ export default function ConciergeClientsPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-white/10/10">
-                  <th className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-[family-name:var(--font-inter)]">
+                  <th className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-ui">
                     Client
                   </th>
-                  <th className="hidden sm:table-cell text-left px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-[family-name:var(--font-inter)]">
+                  <th className="hidden sm:table-cell text-left px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-ui">
                     Contact
                   </th>
-                  <th className="text-center px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-[family-name:var(--font-inter)]">
+                  <th className="text-center px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-ui">
                     Visites
                   </th>
-                  <th className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-[family-name:var(--font-inter)]">
+                  <th className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-ui">
                     Dépenses
                   </th>
-                  <th className="hidden sm:table-cell text-center px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-[family-name:var(--font-inter)]">
+                  <th className="hidden sm:table-cell text-center px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-ui">
                     Grp. moy.
                   </th>
-                  <th className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-[family-name:var(--font-inter)]">
+                  <th className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-ui">
                     Tags
                   </th>
                   <th className="w-10 px-4 py-3" />
@@ -196,7 +196,7 @@ export default function ConciergeClientsPage() {
                     <td className="px-4 py-3.5">
                       <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-full bg-white/15 flex items-center justify-center shrink-0">
-                          <span className="text-xs font-bold text-white/70 font-[family-name:var(--font-manrope)]">
+                          <span className="text-xs font-bold text-white/70 font-ui">
                             {client.name
                               .split(" ")
                               .map((n) => n[0])
@@ -205,7 +205,7 @@ export default function ConciergeClientsPage() {
                         </div>
                         <div>
                           <div className="flex items-center gap-1.5">
-                            <span className="font-semibold text-white font-[family-name:var(--font-manrope)]">
+                            <span className="font-semibold text-white font-ui">
                               {client.name}
                             </span>
                             {client.vip && (
@@ -216,7 +216,7 @@ export default function ConciergeClientsPage() {
                               />
                             )}
                           </div>
-                          <p className="text-[11px] text-white/60/60 font-[family-name:var(--font-inter)]">
+                          <p className="text-[11px] text-white/60/60 font-ui">
                             Dernier : {client.lastVisit}
                           </p>
                         </div>
@@ -234,17 +234,17 @@ export default function ConciergeClientsPage() {
                       </div>
                     </td>
                     <td className="px-4 py-3.5 text-center">
-                      <span className="font-bold text-white font-[family-name:var(--font-manrope)]">
+                      <span className="font-bold text-white font-ui">
                         {client.visits}
                       </span>
                     </td>
                     <td className="px-4 py-3.5">
-                      <span className="font-semibold text-white font-[family-name:var(--font-manrope)]">
+                      <span className="font-semibold text-white font-ui">
                         {client.totalSpent}
                       </span>
                     </td>
                     <td className="hidden sm:table-cell px-4 py-3.5 text-center">
-                      <span className="text-white/60 font-[family-name:var(--font-inter)]">
+                      <span className="text-white/60 font-ui">
                         {client.avgGroup}
                       </span>
                     </td>
@@ -321,7 +321,7 @@ export default function ConciergeClientsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="bg-white/[0.07] rounded-xl shadow-xl w-full max-w-md mx-4 p-6">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-lg font-bold text-white font-[family-name:var(--font-manrope)]">
+              <h2 className="text-lg font-bold text-white font-ui">
                 Nouveau client
               </h2>
               <button
@@ -333,7 +333,7 @@ export default function ConciergeClientsPage() {
             </div>
             <form onSubmit={handleAddClient} className="space-y-4">
               <div>
-                <label className="block text-xs font-medium text-white/60 mb-1 font-[family-name:var(--font-inter)]">
+                <label className="block text-xs font-medium text-white/60 mb-1 font-ui">
                   Nom complet *
                 </label>
                 <input
@@ -341,12 +341,12 @@ export default function ConciergeClientsPage() {
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
                   placeholder="Ex: Mohamed Tazi"
-                  className="w-full px-3 py-2 text-sm bg-white/[0.05] border-none rounded-lg text-white placeholder:text-white/40 font-[family-name:var(--font-inter)] focus:ring-1 focus:ring-white/30 focus:outline-none"
+                  className="w-full px-3 py-2 text-sm bg-white/[0.05] border-none rounded-lg text-white placeholder:text-white/40 font-ui focus:ring-1 focus:ring-white/30 focus:outline-none"
                   required
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-white/60 mb-1 font-[family-name:var(--font-inter)]">
+                <label className="block text-xs font-medium text-white/60 mb-1 font-ui">
                   Téléphone
                 </label>
                 <input
@@ -354,11 +354,11 @@ export default function ConciergeClientsPage() {
                   value={newPhone}
                   onChange={(e) => setNewPhone(e.target.value)}
                   placeholder="+212 6 XX XX XX XX"
-                  className="w-full px-3 py-2 text-sm bg-white/[0.05] border-none rounded-lg text-white placeholder:text-white/40 font-[family-name:var(--font-inter)] focus:ring-1 focus:ring-white/30 focus:outline-none"
+                  className="w-full px-3 py-2 text-sm bg-white/[0.05] border-none rounded-lg text-white placeholder:text-white/40 font-ui focus:ring-1 focus:ring-white/30 focus:outline-none"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-white/60 mb-1 font-[family-name:var(--font-inter)]">
+                <label className="block text-xs font-medium text-white/60 mb-1 font-ui">
                   Email
                 </label>
                 <input
@@ -366,7 +366,7 @@ export default function ConciergeClientsPage() {
                   value={newEmail}
                   onChange={(e) => setNewEmail(e.target.value)}
                   placeholder="email@example.com"
-                  className="w-full px-3 py-2 text-sm bg-white/[0.05] border-none rounded-lg text-white placeholder:text-white/40 font-[family-name:var(--font-inter)] focus:ring-1 focus:ring-white/30 focus:outline-none"
+                  className="w-full px-3 py-2 text-sm bg-white/[0.05] border-none rounded-lg text-white placeholder:text-white/40 font-ui focus:ring-1 focus:ring-white/30 focus:outline-none"
                 />
               </div>
               <button

@@ -133,7 +133,7 @@ export default function NetworkPage() {
       <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-white font-[family-name:var(--font-manrope)]">
+            <h1 className="text-2xl sm:text-3xl font-bold text-white font-ui">
               Réseau RP
             </h1>
             <p className="text-white/50 text-sm mt-1">
@@ -155,15 +155,15 @@ export default function NetworkPage() {
         <div className="grid grid-cols-3 gap-4">
           <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl p-4">
             <p className="text-white/40 text-xs">RP Actifs</p>
-            <p className="text-xl font-bold text-white mt-1 font-[family-name:var(--font-manrope)]">{activePRs}</p>
+            <p className="text-xl font-bold text-white mt-1 font-ui">{activePRs}</p>
           </div>
           <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl p-4">
             <p className="text-white/40 text-xs">Couverts ce mois</p>
-            <p className="text-xl font-bold text-blue-400 mt-1 font-[family-name:var(--font-manrope)]">{totalCouverts}</p>
+            <p className="text-xl font-bold text-blue-400 mt-1 font-ui">{totalCouverts}</p>
           </div>
           <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl p-4">
             <p className="text-white/40 text-xs">En attente</p>
-            <p className="text-xl font-bold text-amber-400 mt-1 font-[family-name:var(--font-manrope)]">{pendingPRs}</p>
+            <p className="text-xl font-bold text-amber-400 mt-1 font-ui">{pendingPRs}</p>
           </div>
         </div>
       )}
@@ -243,7 +243,7 @@ export default function NetworkPage() {
                         <span className="text-sm font-semibold text-blue-400">{pr.initials}</span>
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-white font-[family-name:var(--font-manrope)]">{pr.name}</p>
+                        <p className="text-sm font-medium text-white font-ui">{pr.name}</p>
                         <p className="text-[0.6875rem] text-white/35">{pr.agency}</p>
                       </div>
                     </div>
@@ -326,7 +326,7 @@ export default function NetworkPage() {
                 <div className="w-12 h-12 rounded-full bg-white/[0.06] flex items-center justify-center mb-3">
                   <UserPlus size={20} strokeWidth={1.5} className="text-white/25" />
                 </div>
-                <h3 className="text-sm font-semibold text-white/60 font-[family-name:var(--font-manrope)] mb-1">
+                <h3 className="text-sm font-semibold text-white/60 font-ui mb-1">
                   Étendre votre réseau
                 </h3>
                 <p className="text-xs text-white/25 max-w-[180px]">
@@ -346,7 +346,7 @@ export default function NetworkPage() {
                 <div className="h-16 w-16 rounded-full bg-blue-400/15 flex items-center justify-center mx-auto mb-3">
                   <span className="text-xl font-bold text-blue-400">{selected.initials}</span>
                 </div>
-                <h2 className="text-lg font-semibold text-white font-[family-name:var(--font-manrope)]">{selected.name}</h2>
+                <h2 className="text-lg font-semibold text-white font-ui">{selected.name}</h2>
                 <p className="text-xs text-white/40 mt-0.5">{selected.agency}</p>
                 <div className="flex items-center justify-center gap-2 mt-2">
                   <span className={`text-[0.625rem] font-semibold px-2.5 py-0.5 rounded-full ${statusBadge(selected.status)}`}>{selected.status}</span>
@@ -387,19 +387,19 @@ export default function NetworkPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-white/[0.04] rounded-xl p-3">
                   <p className="text-[0.625rem] text-white/25 uppercase tracking-wider">Couverts</p>
-                  <p className="text-lg font-bold text-white mt-0.5 font-[family-name:var(--font-manrope)]">{selected.couverts}</p>
+                  <p className="text-lg font-bold text-white mt-0.5 font-ui">{selected.couverts}</p>
                 </div>
                 <div className="bg-white/[0.04] rounded-xl p-3">
                   <p className="text-[0.625rem] text-white/25 uppercase tracking-wider">Événements</p>
-                  <p className="text-lg font-bold text-white mt-0.5 font-[family-name:var(--font-manrope)]">{selected.events}</p>
+                  <p className="text-lg font-bold text-white mt-0.5 font-ui">{selected.events}</p>
                 </div>
                 <div className="bg-white/[0.04] rounded-xl p-3">
                   <p className="text-[0.625rem] text-white/25 uppercase tracking-wider">CA généré</p>
-                  <p className="text-sm font-bold text-white mt-0.5 font-[family-name:var(--font-manrope)]">{selected.ca}</p>
+                  <p className="text-sm font-bold text-white mt-0.5 font-ui">{selected.ca}</p>
                 </div>
                 <div className="bg-white/[0.04] rounded-xl p-3">
                   <p className="text-[0.625rem] text-white/25 uppercase tracking-wider">Commission</p>
-                  <p className="text-sm font-bold text-white mt-0.5 font-[family-name:var(--font-manrope)]">{selected.commission}</p>
+                  <p className="text-sm font-bold text-white mt-0.5 font-ui">{selected.commission}</p>
                 </div>
               </div>
 
@@ -431,7 +431,7 @@ export default function NetworkPage() {
             <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-5 space-y-4">
               <div className="flex items-center gap-2">
                 <Award size={16} strokeWidth={1.5} className="text-amber-400" />
-                <h3 className="text-sm font-semibold text-white font-[family-name:var(--font-manrope)]">Meilleur performeur</h3>
+                <h3 className="text-sm font-semibold text-white font-ui">Meilleur performeur</h3>
               </div>
 
               <div className="flex items-center gap-3">
@@ -447,15 +447,15 @@ export default function NetworkPage() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-white/30">CA ce mois</span>
-                  <span className="text-sm font-semibold text-white font-[family-name:var(--font-manrope)]">{topPerformer.ca}</span>
+                  <span className="text-sm font-semibold text-white font-ui">{topPerformer.ca}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-white/30">Couverts</span>
-                  <span className="text-sm font-semibold text-white font-[family-name:var(--font-manrope)]">{topPerformer.couverts}</span>
+                  <span className="text-sm font-semibold text-white font-ui">{topPerformer.couverts}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-white/30">Événements</span>
-                  <span className="text-sm font-semibold text-white font-[family-name:var(--font-manrope)]">{topPerformer.events}</span>
+                  <span className="text-sm font-semibold text-white font-ui">{topPerformer.events}</span>
                 </div>
               </div>
 
@@ -471,7 +471,7 @@ export default function NetworkPage() {
             <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-5">
               <div className="flex items-center gap-2 mb-4">
                 <BarChart3 size={16} strokeWidth={1.5} className="text-white/30" />
-                <h3 className="text-sm font-semibold text-white font-[family-name:var(--font-manrope)]">CA mensuel RP</h3>
+                <h3 className="text-sm font-semibold text-white font-ui">CA mensuel RP</h3>
               </div>
               <div className="flex items-end gap-2 h-28">
                 {MONTHLY_CA.map((m) => {
@@ -499,7 +499,7 @@ export default function NetworkPage() {
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowInviteModal(false)} />
           <div className="relative z-10 w-full max-w-md mx-4 backdrop-blur-xl bg-[#0e0e1a]/95 border border-white/[0.12] rounded-3xl p-6 space-y-5">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-bold text-white font-[family-name:var(--font-manrope)]">Inviter un RP</h2>
+              <h2 className="text-lg font-bold text-white font-ui">Inviter un RP</h2>
               <button onClick={() => setShowInviteModal(false)} className="p-1.5 rounded-lg text-white/30 hover:text-white hover:bg-white/[0.08] transition-all">
                 <X size={18} strokeWidth={1.5} />
               </button>

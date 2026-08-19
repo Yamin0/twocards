@@ -178,7 +178,7 @@ export default function GuestsPage() {
       <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-extrabold font-[family-name:var(--font-manrope)] text-white">
+            <h1 className="text-2xl font-extrabold font-ui text-white">
               Clients
             </h1>
             <p className="text-sm text-white/50 mt-1">

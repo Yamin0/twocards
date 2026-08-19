@@ -59,7 +59,7 @@ export default function ConciergeSettingsPage() {
   return (
     <div className="bg-transparent min-h-screen">
       <div className="px-8 pt-8 pb-6">
-        <h1 className="text-white font-[family-name:var(--font-manrope)] text-2xl font-extrabold">
+        <h1 className="text-white font-ui text-2xl font-extrabold">
           Paramètres
         </h1>
         <p className="text-white/60 mt-1 text-sm">
@@ -80,14 +80,14 @@ export default function ConciergeSettingsPage() {
         </div>
 
         <div className="bg-white/[0.07] rounded-md editorial-shadow p-8">
-          <h2 className="text-sm font-semibold text-white font-[family-name:var(--font-manrope)] mb-6">
+          <h2 className="text-sm font-semibold text-white font-ui mb-6">
             Informations personnelles
           </h2>
 
           <form className="space-y-5" onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="block font-[family-name:var(--font-inter)] text-xs uppercase tracking-wider text-white/60">
+                <label className="block font-ui text-xs uppercase tracking-wider text-white/60">
                   Nom complet
                 </label>
                 <div className="relative">
@@ -96,13 +96,13 @@ export default function ConciergeSettingsPage() {
                     type="text"
                     value={form.fullname}
                     onChange={(e) => updateForm("fullname", e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-white/[0.05] border-none rounded-sm text-sm text-white font-[family-name:var(--font-inter)] focus:bg-white/[0.07] focus:ring-1 focus:ring-white/30 focus:outline-none transition-colors"
+                    className="w-full pl-10 pr-4 py-2.5 bg-white/[0.05] border-none rounded-sm text-sm text-white font-ui focus:bg-white/[0.07] focus:ring-1 focus:ring-white/30 focus:outline-none transition-colors"
                   />
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <label className="block font-[family-name:var(--font-inter)] text-xs uppercase tracking-wider text-white/60">
+                <label className="block font-ui text-xs uppercase tracking-wider text-white/60">
                   Email
                 </label>
                 <div className="relative">
@@ -111,13 +111,13 @@ export default function ConciergeSettingsPage() {
                     type="email"
                     value={form.email}
                     onChange={(e) => updateForm("email", e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-white/[0.05] border-none rounded-sm text-sm text-white font-[family-name:var(--font-inter)] focus:bg-white/[0.07] focus:ring-1 focus:ring-white/30 focus:outline-none transition-colors"
+                    className="w-full pl-10 pr-4 py-2.5 bg-white/[0.05] border-none rounded-sm text-sm text-white font-ui focus:bg-white/[0.07] focus:ring-1 focus:ring-white/30 focus:outline-none transition-colors"
                   />
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <label className="block font-[family-name:var(--font-inter)] text-xs uppercase tracking-wider text-white/60">
+                <label className="block font-ui text-xs uppercase tracking-wider text-white/60">
                   Téléphone
                 </label>
                 <div className="relative">
@@ -126,13 +126,13 @@ export default function ConciergeSettingsPage() {
                     type="tel"
                     value={form.phone}
                     onChange={(e) => updateForm("phone", e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-white/[0.05] border-none rounded-sm text-sm text-white font-[family-name:var(--font-inter)] focus:bg-white/[0.07] focus:ring-1 focus:ring-white/30 focus:outline-none transition-colors"
+                    className="w-full pl-10 pr-4 py-2.5 bg-white/[0.05] border-none rounded-sm text-sm text-white font-ui focus:bg-white/[0.07] focus:ring-1 focus:ring-white/30 focus:outline-none transition-colors"
                   />
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <label className="block font-[family-name:var(--font-inter)] text-xs uppercase tracking-wider text-white/60">
+                <label className="block font-ui text-xs uppercase tracking-wider text-white/60">
                   Ville
                 </label>
                 <div className="relative">
@@ -141,7 +141,7 @@ export default function ConciergeSettingsPage() {
                     type="text"
                     value={form.city}
                     onChange={(e) => updateForm("city", e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-white/[0.05] border-none rounded-sm text-sm text-white font-[family-name:var(--font-inter)] focus:bg-white/[0.07] focus:ring-1 focus:ring-white/30 focus:outline-none transition-colors"
+                    className="w-full pl-10 pr-4 py-2.5 bg-white/[0.05] border-none rounded-sm text-sm text-white font-ui focus:bg-white/[0.07] focus:ring-1 focus:ring-white/30 focus:outline-none transition-colors"
                   />
                 </div>
               </div>

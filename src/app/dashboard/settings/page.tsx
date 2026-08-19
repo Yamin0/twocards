@@ -453,7 +453,7 @@ export default function SettingsPage() {
     <div className="space-y-6">
       {/* Password */}
       <div className={`${glassCard} p-6 space-y-5`}>
-        <h3 className="text-sm font-semibold text-white font-[family-name:var(--font-manrope)]">
+        <h3 className="text-sm font-semibold text-white font-ui">
           Changer le mot de passe
         </h3>
         <div>
@@ -532,7 +532,7 @@ export default function SettingsPage() {
 
       {/* Sessions */}
       <div className={`${glassCard} p-6 space-y-4`}>
-        <h3 className="text-sm font-semibold text-white font-[family-name:var(--font-manrope)]">
+        <h3 className="text-sm font-semibold text-white font-ui">
           Sessions actives
         </h3>
         {sessions.map((s, i) => {
@@ -604,7 +604,7 @@ export default function SettingsPage() {
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
-                  className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-[family-name:var(--font-manrope)] transition-all whitespace-nowrap ${
+                  className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-ui transition-all whitespace-nowrap ${
                     isActive
                       ? "bg-white/[0.1] text-blue-400 font-bold"
                       : "text-white/40 hover:text-white hover:bg-white/[0.05]"
@@ -622,7 +622,7 @@ export default function SettingsPage() {
         <div className="flex-1 space-y-6">
           {/* Header */}
           <div>
-            <h1 className="text-2xl font-extrabold font-[family-name:var(--font-manrope)] text-white">
+            <h1 className="text-2xl font-extrabold font-ui text-white">
               {header.title}
             </h1>
             <p className="text-sm text-white/40 mt-1">{header.subtitle}</p>
@@ -648,7 +648,7 @@ export default function SettingsPage() {
             <div className="w-12 h-12 rounded-full bg-red-500/10 border border-red-400/20 flex items-center justify-center mx-auto mb-4">
               <Shield size={20} className="text-red-400" />
             </div>
-            <h2 className="text-lg font-bold text-white font-[family-name:var(--font-manrope)] mb-2">
+            <h2 className="text-lg font-bold text-white font-ui mb-2">
               Supprimer le compte ?
             </h2>
             <p className="text-sm text-white/40 mb-6">

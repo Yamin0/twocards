@@ -25,7 +25,7 @@ export default function ConciergeVenuesPage() {
   return (
     <div className="bg-transparent min-h-screen">
       <div className="px-8 pt-8 pb-6">
-        <h1 className="text-white font-[family-name:var(--font-manrope)] text-2xl font-extrabold">
+        <h1 className="text-white font-ui text-2xl font-extrabold">
           Mes établissements
         </h1>
         <p className="text-white/60 mt-1 text-sm">
@@ -40,7 +40,7 @@ export default function ConciergeVenuesPage() {
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-[family-name:var(--font-manrope)] font-bold text-lg text-white">
+                    <h3 className="font-ui font-bold text-lg text-white">
                       {venue.name}
                     </h3>
                     {!venue.active && (
@@ -66,11 +66,11 @@ export default function ConciergeVenuesPage() {
               <div className="grid grid-cols-3 gap-4">
                 <div>
                   <p className="text-[0.625rem] uppercase tracking-wider text-white/60 font-semibold">Commission</p>
-                  <p className="text-white font-bold text-lg font-[family-name:var(--font-manrope)]">{venue.commission}</p>
+                  <p className="text-white font-bold text-lg font-ui">{venue.commission}</p>
                 </div>
                 <div>
                   <p className="text-[0.625rem] uppercase tracking-wider text-white/60 font-semibold">Couverts ce mois</p>
-                  <p className="text-white font-bold text-lg font-[family-name:var(--font-manrope)]">{venue.covers}</p>
+                  <p className="text-white font-bold text-lg font-ui">{venue.covers}</p>
                 </div>
                 <div className="flex items-end justify-end">
                   <button

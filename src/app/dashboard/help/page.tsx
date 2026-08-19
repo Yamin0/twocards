@@ -106,11 +106,11 @@ export default function HelpPage() {
       <div>
         <div className="flex items-center gap-3 mb-1">
           <HelpCircle size={28} strokeWidth={1.5} className="text-blue-400" />
-          <h1 className="text-2xl font-extrabold font-[family-name:var(--font-manrope)] text-white">
+          <h1 className="text-2xl font-extrabold font-ui text-white">
             Centre d&apos;aide
           </h1>
         </div>
-        <p className="text-sm text-white/40 font-[family-name:var(--font-inter)]">
+        <p className="text-sm text-white/40 font-ui">
           Trouvez des reponses a vos questions et contactez notre equipe de
           support.
         </p>
@@ -118,7 +118,7 @@ export default function HelpPage() {
 
       {/* FAQ */}
       <section className="space-y-3">
-        <h2 className="text-lg font-bold font-[family-name:var(--font-manrope)] text-white">
+        <h2 className="text-lg font-bold font-ui text-white">
           Questions frequentes
         </h2>
         <div className={`${glassCard} divide-y divide-white/[0.06]`}>
@@ -128,7 +128,7 @@ export default function HelpPage() {
                 onClick={() => toggle(i)}
                 className="w-full flex items-center justify-between px-6 py-4 text-left group"
               >
-                <span className="text-sm font-medium text-white group-hover:text-blue-400 transition-colors font-[family-name:var(--font-inter)]">
+                <span className="text-sm font-medium text-white group-hover:text-blue-400 transition-colors font-ui">
                   {item.question}
                 </span>
                 <ChevronDown
@@ -140,7 +140,7 @@ export default function HelpPage() {
               </button>
               {openIndex === i && (
                 <div className="px-6 pb-4">
-                  <p className="text-sm text-white/50 leading-relaxed font-[family-name:var(--font-inter)]">
+                  <p className="text-sm text-white/50 leading-relaxed font-ui">
                     {item.answer}
                   </p>
                 </div>
@@ -152,7 +152,7 @@ export default function HelpPage() {
 
       {/* Contact support */}
       <section className="space-y-3">
-        <h2 className="text-lg font-bold font-[family-name:var(--font-manrope)] text-white">
+        <h2 className="text-lg font-bold font-ui text-white">
           Contacter le support
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -162,7 +162,7 @@ export default function HelpPage() {
                 <Mail size={18} className="text-blue-400" />
               </div>
               <div>
-                <p className="text-sm font-medium text-white font-[family-name:var(--font-manrope)]">
+                <p className="text-sm font-medium text-white font-ui">
                   E-mail
                 </p>
                 <p className="text-xs text-white/30">Reponse sous 24h</p>
@@ -170,7 +170,7 @@ export default function HelpPage() {
             </div>
             <a
               href="mailto:support@twocards.io"
-              className="text-sm text-blue-400 hover:underline font-[family-name:var(--font-inter)]"
+              className="text-sm text-blue-400 hover:underline font-ui"
             >
               support@twocards.io
             </a>
@@ -182,7 +182,7 @@ export default function HelpPage() {
                 <MessageCircle size={18} className="text-white/30" />
               </div>
               <div>
-                <p className="text-sm font-medium text-white font-[family-name:var(--font-manrope)]">
+                <p className="text-sm font-medium text-white font-ui">
                   Chat en direct
                 </p>
                 <p className="text-xs text-white/30">
@@ -190,7 +190,7 @@ export default function HelpPage() {
                 </p>
               </div>
             </div>
-            <span className="inline-block text-xs text-white/20 bg-white/[0.05] border border-white/[0.08] px-3 py-1 rounded-full font-[family-name:var(--font-inter)]">
+            <span className="inline-block text-xs text-white/20 bg-white/[0.05] border border-white/[0.08] px-3 py-1 rounded-full font-ui">
               Bientot disponible
             </span>
           </div>
@@ -199,7 +199,7 @@ export default function HelpPage() {
 
       {/* Quick links */}
       <section className="space-y-3">
-        <h2 className="text-lg font-bold font-[family-name:var(--font-manrope)] text-white">
+        <h2 className="text-lg font-bold font-ui text-white">
           Acces rapide
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -216,10 +216,10 @@ export default function HelpPage() {
                   strokeWidth={1.5}
                   className="text-blue-400 mb-2"
                 />
-                <p className="text-sm font-medium text-white group-hover:text-blue-400 transition-colors font-[family-name:var(--font-manrope)]">
+                <p className="text-sm font-medium text-white group-hover:text-blue-400 transition-colors font-ui">
                   {link.label}
                 </p>
-                <p className="text-xs text-white/30 mt-0.5 font-[family-name:var(--font-inter)]">
+                <p className="text-xs text-white/30 mt-0.5 font-ui">
                   {link.desc}
                 </p>
               </Link>

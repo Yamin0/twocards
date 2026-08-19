@@ -90,15 +90,15 @@ export default function HotelSettingsPage() {
   if (isLoading) return <DashboardSkeleton />;
 
   const inputClass =
-    "w-full pl-10 pr-4 py-2.5 bg-white/[0.05] border-none rounded-sm text-sm text-white font-[family-name:var(--font-inter)] focus:bg-white/[0.07] focus:ring-1 focus:ring-white/30 focus:outline-none transition-colors";
+    "w-full pl-10 pr-4 py-2.5 bg-white/[0.05] border-none rounded-sm text-sm text-white font-ui focus:bg-white/[0.07] focus:ring-1 focus:ring-white/30 focus:outline-none transition-colors";
   const fieldLabelClass =
-    "block font-[family-name:var(--font-inter)] text-xs uppercase tracking-wider text-white/60";
+    "block font-ui text-xs uppercase tracking-wider text-white/60";
   const iconClass = "absolute left-3 top-1/2 -translate-y-1/2 text-white/40";
 
   return (
     <div className="bg-transparent min-h-screen">
       <div className="px-8 pt-8 pb-6">
-        <h1 className="text-white font-[family-name:var(--font-manrope)] text-2xl font-extrabold">
+        <h1 className="text-white font-ui text-2xl font-extrabold">
           Paramètres
         </h1>
         <p className="text-white/60 mt-1 text-sm">
@@ -124,7 +124,7 @@ export default function HotelSettingsPage() {
         </div>
 
         <div className="bg-white/[0.07] rounded-md editorial-shadow p-8">
-          <h2 className="text-sm font-semibold text-white font-[family-name:var(--font-manrope)] mb-6">
+          <h2 className="text-sm font-semibold text-white font-ui mb-6">
             Profil de l&apos;hôtel
           </h2>
 
@@ -155,7 +155,7 @@ export default function HotelSettingsPage() {
                     className={inputClass}
                   />
                 </div>
-                <p className="text-[11px] text-white/40 font-[family-name:var(--font-inter)]">
+                <p className="text-[11px] text-white/40 font-ui">
                   Détermine le catalogue de sorties proposé à vos clients.
                 </p>
               </div>
@@ -198,7 +198,7 @@ export default function HotelSettingsPage() {
                     className={`${inputClass} opacity-50 cursor-not-allowed`}
                   />
                 </div>
-                <p className="text-[11px] text-white/40 font-[family-name:var(--font-inter)]">
+                <p className="text-[11px] text-white/40 font-ui">
                   L&apos;email de connexion ne se change pas ici.
                 </p>
               </div>
