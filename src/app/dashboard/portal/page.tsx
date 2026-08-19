@@ -13,6 +13,7 @@ import {
   Download,
   ExternalLink,
   Globe,
+  ImagePlus,
   Loader2,
   Save,
 } from "lucide-react";
@@ -28,6 +29,8 @@ type Portal = {
   display_name: string;
   tagline: string;
   accent_color: string;
+  background_color: string;
+  cover_url: string | null;
   party_max: number;
   start_time: string;
   end_time: string;
@@ -36,6 +39,7 @@ type Portal = {
 };
 
 const ACCENTS = ["#13305c", "#0d0d0d", "#7c2d3a", "#1f6a4f", "#8a6d1d", "#4c3a8f"];
+const BACKGROUNDS = ["#f5f5f4", "#ffffff", "#ece4d8", "#101726", "#0d0d0d", "#0e2a22"];
 const HOURS = Array.from({ length: 48 }, (_, i) => {
   const h = String(Math.floor(i / 2)).padStart(2, "0");
   return `${h}:${i % 2 ? "30" : "00"}`;
@@ -51,17 +55,20 @@ const slugify = (s: string) =>
     .slice(0, 40);
 
 export default function PortalAdminPage() {
-  const { isLoading, venueName } = useAuthUser();
+  const { isLoading, venueName, userId } = useAuthUser();
   const { toast, showToast } = useToast();
   const [loaded, setLoaded] = useState(false);
   const [exists, setExists] = useState(false);
   const [saving, setSaving] = useState(false);
   const [copied, setCopied] = useState<"url" | "embed" | null>(null);
+  const [uploading, setUploading] = useState(false);
   const [form, setForm] = useState<Portal>({
     slug: "",
     display_name: "",
     tagline: "",
     accent_color: "#13305c",
+    background_color: "#f5f5f4",
+    cover_url: null,
     party_max: 8,
     start_time: "19:00",
     end_time: "01:00",
@@ -74,7 +81,7 @@ export default function PortalAdminPage() {
     createClient()
       .from("venue_portals")
       .select(
-        "slug, display_name, tagline, accent_color, party_max, start_time, end_time, interval_minutes, active"
+        "slug, display_name, tagline, accent_color, background_color, cover_url, party_max, start_time, end_time, interval_minutes, active"
       )
       .maybeSingle()
       .then(({ data }) => {
@@ -126,6 +133,43 @@ export default function PortalAdminPage() {
     } catch {
       showToast("Impossible de copier");
     }
+  };
+
+  /* Couverture : image redimensionnée en webp côté navigateur, envoyée dans
+     le bucket avatars sous le dossier de l'utilisateur (mêmes règles que la
+     photo de profil). */
+  const uploadCover = async (file: File) => {
+    if (!userId) return;
+    if (!file.type.startsWith("image/")) {
+      showToast("Choisissez une image");
+      return;
+    }
+    setUploading(true);
+    try {
+      const bitmap = await createImageBitmap(file);
+      const scale = Math.min(1, 1600 / bitmap.width);
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(bitmap.width * scale);
+      canvas.height = Math.round(bitmap.height * scale);
+      canvas.getContext("2d")!.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+      const blob: Blob = await new Promise((res, rej) =>
+        canvas.toBlob((b) => (b ? res(b) : rej(new Error("encode"))), "image/webp", 0.85)
+      );
+      const supabase = createClient();
+      const path = `${userId}/portal-cover-${crypto.randomUUID()}.webp`;
+      const { error: upErr } = await supabase.storage
+        .from("avatars")
+        .upload(path, blob, { contentType: "image/webp" });
+      if (upErr) throw upErr;
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("avatars").getPublicUrl(path);
+      set("cover_url", publicUrl);
+      showToast("Couverture importée — pensez à enregistrer");
+    } catch {
+      showToast("L'envoi de l'image a échoué");
+    }
+    setUploading(false);
   };
 
   const save = async () => {
@@ -240,6 +284,87 @@ export default function PortalAdminPage() {
                 className="h-8 w-8 cursor-pointer rounded-full border border-white/20 bg-transparent"
               />
             </div>
+          </div>
+
+          <div>
+            <label className={label}>Fond de la page</label>
+            <div className="flex items-center gap-2">
+              {BACKGROUNDS.map((c) => (
+                <button
+                  key={c}
+                  onClick={() => set("background_color", c)}
+                  aria-label={`Fond ${c}`}
+                  className={`h-8 w-8 rounded-full border-2 transition-transform hover:scale-110 ${
+                    form.background_color === c ? "border-white" : "border-white/20"
+                  }`}
+                  style={{ background: c }}
+                />
+              ))}
+              <input
+                type="color"
+                value={form.background_color}
+                onChange={(e) => set("background_color", e.target.value)}
+                aria-label="Fond personnalisé"
+                className="h-8 w-8 cursor-pointer rounded-full border border-white/20 bg-transparent"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className={label}>Photo de couverture (facultatif)</label>
+            {form.cover_url ? (
+              <div className="flex items-center gap-3">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={form.cover_url}
+                  alt="Couverture du portail"
+                  className="h-16 w-28 rounded-lg object-cover border border-white/15"
+                />
+                <div className="flex flex-col gap-1.5">
+                  <label className="font-ui cursor-pointer text-xs font-medium text-blue-400 hover:text-blue-300">
+                    Remplacer
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        if (f) uploadCover(f);
+                        e.target.value = "";
+                      }}
+                    />
+                  </label>
+                  <button
+                    onClick={() => set("cover_url", null)}
+                    className="font-ui text-left text-xs text-white/40 hover:text-red-400"
+                  >
+                    Retirer
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <label className="font-ui flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-white/20 bg-white/[0.03] px-4 py-4 text-xs text-white/50 transition-colors hover:border-white/40 hover:text-white">
+                {uploading ? (
+                  <Loader2 size={14} strokeWidth={2} className="animate-spin" />
+                ) : (
+                  <ImagePlus size={14} strokeWidth={1.5} />
+                )}
+                {uploading
+                  ? "Envoi en cours…"
+                  : "Importer une image (bandeau en haut de la page)"}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  disabled={uploading}
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) uploadCover(f);
+                    e.target.value = "";
+                  }}
+                />
+              </label>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-3">

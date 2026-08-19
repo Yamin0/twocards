@@ -25,6 +25,7 @@ import {
   Info,
   Link2,
   X,
+  Globe,
 } from "lucide-react";
 
 export default function VenueQrReservationsPage() {
@@ -257,9 +258,22 @@ export default function VenueQrReservationsPage() {
                       <td className="px-4 py-3">
                         <p className="text-sm text-white font-ui">
                           {r.guest_name}
-                          {r.source === "portal" && (
-                            <span className="font-ui ml-2 rounded-md bg-purple-500/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-purple-300 align-middle">
+                          {/* Origine de la réservation : chaque ligne porte son badge */}
+                          {r.source === "portal" ? (
+                            <span
+                              className="font-ui ml-2 inline-flex items-center gap-1 rounded-md bg-purple-500/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-purple-300 align-middle"
+                              title="Réservation directe via le portail de l'établissement"
+                            >
+                              <Globe size={9} strokeWidth={2} />
                               direct
+                            </span>
+                          ) : (
+                            <span
+                              className="font-ui ml-2 inline-flex items-center gap-1 rounded-md bg-blue-500/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-blue-300 align-middle"
+                              title="Client envoyé par un hôtel partenaire via QR code"
+                            >
+                              <QrCode size={9} strokeWidth={2} />
+                              QR hôtel
                             </span>
                           )}
                         </p>

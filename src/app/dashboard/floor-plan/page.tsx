@@ -16,6 +16,11 @@ import {
   Pencil,
   Trash2,
   Lock,
+  ChevronLeft,
+  ChevronRight,
+  CalendarDays,
+  QrCode,
+  Globe,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useAuthUser } from "@/hooks/use-auth-user";
@@ -32,18 +37,23 @@ interface TableData {
   vip: boolean;
   label: string;
   capacity: number;
-  reservation?: {
-    /* id de la réservation QR rattachée — absent pour les données de démo */
-    resId?: string;
-    client: string;
-    initials: string;
-    rp?: string;
-    conciergerie?: string;
-    partySize: number;
-    arrival: string;
-    minSpend?: string;
-    notes: string;
-  };
+  reservation?: TableReservation;
+}
+
+/* Une réservation assignée à une table, pour la date sélectionnée. */
+interface TableReservation {
+  /* id de la réservation QR rattachée — absent pour les données de démo */
+  resId?: string;
+  client: string;
+  initials: string;
+  rp?: string;
+  conciergerie?: string;
+  partySize: number;
+  arrival: string;
+  time: string | null;
+  source: "qr" | "portal";
+  minSpend?: string;
+  notes: string;
 }
 
 interface ContextMenu {
@@ -76,7 +86,21 @@ type AssignedRow = {
   reservation_date: string;
   reservation_time: string | null;
   notes: string | null;
+  source: "qr" | "portal";
   table_id: number;
+};
+
+/* Date locale AAAA-MM-JJ — pas d'UTC, sinon le plan bascule au mauvais
+   jour après minuit heure locale. */
+const localISODate = (d = new Date()) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
+    d.getDate()
+  ).padStart(2, "0")}`;
+
+const shiftISODate = (iso: string, days: number) => {
+  const d = new Date(iso + "T00:00:00");
+  d.setDate(d.getDate() + days);
+  return localISODate(d);
 };
 
 const initialsOf = (name: string) =>
@@ -147,30 +171,33 @@ export default function FloorPlanPage() {
     };
   }, []);
 
-  /* Occupations réelles : la première réservation à venir assignée à
-     chaque table. Le plan cesse d'être une maquette. */
+  /* Date affichée sur le plan — le plan montre l'occupation de CE jour-là,
+     pas un état figé « aujourd'hui ». */
+  const [selectedDate, setSelectedDate] = useState(() => localISODate());
+  const today = localISODate();
+
+  /* Occupations réelles : toutes les réservations assignées aux tables pour
+     la date sélectionnée, triées par heure. Le plan cesse d'être une maquette. */
   const [resByTable, setResByTable] = useState<
-    Record<number, TableData["reservation"]>
+    Record<number, TableReservation[]>
   >({});
 
   useEffect(() => {
     let cancelled = false;
-    const today = new Date().toISOString().slice(0, 10);
     createClient()
       .from("qr_reservations")
       .select(
-        "id, guest_name, party_size, reservation_date, reservation_time, notes, table_id"
+        "id, guest_name, party_size, reservation_date, reservation_time, notes, source, table_id"
       )
       .not("table_id", "is", null)
       .neq("status", "annulée")
-      .gte("reservation_date", today)
-      .order("reservation_date", { ascending: true })
+      .eq("reservation_date", selectedDate)
+      .order("reservation_time", { ascending: true, nullsFirst: false })
       .then(({ data }) => {
         if (cancelled) return;
-        const map: Record<number, TableData["reservation"]> = {};
+        const map: Record<number, TableReservation[]> = {};
         for (const r of (data as AssignedRow[] | null) ?? []) {
-          if (map[r.table_id]) continue;
-          map[r.table_id] = {
+          (map[r.table_id] ??= []).push({
             resId: r.id,
             client: r.guest_name,
             initials: initialsOf(r.guest_name),
@@ -179,29 +206,32 @@ export default function FloorPlanPage() {
               new Date(r.reservation_date + "T00:00:00").toLocaleDateString(
                 "fr-FR"
               ) + (r.reservation_time ? ` · ${r.reservation_time}` : ""),
+            time: r.reservation_time,
+            source: r.source,
             notes: r.notes ?? "",
-          };
+          });
         }
         setResByTable(map);
       });
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [selectedDate]);
 
   if (isLoading || tablesList === null) return <DashboardSkeleton />;
 
   const currentTables = tablesList.map((t) => {
-    const reservation = resByTable[t.id];
-    return reservation
+    const dayReservations = resByTable[t.id];
+    return dayReservations?.length
       ? {
           ...t,
           status: (t.status === "blocked" ? "blocked" : "occupied") as TableData["status"],
-          reservation,
+          reservation: dayReservations[0],
         }
       : t;
   });
   const selected = currentTables.find((t) => t.id === selectedTable);
+  const selectedReservations = selected ? resByTable[selected.id] ?? [] : [];
 
   /* Écriture partielle d'une table : optimiste en local, persistée en base.
      En cas d'échec, on recharge l'état réel plutôt que de mentir. */
@@ -228,7 +258,13 @@ export default function FloorPlanPage() {
   const totalCapacity = currentTables.reduce((sum, t) => sum + t.capacity, 0);
   const occupiedCapacity = currentTables
     .filter((t) => t.status === "occupied")
-    .reduce((sum, t) => sum + (t.reservation?.partySize ?? t.capacity), 0);
+    .reduce((sum, t) => {
+      const list = resByTable[t.id];
+      return (
+        sum +
+        (list?.length ? list.reduce((s, r) => s + r.partySize, 0) : t.capacity)
+      );
+    }, 0);
 
   /* ── add table (persistée, l'id vient de la base) ── */
   const addTable = async (x: number, y: number) => {
@@ -349,11 +385,55 @@ export default function FloorPlanPage() {
               Plan de salle
             </h1>
             <p className="font-ui text-white/50 text-sm mt-1">
-              Votre salle, enregistrée automatiquement — chaque table, sa
-              position et ses propriétés
+              {selectedDate === today
+                ? "Occupation d'aujourd'hui — choisissez une date pour voir un autre service"
+                : `Occupation du ${new Date(
+                    selectedDate + "T00:00:00"
+                  ).toLocaleDateString("fr-FR", {
+                    weekday: "long",
+                    day: "numeric",
+                    month: "long",
+                  })}`}
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
+            {/* Sélecteur de date : le plan reflète les réservations du jour choisi */}
+            <div className="flex items-center gap-1 backdrop-blur-2xl bg-black/45 border border-white/[0.15] rounded-xl px-1.5 py-1">
+              <button
+                onClick={() => setSelectedDate((d) => shiftISODate(d, -1))}
+                aria-label="Jour précédent"
+                className="h-8 w-8 rounded-lg flex items-center justify-center text-white/50 hover:text-white hover:bg-white/[0.1] transition-all"
+              >
+                <ChevronLeft size={16} strokeWidth={1.5} />
+              </button>
+              <div className="flex items-center gap-2 px-1">
+                <CalendarDays size={14} strokeWidth={1.5} className="text-white/40" />
+                <input
+                  type="date"
+                  value={selectedDate}
+                  onChange={(e) => {
+                    if (e.target.value) setSelectedDate(e.target.value);
+                  }}
+                  aria-label="Date du plan de salle"
+                  className="bg-transparent text-sm text-white font-ui [color-scheme:dark] focus:outline-none"
+                />
+              </div>
+              <button
+                onClick={() => setSelectedDate((d) => shiftISODate(d, 1))}
+                aria-label="Jour suivant"
+                className="h-8 w-8 rounded-lg flex items-center justify-center text-white/50 hover:text-white hover:bg-white/[0.1] transition-all"
+              >
+                <ChevronRight size={16} strokeWidth={1.5} />
+              </button>
+            </div>
+            {selectedDate !== today && (
+              <button
+                onClick={() => setSelectedDate(today)}
+                className="px-3 py-2.5 rounded-xl text-sm font-medium backdrop-blur-2xl bg-black/45 border border-white/[0.15] text-white/60 hover:bg-white/[0.1] hover:text-white transition-all"
+              >
+                Aujourd&apos;hui
+              </button>
+            )}
             {/* Edit mode toggle */}
             <button
               onClick={() => {
@@ -552,7 +632,11 @@ export default function FloorPlanPage() {
                     <span className="text-xs font-semibold leading-none">
                       {table.label}
                     </span>
-                    <span className="text-[0.5rem] opacity-60">{table.capacity}p</span>
+                    <span className="text-[0.5rem] opacity-60">
+                      {table.reservation?.time
+                        ? table.reservation.time.slice(0, 5)
+                        : `${table.capacity}p`}
+                    </span>
                     {table.vip && (
                       <Crown size={8} strokeWidth={2} className="absolute -top-1 -right-1 text-amber-400" />
                     )}
@@ -644,55 +728,73 @@ export default function FloorPlanPage() {
                 </div>
               </div>
 
-              {/* Reservation details */}
-              {selected.reservation ? (
-                <div className="bg-white/[0.04] border border-white/[0.08] rounded-2xl p-4 space-y-3">
+              {/* Reservation details — toutes les réservations du jour sélectionné */}
+              {selectedReservations.length > 0 ? (
+                <div className="space-y-3">
                   <p className="text-[0.625rem] text-white/30 uppercase tracking-wider font-semibold">
-                    Réservation
+                    {selectedReservations.length > 1
+                      ? `${selectedReservations.length} réservations ce jour`
+                      : "Réservation"}
                   </p>
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-blue-400/15 flex items-center justify-center">
-                      <span className="text-sm font-semibold text-blue-400">
-                        {selected.reservation.initials}
-                      </span>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-white">{selected.reservation.client}</p>
-                      <p className="text-[0.6875rem] text-white/40">
-                        {selected.reservation.rp
-                          ? `${selected.reservation.rp} · ${selected.reservation.conciergerie}`
-                          : "Réservation twocards"}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-white/50 text-sm">
-                      <Users size={14} strokeWidth={1.5} />
-                      <span>{selected.reservation.partySize} personnes</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-white/50 text-sm">
-                      <Clock size={14} strokeWidth={1.5} />
-                      <span>Arrivée : {selected.reservation.arrival}</span>
-                    </div>
-                    {selected.reservation.minSpend && (
-                      <div className="flex items-center gap-2 text-white/50 text-sm">
-                        <span className="text-[0.6875rem] text-white/30">Min. spend:</span>
-                        <span className="text-white/70 font-medium">{selected.reservation.minSpend}</span>
+                  {selectedReservations.map((res) => (
+                    <div
+                      key={res.resId ?? res.client}
+                      className="bg-white/[0.04] border border-white/[0.08] rounded-2xl p-4 space-y-3"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-full bg-blue-400/15 flex items-center justify-center shrink-0">
+                          <span className="text-sm font-semibold text-blue-400">
+                            {res.initials}
+                          </span>
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-white truncate">
+                            {res.client}
+                          </p>
+                          {res.source === "portal" ? (
+                            <span className="inline-flex items-center gap-1 mt-0.5 rounded-md bg-purple-500/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-purple-300">
+                              <Globe size={9} strokeWidth={2} />
+                              Direct
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 mt-0.5 rounded-md bg-blue-500/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-blue-300">
+                              <QrCode size={9} strokeWidth={2} />
+                              QR hôtel
+                            </span>
+                          )}
+                        </div>
                       </div>
-                    )}
-                  </div>
 
-                  {selected.reservation.notes && (
-                    <div className="pt-2 border-t border-white/[0.06]">
-                      <p className="text-[0.625rem] text-white/30 uppercase tracking-wider mb-1">Notes</p>
-                      <p className="text-xs text-white/50 leading-relaxed">{selected.reservation.notes}</p>
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-white/50 text-sm">
+                          <Users size={14} strokeWidth={1.5} />
+                          <span>{res.partySize} personnes</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-white/50 text-sm">
+                          <Clock size={14} strokeWidth={1.5} />
+                          <span>
+                            {res.time
+                              ? `Arrivée : ${res.time.slice(0, 5)}`
+                              : "Heure non précisée"}
+                          </span>
+                        </div>
+                      </div>
+
+                      {res.notes && (
+                        <div className="pt-2 border-t border-white/[0.06]">
+                          <p className="text-[0.625rem] text-white/30 uppercase tracking-wider mb-1">Notes</p>
+                          <p className="text-xs text-white/50 leading-relaxed">{res.notes}</p>
+                        </div>
+                      )}
                     </div>
-                  )}
+                  ))}
                 </div>
               ) : (
                 <div className="bg-white/[0.04] border border-white/[0.08] rounded-2xl p-6 text-center">
-                  <p className="text-xs text-white/30">Aucune réservation sur cette table</p>
+                  <p className="text-xs text-white/30">
+                    Aucune réservation sur cette table le{" "}
+                    {new Date(selectedDate + "T00:00:00").toLocaleDateString("fr-FR")}
+                  </p>
                 </div>
               )}
 
@@ -718,12 +820,14 @@ export default function FloorPlanPage() {
                   </button>
                   <button
                     onClick={async () => {
-                      const resId = selected.reservation?.resId;
-                      if (resId) {
+                      const ids = selectedReservations
+                        .map((r) => r.resId)
+                        .filter((id): id is string => Boolean(id));
+                      if (ids.length > 0) {
                         const { error } = await createClient()
                           .from("qr_reservations")
                           .update({ table_id: null })
-                          .eq("id", resId);
+                          .in("id", ids);
                         if (error) {
                           showToast("Impossible de libérer la table");
                           return;
