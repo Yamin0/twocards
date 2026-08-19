@@ -124,8 +124,8 @@ export default function RestaurantsPage() {
                 "CA apporté par twocards, sorties par semaine, commissions reversées, satisfaction moyenne : votre dashboard agrège tout ce que le réseau vous rapporte. C'est vous qui saisissez le montant de chaque addition — la commission est calculée automatiquement, au taux convenu.",
               bullets: [
                 {
-                  title: "Saisie du montant en fin de sortie",
-                  text: "Deux chiffres et une validation : la sortie est confirmée, la commission de l'apporteur est calculée, tout le monde est aligné.",
+                  title: "Montant saisi — ou envoyé par votre caisse",
+                  text: "Deux chiffres et une validation, ou zéro geste : connectez votre POS (Lightspeed, Square, Tiller, L'Addition…) et chaque ticket fermé remplit le montant tout seul.",
                 },
                 {
                   title: "Des courbes, pas des impressions",

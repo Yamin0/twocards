@@ -349,6 +349,11 @@ export default function VenueQrReservationsPage() {
                             <span className="text-sm text-white font-ui">
                               {(r.amount_spent ?? 0).toLocaleString()} MAD
                             </span>
+                            {r.amount_source === "pos" && (
+                              <span className="font-ui rounded-md bg-blue-500/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-blue-300">
+                                caisse
+                              </span>
+                            )}
                             <button
                               onClick={() =>
                                 setEditing((prev) => ({

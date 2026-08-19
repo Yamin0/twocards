@@ -16,6 +16,7 @@ export type VenueQrReservation = {
   commission: number;
   commission_rate: number;
   amount_spent: number | null;
+  amount_source: "manuel" | "pos";
   table_id: number | null;
   rating: number | null;
   rating_comment: string | null;
@@ -27,7 +28,7 @@ export type VenueQrReservation = {
 const SELECT =
   "id, category, guest_name, guest_phone, reservation_date, " +
   "reservation_time, party_size, notes, status, commission, " +
-  "commission_rate, amount_spent, table_id, rating, rating_comment, created_at";
+  "commission_rate, amount_spent, amount_source, table_id, rating, rating_comment, created_at";
 
 /* Réservations adressées à l'établissement connecté — la RLS ne laisse
    passer que celles dont venue_slug pointe vers sa fiche venues. Tenues à

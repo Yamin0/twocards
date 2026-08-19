@@ -10,6 +10,7 @@ import {
   Ticket,
   Users,
   Grid3X3,
+  Plug,
   Network,
   CreditCard,
   MessageSquare,
@@ -32,6 +33,7 @@ const mainNav = [
   { icon: CalendarDays, label: "Réservations", href: "/dashboard/reservations" },
   { icon: Ticket, label: "Événements", href: "/dashboard/events" },
   { icon: Grid3X3, label: "Plan de salle", href: "/dashboard/floor-plan" },
+  { icon: Plug, label: "Caisse (POS)", href: "/dashboard/integrations" },
   { icon: Users, label: "Clients", href: "/dashboard/guests" },
 ];
 
