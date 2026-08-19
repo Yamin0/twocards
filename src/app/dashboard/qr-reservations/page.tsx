@@ -24,6 +24,7 @@ import {
   Loader2,
   Info,
   Link2,
+  X,
 } from "lucide-react";
 
 export default function VenueQrReservationsPage() {
@@ -38,6 +39,8 @@ export default function VenueQrReservationsPage() {
   const [overrides, setOverrides] = useState<
     Record<string, Partial<VenueQrReservation>>
   >({});
+  /* Avis ouvert en modale au clic sur les étoiles. */
+  const [reviewOf, setReviewOf] = useState<VenueQrReservation | null>(null);
 
   if (isLoading || loadingData || reservations === null)
     return <TableSkeleton />;
@@ -310,9 +313,13 @@ export default function VenueQrReservationsPage() {
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
                         {r.rating !== null ? (
-                          <span title={r.rating_comment ?? undefined}>
+                          <button
+                            onClick={() => setReviewOf(r)}
+                            aria-label={`Lire l'avis de ${r.guest_name}`}
+                            className="rounded-lg p-1 -m-1 transition-colors hover:bg-white/10"
+                          >
                             <RatingStars value={r.rating} size={12} />
-                          </span>
+                          </button>
                         ) : r.status === "confirmée" ? (
                           <button
                             onClick={() => copyRatingLink(r.id)}
@@ -344,6 +351,59 @@ export default function VenueQrReservationsPage() {
           montant). Le montant reste modifiable en cas d&apos;erreur.
         </p>
       </div>
+
+      {/* Avis en modale */}
+      {reviewOf && reviewOf.rating !== null && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+          <div
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            onClick={() => setReviewOf(null)}
+          />
+          <div className="relative z-10 w-full max-w-md rounded-3xl border border-white/15 bg-[#10131f]/95 backdrop-blur-2xl p-7">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="font-ui text-[10px] font-bold uppercase tracking-[0.18em] text-white/45">
+                  Avis client
+                </p>
+                <h3 className="font-display mt-1 text-2xl font-light text-white">
+                  {reviewOf.guest_name}
+                </h3>
+                <p className="font-ui text-xs text-white/40 mt-0.5">
+                  Sortie du{" "}
+                  {new Date(
+                    reviewOf.reservation_date + "T00:00:00"
+                  ).toLocaleDateString("fr-FR")}
+                  {" · "}
+                  {reviewOf.party_size} pers.
+                </p>
+              </div>
+              <button
+                onClick={() => setReviewOf(null)}
+                aria-label="Fermer"
+                className="rounded-lg p-1 text-white/40 transition-colors hover:text-white"
+              >
+                <X size={20} strokeWidth={1.5} />
+              </button>
+            </div>
+            <div className="mt-5 flex items-center gap-3">
+              <p className="font-display text-4xl font-light text-white">
+                {reviewOf.rating}
+                <span className="text-lg text-white/40">/5</span>
+              </p>
+              <RatingStars value={reviewOf.rating} size={18} />
+            </div>
+            {reviewOf.rating_comment ? (
+              <p className="font-ui mt-5 border-l-2 border-amber-400/40 pl-4 text-sm italic leading-relaxed text-white/75">
+                « {reviewOf.rating_comment} »
+              </p>
+            ) : (
+              <p className="font-ui mt-5 text-xs text-white/40">
+                Le client n&apos;a pas laissé de commentaire.
+              </p>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Toast */}
       {toast && (

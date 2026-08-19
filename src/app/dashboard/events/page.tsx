@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
+import { createClient } from "@/lib/supabase/client";
 import { useAuthUser } from "@/hooks/use-auth-user";
 import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
 import Image from "next/image";
@@ -106,44 +107,84 @@ interface DemoEvent {
   description: string;
 }
 
-const INITIAL_EVENTS: DemoEvent[] = [
-  {
-    id: 1, title: "Gala de Minuit", venue: "Maison Dorée", date: "Sam 29 Oct", dateObj: { day: 29, month: 9, year: 2022 }, time: "22:00 - 05:00",
-    status: "Ouvert", genre: ["Electro", "House"], gradient: "from-purple-600 to-indigo-900", iconIdx: 0, coverImage: null,
-    spots: 113, totalSpots: 200, reservations: 87, revenue: "174 000 MAD", rpCount: 6, closed: false,
-    description: "Soirée exclusive avec DJ international et performance live.",
-  },
-  {
-    id: 2, title: "Nuit Blanche", venue: "Le Phantom Club", date: "Ven 28 Oct", dateObj: { day: 28, month: 9, year: 2022 }, time: "23:00 - 06:00",
-    status: "Bientôt complet", genre: ["Techno", "Minimal"], gradient: "from-blue-600 to-blue-900", iconIdx: 1, coverImage: null,
-    spots: 12, totalSpots: 150, reservations: 138, revenue: "276 000 MAD", rpCount: 8, closed: false,
-    description: "La nuit techno incontournable. Line-up surprise révélé 1h avant.",
-  },
-  {
-    id: 3, title: "Soirée Tropicale", venue: "Jardin Perché", date: "Jeu 3 Nov", dateObj: { day: 3, month: 10, year: 2022 }, time: "20:00 - 02:00",
-    status: "Ouvert", genre: ["Afro", "Dancehall"], gradient: "from-emerald-600 to-teal-900", iconIdx: 13, coverImage: null,
-    spots: 67, totalSpots: 120, reservations: 53, revenue: "106 000 MAD", rpCount: 4, closed: false,
-    description: "Ambiance tropicale en rooftop avec cocktails signature.",
-  },
-  {
-    id: 4, title: "After Dark Sessions", venue: "Le Phantom Club", date: "Ven 4 Nov", dateObj: { day: 4, month: 10, year: 2022 }, time: "00:00 - 07:00",
-    status: "Bientôt complet", genre: ["Deep House"], gradient: "from-slate-600 to-slate-900", iconIdx: 5, coverImage: null,
-    spots: 8, totalSpots: 100, reservations: 92, revenue: "184 000 MAD", rpCount: 5, closed: false,
-    description: "Sessions intimistes deep house jusqu'au lever du soleil.",
-  },
-  {
-    id: 5, title: "Classique en Noir", venue: "Opera Lounge", date: "Sam 5 Nov", dateObj: { day: 5, month: 10, year: 2022 }, time: "21:00 - 03:00",
-    status: "Brouillon", genre: ["Jazz", "Soul"], gradient: "from-amber-600 to-orange-900", iconIdx: 2, coverImage: null,
-    spots: 80, totalSpots: 80, reservations: 0, revenue: "0 MAD", rpCount: 0, closed: false,
-    description: "Soirée jazz et soul dans un cadre opulent.",
-  },
-  {
-    id: 6, title: "Dîner Spectacle", venue: "Maison Dorée", date: "Mer 26 Oct", dateObj: { day: 26, month: 9, year: 2022 }, time: "20:00 - 01:00",
-    status: "Fermé", genre: ["Cabaret", "Live"], gradient: "from-gray-600 to-gray-800", iconIdx: 4, coverImage: null,
-    spots: 0, totalSpots: 100, reservations: 100, revenue: "200 000 MAD", rpCount: 7, closed: true,
-    description: "Dîner gastronomique avec spectacle cabaret.",
-  },
-];
+/* Ligne venue_events ↔ DemoEvent. La forme client reste celle de l'UI
+   existante ; seule la couche de stockage change (base au lieu de démo). */
+type EventRow = {
+  id: number;
+  title: string;
+  venue: string;
+  event_day: number | null;
+  event_month: number | null;
+  event_year: number | null;
+  time_range: string;
+  status: EventStatus;
+  genres: string[];
+  gradient: string;
+  icon_idx: number;
+  cover_image: string | null;
+  total_spots: number;
+  spots: number;
+  reservations: number;
+  revenue: string;
+  rp_count: number;
+  closed: boolean;
+  description: string;
+};
+
+const EVENT_SELECT =
+  "id, title, venue, event_day, event_month, event_year, time_range, " +
+  "status, genres, gradient, icon_idx, cover_image, total_spots, spots, " +
+  "reservations, revenue, rp_count, closed, description";
+
+function rowToEvent(r: EventRow): DemoEvent {
+  const dateObj =
+    r.event_day != null && r.event_month != null && r.event_year != null
+      ? { day: r.event_day, month: r.event_month, year: r.event_year }
+      : undefined;
+  return {
+    id: r.id,
+    title: r.title,
+    venue: r.venue,
+    date: dateObj ? formatDateObj(dateObj) : "",
+    dateObj,
+    time: r.time_range,
+    status: r.status,
+    genre: r.genres,
+    gradient: r.gradient || GRADIENTS[0],
+    iconIdx: r.icon_idx,
+    coverImage: r.cover_image,
+    spots: r.spots,
+    totalSpots: r.total_spots,
+    reservations: r.reservations,
+    revenue: r.revenue,
+    rpCount: r.rp_count,
+    closed: r.closed,
+    description: r.description,
+  };
+}
+
+function eventToRow(e: Omit<DemoEvent, "id">): Omit<EventRow, "id"> {
+  return {
+    title: e.title,
+    venue: e.venue,
+    event_day: e.dateObj?.day ?? null,
+    event_month: e.dateObj?.month ?? null,
+    event_year: e.dateObj?.year ?? null,
+    time_range: e.time,
+    status: e.status,
+    genres: e.genre,
+    gradient: e.gradient,
+    icon_idx: e.iconIdx,
+    cover_image: e.coverImage,
+    total_spots: e.totalSpots,
+    spots: e.spots,
+    reservations: e.reservations,
+    revenue: e.revenue,
+    rp_count: e.rpCount,
+    closed: e.closed,
+    description: e.description,
+  };
+}
 
 function statusBadge(status: EventStatus) {
   switch (status) {
@@ -313,12 +354,13 @@ function MiniCalendar({ selected, onSelect }: {
 /* ── Component ── */
 
 export default function EventsPage() {
-  const { isDemoVenue, isLoading } = useAuthUser();
+  const { isLoading } = useAuthUser();
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [filterStatus, setFilterStatus] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [openMenu, setOpenMenu] = useState<number | null>(null);
-  const [events, setEvents] = useState<DemoEvent[]>(INITIAL_EVENTS);
+  const [events, setEvents] = useState<DemoEvent[]>([]);
+  const [eventsLoaded, setEventsLoaded] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [panel, setPanel] = useState<Panel>("none");
   const [panelEventId, setPanelEventId] = useState<number | null>(null);
@@ -336,7 +378,27 @@ export default function EventsPage() {
     setTimeout(() => setToast(null), 2500);
   }, []);
 
-  const displayEvents = isDemoVenue ? events : [];
+  /* Événements chargés depuis venue_events — la RLS les limite au compte.
+     Fini le décor : ce que vous créez est enregistré et réapparaît. */
+  useEffect(() => {
+    let cancelled = false;
+    createClient()
+      .from("venue_events")
+      .select(EVENT_SELECT)
+      .order("event_year", { ascending: true })
+      .order("event_month", { ascending: true })
+      .order("event_day", { ascending: true })
+      .then(({ data }) => {
+        if (cancelled) return;
+        setEvents(((data as unknown as EventRow[] | null) ?? []).map(rowToEvent));
+        setEventsLoaded(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const displayEvents = events;
 
   const filteredEvents = displayEvents.filter((e) => {
     if (filterStatus) {
@@ -368,21 +430,35 @@ export default function EventsPage() {
   const openCreate = () => { setForm(emptyForm()); setPanelEventId(null); setPanel("create"); };
   const closePanel = () => { setPanel("none"); setPanelEventId(null); setOpenDropdownOpen(false); setCloseDropdownOpen(false); setIconDropdownOpen(false); setGalleryOpen(false); };
 
-  const duplicateEvent = (id: number) => {
+  const duplicateEvent = async (id: number) => {
     const ev = events.find((e) => e.id === id);
     if (!ev) return;
-    const newId = Math.max(...events.map((e) => e.id)) + 1;
-    setEvents((prev) => [...prev, { ...ev, id: newId, title: `${ev.title} (copie)`, status: "Brouillon" as EventStatus, reservations: 0, spots: ev.totalSpots, revenue: "0 MAD", rpCount: 0, closed: false }]);
     setOpenMenu(null);
+    const copy = { ...ev, title: `${ev.title} (copie)`, status: "Brouillon" as EventStatus, reservations: 0, spots: ev.totalSpots, revenue: "0 MAD", rpCount: 0, closed: false };
+    const { data, error } = await createClient()
+      .from("venue_events")
+      .insert(eventToRow(copy))
+      .select(EVENT_SELECT)
+      .single();
+    if (error || !data) {
+      showToast("Impossible de dupliquer");
+      return;
+    }
+    setEvents((prev) => [...prev, rowToEvent(data as unknown as EventRow)]);
     showToast(`"${ev.title}" dupliqué`);
   };
 
-  const deleteEvent = (id: number) => {
+  const deleteEvent = async (id: number) => {
     const ev = events.find((e) => e.id === id);
     setEvents((prev) => prev.filter((e) => e.id !== id));
     if (panelEventId === id) closePanel();
     setOpenMenu(null);
-    showToast(`"${ev?.title}" supprimé`);
+    const { error } = await createClient()
+      .from("venue_events")
+      .delete()
+      .eq("id", id);
+    if (error) showToast("Échec de la suppression");
+    else showToast(`"${ev?.title}" supprimé`);
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -395,16 +471,15 @@ export default function EventsPage() {
     reader.readAsDataURL(file);
   };
 
-  const saveForm = () => {
+  const saveForm = async () => {
     if (!form.title.trim()) return;
     const genres = form.genre.split(",").map((g) => g.trim()).filter(Boolean);
     const dateStr = formatDateObj(form.dateObj);
     const timeStr = form.timeOpen && form.timeClose ? `${form.timeOpen} - ${form.timeClose}` : form.timeOpen || "";
 
     if (panel === "create") {
-      const newId = events.length > 0 ? Math.max(...events.map((e) => e.id)) + 1 : 1;
-      const newEvent: DemoEvent = {
-        id: newId, title: form.title, venue: form.venue,
+      const draft: Omit<DemoEvent, "id"> = {
+        title: form.title, venue: form.venue,
         date: dateStr, dateObj: form.dateObj ?? undefined,
         time: timeStr, status: form.status, genre: genres,
         gradient: form.gradient, iconIdx: form.iconIdx, coverImage: form.coverImage,
@@ -412,25 +487,39 @@ export default function EventsPage() {
         reservations: 0, revenue: "0 MAD", rpCount: 0, closed: false,
         description: form.description,
       };
-      setEvents((prev) => [...prev, newEvent]);
+      const { data, error } = await createClient()
+        .from("venue_events")
+        .insert(eventToRow(draft))
+        .select(EVENT_SELECT)
+        .single();
+      if (error || !data) {
+        showToast("Impossible de créer l'événement");
+        return;
+      }
+      setEvents((prev) => [...prev, rowToEvent(data as unknown as EventRow)]);
       showToast(`"${form.title}" créé`);
     } else if (panel === "edit" && panelEventId !== null) {
-      setEvents((prev) =>
-        prev.map((e) =>
-          e.id === panelEventId
-            ? {
-                ...e, title: form.title, venue: form.venue,
-                date: dateStr || e.date, dateObj: form.dateObj ?? e.dateObj,
-                time: timeStr || e.time, status: form.status,
-                genre: genres, totalSpots: form.totalSpots,
-                spots: Math.max(0, form.totalSpots - e.reservations),
-                description: form.description, gradient: form.gradient,
-                iconIdx: form.iconIdx, coverImage: form.coverImage,
-                closed: false,
-              }
-            : e
-        )
-      );
+      const existing = events.find((e) => e.id === panelEventId);
+      if (!existing) return;
+      const updated: DemoEvent = {
+        ...existing, title: form.title, venue: form.venue,
+        date: dateStr || existing.date, dateObj: form.dateObj ?? existing.dateObj,
+        time: timeStr || existing.time, status: form.status,
+        genre: genres, totalSpots: form.totalSpots,
+        spots: Math.max(0, form.totalSpots - existing.reservations),
+        description: form.description, gradient: form.gradient,
+        iconIdx: form.iconIdx, coverImage: form.coverImage,
+        closed: false,
+      };
+      const { error } = await createClient()
+        .from("venue_events")
+        .update(eventToRow(updated))
+        .eq("id", panelEventId);
+      if (error) {
+        showToast("Impossible d'enregistrer les modifications");
+        return;
+      }
+      setEvents((prev) => prev.map((e) => (e.id === panelEventId ? updated : e)));
       showToast(`"${form.title}" mis à jour`);
     }
     closePanel();
@@ -455,7 +544,7 @@ export default function EventsPage() {
     { mode: "calendar", icon: Calendar, label: "Calendrier" },
   ];
 
-  if (isLoading) return <DashboardSkeleton />;
+  if (isLoading || !eventsLoaded) return <DashboardSkeleton />;
 
   const panelEvent = panelEventId !== null ? events.find((e) => e.id === panelEventId) : null;
   const PanelIcon = panelEvent ? ICONS[panelEvent.iconIdx] ?? Sparkles : Sparkles;
@@ -893,7 +982,7 @@ export default function EventsPage() {
       </div>
 
       {/* ── Stats strip ── */}
-      {isDemoVenue && (
+      {displayEvents.length > 0 && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl p-4">
             <p className="text-white/40 text-xs">Événements actifs</p>

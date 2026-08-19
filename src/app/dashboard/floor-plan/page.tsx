@@ -2,7 +2,6 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import {
-  ChevronDown,
   Plus,
   Minus,
   Users,
@@ -13,13 +12,12 @@ import {
   Music,
   Wine,
   DoorOpen,
-  CalendarDays,
   GripVertical,
-  Check,
   Pencil,
   Trash2,
   Lock,
 } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 import { useAuthUser } from "@/hooks/use-auth-user";
 import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
 
@@ -46,13 +44,6 @@ interface TableData {
   };
 }
 
-interface EventOption {
-  id: string;
-  name: string;
-  date: string;
-  time: string;
-}
-
 interface ContextMenu {
   x: number;
   y: number;
@@ -61,69 +52,20 @@ interface ContextMenu {
   tableId: number | null;
 }
 
-/* ── demo data ──────────────────────────────────────────── */
-
-const DEMO_EVENTS: EventOption[] = [
-  { id: "e1", name: "Nuit Blanche", date: "Ven 28 Oct", time: "23:00" },
-  { id: "e2", name: "Gala de Minuit", date: "Sam 29 Oct", time: "22:00" },
-  { id: "e3", name: "Soirée Tropicale", date: "Jeu 3 Nov", time: "20:00" },
-  { id: "e4", name: "After Dark Sessions", date: "Ven 4 Nov", time: "00:00" },
-];
-
-const DEMO_TABLES: Record<string, TableData[]> = {
-  e1: [
-    { id: 1, x: 100, y: 100, shape: "round", status: "occupied", vip: false, label: "1", capacity: 4, reservation: { client: "Youssef Alaoui", initials: "YA", rp: "Liam Hamza", conciergerie: "Jota Conciergerie", partySize: 4, arrival: "23h30", minSpend: "2 000 MAD", notes: "Client régulier, préfère côté bar." } },
-    { id: 2, x: 220, y: 100, shape: "round", status: "available", vip: false, label: "2", capacity: 4 },
-    { id: 3, x: 340, y: 100, shape: "round", status: "occupied", vip: false, label: "3", capacity: 6, reservation: { client: "Amine Tazi", initials: "AT", rp: "Karim Bennani", conciergerie: "Atlas Concierge", partySize: 6, arrival: "00h00", minSpend: "3 000 MAD", notes: "Groupe d'amis, veulent musique latine." } },
-    { id: 4, x: 460, y: 100, shape: "round", status: "available", vip: false, label: "4", capacity: 4 },
-    { id: 5, x: 100, y: 230, shape: "round", status: "blocked", vip: false, label: "5", capacity: 4 },
-    { id: 6, x: 220, y: 230, shape: "round", status: "available", vip: false, label: "6", capacity: 6 },
-    { id: 7, x: 340, y: 230, shape: "round", status: "occupied", vip: false, label: "7", capacity: 4, reservation: { client: "Mehdi Lahlou", initials: "ML", rp: "Hind Fassi", conciergerie: "Prestige Access", partySize: 4, arrival: "23h00", minSpend: "2 000 MAD", notes: "" } },
-    { id: 8, x: 460, y: 230, shape: "round", status: "available", vip: false, label: "8", capacity: 6 },
-    { id: 9, x: 100, y: 380, shape: "rect", status: "occupied", vip: true, label: "VIP 1", capacity: 8, reservation: { client: "Hicham El Guerrouj", initials: "HE", rp: "Youssef El Idrissi", conciergerie: "Noctis VIP", partySize: 8, arrival: "23h30", minSpend: "5 000 MAD", notes: "Anniversaire de sa femme. Gâteau à 1h00. Champagne Ruinart." } },
-    { id: 10, x: 280, y: 380, shape: "rect", status: "available", vip: true, label: "VIP 2", capacity: 10 },
-    { id: 11, x: 460, y: 380, shape: "rect", status: "occupied", vip: true, label: "VIP 3", capacity: 12, reservation: { client: "Salma Chraibi", initials: "SC", rp: "Sofia Alaoui", conciergerie: "Jota Conciergerie", partySize: 10, arrival: "22h30", minSpend: "8 000 MAD", notes: "Corporate event. Demande espace privé." } },
-  ],
-  e2: [
-    { id: 1, x: 100, y: 100, shape: "round", status: "occupied", vip: false, label: "1", capacity: 4, reservation: { client: "Nora Kadiri", initials: "NK", rp: "Rachid Mouline", conciergerie: "Noctis VIP", partySize: 3, arrival: "22h00", minSpend: "2 000 MAD", notes: "" } },
-    { id: 2, x: 220, y: 100, shape: "round", status: "occupied", vip: false, label: "2", capacity: 4, reservation: { client: "Khalid Bousfiha", initials: "KB", rp: "Nadia Chraibi", conciergerie: "Atlas Concierge", partySize: 4, arrival: "22h30", minSpend: "2 000 MAD", notes: "" } },
-    { id: 3, x: 340, y: 100, shape: "round", status: "available", vip: false, label: "3", capacity: 6 },
-    { id: 4, x: 460, y: 100, shape: "round", status: "available", vip: false, label: "4", capacity: 4 },
-    { id: 5, x: 100, y: 230, shape: "round", status: "available", vip: false, label: "5", capacity: 4 },
-    { id: 6, x: 220, y: 230, shape: "round", status: "available", vip: false, label: "6", capacity: 6 },
-    { id: 7, x: 340, y: 230, shape: "round", status: "available", vip: false, label: "7", capacity: 4 },
-    { id: 8, x: 460, y: 230, shape: "round", status: "available", vip: false, label: "8", capacity: 6 },
-    { id: 9, x: 100, y: 380, shape: "rect", status: "available", vip: true, label: "VIP 1", capacity: 8 },
-    { id: 10, x: 280, y: 380, shape: "rect", status: "occupied", vip: true, label: "VIP 2", capacity: 10, reservation: { client: "Fatima Zahra B.", initials: "FZ", rp: "Amine Tazi", conciergerie: "Prestige Access", partySize: 8, arrival: "22h00", minSpend: "6 000 MAD", notes: "Anniversaire. Prévoir sparklers." } },
-    { id: 11, x: 460, y: 380, shape: "rect", status: "available", vip: true, label: "VIP 3", capacity: 12 },
-  ],
-  e3: [
-    { id: 1, x: 100, y: 100, shape: "round", status: "available", vip: false, label: "1", capacity: 4 },
-    { id: 2, x: 220, y: 100, shape: "round", status: "available", vip: false, label: "2", capacity: 4 },
-    { id: 3, x: 340, y: 100, shape: "round", status: "available", vip: false, label: "3", capacity: 6 },
-    { id: 4, x: 460, y: 100, shape: "round", status: "available", vip: false, label: "4", capacity: 4 },
-    { id: 5, x: 100, y: 230, shape: "round", status: "available", vip: false, label: "5", capacity: 4 },
-    { id: 6, x: 220, y: 230, shape: "round", status: "available", vip: false, label: "6", capacity: 6 },
-    { id: 7, x: 340, y: 230, shape: "round", status: "available", vip: false, label: "7", capacity: 4 },
-    { id: 8, x: 460, y: 230, shape: "round", status: "available", vip: false, label: "8", capacity: 6 },
-    { id: 9, x: 100, y: 380, shape: "rect", status: "available", vip: true, label: "VIP 1", capacity: 8 },
-    { id: 10, x: 280, y: 380, shape: "rect", status: "available", vip: true, label: "VIP 2", capacity: 10 },
-    { id: 11, x: 460, y: 380, shape: "rect", status: "available", vip: true, label: "VIP 3", capacity: 12 },
-  ],
-  e4: [
-    { id: 1, x: 100, y: 100, shape: "round", status: "available", vip: false, label: "1", capacity: 4 },
-    { id: 2, x: 220, y: 100, shape: "round", status: "occupied", vip: false, label: "2", capacity: 4, reservation: { client: "Asmae Boutaleb", initials: "AB", rp: "Liam Hamza", conciergerie: "Jota Conciergerie", partySize: 2, arrival: "00h30", minSpend: "2 000 MAD", notes: "" } },
-    { id: 3, x: 340, y: 100, shape: "round", status: "available", vip: false, label: "3", capacity: 6 },
-    { id: 4, x: 460, y: 100, shape: "round", status: "available", vip: false, label: "4", capacity: 4 },
-    { id: 5, x: 100, y: 230, shape: "round", status: "available", vip: false, label: "5", capacity: 4 },
-    { id: 6, x: 220, y: 230, shape: "round", status: "available", vip: false, label: "6", capacity: 6 },
-    { id: 7, x: 340, y: 230, shape: "round", status: "available", vip: false, label: "7", capacity: 4 },
-    { id: 8, x: 460, y: 230, shape: "round", status: "available", vip: false, label: "8", capacity: 6 },
-    { id: 9, x: 100, y: 380, shape: "rect", status: "available", vip: true, label: "VIP 1", capacity: 8 },
-    { id: 10, x: 280, y: 380, shape: "rect", status: "available", vip: true, label: "VIP 2", capacity: 10 },
-    { id: 11, x: 460, y: 380, shape: "rect", status: "available", vip: true, label: "VIP 3", capacity: 12 },
-  ],
+/* Ligne venue_tables ↔ TableData : le plan est propriété du compte,
+   une table = une ligne, la position persiste. */
+type TableRow = {
+  id: number;
+  label: string;
+  x: number;
+  y: number;
+  shape: "round" | "rect";
+  status: "available" | "occupied" | "blocked";
+  vip: boolean;
+  capacity: number;
 };
+
+const rowToTable = (r: TableRow): TableData => ({ ...r });
 
 /* ── helpers ────────────────────────────────────────────── */
 
@@ -138,10 +80,8 @@ function tableColor(status: string, vip: boolean, selected: boolean) {
 /* ── component ──────────────────────────────────────────── */
 
 export default function FloorPlanPage() {
-  const { isDemoVenue, isLoading } = useAuthUser();
-  const [selectedEvent, setSelectedEvent] = useState("e1");
-  const [eventDropdownOpen, setEventDropdownOpen] = useState(false);
-  const [tables, setTables] = useState<Record<string, TableData[]>>(DEMO_TABLES);
+  const { isLoading } = useAuthUser();
+  const [tablesList, setTablesList] = useState<TableData[] | null>(null);
   const [selectedTable, setSelectedTable] = useState<number | null>(null);
   const [zoom, setZoom] = useState(1);
   const [checkedIn, setCheckedIn] = useState<Set<string>>(new Set());
@@ -170,13 +110,46 @@ export default function FloorPlanPage() {
     return () => window.removeEventListener("click", close);
   }, []);
 
-  if (isLoading) return <DashboardSkeleton />;
+  /* Plan chargé depuis venue_tables — la RLS le limite au compte. */
+  useEffect(() => {
+    let cancelled = false;
+    createClient()
+      .from("venue_tables")
+      .select("id, label, x, y, shape, status, vip, capacity")
+      .order("id", { ascending: true })
+      .then(({ data }) => {
+        if (!cancelled)
+          setTablesList(((data as TableRow[] | null) ?? []).map(rowToTable));
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
-  /* Les événements démo n'existent que sur le compte de démonstration. */
-  const events = isDemoVenue ? DEMO_EVENTS : [];
-  const currentEvent = events.find((e) => e.id === selectedEvent);
-  const currentTables = isDemoVenue ? (tables[selectedEvent] ?? []) : [];
+  if (isLoading || tablesList === null) return <DashboardSkeleton />;
+
+  const currentTables = tablesList;
   const selected = currentTables.find((t) => t.id === selectedTable);
+
+  /* Écriture partielle d'une table : optimiste en local, persistée en base.
+     En cas d'échec, on recharge l'état réel plutôt que de mentir. */
+  const patchTable = async (tableId: number, patch: Partial<TableRow>) => {
+    setTablesList((prev) =>
+      (prev ?? []).map((t) => (t.id === tableId ? { ...t, ...patch } : t))
+    );
+    const { error } = await createClient()
+      .from("venue_tables")
+      .update(patch)
+      .eq("id", tableId);
+    if (error) {
+      showToast("Échec de l'enregistrement");
+      const { data } = await createClient()
+        .from("venue_tables")
+        .select("id, label, x, y, shape, status, vip, capacity")
+        .order("id", { ascending: true });
+      setTablesList(((data as TableRow[] | null) ?? []).map(rowToTable));
+    }
+  };
 
   const occupiedCount = currentTables.filter((t) => t.status === "occupied").length;
   const availableCount = currentTables.filter((t) => t.status === "available").length;
@@ -185,44 +158,37 @@ export default function FloorPlanPage() {
     .filter((t) => t.status === "occupied")
     .reduce((sum, t) => sum + (t.reservation?.partySize ?? t.capacity), 0);
 
-  /* ── next id helper ── */
-  const nextId = () => {
-    const allIds = currentTables.map((t) => t.id);
-    return allIds.length > 0 ? Math.max(...allIds) + 1 : 1;
-  };
-
-  /* ── add table ── */
-  const addTable = (x: number, y: number) => {
-    const id = nextId();
-    const label = String(id);
-    const newTable: TableData = {
-      id,
-      x: Math.round(x),
-      y: Math.round(y),
-      shape: "round",
-      status: "available",
-      vip: false,
-      label,
-      capacity: 4,
-    };
-    setTables((prev) => ({
-      ...prev,
-      [selectedEvent]: [...prev[selectedEvent], newTable],
-    }));
-    setSelectedTable(id);
+  /* ── add table (persistée, l'id vient de la base) ── */
+  const addTable = async (x: number, y: number) => {
+    const label = String(
+      currentTables.reduce((m, t) => Math.max(m, Number(t.label) || 0), 0) + 1
+    );
+    const { data, error } = await createClient()
+      .from("venue_tables")
+      .insert({ label, x: Math.round(x), y: Math.round(y) })
+      .select("id, label, x, y, shape, status, vip, capacity")
+      .single();
+    if (error || !data) {
+      showToast("Impossible d'ajouter la table");
+      return;
+    }
+    setTablesList((prev) => [...(prev ?? []), rowToTable(data as TableRow)]);
+    setSelectedTable((data as TableRow).id);
     showToast(`Table ${label} ajoutée`);
   };
 
-  /* ── delete table ── */
-  const deleteTable = (tableId: number) => {
+  /* ── delete table (persistée) ── */
+  const deleteTable = async (tableId: number) => {
     const table = currentTables.find((t) => t.id === tableId);
     if (!table) return;
-    setTables((prev) => ({
-      ...prev,
-      [selectedEvent]: prev[selectedEvent].filter((t) => t.id !== tableId),
-    }));
+    setTablesList((prev) => (prev ?? []).filter((t) => t.id !== tableId));
     if (selectedTable === tableId) setSelectedTable(null);
-    showToast(`Table ${table.label} supprimée`);
+    const { error } = await createClient()
+      .from("venue_tables")
+      .delete()
+      .eq("id", tableId);
+    if (error) showToast("Échec de la suppression");
+    else showToast(`Table ${table.label} supprimée`);
   };
 
   /* ── drag handlers (edit mode only) ── */
@@ -249,15 +215,18 @@ export default function FloorPlanPage() {
     const newX = Math.max(20, Math.min(530, e.clientX / zoom - rect.left / zoom - dragOffset.x));
     const newY = Math.max(20, Math.min(470, e.clientY / zoom - rect.top / zoom - dragOffset.y));
 
-    setTables((prev) => ({
-      ...prev,
-      [selectedEvent]: prev[selectedEvent].map((t) =>
+    setTablesList((prev) =>
+      (prev ?? []).map((t) =>
         t.id === dragging ? { ...t, x: Math.round(newX), y: Math.round(newY) } : t
-      ),
-    }));
+      )
+    );
   };
 
   const handleMouseUp = () => {
+    if (dragging !== null) {
+      const t = currentTables.find((x) => x.id === dragging);
+      if (t) patchTable(t.id, { x: t.x, y: t.y });
+    }
     setDragging(null);
   };
 
@@ -304,11 +273,12 @@ export default function FloorPlanPage() {
       <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6 relative z-20">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-white font-[family-name:var(--font-manrope)]">
-              Plan de Salle
+            <h1 className="font-display text-3xl font-light text-white">
+              Plan de salle
             </h1>
-            <p className="text-white/50 text-sm mt-1">
-              Gérez la disposition des tables par événement
+            <p className="font-ui text-white/50 text-sm mt-1">
+              Votre salle, enregistrée automatiquement — chaque table, sa
+              position et ses propriétés
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -338,64 +308,12 @@ export default function FloorPlanPage() {
               )}
             </button>
 
-            {/* Event selector */}
-            <div className="relative">
-              <button
-                onClick={() => setEventDropdownOpen(!eventDropdownOpen)}
-                className="flex items-center gap-2 px-4 py-2.5 backdrop-blur-2xl bg-black/45 border border-white/[0.15] rounded-xl text-sm text-white hover:bg-white/[0.1] transition-all"
-              >
-                <CalendarDays size={16} strokeWidth={1.5} className="text-blue-400" />
-                <span className="font-medium">
-                  {currentEvent ? currentEvent.name : "Aucun événement"}
-                </span>
-                {currentEvent && (
-                  <span className="text-white/40">— {currentEvent.date}</span>
-                )}
-                <ChevronDown size={14} strokeWidth={1.5} className="text-white/40" />
-              </button>
-              {eventDropdownOpen && (
-                <>
-                  <div className="fixed inset-0 z-[70]" onClick={() => setEventDropdownOpen(false)} />
-                  <div className="absolute right-0 top-full mt-2 z-[80] backdrop-blur-xl bg-[#1a1a2e] border border-white/15 rounded-xl p-1.5 shadow-xl min-w-[280px]">
-                    {events.length === 0 && (
-                      <p className="px-3.5 py-2.5 text-sm text-white/40">
-                        Vos événements apparaîtront ici.
-                      </p>
-                    )}
-                    {events.map((ev) => (
-                      <button
-                        key={ev.id}
-                        onClick={() => {
-                          setSelectedEvent(ev.id);
-                          setSelectedTable(null);
-                          setEventDropdownOpen(false);
-                        }}
-                        className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm transition-all hover:bg-white/10 ${
-                          selectedEvent === ev.id ? "bg-white/[0.08]" : ""
-                        }`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <CalendarDays size={14} strokeWidth={1.5} className="text-blue-400" />
-                          <div className="text-left">
-                            <p className="text-white font-medium">{ev.name}</p>
-                            <p className="text-[0.6875rem] text-white/40">{ev.date} · {ev.time}</p>
-                          </div>
-                        </div>
-                        {selectedEvent === ev.id && (
-                          <Check size={14} strokeWidth={2} className="text-blue-400" />
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
           </div>
         </div>
       </div>
 
       {/* ── Stats strip ── */}
-      {isDemoVenue && (
+      {currentTables.length > 0 && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl p-4">
             <p className="text-white/40 text-xs">Tables occupées</p>
@@ -707,32 +625,31 @@ export default function FloorPlanPage() {
                 <div className="space-y-2">
                   <button
                     onClick={() => {
-                      const key = `${selectedEvent}-${selected.id}`;
+                      const key = `t-${selected.id}`;
                       if (!checkedIn.has(key)) {
                         setCheckedIn((prev) => new Set(prev).add(key));
                         showToast(`Table ${selected.label} — Check-in effectué`);
                       }
                     }}
                     className={`w-full inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-all ${
-                      checkedIn.has(`${selectedEvent}-${selected.id}`)
+                      checkedIn.has(`t-${selected.id}`)
                         ? "bg-green-400/15 text-green-400 border border-green-400/20"
                         : "bg-blue-500 hover:bg-blue-400 text-white"
                     }`}
                   >
                     <LogIn size={16} strokeWidth={1.5} />
-                    {checkedIn.has(`${selectedEvent}-${selected.id}`) ? "Arrivé" : "Check In"}
+                    {checkedIn.has(`t-${selected.id}`) ? "Arrivé" : "Check In"}
                   </button>
                   <button
                     onClick={() => {
                       showToast(`Réservation table ${selected.label} annulée`);
-                      setTables((prev) => ({
-                        ...prev,
-                        [selectedEvent]: prev[selectedEvent].map((t) =>
+                      setTablesList((prev) =>
+                        (prev ?? []).map((t) =>
                           t.id === selected.id
                             ? { ...t, status: "available" as const, reservation: undefined }
                             : t
-                        ),
-                      }));
+                        )
+                      );
                       setSelectedTable(null);
                     }}
                     className="w-full inline-flex items-center justify-center gap-2 text-sm text-white/30 hover:text-red-400 transition-colors py-2 rounded-xl hover:bg-red-400/5"
@@ -743,9 +660,103 @@ export default function FloorPlanPage() {
                 </div>
               )}
 
-              {/* Edit mode actions on selected table */}
+              {/* Edit mode : propriétés de la table, persistées à chaque clic */}
               {editMode && (
                 <div className="space-y-2">
+                  <div className="bg-white/[0.04] border border-white/[0.08] rounded-2xl p-4 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-white/50">Capacité</span>
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() =>
+                            patchTable(selected.id, {
+                              capacity: Math.max(1, selected.capacity - 1),
+                            })
+                          }
+                          aria-label="Réduire la capacité"
+                          className="h-7 w-7 rounded-lg bg-white/10 text-white/70 hover:bg-white/15 flex items-center justify-center"
+                        >
+                          <Minus size={13} strokeWidth={2} />
+                        </button>
+                        <span className="w-8 text-center text-sm font-medium text-white tabular-nums">
+                          {selected.capacity}
+                        </span>
+                        <button
+                          onClick={() =>
+                            patchTable(selected.id, {
+                              capacity: Math.min(50, selected.capacity + 1),
+                            })
+                          }
+                          aria-label="Augmenter la capacité"
+                          className="h-7 w-7 rounded-lg bg-white/10 text-white/70 hover:bg-white/15 flex items-center justify-center"
+                        >
+                          <Plus size={13} strokeWidth={2} />
+                        </button>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-white/50">Table VIP</span>
+                      <button
+                        onClick={() =>
+                          patchTable(selected.id, { vip: !selected.vip })
+                        }
+                        role="switch"
+                        aria-checked={selected.vip}
+                        aria-label="Table VIP"
+                        className={`relative h-5 w-9 rounded-full transition-colors ${
+                          selected.vip ? "bg-amber-400/80" : "bg-white/15"
+                        }`}
+                      >
+                        <span
+                          className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-all ${
+                            selected.vip ? "left-[18px]" : "left-0.5"
+                          }`}
+                        />
+                      </button>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-white/50">Forme</span>
+                      <div className="flex gap-1.5">
+                        {(["round", "rect"] as const).map((sh) => (
+                          <button
+                            key={sh}
+                            onClick={() => patchTable(selected.id, { shape: sh })}
+                            className={`px-3 py-1 rounded-lg text-xs transition-colors ${
+                              selected.shape === sh
+                                ? "bg-white/20 text-white"
+                                : "bg-white/[0.06] text-white/40 hover:text-white/70"
+                            }`}
+                          >
+                            {sh === "round" ? "Ronde" : "Rectangle"}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-white/50">Statut</span>
+                      <div className="flex gap-1.5">
+                        {(
+                          [
+                            ["available", "Libre"],
+                            ["occupied", "Occupée"],
+                            ["blocked", "Bloquée"],
+                          ] as const
+                        ).map(([st, lab]) => (
+                          <button
+                            key={st}
+                            onClick={() => patchTable(selected.id, { status: st })}
+                            className={`px-2.5 py-1 rounded-lg text-xs transition-colors ${
+                              selected.status === st
+                                ? "bg-white/20 text-white"
+                                : "bg-white/[0.06] text-white/40 hover:text-white/70"
+                            }`}
+                          >
+                            {lab}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
                   <button
                     onClick={() => deleteTable(selected.id)}
                     className="w-full inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium bg-red-500/10 hover:bg-red-500/20 border border-red-400/20 text-red-400 transition-all"
