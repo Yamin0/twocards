@@ -257,6 +257,11 @@ export default function VenueQrReservationsPage() {
                       <td className="px-4 py-3">
                         <p className="text-sm text-white font-ui">
                           {r.guest_name}
+                          {r.source === "portal" && (
+                            <span className="font-ui ml-2 rounded-md bg-purple-500/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-purple-300 align-middle">
+                              direct
+                            </span>
+                          )}
                         </p>
                         <p className="text-xs text-white/40 font-ui">
                           {r.guest_phone}

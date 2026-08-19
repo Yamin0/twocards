@@ -11,6 +11,7 @@ import {
   Users,
   Grid3X3,
   Plug,
+  Globe,
   Network,
   CreditCard,
   MessageSquare,
@@ -34,6 +35,7 @@ const mainNav = [
   { icon: Ticket, label: "Événements", href: "/dashboard/events" },
   { icon: Grid3X3, label: "Plan de salle", href: "/dashboard/floor-plan" },
   { icon: Plug, label: "Caisse (POS)", href: "/dashboard/integrations" },
+  { icon: Globe, label: "Portail de résa", href: "/dashboard/portal" },
   { icon: Users, label: "Clients", href: "/dashboard/guests" },
 ];
 
