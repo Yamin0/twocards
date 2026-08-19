@@ -7,7 +7,6 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   CalendarDays,
-  QrCode,
   Ticket,
   Users,
   Grid3X3,
@@ -31,7 +30,6 @@ import { Avatar } from "@/components/shared/avatar";
 const mainNav = [
   { icon: LayoutDashboard, label: "Tableau de bord", href: "/dashboard" },
   { icon: CalendarDays, label: "Réservations", href: "/dashboard/reservations" },
-  { icon: QrCode, label: "Réservations QR", href: "/dashboard/qr-reservations" },
   { icon: Ticket, label: "Événements", href: "/dashboard/events" },
   { icon: Grid3X3, label: "Plan de salle", href: "/dashboard/floor-plan" },
   { icon: Users, label: "Clients", href: "/dashboard/guests" },

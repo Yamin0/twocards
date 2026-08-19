@@ -33,13 +33,15 @@ interface TableData {
   label: string;
   capacity: number;
   reservation?: {
+    /* id de la réservation QR rattachée — absent pour les données de démo */
+    resId?: string;
     client: string;
     initials: string;
-    rp: string;
-    conciergerie: string;
+    rp?: string;
+    conciergerie?: string;
     partySize: number;
     arrival: string;
-    minSpend: string;
+    minSpend?: string;
     notes: string;
   };
 }
@@ -66,6 +68,25 @@ type TableRow = {
 };
 
 const rowToTable = (r: TableRow): TableData => ({ ...r });
+
+type AssignedRow = {
+  id: string;
+  guest_name: string;
+  party_size: number;
+  reservation_date: string;
+  reservation_time: string | null;
+  notes: string | null;
+  table_id: number;
+};
+
+const initialsOf = (name: string) =>
+  name
+    .split(" ")
+    .filter(Boolean)
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
 
 /* ── helpers ────────────────────────────────────────────── */
 
@@ -126,9 +147,60 @@ export default function FloorPlanPage() {
     };
   }, []);
 
+  /* Occupations réelles : la première réservation à venir assignée à
+     chaque table. Le plan cesse d'être une maquette. */
+  const [resByTable, setResByTable] = useState<
+    Record<number, TableData["reservation"]>
+  >({});
+
+  useEffect(() => {
+    let cancelled = false;
+    const today = new Date().toISOString().slice(0, 10);
+    createClient()
+      .from("qr_reservations")
+      .select(
+        "id, guest_name, party_size, reservation_date, reservation_time, notes, table_id"
+      )
+      .not("table_id", "is", null)
+      .neq("status", "annulée")
+      .gte("reservation_date", today)
+      .order("reservation_date", { ascending: true })
+      .then(({ data }) => {
+        if (cancelled) return;
+        const map: Record<number, TableData["reservation"]> = {};
+        for (const r of (data as AssignedRow[] | null) ?? []) {
+          if (map[r.table_id]) continue;
+          map[r.table_id] = {
+            resId: r.id,
+            client: r.guest_name,
+            initials: initialsOf(r.guest_name),
+            partySize: r.party_size,
+            arrival:
+              new Date(r.reservation_date + "T00:00:00").toLocaleDateString(
+                "fr-FR"
+              ) + (r.reservation_time ? ` · ${r.reservation_time}` : ""),
+            notes: r.notes ?? "",
+          };
+        }
+        setResByTable(map);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   if (isLoading || tablesList === null) return <DashboardSkeleton />;
 
-  const currentTables = tablesList;
+  const currentTables = tablesList.map((t) => {
+    const reservation = resByTable[t.id];
+    return reservation
+      ? {
+          ...t,
+          status: (t.status === "blocked" ? "blocked" : "occupied") as TableData["status"],
+          reservation,
+        }
+      : t;
+  });
   const selected = currentTables.find((t) => t.id === selectedTable);
 
   /* Écriture partielle d'une table : optimiste en local, persistée en base.
@@ -587,7 +659,9 @@ export default function FloorPlanPage() {
                     <div>
                       <p className="text-sm font-medium text-white">{selected.reservation.client}</p>
                       <p className="text-[0.6875rem] text-white/40">
-                        {selected.reservation.rp} · {selected.reservation.conciergerie}
+                        {selected.reservation.rp
+                          ? `${selected.reservation.rp} · ${selected.reservation.conciergerie}`
+                          : "Réservation twocards"}
                       </p>
                     </div>
                   </div>
@@ -601,10 +675,12 @@ export default function FloorPlanPage() {
                       <Clock size={14} strokeWidth={1.5} />
                       <span>Arrivée : {selected.reservation.arrival}</span>
                     </div>
-                    <div className="flex items-center gap-2 text-white/50 text-sm">
-                      <span className="text-[0.6875rem] text-white/30">Min. spend:</span>
-                      <span className="text-white/70 font-medium">{selected.reservation.minSpend}</span>
-                    </div>
+                    {selected.reservation.minSpend && (
+                      <div className="flex items-center gap-2 text-white/50 text-sm">
+                        <span className="text-[0.6875rem] text-white/30">Min. spend:</span>
+                        <span className="text-white/70 font-medium">{selected.reservation.minSpend}</span>
+                      </div>
+                    )}
                   </div>
 
                   {selected.reservation.notes && (
@@ -641,21 +717,30 @@ export default function FloorPlanPage() {
                     {checkedIn.has(`t-${selected.id}`) ? "Arrivé" : "Check In"}
                   </button>
                   <button
-                    onClick={() => {
-                      showToast(`Réservation table ${selected.label} annulée`);
-                      setTablesList((prev) =>
-                        (prev ?? []).map((t) =>
-                          t.id === selected.id
-                            ? { ...t, status: "available" as const, reservation: undefined }
-                            : t
-                        )
-                      );
+                    onClick={async () => {
+                      const resId = selected.reservation?.resId;
+                      if (resId) {
+                        const { error } = await createClient()
+                          .from("qr_reservations")
+                          .update({ table_id: null })
+                          .eq("id", resId);
+                        if (error) {
+                          showToast("Impossible de libérer la table");
+                          return;
+                        }
+                      }
+                      setResByTable((prev) => {
+                        const next = { ...prev };
+                        delete next[selected.id];
+                        return next;
+                      });
                       setSelectedTable(null);
+                      showToast(`Table ${selected.label} libérée`);
                     }}
                     className="w-full inline-flex items-center justify-center gap-2 text-sm text-white/30 hover:text-red-400 transition-colors py-2 rounded-xl hover:bg-red-400/5"
                   >
                     <X size={14} strokeWidth={1.5} />
-                    Annuler la réservation
+                    Libérer la table
                   </button>
                 </div>
               )}

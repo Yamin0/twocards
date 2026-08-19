@@ -1,590 +1,475 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 import { useAuthUser } from "@/hooks/use-auth-user";
-import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
-import Link from "next/link";
 import {
-  CalendarDays,
-  Clock,
+  useVenueQrReservations,
+  type VenueQrReservation,
+} from "@/hooks/use-venue-qr-reservations";
+import { TableSkeleton } from "@/components/shared/loading-skeleton";
+import { StatStrip } from "@/components/shared/stat-strip";
+import { StatusBadge } from "@/components/shared/status-badge";
+import { useToast } from "@/hooks/use-toast";
+import {
+  MiniBars,
+  RatingStars,
+  weeklySeries,
+} from "@/components/shared/mini-charts";
+import {
+  QrCode,
   Users,
-  TrendingUp,
-  Plus,
-  Search,
-  Download,
-  ChevronRight,
-  CheckCircle2,
-  XCircle,
+  Check,
+  Pencil,
+  Loader2,
+  Info,
+  Link2,
+  X,
 } from "lucide-react";
 
-/* ── demo data ──────────────────────────────────────────── */
+export default function VenueQrReservationsPage() {
+  const { isLoading } = useAuthUser();
+  const { reservations, isLoading: loadingData } = useVenueQrReservations();
+  const { toast, showToast } = useToast();
+  /* Saisie locale du montant, par réservation. Les mises à jour confirmées
+     sont fusionnées dans `overrides` : la liste reste juste même si le
+     canal temps réel tarde à répercuter l'UPDATE. */
+  const [editing, setEditing] = useState<Record<string, string>>({});
+  const [savingId, setSavingId] = useState<string | null>(null);
+  const [overrides, setOverrides] = useState<
+    Record<string, Partial<VenueQrReservation>>
+  >({});
+  /* Avis ouvert en modale au clic sur les étoiles. */
+  const [reviewOf, setReviewOf] = useState<VenueQrReservation | null>(null);
+  /* Tables du plan de salle, pour assigner une réservation à une table. */
+  const [venueTables, setVenueTables] = useState<
+    { id: number; label: string; vip: boolean }[]
+  >([]);
 
-/* Les compteurs se calculent depuis la liste et son état courant : ils
-   suivent chaque acceptation ou refus. Aucune valeur figée — les anciennes
-   annonçaient 148 réservations et 24 en attente au-dessus d'une liste qui en
-   comptait 8 et 3. */
-function buildStats(rows: { covers: number; currentStatus: ResStatus }[]) {
-  const confirmed = rows.filter((r) => r.currentStatus === "confirmed");
-  const pending = rows.filter((r) => r.currentStatus === "pending");
-  const rejected = rows.filter((r) => r.currentStatus === "rejected");
+  useEffect(() => {
+    let cancelled = false;
+    createClient()
+      .from("venue_tables")
+      .select("id, label, vip")
+      .order("label", { ascending: true })
+      .then(({ data }) => {
+        if (!cancelled) setVenueTables(data ?? []);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
-  /* Taux calculé sur les demandes tranchées : les réservations encore en
-     attente ne sont pas des refus et ne doivent pas peser dessus. */
-  const decided = confirmed.length + rejected.length;
-  const rate = decided
-    ? `${Math.round((confirmed.length / decided) * 100)} %`
-    : "—";
+  if (isLoading || loadingData || reservations === null)
+    return <TableSkeleton />;
 
-  return [
-    { label: "Réservations totales", value: String(rows.length), icon: CalendarDays },
-    { label: "En attente", value: String(pending.length), icon: Clock },
-    {
-      label: "Couverts confirmés",
-      value: confirmed
-        .reduce((sum, r) => sum + r.covers, 0)
-        .toLocaleString("fr-FR")
-        .replace(/ | /g, " "),
-      icon: Users,
-    },
-    { label: "Taux de confirmation", value: rate, icon: TrendingUp },
-  ];
-}
+  const rows = reservations.map((r) => ({ ...r, ...overrides[r.id] }));
+  const awaiting = rows.filter(
+    (r) => r.amount_spent === null && r.status !== "annulée"
+  ).length;
+  const revenue = rows.reduce((sum, r) => sum + (r.amount_spent ?? 0), 0);
+  const commissions = rows
+    .filter((r) => r.status !== "annulée")
+    .reduce((sum, r) => sum + r.commission, 0);
+  const rated = rows.filter((r) => r.rating !== null);
+  const avgRating =
+    rated.length > 0
+      ? rated.reduce((s, r) => s + (r.rating ?? 0), 0) / rated.length
+      : null;
+  const lastComments = rated
+    .filter((r) => r.rating_comment)
+    .slice(0, 2);
+  const weekly = weeklySeries(rows.map((r) => r.created_at));
 
-const DEMO_RESERVATIONS = [
-  {
-    guest: "Youssef Alaoui",
-    rp: "Liam Hamza",
-    conciergerie: "Jota Conciergerie",
-    event: "Nuit Blanche",
-    date: "28 Oct",
-    time: "23:00",
-    covers: 6,
-    type: "Table VIP",
-    status: "confirmed" as const,
-  },
-  {
-    guest: "Asmae Boutaleb",
-    rp: "Karim Bennani",
-    conciergerie: "Atlas Concierge",
-    event: "Gala de Minuit",
-    date: "29 Oct",
-    time: "22:00",
-    covers: 4,
-    type: "Guest List",
-    status: "pending" as const,
-  },
-  {
-    guest: "Khalid Bousfiha",
-    rp: "Youssef El Idrissi",
-    conciergerie: "Noctis VIP",
-    event: "Nuit Blanche",
-    date: "28 Oct",
-    time: "23:00",
-    covers: 8,
-    type: "Table VIP",
-    status: "confirmed" as const,
-  },
-  {
-    guest: "Salma Chraibi",
-    rp: "Sofia Alaoui",
-    conciergerie: "Jota Conciergerie",
-    event: "After Dark Sessions",
-    date: "4 Nov",
-    time: "00:00",
-    covers: 2,
-    type: "Guest List",
-    status: "rejected" as const,
-  },
-  {
-    guest: "Amine Tazi",
-    rp: "Nadia Chraibi",
-    conciergerie: "Atlas Concierge",
-    event: "Soirée Tropicale",
-    date: "3 Nov",
-    time: "20:00",
-    covers: 10,
-    type: "Table VIP",
-    status: "confirmed" as const,
-  },
-  {
-    guest: "Fatima Zahra B.",
-    rp: "Rachid Mouline",
-    conciergerie: "Noctis VIP",
-    event: "Gala de Minuit",
-    date: "29 Oct",
-    time: "22:00",
-    covers: 4,
-    type: "Guest List",
-    status: "pending" as const,
-  },
-  {
-    guest: "Mehdi Lahlou",
-    rp: "Hind Fassi",
-    conciergerie: "Prestige Access",
-    event: "Nuit Blanche",
-    date: "28 Oct",
-    time: "23:00",
-    covers: 6,
-    type: "Table VIP",
-    status: "confirmed" as const,
-  },
-  {
-    guest: "Nora Kadiri",
-    rp: "Amine Tazi",
-    conciergerie: "Prestige Access",
-    event: "Soirée Tropicale",
-    date: "3 Nov",
-    time: "20:00",
-    covers: 3,
-    type: "Guest List",
-    status: "pending" as const,
-  },
-];
+  const assignTable = async (r: VenueQrReservation, tableId: number | null) => {
+    setOverrides((prev) => ({ ...prev, [r.id]: { ...prev[r.id], table_id: tableId } }));
+    const { error } = await createClient()
+      .from("qr_reservations")
+      .update({ table_id: tableId })
+      .eq("id", r.id);
+    if (error) {
+      showToast("Impossible d'assigner la table");
+      setOverrides((prev) => ({ ...prev, [r.id]: { ...prev[r.id], table_id: r.table_id } }));
+      return;
+    }
+    const t = venueTables.find((x) => x.id === tableId);
+    showToast(t ? `Table ${t.label} assignée — visible sur le plan de salle` : "Table retirée");
+  };
 
-const DEMO_UPCOMING_EVENTS = [
-  { name: "Nuit Blanche", date: "Ven 28 Oct", time: "23:00", reservations: 12, capacity: 300, fill: 78 },
-  { name: "Gala de Minuit", date: "Sam 29 Oct", time: "22:00", reservations: 8, capacity: 200, fill: 62 },
-  { name: "Soirée Tropicale", date: "Jeu 3 Nov", time: "20:00", reservations: 5, capacity: 150, fill: 45 },
-  { name: "After Dark Sessions", date: "Ven 4 Nov", time: "00:00", reservations: 3, capacity: 120, fill: 23 },
-];
+  const copyRatingLink = async (id: string) => {
+    try {
+      await navigator.clipboard.writeText(`${window.location.origin}/avis/${id}`);
+      showToast("Lien d'avis copié — envoyez-le au client");
+    } catch {
+      showToast("Impossible de copier le lien");
+    }
+  };
 
-const STATUS_CONFIG = {
-  confirmed: { label: "Confirmée", bg: "bg-green-400/10", text: "text-green-400", dot: "bg-green-400" },
-  pending: { label: "En attente", bg: "bg-amber-400/10", text: "text-amber-400", dot: "bg-amber-400" },
-  rejected: { label: "Refusée", bg: "bg-red-400/10", text: "text-red-400", dot: "bg-red-400" },
-};
-
-/* ── filters ────────────────────────────────────────────── */
-
-const FILTER_TABS = ["Toutes", "Confirmées", "En attente", "Refusées"] as const;
-
-/* ── component ──────────────────────────────────────────── */
-
-type ResStatus = "confirmed" | "pending" | "rejected";
-
-export default function ReservationsPage() {
-  const { isDemoVenue, isLoading } = useAuthUser();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [activeFilter, setActiveFilter] = useState<(typeof FILTER_TABS)[number]>("Toutes");
-  const [statuses, setStatuses] = useState<Record<number, ResStatus>>(
-    Object.fromEntries(DEMO_RESERVATIONS.map((r, i) => [i, r.status]))
-  );
-  const [openDropdown, setOpenDropdown] = useState<number | null>(null);
-
-  if (isLoading) return <DashboardSkeleton />;
-
-  const reservations = isDemoVenue ? DEMO_RESERVATIONS : [];
-  const events = isDemoVenue ? DEMO_UPCOMING_EVENTS : [];
-
-  /* Source unique : la liste augmentée de son statut courant. Compteurs,
-     demandes en attente et tableau filtré en découlent tous. */
-  const rows = reservations.map((r, i) => ({
-    ...r,
-    idx: i,
-    currentStatus: statuses[i] ?? r.status,
-  }));
-
-  const stats = isDemoVenue ? buildStats(rows) : [];
-
-  const pendingRequests = rows.filter((r) => r.currentStatus === "pending");
-
-  const filteredReservations = rows
-    .filter((r) => {
-      const matchSearch = searchQuery
-        ? r.guest.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          r.rp.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          r.event.toLowerCase().includes(searchQuery.toLowerCase())
-        : true;
-      const matchFilter =
-        activeFilter === "Toutes"
-          ? true
-          : activeFilter === "Confirmées"
-            ? r.currentStatus === "confirmed"
-            : activeFilter === "En attente"
-              ? r.currentStatus === "pending"
-              : r.currentStatus === "rejected";
-      return matchSearch && matchFilter;
+  const saveAmount = async (r: VenueQrReservation) => {
+    const raw = (editing[r.id] ?? "").replace(",", ".").trim();
+    const amount = Number(raw);
+    if (!raw || !Number.isFinite(amount) || amount < 0) {
+      showToast("Montant invalide");
+      return;
+    }
+    setSavingId(r.id);
+    /* Seules colonnes accordées à l'établissement : amount_spent et status.
+       La commission est recalculée par le trigger, jamais envoyée. */
+    const { data, error } = await createClient()
+      .from("qr_reservations")
+      .update({ amount_spent: amount, status: "confirmée" })
+      .eq("id", r.id)
+      .select("amount_spent, commission, status")
+      .single();
+    setSavingId(null);
+    if (error || !data) {
+      showToast("Impossible d'enregistrer le montant");
+      return;
+    }
+    setOverrides((prev) => ({ ...prev, [r.id]: data }));
+    setEditing((prev) => {
+      const next = { ...prev };
+      delete next[r.id];
+      return next;
     });
+    showToast(`Montant enregistré — ${data.commission.toLocaleString()} MAD reversés`);
+  };
+
+  const stats = [
+    { label: "Sorties reçues", value: rows.length },
+    { label: "En attente de montant", value: awaiting },
+    { label: "CA saisi", value: `${revenue.toLocaleString()} MAD` },
+    {
+      label: "Commissions reversées",
+      value: `${commissions.toLocaleString()} MAD`,
+    },
+  ];
 
   return (
-    <div className="space-y-6">
-      {/* ── Header ── */}
-      <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-white font-[family-name:var(--font-manrope)]">
-              Réservations
-            </h1>
-            <p className="text-white/50 text-sm mt-1">
-              Suivez toutes les réservations de votre réseau RP
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <Link
-              href="/dashboard/reservations/new"
-              className="flex items-center gap-2 px-4 py-2.5 bg-blue-500 hover:bg-blue-400 text-white rounded-xl text-sm font-medium transition-all duration-300 hover:scale-[1.02]"
-            >
-              <Plus size={16} strokeWidth={1.5} />
-              <span className="hidden sm:inline">Nouvelle résa</span>
-            </Link>
-          </div>
-        </div>
+    <div className="bg-transparent min-h-screen">
+      {/* Header */}
+      <div className="px-4 sm:px-6 pt-6 pb-4">
+        <h1 className="font-display text-3xl font-light text-white">
+          Réservations
+        </h1>
+        <p className="font-ui text-sm text-white/60 mt-1.5">
+          Clients envoyés par les hôtels partenaires — saisissez le montant en
+          fin de sortie
+        </p>
       </div>
 
-      {/* ── Stats strip ── */}
-      {isDemoVenue && (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {stats.map((stat) => {
-            const Icon = stat.icon;
-            return (
-              <div
-                key={stat.label}
-                className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl p-5 transition-all duration-500 hover:bg-white/[0.1]"
-              >
-                {/* Pas d'indicateur de tendance : il n'existe aucun
-                    historique pour le calculer. L'ancien affichait « +3 »
-                    sous une flèche descendante rouge. */}
-                <div className="flex items-center mb-3">
-                  <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
-                    <Icon size={20} strokeWidth={1.5} className="text-blue-400" />
+      {/* Bandeau KPI */}
+      <div className="px-4 sm:px-6 pb-6">
+        <StatStrip stats={stats} />
+      </div>
+
+      {/* Analyses : demande et satisfaction, à la SevenRooms */}
+      {rows.length > 0 && (
+        <div className="px-4 sm:px-6 pb-6 grid grid-cols-1 lg:grid-cols-2 gap-3">
+          <div className="bg-white/[0.07] rounded-xl border border-white/10 p-5">
+            <h2 className="font-display text-lg font-normal text-white mb-1">
+              Sorties par semaine
+            </h2>
+            <p className="text-xs text-white/40 font-[family-name:var(--font-inter)] mb-4">
+              8 dernières semaines
+            </p>
+            <MiniBars data={weekly} color="bg-purple-400/70" />
+          </div>
+          <div className="bg-white/[0.07] rounded-xl border border-white/10 p-5">
+            <h2 className="font-display text-lg font-normal text-white mb-3">
+              Satisfaction client
+            </h2>
+            {avgRating !== null ? (
+              <>
+                <div className="flex items-center gap-3">
+                  <p className="font-display text-4xl font-light text-white">
+                    {avgRating.toFixed(1).replace(".", ",")}
+                    <span className="text-lg text-white/40">/5</span>
+                  </p>
+                  <div>
+                    <RatingStars value={avgRating} />
+                    <p className="text-[10px] text-white/40 font-[family-name:var(--font-inter)] mt-0.5">
+                      {rated.length} avis client{rated.length > 1 ? "s" : ""}
+                    </p>
                   </div>
                 </div>
-                <p className="text-2xl font-bold text-white font-[family-name:var(--font-manrope)]">
-                  {stat.value}
-                </p>
-                <p className="text-white/40 text-xs mt-1 font-[family-name:var(--font-inter)]">
-                  {stat.label}
-                </p>
-              </div>
-            );
-          })}
+                {lastComments.map((r) => (
+                  <p
+                    key={r.id}
+                    className="mt-3 text-xs italic text-white/50 font-[family-name:var(--font-inter)] border-l-2 border-white/15 pl-3"
+                  >
+                    « {r.rating_comment} » — {r.guest_name}
+                  </p>
+                ))}
+              </>
+            ) : (
+              <p className="text-xs text-white/40 font-[family-name:var(--font-inter)]">
+                Aucun avis pour le moment. Après la sortie, copiez le lien
+                d&apos;avis depuis le tableau et envoyez-le au client par
+                WhatsApp — sa note apparaîtra ici.
+              </p>
+            )}
+          </div>
         </div>
       )}
 
-      {/* ── Main grid ── */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        {/* ── Reservations table ── */}
-        <div className="xl:col-span-2 backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
-          {/* Toolbar */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-            <div className="flex items-center gap-2">
-              {FILTER_TABS.map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveFilter(tab)}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                    activeFilter === tab
-                      ? "bg-blue-500/20 text-blue-400 border border-blue-400/30"
-                      : "text-white/40 hover:text-white/70 hover:bg-white/5"
-                  }`}
-                >
-                  {tab}
-                </button>
-              ))}
+      {/* Table / empty state */}
+      <div className="px-4 sm:px-6 pb-4">
+        {rows.length === 0 ? (
+          <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl p-12 text-center">
+            <div className="w-14 h-14 rounded-2xl bg-blue-500/15 border border-blue-400/20 flex items-center justify-center mx-auto mb-5">
+              <QrCode size={26} strokeWidth={1.5} className="text-blue-400" />
             </div>
-            <div className="flex items-center gap-2">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30 h-4 w-4" />
-                <input
-                  type="text"
-                  placeholder="Rechercher..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-4 py-2 bg-white/5 border border-white/15 rounded-xl text-sm text-white placeholder:text-white/30 focus:border-white/30 focus:bg-white/10 focus:outline-none transition-all w-44"
-                />
+            <h2 className="text-lg font-bold text-white font-[family-name:var(--font-manrope)] mb-2">
+              Aucune réservation QR pour le moment
+            </h2>
+            <p className="text-sm text-white/50 font-[family-name:var(--font-inter)] max-w-md mx-auto">
+              Quand un client d&apos;hôtel réserve chez vous via un QR code
+              twocards, la réservation apparaît ici instantanément.
+            </p>
+          </div>
+        ) : (
+          <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-2xl overflow-x-auto">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="border-b border-white/10">
+                  {["Client", "Date", "Pers.", "Note", "Table", "Statut", "Montant dépensé", "Commission", "Avis"].map(
+                    (h) => (
+                      <th
+                        key={h}
+                        className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/50 font-[family-name:var(--font-inter)]"
+                      >
+                        {h}
+                      </th>
+                    )
+                  )}
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((r) => {
+                  const isEditing =
+                    editing[r.id] !== undefined || r.amount_spent === null;
+                  return (
+                    <tr
+                      key={r.id}
+                      className="border-b border-white/[0.06] last:border-0"
+                    >
+                      <td className="px-4 py-3">
+                        <p className="text-sm text-white font-[family-name:var(--font-manrope)]">
+                          {r.guest_name}
+                        </p>
+                        <p className="text-xs text-white/40 font-[family-name:var(--font-inter)]">
+                          {r.guest_phone}
+                        </p>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-white/70 font-[family-name:var(--font-inter)] whitespace-nowrap">
+                        {new Date(
+                          r.reservation_date + "T00:00:00"
+                        ).toLocaleDateString("fr-FR")}
+                        {r.reservation_time ? ` · ${r.reservation_time}` : ""}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-white/70 font-[family-name:var(--font-inter)]">
+                        <span className="inline-flex items-center gap-1">
+                          <Users size={12} strokeWidth={1.5} />
+                          {r.party_size}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-xs text-white/50 font-[family-name:var(--font-inter)] max-w-[180px] truncate">
+                        {r.notes ?? "—"}
+                      </td>
+                      <td className="px-4 py-3">
+                        {r.status === "annulée" ? (
+                          <span className="text-sm text-white/30">—</span>
+                        ) : (
+                          <select
+                            value={r.table_id ?? ""}
+                            onChange={(e) =>
+                              assignTable(
+                                r,
+                                e.target.value ? Number(e.target.value) : null
+                              )
+                            }
+                            aria-label={`Table pour ${r.guest_name}`}
+                            className="font-ui rounded-lg bg-white/[0.07] border border-white/10 px-2 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-white/40 [&>option]:bg-[#10131f]"
+                          >
+                            <option value="">— aucune —</option>
+                            {venueTables.map((t) => (
+                              <option key={t.id} value={t.id}>
+                                {t.vip ? "VIP " : "Table "}
+                                {t.label}
+                              </option>
+                            ))}
+                          </select>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        <StatusBadge status={r.status} />
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        {r.status === "annulée" ? (
+                          <span className="text-sm text-white/40">—</span>
+                        ) : isEditing ? (
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="text"
+                              inputMode="decimal"
+                              placeholder="0"
+                              value={editing[r.id] ?? ""}
+                              onChange={(e) =>
+                                setEditing((prev) => ({
+                                  ...prev,
+                                  [r.id]: e.target.value,
+                                }))
+                              }
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") saveAmount(r);
+                              }}
+                              className="w-24 px-3 py-1.5 bg-white/[0.07] rounded-lg text-sm text-white text-right font-[family-name:var(--font-inter)] placeholder:text-white/30 focus:ring-1 focus:ring-white/40 focus:outline-none"
+                            />
+                            <span className="text-xs text-white/40">MAD</span>
+                            <button
+                              onClick={() => saveAmount(r)}
+                              disabled={savingId === r.id}
+                              aria-label={`Valider le montant pour ${r.guest_name}`}
+                              className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 transition-colors disabled:opacity-50"
+                            >
+                              {savingId === r.id ? (
+                                <Loader2
+                                  size={14}
+                                  strokeWidth={2}
+                                  className="animate-spin"
+                                />
+                              ) : (
+                                <Check size={14} strokeWidth={2} />
+                              )}
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm text-white font-[family-name:var(--font-manrope)]">
+                              {(r.amount_spent ?? 0).toLocaleString()} MAD
+                            </span>
+                            <button
+                              onClick={() =>
+                                setEditing((prev) => ({
+                                  ...prev,
+                                  [r.id]: String(r.amount_spent ?? ""),
+                                }))
+                              }
+                              aria-label={`Modifier le montant pour ${r.guest_name}`}
+                              className="p-1 text-white/30 hover:text-white/70 transition-colors"
+                            >
+                              <Pencil size={13} strokeWidth={1.5} />
+                            </button>
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-sm font-bold text-purple-300 font-[family-name:var(--font-manrope)] whitespace-nowrap">
+                        {r.commission > 0
+                          ? `${r.commission.toLocaleString()} MAD`
+                          : "—"}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        {r.rating !== null ? (
+                          <button
+                            onClick={() => setReviewOf(r)}
+                            aria-label={`Lire l'avis de ${r.guest_name}`}
+                            className="rounded-lg p-1 -m-1 transition-colors hover:bg-white/10"
+                          >
+                            <RatingStars value={r.rating} size={12} />
+                          </button>
+                        ) : r.status === "confirmée" ? (
+                          <button
+                            onClick={() => copyRatingLink(r.id)}
+                            className="flex items-center gap-1.5 text-[11px] font-medium text-blue-400 hover:text-blue-300 transition-colors font-[family-name:var(--font-inter)]"
+                          >
+                            <Link2 size={12} strokeWidth={1.5} />
+                            Lien d&apos;avis
+                          </button>
+                        ) : (
+                          <span className="text-sm text-white/30">—</span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* Modèle énoncé */}
+      <div className="px-4 sm:px-6 pb-8">
+        <p className="flex items-start gap-2 text-xs text-white/40 font-[family-name:var(--font-inter)] max-w-2xl">
+          <Info size={13} strokeWidth={1.5} className="shrink-0 mt-0.5" />
+          Saisir le montant confirme la sortie et calcule automatiquement la
+          commission reversée à l&apos;apporteur ({""}
+          {rows[0] ? Math.round(rows[0].commission_rate * 100) : 10}&nbsp;% du
+          montant). Le montant reste modifiable en cas d&apos;erreur.
+        </p>
+      </div>
+
+      {/* Avis en modale */}
+      {reviewOf && reviewOf.rating !== null && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+          <div
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            onClick={() => setReviewOf(null)}
+          />
+          <div className="relative z-10 w-full max-w-md rounded-3xl border border-white/15 bg-[#10131f]/95 backdrop-blur-2xl p-7">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="font-ui text-[10px] font-bold uppercase tracking-[0.18em] text-white/45">
+                  Avis client
+                </p>
+                <h3 className="font-display mt-1 text-2xl font-light text-white">
+                  {reviewOf.guest_name}
+                </h3>
+                <p className="font-ui text-xs text-white/40 mt-0.5">
+                  Sortie du{" "}
+                  {new Date(
+                    reviewOf.reservation_date + "T00:00:00"
+                  ).toLocaleDateString("fr-FR")}
+                  {" · "}
+                  {reviewOf.party_size} pers.
+                </p>
               </div>
-              <button className="p-2 rounded-lg text-white/40 hover:text-white/70 hover:bg-white/10 transition-all">
-                <Download size={16} strokeWidth={1.5} />
+              <button
+                onClick={() => setReviewOf(null)}
+                aria-label="Fermer"
+                className="rounded-lg p-1 text-white/40 transition-colors hover:text-white"
+              >
+                <X size={20} strokeWidth={1.5} />
               </button>
             </div>
+            <div className="mt-5 flex items-center gap-3">
+              <p className="font-display text-4xl font-light text-white">
+                {reviewOf.rating}
+                <span className="text-lg text-white/40">/5</span>
+              </p>
+              <RatingStars value={reviewOf.rating} size={18} />
+            </div>
+            {reviewOf.rating_comment ? (
+              <p className="font-ui mt-5 border-l-2 border-amber-400/40 pl-4 text-sm italic leading-relaxed text-white/75">
+                « {reviewOf.rating_comment} »
+              </p>
+            ) : (
+              <p className="font-ui mt-5 text-xs text-white/40">
+                Le client n&apos;a pas laissé de commentaire.
+              </p>
+            )}
           </div>
-
-          {/* Table */}
-          {filteredReservations.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[600px]">
-                <thead>
-                  <tr className="border-b border-white/10">
-                    <th className="text-left text-[0.6875rem] font-semibold text-white/40 uppercase tracking-wider pb-3 pl-1">
-                      Invité
-                    </th>
-                    <th className="text-left text-[0.6875rem] font-semibold text-white/40 uppercase tracking-wider pb-3">
-                      RP / Conciergerie
-                    </th>
-                    <th className="text-left text-[0.6875rem] font-semibold text-white/40 uppercase tracking-wider pb-3">
-                      Événement
-                    </th>
-                    <th className="text-center text-[0.6875rem] font-semibold text-white/40 uppercase tracking-wider pb-3">
-                      Couverts
-                    </th>
-                    <th className="text-center text-[0.6875rem] font-semibold text-white/40 uppercase tracking-wider pb-3">
-                      Type
-                    </th>
-                    <th className="text-center text-[0.6875rem] font-semibold text-white/40 uppercase tracking-wider pb-3 pr-1">
-                      Statut
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredReservations.map((res) => {
-                    const status = STATUS_CONFIG[res.currentStatus];
-                    const isOpen = openDropdown === res.idx;
-                    return (
-                      <tr
-                        key={res.idx}
-                        className="border-b border-white/[0.06] last:border-0 hover:bg-white/[0.03] transition-colors"
-                      >
-                        <td className="py-3.5 pl-1">
-                          <div>
-                            <p className="text-sm font-medium text-white font-[family-name:var(--font-manrope)]">
-                              {res.guest}
-                            </p>
-                            <p className="text-[0.6875rem] text-white/30 mt-0.5">
-                              {res.date} · {res.time}
-                            </p>
-                          </div>
-                        </td>
-                        <td className="py-3.5">
-                          <div>
-                            <p className="text-sm text-white/80">{res.rp}</p>
-                            <p className="text-[0.6875rem] text-white/30">{res.conciergerie}</p>
-                          </div>
-                        </td>
-                        <td className="py-3.5">
-                          <span className="text-sm text-white/70">{res.event}</span>
-                        </td>
-                        <td className="py-3.5 text-center">
-                          <span className="text-sm font-semibold text-white">{res.covers}</span>
-                        </td>
-                        <td className="py-3.5 text-center">
-                          <span
-                            className={`text-[0.6875rem] font-medium px-2.5 py-1 rounded-full ${
-                              res.type === "Table VIP"
-                                ? "bg-purple-400/10 text-purple-400"
-                                : "bg-blue-400/10 text-blue-400"
-                            }`}
-                          >
-                            {res.type}
-                          </span>
-                        </td>
-                        <td className="py-3.5 text-center pr-1 relative">
-                          <button
-                            onClick={() => setOpenDropdown(isOpen ? null : res.idx)}
-                            className={`inline-flex items-center gap-1.5 text-[0.6875rem] font-medium px-2.5 py-1 rounded-full cursor-pointer transition-all hover:scale-105 ${status.bg} ${status.text}`}
-                          >
-                            <span className={`w-1.5 h-1.5 rounded-full ${status.dot}`} />
-                            {status.label}
-                          </button>
-                          {isOpen && (
-                            <>
-                              <div
-                                className="fixed inset-0 z-30"
-                                onClick={() => setOpenDropdown(null)}
-                              />
-                              <div className="absolute right-0 top-full mt-1 z-40 backdrop-blur-xl bg-[#1a1a2e] border border-white/15 rounded-xl p-1 shadow-xl min-w-[130px]">
-                                {(
-                                  [
-                                    ["confirmed", "Confirmée"],
-                                    ["pending", "En attente"],
-                                    ["rejected", "Refusée"],
-                                  ] as [ResStatus, string][]
-                                ).map(([key, label]) => {
-                                  const cfg = STATUS_CONFIG[key];
-                                  return (
-                                    <button
-                                      key={key}
-                                      onClick={() => {
-                                        setStatuses((prev) => ({ ...prev, [res.idx]: key }));
-                                        setOpenDropdown(null);
-                                      }}
-                                      className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all hover:bg-white/10 ${
-                                        res.currentStatus === key ? "bg-white/[0.06]" : ""
-                                      } ${cfg.text}`}
-                                    >
-                                      <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
-                                      {label}
-                                    </button>
-                                  );
-                                })}
-                              </div>
-                            </>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <div className="text-center py-16">
-              <CalendarDays size={48} strokeWidth={1} className="text-white/20 mx-auto mb-4" />
-              <p className="text-white/40 text-sm">Aucune réservation trouvée</p>
-            </div>
-          )}
         </div>
+      )}
 
-        {/* ── Sidebar ── */}
-        <div className="space-y-6">
-          {/* Nouvelles demandes (pending) */}
-          {isDemoVenue && (
-            <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl p-5">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-semibold text-white font-[family-name:var(--font-manrope)]">
-                  Nouvelles demandes
-                </h3>
-                {pendingRequests.length > 0 && (
-                  <span className="text-[0.625rem] font-bold bg-amber-400/20 text-amber-400 px-2 py-0.5 rounded-full">
-                    {pendingRequests.length}
-                  </span>
-                )}
-              </div>
-              {pendingRequests.length > 0 ? (
-                <div className="space-y-3">
-                  {pendingRequests.map((req) => (
-                    <div
-                      key={req.idx}
-                      className="p-3.5 rounded-xl bg-white/[0.04] border border-amber-400/10 hover:bg-white/[0.06] transition-all"
-                    >
-                      <div className="flex items-start justify-between mb-1.5">
-                        <div className="min-w-0">
-                          <p className="text-sm font-medium text-white font-[family-name:var(--font-manrope)] truncate">
-                            {req.guest}
-                          </p>
-                          <p className="text-[0.6875rem] text-white/40 mt-0.5">
-                            {req.covers} couverts · {req.type}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 text-[0.6875rem] text-white/30 mb-3">
-                        <span>{req.event}</span>
-                        <span>·</span>
-                        <span>{req.date}</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <p className="text-[0.625rem] text-white/40">
-                          via <span className="text-white/60">{req.rp}</span>
-                        </p>
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() =>
-                              setStatuses((prev) => ({ ...prev, [req.idx]: "rejected" }))
-                            }
-                            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-red-400/10 text-red-400 text-[0.6875rem] font-medium hover:bg-red-400/20 transition-all"
-                          >
-                            <XCircle size={12} strokeWidth={2} />
-                            Refuser
-                          </button>
-                          <button
-                            onClick={() =>
-                              setStatuses((prev) => ({ ...prev, [req.idx]: "confirmed" }))
-                            }
-                            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-green-400/10 text-green-400 text-[0.6875rem] font-medium hover:bg-green-400/20 transition-all"
-                          >
-                            <CheckCircle2 size={12} strokeWidth={2} />
-                            Accepter
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-6">
-                  <CheckCircle2 size={32} strokeWidth={1} className="text-green-400/30 mx-auto mb-2" />
-                  <p className="text-xs text-white/30">Aucune demande en attente</p>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Événements à venir */}
-          <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl p-5">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-semibold text-white font-[family-name:var(--font-manrope)]">
-                Événements à venir
-              </h3>
-              <Link
-                href="/dashboard/events"
-                className="text-xs text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-1"
-              >
-                Voir tout
-                <ChevronRight size={12} strokeWidth={2} />
-              </Link>
-            </div>
-            <div className="space-y-3">
-              {events.map((event, i) => (
-                <div
-                  key={i}
-                  className="p-3.5 rounded-xl bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.06] transition-all"
-                >
-                  <div className="flex items-start justify-between mb-2">
-                    <div>
-                      <p className="text-sm font-medium text-white font-[family-name:var(--font-manrope)]">
-                        {event.name}
-                      </p>
-                      <p className="text-[0.6875rem] text-white/40 mt-0.5">
-                        {event.date} · {event.time}
-                      </p>
-                    </div>
-                    <span className="text-xs text-white/50 bg-white/[0.06] px-2 py-0.5 rounded-md">
-                      {event.reservations} résa
-                    </span>
-                  </div>
-                  <div className="mt-2">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-[0.625rem] text-white/30">Remplissage</span>
-                      <span className="text-[0.625rem] text-white/50 font-medium">{event.fill}%</span>
-                    </div>
-                    <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
-                      <div
-                        className={`h-full rounded-full transition-all ${
-                          event.fill > 70
-                            ? "bg-green-400"
-                            : event.fill > 40
-                              ? "bg-blue-400"
-                              : "bg-amber-400"
-                        }`}
-                        style={{ width: `${event.fill}%` }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Résa par conciergerie */}
-          {isDemoVenue && (
-            <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl p-5">
-              <h3 className="text-sm font-semibold text-white font-[family-name:var(--font-manrope)] mb-4">
-                Résa par conciergerie
-              </h3>
-              <div className="space-y-3">
-                {[
-                  { name: "Jota Conciergerie", count: 42, pct: 28 },
-                  { name: "Atlas Concierge", count: 38, pct: 26 },
-                  { name: "Noctis VIP", count: 35, pct: 24 },
-                  { name: "Prestige Access", count: 33, pct: 22 },
-                ].map((c) => (
-                  <div key={c.name}>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs text-white/60">{c.name}</span>
-                      <span className="text-xs text-white/80 font-medium">{c.count}</span>
-                    </div>
-                    <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-blue-400/60 rounded-full"
-                        style={{ width: `${c.pct * 3.5}%` }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+      {/* Toast */}
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-black/70 backdrop-blur-xl border border-white/15 text-white px-4 py-3 rounded-xl shadow-lg">
+          <Check size={16} strokeWidth={2} />
+          <span className="text-sm font-medium">{toast}</span>
         </div>
-      </div>
+      )}
     </div>
   );
 }

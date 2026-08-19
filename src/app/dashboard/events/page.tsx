@@ -398,7 +398,43 @@ export default function EventsPage() {
     };
   }, []);
 
-  const displayEvents = events;
+  /* Compteurs vivants : les réservations QR du jour de l'événement.
+     reservations/revenue de venue_events ne sont plus des chiffres saisis
+     mais dérivés du réel. */
+  const [qrRows, setQrRows] = useState<
+    { reservation_date: string; party_size: number; amount_spent: number | null; status: string }[]
+  >([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    createClient()
+      .from("qr_reservations")
+      .select("reservation_date, party_size, amount_spent, status")
+      .neq("status", "annulée")
+      .then(({ data }) => {
+        if (!cancelled) setQrRows(data ?? []);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const withLiveCounts = (e: DemoEvent): DemoEvent => {
+    if (!e.dateObj) return e;
+    const iso = `${e.dateObj.year}-${String(e.dateObj.month + 1).padStart(2, "0")}-${String(e.dateObj.day).padStart(2, "0")}`;
+    const rows = qrRows.filter((r) => r.reservation_date === iso);
+    if (rows.length === 0) return e;
+    const covers = rows.reduce((sum, r) => sum + r.party_size, 0);
+    const revenue = rows.reduce((sum, r) => sum + (r.amount_spent ?? 0), 0);
+    return {
+      ...e,
+      reservations: rows.length,
+      spots: Math.max(0, e.totalSpots - covers),
+      revenue: `${revenue.toLocaleString()} MAD`,
+    };
+  };
+
+  const displayEvents = events.map(withLiveCounts);
 
   const filteredEvents = displayEvents.filter((e) => {
     if (filterStatus) {
