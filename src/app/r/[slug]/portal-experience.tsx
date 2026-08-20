@@ -15,7 +15,8 @@ import {
 /* Style « widget de réservation » à la SevenRooms : carte blanche centrée,
    typographie noire, beaucoup d'air, une couleur d'accent par établissement,
    parcours en trois temps — couverts / date / créneau, puis coordonnées,
-   puis confirmation. Mobile : pleine largeur ; desktop : carte ~480 px. */
+   puis confirmation. Mobile : pleine largeur ; desktop : carte ~480 px.
+   L'accent signe aussi les détails du navigateur (sélection, caret, focus). */
 
 type Portal = {
   display_name: string;
@@ -32,21 +33,34 @@ type Portal = {
 type Step = "slots" | "details" | "done" | "notfound" | "loading";
 
 /* Créneaux depuis l'amplitude configurée — gère le passage de minuit
-   (19:00 → 01:00). */
-function buildSlots(start: string, end: string, interval: number): string[] {
+   (19:00 → 01:00) : les créneaux après minuit portent dayOffset 1. */
+type Slot = { label: string; dayOffset: 0 | 1 };
+
+function buildSlots(start: string, end: string, interval: number): Slot[] {
   const [sh, sm] = start.split(":").map(Number);
   const [eh, em] = end.split(":").map(Number);
   let t = sh * 60 + sm;
   let endMin = eh * 60 + em;
   if (endMin <= t) endMin += 24 * 60;
-  const out: string[] = [];
+  const out: Slot[] = [];
   while (t <= endMin) {
     const h = Math.floor(t / 60) % 24;
     const m = t % 60;
-    out.push(`${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`);
+    out.push({
+      label: `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`,
+      dayOffset: t >= 24 * 60 ? 1 : 0,
+    });
     t += interval;
   }
   return out;
+}
+
+/* Instant réel d'un créneau pour un jour donné — un créneau « 00:30 » d'une
+   amplitude 19:00 → 01:00 a lieu le lendemain matin. */
+function slotDateTime(dayIso: string, slot: Slot): Date {
+  const d = new Date(`${dayIso}T${slot.label}:00`);
+  if (slot.dayOffset) d.setDate(d.getDate() + 1);
+  return d;
 }
 
 function nextDays(n: number): Date[] {
@@ -67,6 +81,16 @@ const MONTH_LABELS = [
 ];
 const isoDay = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
+/* Les fonds proposés vont du grège au noir : la carte blanche flotte
+   différemment selon la luminosité du fond. */
+const isDarkHex = (hex: string) => {
+  const n = parseInt(hex.slice(1), 16);
+  const r = (n >> 16) & 255;
+  const g = (n >> 8) & 255;
+  const b = n & 255;
+  return 0.299 * r + 0.587 * g + 0.114 * b < 128;
+};
 
 export function PortalExperience({
   slug,
@@ -99,6 +123,15 @@ export function PortalExperience({
           return;
         }
         setPortal(row);
+        /* Si tous les créneaux du jour sont déjà passés, ouvrir sur demain
+           plutôt que sur une grille entièrement grisée. */
+        const todayIso = isoDay(new Date());
+        const s = buildSlots(row.start_time, row.end_time, row.interval_minutes);
+        if (s.length && s.every((sl) => slotDateTime(todayIso, sl) < new Date())) {
+          const tomorrow = new Date();
+          tomorrow.setDate(tomorrow.getDate() + 1);
+          setDate(isoDay(tomorrow));
+        }
         setStep("slots");
       });
     return () => {
@@ -115,6 +148,11 @@ export function PortalExperience({
   );
   const days = useMemo(() => nextDays(14), []);
   const accent = portal?.accent_color ?? "#13305c";
+  const darkBg = portal ? isDarkHex(portal.background_color) : false;
+
+  const now = new Date();
+  const noSlotLeft =
+    slots.length > 0 && slots.every((s) => slotDateTime(date, s) < now);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -147,40 +185,62 @@ export function PortalExperience({
 
   return (
     <div
+      data-portal=""
       className={`min-h-screen text-neutral-900 ${embed ? "" : "sm:py-10"}`}
       style={{
         background: portal?.background_color ?? "#f5f5f4",
         fontFamily: "var(--font-portal-ui), sans-serif",
+        ["--portal-accent" as string]: accent,
       }}
     >
+      {/* L'accent de l'établissement signe jusqu'aux détails du navigateur. */}
+      <style>{`
+        [data-portal] ::selection { background: var(--portal-accent); color: #fff; }
+        [data-portal] :focus-visible { outline: 2px solid var(--portal-accent); outline-offset: 2px; }
+        [data-portal] input, [data-portal] textarea { caret-color: var(--portal-accent); }
+        [data-portal] .portal-rail { scrollbar-width: thin; scrollbar-color: #e5e5e5 transparent; }
+        [data-portal] .portal-rail::-webkit-scrollbar { height: 4px; }
+        [data-portal] .portal-rail::-webkit-scrollbar-thumb { background: #e5e5e5; border-radius: 2px; }
+        [data-portal] .portal-rail::-webkit-scrollbar-track { background: transparent; }
+        @keyframes portal-pop { from { opacity: 0; transform: scale(0.82); } }
+      `}</style>
       <div
         className={`mx-auto w-full bg-white ${
           embed
             ? "min-h-screen"
-            : "min-h-screen sm:min-h-0 sm:max-w-[480px] sm:rounded-2xl sm:shadow-[0_20px_60px_-30px_rgba(0,0,0,0.3)]"
+            : `min-h-screen sm:min-h-0 sm:max-w-[480px] sm:rounded-2xl ${
+                darkBg
+                  ? "sm:shadow-[0_32px_90px_-24px_rgba(0,0,0,0.85)]"
+                  : "sm:shadow-[0_20px_60px_-30px_rgba(0,0,0,0.3)]"
+              }`
         }`}
       >
-        {/* Photo de couverture importée par l'établissement */}
+        {/* Photo de couverture importée par l'établissement — fondue dans
+            l'en-tête pour que la maison ouvre la page, pas le widget. */}
         {portal?.cover_url && step !== "notfound" && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={portal.cover_url}
-            alt=""
-            className={`h-40 w-full object-cover sm:h-44 ${
-              embed ? "" : "sm:rounded-t-2xl"
-            }`}
-          />
+          <div className="relative">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={portal.cover_url}
+              alt=""
+              className={`h-48 w-full object-cover sm:h-52 ${
+                embed ? "" : "sm:rounded-t-2xl"
+              }`}
+            />
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-white to-transparent" />
+          </div>
         )}
 
         {/* En-tête établissement */}
         <div className="border-b border-neutral-200 px-6 pb-5 pt-7 text-center">
-          <p
-            className="text-[10px] font-bold uppercase tracking-[0.25em]"
-            style={{ color: accent }}
-          >
-            Réservation
-          </p>
-          <h1 className="font-[family-name:var(--font-portal-display)] mt-1 text-[26px] font-normal tracking-wide">
+          {/* Sans photo, un simple trait d'accent tient lieu de signature. */}
+          {portal && !portal.cover_url && (
+            <div
+              className="mx-auto mb-4 h-[3px] w-8 rounded-full"
+              style={{ background: accent }}
+            />
+          )}
+          <h1 className="font-[family-name:var(--font-portal-display)] text-balance break-words text-[26px] font-normal tracking-wide">
             {step === "notfound" ? "Portail introuvable" : portal?.display_name ?? "…"}
           </h1>
           {portal?.tagline && step !== "notfound" && (
@@ -216,7 +276,8 @@ export function PortalExperience({
                       key={n}
                       onClick={() => setParty(n)}
                       aria-label={`${n} personne${n > 1 ? "s" : ""}`}
-                      className="h-10 w-10 rounded-full border text-sm font-medium transition-colors"
+                      aria-pressed={party === n}
+                      className="h-11 w-11 rounded-full border text-sm font-medium transition-colors"
                       style={
                         party === n
                           ? { background: accent, borderColor: accent, color: "#fff" }
@@ -232,14 +293,24 @@ export function PortalExperience({
               <p className="mb-2 mt-7 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-neutral-400">
                 <Calendar size={12} strokeWidth={2} /> Date
               </p>
-              <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+              <div className="portal-rail -mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
                 {days.map((d) => {
                   const iso = isoDay(d);
                   const selected = iso === date;
                   return (
                     <button
                       key={iso}
-                      onClick={() => setDate(iso)}
+                      onClick={() => {
+                        setDate(iso);
+                        /* Un créneau choisi peut être déjà passé sur la
+                           nouvelle date (retour sur aujourd'hui). */
+                        if (time) {
+                          const sl = slots.find((s) => s.label === time);
+                          if (sl && slotDateTime(iso, sl) < new Date())
+                            setTime(null);
+                        }
+                      }}
+                      aria-pressed={selected}
                       className="flex w-14 shrink-0 flex-col items-center rounded-xl border py-2.5 transition-colors"
                       style={
                         selected
@@ -265,21 +336,35 @@ export function PortalExperience({
                 <Clock size={12} strokeWidth={2} /> Heure
               </p>
               <div className="grid grid-cols-4 gap-2">
-                {slots.map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => setTime(s)}
-                    className="rounded-lg border py-2.5 text-[13px] font-medium transition-colors"
-                    style={
-                      time === s
-                        ? { background: accent, borderColor: accent, color: "#fff" }
-                        : { borderColor: "#e5e5e5", color: "#404040" }
-                    }
-                  >
-                    {s}
-                  </button>
-                ))}
+                {slots.map((s) => {
+                  const past = slotDateTime(date, s) < now;
+                  const selected = time === s.label;
+                  return (
+                    <button
+                      key={s.label}
+                      onClick={() => setTime(s.label)}
+                      disabled={past}
+                      aria-pressed={selected}
+                      className="rounded-lg border py-3 text-[13px] font-medium transition-colors disabled:cursor-not-allowed"
+                      style={
+                        selected
+                          ? { background: accent, borderColor: accent, color: "#fff" }
+                          : past
+                            ? { borderColor: "#f5f5f5", color: "#d4d4d4" }
+                            : { borderColor: "#e5e5e5", color: "#404040" }
+                      }
+                    >
+                      {s.label}
+                    </button>
+                  );
+                })}
               </div>
+              {noSlotLeft && (
+                <p className="mt-3 text-center text-[13px] text-neutral-500">
+                  Plus de créneau disponible pour cette date — choisissez un
+                  autre jour.
+                </p>
+              )}
 
               <button
                 onClick={() => time && setStep("details")}
@@ -287,8 +372,14 @@ export function PortalExperience({
                 className="mt-8 w-full rounded-xl py-3.5 text-sm font-bold text-white transition-opacity disabled:opacity-30"
                 style={{ background: accent }}
               >
-                Continuer
+                {time
+                  ? `Continuer — ${DAY_LABELS[selectedDate.getDay()]} ${selectedDate.getDate()} ${MONTH_LABELS[selectedDate.getMonth()]} · ${time}`
+                  : "Continuer"}
               </button>
+              <p className="mt-3 text-center text-[11px] text-neutral-400">
+                Sans prépaiement — l&apos;établissement confirme par téléphone
+                ou WhatsApp.
+              </p>
             </>
           )}
 
@@ -303,7 +394,7 @@ export function PortalExperience({
                 <ChevronLeft size={15} strokeWidth={2} /> Retour
               </button>
 
-              <div className="mb-6 rounded-xl bg-neutral-50 px-4 py-3">
+              <div className="mb-2 rounded-xl bg-neutral-50 px-4 py-3">
                 <p className="text-[13px] text-neutral-600">
                   <span className="font-semibold text-neutral-900">
                     {portal.display_name}
@@ -317,6 +408,12 @@ export function PortalExperience({
                   · {time}
                 </p>
               </div>
+              {/* La promesse avant l'effort : on demande un numéro, on dit
+                  tout de suite pourquoi et ce qui n'est pas demandé. */}
+              <p className="mb-6 px-1 text-[12px] leading-relaxed text-neutral-400">
+                Sans prépaiement — l&apos;établissement vous confirme par
+                téléphone ou WhatsApp.
+              </p>
 
               <div className="grid grid-cols-2 gap-3">
                 <input
@@ -374,9 +471,6 @@ export function PortalExperience({
                   "Confirmer la réservation"
                 )}
               </button>
-              <p className="mt-3 text-center text-[11px] text-neutral-400">
-                Sans prépaiement — confirmation par téléphone ou WhatsApp.
-              </p>
             </form>
           )}
 
@@ -385,7 +479,10 @@ export function PortalExperience({
             <div className="py-8 text-center">
               <div
                 className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full"
-                style={{ background: `${accent}1a` }}
+                style={{
+                  background: `${accent}1a`,
+                  animation: "portal-pop 0.45s cubic-bezier(0.16, 1, 0.3, 1) both",
+                }}
               >
                 <Check size={30} strokeWidth={2} style={{ color: accent }} />
               </div>
