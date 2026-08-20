@@ -110,6 +110,9 @@ export function PortalExperience({
   const [notes, setNotes] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  /* Créneaux complets pour la date affichée : toutes les tables du plan de
+     salle y portent déjà une réservation. Ils ne sont pas proposés. */
+  const [fullSlots, setFullSlots] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     let cancelled = false;
@@ -139,6 +142,25 @@ export function PortalExperience({
     };
   }, [slug]);
 
+  /* La disponibilité se recharge à chaque changement de date. En cas
+     d'échec réseau, on montre tout plutôt que de bloquer la vente. */
+  useEffect(() => {
+    let cancelled = false;
+    createClient()
+      .rpc("portal_full_slots", { p_slug: slug, p_date: date })
+      .then(({ data }) => {
+        if (cancelled) return;
+        const full = new Set(
+          ((data as { slot: string }[] | null) ?? []).map((r) => r.slot)
+        );
+        setFullSlots(full);
+        setTime((t) => (t && full.has(t) ? null : t));
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [slug, date]);
+
   const slots = useMemo(
     () =>
       portal
@@ -146,13 +168,20 @@ export function PortalExperience({
         : [],
     [portal]
   );
+  const openSlots = useMemo(
+    () => slots.filter((s) => !fullSlots.has(s.label)),
+    [slots, fullSlots]
+  );
   const days = useMemo(() => nextDays(14), []);
   const accent = portal?.accent_color ?? "#13305c";
   const darkBg = portal ? isDarkHex(portal.background_color) : false;
 
   const now = new Date();
+  /* Plus rien à proposer : tout est passé, ou complet. */
   const noSlotLeft =
-    slots.length > 0 && slots.every((s) => slotDateTime(date, s) < now);
+    slots.length > 0 &&
+    (openSlots.length === 0 ||
+      openSlots.every((s) => slotDateTime(date, s) < now));
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -336,7 +365,7 @@ export function PortalExperience({
                 <Clock size={12} strokeWidth={2} /> Heure
               </p>
               <div className="grid grid-cols-4 gap-2">
-                {slots.map((s) => {
+                {openSlots.map((s) => {
                   const past = slotDateTime(date, s) < now;
                   const selected = time === s.label;
                   return (
@@ -361,8 +390,9 @@ export function PortalExperience({
               </div>
               {noSlotLeft && (
                 <p className="mt-3 text-center text-[13px] text-neutral-500">
-                  Plus de créneau disponible pour cette date — choisissez un
-                  autre jour.
+                  {openSlots.length === 0
+                    ? "Complet pour cette date — choisissez un autre jour."
+                    : "Plus de créneau disponible pour cette date — choisissez un autre jour."}
                 </p>
               )}
 
