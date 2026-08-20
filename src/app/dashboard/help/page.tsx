@@ -20,36 +20,43 @@ import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
 const glassCard =
   "backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl";
 
+/* La FAQ décrit le produit tel qu'il est — chaque réponse correspond à une
+   fonctionnalité réellement présente dans le dashboard. */
 const faqItems = [
   {
-    question: "Comment ajouter un nouveau RP a mon reseau ?",
+    question: "D'où viennent mes réservations ?",
     answer:
-      "Rendez-vous dans la section Reseau depuis le menu lateral. Cliquez sur \"Inviter un RP\" et renseignez son adresse e-mail. Il recevra une invitation pour rejoindre votre etablissement sur TwoCards.",
+      "De trois canaux : les QR codes des hôtels partenaires (badge « QR hôtel », commissionnés), votre portail de réservation directe (badge « direct », 0 % de commission) et les réservations que vous saisissez vous-même — téléphone ou walk-in (badge « maison », 0 % également). Le bouton « Nouvelle réservation » en haut de la page Réservations sert à saisir un appel.",
   },
   {
     question: "Comment fonctionnent les commissions ?",
     answer:
-      "Les commissions sont calculees automatiquement en fonction des reservations confirmees apportees par chaque RP. Vous pouvez consulter le detail et l'historique dans la section Commissions, et ajuster les taux depuis les parametres.",
+      "Quand vous saisissez le montant dépensé en fin de sortie, la commission de l'apporteur est calculée automatiquement (10 % du montant pour les apports hôtel ; les canaux direct et maison sont à 0 %). Le détail par sortie et par hôtel apporteur se trouve dans les sections Commissions et Réseau.",
   },
   {
-    question: "Comment suivre mes reservations en temps reel ?",
+    question: "Comment suivre mes réservations en temps réel ?",
     answer:
-      "La section Reservations affiche toutes les reservations en cours, confirmees et passees. Vous pouvez filtrer par date, par RP ou par statut. Les nouvelles reservations apparaissent instantanement.",
+      "La page Réservations se met à jour en direct et se filtre par période (aujourd'hui, à venir, passées), par statut et par nom ou téléphone. Chaque ligne propose ses actions : confirmer, check-in à l'arrivée du client, no-show, annuler. Le plan de salle affiche les occupations du jour choisi, table par table.",
   },
   {
-    question: "Comment interpreter les donnees analytiques ?",
+    question: "Comment marquer l'arrivée d'un client ou un no-show ?",
     answer:
-      "Le tableau de bord Analytics presente vos indicateurs cles : chiffre d'affaires, nombre de couverts, taux de conversion et performance par RP. Utilisez les filtres de periode pour comparer vos resultats.",
+      "Depuis la page Réservations (icônes d'action en bout de ligne) ou depuis le plan de salle en cliquant sur la table. Le check-in enregistre l'heure d'arrivée, visible de tous les postes ; le no-show libère le créneau sur votre portail de réservation.",
   },
   {
-    question: "Comment modifier les informations de mon etablissement ?",
+    question: "Comment interpréter les données analytiques ?",
     answer:
-      "Allez dans Parametres > Etablissement pour mettre a jour le nom, l'adresse, les horaires d'ouverture, la capacite et la description de votre etablissement.",
+      "La page Analytics calcule vos indicateurs réels : chiffre d'affaires, couverts, panier moyen, taux de no-show, répartition par canal et meilleurs jours de la semaine. Le sélecteur de période (7 jours, 30 jours, 12 mois, tout) recalcule l'ensemble, et l'export CSV s'ouvre directement dans Excel.",
   },
   {
-    question: "Comment contacter un RP directement ?",
+    question: "Comment modifier les informations de mon établissement ?",
     answer:
-      "Utilisez la section Messages pour envoyer un message direct a n'importe quel RP de votre reseau. Vous pouvez egalement envoyer des messages groupes pour communiquer une offre ou un evenement.",
+      "Dans Paramètres : téléphone, ville, adresse, description, capacité, horaires et préférences de notifications s'enregistrent réellement. Le nom d'établissement et son type sont gérés par twocards — contactez le support pour les modifier.",
+  },
+  {
+    question: "Comment contacter un hôtel apporteur ?",
+    answer:
+      "Depuis la page Réseau, chaque carte d'apporteur propose un bouton « Message » qui ouvre la conversation directement dans la messagerie. Vous y voyez aussi combien de sorties, de couverts et de chiffre d'affaires chaque hôtel vous a apportés.",
   },
 ];
 
@@ -61,22 +68,22 @@ const quickLinks = [
     desc: "Vue d'ensemble",
   },
   {
-    label: "Reseau RP",
+    label: "Réseau apporteurs",
     href: "/dashboard/network",
     icon: Users,
-    desc: "Gerer vos RP",
+    desc: "Vos hôtels partenaires",
   },
   {
-    label: "Reservations",
+    label: "Réservations",
     href: "/dashboard/reservations",
     icon: CalendarCheck,
-    desc: "Suivi en temps reel",
+    desc: "Suivi en temps réel",
   },
   {
     label: "Commissions",
     href: "/dashboard/commissions",
     icon: Banknote,
-    desc: "Paiements et historique",
+    desc: "Reversements et historique",
   },
   {
     label: "Analytics",
@@ -85,7 +92,7 @@ const quickLinks = [
     desc: "Performances",
   },
   {
-    label: "Parametres",
+    label: "Paramètres",
     href: "/dashboard/settings",
     icon: Settings,
     desc: "Configuration",
@@ -111,7 +118,7 @@ export default function HelpPage() {
           </h1>
         </div>
         <p className="text-sm text-white/40 font-ui">
-          Trouvez des reponses a vos questions et contactez notre equipe de
+          Trouvez des réponses à vos questions et contactez notre équipe de
           support.
         </p>
       </div>
@@ -119,7 +126,7 @@ export default function HelpPage() {
       {/* FAQ */}
       <section className="space-y-3">
         <h2 className="text-lg font-bold text-white">
-          Questions frequentes
+          Questions fréquentes
         </h2>
         <div className={`${glassCard} divide-y divide-white/[0.06]`}>
           {faqItems.map((item, i) => (
@@ -165,7 +172,7 @@ export default function HelpPage() {
                 <p className="text-sm font-medium text-white font-ui">
                   E-mail
                 </p>
-                <p className="text-xs text-white/30">Reponse sous 24h</p>
+                <p className="text-xs text-white/30">Réponse sous 24 h</p>
               </div>
             </div>
             <a
@@ -186,12 +193,12 @@ export default function HelpPage() {
                   Chat en direct
                 </p>
                 <p className="text-xs text-white/30">
-                  Assistance instantanee
+                  Assistance instantanée
                 </p>
               </div>
             </div>
             <span className="inline-block text-xs text-white/20 bg-white/[0.05] border border-white/[0.08] px-3 py-1 rounded-full font-ui">
-              Bientot disponible
+              Bientôt disponible
             </span>
           </div>
         </div>
@@ -200,7 +207,7 @@ export default function HelpPage() {
       {/* Quick links */}
       <section className="space-y-3">
         <h2 className="text-lg font-bold text-white">
-          Acces rapide
+          Accès rapide
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {quickLinks.map((link) => {

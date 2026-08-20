@@ -34,6 +34,7 @@ import {
   UserCheck,
   Upload,
   Check,
+  Loader2,
   Images as ImageIcon,
   Wine,
   Mic2,
@@ -372,6 +373,7 @@ export default function EventsPage() {
   const [closeDropdownOpen, setCloseDropdownOpen] = useState(false);
   const [iconDropdownOpen, setIconDropdownOpen] = useState(false);
   const [galleryOpen, setGalleryOpen] = useState(false);
+  const [uploadingCover, setUploadingCover] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const showToast = useCallback((msg: string) => {
@@ -502,14 +504,49 @@ export default function EventsPage() {
     else showToast(`"${ev?.title}" supprimé`);
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  /* Couverture : plus de base64 en base — image redimensionnée en webp côté
+     navigateur puis envoyée dans le bucket avatars sous le dossier de
+     l'utilisateur, comme la couverture du portail. Seule l'URL publique est
+     stockée. Les anciennes couvertures base64 restent des data-URLs valides
+     et continuent de s'afficher telles quelles. */
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    e.target.value = "";
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      setForm({ ...form, coverImage: ev.target?.result as string });
-    };
-    reader.readAsDataURL(file);
+    if (!file.type.startsWith("image/")) {
+      showToast("Choisissez une image");
+      return;
+    }
+    setUploadingCover(true);
+    try {
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error("no-user");
+      const bitmap = await createImageBitmap(file);
+      const scale = Math.min(1, 1600 / bitmap.width);
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(bitmap.width * scale);
+      canvas.height = Math.round(bitmap.height * scale);
+      canvas.getContext("2d")!.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+      const blob: Blob = await new Promise((res, rej) =>
+        canvas.toBlob((b) => (b ? res(b) : rej(new Error("encode"))), "image/webp", 0.85)
+      );
+      /* Préfixe event- + timestamp : n'écrase jamais la couverture du portail. */
+      const path = `${user.id}/event-${Date.now()}.webp`;
+      const { error: upErr } = await supabase.storage
+        .from("avatars")
+        .upload(path, blob, { contentType: "image/webp" });
+      if (upErr) throw upErr;
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("avatars").getPublicUrl(path);
+      setForm((prev) => ({ ...prev, coverImage: publicUrl }));
+    } catch {
+      showToast("L'envoi de l'image a échoué");
+    }
+    setUploadingCover(false);
   };
 
   const saveForm = async () => {
@@ -723,7 +760,9 @@ export default function EventsPage() {
               )}
               {/* Upload overlay */}
               <div
-                onClick={() => fileInputRef.current?.click()}
+                onClick={() => {
+                  if (!uploadingCover) fileInputRef.current?.click();
+                }}
                 className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-2 bg-black/0 group-hover:bg-black/40 transition-all cursor-pointer opacity-0 group-hover:opacity-100"
               >
                 <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
@@ -747,10 +786,15 @@ export default function EventsPage() {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-white/[0.12] bg-white/[0.06] px-3 py-2.5 text-xs font-medium text-white/70 transition-colors hover:bg-white/[0.12] hover:text-white"
+                disabled={uploadingCover}
+                className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-white/[0.12] bg-white/[0.06] px-3 py-2.5 text-xs font-medium text-white/70 transition-colors hover:bg-white/[0.12] hover:text-white disabled:opacity-50 disabled:hover:bg-white/[0.06] disabled:hover:text-white/70"
               >
-                <Upload size={14} strokeWidth={1.5} />
-                Importer une image
+                {uploadingCover ? (
+                  <Loader2 size={14} strokeWidth={2} className="animate-spin" />
+                ) : (
+                  <Upload size={14} strokeWidth={1.5} />
+                )}
+                {uploadingCover ? "Import en cours…" : "Importer une image"}
               </button>
               <button
                 onClick={() => setGalleryOpen((v) => !v)}

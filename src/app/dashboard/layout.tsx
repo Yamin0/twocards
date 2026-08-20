@@ -26,7 +26,7 @@ import {
 } from "lucide-react";
 import { useAuthUser } from "@/hooks/use-auth-user";
 import { useUnreadMessages } from "@/hooks/use-unread-messages";
-import { PRQualityProvider } from "@/contexts/pr-quality-context";
+import { useVenueNotifications } from "@/hooks/use-venue-notifications";
 import { Avatar } from "@/components/shared/avatar";
 
 const mainNav = [
@@ -40,7 +40,7 @@ const mainNav = [
 ];
 
 const toolsNav = [
-  { icon: Network, label: "Réseau RP", href: "/dashboard/network" },
+  { icon: Network, label: "Réseau apporteurs", href: "/dashboard/network" },
   { icon: CreditCard, label: "Commissions", href: "/dashboard/commissions" },
   { icon: MessageSquare, label: "Messages", href: "/dashboard/messages" },
   { icon: BarChart3, label: "Analyses", href: "/dashboard/analytics" },
@@ -108,7 +108,12 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const closeSidebar = () => setSidebarOpen(false);
   const unreadMessages = useUnreadMessages();
-  const badges = { "/dashboard/messages": unreadMessages };
+  /* unreadCount retombe à 0 si la requête échoue : le layout ne casse pas. */
+  const { unreadCount: unreadNotifications } = useVenueNotifications();
+  const badges = {
+    "/dashboard/messages": unreadMessages,
+    "/dashboard/notifications": unreadNotifications,
+  };
   /* L'entrée Administration n'existe que pour le compte porteur du drapeau
      admin ; la garde réelle est en base, ceci n'est que de l'affichage. */
   const adminItems = isAdmin
@@ -127,8 +132,7 @@ export default function DashboardLayout({
   }, [sidebarOpen]);
 
   return (
-    <PRQualityProvider>
-      <div className="min-h-screen lg:h-screen relative lg:overflow-hidden bg-[#141210]">
+    <div className="min-h-screen lg:h-screen relative lg:overflow-hidden bg-[#141210]">
         {/* Fond photo neutre (remplacer public/dashboard-bg.jpg par votre photo) */}
         <div
           className="fixed inset-0 bg-cover bg-center"
@@ -173,7 +177,16 @@ export default function DashboardLayout({
                 <NavSection items={mainNav} pathname={pathname} onNavigate={closeSidebar} badges={badges} />
                 <NavSection items={toolsNav} pathname={pathname} onNavigate={closeSidebar} badges={badges} />
                 <NavSection items={adminItems} pathname={pathname} onNavigate={closeSidebar} badges={badges} />
-                <div className="pt-3 border-t border-white/10">
+                <div className="pt-3 border-t border-white/10 space-y-0.5">
+                  {/* Aide n'existait qu'en sidebar desktop — le mobile y a droit aussi */}
+                  <Link
+                    href="/dashboard/help"
+                    onClick={closeSidebar}
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-white/40 hover:text-white/70 hover:bg-white/10 transition-all font-ui"
+                  >
+                    <HelpCircle size={18} strokeWidth={1.5} />
+                    Aide
+                  </Link>
                   <form action="/auth/signout" method="post">
                     <button
                       type="submit"
@@ -256,8 +269,7 @@ export default function DashboardLayout({
           <main className="col-span-12 lg:col-span-10 lg:h-[calc(100vh-48px)] lg:overflow-y-auto overflow-x-hidden scrollbar-thin">
             {children}
           </main>
-        </div>
       </div>
-    </PRQualityProvider>
+    </div>
   );
 }

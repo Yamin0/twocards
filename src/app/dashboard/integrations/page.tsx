@@ -17,8 +17,7 @@ import {
   Webhook,
 } from "lucide-react";
 
-const WEBHOOK_URL =
-  "https://bxipezffrrclyezkjckg.supabase.co/functions/v1/pos-webhook";
+const WEBHOOK_URL = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/pos-webhook`;
 
 /* Caisses courantes : la v1 passe par le webhook universel — toutes savent
    l'appeler, directement ou via Zapier / Make. */
@@ -62,15 +61,24 @@ export default function IntegrationsPage() {
   const [tables, setTables] = useState<string[]>([]);
   const [provider, setProvider] = useState("generic");
   const [freshKey, setFreshKey] = useState<string | null>(null);
+  /* Clé saisie pour le ticket de test : pré-remplie à la génération, sinon
+     collée par l'utilisateur — la clé n'étant jamais réaffichée. */
+  const [testKey, setTestKey] = useState("");
   const [busy, setBusy] = useState<"key" | "test" | null>(null);
   const [copied, setCopied] = useState<"url" | "key" | null>(null);
 
-  const load = () => {
+  const load = (isCancelled: () => boolean = () => false) => {
     const sb = createClient();
     sb.from("venue_integrations")
       .select("provider, status, last_event_at")
       .maybeSingle()
-      .then(({ data }) => {
+      .then(({ data, error }) => {
+        if (isCancelled()) return;
+        if (error) {
+          setIntegration(null);
+          showToast("Impossible de charger l'intégration");
+          return;
+        }
         setIntegration(data ?? null);
         if (data) setProvider(data.provider);
       });
@@ -78,14 +86,25 @@ export default function IntegrationsPage() {
       .select("id, ticket_id, table_label, amount, status, reason, created_at")
       .order("created_at", { ascending: false })
       .limit(10)
-      .then(({ data }) => setEvents(data ?? []));
+      .then(({ data }) => {
+        if (!isCancelled()) setEvents(data ?? []);
+      });
     sb.from("venue_tables")
       .select("label")
       .order("label")
-      .then(({ data }) => setTables((data ?? []).map((t) => t.label)));
+      .then(({ data }) => {
+        if (!isCancelled()) setTables((data ?? []).map((t) => t.label));
+      });
   };
 
-  useEffect(load, []);
+  useEffect(() => {
+    let cancelled = false;
+    load(() => cancelled);
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (isLoading || integration === undefined) return <DashboardSkeleton />;
 
@@ -110,21 +129,23 @@ export default function IntegrationsPage() {
       return;
     }
     setFreshKey(data as string);
+    setTestKey(data as string);
     load();
   };
 
   const sendTest = async () => {
-    if (!freshKey) return;
+    const key = testKey.trim();
+    if (!key || tables.length === 0) return;
     setBusy("test");
     try {
       const res = await fetch(WEBHOOK_URL, {
         method: "POST",
         headers: {
           "content-type": "application/json",
-          "x-twocards-key": freshKey,
+          "x-twocards-key": key,
         },
         body: JSON.stringify({
-          table: tables[0] ?? "1",
+          table: tables[0],
           amount: 1234,
           ticket_id: `TEST-${Date.now()}`,
         }),
@@ -282,24 +303,60 @@ export default function IntegrationsPage() {
             </p>
           </div>
 
-          <div className="flex items-center justify-between border-t border-white/[0.08] pt-4">
-            <p className="font-ui text-xs text-white/40 flex items-center gap-1.5">
-              <ShieldCheck size={13} strokeWidth={1.5} />
-              Clé hachée en base, jamais stockée en clair
-            </p>
-            <button
-              onClick={sendTest}
-              disabled={!freshKey || busy === "test"}
-              title={freshKey ? undefined : "Générez d'abord une clé"}
-              className="font-ui flex items-center gap-2 bg-white/10 hover:bg-white/15 text-white text-xs font-medium px-3 py-2 rounded-lg transition-colors disabled:opacity-40"
-            >
-              {busy === "test" ? (
-                <Loader2 size={13} strokeWidth={2} className="animate-spin" />
-              ) : (
-                <Send size={13} strokeWidth={1.5} />
-              )}
-              Envoyer un ticket de test
-            </button>
+          <div className="border-t border-white/[0.08] pt-4 space-y-3">
+            <div>
+              <label
+                htmlFor="pos-test-key"
+                className="font-ui block text-xs text-white/60 mb-1.5"
+              >
+                Clé API
+              </label>
+              <input
+                id="pos-test-key"
+                type="text"
+                value={testKey}
+                onChange={(e) => setTestKey(e.target.value)}
+                placeholder="Collez votre clé pour tester"
+                autoComplete="off"
+                spellCheck={false}
+                className="font-mono w-full rounded-xl bg-black/30 border border-white/10 px-3 py-2.5 text-xs text-white/70 placeholder:text-white/25 focus:outline-none focus:ring-1 focus:ring-white/40"
+              />
+              <p className="font-ui text-[11px] text-white/40 mt-1.5">
+                La clé n&apos;est jamais réaffichée après sa génération —
+                collez celle que vous avez conservée.
+              </p>
+            </div>
+            {tables.length === 0 && (
+              <p className="font-ui text-[11px] text-amber-300/80">
+                Créez d&apos;abord une table dans le plan de salle pour tester
+                le rapprochement.
+              </p>
+            )}
+            <div className="flex items-center justify-between">
+              <p className="font-ui text-xs text-white/40 flex items-center gap-1.5">
+                <ShieldCheck size={13} strokeWidth={1.5} />
+                Clé hachée en base, jamais stockée en clair
+              </p>
+              <button
+                onClick={sendTest}
+                disabled={!testKey.trim() || tables.length === 0 || busy === "test"}
+                title={
+                  tables.length === 0
+                    ? "Créez d'abord une table dans le plan de salle"
+                    : testKey.trim()
+                      ? undefined
+                      : "Collez d'abord votre clé API"
+                }
+                className="font-ui flex items-center gap-2 bg-white/10 hover:bg-white/15 text-white text-xs font-medium px-3 py-2 rounded-lg transition-colors disabled:opacity-40"
+              >
+                {busy === "test" ? (
+                  <Loader2 size={13} strokeWidth={2} className="animate-spin" />
+                ) : (
+                  <Send size={13} strokeWidth={1.5} />
+                )}
+                Envoyer un ticket de test
+              </button>
+            </div>
           </div>
         </div>
 
@@ -311,7 +368,7 @@ export default function IntegrationsPage() {
                 Journal des événements
               </h2>
               <button
-                onClick={load}
+                onClick={() => load()}
                 aria-label="Rafraîchir"
                 className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/[0.06] text-white/50 hover:text-white"
               >
