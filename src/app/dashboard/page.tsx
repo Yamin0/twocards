@@ -8,11 +8,7 @@ import { useVenueQrReservations } from "@/hooks/use-venue-qr-reservations";
 import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
 import { StatStrip } from "@/components/shared/stat-strip";
 import { StatusBadge } from "@/components/shared/status-badge";
-import {
-  MiniBars,
-  RatingStars,
-  weeklySeries,
-} from "@/components/shared/mini-charts";
+import { MiniBars, weeklySeries } from "@/components/shared/mini-charts";
 import {
   ArrowRight,
   CalendarDays,
@@ -76,7 +72,9 @@ export default function VenueDashboardPage() {
       .select(
         "id, title, event_day, event_month, event_year, time_range, status, total_spots"
       )
-      .neq("status", "Fermé")
+      /* Un brouillon n'est pas un événement annoncé : seuls les statuts
+         publiés apparaissent comme « prochain événement ». */
+      .in("status", ["Ouvert", "Bientôt complet"])
       .then(({ data }) => {
         if (cancelled) return;
         const upcoming = ((data as UpcomingEvent[] | null) ?? [])
@@ -97,7 +95,9 @@ export default function VenueDashboardPage() {
   if (isLoading || reservations === null || nextEvent === undefined)
     return <DashboardSkeleton />;
 
-  const active = reservations.filter((r) => r.status !== "annulée");
+  const active = reservations.filter(
+    (r) => r.status !== "annulée" && r.status !== "no-show"
+  );
   const pending = reservations.filter((r) => r.status === "en attente").length;
   const revenue = active.reduce((sum, r) => sum + (r.amount_spent ?? 0), 0);
   const commissions = active.reduce((sum, r) => sum + r.commission, 0);
@@ -106,8 +106,26 @@ export default function VenueDashboardPage() {
     rated.length > 0
       ? rated.reduce((s, r) => s + (r.rating ?? 0), 0) / rated.length
       : null;
-  const weekly = weeklySeries(reservations.map((r) => r.created_at));
+  /* Même définition du volume que les KPI : les annulées n'y figurent pas. */
+  const weekly = weeklySeries(active.map((r) => r.created_at));
   const latest = reservations.slice(0, 5);
+
+  /* Service du jour : ce que le manager veut savoir en ouvrant l'app. */
+  const todayIso = (() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  })();
+  const tonight = active.filter((r) => r.reservation_date === todayIso);
+  const tonightCovers = tonight.reduce((s, r) => s + r.party_size, 0);
+  const nextArrival = tonight
+    .filter((r) => r.reservation_time && !r.arrived_at)
+    .map((r) => r.reservation_time as string)
+    .filter((t) => {
+      const [h, m] = t.split(":").map(Number);
+      const now = new Date();
+      return h * 60 + m >= now.getHours() * 60 + now.getMinutes();
+    })
+    .sort()[0];
 
   const stats = [
     { label: "CA apporté par twocards", value: `${revenue.toLocaleString()} MAD` },
@@ -152,6 +170,36 @@ export default function VenueDashboardPage() {
           {venueName ? `${venueName} — ` : ""}vos chiffres réels : sorties
           reçues, montants saisis, commissions et satisfaction.
         </p>
+        {/* Service du jour, en une ligne : couverts attendus, prochaine arrivée */}
+        <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-white/[0.08] pt-4">
+          <span className="font-ui inline-flex items-center gap-1.5 text-sm text-white/70">
+            <CalendarDays size={14} strokeWidth={1.5} className="text-blue-400" />
+            Ce soir :{" "}
+            <span className="font-semibold text-white">
+              {tonight.length} réservation{tonight.length > 1 ? "s" : ""}
+            </span>
+          </span>
+          <span className="font-ui inline-flex items-center gap-1.5 text-sm text-white/70">
+            <Users size={14} strokeWidth={1.5} className="text-blue-400" />
+            <span className="font-semibold text-white">{tonightCovers}</span>
+            couvert{tonightCovers > 1 ? "s" : ""} attendus
+          </span>
+          {nextArrival && (
+            <span className="font-ui text-sm text-white/70">
+              Prochaine arrivée :{" "}
+              <span className="font-semibold text-white">
+                {nextArrival.slice(0, 5)}
+              </span>
+            </span>
+          )}
+          <Link
+            href="/dashboard/floor-plan"
+            className="font-ui ml-auto inline-flex items-center gap-1 text-xs font-medium text-blue-400 hover:text-blue-300 transition-colors"
+          >
+            Voir le plan de salle
+            <ArrowRight size={12} strokeWidth={1.5} />
+          </Link>
+        </div>
       </div>
 
       {/* KPI */}

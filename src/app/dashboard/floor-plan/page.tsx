@@ -21,6 +21,7 @@ import {
   CalendarDays,
   QrCode,
   Globe,
+  Phone,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useAuthUser } from "@/hooks/use-auth-user";
@@ -51,7 +52,8 @@ interface TableReservation {
   partySize: number;
   arrival: string;
   time: string | null;
-  source: "qr" | "portal";
+  source: "qr" | "portal" | "venue";
+  arrivedAt: string | null;
   minSpend?: string;
   notes: string;
 }
@@ -86,7 +88,8 @@ type AssignedRow = {
   reservation_date: string;
   reservation_time: string | null;
   notes: string | null;
-  source: "qr" | "portal";
+  source: "qr" | "portal" | "venue";
+  arrived_at: string | null;
   table_id: number;
 };
 
@@ -129,8 +132,10 @@ export default function FloorPlanPage() {
   const [tablesList, setTablesList] = useState<TableData[] | null>(null);
   const [selectedTable, setSelectedTable] = useState<number | null>(null);
   const [zoom, setZoom] = useState(1);
-  const [checkedIn, setCheckedIn] = useState<Set<string>>(new Set());
   const [toast, setToast] = useState<string | null>(null);
+  /* Walk-in : nombre de couverts à installer sur une table libre. */
+  const [walkInParty, setWalkInParty] = useState(2);
+  const [seating, setSeating] = useState(false);
 
   // Edit mode
   const [editMode, setEditMode] = useState(false);
@@ -155,19 +160,35 @@ export default function FloorPlanPage() {
     return () => window.removeEventListener("click", close);
   }, []);
 
-  /* Plan chargé depuis venue_tables — la RLS le limite au compte. */
+  /* Plan chargé depuis venue_tables — la RLS le limite au compte.
+     Temps réel : une table créée ou déplacée sur un autre poste apparaît
+     ici sans recharger. On ne recharge pas pendant un drag local. */
+  const draggingRef = useRef(false);
   useEffect(() => {
     let cancelled = false;
-    createClient()
-      .from("venue_tables")
-      .select("id, label, x, y, shape, status, vip, capacity")
-      .order("id", { ascending: true })
-      .then(({ data }) => {
-        if (!cancelled)
-          setTablesList(((data as TableRow[] | null) ?? []).map(rowToTable));
-      });
+    const supabase = createClient();
+    const load = () => {
+      supabase
+        .from("venue_tables")
+        .select("id, label, x, y, shape, status, vip, capacity")
+        .order("id", { ascending: true })
+        .then(({ data }) => {
+          if (!cancelled && !draggingRef.current)
+            setTablesList(((data as TableRow[] | null) ?? []).map(rowToTable));
+        });
+    };
+    load();
+    const channel = supabase
+      .channel("floor-plan-tables")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "venue_tables" },
+        load
+      )
+      .subscribe();
     return () => {
       cancelled = true;
+      supabase.removeChannel(channel);
     };
   }, []);
 
@@ -184,37 +205,53 @@ export default function FloorPlanPage() {
 
   useEffect(() => {
     let cancelled = false;
-    createClient()
-      .from("qr_reservations")
-      .select(
-        "id, guest_name, party_size, reservation_date, reservation_time, notes, source, table_id"
+    const supabase = createClient();
+    const load = () => {
+      supabase
+        .from("qr_reservations")
+        .select(
+          "id, guest_name, party_size, reservation_date, reservation_time, notes, source, arrived_at, table_id"
+        )
+        .not("table_id", "is", null)
+        .not("status", "in", '("annulée","no-show")')
+        .eq("reservation_date", selectedDate)
+        .order("reservation_time", { ascending: true, nullsFirst: false })
+        .then(({ data }) => {
+          if (cancelled) return;
+          const map: Record<number, TableReservation[]> = {};
+          for (const r of (data as AssignedRow[] | null) ?? []) {
+            (map[r.table_id] ??= []).push({
+              resId: r.id,
+              client: r.guest_name,
+              initials: initialsOf(r.guest_name),
+              partySize: r.party_size,
+              arrival:
+                new Date(r.reservation_date + "T00:00:00").toLocaleDateString(
+                  "fr-FR"
+                ) + (r.reservation_time ? ` · ${r.reservation_time}` : ""),
+              time: r.reservation_time,
+              source: r.source,
+              arrivedAt: r.arrived_at,
+              notes: r.notes ?? "",
+            });
+          }
+          setResByTable(map);
+        });
+    };
+    load();
+    /* L'écran de salle reflète l'instant : toute réservation assignée,
+       déplacée ou annulée depuis un autre poste arrive ici en direct. */
+    const channel = supabase
+      .channel("floor-plan-reservations")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "qr_reservations" },
+        load
       )
-      .not("table_id", "is", null)
-      .neq("status", "annulée")
-      .eq("reservation_date", selectedDate)
-      .order("reservation_time", { ascending: true, nullsFirst: false })
-      .then(({ data }) => {
-        if (cancelled) return;
-        const map: Record<number, TableReservation[]> = {};
-        for (const r of (data as AssignedRow[] | null) ?? []) {
-          (map[r.table_id] ??= []).push({
-            resId: r.id,
-            client: r.guest_name,
-            initials: initialsOf(r.guest_name),
-            partySize: r.party_size,
-            arrival:
-              new Date(r.reservation_date + "T00:00:00").toLocaleDateString(
-                "fr-FR"
-              ) + (r.reservation_time ? ` · ${r.reservation_time}` : ""),
-            time: r.reservation_time,
-            source: r.source,
-            notes: r.notes ?? "",
-          });
-        }
-        setResByTable(map);
-      });
+      .subscribe();
     return () => {
       cancelled = true;
+      supabase.removeChannel(channel);
     };
   }, [selectedDate]);
 
@@ -285,10 +322,19 @@ export default function FloorPlanPage() {
     showToast(`Table ${label} ajoutée`);
   };
 
-  /* ── delete table (persistée) ── */
+  /* ── delete table (persistée, avec garde-fou) ── */
   const deleteTable = async (tableId: number) => {
     const table = currentTables.find((t) => t.id === tableId);
     if (!table) return;
+    const hasRes = (resByTable[tableId] ?? []).length > 0;
+    if (
+      !window.confirm(
+        hasRes
+          ? `Supprimer la table ${table.label} ? Ses réservations du jour perdront leur assignation.`
+          : `Supprimer la table ${table.label} ?`
+      )
+    )
+      return;
     setTablesList((prev) => (prev ?? []).filter((t) => t.id !== tableId));
     if (selectedTable === tableId) setSelectedTable(null);
     const { error } = await createClient()
@@ -297,6 +343,61 @@ export default function FloorPlanPage() {
       .eq("id", tableId);
     if (error) showToast("Échec de la suppression");
     else showToast(`Table ${table.label} supprimée`);
+  };
+
+  /* Check-in persisté : l'heure d'arrivée est en base, partagée entre
+     postes — le temps réel rafraîchit la carte. */
+  const resCheckIn = async (res: TableReservation) => {
+    if (!res.resId) return;
+    const arrived_at = new Date().toISOString();
+    setResByTable((prev) => {
+      const next: typeof prev = {};
+      for (const [k, list] of Object.entries(prev))
+        next[Number(k)] = list.map((x) =>
+          x.resId === res.resId ? { ...x, arrivedAt: arrived_at } : x
+        );
+      return next;
+    });
+    const { error } = await createClient()
+      .from("qr_reservations")
+      .update({ arrived_at })
+      .eq("id", res.resId);
+    if (error) showToast("Impossible d'enregistrer l'arrivée");
+    else showToast(`${res.client} — arrivée enregistrée`);
+  };
+
+  /* Walk-in : un client se présente, on l'installe sur une table libre.
+     Réservation « maison » créée à l'instant, check-in immédiat. */
+  const seatWalkIn = async () => {
+    if (!selected || seating) return;
+    setSeating(true);
+    const now = new Date();
+    const time = `${String(now.getHours()).padStart(2, "0")}:${String(
+      now.getMinutes()
+    ).padStart(2, "0")}`;
+    const supabase = createClient();
+    const { data, error } = await supabase.rpc("venue_create_reservation", {
+      p_guest_name: "Walk-in",
+      p_guest_phone: null,
+      p_date: selectedDate,
+      p_time: time,
+      p_party_size: walkInParty,
+      p_notes: null,
+      p_table_id: selected.id,
+    });
+    if (error || !data) {
+      setSeating(false);
+      showToast("Impossible d'installer le client");
+      return;
+    }
+    await supabase
+      .from("qr_reservations")
+      .update({ arrived_at: now.toISOString() })
+      .eq("id", data as string);
+    setSeating(false);
+    showToast(
+      `${walkInParty} couvert${walkInParty > 1 ? "s" : ""} installés — table ${selected.label}`
+    );
   };
 
   /* ── drag handlers (edit mode only) ── */
@@ -310,6 +411,7 @@ export default function FloorPlanPage() {
 
     const rect = canvasRef.current.getBoundingClientRect();
     setDragging(tableId);
+    draggingRef.current = true;
     setDragOffset({
       x: e.clientX / zoom - rect.left / zoom - table.x,
       y: e.clientY / zoom - rect.top / zoom - table.y,
@@ -336,6 +438,7 @@ export default function FloorPlanPage() {
       if (t) patchTable(t.id, { x: t.x, y: t.y });
     }
     setDragging(null);
+    draggingRef.current = false;
   };
 
   /* ── context menu handler ── */
@@ -640,6 +743,10 @@ export default function FloorPlanPage() {
                     {table.vip && (
                       <Crown size={8} strokeWidth={2} className="absolute -top-1 -right-1 text-amber-400" />
                     )}
+                    {/* Client arrivé : pastille verte visible de loin */}
+                    {table.reservation?.arrivedAt && (
+                      <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-green-400 border-2 border-[#0a0a0f]" />
+                    )}
                   </div>
                 );
               })}
@@ -756,6 +863,11 @@ export default function FloorPlanPage() {
                               <Globe size={9} strokeWidth={2} />
                               Direct
                             </span>
+                          ) : res.source === "venue" ? (
+                            <span className="inline-flex items-center gap-1 mt-0.5 rounded-md bg-emerald-500/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-emerald-300">
+                              <Phone size={9} strokeWidth={2} />
+                              Maison
+                            </span>
                           ) : (
                             <span className="inline-flex items-center gap-1 mt-0.5 rounded-md bg-blue-500/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-blue-300">
                               <QrCode size={9} strokeWidth={2} />
@@ -780,6 +892,29 @@ export default function FloorPlanPage() {
                         </div>
                       </div>
 
+                      {/* Check-in réel : écrit en base, partagé entre postes */}
+                      {res.resId &&
+                        (res.arrivedAt ? (
+                          <div className="flex items-center gap-2 rounded-xl bg-green-400/10 border border-green-400/20 px-3 py-2 text-xs font-medium text-green-400">
+                            <LogIn size={13} strokeWidth={1.5} />
+                            Arrivé à{" "}
+                            {new Date(res.arrivedAt).toLocaleTimeString(
+                              "fr-FR",
+                              { hour: "2-digit", minute: "2-digit" }
+                            )}
+                          </div>
+                        ) : (
+                          !editMode && (
+                            <button
+                              onClick={() => resCheckIn(res)}
+                              className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-blue-500 hover:bg-blue-400 px-3 py-2 text-xs font-medium text-white transition-colors"
+                            >
+                              <LogIn size={13} strokeWidth={1.5} />
+                              Check-in
+                            </button>
+                          )
+                        ))}
+
                       {res.notes && (
                         <div className="pt-2 border-t border-white/[0.06]">
                           <p className="text-[0.625rem] text-white/30 uppercase tracking-wider mb-1">Notes</p>
@@ -790,34 +925,58 @@ export default function FloorPlanPage() {
                   ))}
                 </div>
               ) : (
-                <div className="bg-white/[0.04] border border-white/[0.08] rounded-2xl p-6 text-center">
-                  <p className="text-xs text-white/30">
+                <div className="bg-white/[0.04] border border-white/[0.08] rounded-2xl p-5 space-y-4">
+                  <p className="text-xs text-white/30 text-center">
                     Aucune réservation sur cette table le{" "}
                     {new Date(selectedDate + "T00:00:00").toLocaleDateString("fr-FR")}
                   </p>
+                  {/* Walk-in : installer immédiatement un client qui se présente */}
+                  {!editMode &&
+                    selected.status !== "blocked" &&
+                    selectedDate === today && (
+                      <div className="space-y-3 pt-1 border-t border-white/[0.06]">
+                        <div className="flex items-center justify-between pt-2">
+                          <span className="text-xs text-white/50">Couverts</span>
+                          <div className="flex items-center gap-3">
+                            <button
+                              onClick={() =>
+                                setWalkInParty((p) => Math.max(1, p - 1))
+                              }
+                              aria-label="Moins de couverts"
+                              className="h-7 w-7 rounded-lg bg-white/10 text-white/70 hover:bg-white/15 flex items-center justify-center"
+                            >
+                              <Minus size={13} strokeWidth={2} />
+                            </button>
+                            <span className="w-7 text-center text-sm font-medium text-white tabular-nums">
+                              {walkInParty}
+                            </span>
+                            <button
+                              onClick={() =>
+                                setWalkInParty((p) => Math.min(50, p + 1))
+                              }
+                              aria-label="Plus de couverts"
+                              className="h-7 w-7 rounded-lg bg-white/10 text-white/70 hover:bg-white/15 flex items-center justify-center"
+                            >
+                              <Plus size={13} strokeWidth={2} />
+                            </button>
+                          </div>
+                        </div>
+                        <button
+                          onClick={seatWalkIn}
+                          disabled={seating}
+                          className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-blue-500 hover:bg-blue-400 px-3 py-2.5 text-xs font-medium text-white transition-colors disabled:opacity-60"
+                        >
+                          <LogIn size={13} strokeWidth={1.5} />
+                          {seating ? "Installation…" : "Installer un walk-in"}
+                        </button>
+                      </div>
+                    )}
                 </div>
               )}
 
               {/* Actions */}
               {selected.reservation && !editMode && (
                 <div className="space-y-2">
-                  <button
-                    onClick={() => {
-                      const key = `t-${selected.id}`;
-                      if (!checkedIn.has(key)) {
-                        setCheckedIn((prev) => new Set(prev).add(key));
-                        showToast(`Table ${selected.label} — Check-in effectué`);
-                      }
-                    }}
-                    className={`w-full inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-all ${
-                      checkedIn.has(`t-${selected.id}`)
-                        ? "bg-green-400/15 text-green-400 border border-green-400/20"
-                        : "bg-blue-500 hover:bg-blue-400 text-white"
-                    }`}
-                  >
-                    <LogIn size={16} strokeWidth={1.5} />
-                    {checkedIn.has(`t-${selected.id}`) ? "Arrivé" : "Check In"}
-                  </button>
                   <button
                     onClick={async () => {
                       const ids = selectedReservations

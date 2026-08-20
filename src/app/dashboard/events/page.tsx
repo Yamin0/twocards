@@ -202,7 +202,7 @@ interface FormState {
   dateObj: { day: number; month: number; year: number } | null;
   timeOpen: string;
   timeClose: string;
-  status: "Brouillon" | "Ouvert";
+  status: EventStatus;
   genre: string;
   totalSpots: number;
   description: string;
@@ -271,7 +271,7 @@ function eventToForm(ev: DemoEvent): FormState {
     title: ev.title, venue: ev.venue,
     dateObj: ev.dateObj ?? null,
     timeOpen: open, timeClose: close,
-    status: (ev.status === "Brouillon" || ev.status === "Ouvert") ? ev.status : "Ouvert",
+    status: ev.status,
     genre: ev.genre.join(", "),
     totalSpots: ev.totalSpots, description: ev.description,
     gradient: ev.gradient, iconIdx: ev.iconIdx,
@@ -365,8 +365,9 @@ export default function EventsPage() {
   const [panel, setPanel] = useState<Panel>("none");
   const [panelEventId, setPanelEventId] = useState<number | null>(null);
   const [form, setForm] = useState<FormState>(emptyForm());
-  const [calMonth, setCalMonth] = useState(9);
-  const [calYear, setCalYear] = useState(2022);
+  /* Le calendrier s'ouvre sur le mois courant — plus jamais octobre 2022. */
+  const [calMonth, setCalMonth] = useState(() => new Date().getMonth());
+  const [calYear, setCalYear] = useState(() => new Date().getFullYear());
   const [openDropdownOpen, setOpenDropdownOpen] = useState(false);
   const [closeDropdownOpen, setCloseDropdownOpen] = useState(false);
   const [iconDropdownOpen, setIconDropdownOpen] = useState(false);
@@ -452,8 +453,10 @@ export default function EventsPage() {
   const totalReservations = displayEvents.reduce((sum, e) => sum + e.reservations, 0);
   const activeEvents = displayEvents.filter((e) => e.status === "Ouvert" || e.status === "Bientôt complet").length;
   const totalRp = displayEvents.reduce((sum, e) => sum + e.rpCount, 0);
-  const avgFill = displayEvents.filter((e) => !e.closed).length > 0
-    ? Math.round(displayEvents.filter((e) => !e.closed).reduce((sum, e) => sum + ((e.totalSpots - e.spots) / e.totalSpots) * 100, 0) / displayEvents.filter((e) => !e.closed).length)
+  /* Capacité nulle exclue du taux de remplissage — plus de division par zéro. */
+  const fillables = displayEvents.filter((e) => !e.closed && e.totalSpots > 0);
+  const avgFill = fillables.length > 0
+    ? Math.round(fillables.reduce((sum, e) => sum + ((e.totalSpots - e.spots) / e.totalSpots) * 100, 0) / fillables.length)
     : 0;
 
   /* ── Panel actions ── */
@@ -486,6 +489,8 @@ export default function EventsPage() {
 
   const deleteEvent = async (id: number) => {
     const ev = events.find((e) => e.id === id);
+    if (!window.confirm(`Supprimer "${ev?.title ?? "cet événement"}" ? Cette action est définitive.`))
+      return;
     setEvents((prev) => prev.filter((e) => e.id !== id));
     if (panelEventId === id) closePanel();
     setOpenMenu(null);
@@ -545,7 +550,9 @@ export default function EventsPage() {
         spots: Math.max(0, form.totalSpots - existing.reservations),
         description: form.description, gradient: form.gradient,
         iconIdx: form.iconIdx, coverImage: form.coverImage,
-        closed: false,
+        /* closed suit le statut choisi — modifier un titre ne rouvre
+           plus un événement fermé. */
+        closed: form.status === "Fermé",
       };
       const { error } = await createClient()
         .from("venue_events")
@@ -590,7 +597,7 @@ export default function EventsPage() {
 
     /* ── View Panel ── */
     if (panel === "view" && panelEvent) {
-      const fillPercent = Math.round(((panelEvent.totalSpots - panelEvent.spots) / panelEvent.totalSpots) * 100);
+      const fillPercent = panelEvent.totalSpots > 0 ? Math.round(((panelEvent.totalSpots - panelEvent.spots) / panelEvent.totalSpots) * 100) : 0;
       return (
         <div className="fixed inset-0 z-50 flex items-start justify-end">
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={closePanel} />
@@ -940,19 +947,28 @@ export default function EventsPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-[0.625rem] text-white/30 uppercase tracking-wider block mb-1.5">Statut</label>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => setForm({ ...form, status: "Brouillon" })}
-                      className={`flex-1 px-3 py-2.5 rounded-xl text-xs font-medium border transition-all ${form.status === "Brouillon" ? "bg-blue-400/15 border-blue-400/30 text-blue-400" : "bg-white/[0.04] border-white/[0.08] text-white/30 hover:text-white/50"}`}
-                    >
-                      Brouillon
-                    </button>
-                    <button
-                      onClick={() => setForm({ ...form, status: "Ouvert" })}
-                      className={`flex-1 px-3 py-2.5 rounded-xl text-xs font-medium border transition-all ${form.status === "Ouvert" ? "bg-green-400/15 border-green-400/30 text-green-400" : "bg-white/[0.04] border-white/[0.08] text-white/30 hover:text-white/50"}`}
-                    >
-                      Ouvert
-                    </button>
+                  {/* Les quatre statuts du cycle de vie, plus seulement deux */}
+                  <div className="grid grid-cols-2 gap-2">
+                    {(
+                      [
+                        ["Brouillon", "bg-blue-400/15 border-blue-400/30 text-blue-400"],
+                        ["Ouvert", "bg-green-400/15 border-green-400/30 text-green-400"],
+                        ["Bientôt complet", "bg-amber-400/15 border-amber-400/30 text-amber-400"],
+                        ["Fermé", "bg-white/15 border-white/25 text-white/70"],
+                      ] as const
+                    ).map(([st, activeCls]) => (
+                      <button
+                        key={st}
+                        onClick={() => setForm({ ...form, status: st })}
+                        className={`px-3 py-2.5 rounded-xl text-xs font-medium border transition-all whitespace-nowrap ${
+                          form.status === st
+                            ? activeCls
+                            : "bg-white/[0.04] border-white/[0.08] text-white/30 hover:text-white/50"
+                        }`}
+                      >
+                        {st}
+                      </button>
+                    ))}
                   </div>
                 </div>
                 <div>
@@ -1115,7 +1131,7 @@ export default function EventsPage() {
             <div className="col-span-1 text-right">Actions</div>
           </div>
           {filteredEvents.map((event) => {
-            const fillPercent = Math.round(((event.totalSpots - event.spots) / event.totalSpots) * 100);
+            const fillPercent = event.totalSpots > 0 ? Math.round(((event.totalSpots - event.spots) / event.totalSpots) * 100) : 0;
             const Icon = ICONS[event.iconIdx] ?? Sparkles;
             return (
               <div key={event.id} className={`grid grid-cols-12 gap-4 px-5 py-4 border-b border-white/[0.05] hover:bg-white/[0.03] transition-colors items-center ${event.closed ? "opacity-50" : ""}`}>
@@ -1170,7 +1186,7 @@ export default function EventsPage() {
         /* ── Grid view ── */
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
           {filteredEvents.map((event) => {
-            const fillPercent = Math.round(((event.totalSpots - event.spots) / event.totalSpots) * 100);
+            const fillPercent = event.totalSpots > 0 ? Math.round(((event.totalSpots - event.spots) / event.totalSpots) * 100) : 0;
             const Icon = ICONS[event.iconIdx] ?? Sparkles;
             return (
               <div key={event.id} className={`group backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl overflow-hidden hover:bg-white/[0.09] transition-all duration-300 ${event.closed ? "opacity-50" : ""}`}>

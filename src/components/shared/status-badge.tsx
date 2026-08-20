@@ -9,6 +9,7 @@ const STYLES: Record<string, string> = {
   confirmée: "bg-emerald-500/15 text-emerald-400",
   "en attente": "bg-amber-500/15 text-amber-400",
   annulée: "bg-red-500/15 text-red-400",
+  "no-show": "bg-white/10 text-white/50 line-through decoration-white/30",
 };
 
 export function StatusBadge({ status }: { status: string }) {

@@ -1,406 +1,556 @@
 "use client";
 
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useMemo, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useAuthUser } from "@/hooks/use-auth-user";
-import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
 import {
-  Search,
+  useVenueQrReservations,
+  type VenueQrReservation,
+} from "@/hooks/use-venue-qr-reservations";
+import { TableSkeleton } from "@/components/shared/loading-skeleton";
+import { StatStrip } from "@/components/shared/stat-strip";
+import { RatingStars } from "@/components/shared/mini-charts";
+import {
+  ArrowDown,
+  ArrowUp,
+  CalendarPlus,
   Download,
-  ChevronDown,
-  Calendar,
-  UserPlus,
-  Crown,
+  Search,
   Users,
-  TrendingUp,
-  ShieldCheck,
-  Check,
-  X,
 } from "lucide-react";
 
-const DEMO_GUESTS = [
-  {
-    id: "1",
-    nom: "Hicham El Guerrouj",
-    telephone: "+212 6 12 34 56 78",
-    totalVisites: 23,
-    depenses: "124 000 MAD",
-    derniereVisite: "28 Mars 2026",
-    vip: "VIP Platinum",
-    recommande: "Youssef Alaoui",
-  },
-  {
-    id: "2",
-    nom: "Leila Hadioui",
-    telephone: "+212 6 98 76 54 32",
-    totalVisites: 15,
-    depenses: "87 500 MAD",
-    derniereVisite: "25 Mars 2026",
-    vip: "VIP Gold",
-    recommande: "Amira Benjelloun",
-  },
-  {
-    id: "3",
-    nom: "Enzo Rossi",
-    telephone: "+212 6 55 44 33 22",
-    totalVisites: 8,
-    depenses: "32 000 MAD",
-    derniereVisite: "20 Mars 2026",
-    vip: null,
-    recommande: "Direct",
-  },
-  {
-    id: "4",
-    nom: "Asmae Boutaleb",
-    telephone: "+212 6 77 88 99 00",
-    totalVisites: 31,
-    depenses: "189 000 MAD",
-    derniereVisite: "27 Mars 2026",
-    vip: "VIP Black",
-    recommande: "Omar Tazi",
-  },
-  {
-    id: "5",
-    nom: "Khalid Bousfiha",
-    telephone: "+212 6 11 22 33 44",
-    totalVisites: 5,
-    depenses: "18 500 MAD",
-    derniereVisite: "15 Mars 2026",
-    vip: null,
-    recommande: "Leila Hadioui",
-  },
-  {
-    id: "6",
-    nom: "Zineb Lyoubi",
-    telephone: "+212 6 66 55 44 33",
-    totalVisites: 19,
-    depenses: "96 000 MAD",
-    derniereVisite: "26 Mars 2026",
-    vip: "VIP Blue",
-    recommande: "Youssef Alaoui",
-  },
-];
+/* CRM clients dérivé des réservations : pas de table clients à part, un
+   client = un numéro de téléphone vu dans qr_reservations (la RLS limite
+   déjà aux réservations de l'établissement connecté). Tout est recalculé
+   à partir des lignes réelles — aucune donnée de démo. */
 
-/* Identité stable : un [] recréé à chaque rendu invaliderait le useMemo. */
-const NO_GUESTS: typeof DEMO_GUESTS = [];
+/* ---------- Dérivation ---------- */
 
-function vipBadge(vip: string | null) {
-  if (!vip) return null;
-  const colorMap: Record<string, string> = {
-    "VIP Platinum": "bg-white/10 text-white border border-white/20",
-    "VIP Gold": "bg-amber-400/15 text-amber-400 border border-amber-400/20",
-    "VIP Black": "bg-white/[0.06] text-white border border-white/15",
-    "VIP Blue": "bg-blue-400/15 text-blue-400 border border-blue-400/20",
-  };
+/* Clé d'identité d'un client : téléphone sans espaces/points/tirets,
+   le + initial conservé. */
+function normalizePhone(raw: string) {
+  return raw.replace(/[\s.\-]/g, "");
+}
+
+const localToday = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+};
+
+const isCancelled = (r: VenueQrReservation) =>
+  r.status === "annulée" || (r.status as string) === "no-show";
+
+/* Une visite : réservation non annulée déjà passée, ou dont le montant
+   dépensé est connu (le client est bien venu). */
+const isVisit = (r: VenueQrReservation, today: string) =>
+  !isCancelled(r) && (r.reservation_date < today || r.amount_spent !== null);
+
+const isUpcoming = (r: VenueQrReservation, today: string) =>
+  !isCancelled(r) && r.reservation_date >= today && r.amount_spent === null;
+
+type GuestProfile = {
+  id: string;
+  name: string;
+  phone: string;
+  visits: number;
+  totalSpent: number;
+  avgBasket: number | null;
+  lastVisit: string | null;
+  nextReservation: VenueQrReservation | null;
+  avgRating: number | null;
+  sources: string[];
+  firstSeen: string;
+  segments: string[];
+};
+
+function sourceLabel(source: string) {
+  if (source === "qr") return "Réseau QR";
+  if (source === "portal") return "Portail";
+  if (source === "venue") return "Sur place";
+  return source;
+}
+
+const DAY_MS = 86_400_000;
+
+function buildGuests(reservations: VenueQrReservation[]): GuestProfile[] {
+  const today = localToday();
+  const byPhone = new Map<string, VenueQrReservation[]>();
+  for (const r of reservations) {
+    const key = normalizePhone(r.guest_phone ?? "");
+    if (!key) continue;
+    const list = byPhone.get(key);
+    if (list) list.push(r);
+    else byPhone.set(key, [r]);
+  }
+
+  const guests: GuestProfile[] = [];
+  for (const [phone, rows] of byPhone) {
+    const latest = rows.reduce((a, b) => (a.created_at >= b.created_at ? a : b));
+    const visits = rows.filter((r) => isVisit(r, today));
+    const spentRows = rows.filter(
+      (r) => !isCancelled(r) && r.amount_spent !== null
+    );
+    const totalSpent = spentRows.reduce((s, r) => s + (r.amount_spent ?? 0), 0);
+    const rated = rows.filter((r) => r.rating !== null);
+    const upcoming = rows
+      .filter((r) => isUpcoming(r, today))
+      .sort((a, b) => (a.reservation_date < b.reservation_date ? -1 : 1));
+    const lastVisit =
+      visits.length > 0
+        ? visits.reduce((m, r) => (r.reservation_date > m ? r.reservation_date : m), visits[0].reservation_date)
+        : null;
+
+    guests.push({
+      id: phone,
+      name: latest.guest_name,
+      phone,
+      visits: visits.length,
+      totalSpent,
+      avgBasket: spentRows.length > 0 ? totalSpent / spentRows.length : null,
+      lastVisit,
+      nextReservation: upcoming[0] ?? null,
+      avgRating:
+        rated.length > 0
+          ? rated.reduce((s, r) => s + (r.rating ?? 0), 0) / rated.length
+          : null,
+      sources: [...new Set(rows.map((r) => r.source as string))],
+      firstSeen: rows.reduce(
+        (m, r) => (r.created_at < m ? r.created_at : m),
+        rows[0].created_at
+      ),
+      segments: [],
+    });
+  }
+
+  /* Seuil VIP : le top 10 % des totaux dépensés (au moins un client dès
+     qu'un montant existe) — calculé, pas décrété. */
+  const totals = guests
+    .map((g) => g.totalSpent)
+    .filter((t) => t > 0)
+    .sort((a, b) => b - a);
+  const vipThreshold =
+    totals.length > 0
+      ? totals[Math.max(0, Math.ceil(totals.length * 0.1) - 1)]
+      : Infinity;
+
+  const now = Date.now();
+  for (const g of guests) {
+    if (g.totalSpent > 0 && g.totalSpent >= vipThreshold)
+      g.segments.push("VIP");
+    if (g.visits >= 3) {
+      g.segments.push("Habitué");
+      if (
+        g.lastVisit &&
+        now - new Date(g.lastVisit + "T00:00:00").getTime() >= 60 * DAY_MS
+      )
+        g.segments.push("À risque");
+    } else if (g.visits === 1) {
+      g.segments.push("Nouveau");
+    }
+  }
+  return guests;
+}
+
+/* ---------- Présentation ---------- */
+
+const SEGMENT_STYLES: Record<string, string> = {
+  VIP: "bg-amber-400/15 text-amber-400 border-amber-400/20",
+  Habitué: "bg-emerald-500/15 text-emerald-400 border-emerald-400/20",
+  Nouveau: "bg-blue-500/15 text-blue-300 border-blue-400/20",
+  "À risque": "bg-red-500/15 text-red-400 border-red-400/20",
+};
+
+function SegmentBadges({ segments }: { segments: string[] }) {
+  if (segments.length === 0) return <span className="text-white/25">—</span>;
   return (
-    <span
-      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[0.6875rem] font-medium ${colorMap[vip] ?? "bg-white/10 text-white/50 border border-white/10"}`}
-    >
-      <Crown className="h-3 w-3" strokeWidth={1.5} />
-      {vip}
+    <span className="flex flex-wrap gap-1">
+      {segments.map((s) => (
+        <span
+          key={s}
+          className={`font-ui inline-flex rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${SEGMENT_STYLES[s] ?? "bg-white/10 text-white/50 border-white/10"}`}
+        >
+          {s}
+        </span>
+      ))}
     </span>
   );
 }
 
-type SortField = "visites" | "derniereVisite" | "recommande" | null;
+const fmtDate = (iso: string) =>
+  new Date(iso + "T00:00:00").toLocaleDateString("fr-FR", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+
+function exportCsv(guests: GuestProfile[]) {
+  const header = [
+    "Nom",
+    "Téléphone",
+    "Visites",
+    "Total dépensé (MAD)",
+    "Panier moyen (MAD)",
+    "Dernière visite",
+    "Prochaine réservation",
+    "Note moyenne",
+    "Segments",
+    "Canaux",
+  ];
+  const lines = guests.map((g) =>
+    [
+      g.name,
+      g.phone,
+      g.visits,
+      g.totalSpent,
+      g.avgBasket !== null ? Math.round(g.avgBasket) : "",
+      g.lastVisit ?? "",
+      g.nextReservation?.reservation_date ?? "",
+      g.avgRating !== null ? g.avgRating.toFixed(1) : "",
+      g.segments.join(", "),
+      g.sources.map(sourceLabel).join(", "),
+    ]
+      .map((v) => `"${String(v).replace(/"/g, '""')}"`)
+      .join(";")
+  );
+  const blob = new Blob(["﻿" + [header.join(";"), ...lines].join("\n")], {
+    type: "text/csv;charset=utf-8",
+  });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `clients-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+type SortField = "visites" | "depense" | "derniereVisite";
+const SEGMENT_FILTERS = ["VIP", "Habitué", "Nouveau", "À risque"] as const;
 
 export default function GuestsPage() {
-  const { isDemoVenue, isLoading } = useAuthUser();
-  const [vipOnly, setVipOnly] = useState(false);
+  const router = useRouter();
+  const { isLoading } = useAuthUser();
+  const { reservations, isLoading: loadingData } = useVenueQrReservations();
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortBy, setSortBy] = useState<SortField>(null);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [toast, setToast] = useState<string | null>(null);
+  const [segmentFilter, setSegmentFilter] = useState<string | null>(null);
+  const [sortField, setSortField] = useState<SortField>("derniereVisite");
+  const [sortAsc, setSortAsc] = useState(false);
 
-  const showToast = useCallback((message: string) => {
-    setToast(message);
-    setTimeout(() => setToast(null), 3000);
-  }, []);
+  const guests = useMemo(
+    () => buildGuests(reservations ?? []),
+    [reservations]
+  );
 
-  useEffect(() => {
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setShowAddModal(false);
-    };
-    if (showAddModal) {
-      document.addEventListener("keydown", handleEsc);
-      return () => document.removeEventListener("keydown", handleEsc);
-    }
-  }, [showAddModal]);
-
-  const guests = isDemoVenue ? DEMO_GUESTS : NO_GUESTS;
-
-  const filteredGuests = useMemo(() => {
+  const filtered = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    const qPhone = normalizePhone(searchQuery.trim());
     let result = guests.filter((g) => {
-      if (vipOnly && !g.vip) return false;
-      if (searchQuery) {
-        const q = searchQuery.toLowerCase();
-        return (
-          g.nom.toLowerCase().includes(q) ||
-          g.telephone.includes(q) ||
-          (g.recommande && g.recommande.toLowerCase().includes(q))
-        );
-      }
-      return true;
+      if (segmentFilter && !g.segments.includes(segmentFilter)) return false;
+      if (!q) return true;
+      return (
+        g.name.toLowerCase().includes(q) ||
+        (qPhone.length > 0 && g.phone.includes(qPhone))
+      );
     });
-
-    if (sortBy === "visites") {
-      result = [...result].sort((a, b) => b.totalVisites - a.totalVisites);
-    } else if (sortBy === "recommande") {
-      result = [...result].sort((a, b) => a.recommande.localeCompare(b.recommande));
-    }
-
+    const dir = sortAsc ? 1 : -1;
+    result = [...result].sort((a, b) => {
+      if (sortField === "visites") return (a.visits - b.visits) * dir;
+      if (sortField === "depense") return (a.totalSpent - b.totalSpent) * dir;
+      /* Dernière visite : les clients sans visite passent toujours en fin. */
+      if (a.lastVisit === null && b.lastVisit === null) return 0;
+      if (a.lastVisit === null) return 1;
+      if (b.lastVisit === null) return -1;
+      return a.lastVisit < b.lastVisit ? -dir : a.lastVisit > b.lastVisit ? dir : 0;
+    });
     return result;
-  }, [vipOnly, searchQuery, sortBy, guests]);
+  }, [guests, searchQuery, segmentFilter, sortField, sortAsc]);
 
-  const handleExportCSV = () => {
-    const today = new Date().toISOString().split("T")[0];
-    const headers = ["Nom", "Telephone", "Visites", "Depenses", "Derniere Visite", "VIP", "Recommande par"];
-    const csv = [
-      headers.join(","),
-      ...filteredGuests.map((g) =>
-        [g.nom, g.telephone, g.totalVisites, g.depenses, g.derniereVisite, g.vip || "-", g.recommande].map((v) => `"${v}"`).join(",")
-      ),
-    ].join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `clients-${today}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-    showToast("CSV telecharge");
+  if (isLoading || loadingData || reservations === null)
+    return <TableSkeleton cols={7} />;
+
+  /* KPI réels */
+  const now = new Date();
+  const newThisMonth = guests.filter((g) => {
+    const d = new Date(g.firstSeen);
+    return (
+      d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth()
+    );
+  }).length;
+  const allRated = reservations.filter((r) => r.rating !== null);
+  const globalRating =
+    allRated.length > 0
+      ? allRated.reduce((s, r) => s + (r.rating ?? 0), 0) / allRated.length
+      : null;
+  const visited = guests.filter((g) => g.visits >= 1);
+  const returning = guests.filter((g) => g.visits >= 2);
+  const returnRate =
+    visited.length > 0
+      ? Math.round((returning.length / visited.length) * 100)
+      : null;
+
+  const stats = [
+    { label: "Clients uniques", value: guests.length },
+    { label: "Nouveaux ce mois", value: newThisMonth },
+    {
+      label: "Note moyenne",
+      value: globalRating !== null ? globalRating.toFixed(1).replace(".", ",") : "—",
+      hint:
+        allRated.length > 0
+          ? `${allRated.length} avis`
+          : "aucun avis pour le moment",
+    },
+    {
+      label: "Clients qui reviennent",
+      value: returnRate !== null ? `${returnRate}%` : "—",
+      hint:
+        visited.length > 0
+          ? `${returning.length} sur ${visited.length} clients venus`
+          : undefined,
+    },
+  ];
+
+  const sortButton = (field: SortField, label: string) => {
+    const active = sortField === field;
+    return (
+      <button
+        key={field}
+        onClick={() => {
+          if (active) setSortAsc(!sortAsc);
+          else {
+            setSortField(field);
+            setSortAsc(false);
+          }
+        }}
+        className={`font-ui inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm transition-colors ${active ? "bg-blue-500 text-white" : "bg-white/[0.07] text-white/50 border border-white/[0.1] hover:bg-white/[0.1]"}`}
+      >
+        {label}
+        {active &&
+          (sortAsc ? (
+            <ArrowUp className="h-3.5 w-3.5" strokeWidth={1.5} />
+          ) : (
+            <ArrowDown className="h-3.5 w-3.5" strokeWidth={1.5} />
+          ))}
+      </button>
+    );
   };
-
-  if (isLoading) return <DashboardSkeleton />;
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-extrabold text-white">
-              Clients
-            </h1>
-            <p className="text-sm text-white/50 mt-1">
-              Gérez votre base de clients et suivez leur fidélité.
-            </p>
-          </div>
-          <button
-            onClick={handleExportCSV}
-            className="flex items-center gap-2 px-4 py-2.5 bg-blue-500 text-white rounded-xl text-xs font-semibold hover:bg-blue-600 transition-colors shadow-lg shadow-blue-500/20"
+      <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="font-display text-3xl font-light text-white">
+            Clients
+          </h1>
+          <p className="font-ui text-sm text-white/60 mt-1.5">
+            Votre base clients, construite automatiquement à partir des
+            réservations — un client naît d&apos;une réservation.
+          </p>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <Link
+            href="/dashboard/reservations"
+            className="font-ui flex items-center gap-2 bg-white/10 hover:bg-white/15 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors"
           >
-            <Download className="h-4 w-4" strokeWidth={1.5} />
-            Exporter CSV
-          </button>
+            <CalendarPlus size={16} strokeWidth={1.5} />
+            Réservations
+          </Link>
+          {filtered.length > 0 && (
+            <button
+              onClick={() => exportCsv(filtered)}
+              className="font-ui flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors shadow-lg shadow-blue-500/20"
+            >
+              <Download size={16} strokeWidth={1.5} />
+              Exporter CSV
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Search + Filters */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search
-            className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30"
-            strokeWidth={1.5}
-          />
-          <input
-            type="text"
-            placeholder="Rechercher un client par nom, téléphone ou email..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-white/[0.05] border border-white/[0.1] rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-blue-400/40 transition-colors"
-          />
-        </div>
+      {/* KPI */}
+      <StatStrip stats={stats} />
+
+      {/* Recherche */}
+      <div className="relative">
+        <Search
+          className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30"
+          strokeWidth={1.5}
+        />
+        <input
+          type="text"
+          placeholder="Rechercher un client par nom ou téléphone..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="font-ui w-full bg-white/[0.05] border border-white/[0.1] rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-blue-400/40 transition-colors"
+        />
       </div>
 
-      {/* Filters */}
+      {/* Segments + tris */}
       <div className="flex flex-wrap items-center gap-3">
-        {/* VIP Toggle */}
-        <label className="inline-flex items-center gap-2 cursor-pointer">
-          <span className="text-[0.625rem] text-white/30 uppercase tracking-wider">
-            VIP
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={() => setSegmentFilter(null)}
+            className={`font-ui rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${segmentFilter === null ? "bg-white text-black" : "bg-white/[0.07] text-white/50 border border-white/[0.1] hover:bg-white/[0.1]"}`}
+          >
+            Tous · {guests.length}
+          </button>
+          {SEGMENT_FILTERS.map((s) => {
+            const count = guests.filter((g) => g.segments.includes(s)).length;
+            return (
+              <button
+                key={s}
+                onClick={() =>
+                  setSegmentFilter(segmentFilter === s ? null : s)
+                }
+                className={`font-ui rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${segmentFilter === s ? "bg-white text-black" : "bg-white/[0.07] text-white/50 border border-white/[0.1] hover:bg-white/[0.1]"}`}
+              >
+                {s} · {count}
+              </button>
+            );
+          })}
+        </div>
+        <div className="ml-auto flex flex-wrap items-center gap-2">
+          <span className="font-ui text-[10px] uppercase tracking-wider text-white/30">
+            Trier
           </span>
-          <button
-            onClick={() => setVipOnly(!vipOnly)}
-            className={`relative w-9 h-5 rounded-full transition-colors ${vipOnly ? "bg-blue-500" : "bg-white/[0.1]"}`}
-          >
-            <span
-              className={`absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white transition-transform ${vipOnly ? "translate-x-4" : "translate-x-0"}`}
-            />
-          </button>
-        </label>
-
-        {/* Nombre de visites */}
-        <button
-          onClick={() => setSortBy(sortBy === "visites" ? null : "visites")}
-          className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm transition-colors ${sortBy === "visites" ? "bg-blue-500 text-white" : "bg-white/[0.07] text-white/50 border border-white/[0.1] hover:bg-white/[0.1]"}`}
-        >
-          Nombre de visites
-          <ChevronDown className="h-3.5 w-3.5" strokeWidth={1.5} />
-        </button>
-
-        {/* Derniere visite */}
-        <button
-          onClick={() => setSortBy(sortBy === "derniereVisite" ? null : "derniereVisite")}
-          className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm transition-colors ${sortBy === "derniereVisite" ? "bg-blue-500 text-white" : "bg-white/[0.07] text-white/50 border border-white/[0.1] hover:bg-white/[0.1]"}`}
-        >
-          <Calendar className="h-3.5 w-3.5" strokeWidth={1.5} />
-          Derniere visite
-          <ChevronDown className="h-3.5 w-3.5" strokeWidth={1.5} />
-        </button>
-
-        {/* Recommande par */}
-        <button
-          onClick={() => setSortBy(sortBy === "recommande" ? null : "recommande")}
-          className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm transition-colors ${sortBy === "recommande" ? "bg-blue-500 text-white" : "bg-white/[0.07] text-white/50 border border-white/[0.1] hover:bg-white/[0.1]"}`}
-        >
-          Recommande par
-          <ChevronDown className="h-3.5 w-3.5" strokeWidth={1.5} />
-        </button>
-      </div>
-
-      {/* Table */}
-      <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl overflow-hidden">
-        {/* Table Header */}
-        <div className="grid grid-cols-4 sm:grid-cols-7 gap-4 px-5 py-3 bg-white/[0.04]">
-          <span className="text-[0.625rem] text-white/30 uppercase tracking-wider">Nom</span>
-          <span className="hidden sm:block text-[0.625rem] text-white/30 uppercase tracking-wider">Telephone</span>
-          <span className="text-[0.625rem] text-white/30 uppercase tracking-wider">Total Visites</span>
-          <span className="hidden sm:block text-[0.625rem] text-white/30 uppercase tracking-wider">Depenses Totales</span>
-          <span className="text-[0.625rem] text-white/30 uppercase tracking-wider">Derniere Visite</span>
-          <span className="text-[0.625rem] text-white/30 uppercase tracking-wider">Statut VIP</span>
-          <span className="hidden sm:block text-[0.625rem] text-white/30 uppercase tracking-wider">Recommande par</span>
-        </div>
-
-        {/* Table Rows */}
-        {filteredGuests.length === 0 ? (
-          <div className="px-5 py-8 text-center text-sm text-white/40">
-            Aucun client trouve
-          </div>
-        ) : (
-          filteredGuests.map((guest, i) => (
-            <div
-              key={guest.id}
-              className={`grid grid-cols-4 sm:grid-cols-7 gap-4 px-5 py-3.5 items-center text-sm hover:bg-white/[0.06] transition-colors border-t border-white/[0.06] ${i % 2 === 1 ? "bg-white/[0.02]" : ""}`}
-            >
-              <span className="font-medium text-white truncate">
-                {guest.nom}
-              </span>
-              <span className="hidden sm:block text-white/50">{guest.telephone}</span>
-              <span className="text-white">{guest.totalVisites}</span>
-              <span className="hidden sm:block text-white font-medium">{guest.depenses}</span>
-              <span className="text-white/50">{guest.derniereVisite}</span>
-              <span>{vipBadge(guest.vip)}</span>
-              <span className="hidden sm:block text-white/50 truncate">
-                {guest.recommande}
-              </span>
-            </div>
-          ))
-        )}
-      </div>
-
-      {/* Footer Stats */}
-      <div className="mt-8">
-        <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-5 flex flex-wrap items-center justify-between gap-6">
-          <div className="flex items-center gap-8">
-            <div className="flex items-center gap-3">
-              <div className="h-9 w-9 rounded-full bg-blue-500/15 flex items-center justify-center">
-                <Users className="h-4 w-4 text-blue-400" strokeWidth={1.5} />
-              </div>
-              <div>
-                <p className="text-[0.625rem] text-white/30 uppercase tracking-wider">
-                  Total Clients
-                </p>
-                <p className="text-lg font-semibold text-white">
-                  {isDemoVenue ? "2 842" : "0"}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <div className="h-9 w-9 rounded-full bg-blue-500/15 flex items-center justify-center">
-                <TrendingUp className="h-4 w-4 text-blue-400" strokeWidth={1.5} />
-              </div>
-              <div>
-                <p className="text-[0.625rem] text-white/30 uppercase tracking-wider">
-                  Nouveaux ce mois
-                </p>
-                <p className="text-lg font-semibold text-white">
-                  {isDemoVenue ? "+148" : "0"}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <div className="h-9 w-9 rounded-full bg-blue-500/15 flex items-center justify-center">
-                <ShieldCheck className="h-4 w-4 text-blue-400" strokeWidth={1.5} />
-              </div>
-              <div>
-                <p className="text-[0.625rem] text-white/30 uppercase tracking-wider">
-                  Retention VIP
-                </p>
-                <p className="text-lg font-semibold text-white">
-                  {isDemoVenue ? "94%" : "0%"}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="inline-flex items-center gap-2 bg-blue-500 text-white rounded-xl px-5 py-2.5 text-sm font-medium hover:bg-blue-600 transition-colors"
-          >
-            <UserPlus className="h-4 w-4" strokeWidth={1.5} />
-            Ajouter un Client
-          </button>
+          {sortButton("derniereVisite", "Dernière visite")}
+          {sortButton("visites", "Visites")}
+          {sortButton("depense", "Dépense totale")}
         </div>
       </div>
 
-      {/* Add Client Modal */}
-      {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6 w-full max-w-md mx-4">
-            <div className="flex items-center justify-between mb-5">
-              <h2 className="text-lg font-bold text-white">
-                Nouveau Client
-              </h2>
-              <button onClick={() => setShowAddModal(false)} className="text-white/40 hover:text-white transition-colors">
-                <X size={20} strokeWidth={1.5} />
-              </button>
-            </div>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                setShowAddModal(false);
-                showToast("Client ajoute avec succes");
-              }}
-              className="space-y-4"
-            >
-              <div>
-                <label className="block text-[0.625rem] text-white/30 uppercase tracking-wider mb-1.5">Nom complet</label>
-                <input type="text" required className="w-full px-4 py-2.5 bg-white/[0.05] border border-white/[0.1] rounded-xl text-sm text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500/30" />
-              </div>
-              <div>
-                <label className="block text-[0.625rem] text-white/30 uppercase tracking-wider mb-1.5">Telephone</label>
-                <input type="tel" required className="w-full px-4 py-2.5 bg-white/[0.05] border border-white/[0.1] rounded-xl text-sm text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500/30" />
-              </div>
-              <div>
-                <label className="block text-[0.625rem] text-white/30 uppercase tracking-wider mb-1.5">Email</label>
-                <input type="email" className="w-full px-4 py-2.5 bg-white/[0.05] border border-white/[0.1] rounded-xl text-sm text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500/30" />
-              </div>
-              <button type="submit" className="w-full bg-blue-500 text-white rounded-xl px-5 py-2.5 text-sm font-medium hover:bg-blue-600 transition-colors">
-                Ajouter
-              </button>
-            </form>
+      {/* Table / état vide */}
+      {guests.length === 0 ? (
+        <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-12 text-center">
+          <div className="w-14 h-14 rounded-2xl bg-blue-500/15 border border-blue-400/20 flex items-center justify-center mx-auto mb-5">
+            <Users size={26} strokeWidth={1.5} className="text-blue-400" />
           </div>
+          <h2 className="font-display text-xl font-normal text-white mb-2">
+            Aucun client pour le moment
+          </h2>
+          <p className="font-ui text-sm text-white/50 max-w-md mx-auto">
+            Votre base clients se construit toute seule : dès qu&apos;une
+            réservation arrive — QR du réseau ou portail direct — le client
+            apparaît ici avec ses visites, ses dépenses et ses avis.
+          </p>
+          <Link
+            href="/dashboard/reservations"
+            className="font-ui inline-flex items-center gap-2 mt-6 bg-white/10 hover:bg-white/15 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors"
+          >
+            <CalendarPlus size={16} strokeWidth={1.5} />
+            Voir les réservations
+          </Link>
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-10 text-center">
+          <p className="font-ui text-sm text-white/50">
+            Aucun client ne correspond à cette recherche.
+          </p>
+        </div>
+      ) : (
+        <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl overflow-x-auto">
+          <table className="w-full text-left">
+            <thead>
+              <tr className="border-b border-white/10">
+                {[
+                  "Client",
+                  "Visites",
+                  "Total dépensé",
+                  "Panier moyen",
+                  "Dernière visite",
+                  "Prochaine résa",
+                  "Note",
+                  "Canaux",
+                  "Segment",
+                ].map((h) => (
+                  <th
+                    key={h}
+                    className="font-ui px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/50 whitespace-nowrap"
+                  >
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((g) => (
+                <tr
+                  key={g.id}
+                  onClick={() =>
+                    router.push(
+                      `/dashboard/guests/${encodeURIComponent(g.id)}`
+                    )
+                  }
+                  className="border-b border-white/[0.06] last:border-0 cursor-pointer hover:bg-white/[0.06] transition-colors"
+                >
+                  <td className="px-4 py-3">
+                    <p className="font-ui text-sm font-medium text-white">
+                      {g.name}
+                    </p>
+                    <p className="font-ui text-xs text-white/40">{g.phone}</p>
+                  </td>
+                  <td className="font-ui px-4 py-3 text-sm text-white tabular-nums">
+                    {g.visits}
+                  </td>
+                  <td className="font-ui px-4 py-3 text-sm text-white tabular-nums whitespace-nowrap">
+                    {g.totalSpent > 0
+                      ? `${g.totalSpent.toLocaleString()} MAD`
+                      : "—"}
+                  </td>
+                  <td className="font-ui px-4 py-3 text-sm text-white/70 tabular-nums whitespace-nowrap">
+                    {g.avgBasket !== null
+                      ? `${Math.round(g.avgBasket).toLocaleString()} MAD`
+                      : "—"}
+                  </td>
+                  <td className="font-ui px-4 py-3 text-sm text-white/70 whitespace-nowrap">
+                    {g.lastVisit ? fmtDate(g.lastVisit) : "—"}
+                  </td>
+                  <td className="font-ui px-4 py-3 text-sm text-white/70 whitespace-nowrap">
+                    {g.nextReservation
+                      ? fmtDate(g.nextReservation.reservation_date)
+                      : "—"}
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    {g.avgRating !== null ? (
+                      <span className="inline-flex items-center gap-1.5">
+                        <RatingStars value={g.avgRating} size={12} />
+                        <span className="font-ui text-xs text-white/60 tabular-nums">
+                          {g.avgRating.toFixed(1)}
+                        </span>
+                      </span>
+                    ) : (
+                      <span className="text-white/25">—</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className="flex flex-wrap gap-1">
+                      {g.sources.map((s) => (
+                        <span
+                          key={s}
+                          className="font-ui rounded-md bg-white/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white/50 whitespace-nowrap"
+                        >
+                          {sourceLabel(s)}
+                        </span>
+                      ))}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <SegmentBadges segments={g.segments} />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
 
-      {/* Toast */}
-      {toast && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 backdrop-blur-xl bg-white/15 border border-white/20 text-white px-5 py-3 rounded-xl shadow-lg">
-          <Check size={16} strokeWidth={2} />
-          <span className="text-sm font-medium">{toast}</span>
-        </div>
+      {/* Lecture des segments */}
+      {guests.length > 0 && (
+        <p className="font-ui text-xs text-white/40 max-w-3xl">
+          Segments calculés sur vos réservations réelles : « Nouveau » = 1
+          visite, « Habitué » = 3 visites ou plus, « À risque » = habitué sans
+          visite depuis 60 jours, « VIP » = top 10 % des dépenses totales.
+        </p>
       )}
     </div>
   );

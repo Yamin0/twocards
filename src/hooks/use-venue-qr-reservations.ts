@@ -12,13 +12,14 @@ export type VenueQrReservation = {
   reservation_time: string | null;
   party_size: number;
   notes: string | null;
-  status: "en attente" | "confirmée" | "annulée";
+  status: "en attente" | "confirmée" | "annulée" | "no-show";
   commission: number;
   commission_rate: number;
   amount_spent: number | null;
   amount_source: "manuel" | "pos";
-  source: "qr" | "portal";
+  source: "qr" | "portal" | "venue";
   table_id: number | null;
+  arrived_at: string | null;
   rating: number | null;
   rating_comment: string | null;
   created_at: string;
@@ -29,7 +30,8 @@ export type VenueQrReservation = {
 const SELECT =
   "id, category, guest_name, guest_phone, reservation_date, " +
   "reservation_time, party_size, notes, status, commission, " +
-  "commission_rate, amount_spent, amount_source, source, table_id, rating, rating_comment, created_at";
+  "commission_rate, amount_spent, amount_source, source, table_id, " +
+  "arrived_at, rating, rating_comment, created_at";
 
 /* Réservations adressées à l'établissement connecté — la RLS ne laisse
    passer que celles dont venue_slug pointe vers sa fiche venues. Tenues à
