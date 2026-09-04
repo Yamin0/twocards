@@ -393,7 +393,7 @@ export default function AdminPage() {
         className="fixed inset-0 bg-cover bg-center"
         style={{ backgroundImage: "url(/dashboard-bg.jpg)" }}
       />
-      <div className="fixed inset-0 bg-black/55" />
+      <div className="fixed inset-0 bg-black/60" />
 
       <div className="relative z-10 mx-auto max-w-5xl space-y-6 p-4 lg:p-8">
         {/* ── En-tête ── */}

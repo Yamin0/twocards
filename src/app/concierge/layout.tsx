@@ -138,12 +138,16 @@ export default function ConciergeLayout({
 
   return (
     <div className="min-h-screen lg:h-screen relative lg:overflow-hidden bg-[#141210]">
-      {/* Fond photo neutre (remplacer public/dashboard-bg.jpg par votre photo) */}
+      {/* Fond photo neutre (remplacer public/dashboard-bg.jpg par votre photo).
+         Le voile est à 60 % et non 35 % : le zellige est un motif à haute
+         fréquence qui traverse le backdrop-blur des panneaux et parasite la
+         lecture. L'assombrir écrase son contraste sans le flouter, ce qui
+         garde le motif lisible autour des panneaux. */}
       <div
         className="fixed inset-0 bg-cover bg-center"
         style={{ backgroundImage: "url(/dashboard-bg.jpg)" }}
       />
-      <div className="fixed inset-0 bg-black/35" />
+      <div className="fixed inset-0 bg-black/60" />
       <div className="fixed inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/40" />
 
       <div className="relative z-10 p-4 lg:p-6 grid grid-cols-12 gap-4 lg:gap-6 lg:h-screen">
