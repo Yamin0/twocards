@@ -48,6 +48,25 @@ const suisse = localFont({
   ],
 });
 
+// Satoshi — page d'accueil. Fonte variable (300 à 900, droit et italique) :
+// une seule paire de fichiers couvre toutes les graisses de la landing.
+const satoshi = localFont({
+  variable: "--font-satoshi",
+  display: "swap",
+  src: [
+    {
+      path: "./fonts/Satoshi-Variable.woff2",
+      weight: "300 900",
+      style: "normal",
+    },
+    {
+      path: "./fonts/Satoshi-VariableItalic.woff2",
+      weight: "300 900",
+      style: "italic",
+    },
+  ],
+});
+
 /* Teinte la barre de Safari iOS (et le chrome des navigateurs mobiles) dans
    le noir de la navbar au lieu du blanc par défaut : la barre se fond dans le
    site. Même valeur que l'écran de chargement du héros (#0a0a0a). */
@@ -57,9 +76,9 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://twocardspro.com"),
-  title: "twocards. | Transformez chaque recommandation en réservation traçable",
+  title: "twocards. | Un seul QR code, de la chambre à la commission",
   description:
-    "TwoCards connecte les établissements aux concierges et RP vérifiés, synchronise les disponibilités et automatise l'attribution, les acomptes et les commissions.",
+    "Un QR en chambre, un lien par e-mail ou WhatsApp : votre client découvre votre sélection, réserve en quelques secondes, et vous suivez tout — arrivée, facture vérifiée, commission.",
   openGraph: {
     type: "website",
     locale: "fr_FR",
@@ -84,7 +103,7 @@ export default function RootLayout({
   return (
     <html
       lang="fr"
-      className={`${manrope.variable} ${inter.variable} ${nunito.variable} ${gotham.variable} ${suisse.variable} scroll-smooth`}
+      className={`${manrope.variable} ${inter.variable} ${nunito.variable} ${gotham.variable} ${suisse.variable} ${satoshi.variable} scroll-smooth`}
     >
       <body>
         <ImpersonationBanner />

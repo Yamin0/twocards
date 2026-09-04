@@ -86,7 +86,7 @@ export function Activity({ variant = "light" }: { variant?: Variant }) {
           transition={{ duration: 0.6 }}
         >
           <h2
-            className={`mb-6 font-title text-3xl font-normal leading-tight md:text-4xl ${
+            className={`mb-6 font-title text-3xl font-bold leading-tight tracking-[-0.03em] md:text-4xl ${
               onVideo ? "text-on-video text-white" : "text-[var(--landing-ink)]"
             }`}
           >
@@ -101,9 +101,9 @@ export function Activity({ variant = "light" }: { variant?: Variant }) {
                 : "text-[var(--landing-ink)]/70"
             }`}
           >
-            Chaque événement du parcours (confirmation, arrivée du client,
-            validation de la facture, commission) vous est notifié à
-            l&apos;instant où il se produit. Côté concierge comme côté
+            Du scan du QR à la commission, chaque événement du parcours
+            (confirmation, arrivée du client, validation de la facture) vous
+            est notifié à l&apos;instant où il se produit. Côté concierge comme côté
             établissement, plus personne ne relance personne :
             l&apos;information arrive d&apos;elle-même.
           </p>

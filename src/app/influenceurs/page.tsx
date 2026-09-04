@@ -17,6 +17,14 @@ export default function InfluenceursPage() {
         titleEnd: ".",
         subtitle:
           "On vous demande déjà où dîner, où sortir, où passer la soirée. Chaque réponse déclenche des réservations dont vous ne voyez jamais la couleur. TwoCards attribue chaque réservation issue de vos recommandations et vous rémunère sur le revenu réellement vérifié.",
+        /* La séquence des portes, pilotée par le scroll et épinglée derrière
+           toute la page : elle vient de la page d'accueil, qui porte
+           désormais le héros vidéo du système QR. */
+        scrollVideo: {
+          desktop: "/videos/hero-doors.mp4",
+          mobile: "/videos/hero-doors-720.mp4",
+          poster: "/videos/hero-doors-poster.jpg",
+        },
         primaryCta: { label: "Créer ma sélection", href: "/signup?role=concierge" },
         secondaryCta: { label: "Voir comment ça marche", href: "/" },
         steps: [
