@@ -121,6 +121,26 @@
   font-family: var(--font-suisse), var(--font-inter), sans-serif;
 }
 
+/* Page d'accueil : Satoshi partout, titres comme textes. Sa fonte variable
+   couvre 300 à 900 ; les graisses se règlent donc élément par élément dans
+   les composants — 700 aux titres, 600 aux sous-titres, 500 aux libellés,
+   400 au texte courant, 300 aux accents italiques et aux numéros. Seul
+   l'accent italique est fixé ici : il revient dans chaque titre, et sa
+   légèreté fait tout le contraste avec la graisse qui l'entoure. */
+.landing-satoshi,
+.landing-satoshi .font-title,
+.landing-satoshi .font-body {
+  font-family: var(--font-satoshi), var(--font-inter), sans-serif;
+}
+/* La règle globale h1…h6 impose Manrope à tout titre : les titres de la
+   landing qui ne portent ni .font-title ni .font-body doivent la lever. */
+.landing-satoshi :is(h1, h2, h3, h4, h5, h6) {
+  font-family: inherit;
+}
+.landing-satoshi .font-title em {
+  font-weight: 300;
+}
+
 @keyframes moveBackground {
   from {
     background-position: 0% 0%;
