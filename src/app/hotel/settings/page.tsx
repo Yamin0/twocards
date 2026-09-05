@@ -28,6 +28,8 @@ import { useToast } from "@/hooks/use-toast";
 import { AvatarUploader } from "@/components/shared/avatar-uploader";
 import { useHotelSpace } from "@/lib/hotel/store";
 import { isDarkHex } from "@/lib/hotel/format";
+import { uploadImage } from "@/lib/hotel/upload-image";
+import { CATEGORY_KEYS, CATEGORY_META, type GuestCategoryKey } from "@/lib/guest-catalog";
 import { guestUrl } from "@/lib/qr";
 import {
   Button,
@@ -85,6 +87,7 @@ function SettingsContent() {
     accent: profile.accent_color,
     background: profile.background_color,
     cover: profile.cover_url,
+    categoryImages: profile.category_images as Partial<Record<GuestCategoryKey, string>>,
     welcome: "",
     reception: "",
     prices: true,
@@ -94,6 +97,9 @@ function SettingsContent() {
   const [saving, setSaving] = useState<Tab | null>(null);
   const [uploading, setUploading] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
+  /* Photo de catégorie en cours de remplacement (un seul champ fichier). */
+  const [catTarget, setCatTarget] = useState<GuestCategoryKey | null>(null);
+  const catInput = useRef<HTMLInputElement>(null);
 
   if (!authLoading && !isLoading && !ready) {
     setReady(true);
@@ -107,6 +113,7 @@ function SettingsContent() {
       accent: profile.accent_color,
       background: profile.background_color,
       cover: profile.cover_url,
+      categoryImages: profile.category_images,
       welcome: profile.welcome_message ?? "",
       reception: profile.reception_phone ?? "",
       prices: profile.show_prices,
@@ -139,6 +146,7 @@ function SettingsContent() {
       accent_color: menu.accent,
       background_color: menu.background,
       cover_url: menu.cover,
+      category_images: menu.categoryImages,
       welcome_message: menu.welcome.trim() || null,
       reception_phone: menu.reception.trim() || null,
       show_prices: menu.prices,
@@ -183,6 +191,20 @@ function SettingsContent() {
     setUploading(false);
   };
 
+  const uploadCategory = async (file: File) => {
+    if (!userId || !catTarget) return;
+    setUploading(true);
+    try {
+      const url = await uploadImage(file, userId, `cat-${catTarget}`, 1600);
+      setMenu((m) => ({ ...m, categoryImages: { ...m.categoryImages, [catTarget]: url } }));
+      showToast("Photo importée, pensez à enregistrer");
+    } catch {
+      showToast("L'envoi de l'image a échoué");
+    }
+    setUploading(false);
+    setCatTarget(null);
+  };
+
   const saveAccount = async () => {
     setSaving("compte");
     const { error } = await createClient().auth.updateUser({ data: { full_name: account.fullName.trim() } });
@@ -198,6 +220,7 @@ function SettingsContent() {
     menu.accent !== profile.accent_color ||
     menu.background !== profile.background_color ||
     menu.cover !== profile.cover_url ||
+    JSON.stringify(menu.categoryImages) !== JSON.stringify(profile.category_images) ||
     menu.welcome !== (profile.welcome_message ?? "") ||
     menu.reception !== (profile.reception_phone ?? "") ||
     menu.prices !== profile.show_prices;
@@ -315,6 +338,66 @@ function SettingsContent() {
                     </Button>
                   )}
                 </div>
+              </div>
+            </Panel>
+
+            <Panel title="Photos des catégories" description="Les quatre bandeaux du menu : une photo par catégorie. Sans photo, celle de twocards est utilisée. Format panoramique conseillé.">
+              <input
+                ref={catInput}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) uploadCategory(f);
+                  e.target.value = "";
+                }}
+              />
+              <div className="grid gap-3 sm:grid-cols-2">
+                {CATEGORY_KEYS.map((k) => {
+                  const custom = menu.categoryImages[k];
+                  const img = custom || CATEGORY_META[k].image;
+                  return (
+                    <div key={k} className="relative h-28 overflow-hidden rounded-xl border border-white/10 bg-white/[0.04]">
+                      <Image src={img} alt="" fill unoptimized={img.startsWith("http")} sizes="400px" className="object-cover" />
+                      <div className="absolute inset-0 bg-black/40" />
+                      <div className="absolute inset-0 flex flex-col items-center justify-center text-white">
+                        <span className="font-display text-sm font-bold uppercase tracking-[0.3em]">{CATEGORY_META[k].label}</span>
+                        <span className="mt-0.5 text-[10px] text-white/70">{custom ? "Votre photo" : "Photo twocards"}</span>
+                      </div>
+                      <div className="absolute inset-x-2 bottom-2 flex justify-center gap-1.5">
+                        <Button
+                          size="sm"
+                          variant="primary"
+                          icon={ImagePlus}
+                          loading={uploading && catTarget === k}
+                          onClick={() => {
+                            setCatTarget(k);
+                            catInput.current?.click();
+                          }}
+                        >
+                          {custom ? "Changer" : "Choisir"}
+                        </Button>
+                        {custom && (
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            icon={Trash2}
+                            onClick={() =>
+                              setMenu((m) => {
+                                const next = { ...m.categoryImages };
+                                delete next[k];
+                                return { ...m, categoryImages: next };
+                              })
+                            }
+                          >
+                            Par défaut
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </Panel>
 

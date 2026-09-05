@@ -18,7 +18,6 @@ import {
   Clock,
   LayoutGrid,
   Loader2,
-  MapPin,
   MessageCircle,
   Minus,
   Music,
@@ -126,6 +125,7 @@ export function GuestExperience({
   /* Catalogue du réseau et adresses maison de l'hôtel, livrés avec le menu. */
   const [catalog, setCatalog] = useState<OfferRow[]>([]);
   const [hotelOffers, setHotelOffers] = useState<OfferRow[]>([]);
+  const [categoryImages, setCategoryImages] = useState<Partial<Record<GuestCategoryKey, string>>>({});
   const [category, setCategory] = useState<GuestCategoryKey | "tous">("tous");
   const [search, setSearch] = useState("");
   const [offer, setOffer] = useState<{ offer: GuestOffer; category: GuestCategory } | null>(null);
@@ -149,6 +149,11 @@ export function GuestExperience({
           setHidden(row.hidden_offers ?? []);
           setCatalog(Array.isArray(row.catalog) ? (row.catalog as OfferRow[]) : []);
           setHotelOffers(Array.isArray(row.hotel_offers) ? (row.hotel_offers as OfferRow[]) : []);
+          setCategoryImages(
+            row.category_images && typeof row.category_images === "object"
+              ? (row.category_images as Partial<Record<GuestCategoryKey, string>>)
+              : {}
+          );
           setInfo({
             label: row.label ?? null,
             hotelName: row.hotel_name || fallbackHotelName,
@@ -172,8 +177,8 @@ export function GuestExperience({
   }, [code, fallbackHotelName, fallbackCity, preview]);
 
   const menu = useMemo(
-    () => buildGuestMenu({ city: info.city, hidden, catalog, hotelOffers }),
-    [info.city, hidden, catalog, hotelOffers]
+    () => buildGuestMenu({ city: info.city, hidden, catalog, hotelOffers, categoryImages }),
+    [info.city, hidden, catalog, hotelOffers, categoryImages]
   );
   const total = menu.reduce((s, c) => s + c.offers.length, 0);
   const q = search.trim().toLowerCase();
@@ -322,6 +327,7 @@ export function GuestExperience({
                     src={c.image}
                     alt=""
                     fill
+                    unoptimized={c.image.startsWith("http")}
                     priority={i < 2}
                     sizes="(max-width: 1152px) 100vw, 1152px"
                     className="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
@@ -354,7 +360,7 @@ export function GuestExperience({
               return (
                 <div>
                   <div className="relative h-36 overflow-hidden rounded-2xl text-white sm:h-44 lg:h-52">
-                    <Image src={current.image} alt="" fill sizes="(max-width: 1152px) 100vw, 1152px" className="object-cover" />
+                    <Image src={current.image} alt="" fill unoptimized={current.image.startsWith("http")} sizes="(max-width: 1152px) 100vw, 1152px" className="object-cover" />
                     <div className="absolute inset-0 bg-black/40" />
                     <button
                       type="button"
@@ -408,10 +414,10 @@ export function GuestExperience({
                       <p className="mt-1 text-sm text-neutral-500">Essayez un autre mot.</p>
                     </div>
                   ) : (
-                    <ul className="mt-4 grid gap-3 lg:grid-cols-2 lg:gap-4">
+                    <ul className="mt-4 grid gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 lg:gap-6">
                       {shown.offers.map((o) => (
                         <li key={o.id}>
-                          <OfferRow offer={o} showPrice={info.showPrices} onPick={() => setOffer({ offer: o, category: current })} />
+                          <OfferCard offer={o} showPrice={info.showPrices} onPick={() => setOffer({ offer: o, category: current })} />
                         </li>
                       ))}
                     </ul>
@@ -490,37 +496,36 @@ function CategoryChip({
   );
 }
 
-function OfferRow({ offer: o, showPrice, onPick }: { offer: GuestOffer; showPrice: boolean; onPick: () => void }) {
+function OfferCard({ offer: o, showPrice, onPick }: { offer: GuestOffer; showPrice: boolean; onPick: () => void }) {
   return (
     <button
       type="button"
       onClick={onPick}
-      className="group flex h-full w-full items-stretch gap-3.5 rounded-2xl border border-black/[0.06] bg-white p-3 text-left transition-all hover:border-black/[0.12] hover:shadow-[0_16px_40px_-24px_rgba(0,0,0,0.4)] active:scale-[0.99] lg:gap-4"
+      className="group flex h-full w-full flex-col overflow-hidden rounded-2xl bg-white text-left shadow-[0_1px_2px_rgba(0,0,0,0.04)] ring-1 ring-black/[0.05] transition-all hover:-translate-y-0.5 hover:shadow-[0_24px_50px_-30px_rgba(0,0,0,0.45)] active:scale-[0.99]"
     >
-      <div className="relative w-[92px] shrink-0 self-stretch overflow-hidden rounded-xl bg-neutral-100 sm:w-[110px] lg:w-[132px]">
-        <Image src={o.image} alt="" fill unoptimized={o.image.startsWith("http")} sizes="132px" className="object-cover transition-transform duration-500 group-hover:scale-105" />
+      <div className="relative aspect-[4/3] w-full overflow-hidden bg-neutral-100">
+        <Image
+          src={o.image}
+          alt=""
+          fill
+          unoptimized={o.image.startsWith("http")}
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 380px"
+          className="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+        />
+        {o.source === "hotel" && (
+          <span className="absolute left-3 top-3 rounded-full bg-[var(--accent)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--on-accent)]">
+            Par l&apos;hôtel
+          </span>
+        )}
       </div>
-      <div className="flex min-w-0 flex-1 flex-col">
-        <p className="font-display line-clamp-2 text-[15px] font-bold leading-snug tracking-tight lg:text-base">{o.name}</p>
-        <p className="mt-0.5 flex flex-wrap items-center gap-x-1 text-xs text-neutral-500">
-          {o.source === "hotel" && (
-            <span className="rounded-md bg-[var(--accent)] px-1.5 py-0.5 text-[10px] font-bold text-[var(--on-accent)]">Par l&apos;hôtel</span>
-          )}
-          <span className="font-medium text-neutral-700">{o.tag}</span>
-          {o.city && (
-            <>
-              <span aria-hidden>·</span>
-              <span className="inline-flex items-center gap-0.5">
-                <MapPin size={11} strokeWidth={2} className="shrink-0" />
-                {o.city}
-              </span>
-            </>
-          )}
-        </p>
-        <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-neutral-500 lg:line-clamp-3">{o.description}</p>
-        <div className="mt-auto flex items-center justify-between gap-2 pt-2.5">
-          <span className="num text-xs font-bold text-neutral-800">{showPrice && o.price ? o.price : ""}</span>
-          <span className="inline-flex h-8 items-center gap-1 rounded-full bg-[var(--accent)] px-3 text-xs font-bold text-[var(--on-accent)] transition-transform group-hover:translate-x-0.5">
+      <div className="flex flex-1 flex-col px-4 pb-4 pt-3.5 sm:px-5 sm:pb-5 sm:pt-4">
+        {o.tag && (
+          <p className="text-[10px] font-medium uppercase tracking-[0.24em] text-neutral-400">{o.tag}</p>
+        )}
+        <p className="font-display mt-1 text-lg font-black leading-tight tracking-tight text-neutral-900 sm:text-xl">{o.name}</p>
+        <div className="mt-auto flex items-end justify-between gap-3 pt-4">
+          <span className="num text-sm font-light italic text-neutral-500">{showPrice && o.price ? o.price : ""}</span>
+          <span className="inline-flex h-9 items-center gap-1.5 rounded-full bg-[var(--accent)] px-4 text-xs font-bold text-[var(--on-accent)] transition-transform group-hover:translate-x-0.5">
             Réserver
             <ChevronRight size={13} strokeWidth={2.5} />
           </span>
@@ -735,6 +740,22 @@ function ReservationSheet({
 
             {step === "details" && (
               <div className="space-y-6 px-5 pb-5 pt-5 sm:px-7">
+                {/* L'adresse en un coup d'œil : photo, étiquette, prix, description. */}
+                <section className="overflow-hidden rounded-2xl bg-[#f7f6f3]">
+                  <div className="relative aspect-[16/9] w-full">
+                    <Image src={offer.image} alt="" fill unoptimized={offer.image.startsWith("http")} sizes="(max-width: 640px) 100vw, 512px" className="object-cover" />
+                  </div>
+                  <div className="px-4 py-3.5">
+                    <div className="flex items-baseline justify-between gap-3">
+                      <p className="text-[10px] font-medium uppercase tracking-[0.24em] text-neutral-400">{offer.tag}</p>
+                      {offer.price && <p className="num text-sm font-light italic text-neutral-500">{offer.price}</p>}
+                    </div>
+                    {offer.description && (
+                      <p className="mt-1.5 text-[15px] leading-relaxed text-neutral-700">{offer.description}</p>
+                    )}
+                  </div>
+                </section>
+
                 {/* Couverts */}
                 <section>
                   <p className="mb-2.5 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-neutral-500">

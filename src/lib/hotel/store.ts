@@ -69,6 +69,8 @@ export type HotelProfile = {
   show_prices: boolean;
   /* Adresses du catalogue réseau retirées pour tout l'hôtel (slugs). */
   hidden_offers: string[];
+  /* Photo de chaque bandeau de catégorie du menu client ({clé: URL}). */
+  category_images: Partial<Record<GuestCategoryKey, string>>;
 };
 
 export const DEFAULT_PROFILE: HotelProfile = {
@@ -81,6 +83,7 @@ export const DEFAULT_PROFILE: HotelProfile = {
   reception_phone: null,
   show_prices: true,
   hidden_offers: [],
+  category_images: {},
 };
 
 /* Offre du catalogue réseau (lecture seule côté hôtel). */
@@ -376,7 +379,7 @@ const profileStore = createStore<HotelProfile>(async () => {
   const { data, error } = await createClient()
     .from("hotel_profiles")
     .select(
-      "hotel_name, city, accent_color, background_color, cover_url, welcome_message, reception_phone, show_prices, hidden_offers"
+      "hotel_name, city, accent_color, background_color, cover_url, welcome_message, reception_phone, show_prices, hidden_offers, category_images"
     )
     .maybeSingle();
   if (error) throw error;

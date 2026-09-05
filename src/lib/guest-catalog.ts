@@ -120,11 +120,14 @@ export function buildGuestMenu({
   hidden,
   catalog,
   hotelOffers = [],
+  categoryImages = {},
 }: {
   city: string | null;
   hidden: string[];
   catalog: OfferRow[];
   hotelOffers?: OfferRow[];
+  /* Photos de bandeau choisies par l'hôtel ; sinon celles de twocards. */
+  categoryImages?: Partial<Record<GuestCategoryKey, string>>;
 }): GuestCategory[] {
   const hiddenSet = new Set(hidden);
   const hotelCity = city ? normalizeCity(city) : null;
@@ -148,6 +151,7 @@ export function buildGuestMenu({
   return CATEGORY_KEYS.map((key) => ({
     key,
     ...CATEGORY_META[key],
+    image: categoryImages[key] || CATEGORY_META[key].image,
     offers: byCategory.get(key)!.filter((o) => !hiddenSet.has(o.id)),
   })).filter((cat) => cat.offers.length > 0);
 }
