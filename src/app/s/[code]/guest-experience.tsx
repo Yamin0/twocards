@@ -15,6 +15,7 @@ import {
   Check,
   ChevronRight,
   Clock,
+  LayoutGrid,
   Loader2,
   MapPin,
   MessageCircle,
@@ -33,12 +34,18 @@ import {
 import { cn } from "@/lib/utils";
 
 /* Menu client après scan — style « widget de réservation » à la SevenRooms :
-   fond clair, carte blanche centrée, typographie noire en Satoshi, une seule
-   couleur d'accent (celle de l'hôtel), beaucoup d'air. Mobile d'abord : le
-   QR est scanné avec un téléphone. Parcours en trois temps — choisir une
-   adresse, régler couverts / date / heure, laisser ses coordonnées — puis
-   confirmation. Sans compte, sans paiement : l'établissement confirme par
-   téléphone ou WhatsApp. */
+   fond clair, blanc, typographie noire en Satoshi, une seule couleur
+   d'accent (celle de l'hôtel), beaucoup d'air.
+
+   Deux mises en page pour un même contenu. Sur téléphone (le QR est scanné
+   avec), une colonne : couverture, onglets collants, liste. Sur grand
+   écran (lien reçu par e-mail ou WhatsApp, ouvert sur un ordinateur), une
+   vraie page web : couverture panoramique, colonne de navigation fixe à
+   gauche avec catégories, recherche et contact, grille d'adresses à droite.
+
+   Parcours en trois temps — choisir une adresse, régler couverts / date /
+   heure, laisser ses coordonnées — puis confirmation. Sans compte, sans
+   paiement : l'établissement confirme par téléphone ou WhatsApp. */
 
 const CATEGORY_ICONS = {
   restaurants: UtensilsCrossed,
@@ -52,6 +59,8 @@ type HotelInfo = {
   hotelName: string | null;
   city: string | null;
   accent: string;
+  background: string;
+  cover: string | null;
   welcome: string | null;
   reception: string | null;
   showPrices: boolean;
@@ -73,6 +82,8 @@ function trackScanOnce(code: string) {
     .rpc("qr_track_scan", { p_code: code })
     .then(() => undefined, () => undefined);
 }
+
+const HEX = /^#[0-9a-fA-F]{6}$/;
 
 const isDarkHex = (hex: string) => {
   const n = parseInt(hex.replace("#", ""), 16);
@@ -104,6 +115,8 @@ export function GuestExperience({
     hotelName: fallbackHotelName,
     city: fallbackCity,
     accent: "#13305c",
+    background: "#f4f3ef",
+    cover: null,
     welcome: null,
     reception: null,
     showPrices: true,
@@ -112,6 +125,7 @@ export function GuestExperience({
   const [category, setCategory] = useState<GuestCategoryKey | "tous">("tous");
   const [search, setSearch] = useState("");
   const [offer, setOffer] = useState<{ offer: GuestOffer; category: GuestCategory } | null>(null);
+  const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!preview) trackScanOnce(code);
@@ -133,7 +147,9 @@ export function GuestExperience({
             label: row.label ?? null,
             hotelName: row.hotel_name || fallbackHotelName,
             city: row.city || fallbackCity,
-            accent: /^#[0-9a-fA-F]{6}$/.test(row.accent_color ?? "") ? row.accent_color : "#13305c",
+            accent: HEX.test(row.accent_color ?? "") ? row.accent_color : "#13305c",
+            background: HEX.test(row.background_color ?? "") ? row.background_color : "#f4f3ef",
+            cover: row.cover_url || null,
             welcome: row.welcome_message ?? null,
             reception: row.reception_phone ?? null,
             showPrices: row.show_prices ?? true,
@@ -167,164 +183,300 @@ export function GuestExperience({
     }))
     .filter((c) => c.offers.length > 0);
 
-  const dark = isDarkHex(info.accent);
+  const darkAccent = isDarkHex(info.accent);
+  const darkPage = isDarkHex(info.background);
   const themeStyle = {
     "--accent": info.accent,
-    "--on-accent": dark ? "#ffffff" : "#0a0a0a",
+    "--on-accent": darkAccent ? "#ffffff" : "#0a0a0a",
+    "--page": info.background,
+    "--on-page": darkPage ? "#ffffff" : "#171717",
+    "--on-page-muted": darkPage ? "rgba(255,255,255,0.6)" : "rgba(23,23,23,0.55)",
   } as CSSProperties;
 
   const hotelName = info.hotelName ?? "Votre hôtel";
+  const welcome =
+    info.welcome ??
+    (info.city
+      ? `Les meilleures adresses de ${info.city}, réservées en quelques secondes — nous nous occupons du reste.`
+      : "Réservez vos plus belles sorties en quelques secondes — nous nous occupons du reste.");
+
+  const pick = (key: GuestCategoryKey | "tous") => {
+    setCategory(key);
+    /* Sur grand écran la liste défile sous une couverture haute : on la
+       ramène en vue à chaque changement de catégorie. */
+    if (window.innerWidth >= 1024 && listRef.current) {
+      const top = listRef.current.getBoundingClientRect().top + window.scrollY - 96;
+      if (window.scrollY > top) window.scrollTo({ top, behavior: "smooth" });
+    }
+  };
 
   return (
-    <div className="satoshi min-h-screen bg-[#f4f3ef] text-neutral-900 selection:bg-[var(--accent)] selection:text-[var(--on-accent)]" style={themeStyle}>
-      <div className="mx-auto flex min-h-screen w-full max-w-lg flex-col sm:py-8">
-        <div className="flex flex-1 flex-col overflow-hidden bg-white sm:rounded-[1.75rem] sm:border sm:border-black/[0.06] sm:shadow-[0_30px_80px_-40px_rgba(0,0,0,0.35)]">
-          {/* En-tête à la couleur de l'hôtel */}
-          <header className="relative overflow-hidden px-6 pb-6 pt-7 text-[var(--on-accent)] sm:px-8 sm:pt-8" style={{ background: info.accent }}>
-            <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-white/10 blur-2xl" />
-            <div className="relative">
-              <p className="text-[11px] font-bold uppercase tracking-[0.24em] opacity-70">
-                {state === "loading" ? "Conciergerie" : info.label ? `Conciergerie · ${info.label}` : "Conciergerie"}
-              </p>
-              <h1 className="font-display mt-2 text-[1.9rem] font-black leading-[1.05] tracking-tight sm:text-4xl">
-                {state === "loading" && !fallbackHotelName ? <span className="inline-block h-9 w-48 animate-pulse rounded-lg bg-white/20" /> : hotelName}
-              </h1>
-              <p className="mt-3 max-w-sm text-[15px] leading-relaxed opacity-85">
-                {info.welcome ??
-                  (info.city
-                    ? `Les meilleures adresses de ${info.city}, réservées en quelques secondes — nous nous occupons du reste.`
-                    : "Réservez vos plus belles sorties en quelques secondes — nous nous occupons du reste.")}
-              </p>
+    <div
+      className="satoshi min-h-screen bg-[var(--page)] text-neutral-900 selection:bg-[var(--accent)] selection:text-[var(--on-accent)]"
+      style={themeStyle}
+    >
+      {/* ─── Couverture ─────────────────────────────────────────────────────── */}
+      <header className="relative overflow-hidden text-white">
+        <div className="absolute inset-0" style={{ background: info.accent }}>
+          {info.cover && (
+            <Image
+              src={info.cover}
+              alt=""
+              fill
+              unoptimized
+              priority
+              sizes="100vw"
+              className="object-cover"
+            />
+          )}
+          <div
+            className={cn(
+              "absolute inset-0",
+              info.cover
+                ? "bg-gradient-to-t from-black/80 via-black/45 to-black/15"
+                : "bg-gradient-to-br from-white/10 via-transparent to-black/25"
+            )}
+          />
+          {!info.cover && (
+            <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
+          )}
+        </div>
+        <div
+          className={cn(
+            "relative mx-auto flex w-full max-w-6xl flex-col justify-end px-5 sm:px-8 lg:px-10",
+            info.cover ? "min-h-[260px] pb-7 pt-20 sm:min-h-[320px] lg:min-h-[400px] lg:pb-12" : "pb-7 pt-8 sm:pt-10 lg:pb-10 lg:pt-14",
+            !info.cover && !darkAccent && "text-neutral-900"
+          )}
+        >
+          <p
+            className={cn(
+              "text-[11px] font-bold uppercase tracking-[0.24em] sm:text-xs",
+              info.cover || darkAccent ? "text-white/75" : "text-neutral-900/60"
+            )}
+          >
+            {state === "loading" ? "Conciergerie" : info.label ? `Conciergerie · ${info.label}` : "Conciergerie"}
+          </p>
+          <h1 className="font-display mt-2 max-w-3xl text-[2rem] font-black leading-[1.02] tracking-tight sm:text-5xl lg:text-6xl">
+            {state === "loading" && !fallbackHotelName ? (
+              <span className="inline-block h-10 w-56 animate-pulse rounded-lg bg-white/25" />
+            ) : (
+              hotelName
+            )}
+          </h1>
+          <p
+            className={cn(
+              "mt-3 max-w-xl text-[15px] leading-relaxed sm:text-base lg:text-lg",
+              info.cover || darkAccent ? "text-white/85" : "text-neutral-900/70"
+            )}
+          >
+            {welcome}
+          </p>
+          {state === "ready" && total > 0 && (
+            <p
+              className={cn(
+                "num mt-4 hidden items-center gap-2 text-xs font-bold lg:inline-flex",
+                info.cover || darkAccent ? "text-white/70" : "text-neutral-900/55"
+              )}
+            >
+              <LayoutGrid size={13} strokeWidth={2} />
+              {total} adresses sélectionnées par l&apos;hôtel
+              {info.city ? ` à ${info.city}` : ""}
+            </p>
+          )}
+        </div>
+      </header>
+
+      {state === "inactive" ? (
+        <Inactive reception={info.reception} hotelName={hotelName} />
+      ) : (
+        <div className="mx-auto w-full max-w-6xl px-0 sm:px-8 lg:px-10">
+          {/* ─── Onglets mobiles / tablette, collants ─────────────────────── */}
+          <div className="sticky top-0 z-20 -mx-0 border-b border-black/[0.06] bg-white/95 backdrop-blur sm:mx-0 sm:mt-6 sm:rounded-2xl sm:border lg:hidden">
+            <div className="no-scrollbar flex gap-1.5 overflow-x-auto px-4 py-3 sm:px-5">
+              <CategoryChip active={category === "tous"} onClick={() => pick("tous")} label="Tout" count={total} />
+              {menu.map((c) => (
+                <CategoryChip
+                  key={c.key}
+                  active={category === c.key}
+                  onClick={() => pick(c.key)}
+                  label={c.label}
+                  count={c.offers.length}
+                  icon={CATEGORY_ICONS[c.key]}
+                />
+              ))}
             </div>
-          </header>
+          </div>
 
-          {state === "inactive" ? (
-            <Inactive hotelName={hotelName} reception={info.reception} />
-          ) : (
-            <>
-              {/* Onglets de catégories, collants */}
-              <div className="sticky top-0 z-20 border-b border-black/[0.06] bg-white/95 backdrop-blur">
-                <div className="no-scrollbar flex gap-1.5 overflow-x-auto px-4 py-3 sm:px-6">
-                  <CategoryChip active={category === "tous"} onClick={() => setCategory("tous")} label="Tout" count={total} />
-                  {menu.map((c) => (
-                    <CategoryChip
-                      key={c.key}
-                      active={category === c.key}
-                      onClick={() => setCategory(c.key)}
-                      label={c.label}
-                      count={c.offers.length}
-                      icon={CATEGORY_ICONS[c.key]}
+          <div ref={listRef} className="lg:grid lg:grid-cols-[272px_1fr] lg:gap-10 lg:pt-10">
+            {/* ─── Colonne de navigation (grand écran) ──────────────────────── */}
+            <aside className="hidden lg:block">
+              <div className="sticky top-8 space-y-5">
+                <div className="rounded-2xl border border-black/[0.06] bg-white p-3 shadow-[0_20px_60px_-40px_rgba(0,0,0,0.35)]">
+                  <div className="relative mb-2 px-1">
+                    <Search size={15} strokeWidth={2} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400" />
+                    <input
+                      type="search"
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      placeholder="Rechercher…"
+                      className="h-10 w-full rounded-xl border border-black/[0.08] bg-[#f7f6f3] pl-10 pr-3 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-[var(--accent)] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/20"
                     />
-                  ))}
+                  </div>
+                  <nav className="space-y-0.5">
+                    <SideItem active={category === "tous"} onClick={() => pick("tous")} label="Toutes les adresses" count={total} icon={LayoutGrid} />
+                    {menu.map((c) => (
+                      <SideItem
+                        key={c.key}
+                        active={category === c.key}
+                        onClick={() => pick(c.key)}
+                        label={c.label}
+                        count={c.offers.length}
+                        icon={CATEGORY_ICONS[c.key]}
+                      />
+                    ))}
+                  </nav>
                 </div>
-              </div>
 
-              <main className="flex-1 px-4 pb-8 pt-4 sm:px-6">
-                {state === "loading" ? (
-                  <ul className="space-y-3" aria-busy>
-                    {[1, 2, 3, 4].map((i) => (
-                      <li key={i} className="flex gap-3.5 rounded-2xl border border-black/[0.06] p-3">
-                        <div className="h-[84px] w-[84px] shrink-0 animate-pulse rounded-xl bg-neutral-200" />
-                        <div className="flex-1 space-y-2 py-1">
-                          <div className="h-4 w-2/3 animate-pulse rounded bg-neutral-200" />
-                          <div className="h-3 w-1/3 animate-pulse rounded bg-neutral-100" />
-                          <div className="h-3 w-full animate-pulse rounded bg-neutral-100" />
-                        </div>
+                <div className="rounded-2xl border border-black/[0.06] bg-white p-5">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-neutral-400">Comment ça marche</p>
+                  <ol className="mt-3 space-y-3">
+                    {[
+                      ["Choisissez", "une adresse dans la sélection de l'hôtel."],
+                      ["Indiquez", "vos couverts, la date, l'heure et vos coordonnées."],
+                      ["Confirmation", "par téléphone ou WhatsApp, sans paiement."],
+                    ].map(([t, d], i) => (
+                      <li key={t} className="flex gap-3 text-sm">
+                        <span className="num flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--accent)] text-[11px] font-black text-[var(--on-accent)]">
+                          {i + 1}
+                        </span>
+                        <span className="leading-snug text-neutral-600">
+                          <span className="font-bold text-neutral-900">{t}</span> {d}
+                        </span>
                       </li>
                     ))}
-                  </ul>
-                ) : (
-                  <>
-                    {total > 6 && (
-                      <div className="relative mb-4">
-                        <Search size={15} strokeWidth={2} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400" />
-                        <input
-                          type="search"
-                          value={search}
-                          onChange={(e) => setSearch(e.target.value)}
-                          placeholder="Rechercher une adresse, une envie…"
-                          className="h-11 w-full rounded-xl border border-black/[0.08] bg-[#f7f6f3] pl-10 pr-4 text-[15px] text-neutral-900 placeholder:text-neutral-400 focus:border-[var(--accent)] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/20"
-                        />
-                      </div>
-                    )}
+                  </ol>
+                  {info.reception && (
+                    <a
+                      href={waLink(info.reception, `Bonjour ${hotelName}, `)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-black/[0.08] bg-[#f7f6f3] text-sm font-bold text-neutral-800 transition-colors hover:bg-neutral-100"
+                    >
+                      <MessageCircle size={15} strokeWidth={2} className="text-emerald-600" />
+                      Écrire à la réception
+                    </a>
+                  )}
+                </div>
+              </div>
+            </aside>
 
-                    {visible.length === 0 ? (
-                      <div className="rounded-2xl border border-dashed border-black/10 px-6 py-12 text-center">
-                        <p className="text-sm font-bold">Aucune adresse ne correspond</p>
-                        <p className="mt-1 text-sm text-neutral-500">Essayez un autre mot ou une autre catégorie.</p>
+            {/* ─── Liste ─────────────────────────────────────────────────────── */}
+            <main className="min-w-0 bg-white px-4 pb-8 pt-4 sm:mt-4 sm:rounded-3xl sm:border sm:border-black/[0.06] sm:px-6 sm:pb-8 sm:pt-5 lg:mt-0 lg:rounded-3xl lg:bg-transparent lg:border-0 lg:p-0">
+              {state === "loading" ? (
+                <ul className="space-y-3 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0" aria-busy>
+                  {[1, 2, 3, 4].map((i) => (
+                    <li key={i} className="flex gap-3 rounded-2xl border border-black/[0.06] bg-white p-3">
+                      <div className="h-[84px] w-[84px] shrink-0 animate-pulse rounded-xl bg-neutral-200" />
+                      <div className="flex-1 space-y-2 py-1">
+                        <div className="h-4 w-2/3 animate-pulse rounded bg-neutral-200" />
+                        <div className="h-3 w-1/3 animate-pulse rounded bg-neutral-100" />
+                        <div className="h-3 w-full animate-pulse rounded bg-neutral-100" />
                       </div>
-                    ) : (
-                      <div className="space-y-7">
-                        {visible.map((c) => {
-                          const Icon = CATEGORY_ICONS[c.key];
-                          return (
-                            <section key={c.key}>
-                              {category === "tous" && (
-                                <div className="mb-3 flex items-end justify-between">
-                                  <h2 className="font-display flex items-center gap-2 text-lg font-bold tracking-tight">
-                                    <Icon size={17} strokeWidth={2} className="text-[var(--accent)]" />
-                                    {c.label}
-                                  </h2>
-                                  <button
-                                    type="button"
-                                    onClick={() => setCategory(c.key)}
-                                    className="text-xs font-bold text-[var(--accent)]"
-                                  >
-                                    Voir tout
-                                  </button>
-                                </div>
-                              )}
-                              {category !== "tous" && <p className="mb-3 text-sm text-neutral-500">{c.tagline}</p>}
-                              <ul className="space-y-3">
-                                {(category === "tous" && !q ? c.offers.slice(0, 3) : c.offers).map((o) => (
-                                  <li key={o.id}>
-                                    <OfferRow offer={o} showPrice={info.showPrices} onPick={() => setOffer({ offer: o, category: c })} />
-                                  </li>
-                                ))}
-                              </ul>
-                              {category === "tous" && !q && c.offers.length > 3 && (
-                                <button
-                                  type="button"
-                                  onClick={() => setCategory(c.key)}
-                                  className="mt-2 w-full rounded-xl border border-black/[0.08] py-2.5 text-sm font-bold text-neutral-700 transition-colors hover:bg-neutral-50"
-                                >
-                                  {c.offers.length - 3} autre{c.offers.length - 3 > 1 ? "s" : ""} {c.label.toLowerCase()}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <>
+                  {total > 6 && (
+                    <div className="relative mb-4 lg:hidden">
+                      <Search size={15} strokeWidth={2} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400" />
+                      <input
+                        type="search"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        placeholder="Rechercher une adresse, une envie…"
+                        className="h-11 w-full rounded-xl border border-black/[0.08] bg-[#f7f6f3] pl-10 pr-4 text-[15px] text-neutral-900 placeholder:text-neutral-400 focus:border-[var(--accent)] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/20"
+                      />
+                    </div>
+                  )}
+
+                  {visible.length === 0 ? (
+                    <div className="rounded-2xl border border-dashed border-black/10 bg-white px-6 py-12 text-center">
+                      <p className="text-sm font-bold">Aucune adresse ne correspond</p>
+                      <p className="mt-1 text-sm text-neutral-500">Essayez un autre mot ou une autre catégorie.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-7 lg:space-y-10">
+                      {visible.map((c) => {
+                        const Icon = CATEGORY_ICONS[c.key];
+                        const showAll = category !== "tous" || !!q;
+                        const offers = showAll ? c.offers : c.offers.slice(0, 4);
+                        return (
+                          <section key={c.key}>
+                            <div className="mb-3 flex items-end justify-between gap-4 lg:mb-4">
+                              <div>
+                                <h2 className="font-display flex items-center gap-2 text-lg font-bold tracking-tight text-[var(--on-page)] lg:text-2xl">
+                                  <Icon size={17} strokeWidth={2} className="text-[var(--accent)] lg:h-5 lg:w-5" />
+                                  {c.label}
+                                  <span className="num text-sm font-bold text-[var(--on-page-muted)]">{c.offers.length}</span>
+                                </h2>
+                                <p className="mt-0.5 hidden text-sm text-[var(--on-page-muted)] sm:block">{c.tagline}</p>
+                              </div>
+                              {category === "tous" && !q && c.offers.length > offers.length && (
+                                <button type="button" onClick={() => pick(c.key)} className="shrink-0 text-xs font-bold text-[var(--accent)] lg:text-sm">
+                                  Voir tout
                                 </button>
                               )}
-                            </section>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </>
-                )}
-              </main>
-            </>
-          )}
-
-          <footer className="border-t border-black/[0.06] bg-[#fafaf8] px-6 py-5 text-center">
-            {info.reception && state !== "loading" && (
-              <a
-                href={waLink(info.reception, `Bonjour ${hotelName}, `)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mb-4 inline-flex items-center gap-2 rounded-full border border-black/[0.08] bg-white px-4 py-2 text-sm font-bold text-neutral-800 transition-colors hover:bg-neutral-50"
-              >
-                <MessageCircle size={15} strokeWidth={2} className="text-emerald-600" />
-                Écrire à la réception
-              </a>
-            )}
-            <p className="text-xs leading-relaxed text-neutral-500">
-              Sans engagement — l&apos;établissement confirme par téléphone ou WhatsApp.
-            </p>
-            <div className="mt-3 flex items-center justify-center gap-1.5 text-neutral-400">
-              <span className="text-[11px]">Propulsé par</span>
-              <Image src="/logo-header.png" alt="" width={16} height={16} className="h-4 w-auto opacity-60" />
-              <span className="text-xs font-black text-neutral-600">twocards.</span>
-            </div>
-          </footer>
+                            </div>
+                            <ul className="space-y-3 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
+                              {offers.map((o) => (
+                                <li key={o.id}>
+                                  <OfferRow offer={o} showPrice={info.showPrices} onPick={() => setOffer({ offer: o, category: c })} />
+                                </li>
+                              ))}
+                            </ul>
+                            {category === "tous" && !q && c.offers.length > offers.length && (
+                              <button
+                                type="button"
+                                onClick={() => pick(c.key)}
+                                className="mt-3 w-full rounded-xl border border-black/[0.08] bg-white py-2.5 text-sm font-bold text-neutral-700 transition-colors hover:bg-neutral-50"
+                              >
+                                {c.offers.length - offers.length} autre{c.offers.length - offers.length > 1 ? "s" : ""} {c.label.toLowerCase()}
+                              </button>
+                            )}
+                          </section>
+                        );
+                      })}
+                    </div>
+                  )}
+                </>
+              )}
+            </main>
+          </div>
         </div>
-      </div>
+      )}
+
+      <footer className="mx-auto w-full max-w-6xl px-6 py-8 text-center lg:py-12">
+        {info.reception && state !== "loading" && (
+          <a
+            href={waLink(info.reception, `Bonjour ${hotelName}, `)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mb-4 inline-flex items-center gap-2 rounded-full border border-black/[0.08] bg-white px-4 py-2 text-sm font-bold text-neutral-800 transition-colors hover:bg-neutral-50 lg:hidden"
+          >
+            <MessageCircle size={15} strokeWidth={2} className="text-emerald-600" />
+            Écrire à la réception
+          </a>
+        )}
+        <p className="text-xs leading-relaxed text-[var(--on-page-muted)]">
+          Sans engagement — l&apos;établissement confirme par téléphone ou WhatsApp.
+        </p>
+        <div className="mt-3 flex items-center justify-center gap-1.5 text-[var(--on-page-muted)]">
+          <span className="text-[11px]">Propulsé par</span>
+          <Image src="/logo-header.png" alt="" width={16} height={16} className={cn("h-4 w-auto opacity-70", darkPage && "brightness-0 invert")} />
+          <span className="text-xs font-black text-[var(--on-page)]">twocards.</span>
+        </div>
+      </footer>
 
       {offer && (
         <ReservationSheet
@@ -371,18 +523,48 @@ function CategoryChip({
   );
 }
 
+function SideItem({
+  active,
+  onClick,
+  label,
+  count,
+  icon: Icon,
+}: {
+  active: boolean;
+  onClick: () => void;
+  label: string;
+  count: number;
+  icon: typeof UtensilsCrossed;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={cn(
+        "flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-bold transition-colors",
+        active ? "bg-[var(--accent)] text-[var(--on-accent)]" : "text-neutral-700 hover:bg-[#f1f0ec]"
+      )}
+    >
+      <Icon size={16} strokeWidth={2} className={active ? "opacity-90" : "text-neutral-400"} />
+      <span className="flex-1 truncate">{label}</span>
+      <span className={cn("num text-[11px] font-bold", active ? "opacity-70" : "text-neutral-400")}>{count}</span>
+    </button>
+  );
+}
+
 function OfferRow({ offer: o, showPrice, onPick }: { offer: GuestOffer; showPrice: boolean; onPick: () => void }) {
   return (
     <button
       type="button"
       onClick={onPick}
-      className="group flex w-full items-stretch gap-3.5 rounded-2xl border border-black/[0.06] bg-white p-3 text-left transition-all hover:border-black/[0.12] hover:shadow-[0_10px_30px_-18px_rgba(0,0,0,0.35)] active:scale-[0.99]"
+      className="group flex h-full w-full items-stretch gap-3.5 rounded-2xl border border-black/[0.06] bg-white p-3 text-left transition-all hover:border-black/[0.12] hover:shadow-[0_16px_40px_-24px_rgba(0,0,0,0.4)] active:scale-[0.99] lg:gap-4"
     >
-      <div className="relative w-[92px] shrink-0 self-stretch overflow-hidden rounded-xl bg-neutral-100 sm:w-[110px]">
-        <Image src={o.image} alt="" fill sizes="110px" className="object-cover transition-transform duration-500 group-hover:scale-105" />
+      <div className="relative w-[92px] shrink-0 self-stretch overflow-hidden rounded-xl bg-neutral-100 sm:w-[110px] lg:w-[132px]">
+        <Image src={o.image} alt="" fill sizes="132px" className="object-cover transition-transform duration-500 group-hover:scale-105" />
       </div>
       <div className="flex min-w-0 flex-1 flex-col">
-        <p className="font-display line-clamp-2 text-[15px] font-bold leading-snug tracking-tight">{o.name}</p>
+        <p className="font-display line-clamp-2 text-[15px] font-bold leading-snug tracking-tight lg:text-base">{o.name}</p>
         <p className="mt-0.5 flex flex-wrap items-center gap-x-1 text-xs text-neutral-500">
           <span className="font-medium text-neutral-700">{o.tag}</span>
           {o.city && (
@@ -395,10 +577,10 @@ function OfferRow({ offer: o, showPrice, onPick }: { offer: GuestOffer; showPric
             </>
           )}
         </p>
-        <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-neutral-500">{o.description}</p>
-        <div className="mt-2.5 flex items-center justify-between gap-2">
+        <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-neutral-500 lg:line-clamp-3">{o.description}</p>
+        <div className="mt-auto flex items-center justify-between gap-2 pt-2.5">
           <span className="num text-xs font-bold text-neutral-800">{showPrice && o.price ? o.price : ""}</span>
-          <span className="inline-flex h-8 items-center gap-1 rounded-full bg-[var(--accent)] px-3 text-xs font-bold text-[var(--on-accent)]">
+          <span className="inline-flex h-8 items-center gap-1 rounded-full bg-[var(--accent)] px-3 text-xs font-bold text-[var(--on-accent)] transition-transform group-hover:translate-x-0.5">
             Réserver
             <ChevronRight size={13} strokeWidth={2.5} />
           </span>
@@ -410,12 +592,12 @@ function OfferRow({ offer: o, showPrice, onPick }: { offer: GuestOffer; showPric
 
 function Inactive({ hotelName, reception }: { hotelName: string; reception: string | null }) {
   return (
-    <main className="flex flex-1 flex-col items-center justify-center px-8 py-16 text-center">
-      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-neutral-100">
-        <X size={20} strokeWidth={2} className="text-neutral-500" />
+    <main className="mx-auto flex w-full max-w-md flex-col items-center px-8 py-16 text-center">
+      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-black/[0.06]">
+        <X size={20} strokeWidth={2} className="text-[var(--on-page-muted)]" />
       </div>
-      <h2 className="font-display text-xl font-bold tracking-tight">Ce menu n&apos;est plus disponible</h2>
-      <p className="mt-2 max-w-xs text-sm leading-relaxed text-neutral-500">
+      <h2 className="font-display text-xl font-bold tracking-tight text-[var(--on-page)]">Ce menu n&apos;est plus disponible</h2>
+      <p className="mt-2 max-w-xs text-sm leading-relaxed text-[var(--on-page-muted)]">
         Ce QR code a été désactivé par l&apos;hôtel. Adressez-vous à la réception pour réserver vos sorties.
       </p>
       {reception && (

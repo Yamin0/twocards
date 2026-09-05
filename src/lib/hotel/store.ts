@@ -61,6 +61,8 @@ export type HotelProfile = {
   hotel_name: string | null;
   city: string | null;
   accent_color: string;
+  background_color: string;
+  cover_url: string | null;
   welcome_message: string | null;
   reception_phone: string | null;
   show_prices: boolean;
@@ -70,6 +72,8 @@ export const DEFAULT_PROFILE: HotelProfile = {
   hotel_name: null,
   city: null,
   accent_color: "#13305c",
+  background_color: "#f4f3ef",
+  cover_url: null,
   welcome_message: null,
   reception_phone: null,
   show_prices: true,
@@ -338,7 +342,7 @@ const profileStore = createStore<HotelProfile>(async () => {
   const { data, error } = await createClient()
     .from("hotel_profiles")
     .select(
-      "hotel_name, city, accent_color, welcome_message, reception_phone, show_prices"
+      "hotel_name, city, accent_color, background_color, cover_url, welcome_message, reception_phone, show_prices"
     )
     .maybeSingle();
   if (error) throw error;
