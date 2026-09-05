@@ -24,11 +24,7 @@ export function CtaBanner() {
         transition={{ duration: 0.7 }}
         className="relative z-10 flex max-w-3xl flex-col items-center text-center"
       >
-        <p className="mb-6 text-[11px] font-medium uppercase tracking-[0.28em] text-white/80">
-          Founding Circle — Marrakech, places limitées
-        </p>
-
-        <h2 className="mb-6 font-title text-4xl font-normal leading-[1.15] text-white md:text-6xl">
+        <h2 className="mb-6 font-title text-4xl font-bold leading-[1.15] tracking-[-0.03em] text-white md:text-6xl">
           Digitalisez les relations qui{" "}
           <em className="italic">existent déjà</em>.
         </h2>

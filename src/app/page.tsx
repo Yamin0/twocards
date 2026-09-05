@@ -1,21 +1,30 @@
-import { ScrollVideoHero } from "@/components/landing/scroll-video-hero";
+import { QrHero } from "@/components/landing/qr-hero";
+import { QrFlow, QrAudiences } from "@/components/landing/qr-system";
 import { Activity } from "@/components/landing/activity";
 import { Differentiators } from "@/components/landing/differentiators";
-import { Platform } from "@/components/landing/platform";
+import { FaqHome } from "@/components/landing/faq-home";
+import { CtaBanner } from "@/components/landing/cta-banner";
 import { Footer } from "@/components/layout/footer";
 
+/* La page d'accueil porte le système QR : héros en deux volets avec la
+   vidéo de présentation, puis le parcours du QR et les métiers qu'il sert.
+   Les sections notifications et différenciateurs descendent ensuite, sur
+   fond ivoire — la vidéo des portes pilotée par le scroll est passée sur la
+   page Influenceurs.
+
+   QrAudiences remplace ici la section Platform, qui ouvrait les mêmes
+   portes par métier : le composant reste disponible pour une autre page. */
 export default function Home() {
   return (
-    <div className="min-h-screen bg-[var(--landing-ivory)] text-[var(--landing-ink)]">
+    <div className="landing-satoshi min-h-screen bg-[var(--landing-ivory)] text-[var(--landing-ink)]">
       <main>
-        {/* Tout le contenu défile en transparence sur la vidéo épinglée */}
-        <ScrollVideoHero>
-          <Activity variant="overlay" />
-          <Differentiators variant="overlay" />
-        </ScrollVideoHero>
-        {/* Après la scène vidéo : ce que la plateforme fait, pour qui,
-            avec une porte d'entrée par métier. */}
-        <Platform />
+        <QrHero />
+        <QrFlow />
+        <QrAudiences />
+        <Activity />
+        <Differentiators />
+        <FaqHome />
+        <CtaBanner />
       </main>
       <Footer />
     </div>
