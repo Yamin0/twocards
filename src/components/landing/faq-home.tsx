@@ -10,11 +10,11 @@ const FAQ = [
   },
   {
     q: "Que se passe-t-il quand un client scanne le QR ?",
-    a: "Il arrive sur la sélection de l'établissement qui a posé le QR — restaurants, rooftops, clubs, expériences — aux vraies disponibilités, et réserve seul en quelques secondes. La réservation porte le QR d'origine (chambre, lobby, table, carte) et apparaît aussitôt dans le tableau de bord de l'établissement, avec les scans, les arrivées et les commissions.",
+    a: "Il arrive sur la sélection de l'établissement qui a posé le QR (restaurants, rooftops, clubs, expériences), aux vraies disponibilités, et réserve seul en quelques secondes. La réservation porte le QR d'origine (chambre, lobby, table, carte) et apparaît aussitôt dans le tableau de bord de l'établissement, avec les scans, les arrivées et les commissions.",
   },
   {
     q: "TwoCards remplace-t-il mon logiciel de réservation ou ma caisse ?",
-    a: "Non. Votre système reste la source de vérité opérationnelle. TwoCards gère la couche commerciale entre vous et vos apporteurs — attribution, check-in, facture vérifiée, commission — au-dessus de vos outils existants.",
+    a: "Non. Votre système reste la source de vérité opérationnelle. TwoCards gère la couche commerciale entre vous et vos apporteurs (attribution, check-in, facture vérifiée, commission), au-dessus de vos outils existants.",
   },
   {
     q: "Qui peut rejoindre le réseau ?",
@@ -26,7 +26,7 @@ const FAQ = [
   },
   {
     q: "Où êtes-vous disponibles ?",
-    a: "Marrakech d'abord — Hivernage et Guéliz en priorité, puis Palmeraie et Agafay. Le réseau suivra ensuite les corridors de clientèle : Casablanca, Paris, Saint-Tropez, Dubaï.",
+    a: "Marrakech d'abord, Hivernage et Guéliz en priorité, puis Palmeraie et Agafay. Le réseau suivra ensuite les corridors de clientèle : Casablanca, Paris, Saint-Tropez, Dubaï.",
   },
   {
     q: "Comment évitez-vous les litiges de commission ?",

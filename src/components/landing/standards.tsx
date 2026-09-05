@@ -62,7 +62,7 @@ export function Standards() {
 
         <p className="mt-10 text-center text-[12px] font-normal text-[var(--landing-mute)]">
           Objectifs contractuels du réseau, suivis en continu pendant le pilote
-          Marrakech — pas des moyennes marketing.
+          Marrakech, pas des moyennes marketing.
         </p>
       </div>
     </section>

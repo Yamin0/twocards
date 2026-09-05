@@ -40,7 +40,7 @@ const folders = [
     href: "/concierge/reservations",
     icon: CalendarDays,
     iconColor: "text-blue-400",
-    preview: ["12 événements cette semaine", "OPENING NIGHT — Jeu. 24"],
+    preview: ["12 événements cette semaine", "OPENING NIGHT · Jeu. 24"],
   },
   {
     label: "CRM Clients",
@@ -72,7 +72,7 @@ const folders = [
     href: "/concierge/messages",
     icon: MessageSquare,
     iconColor: "text-indigo-400",
-    preview: ["3 messages non lus", "Le Comptoir — Confirmation VIP"],
+    preview: ["3 messages non lus", "Le Comptoir · Confirmation VIP"],
   },
   {
     label: "Établissements",
@@ -259,7 +259,7 @@ export default function ConciergePage() {
             <p className="text-white/40 text-sm mt-0.5">
               {venues === null
                 ? "Chargement de l'annuaire…"
-                : `${venues.length} établissement${venues.length > 1 ? "s" : ""} référencé${venues.length > 1 ? "s" : ""} — mis à jour en direct`}
+                : `${venues.length} établissement${venues.length > 1 ? "s" : ""} référencé${venues.length > 1 ? "s" : ""}, mis à jour en direct`}
             </p>
           </div>
         </div>
@@ -321,10 +321,10 @@ export default function ConciergePage() {
           </h2>
           <div className="space-y-3">
             {[
-              { text: "Réservation confirmée — Famille Tazi, 6 pers. au Comptoir", time: "Il y a 12 min", color: "bg-green-400" },
-              { text: "Commission versée — 9 820 MAD (Le Comptoir, Mars)", time: "Il y a 2h", color: "bg-amber-400" },
-              { text: "Nouveau client ajouté — Sarah Bennis (VIP)", time: "Il y a 5h", color: "bg-blue-400" },
-              { text: "No-show déclaré — Réda F. au Sky Bar", time: "Hier", color: "bg-red-400" },
+              { text: "Réservation confirmée · Famille Tazi, 6 pers. au Comptoir", time: "Il y a 12 min", color: "bg-green-400" },
+              { text: "Commission versée · 9 820 MAD (Le Comptoir, Mars)", time: "Il y a 2h", color: "bg-amber-400" },
+              { text: "Nouveau client ajouté · Sarah Bennis (VIP)", time: "Il y a 5h", color: "bg-blue-400" },
+              { text: "No-show déclaré · Réda F. au Sky Bar", time: "Hier", color: "bg-red-400" },
             ].map((a, i) => (
               <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] transition-colors">
                 <div className={`w-2 h-2 rounded-full ${a.color} shrink-0`} />

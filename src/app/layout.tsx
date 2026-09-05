@@ -78,7 +78,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://twocardspro.com"),
   title: "twocards. | Un seul QR code, de la chambre à la commission",
   description:
-    "Un QR en chambre, un lien par e-mail ou WhatsApp : votre client découvre votre sélection, réserve en quelques secondes, et vous suivez tout — arrivée, facture vérifiée, commission.",
+    "Un QR en chambre, un lien par e-mail ou WhatsApp : votre client découvre votre sélection, réserve en quelques secondes, et vous suivez tout, arrivée, facture vérifiée, commission.",
   openGraph: {
     type: "website",
     locale: "fr_FR",

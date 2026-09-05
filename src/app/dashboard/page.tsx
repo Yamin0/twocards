@@ -167,7 +167,7 @@ export default function VenueDashboardPage() {
           Bienvenue{fullName ? `, ${fullName.split(" ")[0]}` : ""}
         </h1>
         <p className="font-ui text-sm text-white/60 mt-2">
-          {venueName ? `${venueName} — ` : ""}vos chiffres réels : sorties
+          {venueName ? `${venueName} · ` : ""}vos chiffres réels : sorties
           reçues, montants saisis, commissions et satisfaction.
         </p>
         {/* Service du jour, en une ligne : couverts attendus, prochaine arrivée */}
@@ -252,7 +252,7 @@ export default function VenueDashboardPage() {
           ) : (
             <>
               <p className="font-ui text-sm text-white/40 leading-relaxed">
-                Aucun événement à venir. Créez votre prochaine soirée — ses
+                Aucun événement à venir. Créez votre prochaine soirée, ses
                 réservations et son chiffre d&apos;affaires se suivront ici.
               </p>
               <Link

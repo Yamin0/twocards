@@ -144,7 +144,7 @@ function SettingsContent() {
       show_prices: menu.prices,
     });
     setSaving(null);
-    showToast(ok ? "Menu client mis à jour — visible dès le prochain scan" : "Impossible d'enregistrer.");
+    showToast(ok ? "Menu client mis à jour, visible dès le prochain scan" : "Impossible d'enregistrer.");
   };
 
   /* Couverture : image redimensionnée en webp côté navigateur (1600 px de
@@ -176,7 +176,7 @@ function SettingsContent() {
         data: { publicUrl },
       } = supabase.storage.from("avatars").getPublicUrl(path);
       setMenu((m) => ({ ...m, cover: publicUrl }));
-      showToast("Couverture importée — pensez à enregistrer");
+      showToast("Couverture importée, pensez à enregistrer");
     } catch {
       showToast("L'envoi de l'image a échoué");
     }

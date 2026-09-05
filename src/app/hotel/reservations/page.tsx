@@ -323,7 +323,7 @@ function ReservationsContent() {
 
       <InfoNote icon={Info}>
         La confirmation se fait directement entre le client et l&apos;établissement. Le statut et le montant dépensé sont
-        renseignés par l&apos;établissement (ou sa caisse) ; votre commission — 10 % du montant dépensé par défaut — se calcule
+        renseignés par l&apos;établissement (ou sa caisse) ; votre commission (10 % du montant dépensé par défaut) se calcule
         automatiquement dès que le montant est connu.
       </InfoNote>
 

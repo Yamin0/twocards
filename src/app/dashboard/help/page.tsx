@@ -26,7 +26,7 @@ const faqItems = [
   {
     question: "D'où viennent mes réservations ?",
     answer:
-      "De trois canaux : les QR codes des hôtels partenaires (badge « QR hôtel », commissionnés), votre portail de réservation directe (badge « direct », 0 % de commission) et les réservations que vous saisissez vous-même — téléphone ou walk-in (badge « maison », 0 % également). Le bouton « Nouvelle réservation » en haut de la page Réservations sert à saisir un appel.",
+      "De trois canaux : les QR codes des hôtels partenaires (badge « QR hôtel », commissionnés), votre portail de réservation directe (badge « direct », 0 % de commission) et les réservations que vous saisissez vous-même, téléphone ou walk-in (badge « maison », 0 % également). Le bouton « Nouvelle réservation » en haut de la page Réservations sert à saisir un appel.",
   },
   {
     question: "Comment fonctionnent les commissions ?",
@@ -51,7 +51,7 @@ const faqItems = [
   {
     question: "Comment modifier les informations de mon établissement ?",
     answer:
-      "Dans Paramètres : téléphone, ville, adresse, description, capacité, horaires et préférences de notifications s'enregistrent réellement. Le nom d'établissement et son type sont gérés par twocards — contactez le support pour les modifier.",
+      "Dans Paramètres : téléphone, ville, adresse, description, capacité, horaires et préférences de notifications s'enregistrent réellement. Le nom d'établissement et son type sont gérés par twocards, contactez le support pour les modifier.",
   },
   {
     question: "Comment contacter un hôtel apporteur ?",

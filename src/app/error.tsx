@@ -22,7 +22,7 @@ export default function AppError({
         Un léger <em className="italic">contretemps</em>.
       </h1>
       <p className="mt-5 max-w-md text-[15px] font-normal leading-relaxed text-[var(--landing-ink)]/60">
-        Quelque chose s&apos;est mal passé de notre côté. Réessayez — si le
+        Quelque chose s&apos;est mal passé de notre côté. Réessayez. Si le
         problème persiste, contactez-nous.
       </p>
       <button

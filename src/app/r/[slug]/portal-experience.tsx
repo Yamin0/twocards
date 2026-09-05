@@ -391,8 +391,8 @@ export function PortalExperience({
               {noSlotLeft && (
                 <p className="mt-3 text-center text-[13px] text-neutral-500">
                   {openSlots.length === 0
-                    ? "Complet pour cette date — choisissez un autre jour."
-                    : "Plus de créneau disponible pour cette date — choisissez un autre jour."}
+                    ? "Complet pour cette date, choisissez un autre jour."
+                    : "Plus de créneau disponible pour cette date, choisissez un autre jour."}
                 </p>
               )}
 
@@ -403,11 +403,11 @@ export function PortalExperience({
                 style={{ background: accent }}
               >
                 {time
-                  ? `Continuer — ${DAY_LABELS[selectedDate.getDay()]} ${selectedDate.getDate()} ${MONTH_LABELS[selectedDate.getMonth()]} · ${time}`
+                  ? `Continuer · ${DAY_LABELS[selectedDate.getDay()]} ${selectedDate.getDate()} ${MONTH_LABELS[selectedDate.getMonth()]} · ${time}`
                   : "Continuer"}
               </button>
               <p className="mt-3 text-center text-[11px] text-neutral-400">
-                Sans prépaiement — l&apos;établissement confirme par téléphone
+                Sans prépaiement, l&apos;établissement confirme par téléphone
                 ou WhatsApp.
               </p>
             </>
@@ -429,7 +429,7 @@ export function PortalExperience({
                   <span className="font-semibold text-neutral-900">
                     {portal.display_name}
                   </span>{" "}
-                  — {party} pers. ·{" "}
+                  {party} pers. ·{" "}
                   {selectedDate.toLocaleDateString("fr-FR", {
                     weekday: "long",
                     day: "numeric",
@@ -441,7 +441,7 @@ export function PortalExperience({
               {/* La promesse avant l'effort : on demande un numéro, on dit
                   tout de suite pourquoi et ce qui n'est pas demandé. */}
               <p className="mb-6 px-1 text-[12px] leading-relaxed text-neutral-400">
-                Sans prépaiement — l&apos;établissement vous confirme par
+                Sans prépaiement, l&apos;établissement vous confirme par
                 téléphone ou WhatsApp.
               </p>
 

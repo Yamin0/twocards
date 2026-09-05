@@ -128,7 +128,7 @@ export default function NotificationsPage() {
             </p>
             <p className="text-xs text-white/30 mt-1 max-w-xs font-ui">
               {activeFilter === "unread"
-                ? "Tout est lu — rien ne vous attend."
+                ? "Tout est lu, rien ne vous attend."
                 : "Les nouvelles réservations, avis clients et alertes caisse apparaîtront ici."}
             </p>
           </div>

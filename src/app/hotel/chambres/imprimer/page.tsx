@@ -41,7 +41,7 @@ function PrintContent() {
   const [theme, setTheme] = useState<Theme>("clair");
   const [headline, setHeadline] = useState("Scannez pour réserver vos sorties");
   const [subline, setSubline] = useState(
-    "Restaurants, activités, clubs et services — réservez en quelques secondes, la réception s'occupe du reste."
+    "Restaurants, activités, clubs et services, réservez en quelques secondes, la réception s'occupe du reste."
   );
   const ids = useMemo(() => new Set((params.get("ids") ?? "").split(",").filter(Boolean)), [params]);
   const [scope, setScope] = useState<"selection" | "actifs" | "tous">(ids.size > 0 ? "selection" : "actifs");

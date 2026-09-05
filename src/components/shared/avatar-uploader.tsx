@@ -197,7 +197,7 @@ export function AvatarUploader({
         <div>
           <p className="text-sm font-medium text-white">{label}</p>
           <p className="mt-0.5 text-xs text-white/40">
-            JPG, PNG, WebP ou GIF — 10 Mo maximum. L&apos;image est recadrée en
+            JPG, PNG, WebP ou GIF · 10 Mo maximum. L&apos;image est recadrée en
             carré automatiquement.
           </p>
           <div className="mt-2 flex items-center gap-3">

@@ -94,12 +94,12 @@ export function guestUrl(
 }
 
 export function shareByWhatsapp(link: string, hotelName?: string | null) {
-  const text = `${hotelName ? `${hotelName} — ` : ""}Réservez vos sorties (restaurants, activités, clubs, services) en quelques secondes : ${link}`;
+  const text = `${hotelName ? `${hotelName} · ` : ""}Réservez vos sorties (restaurants, activités, clubs, services) en quelques secondes : ${link}`;
   return `https://wa.me/?text=${encodeURIComponent(text)}`;
 }
 
 export function shareByEmail(link: string, hotelName?: string | null) {
-  const subject = `${hotelName ?? "Votre hôtel"} — vos sorties à réserver`;
+  const subject = `${hotelName ?? "Votre hôtel"} : vos sorties à réserver`;
   const body = `Bonjour,\n\nDécouvrez notre sélection de restaurants, activités, clubs et services, et réservez en quelques secondes :\n${link}\n\nÀ très vite,\n${hotelName ?? ""}`;
   return `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }

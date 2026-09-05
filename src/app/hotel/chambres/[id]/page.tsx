@@ -154,7 +154,7 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
     setSavingMenu(true);
     const ok = await update(qr.id, { hidden_offers: [...hiddenSet] });
     setSavingMenu(false);
-    showToast(ok ? "Menu enregistré — visible dès le prochain scan" : "Impossible d'enregistrer le menu");
+    showToast(ok ? "Menu enregistré, visible dès le prochain scan" : "Impossible d'enregistrer le menu");
   };
 
   const rename = async () => {
@@ -170,7 +170,7 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
 
   const toggleActive = async () => {
     const ok = await update(qr.id, { active: !qr.active });
-    showToast(ok ? (qr.active ? "QR désactivé — le lien affiche un message d'indisponibilité" : "QR réactivé") : "Échec de la mise à jour");
+    showToast(ok ? (qr.active ? "QR désactivé, le lien affiche un message d'indisponibilité" : "QR réactivé") : "Échec de la mise à jour");
   };
 
   const confirmDelete = async () => {
@@ -312,7 +312,7 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
             hotelCity ? (
               <>Catalogue twocards de {hotelCity} · {shownOffers}/{totalOffers} adresses proposées. Retirez ce que vous ne souhaitez pas suggérer à ce client.</>
             ) : (
-              <>Indiquez la ville de l&apos;hôtel dans les <Link href="/hotel/settings" className="font-bold text-sky-300">paramètres</Link> pour limiter le catalogue à votre ville — en attendant, tout est proposé.</>
+              <>Indiquez la ville de l&apos;hôtel dans les <Link href="/hotel/settings" className="font-bold text-sky-300">paramètres</Link> pour limiter le catalogue à votre ville, en attendant, tout est proposé.</>
             )
           }
           actions={

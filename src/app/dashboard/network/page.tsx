@@ -103,7 +103,7 @@ export default function NetworkPage() {
           Réseau apporteurs
         </h1>
         <p className="font-ui text-sm text-white/60 mt-1.5">
-          Les hôtels partenaires qui vous envoient des clients — ce que chacun
+          Les hôtels partenaires qui vous envoient des clients, ce que chacun
           apporte, ce que vous lui reversez
         </p>
       </div>
@@ -256,7 +256,7 @@ export default function NetworkPage() {
       {/* Note de périmètre */}
       <p className="font-ui flex items-start gap-2 text-xs text-white/40 max-w-2xl">
         <Globe size={13} strokeWidth={1.5} className="shrink-0 mt-0.5" />
-        Seules les sorties apportées par le réseau (QR hôtel) figurent ici —
+        Seules les sorties apportées par le réseau (QR hôtel) figurent ici,
         annulations et no-show exclus. Les canaux direct (portail) et maison,
         sans commission, n&apos;y apparaissent pas.
       </p>

@@ -222,7 +222,7 @@ export default function HotelCommissionsPage() {
             title="Aucune commission sur cette période"
             description={
               awaiting.length > 0
-                ? `${awaiting.length} ${plural(awaiting.length, "sortie passée", "sorties passées")} ${plural(awaiting.length, "attend", "attendent")} encore un montant — les commissions apparaîtront dès que l'établissement l'aura renseigné.`
+                ? `${awaiting.length} ${plural(awaiting.length, "sortie passée", "sorties passées")} ${plural(awaiting.length, "attend", "attendent")} encore un montant, les commissions apparaîtront dès que l'établissement l'aura renseigné.`
                 : "Chaque sortie réservée via vos QR codes vous rapporte un pourcentage du montant dépensé. Tout apparaîtra ici, exportable en CSV."
             }
             compact
@@ -267,7 +267,7 @@ export default function HotelCommissionsPage() {
 
       <div className="grid gap-3 md:grid-cols-2">
         <InfoNote icon={Percent} tone="amber">
-          Votre commission est un pourcentage du montant réellement dépensé par le client — 10 % par défaut, le taux peut
+          Votre commission est un pourcentage du montant réellement dépensé par le client : 10 % par défaut, le taux peut
           varier selon l&apos;établissement. Elle est calculée automatiquement dès que le montant est renseigné par
           l&apos;établissement ou remonté par sa caisse.
         </InfoNote>

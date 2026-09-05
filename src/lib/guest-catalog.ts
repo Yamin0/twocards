@@ -96,7 +96,7 @@ export const GUEST_CATEGORIES: GuestCategory[] = [
         id: "act-4",
         name: "Cours de cuisine marocaine",
         description:
-          "Marché aux épices, tajine et pâtisseries avec une dada — repas dégusté ensemble.",
+          "Marché aux épices, tajine et pâtisseries avec une dada, repas dégusté ensemble.",
         tag: "Culture",
         price: "dès 500 MAD",
         image: "/images/carousel/08.jpg",

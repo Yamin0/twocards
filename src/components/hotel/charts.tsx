@@ -72,7 +72,7 @@ export function DualBars({
             <div
               key={d.key}
               className="flex min-w-0 flex-1 flex-col items-center justify-end gap-1.5"
-              title={`${d.label} — ${primary.label} : ${d.value} · ${secondary.label} : ${s}`}
+              title={`${d.label} · ${primary.label} : ${d.value} · ${secondary.label} : ${s}`}
             >
               <div className="flex w-full items-end justify-center gap-0.5">
                 <div

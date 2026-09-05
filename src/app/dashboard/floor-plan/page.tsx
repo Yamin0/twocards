@@ -363,7 +363,7 @@ export default function FloorPlanPage() {
       .update({ arrived_at })
       .eq("id", res.resId);
     if (error) showToast("Impossible d'enregistrer l'arrivée");
-    else showToast(`${res.client} — arrivée enregistrée`);
+    else showToast(`${res.client}, arrivée enregistrée`);
   };
 
   /* Walk-in : un client se présente, on l'installe sur une table libre.
@@ -396,7 +396,7 @@ export default function FloorPlanPage() {
       .eq("id", data as string);
     setSeating(false);
     showToast(
-      `${walkInParty} couvert${walkInParty > 1 ? "s" : ""} installés — table ${selected.label}`
+      `${walkInParty} couvert${walkInParty > 1 ? "s" : ""} installés, table ${selected.label}`
     );
   };
 
@@ -489,7 +489,7 @@ export default function FloorPlanPage() {
             </h1>
             <p className="font-ui text-white/50 text-sm mt-1">
               {selectedDate === today
-                ? "Occupation d'aujourd'hui — choisissez une date pour voir un autre service"
+                ? "Occupation d'aujourd'hui, choisissez une date pour voir un autre service"
                 : `Occupation du ${new Date(
                     selectedDate + "T00:00:00"
                   ).toLocaleDateString("fr-FR", {
@@ -636,7 +636,7 @@ export default function FloorPlanPage() {
                 <div className="flex items-center gap-2">
                   <Pencil size={13} strokeWidth={1.5} className="text-blue-400" />
                   <span className="text-xs font-medium text-blue-400">Mode édition actif</span>
-                  <span className="text-xs text-blue-400/50">— Déplacez les tables ou faites clic droit pour ajouter/supprimer</span>
+                  <span className="text-xs text-blue-400/50">Déplacez les tables ou faites clic droit pour ajouter/supprimer</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <button

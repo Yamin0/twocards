@@ -344,7 +344,7 @@ export default function GuestsPage() {
           </h1>
           <p className="font-ui text-sm text-white/60 mt-1.5">
             Votre base clients, construite automatiquement à partir des
-            réservations — un client naît d&apos;une réservation.
+            réservations, un client naît d&apos;une réservation.
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
@@ -430,7 +430,7 @@ export default function GuestsPage() {
           </h2>
           <p className="font-ui text-sm text-white/50 max-w-md mx-auto">
             Votre base clients se construit toute seule : dès qu&apos;une
-            réservation arrive — QR du réseau ou portail direct — le client
+            réservation arrive, QR du réseau ou portail direct, le client
             apparaît ici avec ses visites, ses dépenses et ses avis.
           </p>
           <Link

@@ -153,8 +153,8 @@ export default function IntegrationsPage() {
       const body = await res.json();
       showToast(
         body.status === "matched"
-          ? `Test rapproché — ${body.commission} MAD de commission dérivés`
-          : `Test reçu (${body.status ?? res.status}) — voir le journal`
+          ? `Test rapproché · ${body.commission} MAD de commission dérivés`
+          : `Test reçu (${body.status ?? res.status}), voir le journal`
       );
     } catch {
       showToast("Le test n'a pas abouti");
@@ -175,7 +175,7 @@ export default function IntegrationsPage() {
         </h1>
         <p className="font-ui text-sm text-white/60 mt-1.5 max-w-2xl">
           Connectez votre caisse : chaque ticket fermé remplit automatiquement
-          le montant de la sortie twocards correspondante — la commission se
+          le montant de la sortie twocards correspondante, la commission se
           calcule sans aucune saisie.
         </p>
       </div>
@@ -195,13 +195,13 @@ export default function IntegrationsPage() {
           <div className="min-w-0">
             <p className="font-ui text-sm font-semibold text-white">
               {integration?.status === "active"
-                ? `Intégration active — ${PROVIDERS.find((p) => p.id === integration.provider)?.label ?? integration.provider}`
+                ? `Intégration active · ${PROVIDERS.find((p) => p.id === integration.provider)?.label ?? integration.provider}`
                 : "Aucune caisse connectée"}
             </p>
             <p className="font-ui text-xs text-white/40 mt-0.5">
               {integration?.last_event_at
                 ? `Dernier événement reçu le ${new Date(integration.last_event_at).toLocaleString("fr-FR")}`
-                : "Suivez les trois étapes ci-dessous — cinq minutes suffisent"}
+                : "Suivez les trois étapes ci-dessous, cinq minutes suffisent"}
             </p>
           </div>
         </div>
@@ -322,7 +322,7 @@ export default function IntegrationsPage() {
                 className="font-mono w-full rounded-xl bg-black/30 border border-white/10 px-3 py-2.5 text-xs text-white/70 placeholder:text-white/25 focus:outline-none focus:ring-1 focus:ring-white/40"
               />
               <p className="font-ui text-[11px] text-white/40 mt-1.5">
-                La clé n&apos;est jamais réaffichée après sa génération —
+                La clé n&apos;est jamais réaffichée après sa génération,
                 collez celle que vous avez conservée.
               </p>
             </div>
@@ -378,7 +378,7 @@ export default function IntegrationsPage() {
             {events.length === 0 ? (
               <p className="font-ui text-xs text-white/40 leading-relaxed">
                 Aucun événement reçu. Dès que votre caisse appellera le
-                webhook, chaque ticket apparaîtra ici — rapproché ou non.
+                webhook, chaque ticket apparaîtra ici, rapproché ou non.
               </p>
             ) : (
               <ul className="divide-y divide-white/[0.06]">
@@ -392,7 +392,7 @@ export default function IntegrationsPage() {
                       </p>
                       <p className="font-ui text-[11px] text-white/40 truncate">
                         {new Date(e.created_at).toLocaleString("fr-FR")}
-                        {e.reason ? ` — ${e.reason}` : ""}
+                        {e.reason ? ` · ${e.reason}` : ""}
                       </p>
                     </div>
                     <span
@@ -416,7 +416,7 @@ export default function IntegrationsPage() {
             </p>
             {tables.length === 0 ? (
               <p className="font-ui text-xs text-amber-300/80">
-                Aucune table dans votre plan de salle — créez-les d&apos;abord.
+                Aucune table dans votre plan de salle, créez-les d&apos;abord.
               </p>
             ) : (
               <div className="flex flex-wrap gap-1.5">
@@ -439,7 +439,7 @@ export default function IntegrationsPage() {
         <p className="font-ui flex items-start gap-2 text-xs text-white/40 max-w-2xl">
           <Webhook size={13} strokeWidth={1.5} className="shrink-0 mt-0.5" />
           Votre caisse n&apos;apparaît pas ou vous préférez être accompagné ?
-          L&apos;équipe twocards configure l&apos;intégration avec vous —
+          L&apos;équipe twocards configure l&apos;intégration avec vous,
           écrivez-nous depuis l&apos;onglet Messages.
         </p>
       </div>

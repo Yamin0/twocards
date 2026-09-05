@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { AudiencePage } from "@/components/landing/audience-page";
 
 export const metadata: Metadata = {
-  title: "twocards. | Restaurants — remplissez vos tables à vos conditions",
+  title: "twocards. | Restaurants, remplissez vos tables à vos conditions",
   description:
     "TwoCards distribue votre inventaire aux concierges et RP vérifiés. Vous gardez le contrôle de chaque table, chaque commission est calculée sur du revenu vérifié.",
 };
@@ -16,7 +16,7 @@ export default function RestaurantsPage() {
         titleAccent: "à vos conditions",
         titleEnd: ".",
         subtitle:
-          "TwoCards transforme les réservations que vous recevez déjà sur WhatsApp en un canal géré : votre inventaire est distribué aux concierges et RP vérifiés, chaque client est attribué, et les commissions se calculent sur du revenu vérifié — pas sur des promesses.",
+          "TwoCards transforme les réservations que vous recevez déjà sur WhatsApp en un canal géré : votre inventaire est distribué aux concierges et RP vérifiés, chaque client est attribué, et les commissions se calculent sur du revenu vérifié, pas sur des promesses.",
         heroVideo: "/videos/etablissements-hero-60.mp4",
         heroPoster: "/videos/etablissements-hero-poster.jpg",
         /* La séquence va de la salle au zellige fermé : elle se joue une fois
@@ -46,7 +46,7 @@ export default function RestaurantsPage() {
           title: "Une plateforme complète",
           accent: "pour votre établissement.",
           intro:
-            "Des clients qualifiés envoyés par les hôtels et concierges de la ville, un réseau d'apporteurs pilotable, votre réputation mesurée après chaque visite — et des chiffres que vous contrôlez.",
+            "Des clients qualifiés envoyés par les hôtels et concierges de la ville, un réseau d'apporteurs pilotable, votre réputation mesurée après chaque visite, et des chiffres que vous contrôlez.",
           items: [
             {
               id: "reservations",
@@ -58,7 +58,7 @@ export default function RestaurantsPage() {
               bullets: [
                 {
                   title: "Fiche complète à chaque demande",
-                  text: "Vous savez qui arrive, à combien, pour quelle occasion — de quoi préparer la table et le service qui vont avec.",
+                  text: "Vous savez qui arrive, à combien, pour quelle occasion, de quoi préparer la table et le service qui vont avec.",
                 },
                 {
                   title: "Temps réel",
@@ -66,7 +66,7 @@ export default function RestaurantsPage() {
                 },
                 {
                   title: "Clientèle à panier élevé",
-                  text: "Des voyageurs en séjour, envoyés par des prescripteurs de confiance — le profil de client que toute maison veut recevoir.",
+                  text: "Des voyageurs en séjour, envoyés par des prescripteurs de confiance, le profil de client que toute maison veut recevoir.",
                 },
               ],
             },
@@ -76,7 +76,7 @@ export default function RestaurantsPage() {
               kicker: "Prescription",
               title: "Hôtels et concierges deviennent votre force de vente",
               description:
-                "Chaque hôtel équipé d'un QR twocards, chaque concierge avec son lien, recommande votre maison à ses clients. Vous rémunérez uniquement au résultat : un pourcentage du montant réellement dépensé, calculé automatiquement — l'apporteur est payé, la relation est saine, le volume suit.",
+                "Chaque hôtel équipé d'un QR twocards, chaque concierge avec son lien, recommande votre maison à ses clients. Vous rémunérez uniquement au résultat : un pourcentage du montant réellement dépensé, calculé automatiquement, l'apporteur est payé, la relation est saine, le volume suit.",
               bullets: [
                 {
                   title: "Rémunération au résultat",
@@ -84,11 +84,11 @@ export default function RestaurantsPage() {
                 },
                 {
                   title: "Attribution incontestable",
-                  text: "Chaque réservation est rattachée à son apporteur de bout en bout — plus de discussion sur qui a envoyé qui.",
+                  text: "Chaque réservation est rattachée à son apporteur de bout en bout, plus de discussion sur qui a envoyé qui.",
                 },
                 {
                   title: "Un réseau qui grandit",
-                  text: "Plus les hôtels de la ville s'équipent, plus votre maison est proposée — sans effort commercial de votre part.",
+                  text: "Plus les hôtels de la ville s'équipent, plus votre maison est proposée, sans effort commercial de votre part.",
                 },
               ],
             },
@@ -98,7 +98,7 @@ export default function RestaurantsPage() {
               kicker: "Management de réputation",
               title: "Chaque visite se termine par un avis",
               description:
-                "Après la sortie, chaque client reçoit un lien pour noter son expérience sur 5 et laisser un commentaire. Vous suivez votre note moyenne, lisez les retours, repérez les soirs qui déçoivent — et la qualité perçue de votre maison devient une donnée pilotable, pas une rumeur.",
+                "Après la sortie, chaque client reçoit un lien pour noter son expérience sur 5 et laisser un commentaire. Vous suivez votre note moyenne, lisez les retours, repérez les soirs qui déçoivent, et la qualité perçue de votre maison devient une donnée pilotable, pas une rumeur.",
               bullets: [
                 {
                   title: "Avis vérifiés par construction",
@@ -110,7 +110,7 @@ export default function RestaurantsPage() {
                 },
                 {
                   title: "Le lien s'envoie en un clic",
-                  text: "Au moment de saisir l'addition, copiez le lien d'avis et envoyez-le au client par WhatsApp — le tour est joué.",
+                  text: "Au moment de saisir l'addition, copiez le lien d'avis et envoyez-le au client par WhatsApp, le tour est joué.",
                 },
               ],
               stat: { value: "1 clic", label: "pour envoyer la demande d'avis après la sortie" },
@@ -121,10 +121,10 @@ export default function RestaurantsPage() {
               kicker: "Pilotage",
               title: "Vos chiffres, semaine par semaine",
               description:
-                "CA apporté par twocards, sorties par semaine, commissions reversées, satisfaction moyenne : votre dashboard agrège tout ce que le réseau vous rapporte. C'est vous qui saisissez le montant de chaque addition — la commission est calculée automatiquement, au taux convenu.",
+                "CA apporté par twocards, sorties par semaine, commissions reversées, satisfaction moyenne : votre dashboard agrège tout ce que le réseau vous rapporte. C'est vous qui saisissez le montant de chaque addition, la commission est calculée automatiquement, au taux convenu.",
               bullets: [
                 {
-                  title: "Montant saisi — ou envoyé par votre caisse",
+                  title: "Montant saisi, ou envoyé par votre caisse",
                   text: "Deux chiffres et une validation, ou zéro geste : connectez votre POS (Lightspeed, Square, Tiller, L'Addition…) et chaque ticket fermé remplit le montant tout seul.",
                 },
                 {
@@ -133,7 +133,7 @@ export default function RestaurantsPage() {
                 },
                 {
                   title: "Contrôle et transparence",
-                  text: "Le taux de commission est convenu à l'avance et visible sur chaque ligne — aucune surprise en fin de mois.",
+                  text: "Le taux de commission est convenu à l'avance et visible sur chaque ligne, aucune surprise en fin de mois.",
                 },
               ],
             },
@@ -175,13 +175,13 @@ export default function RestaurantsPage() {
           {
             title: "La mesure de chaque apporteur",
             description:
-              "Taux de présence, exactitude des couverts, dépense réelle générée : vous savez enfin qui remplit vos tables — noir sur blanc.",
+              "Taux de présence, exactitude des couverts, dépense réelle générée : vous savez enfin qui remplit vos tables, noir sur blanc.",
           },
         ],
         faq: [
           {
             q: "TwoCards remplace-t-il notre logiciel de réservation ?",
-            a: "Non. TwoCards gère la relation commerciale avec vos apporteurs — attribution, check-in, facture, commission — et fonctionne au-dessus de votre système actuel, avec ou sans intégration technique.",
+            a: "Non. TwoCards gère la relation commerciale avec vos apporteurs (attribution, check-in, facture, commission) et fonctionne au-dessus de votre système actuel, avec ou sans intégration technique.",
           },
           {
             q: "Qui fixe les commissions ?",
@@ -189,7 +189,7 @@ export default function RestaurantsPage() {
           },
           {
             q: "Devons-nous publier tout notre plan de salle ?",
-            a: "Non. Vous allouez uniquement l'inventaire que vous voulez confier au réseau — deux tables le vendredi, dix couverts pour les hôtels, une zone précise. Le reste vous appartient.",
+            a: "Non. Vous allouez uniquement l'inventaire que vous voulez confier au réseau (deux tables le vendredi, dix couverts pour les hôtels, une zone précise). Le reste vous appartient.",
           },
           {
             q: "Comment le montant de la facture est-il vérifié ?",

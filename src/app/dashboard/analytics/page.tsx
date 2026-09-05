@@ -540,7 +540,7 @@ export default function AnalyticsPage() {
               Analyses
             </h1>
             <p className="font-ui text-sm text-white/60 mt-1.5">
-              Les performances réelles de votre établissement — calculées sur
+              Les performances réelles de votre établissement, calculées sur
               vos réservations, mises à jour en temps réel.
             </p>
           </div>
@@ -585,8 +585,8 @@ export default function AnalyticsPage() {
             Pas encore de données à analyser
           </h2>
           <p className="font-ui text-sm text-white/50 max-w-md mx-auto">
-            Dès vos premières réservations — via le réseau QR des hôtels ou
-            votre portail direct — cette page calculera automatiquement votre
+            Dès vos premières réservations, via le réseau QR des hôtels ou
+            votre portail direct, cette page calculera automatiquement votre
             chiffre d&apos;affaires, vos couverts, votre note moyenne et vos
             meilleurs jours. Rien à configurer.
           </p>
@@ -607,7 +607,7 @@ export default function AnalyticsPage() {
           <p className="font-ui text-sm text-white/50 max-w-md mx-auto">
             Votre historique contient {reservations.length} réservation
             {reservations.length > 1 ? "s" : ""}, mais aucune sur cette
-            période. Élargissez la période — « Tout » affiche l&apos;ensemble
+            période. Élargissez la période : « Tout » affiche l&apos;ensemble
             de votre historique.
           </p>
         </div>

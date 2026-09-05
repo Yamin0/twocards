@@ -39,7 +39,7 @@ const AUDIENCES = [
     title: "Des clients qualifiés, une réputation mesurée",
     points: [
       { icon: UserRound, text: "Des clients d'hôtels envoyés par les prescripteurs de la ville" },
-      { icon: Star, text: "Un avis vérifié après chaque visite — votre satisfaction pilotable" },
+      { icon: Star, text: "Un avis vérifié après chaque visite, votre satisfaction pilotable" },
       { icon: ChartLine, text: "CA apporté, sorties par semaine, commissions : tout est chiffré" },
     ],
     href: "/restaurants",

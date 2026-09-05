@@ -100,7 +100,7 @@ export function NetworkBento() {
           <p className="mt-4 max-w-3xl text-sm leading-[1.6] text-white/60 md:text-[15px]">
             TwoCards démarre là où les recommandations circulent déjà :
             Marrakech. Feuille de route, promesse contractuelle, outils
-            compatibles et objectifs du pilote — tout est posé, noir sur
+            compatibles et objectifs du pilote, tout est posé, noir sur
             blanc, avant la première réservation.
           </p>
         </div>
@@ -152,7 +152,7 @@ export function NetworkBento() {
             <SectionLabel align="start">La promesse</SectionLabel>
             <p className="mt-4 text-[13px] leading-[1.6] text-white/85 sm:text-[13.5px]">
               « Une recommandation qui part sur WhatsApp doit revenir en
-              transaction traçable — sans doublon, sans litige, avec un
+              transaction traçable, sans doublon, sans litige, avec un
               paiement certain. C&apos;est le contrat que chaque membre du
               réseau signe, des deux côtés. »
             </p>
@@ -160,7 +160,7 @@ export function NetworkBento() {
               <strong className="font-semibold text-white">
                 L&apos;engagement TwoCards
               </strong>{" "}
-              — Pilote Marrakech 2026
+              Pilote Marrakech 2026
             </p>
           </div>
 
@@ -178,7 +178,7 @@ export function NetworkBento() {
               60+
             </p>
             <p className="relative mt-2 text-center text-[13px] text-white/85">
-              concierges &amp; RP vérifiés — objectif du pilote Marrakech
+              concierges &amp; RP vérifiés, objectif du pilote Marrakech
             </p>
           </div>
         </div>
@@ -202,7 +202,7 @@ export function NetworkBento() {
               <MarqueeRow items={TOOLS_ROW_1} direction="left" />
               <MarqueeRow items={TOOLS_ROW_2} direction="right" />
               <p className="px-5 text-center text-[10px] uppercase tracking-[0.18em] text-white/40">
-                Programme connecteurs — V1
+                Programme connecteurs · V1
               </p>
             </div>
           </div>
@@ -226,7 +226,7 @@ export function NetworkBento() {
                 contact@twocardspro.com
               </a>
               <p className="text-[13px] text-white/60">
-                Marrakech — Hivernage &amp; Guéliz
+                Marrakech · Hivernage &amp; Guéliz
               </p>
             </div>
           </div>

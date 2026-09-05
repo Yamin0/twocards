@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { AudiencePage } from "@/components/landing/audience-page";
 
 export const metadata: Metadata = {
-  title: "twocards. | Influenceurs — votre goût a déjà de la valeur",
+  title: "twocards. | Influenceurs, votre goût a déjà de la valeur",
   description:
     "Vos recommandations circulent déjà. TwoCards les transforme en réservations traçables et en commissions suivies, sans rien changer à votre façon de partager.",
 };
@@ -55,7 +55,7 @@ export default function InfluenceursPage() {
           {
             title: "Vous le faites déjà gratuitement",
             description:
-              "Vos recommandations remplissent des salles depuis des années. Désormais chaque réservation qu'elles déclenchent vous est attribuée — et rémunérée.",
+              "Vos recommandations remplissent des salles depuis des années. Désormais chaque réservation qu'elles déclenchent vous est attribuée, et rémunérée.",
           },
           {
             title: "Un lien, toutes vos adresses",
@@ -98,11 +98,11 @@ export default function InfluenceursPage() {
           },
           {
             q: "Un lieu que j'adore n'est pas encore sur TwoCards ?",
-            a: "Proposez-le. Les établissements suggérés par le réseau sont contactés en priorité — et vous restez l'apporteur attribué s'ils rejoignent.",
+            a: "Proposez-le. Les établissements suggérés par le réseau sont contactés en priorité, et vous restez l'apporteur attribué s'ils rejoignent.",
           },
           {
             q: "Puis-je couvrir plusieurs villes ?",
-            a: "Marrakech d'abord. Le réseau suivra ensuite les corridors de clientèle — Casablanca, Paris, Saint-Tropez, Dubaï — et votre réputation voyagera avec vous.",
+            a: "Marrakech d'abord. Le réseau suivra ensuite les corridors de clientèle (Casablanca, Paris, Saint-Tropez, Dubaï), et votre réputation voyagera avec vous.",
           },
         ],
         finalTitle: "Vos recommandations tournent déjà.",

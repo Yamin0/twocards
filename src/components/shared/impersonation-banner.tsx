@@ -32,7 +32,7 @@ export function ImpersonationBanner() {
     <div className="fixed inset-x-0 top-0 z-[200] flex items-center justify-center gap-3 bg-amber-500 px-4 py-2 text-[13px] font-semibold text-black shadow-lg">
       <Eye size={15} strokeWidth={2} className="shrink-0" />
       <span className="truncate">
-        Vue administrateur — connecté en tant que{" "}
+        Vue administrateur, connecté en tant que{" "}
         <span className="font-bold">{flag.email}</span>
       </span>
       <button

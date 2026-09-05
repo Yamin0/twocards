@@ -118,7 +118,7 @@ export default function PortalAdminPage() {
         : `${window.location.origin}/r/${form.slug}`,
     [form.slug]
   );
-  const embedCode = `<iframe src="${portalUrl}?embed=1" width="100%" height="760" style="border:0;border-radius:16px" title="Réserver — ${form.display_name}"></iframe>`;
+  const embedCode = `<iframe src="${portalUrl}?embed=1" width="100%" height="760" style="border:0;border-radius:16px" title="Réserver · ${form.display_name}"></iframe>`;
 
   if (isLoading || !loaded) return <DashboardSkeleton />;
 
@@ -165,7 +165,7 @@ export default function PortalAdminPage() {
         data: { publicUrl },
       } = supabase.storage.from("avatars").getPublicUrl(path);
       set("cover_url", publicUrl);
-      showToast("Couverture importée — pensez à enregistrer");
+      showToast("Couverture importée, pensez à enregistrer");
     } catch {
       showToast("L'envoi de l'image a échoué");
     }
@@ -198,7 +198,7 @@ export default function PortalAdminPage() {
       return;
     }
     setExists(true);
-    showToast("Portail enregistré — la page publique est à jour");
+    showToast("Portail enregistré, la page publique est à jour");
   };
 
   const input =
@@ -213,7 +213,7 @@ export default function PortalAdminPage() {
           Portail de réservation
         </h1>
         <p className="font-ui text-sm text-white/60 mt-1.5 max-w-2xl">
-          Votre page de réservation directe, hébergée par twocards — à mettre
+          Votre page de réservation directe, hébergée par twocards, à mettre
           en bio Instagram, sur Google et sur votre site (intégration iframe).
           Réservations sans commission : le canal direct est gratuit.
         </p>
@@ -478,7 +478,7 @@ export default function PortalAdminPage() {
               <div className="space-y-5">
                 <div>
                   <label className={label}>
-                    Page publique — réseaux sociaux, bio, Google
+                    Page publique, réseaux sociaux, bio, Google
                   </label>
                   <div className="flex items-center gap-2">
                     <p className="font-mono flex-1 truncate rounded-xl bg-black/30 border border-white/10 px-3 py-2.5 text-xs text-white/70">
@@ -538,7 +538,7 @@ export default function PortalAdminPage() {
                   </div>
                   <div>
                     <p className="font-ui text-xs text-white/60 leading-relaxed mb-2">
-                      QR code de votre portail — cartes, vitrine, flyers.
+                      QR code de votre portail, cartes, vitrine, flyers.
                     </p>
                     <button
                       onClick={() => {
@@ -564,7 +564,7 @@ export default function PortalAdminPage() {
               <li className="flex gap-2">
                 <Globe size={13} strokeWidth={1.5} className="mt-0.5 shrink-0" />
                 Les réservations du portail arrivent dans votre onglet
-                Réservations, marquées « direct » — sans commission, ce canal
+                Réservations, marquées « direct », sans commission, ce canal
                 vous appartient.
               </li>
               <li className="flex gap-2">

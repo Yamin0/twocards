@@ -167,7 +167,7 @@ export default function VenueQrReservationsPage() {
         ? "Table retirée"
         : conflict
           ? `Attention : la table ${t.label} a déjà une réservation à cette heure`
-          : `Table ${t.label} assignée — visible sur le plan de salle`
+          : `Table ${t.label} assignée, visible sur le plan de salle`
     );
   };
 
@@ -215,7 +215,7 @@ export default function VenueQrReservationsPage() {
       showToast("Impossible d'enregistrer l'arrivée");
       return;
     }
-    showToast(`${r.guest_name} — arrivée enregistrée`);
+    showToast(`${r.guest_name}, arrivée enregistrée`);
   };
 
   const createReservation = async (e: React.FormEvent) => {
@@ -246,13 +246,13 @@ export default function VenueQrReservationsPage() {
       tableId: "",
       notes: "",
     });
-    showToast("Réservation créée — visible sur le plan de salle");
+    showToast("Réservation créée, visible sur le plan de salle");
   };
 
   const copyRatingLink = async (id: string) => {
     try {
       await navigator.clipboard.writeText(`${window.location.origin}/avis/${id}`);
-      showToast("Lien d'avis copié — envoyez-le au client");
+      showToast("Lien d'avis copié, envoyez-le au client");
     } catch {
       showToast("Impossible de copier le lien");
     }
@@ -285,7 +285,7 @@ export default function VenueQrReservationsPage() {
       delete next[r.id];
       return next;
     });
-    showToast(`Montant enregistré — ${data.commission.toLocaleString()} MAD reversés`);
+    showToast(`Montant enregistré · ${data.commission.toLocaleString()} MAD reversés`);
   };
 
   const stats = [
@@ -307,7 +307,7 @@ export default function VenueQrReservationsPage() {
             Réservations
           </h1>
           <p className="font-ui text-sm text-white/60 mt-1.5">
-            Tous vos canaux — QR hôtels, portail direct et prises au téléphone
+            Tous vos canaux : QR hôtels, portail direct et prises au téléphone
           </p>
         </div>
         <button
@@ -359,7 +359,7 @@ export default function VenueQrReservationsPage() {
                     key={r.id}
                     className="mt-3 text-xs italic text-white/50 font-ui border-l-2 border-white/15 pl-3"
                   >
-                    « {r.rating_comment} » — {r.guest_name}
+                    « {r.rating_comment} » · {r.guest_name}
                   </p>
                 ))}
               </>
@@ -367,7 +367,7 @@ export default function VenueQrReservationsPage() {
               <p className="text-xs text-white/40 font-ui">
                 Aucun avis pour le moment. Après la sortie, copiez le lien
                 d&apos;avis depuis le tableau et envoyez-le au client par
-                WhatsApp — sa note apparaîtra ici.
+                WhatsApp, sa note apparaîtra ici.
               </p>
             )}
           </div>
@@ -548,7 +548,7 @@ export default function VenueQrReservationsPage() {
                             aria-label={`Table pour ${r.guest_name}`}
                             className="font-ui rounded-lg bg-white/[0.07] border border-white/10 px-2 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-white/40 [&>option]:bg-[#10131f]"
                           >
-                            <option value="">— aucune —</option>
+                            <option value="">Aucune</option>
                             {venueTables.map((t) => (
                               <option key={t.id} value={t.id}>
                                 {t.vip ? "VIP " : "Table "}
@@ -696,7 +696,7 @@ export default function VenueQrReservationsPage() {
                               {!r.arrived_at && (
                                 <button
                                   onClick={() => checkIn(r)}
-                                  title="Check-in — le client est arrivé"
+                                  title="Check-in, le client est arrivé"
                                   aria-label={`Check-in de ${r.guest_name}`}
                                   className="flex h-7 w-7 items-center justify-center rounded-lg text-blue-400/60 hover:bg-blue-500/15 hover:text-blue-400 transition-colors"
                                 >
@@ -706,7 +706,7 @@ export default function VenueQrReservationsPage() {
                               {!r.arrived_at && (
                                 <button
                                   onClick={() => setStatus(r, "no-show")}
-                                  title="No-show — le client n'est pas venu"
+                                  title="No-show, le client n'est pas venu"
                                   aria-label={`No-show pour ${r.guest_name}`}
                                   className="flex h-7 w-7 items-center justify-center rounded-lg text-white/30 hover:bg-white/10 hover:text-white transition-colors"
                                 >
@@ -744,7 +744,7 @@ export default function VenueQrReservationsPage() {
             (rows.find((r) => r.commission_rate > 0)?.commission_rate ?? 0.1) *
               100
           )}
-          &nbsp;% du montant pour les apports hôtel — les canaux direct et
+          &nbsp;% du montant pour les apports hôtel, les canaux direct et
           maison sont à 0&nbsp;%). Le montant reste modifiable en cas
           d&apos;erreur.
         </p>
@@ -764,7 +764,7 @@ export default function VenueQrReservationsPage() {
             <div className="flex items-start justify-between gap-4 mb-5">
               <div>
                 <p className="font-ui text-[10px] font-bold uppercase tracking-[0.18em] text-white/45">
-                  Canal maison — 0 % commission
+                  Canal maison · 0 % commission
                 </p>
                 <h3 className="font-display mt-1 text-2xl font-light text-white">
                   Nouvelle réservation
@@ -865,7 +865,7 @@ export default function VenueQrReservationsPage() {
                   aria-label="Table"
                   className="font-ui w-full rounded-xl bg-white/[0.07] border border-white/10 px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-white/40 [&>option]:bg-[#10131f]"
                 >
-                  <option value="">Table — à assigner plus tard</option>
+                  <option value="">Table : à assigner plus tard</option>
                   {venueTables.map((t) => (
                     <option key={t.id} value={t.id}>
                       {t.vip ? "VIP " : "Table "}

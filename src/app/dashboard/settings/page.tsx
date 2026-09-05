@@ -39,7 +39,7 @@ const labelCls =
   "block text-[0.625rem] text-white/30 uppercase tracking-wider mb-1.5";
 const managedNoteCls = "text-[0.6875rem] text-white/25 mt-1.5";
 const MANAGED_NOTE =
-  "Géré par twocards — contactez le support pour le modifier.";
+  "Géré par twocards, contactez le support pour le modifier.";
 const VENUE_TYPE_LABELS: Record<string, string> = {
   restaurant: "Restaurant",
   bar: "Bar",
@@ -593,7 +593,7 @@ export default function SettingsPage() {
         <div>
           <p className="text-sm text-white font-medium">Supprimer le compte</p>
           <p className="text-xs text-white/40 mt-0.5 max-w-md">
-            Envoyez votre demande à notre support — la suppression est traitée
+            Envoyez votre demande à notre support, la suppression est traitée
             sous 30 jours.
           </p>
         </div>

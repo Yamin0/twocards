@@ -104,7 +104,7 @@ export default function VenueCommissionsPage() {
             Commissions
           </h1>
           <p className="font-ui text-sm text-white/60 mt-1.5">
-            Ce que vous reversez au réseau d&apos;apporteurs — mis à jour en
+            Ce que vous reversez au réseau d&apos;apporteurs, mis à jour en
             temps réel
           </p>
         </div>
@@ -130,8 +130,8 @@ export default function VenueCommissionsPage() {
           className="text-amber-400 shrink-0 mt-0.5"
         />
         <p className="font-ui text-xs leading-relaxed text-white/60 max-w-2xl">
-          Vous reversez un pourcentage du montant réellement dépensé — 10 % par
-          défaut — uniquement sur les clients apportés par le réseau twocards
+          Vous reversez un pourcentage du montant réellement dépensé, 10 % par
+          défaut, uniquement sur les clients apportés par le réseau twocards
           (hôtels, concierges). La commission se calcule automatiquement dès
           que l&apos;addition est saisie ou remontée par votre caisse. Les
           réservations de votre portail direct ne sont jamais commissionnées.
@@ -149,7 +149,7 @@ export default function VenueCommissionsPage() {
           </h2>
           <p className="font-ui text-sm text-white/50 max-w-md mx-auto">
             {awaiting > 0
-              ? `${awaiting} sortie${awaiting > 1 ? "s" : ""} du réseau en attente de montant — saisissez l'addition (ou connectez votre caisse) et les commissions apparaîtront ici.`
+              ? `${awaiting} sortie${awaiting > 1 ? "s" : ""} du réseau en attente de montant, saisissez l'addition (ou connectez votre caisse) et les commissions apparaîtront ici.`
               : "Dès qu'un client apporté par le réseau sort chez vous et que son addition est connue, la commission reversée s'affiche ici, exportable en CSV."}
           </p>
         </div>
@@ -220,7 +220,7 @@ export default function VenueCommissionsPage() {
       <p className="font-ui flex items-start gap-2 text-xs text-white/40 max-w-2xl">
         <Globe size={13} strokeWidth={1.5} className="shrink-0 mt-0.5" />
         Les versements sont consolidés mensuellement par twocards. Le détail
-        par réservation ci-dessus fait foi — même calcul, même base, que ce
+        par réservation ci-dessus fait foi, même calcul, même base, que ce
         que voient vos apporteurs.
       </p>
     </div>

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { AudiencePage } from "@/components/landing/audience-page";
 
 export const metadata: Metadata = {
-  title: "twocards. | Hôtels & riads — le service que vos clients demandent le plus",
+  title: "twocards. | Hôtels & riads, le service que vos clients demandent le plus",
   description:
     "Offrez à vos clients les tables les plus difficiles de la ville, avec une attribution claire à votre établissement et une rémunération conforme à votre politique interne.",
 };
@@ -52,7 +52,7 @@ export default function HotelsPage() {
           title: "Tout ce que twocards apporte",
           accent: "à votre hôtel.",
           intro:
-            "De la chambre au versement de la commission, chaque étape est outillée, mesurée et traçable — sans changer vos habitudes ni celles de vos équipes.",
+            "De la chambre au versement de la commission, chaque étape est outillée, mesurée et traçable, sans changer vos habitudes ni celles de vos équipes.",
           items: [
             {
               id: "chambres",
@@ -60,7 +60,7 @@ export default function HotelsPage() {
               kicker: "Traçabilité",
               title: "Un QR code par chambre, chaque scan attribué",
               description:
-                "Chaque chambre, le lobby, le spa ou la piscine reçoit son propre QR code. Quand un client le scanne, le scan est compté et toute réservation qui en découle est rattachée à cet emplacement précis — vous savez exactement d'où vient chaque sortie, et donc chaque commission.",
+                "Chaque chambre, le lobby, le spa ou la piscine reçoit son propre QR code. Quand un client le scanne, le scan est compté et toute réservation qui en découle est rattachée à cet emplacement précis, vous savez exactement d'où vient chaque sortie, et donc chaque commission.",
               bullets: [
                 {
                   title: "Génération en un clic",
@@ -83,7 +83,7 @@ export default function HotelsPage() {
               kicker: "Curation",
               title: "Vous décidez ce que chaque client peut voir",
               description:
-                "Le menu qui s'ouvre au scan n'est pas un annuaire : c'est votre sélection. Restaurants, activités, clubs et services du catalogue twocards de votre ville — et pour chaque chambre, vous retirez ou proposez chaque adresse individuellement. Un VIP ne voit pas la même sélection qu'une famille.",
+                "Le menu qui s'ouvre au scan n'est pas un annuaire : c'est votre sélection. Restaurants, activités, clubs et services du catalogue twocards de votre ville, et pour chaque chambre, vous retirez ou proposez chaque adresse individuellement. Un VIP ne voit pas la même sélection qu'une famille.",
               bullets: [
                 {
                   title: "Catalogue de votre ville uniquement",
@@ -95,7 +95,7 @@ export default function HotelsPage() {
                 },
                 {
                   title: "Toujours à jour",
-                  text: "Une adresse retirée disparaît immédiatement de tous les téléphones — aucun support imprimé à refaire.",
+                  text: "Une adresse retirée disparaît immédiatement de tous les téléphones, aucun support imprimé à refaire.",
                 },
               ],
             },
@@ -105,11 +105,11 @@ export default function HotelsPage() {
               kicker: "Revenus",
               title: "Une commission claire sur chaque sortie",
               description:
-                "Votre hôtel touche un pourcentage du montant réellement dépensé par le client — 10 % par défaut. Le montant est saisi par l'établissement après la sortie, la commission est calculée automatiquement, sans déclaratif ni discussion. Vous suivez tout, exportez tout.",
+                "Votre hôtel touche un pourcentage du montant réellement dépensé par le client, 10 % par défaut. Le montant est saisi par l'établissement après la sortie, la commission est calculée automatiquement, sans déclaratif ni discussion. Vous suivez tout, exportez tout.",
               bullets: [
                 {
                   title: "Calcul automatique, jamais manuel",
-                  text: "La commission est dérivée en base de données du montant saisi par l'établissement. Personne ne peut la modifier à la main — ni eux, ni nous.",
+                  text: "La commission est dérivée en base de données du montant saisi par l'établissement. Personne ne peut la modifier à la main, ni eux, ni nous.",
                 },
                 {
                   title: "Export comptable",
@@ -128,7 +128,7 @@ export default function HotelsPage() {
               kicker: "Pilotage",
               title: "Un dashboard en temps réel, satisfaction comprise",
               description:
-                "Chaque réservation apparaît dans votre espace à la seconde où le client la fait, rattachée à sa chambre. Vous suivez la demande semaine par semaine, la répartition par type de sortie, et la satisfaction de vos clients — qui notent leur soirée après coup.",
+                "Chaque réservation apparaît dans votre espace à la seconde où le client la fait, rattachée à sa chambre. Vous suivez la demande semaine par semaine, la répartition par type de sortie, et la satisfaction de vos clients, qui notent leur soirée après coup.",
               bullets: [
                 {
                   title: "Temps réel, vraiment",
@@ -136,7 +136,7 @@ export default function HotelsPage() {
                 },
                 {
                   title: "Satisfaction mesurée",
-                  text: "Après chaque sortie, le client peut noter son expérience sur 5. Vous voyez la moyenne et les commentaires — la qualité de vos recommandations devient un chiffre.",
+                  text: "Après chaque sortie, le client peut noter son expérience sur 5. Vous voyez la moyenne et les commentaires, la qualité de vos recommandations devient un chiffre.",
                 },
                 {
                   title: "Vos données vous appartiennent",
@@ -213,7 +213,7 @@ export default function HotelsPage() {
           },
           {
             q: "Nos concierges ne peuvent pas recevoir de commissions. Et alors ?",
-            a: "C'est prévu. Le mode éthique permet une rémunération à l'établissement, à un fonds d'équipe, en avantage client — ou une simple attribution avec reporting, sans aucun versement individuel.",
+            a: "C'est prévu. Le mode éthique permet une rémunération à l'établissement, à un fonds d'équipe, en avantage client, ou une simple attribution avec reporting, sans aucun versement individuel.",
           },
           {
             q: "Comment la réservation est-elle attribuée à notre établissement ?",

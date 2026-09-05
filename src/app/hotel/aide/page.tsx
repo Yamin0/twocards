@@ -52,7 +52,7 @@ const STEPS = [
 const FAQ = [
   {
     q: "Que voit le client quand il scanne ?",
-    a: "Un menu au nom de votre hôtel : restaurants, activités, clubs et services de votre ville, avec les adresses que vous avez choisi de proposer. Il choisit une sortie, une date, une heure, un nombre de personnes, laisse son nom et son WhatsApp — c'est tout. Aucun compte, aucun paiement.",
+    a: "Un menu au nom de votre hôtel : restaurants, activités, clubs et services de votre ville, avec les adresses que vous avez choisi de proposer. Il choisit une sortie, une date, une heure, un nombre de personnes, laisse son nom et son WhatsApp, c'est tout. Aucun compte, aucun paiement.",
   },
   {
     q: "Qui confirme la réservation ?",
@@ -60,7 +60,7 @@ const FAQ = [
   },
   {
     q: "Comment ma commission est-elle calculée ?",
-    a: "Un pourcentage du montant réellement dépensé par le client — 10 % par défaut, le taux peut varier selon l'établissement. Elle est calculée automatiquement dès que l'établissement (ou sa caisse) renseigne le montant, après la sortie.",
+    a: "Un pourcentage du montant réellement dépensé par le client : 10 % par défaut, le taux peut varier selon l'établissement. Elle est calculée automatiquement dès que l'établissement (ou sa caisse) renseigne le montant, après la sortie.",
   },
   {
     q: "Puis-je changer le nom de l'hôtel sans réimprimer les QR ?",
@@ -91,7 +91,7 @@ export default function HotelHelpPage() {
       <PageHeader
         eyebrow="Aide"
         title="Comment ça marche"
-        description="Tout ce qu'il faut savoir pour transformer vos chambres en apporteur d'affaires — et qui contacter si quelque chose coince."
+        description="Tout ce qu'il faut savoir pour transformer vos chambres en apporteur d'affaires, et qui contacter si quelque chose coince."
       />
 
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">

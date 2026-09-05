@@ -197,8 +197,8 @@ export function GuestExperience({
   const welcome =
     info.welcome ??
     (info.city
-      ? `Les meilleures adresses de ${info.city}, réservées en quelques secondes — nous nous occupons du reste.`
-      : "Réservez vos plus belles sorties en quelques secondes — nous nous occupons du reste.");
+      ? `Les meilleures adresses de ${info.city}, réservées en quelques secondes, nous nous occupons du reste.`
+      : "Réservez vos plus belles sorties en quelques secondes, nous nous occupons du reste.");
 
   const pick = (key: GuestCategoryKey | "tous") => {
     setCategory(key);
@@ -469,7 +469,7 @@ export function GuestExperience({
           </a>
         )}
         <p className="text-xs leading-relaxed text-[var(--on-page-muted)]">
-          Sans engagement — l&apos;établissement confirme par téléphone ou WhatsApp.
+          Sans engagement, l&apos;établissement confirme par téléphone ou WhatsApp.
         </p>
         <div className="mt-3 flex items-center justify-center gap-1.5 text-[var(--on-page-muted)]">
           <span className="text-[11px]">Propulsé par</span>
@@ -945,7 +945,7 @@ function ReservationSheet({
                   )}
                 </button>
                 <p className="text-center text-xs leading-relaxed text-neutral-500">
-                  Sans engagement ni paiement — {hotelName} et l&apos;établissement sont prévenus, la confirmation arrive par téléphone ou WhatsApp.
+                  Sans engagement ni paiement : {hotelName} et l&apos;établissement sont prévenus, la confirmation arrive par téléphone ou WhatsApp.
                 </p>
               </div>
             )}

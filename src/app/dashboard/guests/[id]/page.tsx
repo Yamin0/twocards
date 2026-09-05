@@ -292,7 +292,7 @@ export default function GuestProfilePage({
           </div>
           {history.length === 0 ? (
             <p className="font-ui px-5 pb-6 text-sm text-white/40">
-              Pas encore de visite passée — la première réservation de ce
+              Pas encore de visite passée, la première réservation de ce
               client est à venir.
             </p>
           ) : (

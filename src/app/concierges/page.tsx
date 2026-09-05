@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { AudiencePage } from "@/components/landing/audience-page";
 
 export const metadata: Metadata = {
-  title: "twocards. | Concierges & RP — chaque apport tracé, chaque commission payée",
+  title: "twocards. | Concierges & RP, chaque apport tracé, chaque commission payée",
   description:
     "Accédez aux disponibilités des meilleurs établissements, confirmez vos clients plus vite et suivez chaque commission jusqu'au paiement.",
 };
@@ -57,7 +57,7 @@ export default function ConciergesPage() {
                 },
                 {
                   title: "Attribution incontestable",
-                  text: "La réservation porte votre identifiant de bout en bout — l'établissement sait qu'elle vient de vous, la commission aussi.",
+                  text: "La réservation porte votre identifiant de bout en bout, l'établissement sait qu'elle vient de vous, la commission aussi.",
                 },
                 {
                   title: "Vos clients restent les vôtres",
@@ -71,7 +71,7 @@ export default function ConciergesPage() {
               kicker: "Sélection",
               title: "Les adresses qui font votre réputation",
               description:
-                "Clubs, restaurants, activités, services de conciergerie : le catalogue twocards réunit les établissements partenaires de votre ville, avec les vraies disponibilités. Vous recommandez sereinement — la table sera là.",
+                "Clubs, restaurants, activités, services de conciergerie : le catalogue twocards réunit les établissements partenaires de votre ville, avec les vraies disponibilités. Vous recommandez sereinement, la table sera là.",
               bullets: [
                 {
                   title: "Restaurants, clubs, activités, services",
@@ -83,7 +83,7 @@ export default function ConciergesPage() {
                 },
                 {
                   title: "Confirmation rapide",
-                  text: "Le client est recontacté pour confirmation — vous n'avez plus à courir après les réponses.",
+                  text: "Le client est recontacté pour confirmation, vous n'avez plus à courir après les réponses.",
                 },
               ],
             },
@@ -101,7 +101,7 @@ export default function ConciergesPage() {
                 },
                 {
                   title: "Suivi en temps réel",
-                  text: "La sortie de votre client apparaît dans votre dashboard à la seconde — la commission dès que l'addition est saisie.",
+                  text: "La sortie de votre client apparaît dans votre dashboard à la seconde, la commission dès que l'addition est saisie.",
                 },
                 {
                   title: "Versements mensuels",
@@ -162,11 +162,11 @@ export default function ConciergesPage() {
           },
           {
             q: "Et si je ne peux pas toucher de commission personnellement ?",
-            a: "Certains employeurs et standards professionnels l'interdisent. TwoCards permet de rediriger la rémunération vers votre agence, votre équipe, un avantage client — ou de fonctionner en simple attribution et reporting, sans aucun versement individuel.",
+            a: "Certains employeurs et standards professionnels l'interdisent. TwoCards permet de rediriger la rémunération vers votre agence, votre équipe, un avantage client, ou de fonctionner en simple attribution et reporting, sans aucun versement individuel.",
           },
           {
             q: "Mes clients sensibles sont-ils protégés ?",
-            a: "Oui. Les profils confidentiels peuvent être réservés sous alias, avec des coordonnées révélées uniquement après acceptation, et un statut attaché à la réservation — jamais à la personne.",
+            a: "Oui. Les profils confidentiels peuvent être réservés sous alias, avec des coordonnées révélées uniquement après acceptation, et un statut attaché à la réservation, jamais à la personne.",
           },
           {
             q: "Quand suis-je payé ?",

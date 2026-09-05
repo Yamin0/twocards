@@ -180,7 +180,7 @@ const STEPS = [
   {
     title: "Il réserve en quelques secondes",
     description:
-      "Date, couverts, acompte : le client réserve seul, à toute heure. La réservation porte dès l'origine le QR qui l'a générée — chambre, lobby, table ou carte.",
+      "Date, couverts, acompte : le client réserve seul, à toute heure. La réservation porte dès l'origine le QR qui l'a générée, chambre, lobby, table ou carte.",
     visual: BookingVisual,
   },
   {

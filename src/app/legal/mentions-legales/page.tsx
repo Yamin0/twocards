@@ -17,7 +17,7 @@ export default function MentionsLegalesPage() {
           heading: "Éditeur du site",
           body: [
             "Le site twocardspro.com est édité par [Raison sociale de la société], société [forme juridique] au capital de [montant] MAD, immatriculée au registre du commerce de [ville] sous le numéro [RC], dont le siège social est situé [adresse complète], Maroc.",
-            "Identifiant fiscal : [IF] — ICE : [ICE] — Directeur de la publication : [nom du représentant légal].",
+            "Identifiant fiscal : [IF] · ICE : [ICE] · Directeur de la publication : [nom du représentant légal].",
           ],
         },
         {

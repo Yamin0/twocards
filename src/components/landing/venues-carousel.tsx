@@ -69,7 +69,7 @@ export function VenuesCarousel() {
           </div>
           <p className="max-w-sm text-[14px] font-normal leading-relaxed text-[var(--landing-ink)]/60">
             Chaque catégorie du réseau publie un inventaire alloué, ses
-            conditions et ses règles de commission — jamais tout son plan de
+            conditions et ses règles de commission, jamais tout son plan de
             salle.
           </p>
         </motion.div>
