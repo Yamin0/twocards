@@ -67,6 +67,8 @@ export type HotelProfile = {
   welcome_message: string | null;
   reception_phone: string | null;
   show_prices: boolean;
+  /* Adresses du catalogue réseau retirées pour tout l'hôtel (slugs). */
+  hidden_offers: string[];
 };
 
 export const DEFAULT_PROFILE: HotelProfile = {
@@ -78,6 +80,7 @@ export const DEFAULT_PROFILE: HotelProfile = {
   welcome_message: null,
   reception_phone: null,
   show_prices: true,
+  hidden_offers: [],
 };
 
 /* Offre du catalogue réseau (lecture seule côté hôtel). */
@@ -373,7 +376,7 @@ const profileStore = createStore<HotelProfile>(async () => {
   const { data, error } = await createClient()
     .from("hotel_profiles")
     .select(
-      "hotel_name, city, accent_color, background_color, cover_url, welcome_message, reception_phone, show_prices"
+      "hotel_name, city, accent_color, background_color, cover_url, welcome_message, reception_phone, show_prices, hidden_offers"
     )
     .maybeSingle();
   if (error) throw error;

@@ -129,6 +129,9 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
   const rating = averageRating(mine);
   const conversion = conversionRate(qr.scans, live.length);
   const hiddenSet = hidden ?? new Set<string>();
+  /* Retraits valables pour tout l'hôtel (page Mes adresses) : affichés ici
+     pour information, ils ne se règlent pas chambre par chambre. */
+  const globalHidden = new Set(profile.hidden_offers);
   const menuDirty =
     JSON.stringify([...hiddenSet].sort()) !== JSON.stringify([...qr.hidden_offers].sort());
   const totalOffers = menuCatalog.reduce((s, c) => s + c.offers.length, 0);
@@ -344,7 +347,7 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
           <div className="grid gap-3 md:grid-cols-2">
             {menuCatalog.map((cat) => {
               const Icon = CATEGORY_ICONS[cat.key];
-              const ids = cat.offers.map((o) => o.id);
+              const ids = cat.offers.map((o) => o.id).filter((oid) => !globalHidden.has(oid));
               const shown = ids.filter((oid) => !hiddenSet.has(oid)).length;
               const offers = q ? cat.offers.filter((o) => o.name.toLowerCase().includes(q) || o.tag.toLowerCase().includes(q)) : cat.offers;
               if (q && offers.length === 0) return null;
@@ -372,7 +375,8 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
                   </div>
                   <ul className="divide-y divide-white/[0.05] px-1.5 py-1">
                     {offers.map((o) => {
-                      const on = !hiddenSet.has(o.id);
+                      const global = globalHidden.has(o.id);
+                      const on = !global && !hiddenSet.has(o.id);
                       return (
                         <li key={o.id} className={cn("flex items-center justify-between gap-3 rounded-lg px-2 py-2 transition-opacity", !on && "opacity-50")}>
                           <button type="button" onClick={() => toggleOffer(o.id)} className="min-w-0 flex-1 text-left">
@@ -380,6 +384,9 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
                               <span className="truncate">{o.name}</span>
                               {o.source === "hotel" && (
                                 <span className="shrink-0 rounded-md bg-sky-500/20 px-1.5 py-0.5 text-[10px] font-bold text-sky-200">Maison</span>
+                              )}
+                              {global && (
+                                <span className="shrink-0 rounded-md bg-white/10 px-1.5 py-0.5 text-[10px] font-bold text-white/60" title="Retirée pour tout l'hôtel dans Mes adresses">Tout l&apos;hôtel</span>
                               )}
                             </span>
                             <span className="flex items-center gap-1 text-[11px] text-white/45">
@@ -392,7 +399,7 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
                               {o.price ? ` · ${o.price}` : ""}
                             </span>
                           </button>
-                          <Switch size="sm" checked={on} onChange={() => toggleOffer(o.id)} label={`Proposer ${o.name}`} />
+                          <Switch size="sm" checked={on} disabled={global} onChange={() => toggleOffer(o.id)} label={`Proposer ${o.name}`} />
                         </li>
                       );
                     })}

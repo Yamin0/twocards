@@ -9,6 +9,7 @@ import {
   Hotel,
   Loader2,
   LogIn,
+  LogOut,
   MessageSquare,
   RefreshCw,
   Shield,
@@ -427,6 +428,7 @@ export default function AdminPage() {
               </p>
             </div>
           </div>
+          <div className="flex flex-wrap items-center gap-2">
           {isAdmin && (
             <button
               onClick={refresh}
@@ -437,6 +439,18 @@ export default function AdminPage() {
               {refreshing ? "Actualisation…" : "Actualiser"}
             </button>
           )}
+          {email && (
+            <form action="/auth/signout" method="post">
+              <button
+                type="submit"
+                className="flex items-center gap-2 rounded-xl border border-white/[0.12] bg-white/[0.06] px-4 py-2.5 text-xs font-semibold text-white/70 transition-colors hover:border-red-400/30 hover:bg-red-500/15 hover:text-red-200"
+              >
+                <LogOut size={14} />
+                Déconnexion
+              </button>
+            </form>
+          )}
+          </div>
         </div>
 
         {/* ── Gardes ── */}
