@@ -134,12 +134,12 @@ export default function DashboardLayout({
   return (
     <div className="min-h-screen lg:h-screen relative lg:overflow-hidden bg-[#141210]">
         {/* Fond photo : vue aérienne sable / océan (public/dashboard-bg-ocean.jpg).
-           Photo claire (sable, écume) sous du texte blanc : le flou porte sur la
-           photo elle-même pour gommer la texture de l'écume qui traverserait le
-           backdrop-blur des panneaux, et le voile à 55 % ramène la luminance
+           Photo claire (sable, écume) sous du texte blanc : un flou léger (4 px) sur la
+           photo garde l'image reconnaissable ; le backdrop-blur des panneaux lisse
+           le reste sous le texte, et le voile à 55 % ramène la luminance
            sous le texte. Le scale compense les bords éclaircis par le flou. */}
         <div
-          className="fixed inset-0 scale-110 bg-cover bg-center blur-xl"
+          className="fixed inset-0 scale-105 bg-cover bg-center blur-sm"
           style={{ backgroundImage: "url(/dashboard-bg-ocean.jpg)" }}
         />
         {/* Voile de lisibilité */}

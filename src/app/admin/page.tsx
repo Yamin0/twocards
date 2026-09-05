@@ -390,7 +390,7 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen bg-[#141210]">
       <div
-        className="fixed inset-0 scale-110 bg-cover bg-center blur-xl"
+        className="fixed inset-0 scale-105 bg-cover bg-center blur-sm"
         style={{ backgroundImage: "url(/dashboard-bg-ocean.jpg)" }}
       />
       <div className="fixed inset-0 bg-black/60" />
