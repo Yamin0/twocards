@@ -14,6 +14,7 @@ import {
   ArrowLeft,
   Calendar,
   Check,
+  ChevronLeft,
   ChevronRight,
   Clock,
   LayoutGrid,
@@ -535,6 +536,66 @@ function OfferCard({ offer: o, showPrice, onPick }: { offer: GuestOffer; showPri
   );
 }
 
+/* Galerie de la fiche : la couverture, puis les autres photos de l'adresse.
+   Une seule est visible à la fois, les autres restent montées pour que le
+   navigateur les ait déjà en cache au changement. */
+function Gallery({ images }: { images: string[] }) {
+  const [index, setIndex] = useState(0);
+  if (images.length === 0) return null;
+  const go = (step: number) => setIndex((n) => (n + step + images.length) % images.length);
+  return (
+    <div className="relative aspect-[16/9] w-full overflow-hidden bg-neutral-200">
+      {images.map((src, n) => (
+        <Image
+          key={src}
+          src={src}
+          alt=""
+          fill
+          unoptimized={src.startsWith("http")}
+          priority={n === 0}
+          sizes="(max-width: 640px) 100vw, 512px"
+          className={cn("object-cover transition-opacity duration-300", n === index ? "opacity-100" : "opacity-0")}
+        />
+      ))}
+      {images.length > 1 && (
+        <>
+          <button
+            type="button"
+            onClick={() => go(-1)}
+            aria-label="Photo précédente"
+            className="absolute left-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-neutral-900 shadow transition-colors hover:bg-white"
+          >
+            <ChevronLeft size={17} strokeWidth={2.25} />
+          </button>
+          <button
+            type="button"
+            onClick={() => go(1)}
+            aria-label="Photo suivante"
+            className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-neutral-900 shadow transition-colors hover:bg-white"
+          >
+            <ChevronRight size={17} strokeWidth={2.25} />
+          </button>
+          <div className="absolute inset-x-0 bottom-2.5 flex justify-center gap-1.5">
+            {images.map((src, n) => (
+              <button
+                key={src}
+                type="button"
+                onClick={() => setIndex(n)}
+                aria-label={`Photo ${n + 1} sur ${images.length}`}
+                aria-current={n === index}
+                className={cn(
+                  "h-1.5 rounded-full transition-all",
+                  n === index ? "w-5 bg-white" : "w-1.5 bg-white/60 hover:bg-white/85"
+                )}
+              />
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 function Inactive({ hotelName, reception }: { hotelName: string; reception: string | null }) {
   return (
     <main className="mx-auto flex w-full max-w-md flex-col items-center px-8 py-16 text-center">
@@ -742,9 +803,7 @@ function ReservationSheet({
               <div className="space-y-6 px-5 pb-5 pt-5 sm:px-7">
                 {/* L'adresse en un coup d'œil : photo, étiquette, prix, description. */}
                 <section className="overflow-hidden rounded-2xl bg-[#f7f6f3]">
-                  <div className="relative aspect-[16/9] w-full">
-                    <Image src={offer.image} alt="" fill unoptimized={offer.image.startsWith("http")} sizes="(max-width: 640px) 100vw, 512px" className="object-cover" />
-                  </div>
+                  <Gallery images={offer.images} />
                   <div className="px-4 py-3.5">
                     <div className="flex items-baseline justify-between gap-3">
                       <p className="text-[10px] font-medium uppercase tracking-[0.24em] text-neutral-400">{offer.tag}</p>

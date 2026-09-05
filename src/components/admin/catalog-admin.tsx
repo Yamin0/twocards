@@ -25,12 +25,14 @@ export type CatalogRow = {
   description: string;
   price: string | null;
   image_url: string | null;
+  images: string[];
   active: boolean;
   sort_order: number;
   updated_at: string;
 };
 
-const SELECT = "slug, category, name, city, tag, description, price, image_url, active, sort_order, updated_at";
+const SELECT =
+  "slug, category, name, city, tag, description, price, image_url, images, active, sort_order, updated_at";
 
 type Filter = "toutes" | GuestCategoryKey;
 
@@ -41,6 +43,7 @@ const toDraft = (o: CatalogRow): OfferDraft => ({
   description: o.description,
   price: o.price ?? "",
   image_url: o.image_url,
+  images: o.images ?? [],
   active: o.active,
   city: o.city ?? "",
   slug: o.slug,
@@ -124,6 +127,7 @@ export function CatalogAdmin({
       description: draft.description,
       price: draft.price || null,
       image_url: draft.image_url,
+      images: draft.images,
       active: draft.active,
     };
     let error;
@@ -281,6 +285,7 @@ export function CatalogAdmin({
                     <MapPin size={10} /> {r.city ?? "toutes villes"}
                   </span>
                   {r.price ? ` · ${r.price}` : ""}
+                  {r.images?.length ? ` · ${r.images.length + 1} photos` : ""}
                   <span className="font-mono-satoshi text-white/30"> · {r.slug}</span>
                 </p>
               </div>

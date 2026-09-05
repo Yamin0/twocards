@@ -51,6 +51,8 @@ export type OfferRow = {
   description?: string | null;
   price?: string | null;
   image_url?: string | null;
+  /* Photos suivant la couverture, dans l'ordre d'affichage. */
+  images?: string[] | null;
   sort_order?: number | null;
   active?: boolean;
 };
@@ -62,7 +64,10 @@ export type GuestOffer = {
   description: string;
   tag: string;
   price?: string;
+  /* Couverture : la carte du menu et les dashboards n'affichent que celle-ci. */
   image: string;
+  /* Galerie complète, couverture en tête : montrée dans la fiche au clic. */
+  images: string[];
   /* réseau twocards ou adresse ajoutée par l'hôtel */
   source: "reseau" | "hotel";
 };
@@ -86,6 +91,7 @@ export function fallbackImage(slug: string) {
 }
 
 export function toOffer(row: OfferRow, source: GuestOffer["source"]): GuestOffer {
+  const cover = row.image_url || fallbackImage(row.slug);
   return {
     id: row.slug,
     name: row.name,
@@ -93,7 +99,8 @@ export function toOffer(row: OfferRow, source: GuestOffer["source"]): GuestOffer
     description: row.description ?? "",
     tag: row.tag || (source === "hotel" ? "Adresse de l'hôtel" : ""),
     price: row.price ?? undefined,
-    image: row.image_url || fallbackImage(row.slug),
+    image: cover,
+    images: [cover, ...(row.images ?? []).filter(Boolean)],
     source,
   };
 }

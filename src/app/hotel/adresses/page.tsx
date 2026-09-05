@@ -66,6 +66,7 @@ const toDraft = (o: HotelOffer): OfferDraft => ({
   description: o.description,
   price: o.price ?? "",
   image_url: o.image_url,
+  images: o.images ?? [],
   active: o.active,
   city: "",
   slug: o.slug,
@@ -134,6 +135,7 @@ export default function HotelAddressesPage() {
       description: draft.description,
       price: draft.price || null,
       image_url: draft.image_url,
+      images: draft.images,
       active: draft.active,
     };
     const ok = editing?.offer ? await update(editing.offer.id, input) : (await create(input)) !== null;

@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import Image from "next/image";
-import { ImagePlus, Trash2 } from "lucide-react";
+import { ImagePlus, Star, Trash2, X } from "lucide-react";
 import { CATEGORY_KEYS, CATEGORY_LABELS, fallbackImage, type GuestCategoryKey } from "@/lib/guest-catalog";
 import { uploadImage } from "@/lib/hotel/upload-image";
 import { Button, Field, Modal, Segmented, Switch, inputClass } from "@/components/hotel/ui";
@@ -19,7 +19,9 @@ export type OfferDraft = {
   tag: string;
   description: string;
   price: string;
+  /* Couverture, puis les photos suivantes. */
   image_url: string | null;
+  images: string[];
   active: boolean;
   city: string;
   slug: string;
@@ -32,6 +34,7 @@ export const EMPTY_DRAFT: OfferDraft = {
   description: "",
   price: "",
   image_url: null,
+  images: [],
   active: true,
   city: "",
   slug: "",
@@ -45,6 +48,9 @@ export const slugify = (s: string) =>
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "")
     .slice(0, 40);
+
+/* Huit photos par adresse, comme la contrainte de la base. */
+const MAX_PHOTOS = 8;
 
 const TAG_HINTS: Record<GuestCategoryKey, string> = {
   restaurants: "Restaurant, Rooftop, Gastronomique…",
@@ -103,19 +109,29 @@ export function OfferEditor({
     if (msg) setError(msg);
   };
 
-  const upload = async (file: File) => {
+  /* Une seule liste en mémoire : la première photo est la couverture. */
+  const photos = draft.image_url ? [draft.image_url, ...draft.images] : draft.images;
+  const setPhotos = (next: string[]) =>
+    setDraft((d) => ({ ...d, image_url: next[0] ?? null, images: next.slice(1) }));
+
+  const upload = async (files: FileList) => {
     if (!userId) return;
     setUploading(true);
     try {
-      const url = await uploadImage(file, userId, uploadPrefix, 1200);
-      set("image_url", url);
+      const room = MAX_PHOTOS - photos.length;
+      const added: string[] = [];
+      for (const file of Array.from(files).slice(0, Math.max(room, 0))) {
+        added.push(await uploadImage(file, userId, uploadPrefix, 1600));
+      }
+      if (added.length > 0) setPhotos([...photos, ...added]);
+      if (Array.from(files).length > room) setError(`${MAX_PHOTOS} photos au maximum par adresse.`);
     } catch (e) {
       setError(e instanceof Error ? e.message : "L'envoi de l'image a échoué");
     }
     setUploading(false);
   };
 
-  const preview = draft.image_url || fallbackImage(draft.slug || draft.name || "x");
+  const preview = photos[0] || fallbackImage(draft.slug || draft.name || "x");
 
   return (
     <Modal
@@ -134,7 +150,7 @@ export function OfferEditor({
         </>
       }
     >
-      <div className="grid gap-5 md:grid-cols-[200px_1fr]">
+      <div className="grid gap-5 md:grid-cols-[240px_1fr]">
         {/* Photo */}
         <div>
           <input
@@ -142,29 +158,72 @@ export function OfferEditor({
             type="file"
             accept="image/*"
             className="hidden"
+            multiple
             onChange={(e) => {
-              const f = e.target.files?.[0];
-              if (f) upload(f);
+              if (e.target.files?.length) upload(e.target.files);
               e.target.value = "";
             }}
           />
           <div className="relative aspect-[4/3] overflow-hidden rounded-xl border border-white/10 bg-white/[0.04]">
-            <Image src={preview} alt="" fill unoptimized={preview.startsWith("http")} sizes="200px" className="object-cover" />
-            {!draft.image_url && (
-              <span className="absolute inset-x-0 bottom-0 bg-black/60 px-2 py-1 text-center text-[10px] font-bold uppercase tracking-wider text-white/70">
-                Photo par défaut
-              </span>
-            )}
+            <Image src={preview} alt="" fill unoptimized={preview.startsWith("http")} sizes="240px" className="object-cover" />
+            <span className="absolute inset-x-0 bottom-0 bg-black/60 px-2 py-1 text-center text-[10px] font-bold uppercase tracking-wider text-white/70">
+              {photos.length === 0 ? "Photo par défaut" : "Couverture"}
+            </span>
           </div>
+
+          {/* Photos suivantes : montrées dans la fiche, au clic du client. */}
+          {photos.length > 1 && (
+            <ul className="mt-2 grid grid-cols-3 gap-1.5">
+              {photos.slice(1).map((url, i) => (
+                <li key={url} className="group relative aspect-square overflow-hidden rounded-lg border border-white/10">
+                  <Image src={url} alt="" fill unoptimized={url.startsWith("http")} sizes="80px" className="object-cover" />
+                  <div className="absolute inset-0 flex items-center justify-center gap-1 bg-black/55 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
+                    <button
+                      type="button"
+                      onClick={() => setPhotos([url, ...photos.filter((u) => u !== url)])}
+                      aria-label="Définir comme couverture"
+                      title="Définir comme couverture"
+                      className="rounded-md p-1 text-white/80 hover:text-amber-300"
+                    >
+                      <Star size={13} strokeWidth={2} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPhotos(photos.filter((u) => u !== url))}
+                      aria-label="Retirer cette photo"
+                      title="Retirer"
+                      className="rounded-md p-1 text-white/80 hover:text-red-300"
+                    >
+                      <X size={13} strokeWidth={2.5} />
+                    </button>
+                  </div>
+                  <span className="num absolute left-1 top-1 rounded bg-black/60 px-1 text-[9px] font-bold text-white/80">
+                    {i + 2}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+
           <div className="mt-2 flex gap-2">
-            <Button size="sm" icon={ImagePlus} loading={uploading} onClick={() => fileInput.current?.click()} className="flex-1">
-              {draft.image_url ? "Changer" : "Ajouter une photo"}
+            <Button
+              size="sm"
+              icon={ImagePlus}
+              loading={uploading}
+              disabled={photos.length >= MAX_PHOTOS}
+              onClick={() => fileInput.current?.click()}
+              className="flex-1"
+            >
+              {photos.length === 0 ? "Ajouter des photos" : "Ajouter"}
             </Button>
-            {draft.image_url && (
-              <Button size="sm" variant="ghost" icon={Trash2} onClick={() => set("image_url", null)} aria-label="Retirer la photo" />
+            {photos.length > 0 && (
+              <Button size="sm" variant="ghost" icon={Trash2} onClick={() => setPhotos(photos.slice(1))} aria-label="Retirer la couverture" title="Retirer la couverture" />
             )}
           </div>
-          <p className="mt-2 text-[11px] leading-relaxed text-white/40">Format paysage conseillé. Redimensionnée automatiquement.</p>
+          <p className="mt-2 text-[11px] leading-relaxed text-white/40">
+            La première photo est la couverture, seule visible sur la carte. Les suivantes s&apos;affichent dans la
+            fiche, au clic du client. Jusqu&apos;à {MAX_PHOTOS}, format paysage conseillé.
+          </p>
         </div>
 
         {/* Champs */}

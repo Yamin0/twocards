@@ -95,6 +95,7 @@ export type CatalogOffer = OfferRow & {
   description: string;
   price: string | null;
   image_url: string | null;
+  images: string[];
   active: boolean;
   sort_order: number;
 };
@@ -109,6 +110,7 @@ export type HotelOffer = {
   description: string;
   price: string | null;
   image_url: string | null;
+  images: string[];
   active: boolean;
   sort_order: number;
   created_at: string;
@@ -419,7 +421,7 @@ export function useHotelProfile() {
 /* ─── Catalogue réseau (lecture) ───────────────────────────────────────────── */
 
 const CATALOG_SELECT =
-  "slug, category, name, city, tag, description, price, image_url, active, sort_order";
+  "slug, category, name, city, tag, description, price, image_url, images, active, sort_order";
 
 const catalogStore = createStore<CatalogOffer[]>(async () => {
   const { data, error } = await createClient()
@@ -445,7 +447,7 @@ export function useCatalog() {
 /* ─── Adresses maison de l'hôtel ───────────────────────────────────────────── */
 
 const OFFER_SELECT =
-  "id, slug, category, name, tag, description, price, image_url, active, sort_order, created_at";
+  "id, slug, category, name, tag, description, price, image_url, images, active, sort_order, created_at";
 
 const offersStore = createStore<HotelOffer[]>(async () => {
   const { data, error } = await createClient()
