@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useEffect, useCallback, ReactNode } from "react";
+import { useRef, useState, useCallback, ReactNode } from "react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
 /**
@@ -31,17 +31,24 @@ export function SnapCarousel({
     setCanNext(el.scrollLeft < max - 8);
   }, []);
 
-  useEffect(() => {
-    update();
-    const el = trackRef.current;
-    if (!el) return;
-    el.addEventListener("scroll", update, { passive: true });
-    window.addEventListener("resize", update);
-    return () => {
-      el.removeEventListener("scroll", update);
-      window.removeEventListener("resize", update);
-    };
-  }, [update]);
+  /* Abonnement par rappel de ref plutôt que par effet : la première mesure a
+     lieu au montage, la piste déjà dans le DOM, et le nettoyage repart avec
+     elle (React 19 accepte une fonction de nettoyage en retour de ref). */
+  const attachTrack = useCallback(
+    (el: HTMLDivElement | null) => {
+      trackRef.current = el;
+      if (!el) return;
+      update();
+      el.addEventListener("scroll", update, { passive: true });
+      window.addEventListener("resize", update);
+      return () => {
+        trackRef.current = null;
+        el.removeEventListener("scroll", update);
+        window.removeEventListener("resize", update);
+      };
+    },
+    [update]
+  );
 
   const scrollBy = (dir: 1 | -1) => {
     const el = trackRef.current;
@@ -52,7 +59,7 @@ export function SnapCarousel({
   return (
     <div className={className}>
       <div
-        ref={trackRef}
+        ref={attachTrack}
         role="region"
         aria-label={ariaLabel}
         className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:gap-6"

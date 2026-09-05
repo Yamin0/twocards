@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, Plus, QrCode, Mail } from "lucide-react";
@@ -103,13 +103,12 @@ function MarqueeItem({
   onVideo?: boolean;
 }) {
   const [failed, setFailed] = useState(false);
-  const ref = useRef<HTMLImageElement>(null);
 
   /* L'image est rendue côté serveur : si le fichier manque, l'erreur survient
-     avant l'hydratation et onError n'est jamais appelé. On relit donc l'état
-     au montage. */
-  useEffect(() => {
-    const el = ref.current;
+     avant l'hydratation et onError n'est jamais appelé. Le rappel de ref
+     s'exécute au montage, l'élément déjà dans le DOM : on y relit l'état réel
+     de l'image, plutôt que dans un effet qui relancerait un rendu en cascade. */
+  const checkLoaded = useCallback((el: HTMLImageElement | null) => {
     if (el?.complete && el.naturalWidth === 0) setFailed(true);
   }, []);
 
@@ -117,7 +116,7 @@ function MarqueeItem({
     return (
       /* eslint-disable-next-line @next/next/no-img-element */
       <img
-        ref={ref}
+        ref={checkLoaded}
         src={item.logo}
         alt={duplicate ? "" : item.name}
         aria-hidden={duplicate}

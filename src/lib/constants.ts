@@ -85,14 +85,14 @@ export const venues: Venue[] = [
   },
   {
     id: 'venue-5',
-    name: 'Twiga Marrakech',
+    name: 'Table du Marché Hivernage',
     type: 'lounge',
     city: 'Marrakech',
-    address: 'Place Jemaa el-Fna, Medina, 40000 Marrakech',
+    address: 'Rue du Temple, Hivernage, 40000 Marrakech',
     capacity: 280,
-    description: 'Luxury lounge overlooking the Atlas Mountains, where Italian flair meets Marrakech glamour.',
+    description: 'Cuisine de marché et produits de saison, servis dans un patio contemporain au cœur du quartier Hivernage.',
     openingHours: '20:00 - 04:00',
-    coverImage: '/venues/twiga.jpg',
+    coverImage: '/venues/table-du-marche.jpg',
     tables: [
       { id: 't-5-1', number: 1, type: 'vip', capacity: 10, minimumSpend: 8000, shape: 'round', position: { x: 20, y: 10 }, status: 'reserved' },
       { id: 't-5-2', number: 2, type: 'vip', capacity: 8, minimumSpend: 5000, shape: 'rectangle', position: { x: 45, y: 10 }, status: 'available' },
@@ -898,11 +898,11 @@ export const conversations: Conversation[] = [
     id: 'conv-5',
     name: 'Nadia Berrada',
     initials: 'NB',
-    lastMessage: 'Elena confirmed for Friday at Twiga. She wants the terrace VIP.',
+    lastMessage: 'Elena confirmed for Friday at Table du Marché. She wants the terrace VIP.',
     timestamp: '2026-04-05T16:00:00',
     unread: false,
     role: 'PR',
-    venue: 'Twiga Marrakech',
+    venue: 'Table du Marché Hivernage',
   },
 ]
 
@@ -942,11 +942,11 @@ export const messages: Record<string, Message[]> = {
     { id: 'msg-4-5', senderId: 'pr-5', content: 'I have 3 tables worth of clients for Nuit Sauvage. Sending details now.', timestamp: '2026-04-05T18:20:00', isOwn: false },
   ],
   'conv-5': [
-    { id: 'msg-5-1', senderId: 'pr-6', content: 'Elena Papadopoulos is coming Friday to Twiga with her usual group.', timestamp: '2026-04-05T14:00:00', isOwn: false },
+    { id: 'msg-5-1', senderId: 'pr-6', content: 'Elena Papadopoulos is coming Friday to Table du Marché with her usual group.', timestamp: '2026-04-05T14:00:00', isOwn: false },
     { id: 'msg-5-2', senderId: 'self', content: 'VIP 1 terrace? She always wants that one.', timestamp: '2026-04-05T14:15:00', isOwn: true },
     { id: 'msg-5-3', senderId: 'pr-6', content: 'Exactly. Party of 8, vegetarian menu. 8K minimum is fine.', timestamp: '2026-04-05T14:30:00', isOwn: false },
     { id: 'msg-5-4', senderId: 'self', content: 'Booked. Also Viktor Andersen is at VIP 2 same night - the proposal. Keep it discreet.', timestamp: '2026-04-05T15:00:00', isOwn: true },
-    { id: 'msg-5-5', senderId: 'pr-6', content: 'Elena confirmed for Friday at Twiga. She wants the terrace VIP.', timestamp: '2026-04-05T16:00:00', isOwn: false },
+    { id: 'msg-5-5', senderId: 'pr-6', content: 'Elena confirmed for Friday at Table du Marché. She wants the terrace VIP.', timestamp: '2026-04-05T16:00:00', isOwn: false },
   ],
 }
 
