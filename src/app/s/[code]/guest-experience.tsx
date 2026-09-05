@@ -211,10 +211,11 @@ export function GuestExperience({
 
   const pick = (key: GuestCategoryKey | "tous") => {
     setCategory(key);
-    /* Sur grand écran la liste défile sous une couverture haute : on la
-       ramène en vue à chaque changement de catégorie. */
-    if (window.innerWidth >= 1024 && listRef.current) {
-      const top = listRef.current.getBoundingClientRect().top + window.scrollY - 96;
+    setSearch("");
+    /* La couverture est haute : à chaque changement de vue, on ramène la
+       liste en haut de l'écran, sans repasser par la couverture. */
+    if (listRef.current) {
+      const top = listRef.current.getBoundingClientRect().top + window.scrollY - 12;
       if (window.scrollY > top) window.scrollTo({ top, behavior: "smooth" });
     }
   };
@@ -298,170 +299,127 @@ export function GuestExperience({
       {state === "inactive" ? (
         <Inactive reception={info.reception} hotelName={hotelName} />
       ) : (
-        <div className="mx-auto w-full max-w-6xl px-0 sm:px-8 lg:px-10">
-          {/* ─── Onglets mobiles / tablette, collants ─────────────────────── */}
-          <div className="sticky top-0 z-20 -mx-0 border-b border-black/[0.06] bg-white/95 backdrop-blur sm:mx-0 sm:mt-6 sm:rounded-2xl sm:border lg:hidden">
-            <div className="no-scrollbar flex gap-1.5 overflow-x-auto px-4 py-3 sm:px-5">
-              <CategoryChip active={category === "tous"} onClick={() => pick("tous")} label="Tout" count={total} />
-              {menu.map((c) => (
-                <CategoryChip
-                  key={c.key}
-                  active={category === c.key}
-                  onClick={() => pick(c.key)}
-                  label={c.label}
-                  count={c.offers.length}
-                  icon={CATEGORY_ICONS[c.key]}
-                />
+        <div ref={listRef} className="mx-auto w-full max-w-6xl px-3 pb-2 pt-3 sm:px-8 sm:pt-6 lg:px-10 lg:pt-8">
+          {state === "loading" ? (
+            <div className="space-y-3 sm:space-y-4" aria-busy>
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="h-40 animate-pulse rounded-2xl bg-black/10 sm:h-52 lg:h-64" />
               ))}
             </div>
-          </div>
-
-          <div ref={listRef} className="lg:grid lg:grid-cols-[272px_1fr] lg:gap-10 lg:pt-10">
-            {/* ─── Colonne de navigation (grand écran) ──────────────────────── */}
-            <aside className="hidden lg:block">
-              <div className="sticky top-8 space-y-5">
-                <div className="rounded-2xl border border-black/[0.06] bg-white p-3 shadow-[0_20px_60px_-40px_rgba(0,0,0,0.35)]">
-                  <div className="relative mb-2 px-1">
-                    <Search size={15} strokeWidth={2} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400" />
-                    <input
-                      type="search"
-                      value={search}
-                      onChange={(e) => setSearch(e.target.value)}
-                      placeholder="Rechercher…"
-                      className="h-10 w-full rounded-xl border border-black/[0.08] bg-[#f7f6f3] pl-10 pr-3 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-[var(--accent)] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/20"
-                    />
+          ) : category === "tous" ? (
+            /* ─── Bandeaux de catégories ─────────────────────────────────── */
+            <div className="space-y-3 sm:space-y-4">
+              {menu.map((c, i) => (
+                <button
+                  key={c.key}
+                  type="button"
+                  onClick={() => pick(c.key)}
+                  className="group relative block h-40 w-full overflow-hidden rounded-2xl text-white shadow-[0_20px_50px_-30px_rgba(0,0,0,0.6)] transition-transform active:scale-[0.99] sm:h-52 lg:h-64"
+                >
+                  {/* Les deux premiers bandeaux sont sous la couverture, donc
+                      visibles dès l'ouverture : chargés sans attendre. */}
+                  <Image
+                    src={c.image}
+                    alt=""
+                    fill
+                    priority={i < 2}
+                    sizes="(max-width: 1152px) 100vw, 1152px"
+                    className="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+                  />
+                  <div className="absolute inset-0 bg-black/30 transition-colors group-hover:bg-black/40" />
+                  <div className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center">
+                    <span className="font-display text-xl font-bold uppercase tracking-[0.35em] [text-shadow:0_2px_14px_rgba(0,0,0,0.6)] sm:text-2xl lg:text-3xl">
+                      {c.label}
+                    </span>
+                    <span className="num mt-2 text-[11px] font-medium uppercase tracking-[0.22em] text-white/85 [text-shadow:0_1px_8px_rgba(0,0,0,0.6)] sm:text-xs">
+                      {c.offers.length} adresse{c.offers.length > 1 ? "s" : ""}
+                    </span>
                   </div>
-                  <nav className="space-y-0.5">
-                    <SideItem active={category === "tous"} onClick={() => pick("tous")} label="Toutes les adresses" count={total} icon={LayoutGrid} />
+                </button>
+              ))}
+              {menu.length === 0 && (
+                <div className="rounded-2xl border border-dashed border-black/10 bg-white px-6 py-12 text-center">
+                  <p className="text-sm font-bold">Aucune adresse proposée pour le moment</p>
+                  <p className="mt-1 text-sm text-neutral-500">Adressez-vous à la réception.</p>
+                </div>
+              )}
+            </div>
+          ) : (
+            /* ─── Une catégorie ──────────────────────────────────────────── */
+            (() => {
+              const current = menu.find((c) => c.key === category);
+              const shown = visible[0];
+              if (!current) return null;
+              const Icon = CATEGORY_ICONS[current.key];
+              return (
+                <div>
+                  <div className="relative h-36 overflow-hidden rounded-2xl text-white sm:h-44 lg:h-52">
+                    <Image src={current.image} alt="" fill sizes="(max-width: 1152px) 100vw, 1152px" className="object-cover" />
+                    <div className="absolute inset-0 bg-black/40" />
+                    <button
+                      type="button"
+                      onClick={() => pick("tous")}
+                      aria-label="Retour aux catégories"
+                      className="absolute left-3 top-3 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-neutral-900 shadow transition-colors hover:bg-white sm:left-4 sm:top-4"
+                    >
+                      <ArrowLeft size={18} strokeWidth={2.25} />
+                    </button>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center">
+                      <span className="font-display flex items-center gap-2 text-xl font-bold uppercase tracking-[0.35em] [text-shadow:0_2px_14px_rgba(0,0,0,0.6)] sm:text-2xl lg:text-3xl">
+                        <Icon size={18} strokeWidth={2} className="hidden sm:block" />
+                        {current.label}
+                      </span>
+                      <span className="mt-2 text-[11px] font-medium text-white/85 [text-shadow:0_1px_8px_rgba(0,0,0,0.6)] sm:text-xs">
+                        {current.tagline}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="no-scrollbar mt-3 flex gap-1.5 overflow-x-auto py-1 sm:mt-4">
+                    <CategoryChip active={false} onClick={() => pick("tous")} label="Tout" count={total} />
                     {menu.map((c) => (
-                      <SideItem
+                      <CategoryChip
                         key={c.key}
-                        active={category === c.key}
+                        active={c.key === category}
                         onClick={() => pick(c.key)}
                         label={c.label}
                         count={c.offers.length}
                         icon={CATEGORY_ICONS[c.key]}
                       />
                     ))}
-                  </nav>
-                </div>
+                  </div>
 
-                <div className="rounded-2xl border border-black/[0.06] bg-white p-5">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-neutral-400">Comment ça marche</p>
-                  <ol className="mt-3 space-y-3">
-                    {[
-                      ["Choisissez", "une adresse dans la sélection de l'hôtel."],
-                      ["Indiquez", "vos couverts, la date, l'heure et vos coordonnées."],
-                      ["Confirmation", "par téléphone ou WhatsApp, sans paiement."],
-                    ].map(([t, d], i) => (
-                      <li key={t} className="flex gap-3 text-sm">
-                        <span className="num flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--accent)] text-[11px] font-black text-[var(--on-accent)]">
-                          {i + 1}
-                        </span>
-                        <span className="leading-snug text-neutral-600">
-                          <span className="font-bold text-neutral-900">{t}</span> {d}
-                        </span>
-                      </li>
-                    ))}
-                  </ol>
-                  {info.reception && (
-                    <a
-                      href={waLink(info.reception, `Bonjour ${hotelName}, `)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-black/[0.08] bg-[#f7f6f3] text-sm font-bold text-neutral-800 transition-colors hover:bg-neutral-100"
-                    >
-                      <MessageCircle size={15} strokeWidth={2} className="text-emerald-600" />
-                      Écrire à la réception
-                    </a>
-                  )}
-                </div>
-              </div>
-            </aside>
-
-            {/* ─── Liste ─────────────────────────────────────────────────────── */}
-            <main className="min-w-0 bg-white px-4 pb-8 pt-4 sm:mt-4 sm:rounded-3xl sm:border sm:border-black/[0.06] sm:px-6 sm:pb-8 sm:pt-5 lg:mt-0 lg:rounded-3xl lg:bg-transparent lg:border-0 lg:p-0">
-              {state === "loading" ? (
-                <ul className="space-y-3 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0" aria-busy>
-                  {[1, 2, 3, 4].map((i) => (
-                    <li key={i} className="flex gap-3 rounded-2xl border border-black/[0.06] bg-white p-3">
-                      <div className="h-[84px] w-[84px] shrink-0 animate-pulse rounded-xl bg-neutral-200" />
-                      <div className="flex-1 space-y-2 py-1">
-                        <div className="h-4 w-2/3 animate-pulse rounded bg-neutral-200" />
-                        <div className="h-3 w-1/3 animate-pulse rounded bg-neutral-100" />
-                        <div className="h-3 w-full animate-pulse rounded bg-neutral-100" />
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <>
-                  {total > 6 && (
-                    <div className="relative mb-4 lg:hidden">
+                  {current.offers.length > 4 && (
+                    <div className="relative mt-3">
                       <Search size={15} strokeWidth={2} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400" />
                       <input
                         type="search"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        placeholder="Rechercher une adresse, une envie…"
-                        className="h-11 w-full rounded-xl border border-black/[0.08] bg-[#f7f6f3] pl-10 pr-4 text-[15px] text-neutral-900 placeholder:text-neutral-400 focus:border-[var(--accent)] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/20"
+                        placeholder={`Rechercher dans ${current.label.toLowerCase()}…`}
+                        className="h-11 w-full rounded-xl border border-black/[0.08] bg-white pl-10 pr-4 text-[15px] text-neutral-900 placeholder:text-neutral-400 focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/20"
                       />
                     </div>
                   )}
 
-                  {visible.length === 0 ? (
-                    <div className="rounded-2xl border border-dashed border-black/10 bg-white px-6 py-12 text-center">
+                  {!shown || shown.offers.length === 0 ? (
+                    <div className="mt-4 rounded-2xl border border-dashed border-black/10 bg-white px-6 py-12 text-center">
                       <p className="text-sm font-bold">Aucune adresse ne correspond</p>
-                      <p className="mt-1 text-sm text-neutral-500">Essayez un autre mot ou une autre catégorie.</p>
+                      <p className="mt-1 text-sm text-neutral-500">Essayez un autre mot.</p>
                     </div>
                   ) : (
-                    <div className="space-y-7 lg:space-y-10">
-                      {visible.map((c) => {
-                        const Icon = CATEGORY_ICONS[c.key];
-                        const showAll = category !== "tous" || !!q;
-                        const offers = showAll ? c.offers : c.offers.slice(0, 4);
-                        return (
-                          <section key={c.key}>
-                            <div className="mb-3 flex items-end justify-between gap-4 lg:mb-4">
-                              <div>
-                                <h2 className="font-display flex items-center gap-2 text-lg font-bold tracking-tight text-[var(--on-page)] lg:text-2xl">
-                                  <Icon size={17} strokeWidth={2} className="text-[var(--accent)] lg:h-5 lg:w-5" />
-                                  {c.label}
-                                  <span className="num text-sm font-bold text-[var(--on-page-muted)]">{c.offers.length}</span>
-                                </h2>
-                                <p className="mt-0.5 hidden text-sm text-[var(--on-page-muted)] sm:block">{c.tagline}</p>
-                              </div>
-                              {category === "tous" && !q && c.offers.length > offers.length && (
-                                <button type="button" onClick={() => pick(c.key)} className="shrink-0 text-xs font-bold text-[var(--accent)] lg:text-sm">
-                                  Voir tout
-                                </button>
-                              )}
-                            </div>
-                            <ul className="space-y-3 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
-                              {offers.map((o) => (
-                                <li key={o.id}>
-                                  <OfferRow offer={o} showPrice={info.showPrices} onPick={() => setOffer({ offer: o, category: c })} />
-                                </li>
-                              ))}
-                            </ul>
-                            {category === "tous" && !q && c.offers.length > offers.length && (
-                              <button
-                                type="button"
-                                onClick={() => pick(c.key)}
-                                className="mt-3 w-full rounded-xl border border-black/[0.08] bg-white py-2.5 text-sm font-bold text-neutral-700 transition-colors hover:bg-neutral-50"
-                              >
-                                {c.offers.length - offers.length} autre{c.offers.length - offers.length > 1 ? "s" : ""} {c.label.toLowerCase()}
-                              </button>
-                            )}
-                          </section>
-                        );
-                      })}
-                    </div>
+                    <ul className="mt-4 grid gap-3 lg:grid-cols-2 lg:gap-4">
+                      {shown.offers.map((o) => (
+                        <li key={o.id}>
+                          <OfferRow offer={o} showPrice={info.showPrices} onPick={() => setOffer({ offer: o, category: current })} />
+                        </li>
+                      ))}
+                    </ul>
                   )}
-                </>
-              )}
-            </main>
-          </div>
+                </div>
+              );
+            })()
+          )}
         </div>
       )}
 
@@ -471,7 +429,7 @@ export function GuestExperience({
             href={waLink(info.reception, `Bonjour ${hotelName}, `)}
             target="_blank"
             rel="noopener noreferrer"
-            className="mb-4 inline-flex items-center gap-2 rounded-full border border-black/[0.08] bg-white px-4 py-2 text-sm font-bold text-neutral-800 transition-colors hover:bg-neutral-50 lg:hidden"
+            className="mb-4 inline-flex items-center gap-2 rounded-full border border-black/[0.08] bg-white px-4 py-2 text-sm font-bold text-neutral-800 transition-colors hover:bg-neutral-50"
           >
             <MessageCircle size={15} strokeWidth={2} className="text-emerald-600" />
             Écrire à la réception
@@ -527,36 +485,6 @@ function CategoryChip({
     >
       {Icon && <Icon size={14} strokeWidth={2} />}
       {label}
-      <span className={cn("num text-[11px] font-bold", active ? "opacity-70" : "text-neutral-400")}>{count}</span>
-    </button>
-  );
-}
-
-function SideItem({
-  active,
-  onClick,
-  label,
-  count,
-  icon: Icon,
-}: {
-  active: boolean;
-  onClick: () => void;
-  label: string;
-  count: number;
-  icon: typeof UtensilsCrossed;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={active}
-      className={cn(
-        "flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-bold transition-colors",
-        active ? "bg-[var(--accent)] text-[var(--on-accent)]" : "text-neutral-700 hover:bg-[#f1f0ec]"
-      )}
-    >
-      <Icon size={16} strokeWidth={2} className={active ? "opacity-90" : "text-neutral-400"} />
-      <span className="flex-1 truncate">{label}</span>
       <span className={cn("num text-[11px] font-bold", active ? "opacity-70" : "text-neutral-400")}>{count}</span>
     </button>
   );
