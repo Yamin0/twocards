@@ -1,11 +1,59 @@
-import { venues } from "@/lib/constants";
-
 /* Catalogue présenté au client de l'hôtel après un scan de QR code.
-   Restaurants et clubs proviennent des venues partenaires (constants.ts) ;
-   activités et services sont une sélection éditoriale en attendant que ces
-   partenaires soient gérés en base. */
+
+   Les adresses vivent en base : le catalogue du réseau twocards
+   (catalog_offers, tenu par l'administrateur) et les adresses maison de
+   l'hôtel (hotel_offers). Ce module ne fait que les ranger par catégorie,
+   filtrer par ville et appliquer les choix de l'hôtel : aucune adresse n'est
+   écrite ici. */
 
 export type GuestCategoryKey = "restaurants" | "activites" | "clubs" | "services";
+
+export const CATEGORY_KEYS: GuestCategoryKey[] = ["restaurants", "activites", "clubs", "services"];
+
+export const CATEGORY_META: Record<
+  GuestCategoryKey,
+  { label: string; tagline: string; image: string }
+> = {
+  restaurants: {
+    label: "Restaurants",
+    tagline: "Tables raffinées et dîners d'exception",
+    image: "/images/carousel/07.jpg",
+  },
+  activites: {
+    label: "Activités",
+    tagline: "Vivez le meilleur de la destination",
+    image: "/images/carousel/05.jpg",
+  },
+  clubs: {
+    label: "Clubs",
+    tagline: "Les nuits les plus courues du pays",
+    image: "/images/carousel/03.jpg",
+  },
+  services: {
+    label: "Services",
+    tagline: "Une conciergerie à votre écoute",
+    image: "/images/carousel/01.jpg",
+  },
+};
+
+export const CATEGORY_LABELS = Object.fromEntries(
+  CATEGORY_KEYS.map((k) => [k, CATEGORY_META[k].label])
+) as Record<GuestCategoryKey, string>;
+
+/* Ligne telle que renvoyée par la base (catalog_offers, hotel_offers ou le
+   JSON de qr_get_menu). */
+export type OfferRow = {
+  slug: string;
+  category: GuestCategoryKey | string;
+  name: string;
+  city?: string | null;
+  tag?: string | null;
+  description?: string | null;
+  price?: string | null;
+  image_url?: string | null;
+  sort_order?: number | null;
+  active?: boolean;
+};
 
 export type GuestOffer = {
   id: string;
@@ -15,6 +63,8 @@ export type GuestOffer = {
   tag: string;
   price?: string;
   image: string;
+  /* réseau twocards ou adresse ajoutée par l'hôtel */
+  source: "reseau" | "hotel";
 };
 
 export type GuestCategory = {
@@ -25,178 +75,90 @@ export type GuestCategory = {
   offers: GuestOffer[];
 };
 
-/* Les photos des venues (public/venues/*.jpg) ne sont pas dans le repo :
-   on pioche dans le carrousel existant, de façon stable par venue. */
-const CAROUSEL = Array.from(
-  { length: 9 },
-  (_, i) => `/images/carousel/0${i + 1}.jpg`
-);
+/* Photo de secours quand l'adresse n'en a pas : une image du carrousel,
+   stable pour un slug donné. */
+const CAROUSEL = Array.from({ length: 9 }, (_, i) => `/images/carousel/0${i + 1}.jpg`);
 
-const venueImage = (id: string) => {
-  const n = Number(id.replace(/\D/g, "")) || 0;
-  return CAROUSEL[n % CAROUSEL.length];
-};
+export function fallbackImage(slug: string) {
+  let h = 0;
+  for (const c of slug) h = (h * 31 + c.charCodeAt(0)) % 9973;
+  return CAROUSEL[h % CAROUSEL.length];
+}
 
-const fromVenues = (types: string[], tag: string): GuestOffer[] =>
-  venues
-    .filter((v) => types.includes(v.type))
-    .map((v) => ({
-      id: v.id,
-      name: v.name,
-      city: v.city,
-      description: v.description,
-      tag,
-      image: venueImage(v.id),
-    }));
-
-export const GUEST_CATEGORIES: GuestCategory[] = [
-  {
-    key: "restaurants",
-    label: "Restaurants",
-    tagline: "Tables raffinées et dîners d'exception",
-    image: "/images/carousel/07.jpg",
-    offers: fromVenues(["restaurant", "lounge"], "Restaurant"),
-  },
-  {
-    key: "activites",
-    label: "Activités",
-    tagline: "Vivez le meilleur de la destination",
-    image: "/images/carousel/05.jpg",
-    offers: [
-      {
-        id: "act-1",
-        name: "Montgolfière au lever du soleil",
-        city: "Marrakech",
-        description:
-          "Survol du désert d'Agafay et des palmeraies, petit-déjeuner berbère inclus.",
-        tag: "Aventure",
-        price: "dès 1 100 MAD",
-        image: "/images/carousel/02.jpg",
-      },
-      {
-        id: "act-2",
-        name: "Quad & dromadaire dans la Palmeraie",
-        city: "Marrakech",
-        description:
-          "Randonnée guidée entre pistes et palmiers, pause thé à la menthe au campement.",
-        tag: "Aventure",
-        price: "dès 450 MAD",
-        image: "/images/carousel/04.jpg",
-      },
-      {
-        id: "act-3",
-        name: "Hammam & spa traditionnel",
-        description:
-          "Rituel complet : gommage au savon noir, enveloppement au ghassoul, massage à l'huile d'argan.",
-        tag: "Bien-être",
-        price: "dès 600 MAD",
-        image: "/images/carousel/06.jpg",
-      },
-      {
-        id: "act-4",
-        name: "Cours de cuisine marocaine",
-        description:
-          "Marché aux épices, tajine et pâtisseries avec une dada, repas dégusté ensemble.",
-        tag: "Culture",
-        price: "dès 500 MAD",
-        image: "/images/carousel/08.jpg",
-      },
-      {
-        id: "act-5",
-        name: "Excursion vallée de l'Ourika",
-        city: "Marrakech",
-        description:
-          "Villages berbères, cascades et déjeuner au bord de l'oued, transport privé.",
-        tag: "Excursion",
-        price: "dès 700 MAD",
-        image: "/images/carousel/09.jpg",
-      },
-    ],
-  },
-  {
-    key: "clubs",
-    label: "Clubs",
-    tagline: "Les nuits les plus courues du pays",
-    image: "/images/carousel/03.jpg",
-    offers: fromVenues(["club", "bar"], "Club"),
-  },
-  {
-    key: "services",
-    label: "Services",
-    tagline: "Une conciergerie à votre écoute",
-    image: "/images/carousel/01.jpg",
-    offers: [
-      {
-        id: "srv-1",
-        name: "Chauffeur privé & transferts",
-        description:
-          "Berline avec chauffeur pour vos sorties, transferts aéroport et excursions.",
-        tag: "Transport",
-        image: "/images/carousel/01.jpg",
-      },
-      {
-        id: "srv-2",
-        name: "Photographe privé",
-        description:
-          "Séance photo lifestyle dans les plus beaux décors de la ville, clichés retouchés sous 48 h.",
-        tag: "Lifestyle",
-        price: "dès 900 MAD",
-        image: "/images/carousel/03.jpg",
-      },
-      {
-        id: "srv-3",
-        name: "Baby-sitting de confiance",
-        description:
-          "Intervenantes vérifiées, français et anglais parlés, à l'hôtel ou en villa.",
-        tag: "Famille",
-        image: "/images/carousel/05.jpg",
-      },
-      {
-        id: "srv-4",
-        name: "Demande sur mesure",
-        description:
-          "Fleurs, anniversaire, demande spéciale… Dites-nous tout, on s'occupe du reste.",
-        tag: "Conciergerie",
-        image: "/images/carousel/07.jpg",
-      },
-    ],
-  },
-];
+export function toOffer(row: OfferRow, source: GuestOffer["source"]): GuestOffer {
+  return {
+    id: row.slug,
+    name: row.name,
+    city: row.city ?? undefined,
+    description: row.description ?? "",
+    tag: row.tag || (source === "hotel" ? "Adresse de l'hôtel" : ""),
+    price: row.price ?? undefined,
+    image: row.image_url || fallbackImage(row.slug),
+    source,
+  };
+}
 
 /* Comparaison de villes tolérante : la ville de l'hôtel est saisie librement
    au signup (« marrakech », « Marrakech  »…). */
-const normalizeCity = (c: string) =>
+export const normalizeCity = (c: string) =>
   c
     .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[̀-ͯ]/g, "")
     .trim()
     .toLowerCase();
 
-/* Catalogue vu par un client donné : les offres d'une autre ville que celle
-   de l'hôtel sont écartées (celles sans ville sont disponibles partout),
-   puis l'hôtel retire ce qu'il ne veut pas proposer sur ce QR précis.
-   Les catégories vidées disparaissent du menu. */
+const isKey = (c: string): c is GuestCategoryKey =>
+  (CATEGORY_KEYS as string[]).includes(c);
+
+/* Catalogue vu par un client donné : les offres du réseau d'une autre ville
+   que celle de l'hôtel sont écartées (celles sans ville sont disponibles
+   partout), les adresses maison viennent en tête de leur catégorie, puis
+   l'hôtel retire ce qu'il ne veut pas proposer sur ce QR précis. Les
+   catégories vidées disparaissent du menu. */
 export function buildGuestMenu({
   city,
   hidden,
+  catalog,
+  hotelOffers = [],
 }: {
   city: string | null;
   hidden: string[];
+  catalog: OfferRow[];
+  hotelOffers?: OfferRow[];
 }): GuestCategory[] {
   const hiddenSet = new Set(hidden);
   const hotelCity = city ? normalizeCity(city) : null;
-  return GUEST_CATEGORIES.map((cat) => ({
-    ...cat,
-    offers: cat.offers.filter(
-      (o) =>
-        !hiddenSet.has(o.id) &&
-        (!o.city || !hotelCity || normalizeCity(o.city) === hotelCity)
-    ),
+  const byCategory = new Map<GuestCategoryKey, GuestOffer[]>(CATEGORY_KEYS.map((k) => [k, []]));
+
+  const sorted = (rows: OfferRow[]) =>
+    [...rows].sort(
+      (a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0) || a.name.localeCompare(b.name, "fr")
+    );
+
+  for (const row of sorted(hotelOffers)) {
+    if (!isKey(row.category) || row.active === false) continue;
+    byCategory.get(row.category)!.push(toOffer(row, "hotel"));
+  }
+  for (const row of sorted(catalog)) {
+    if (!isKey(row.category) || row.active === false) continue;
+    if (row.city && hotelCity && normalizeCity(row.city) !== hotelCity) continue;
+    byCategory.get(row.category)!.push(toOffer(row, "reseau"));
+  }
+
+  return CATEGORY_KEYS.map((key) => ({
+    key,
+    ...CATEGORY_META[key],
+    offers: byCategory.get(key)!.filter((o) => !hiddenSet.has(o.id)),
   })).filter((cat) => cat.offers.length > 0);
 }
 
-/* Côté hôtel : le catalogue configurable est celui de sa ville, offres
-   masquées comprises — c'est là qu'il coche/décoche. */
-export function cityCatalog(city: string | null): GuestCategory[] {
-  return buildGuestMenu({ city, hidden: [] });
+/* Côté hôtel : le catalogue configurable est celui de sa ville, adresses
+   maison comprises et offres masquées comprises : c'est là qu'il coche et
+   décoche. */
+export function cityCatalog(
+  city: string | null,
+  catalog: OfferRow[],
+  hotelOffers: OfferRow[] = []
+): GuestCategory[] {
+  return buildGuestMenu({ city, hidden: [], catalog, hotelOffers });
 }

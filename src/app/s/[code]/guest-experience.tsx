@@ -8,6 +8,7 @@ import {
   type GuestCategory,
   type GuestCategoryKey,
   type GuestOffer,
+  type OfferRow,
 } from "@/lib/guest-catalog";
 import {
   ArrowLeft,
@@ -122,6 +123,9 @@ export function GuestExperience({
     showPrices: true,
   });
   const [hidden, setHidden] = useState<string[]>([]);
+  /* Catalogue du réseau et adresses maison de l'hôtel, livrés avec le menu. */
+  const [catalog, setCatalog] = useState<OfferRow[]>([]);
+  const [hotelOffers, setHotelOffers] = useState<OfferRow[]>([]);
   const [category, setCategory] = useState<GuestCategoryKey | "tous">("tous");
   const [search, setSearch] = useState("");
   const [offer, setOffer] = useState<{ offer: GuestOffer; category: GuestCategory } | null>(null);
@@ -143,6 +147,8 @@ export function GuestExperience({
             return;
           }
           setHidden(row.hidden_offers ?? []);
+          setCatalog(Array.isArray(row.catalog) ? (row.catalog as OfferRow[]) : []);
+          setHotelOffers(Array.isArray(row.hotel_offers) ? (row.hotel_offers as OfferRow[]) : []);
           setInfo({
             label: row.label ?? null,
             hotelName: row.hotel_name || fallbackHotelName,
@@ -165,7 +171,10 @@ export function GuestExperience({
     };
   }, [code, fallbackHotelName, fallbackCity, preview]);
 
-  const menu = useMemo(() => buildGuestMenu({ city: info.city, hidden }), [info.city, hidden]);
+  const menu = useMemo(
+    () => buildGuestMenu({ city: info.city, hidden, catalog, hotelOffers }),
+    [info.city, hidden, catalog, hotelOffers]
+  );
   const total = menu.reduce((s, c) => s + c.offers.length, 0);
   const q = search.trim().toLowerCase();
   const visible = menu
@@ -561,11 +570,14 @@ function OfferRow({ offer: o, showPrice, onPick }: { offer: GuestOffer; showPric
       className="group flex h-full w-full items-stretch gap-3.5 rounded-2xl border border-black/[0.06] bg-white p-3 text-left transition-all hover:border-black/[0.12] hover:shadow-[0_16px_40px_-24px_rgba(0,0,0,0.4)] active:scale-[0.99] lg:gap-4"
     >
       <div className="relative w-[92px] shrink-0 self-stretch overflow-hidden rounded-xl bg-neutral-100 sm:w-[110px] lg:w-[132px]">
-        <Image src={o.image} alt="" fill sizes="132px" className="object-cover transition-transform duration-500 group-hover:scale-105" />
+        <Image src={o.image} alt="" fill unoptimized={o.image.startsWith("http")} sizes="132px" className="object-cover transition-transform duration-500 group-hover:scale-105" />
       </div>
       <div className="flex min-w-0 flex-1 flex-col">
         <p className="font-display line-clamp-2 text-[15px] font-bold leading-snug tracking-tight lg:text-base">{o.name}</p>
         <p className="mt-0.5 flex flex-wrap items-center gap-x-1 text-xs text-neutral-500">
+          {o.source === "hotel" && (
+            <span className="rounded-md bg-[var(--accent)] px-1.5 py-0.5 text-[10px] font-bold text-[var(--on-accent)]">Par l&apos;hôtel</span>
+          )}
           <span className="font-medium text-neutral-700">{o.tag}</span>
           {o.city && (
             <>
@@ -780,7 +792,7 @@ function ReservationSheet({
                 </button>
               ) : (
                 <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-xl bg-neutral-100">
-                  <Image src={offer.image} alt="" fill sizes="44px" className="object-cover" />
+                  <Image src={offer.image} alt="" fill unoptimized={offer.image.startsWith("http")} sizes="44px" className="object-cover" />
                 </div>
               )}
               <div className="min-w-0 flex-1">

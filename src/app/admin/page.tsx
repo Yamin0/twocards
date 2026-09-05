@@ -19,6 +19,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useAuthUser } from "@/hooks/use-auth-user";
 import { formatTimestamp } from "@/hooks/use-messaging";
 import { startImpersonation } from "@/lib/impersonation";
+import { CatalogAdmin } from "@/components/admin/catalog-admin";
 
 /* Console d'administration : tous les comptes de la plateforme, leur
    activité réelle et leurs échanges. La garde est en base — policies et
@@ -447,6 +448,11 @@ export default function AdminPage() {
               {email ? "Retour à l'accueil" : "Se connecter"}
             </a>
           </div>
+        )}
+
+        {/* ── Catalogue des adresses proposées aux clients des hôtels ── */}
+        {!isLoading && isAdmin && (
+          <CatalogAdmin userId={userId} panel={panel} onSaved={notifyOk} onError={notifyError} />
         )}
 
         {/* ── Sections par type de dashboard ── */}

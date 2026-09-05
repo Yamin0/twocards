@@ -67,6 +67,10 @@ const FAQ = [
     a: "Oui. Le menu lit votre profil en base à chaque scan : nom, ville, couleur et message d'accueil se mettent à jour instantanément sur tous les QR, même déjà imprimés.",
   },
   {
+    q: "Puis-je ajouter mes propres adresses au menu ?",
+    a: "Oui, dans Mes adresses : votre restaurant, votre spa, votre chauffeur, un partenaire de confiance. Photo, description, prix indicatif, catégorie. Elles apparaissent en tête de leur catégorie sur vos QR codes, et nulle part ailleurs. Les demandes vous arrivent directement, sans commission twocards. Le catalogue du réseau, lui, est tenu par twocards : écrivez-nous pour y proposer une adresse.",
+  },
+  {
     q: "Un QR désactivé, ça donne quoi ?",
     a: "Le lien reste valable mais affiche un message d'indisponibilité, sans compter de scan. Réactivez-le quand vous voulez. La suppression, elle, est définitive et efface l'historique de l'emplacement.",
   },

@@ -2,6 +2,7 @@
 
 import { useCallback, useSyncExternalStore } from "react";
 import { createClient } from "@/lib/supabase/client";
+import type { GuestCategoryKey, OfferRow } from "@/lib/guest-catalog";
 
 /* Données de l'espace hôtel, partagées par toutes les pages.
 
@@ -78,6 +79,36 @@ export const DEFAULT_PROFILE: HotelProfile = {
   reception_phone: null,
   show_prices: true,
 };
+
+/* Offre du catalogue réseau (lecture seule côté hôtel). */
+export type CatalogOffer = OfferRow & {
+  slug: string;
+  category: GuestCategoryKey;
+  city: string | null;
+  tag: string;
+  description: string;
+  price: string | null;
+  image_url: string | null;
+  active: boolean;
+  sort_order: number;
+};
+
+/* Adresse maison ajoutée par l'hôtel, visible sur ses seuls QR codes. */
+export type HotelOffer = {
+  id: string;
+  slug: string;
+  category: GuestCategoryKey;
+  name: string;
+  tag: string;
+  description: string;
+  price: string | null;
+  image_url: string | null;
+  active: boolean;
+  sort_order: number;
+  created_at: string;
+};
+
+export type HotelOfferInput = Omit<HotelOffer, "id" | "slug" | "created_at" | "sort_order">;
 
 /* ─── Mini store générique ─────────────────────────────────────────────────── */
 
@@ -379,17 +410,110 @@ export function useHotelProfile() {
   };
 }
 
+/* ─── Catalogue réseau (lecture) ───────────────────────────────────────────── */
+
+const CATALOG_SELECT =
+  "slug, category, name, city, tag, description, price, image_url, active, sort_order";
+
+const catalogStore = createStore<CatalogOffer[]>(async () => {
+  const { data, error } = await createClient()
+    .from("catalog_offers")
+    .select(CATALOG_SELECT)
+    .eq("active", true)
+    .order("sort_order", { ascending: true })
+    .order("name", { ascending: true });
+  if (error) throw error;
+  return (data ?? []) as CatalogOffer[];
+}, []);
+
+export function useCatalog() {
+  const snapshot = useStore(catalogStore);
+  return {
+    catalog: snapshot ?? [],
+    isLoading: snapshot === undefined,
+    failed: catalogStore.failed(),
+    refresh: catalogStore.reload,
+  };
+}
+
+/* ─── Adresses maison de l'hôtel ───────────────────────────────────────────── */
+
+const OFFER_SELECT =
+  "id, slug, category, name, tag, description, price, image_url, active, sort_order, created_at";
+
+const offersStore = createStore<HotelOffer[]>(async () => {
+  const { data, error } = await createClient()
+    .from("hotel_offers")
+    .select(OFFER_SELECT)
+    .order("sort_order", { ascending: true })
+    .order("created_at", { ascending: true });
+  if (error) throw error;
+  return (data ?? []) as HotelOffer[];
+}, []);
+
+export function useHotelOffers() {
+  const snapshot = useStore(offersStore);
+
+  const create = useCallback(async (input: HotelOfferInput) => {
+    const current = offersStore.get() ?? [];
+    const sort_order = current.reduce((m, o) => Math.max(m, o.sort_order), 0) + 10;
+    const { data, error } = await createClient()
+      .from("hotel_offers")
+      .insert({ ...input, sort_order })
+      .select(OFFER_SELECT)
+      .single();
+    if (error || !data) return null;
+    const row = data as HotelOffer;
+    offersStore.set([...current, row]);
+    return row;
+  }, []);
+
+  const update = useCallback(async (id: string, patch: Partial<HotelOfferInput & { sort_order: number }>) => {
+    const { error } = await createClient()
+      .from("hotel_offers")
+      .update({ ...patch, updated_at: new Date().toISOString() })
+      .eq("id", id);
+    if (error) return false;
+    offersStore.set(
+      (offersStore.get() ?? []).map((o) => (o.id === id ? { ...o, ...patch } : o))
+    );
+    return true;
+  }, []);
+
+  const remove = useCallback(async (id: string) => {
+    const { error } = await createClient().from("hotel_offers").delete().eq("id", id);
+    if (error) return false;
+    offersStore.set((offersStore.get() ?? []).filter((o) => o.id !== id));
+    return true;
+  }, []);
+
+  return {
+    offers: snapshot ?? [],
+    isLoading: snapshot === undefined,
+    failed: offersStore.failed(),
+    create,
+    update,
+    remove,
+    refresh: offersStore.reload,
+  };
+}
+
 /* Tout l'espace en une fois : la plupart des pages ont besoin des trois. */
 export function useHotelSpace() {
   const qr = useHotelQrCodes();
   const res = useHotelReservations();
   const profile = useHotelProfile();
+  const catalog = useCatalog();
+  const offers = useHotelOffers();
   return {
     ...qr,
     reservations: res.reservations,
     profile: profile.profile,
     saveProfile: profile.save,
-    isLoading: qr.isLoading || res.isLoading || profile.isLoading,
+    catalog: catalog.catalog,
+    hotelOffers: offers.offers,
+    isLoading:
+      qr.isLoading || res.isLoading || profile.isLoading || catalog.isLoading || offers.isLoading,
     failed: qr.failed || res.failed,
   };
 }

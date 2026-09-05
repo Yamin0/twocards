@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   QrCode,
   CalendarDays,
+  MapPin,
   Users,
   Coins,
   BarChart3,
@@ -151,6 +152,7 @@ export default function HotelLayout({ children }: { children: React.ReactNode })
   const mainNav: NavItem[] = [
     { icon: LayoutDashboard, label: "Vue d'ensemble", href: "/hotel" },
     { icon: QrCode, label: "Chambres & QR", href: "/hotel/chambres" },
+    { icon: MapPin, label: "Mes adresses", href: "/hotel/adresses" },
     { icon: CalendarDays, label: "Réservations", href: "/hotel/reservations", badge: pending },
     { icon: Users, label: "Clients", href: "/hotel/clients" },
   ];

@@ -42,6 +42,12 @@ Le canal direct est gratuit et sans commission, adossé au même back-office que
 - Portail public : identité propre, distincte du back-office — **Marcellus** (serif display, registre hôtellerie de luxe) pour le nom et les titres, **Figtree** pour l'interface. Chargées uniquement sur le portail.
 - Le portail doit ressembler à **l'établissement** (sa photo, ses couleurs), pas à un template twocards ; twocards signe discrètement en pied.
 
+## Catalogue des adresses (menu QR hôtel)
+
+- Deux sources en base, rangées par catégorie (restaurants, activités, clubs, services) et filtrées par la ville de l'hôtel côté client : `catalog_offers`, le catalogue du réseau twocards tenu par l'administrateur dans `/admin` (section « Catalogue réseau »), et `hotel_offers`, les adresses maison qu'un hôtel ajoute lui-même dans `/hotel/adresses` et qui n'apparaissent que sur ses QR codes, en tête de leur catégorie.
+- Chaque adresse du catalogue réseau reçoit sa fiche `venues` par trigger : c'est par ce slug que la réservation remonte au compte de l'établissement. Les adresses maison n'ont pas de fiche : leurs demandes parviennent à l'hôtel seul, sans commission.
+- L'hôtel choisit ensuite, QR par QR, ce qu'il propose (`hotel_qr_codes.hidden_offers`, liste de slugs masqués).
+
 ## Evidence on Hand
 
 - Implémentation réelle : `src/app/r/[slug]/page.tsx` + `portal-experience.tsx` (parcours complet fonctionnel).

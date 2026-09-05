@@ -75,7 +75,7 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
   const { id } = use(params);
   const router = useRouter();
   const { isLoading: authLoading, venueName, city } = useAuthUser();
-  const { qrCodes, reservations, profile, isLoading, update, remove } = useHotelSpace();
+  const { qrCodes, reservations, profile, catalog, hotelOffers, isLoading, update, remove } = useHotelSpace();
   const { toast, showToast } = useToast();
   const { copied, copy } = useCopy();
 
@@ -98,7 +98,10 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
 
   const hotelName = profile.hotel_name || venueName;
   const hotelCity = profile.city || city;
-  const catalog = useMemo(() => cityCatalog(hotelCity ?? null), [hotelCity]);
+  const menuCatalog = useMemo(
+    () => cityCatalog(hotelCity ?? null, catalog, hotelOffers),
+    [hotelCity, catalog, hotelOffers]
+  );
 
   if (authLoading || isLoading || (qr && hidden === null)) return <PageSkeleton kpis={4} table />;
 
@@ -128,8 +131,8 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
   const hiddenSet = hidden ?? new Set<string>();
   const menuDirty =
     JSON.stringify([...hiddenSet].sort()) !== JSON.stringify([...qr.hidden_offers].sort());
-  const totalOffers = catalog.reduce((s, c) => s + c.offers.length, 0);
-  const shownOffers = catalog.reduce((s, c) => s + c.offers.filter((o) => !hiddenSet.has(o.id)).length, 0);
+  const totalOffers = menuCatalog.reduce((s, c) => s + c.offers.length, 0);
+  const shownOffers = menuCatalog.reduce((s, c) => s + c.offers.filter((o) => !hiddenSet.has(o.id)).length, 0);
   const q = menuSearch.trim().toLowerCase();
 
   const toggleOffer = (offerId: string) =>
@@ -310,7 +313,7 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
           title="Menu proposé sur ce QR"
           description={
             hotelCity ? (
-              <>Catalogue twocards de {hotelCity} · {shownOffers}/{totalOffers} adresses proposées. Retirez ce que vous ne souhaitez pas suggérer à ce client.</>
+              <>Catalogue twocards de {hotelCity} et vos <Link href="/hotel/adresses" className="font-bold text-sky-300">adresses maison</Link> · {shownOffers}/{totalOffers} proposées. Retirez ce que vous ne souhaitez pas suggérer à ce client.</>
             ) : (
               <>Indiquez la ville de l&apos;hôtel dans les <Link href="/hotel/settings" className="font-bold text-sky-300">paramètres</Link> pour limiter le catalogue à votre ville, en attendant, tout est proposé.</>
             )
@@ -339,7 +342,7 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
             />
           </div>
           <div className="grid gap-3 md:grid-cols-2">
-            {catalog.map((cat) => {
+            {menuCatalog.map((cat) => {
               const Icon = CATEGORY_ICONS[cat.key];
               const ids = cat.offers.map((o) => o.id);
               const shown = ids.filter((oid) => !hiddenSet.has(oid)).length;
@@ -373,7 +376,12 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
                       return (
                         <li key={o.id} className={cn("flex items-center justify-between gap-3 rounded-lg px-2 py-2 transition-opacity", !on && "opacity-50")}>
                           <button type="button" onClick={() => toggleOffer(o.id)} className="min-w-0 flex-1 text-left">
-                            <span className="block truncate text-[13px] font-medium text-white">{o.name}</span>
+                            <span className="flex items-center gap-1.5 truncate text-[13px] font-medium text-white">
+                              <span className="truncate">{o.name}</span>
+                              {o.source === "hotel" && (
+                                <span className="shrink-0 rounded-md bg-sky-500/20 px-1.5 py-0.5 text-[10px] font-bold text-sky-200">Maison</span>
+                              )}
+                            </span>
                             <span className="flex items-center gap-1 text-[11px] text-white/45">
                               {o.city && (
                                 <>

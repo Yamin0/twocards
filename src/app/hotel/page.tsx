@@ -8,6 +8,7 @@ import {
   Clock,
   Coins,
   Eye,
+  MapPin,
   Printer,
   QrCode,
   ScanLine,
@@ -397,6 +398,7 @@ export default function HotelHomePage() {
             <ul className="space-y-1">
               {[
                 { href: "/hotel/chambres", icon: BedDouble, label: "Gérer les chambres et espaces" },
+                { href: "/hotel/adresses", icon: MapPin, label: "Ajouter une adresse maison au menu" },
                 { href: "/hotel/settings?onglet=menu", icon: Sparkles, label: "Personnaliser le menu client" },
                 { href: "/hotel/clients", icon: Users, label: "Voir mes clients fidèles" },
                 {
