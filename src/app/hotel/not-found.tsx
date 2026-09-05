@@ -3,24 +3,18 @@ import { ArrowLeft } from "lucide-react";
 
 export default function HotelNotFound() {
   return (
-    <div className="flex items-center justify-center min-h-[60vh] p-8">
-      <div className="text-center max-w-md">
-        <p className="text-8xl font-extrabold text-white/[0.06] font-ui mb-2 select-none">
-          404
-        </p>
-        <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-10 -mt-10">
-          <h1 className="text-xl font-bold text-white mb-2">
-            Page introuvable
-          </h1>
-          <p className="text-sm text-white/40 font-ui mb-6">
-            Cette section n&apos;existe pas.
-          </p>
+    <div className="flex min-h-[60vh] items-center justify-center">
+      <div className="max-w-md text-center">
+        <p className="num select-none font-display text-8xl font-black text-white/[0.06]">404</p>
+        <div className="hotel-panel-solid -mt-10 p-10">
+          <h1 className="font-display text-xl font-bold text-white">Page introuvable</h1>
+          <p className="mt-2 text-sm text-white/50">Cette section n&apos;existe pas dans l&apos;espace hôtel.</p>
           <Link
             href="/hotel"
-            className="inline-flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300 font-medium transition-colors font-ui"
+            className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-sky-300 transition-colors hover:text-sky-200"
           >
-            <ArrowLeft size={16} strokeWidth={1.5} />
-            Retour au tableau de bord
+            <ArrowLeft size={16} strokeWidth={2} />
+            Retour à la vue d&apos;ensemble
           </Link>
         </div>
       </div>

@@ -37,7 +37,8 @@ Le canal direct est gratuit et sans commission, adossé au même back-office que
 ## Brand Commitments
 
 - Marque réseau : **twocards.** (wordmark avec point final, logo `public/logo-header.png`). Le pied « Propulsé par twocards. » est présent sur le portail **y compris en embed** — c'est la marque du réseau, non négociable.
-- Back-office : identité typographique Gotham (titres) + Suisse Int'l (texte).
+- Back-office établissement et concierge : identité typographique Gotham (titres) + Suisse Int'l (texte).
+- Espace hôtel (`/hotel/*`) et parcours QR client (`/s/[code]`, `/avis/[id]`) : **Satoshi** dans toutes ses variantes (Light, Regular, Medium, Bold, Black, italiques) via la fonte variable auto-hébergée — classe `.satoshi` dans `globals.css`. Le menu client est un widget clair à la SevenRooms, à la couleur d'accent de l'hôtel (profil `hotel_profiles`, servi par la RPC `qr_get_menu`).
 - Portail public : identité propre, distincte du back-office — **Marcellus** (serif display, registre hôtellerie de luxe) pour le nom et les titres, **Figtree** pour l'interface. Chargées uniquement sur le portail.
 - Le portail doit ressembler à **l'établissement** (sa photo, ses couleurs), pas à un template twocards ; twocards signe discrètement en pied.
 

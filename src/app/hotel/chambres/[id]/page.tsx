@@ -1,14 +1,9 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { use, useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import QRCode from "react-qr-code";
-import { createClient } from "@/lib/supabase/client";
-import { useAuthUser } from "@/hooks/use-auth-user";
-import { TableSkeleton } from "@/components/shared/loading-skeleton";
-import { useToast } from "@/hooks/use-toast";
-import { downloadSvg, guestUrl } from "@/lib/qr";
-import { cityCatalog } from "@/lib/guest-catalog";
 import {
   ArrowLeft,
   CalendarDays,
@@ -17,16 +12,57 @@ import {
   Copy,
   Download,
   ExternalLink,
-  Loader2,
+  Eye,
+  EyeOff,
+  Image as ImageIcon,
+  Mail,
   MapPin,
+  MessageCircle,
   Music,
   Palmtree,
+  Pencil,
+  Power,
+  Printer,
   QrCode,
+  RotateCcw,
   ScanLine,
+  Search,
   Sparkles,
+  Star,
+  Trash2,
+  TrendingUp,
   Users,
   UtensilsCrossed,
 } from "lucide-react";
+import { useAuthUser } from "@/hooks/use-auth-user";
+import { useToast } from "@/hooks/use-toast";
+import { useHotelSpace } from "@/lib/hotel/store";
+import { cityCatalog } from "@/lib/guest-catalog";
+import { averageRating, conversionRate, isLive } from "@/lib/hotel/analytics";
+import { formatDate, formatMad, formatNumber, formatPercent, plural, timeAgo, whatsappLink } from "@/lib/hotel/format";
+import { downloadPng, downloadSvg, guestUrl, shareByEmail, shareByWhatsapp } from "@/lib/qr";
+import {
+  Button,
+  ConfirmDialog,
+  EmptyState,
+  IconButton,
+  KpiGrid,
+  LinkButton,
+  PageHeader,
+  Panel,
+  StatusPill,
+  Switch,
+  Table,
+  Td,
+  Th,
+  Toast,
+  Tr,
+  inputClass,
+  useCopy,
+} from "@/components/hotel/ui";
+import { RatingStars } from "@/components/hotel/charts";
+import { PageSkeleton } from "@/components/hotel/skeleton";
+import { cn } from "@/lib/utils";
 
 const CATEGORY_ICONS = {
   restaurants: UtensilsCrossed,
@@ -35,525 +71,411 @@ const CATEGORY_ICONS = {
   services: Sparkles,
 } as const;
 
-type QrItem = {
-  id: string;
-  label: string;
-  code: string;
-  active: boolean;
-  scans: number;
-};
-
-type QrReservation = {
-  id: string;
-  category: string;
-  venue_name: string;
-  guest_name: string;
-  guest_phone: string;
-  reservation_date: string;
-  reservation_time: string | null;
-  party_size: number;
-  status: "en attente" | "confirmée" | "annulée";
-  commission: number;
-  created_at: string;
-};
-
-const STATUS_STYLES: Record<QrReservation["status"], string> = {
-  confirmée: "bg-emerald-500/15 text-emerald-400",
-  "en attente": "bg-amber-500/15 text-amber-400",
-  annulée: "bg-red-500/15 text-red-400",
-};
-
-export default function HotelQrDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default function HotelQrDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const { isLoading, venueName, city } = useAuthUser();
+  const router = useRouter();
+  const { isLoading: authLoading, venueName, city } = useAuthUser();
+  const { qrCodes, reservations, profile, isLoading, update, remove } = useHotelSpace();
   const { toast, showToast } = useToast();
-  const [qr, setQr] = useState<QrItem | null | undefined>(undefined);
-  const [reservations, setReservations] = useState<QrReservation[]>([]);
-  const [copied, setCopied] = useState(false);
-  /* Menu du QR : ce que l'hôtel a masqué (enregistré) et l'édition en cours.
-     Requête séparée du QR lui-même : la colonne hidden_offers n'existe
-     qu'après la migration room_menu_config, et son absence ne doit pas
-     faire passer la chambre pour inexistante. */
-  const [savedHidden, setSavedHidden] = useState<string[]>([]);
-  const [hidden, setHidden] = useState<Set<string>>(new Set());
+  const { copied, copy } = useCopy();
+
+  const qr = qrCodes.find((q) => q.id === id) ?? null;
+
+  /* Édition du menu : l'état local part des offres masquées enregistrées et
+     n'est renvoyé en base qu'à l'enregistrement. */
+  const [hidden, setHidden] = useState<Set<string> | null>(null);
   const [savingMenu, setSavingMenu] = useState(false);
+  const [menuSearch, setMenuSearch] = useState("");
+  const [renaming, setRenaming] = useState(false);
+  const [label, setLabel] = useState("");
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [preview, setPreview] = useState(false);
 
-  useEffect(() => {
-    const supabase = createClient();
-    let cancelled = false;
+  /* Ajustement d'état pendant le rendu plutôt qu'un effet : l'édition part
+     des offres masquées enregistrées dès que le QR est connu. */
+  if (qr && hidden === null) setHidden(new Set(qr.hidden_offers));
 
-    supabase
-      .from("hotel_qr_codes")
-      .select("id, label, code, active, scans")
-      .eq("id", id)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (!cancelled) setQr(data ?? null);
-      });
+  const hotelName = profile.hotel_name || venueName;
+  const hotelCity = profile.city || city;
+  const catalog = useMemo(() => cityCatalog(hotelCity ?? null), [hotelCity]);
 
-    supabase
-      .from("hotel_qr_codes")
-      .select("hidden_offers")
-      .eq("id", id)
-      .maybeSingle()
-      .then(({ data }) => {
-        const stored = (data as { hidden_offers?: string[] } | null)
-          ?.hidden_offers;
-        if (!cancelled && stored) {
-          setSavedHidden(stored);
-          setHidden(new Set(stored));
-        }
-      });
+  if (authLoading || isLoading || (qr && hidden === null)) return <PageSkeleton kpis={4} table />;
 
-    /* La table n'existe qu'après la migration qr_guest_experience :
-       en cas d'erreur, la page reste utilisable avec zéro réservation. */
-    supabase
-      .from("qr_reservations")
-      .select(
-        "id, category, venue_name, guest_name, guest_phone, reservation_date, reservation_time, party_size, status, commission, created_at"
-      )
-      .eq("qr_code_id", id)
-      .order("created_at", { ascending: false })
-      .then(({ data }) => {
-        if (!cancelled) setReservations(data ?? []);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [id]);
-
-  if (isLoading || qr === undefined) return <TableSkeleton />;
-
-  if (qr === null) {
+  if (!qr) {
     return (
-      <div className="px-4 sm:px-6 py-12 text-center">
-        <p className="text-sm text-white/60 font-ui">
-          Ce QR code n&apos;existe pas ou ne vous appartient pas.
-        </p>
-        <Link
-          href="/hotel/chambres"
-          className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-blue-400 hover:text-blue-300 font-ui"
-        >
-          <ArrowLeft size={15} strokeWidth={1.5} />
-          Retour aux chambres
-        </Link>
-      </div>
+      <Panel solid>
+        <EmptyState
+          icon={QrCode}
+          title="QR code introuvable"
+          description="Ce QR code n'existe pas ou ne vous appartient pas."
+          action={
+            <LinkButton href="/hotel/chambres" icon={ArrowLeft}>
+              Retour aux chambres
+            </LinkButton>
+          }
+        />
+      </Panel>
     );
   }
 
-  const link = guestUrl(qr.code, venueName, city);
-  const active = reservations.filter((r) => r.status !== "annulée");
-  const commissionTotal = active.reduce((sum, r) => sum + (r.commission ?? 0), 0);
-
-  /* Catalogue configurable : celui de la ville de l'hôtel uniquement. */
-  const catalog = cityCatalog(city);
+  const link = guestUrl(qr.code, hotelName, hotelCity);
+  const mine = reservations.filter((r) => r.qr_code_id === qr.id);
+  const live = mine.filter(isLive);
+  const commission = live.reduce((s, r) => s + r.commission, 0);
+  const rating = averageRating(mine);
+  const conversion = conversionRate(qr.scans, live.length);
+  const hiddenSet = hidden ?? new Set<string>();
   const menuDirty =
-    JSON.stringify([...hidden].sort()) !==
-    JSON.stringify([...savedHidden].sort());
+    JSON.stringify([...hiddenSet].sort()) !== JSON.stringify([...qr.hidden_offers].sort());
+  const totalOffers = catalog.reduce((s, c) => s + c.offers.length, 0);
+  const shownOffers = catalog.reduce((s, c) => s + c.offers.filter((o) => !hiddenSet.has(o.id)).length, 0);
+  const q = menuSearch.trim().toLowerCase();
 
-  const toggleOffer = (offerId: string) => {
+  const toggleOffer = (offerId: string) =>
     setHidden((prev) => {
-      const next = new Set(prev);
+      const next = new Set(prev ?? []);
       if (next.has(offerId)) next.delete(offerId);
       else next.add(offerId);
       return next;
     });
-  };
 
-  const toggleCategory = (offerIds: string[], propose: boolean) => {
+  const setCategory = (ids: string[], propose: boolean) =>
     setHidden((prev) => {
-      const next = new Set(prev);
-      for (const oid of offerIds) {
+      const next = new Set(prev ?? []);
+      for (const oid of ids) {
         if (propose) next.delete(oid);
         else next.add(oid);
       }
       return next;
     });
-  };
 
   const saveMenu = async () => {
     setSavingMenu(true);
-    const arr = [...hidden];
-    const { error } = await createClient()
-      .from("hotel_qr_codes")
-      .update({ hidden_offers: arr })
-      .eq("id", qr.id);
+    const ok = await update(qr.id, { hidden_offers: [...hiddenSet] });
     setSavingMenu(false);
-    if (error) {
-      showToast("Impossible d'enregistrer le menu");
+    showToast(ok ? "Menu enregistré — visible dès le prochain scan" : "Impossible d'enregistrer le menu");
+  };
+
+  const rename = async () => {
+    const trimmed = label.trim();
+    if (!trimmed || trimmed === qr.label) {
+      setRenaming(false);
       return;
     }
-    setSavedHidden(arr);
-    showToast("Menu enregistré");
+    const ok = await update(qr.id, { label: trimmed });
+    setRenaming(false);
+    showToast(ok ? "Emplacement renommé" : "Échec du renommage");
   };
 
-  const copyLink = async () => {
-    try {
-      await navigator.clipboard.writeText(link);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      showToast("Impossible de copier le lien");
+  const toggleActive = async () => {
+    const ok = await update(qr.id, { active: !qr.active });
+    showToast(ok ? (qr.active ? "QR désactivé — le lien affiche un message d'indisponibilité" : "QR réactivé") : "Échec de la mise à jour");
+  };
+
+  const confirmDelete = async () => {
+    setBusy(true);
+    const ok = await remove([qr.id]);
+    setBusy(false);
+    if (ok) router.push("/hotel/chambres");
+    else {
+      setDeleteOpen(false);
+      showToast("Échec de la suppression");
     }
   };
 
-  const stats = [
-    {
-      label: "Scans",
-      value: qr.scans,
-      icon: ScanLine,
-      color: "text-green-400",
-    },
-    {
-      label: "Réservations",
-      value: reservations.length,
-      icon: CalendarDays,
-      color: "text-blue-400",
-    },
-    {
-      label: "Commissions",
-      value: `${commissionTotal.toLocaleString()} MAD`,
-      icon: Coins,
-      color: "text-amber-400",
-    },
-  ] as const;
-
   return (
-    <div className="bg-transparent min-h-screen">
-      {/* Header */}
-      <div className="px-4 sm:px-6 pt-6 pb-4 flex items-center gap-3">
-        <Link
-          href="/hotel/chambres"
-          aria-label="Retour aux chambres"
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/10 text-white/70 transition-colors hover:bg-white/15 hover:text-white"
-        >
-          <ArrowLeft size={16} strokeWidth={1.5} />
-        </Link>
-        <div className="min-w-0">
-          <h1 className="flex items-center gap-2 font-display text-2xl font-light text-white">
-            <span className="truncate">{qr.label}</span>
-            <span
-              className={`shrink-0 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider font-ui ${
-                qr.active
-                  ? "bg-emerald-500/15 text-emerald-400"
-                  : "bg-white/10 text-white/40"
-              }`}
-            >
-              {qr.active ? "Actif" : "Inactif"}
-            </span>
-          </h1>
-          <p className="text-sm text-white/60 font-ui mt-0.5">
-            Code {qr.code} — suivi des scans, réservations et commissions
-          </p>
-        </div>
-      </div>
-
-      {/* Stats */}
-      <div className="px-4 sm:px-6 pb-6 grid grid-cols-3 gap-3">
-        {stats.map((s) => (
-          <div
-            key={s.label}
-            className="bg-white/[0.07] rounded-xl border border-white/10 p-4"
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
-                <s.icon size={16} strokeWidth={1.5} className={s.color} />
-              </div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-white/60 font-ui">
-                {s.label}
-              </span>
-            </div>
-            <p className="text-xl font-extrabold text-white font-ui">
-              {s.value}
-            </p>
-          </div>
-        ))}
-      </div>
-
-      {/* Lien unique + QR */}
-      <div className="px-4 sm:px-6 pb-6">
-        <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-2xl p-5 flex flex-col sm:flex-row gap-5">
-          <div
-            id={`qr-${qr.id}`}
-            className="bg-white rounded-xl p-4 flex items-center justify-center self-center sm:self-start"
-          >
-            <QRCode value={link} size={120} />
-          </div>
-          <div className="min-w-0 flex-1">
-            <h2 className="text-sm font-bold text-white">
-              Lien unique de ce QR code
-            </h2>
-            <p className="text-xs text-white/50 font-ui mt-1">
-              Chaque scan et chaque réservation passée par ce lien est
-              rattachée à « {qr.label} ».
-            </p>
-            <p className="mt-3 truncate rounded-xl bg-black/30 border border-white/10 px-3 py-2.5 text-xs text-white/70 font-mono">
-              {link}
-            </p>
-            <div className="mt-3 flex flex-wrap items-center gap-2">
-              <button
-                onClick={copyLink}
-                className="flex items-center gap-2 bg-white/10 hover:bg-white/15 text-white text-xs font-medium px-3 py-2 rounded-lg transition-colors font-ui"
-              >
-                {copied ? (
-                  <Check size={14} strokeWidth={2} className="text-emerald-400" />
-                ) : (
-                  <Copy size={14} strokeWidth={1.5} />
-                )}
-                {copied ? "Copié" : "Copier le lien"}
-              </button>
-              <a
-                href={link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 bg-white/[0.05] hover:bg-white/10 text-white/60 hover:text-white text-xs font-medium px-3 py-2 rounded-lg transition-colors font-ui"
-              >
-                <ExternalLink size={14} strokeWidth={1.5} />
-                Ouvrir
-              </a>
-              <button
-                onClick={() => {
-                  if (downloadSvg(`qr-${qr.id}`, qr.label)) {
-                    showToast("QR code téléchargé");
-                  }
+    <>
+      <PageHeader
+        back={{ href: "/hotel/chambres", label: "Chambres & QR codes" }}
+        eyebrow={`Code ${qr.code}`}
+        title={
+          renaming ? (
+            <span className="flex items-center gap-2">
+              <input
+                value={label}
+                onChange={(e) => setLabel(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") rename();
+                  if (e.key === "Escape") setRenaming(false);
                 }}
-                className="flex items-center gap-2 bg-white/[0.05] hover:bg-white/10 text-white/60 hover:text-white text-xs font-medium px-3 py-2 rounded-lg transition-colors font-ui"
-              >
-                <Download size={14} strokeWidth={1.5} />
-                SVG
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+                autoFocus
+                maxLength={60}
+                className={cn(inputClass, "h-11 w-72 text-xl font-bold")}
+              />
+              <Button size="sm" variant="primary" icon={Check} onClick={rename}>
+                OK
+              </Button>
+              <Button size="sm" variant="ghost" onClick={() => setRenaming(false)}>
+                Annuler
+              </Button>
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-3">
+              {qr.label}
+              <StatusPill status={qr.active ? "actif" : "inactif"} />
+              <IconButton
+                icon={Pencil}
+                label="Renommer"
+                size={15}
+                onClick={() => {
+                  setLabel(qr.label);
+                  setRenaming(true);
+                }}
+              />
+            </span>
+          )
+        }
+        description={`Créé ${timeAgo(qr.created_at)} · ${formatNumber(qr.scans)} ${plural(qr.scans, "scan")} · ${live.length} ${plural(live.length, "réservation")} · ${formatMad(commission)} de commissions.`}
+        actions={
+          <>
+            <Button icon={Power} onClick={toggleActive}>
+              {qr.active ? "Désactiver" : "Activer"}
+            </Button>
+            <LinkButton href={`/hotel/chambres/imprimer?ids=${qr.id}`} icon={Printer}>
+              Imprimer
+            </LinkButton>
+            <Button variant="danger" icon={Trash2} onClick={() => setDeleteOpen(true)}>
+              Supprimer
+            </Button>
+          </>
+        }
+      />
 
-      {/* Menu proposé au client de cette chambre */}
-      <div className="px-4 sm:px-6 pb-6">
-        <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-2xl p-5">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-1">
-            <div>
-              <h2 className="text-sm font-bold text-white">
-                Menu proposé sur ce QR
-              </h2>
-              <p className="text-xs text-white/50 font-ui mt-1">
-                {city ? (
-                  <>
-                    Catalogue twocards de {city}. Décochez ce que vous ne
-                    souhaitez pas proposer au client de « {qr.label} ».
-                  </>
-                ) : (
-                  <>
-                    Renseignez la ville de votre hôtel dans les paramètres pour
-                    restreindre le catalogue — en attendant, tout le catalogue
-                    twocards est proposé.
-                  </>
-                )}
+      <KpiGrid
+        items={[
+          { label: "Scans", value: formatNumber(qr.scans), icon: ScanLine, tone: "emerald", hint: "temps réel" },
+          { label: "Réservations", value: formatNumber(live.length), icon: CalendarDays, tone: "sky", hint: `${mine.length - live.length} annulée${mine.length - live.length > 1 ? "s" : ""} ou no-show` },
+          { label: "Conversion", value: qr.scans > 0 ? formatPercent(conversion, 1) : "—", icon: TrendingUp, tone: "violet", hint: "réservations / scans" },
+          { label: "Commissions", value: formatMad(commission, true), icon: Coins, tone: "amber", hint: rating.average !== null ? `${rating.average.toFixed(1).replace(".", ",")}/5 · ${rating.count} ${plural(rating.count, "avis")}` : "aucun avis" },
+        ]}
+      />
+
+      <div className="grid gap-4 xl:grid-cols-5">
+        {/* QR et lien */}
+        <Panel title="QR code & lien unique" description="Tout scan et toute réservation via ce lien sont rattachés à cet emplacement." className="xl:col-span-2">
+          <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-start">
+            <div id={`qr-${qr.id}`} className="shrink-0 rounded-2xl bg-white p-4">
+              <QRCode value={link} size={148} />
+            </div>
+            <div className="min-w-0 flex-1 space-y-3">
+              <p className="font-mono-satoshi truncate rounded-xl border border-white/10 bg-black/30 px-3 py-2.5 text-xs text-white/70">
+                {link}
               </p>
+              <div className="flex flex-wrap gap-2">
+                <Button size="sm" icon={copied ? Check : Copy} onClick={() => copy(link).then((ok) => !ok && showToast("Impossible de copier"))}>
+                  {copied ? "Copié" : "Copier"}
+                </Button>
+                <LinkButton size="sm" href={link} external icon={ExternalLink}>
+                  Ouvrir
+                </LinkButton>
+                <Button size="sm" icon={Download} onClick={() => downloadSvg(`qr-${qr.id}`, qr.label) && showToast("SVG téléchargé")}>
+                  SVG
+                </Button>
+                <Button size="sm" icon={ImageIcon} onClick={() => downloadPng(`qr-${qr.id}`, qr.label).then((ok) => showToast(ok ? "PNG téléchargé" : "Échec de l'export"))}>
+                  PNG
+                </Button>
+              </div>
+              <div className="border-t border-white/[0.08] pt-3">
+                <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.14em] text-white/40">Partager sans QR</p>
+                <div className="flex flex-wrap gap-2">
+                  <LinkButton size="sm" variant="ghost" href={shareByWhatsapp(link, hotelName)} external icon={MessageCircle}>
+                    WhatsApp
+                  </LinkButton>
+                  <LinkButton size="sm" variant="ghost" href={shareByEmail(link, hotelName)} external icon={Mail}>
+                    E-mail
+                  </LinkButton>
+                  <Button size="sm" variant="ghost" icon={preview ? EyeOff : Eye} onClick={() => setPreview((p) => !p)}>
+                    {preview ? "Masquer l'aperçu" : "Aperçu client"}
+                  </Button>
+                </div>
+              </div>
             </div>
-            {menuDirty && (
-              <button
-                onClick={saveMenu}
-                disabled={savingMenu}
-                className="shrink-0 flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-400 text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors disabled:opacity-60 font-ui"
-              >
-                {savingMenu ? (
-                  <Loader2 size={14} strokeWidth={2} className="animate-spin" />
-                ) : (
-                  <Check size={14} strokeWidth={2} />
-                )}
-                Enregistrer le menu
-              </button>
-            )}
           </div>
+          {preview && (
+            <div className="mt-5 flex justify-center border-t border-white/[0.08] pt-5">
+              <div className="w-[300px] overflow-hidden rounded-[2rem] border-[6px] border-black bg-black shadow-2xl">
+                <iframe
+                  title="Aperçu du menu client"
+                  src={`${link}${link.includes("?") ? "&" : "?"}apercu=1`}
+                  className="h-[560px] w-full bg-white"
+                />
+              </div>
+            </div>
+          )}
+        </Panel>
 
-          <div className="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Menu */}
+        <Panel
+          title="Menu proposé sur ce QR"
+          description={
+            hotelCity ? (
+              <>Catalogue twocards de {hotelCity} · {shownOffers}/{totalOffers} adresses proposées. Retirez ce que vous ne souhaitez pas suggérer à ce client.</>
+            ) : (
+              <>Indiquez la ville de l&apos;hôtel dans les <Link href="/hotel/settings" className="font-bold text-sky-300">paramètres</Link> pour limiter le catalogue à votre ville — en attendant, tout est proposé.</>
+            )
+          }
+          actions={
+            <>
+              {menuDirty && (
+                <Button size="sm" variant="ghost" icon={RotateCcw} onClick={() => setHidden(new Set(qr.hidden_offers))}>
+                  Annuler
+                </Button>
+              )}
+              <Button size="sm" variant={menuDirty ? "primary" : "secondary"} icon={Check} onClick={saveMenu} loading={savingMenu} disabled={!menuDirty}>
+                Enregistrer le menu
+              </Button>
+            </>
+          }
+          className="xl:col-span-3"
+        >
+          <div className="relative mb-4">
+            <Search size={14} strokeWidth={1.75} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
+            <input
+              value={menuSearch}
+              onChange={(e) => setMenuSearch(e.target.value)}
+              placeholder="Rechercher une adresse…"
+              className={cn(inputClass, "h-9 py-0 pl-9 text-[13px]")}
+            />
+          </div>
+          <div className="grid gap-3 md:grid-cols-2">
             {catalog.map((cat) => {
               const Icon = CATEGORY_ICONS[cat.key];
               const ids = cat.offers.map((o) => o.id);
-              const shownCount = ids.filter((oid) => !hidden.has(oid)).length;
-              const allShown = shownCount === ids.length;
+              const shown = ids.filter((oid) => !hiddenSet.has(oid)).length;
+              const offers = q ? cat.offers.filter((o) => o.name.toLowerCase().includes(q) || o.tag.toLowerCase().includes(q)) : cat.offers;
+              if (q && offers.length === 0) return null;
               return (
-                <div
-                  key={cat.key}
-                  className="rounded-xl border border-white/10 bg-white/[0.04] p-4"
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
-                        <Icon
-                          size={15}
-                          strokeWidth={1.5}
-                          className="text-white/80"
-                        />
-                      </div>
+                <div key={cat.key} className="rounded-xl border border-white/10 bg-white/[0.03]">
+                  <div className="flex items-center justify-between gap-2 border-b border-white/[0.08] px-3.5 py-2.5">
+                    <div className="flex items-center gap-2.5">
+                      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10">
+                        <Icon size={15} strokeWidth={1.75} className="text-white/85" />
+                      </span>
                       <div>
-                        <p className="text-xs font-bold text-white font-ui">
-                          {cat.label}
-                        </p>
-                        <p className="text-[10px] text-white/40 font-ui">
-                          {shownCount}/{ids.length} proposée
-                          {shownCount > 1 ? "s" : ""}
+                        <p className="text-sm font-bold text-white">{cat.label}</p>
+                        <p className="num text-[11px] text-white/45">
+                          {shown}/{ids.length} proposée{shown > 1 ? "s" : ""}
                         </p>
                       </div>
                     </div>
                     <button
-                      onClick={() => toggleCategory(ids, !allShown)}
-                      className="text-[11px] font-medium text-blue-400 hover:text-blue-300 transition-colors font-ui"
+                      type="button"
+                      onClick={() => setCategory(ids, shown !== ids.length)}
+                      className="text-[11px] font-bold text-sky-300 hover:text-sky-200"
                     >
-                      {allShown ? "Tout retirer" : "Tout proposer"}
+                      {shown === ids.length ? "Tout retirer" : "Tout proposer"}
                     </button>
                   </div>
-                  <div className="space-y-1">
-                    {cat.offers.map((o) => {
-                      const shown = !hidden.has(o.id);
+                  <ul className="divide-y divide-white/[0.05] px-1.5 py-1">
+                    {offers.map((o) => {
+                      const on = !hiddenSet.has(o.id);
                       return (
-                        <button
-                          key={o.id}
-                          onClick={() => toggleOffer(o.id)}
-                          role="switch"
-                          aria-checked={shown}
-                          aria-label={`Proposer ${o.name}`}
-                          className={`w-full flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-left transition-colors ${
-                            shown ? "hover:bg-white/[0.06]" : "opacity-45 hover:opacity-70"
-                          }`}
-                        >
-                          <span className="min-w-0">
-                            <span className="block truncate text-xs font-medium text-white font-ui">
-                              {o.name}
-                            </span>
-                            <span className="flex items-center gap-1 text-[10px] text-white/40 font-ui">
+                        <li key={o.id} className={cn("flex items-center justify-between gap-3 rounded-lg px-2 py-2 transition-opacity", !on && "opacity-50")}>
+                          <button type="button" onClick={() => toggleOffer(o.id)} className="min-w-0 flex-1 text-left">
+                            <span className="block truncate text-[13px] font-medium text-white">{o.name}</span>
+                            <span className="flex items-center gap-1 text-[11px] text-white/45">
                               {o.city && (
                                 <>
-                                  <MapPin size={9} strokeWidth={1.5} />
-                                  {o.city} ·{" "}
+                                  <MapPin size={10} strokeWidth={1.75} /> {o.city} ·
                                 </>
                               )}
                               {o.tag}
+                              {o.price ? ` · ${o.price}` : ""}
                             </span>
-                          </span>
-                          <span
-                            className={`shrink-0 relative h-5 w-9 rounded-full transition-colors ${
-                              shown ? "bg-emerald-500/80" : "bg-white/15"
-                            }`}
-                          >
-                            <span
-                              className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-all ${
-                                shown ? "left-[18px]" : "left-0.5"
-                              }`}
-                            />
-                          </span>
-                        </button>
+                          </button>
+                          <Switch size="sm" checked={on} onChange={() => toggleOffer(o.id)} label={`Proposer ${o.name}`} />
+                        </li>
                       );
                     })}
-                  </div>
+                  </ul>
                 </div>
               );
             })}
           </div>
-        </div>
+        </Panel>
       </div>
 
       {/* Réservations */}
-      <div className="px-4 sm:px-6 pb-8">
-        {reservations.length === 0 ? (
-          <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-3xl p-12 text-center">
-            <div className="w-14 h-14 rounded-2xl bg-blue-500/15 border border-blue-400/20 flex items-center justify-center mx-auto mb-5">
-              <QrCode size={26} strokeWidth={1.5} className="text-blue-400" />
-            </div>
-            <h2 className="text-lg font-bold text-white mb-2">
-              Aucune réservation via ce QR
-            </h2>
-            <p className="text-sm text-white/50 font-ui max-w-md mx-auto">
-              Dès qu&apos;un client scanne « {qr.label} » et demande une
-              réservation, elle apparaît ici avec sa commission.
-            </p>
-          </div>
+      <Panel
+        title="Réservations de cet emplacement"
+        description={mine.length > 0 ? `${mine.length} ${plural(mine.length, "demande")} depuis la création` : undefined}
+        padded={false}
+      >
+        {mine.length === 0 ? (
+          <EmptyState
+            icon={CalendarDays}
+            title="Aucune réservation via ce QR"
+            description={`Dès qu'un client scanne « ${qr.label} » et demande une réservation, elle apparaît ici avec sa commission.`}
+            compact
+          />
         ) : (
-          <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-2xl overflow-x-auto">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="border-b border-white/10">
-                  {[
-                    "Client",
-                    "Téléphone",
-                    "Catégorie",
-                    "Établissement",
-                    "Date",
-                    "Pers.",
-                    "Statut",
-                    "Commission",
-                  ].map((h) => (
-                    <th
-                      key={h}
-                      className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/50 font-ui"
-                    >
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {reservations.map((r) => (
-                  <tr
-                    key={r.id}
-                    className="border-b border-white/[0.06] last:border-0"
-                  >
-                    <td className="px-4 py-3 text-sm text-white font-ui">
-                      {r.guest_name}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-white/70 font-ui">
+          <Table>
+            <thead>
+              <tr>
+                <Th>Client</Th>
+                <Th>Sortie</Th>
+                <Th>Date</Th>
+                <Th align="center">Pers.</Th>
+                <Th>Statut</Th>
+                <Th>Avis</Th>
+                <Th align="right">Montant</Th>
+                <Th align="right">Commission</Th>
+              </tr>
+            </thead>
+            <tbody>
+              {mine.map((r) => (
+                <Tr key={r.id} onClick={() => router.push(`/hotel/reservations?id=${r.id}`)}>
+                  <Td>
+                    <p className="font-bold">{r.guest_name}</p>
+                    <a href={whatsappLink(r.guest_phone)} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="num text-xs text-white/45 hover:text-emerald-300">
                       {r.guest_phone}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-white/70 font-ui">
-                      {r.category}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-white/70 font-ui">
-                      {r.venue_name}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-white/70 font-ui">
-                      {new Date(
-                        r.reservation_date + "T00:00:00"
-                      ).toLocaleDateString("fr-FR")}
-                      {r.reservation_time ? ` · ${r.reservation_time}` : ""}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-white/70 font-ui">
-                      <span className="inline-flex items-center gap-1">
-                        <Users size={12} strokeWidth={1.5} />
-                        {r.party_size}
+                    </a>
+                  </Td>
+                  <Td>
+                    <p className="font-medium">{r.venue_name}</p>
+                    <p className="text-xs text-white/45">{r.category}</p>
+                  </Td>
+                  <Td muted className="whitespace-nowrap">
+                    {formatDate(r.reservation_date)}
+                    {r.reservation_time ? ` · ${r.reservation_time}` : ""}
+                  </Td>
+                  <Td align="center" muted>
+                    <span className="num inline-flex items-center gap-1">
+                      <Users size={12} strokeWidth={1.75} /> {r.party_size}
+                    </span>
+                  </Td>
+                  <Td><StatusPill status={r.status} /></Td>
+                  <Td>
+                    {r.rating !== null ? (
+                      <span className="inline-flex items-center gap-1.5">
+                        <RatingStars value={r.rating} size={11} />
                       </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider font-ui ${STATUS_STYLES[r.status]}`}
-                      >
-                        {r.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-sm text-white/70 font-ui">
-                      {r.commission > 0
-                        ? `${r.commission.toLocaleString()} MAD`
-                        : "—"}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                    ) : (
+                      <Star size={12} strokeWidth={1.5} className="text-white/20" />
+                    )}
+                  </Td>
+                  <Td align="right" muted className="num whitespace-nowrap">{r.amount_spent !== null ? formatMad(r.amount_spent) : "—"}</Td>
+                  <Td align="right" className="num whitespace-nowrap font-bold text-amber-300">{r.commission > 0 ? formatMad(r.commission) : "—"}</Td>
+                </Tr>
+              ))}
+            </tbody>
+          </Table>
         )}
-      </div>
+      </Panel>
 
-      {/* Toast */}
-      {toast && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-black/70 backdrop-blur-xl border border-white/15 text-white px-4 py-3 rounded-xl shadow-lg">
-          <Check size={16} strokeWidth={2} />
-          <span className="text-sm font-medium">{toast}</span>
-        </div>
-      )}
-    </div>
+      <ConfirmDialog
+        open={deleteOpen}
+        onCancel={() => setDeleteOpen(false)}
+        onConfirm={confirmDelete}
+        loading={busy}
+        danger
+        confirmLabel="Supprimer définitivement"
+        title={`Supprimer « ${qr.label} » ?`}
+        description="Le QR imprimé ne fonctionnera plus et ses réservations seront supprimées de votre historique. Pour une pause temporaire, désactivez-le plutôt."
+      />
+
+      <Toast message={toast} />
+    </>
   );
 }

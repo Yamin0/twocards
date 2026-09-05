@@ -152,6 +152,82 @@
   font-weight: 300;
 }
 
+/* ─── Espace Hôtel & menu client : Satoshi partout ─────────────────────
+   La fonte variable (300 à 900, droit et italique) couvre toutes les
+   variantes : Light pour les grands chiffres et les accents, Regular pour
+   le texte courant, Medium pour l'interface, Bold pour les titres et les
+   libellés forts, Black pour les KPI. Chaque graisse se règle élément par
+   élément avec les utilitaires font-light … font-black ; l'italique avec
+   italic. La classe .satoshi lève les piles Gotham / Suisse Int'l des
+   dashboards (font-display, font-ui) et la règle globale h1…h6. */
+.satoshi,
+.satoshi .font-display,
+.satoshi .font-ui,
+.satoshi .font-title,
+.satoshi .font-body,
+.satoshi :is(h1, h2, h3, h4, h5, h6),
+.satoshi input,
+.satoshi textarea,
+.satoshi select,
+.satoshi button {
+  font-family: var(--font-satoshi), var(--font-inter), system-ui, sans-serif;
+}
+.satoshi .font-display {
+  letter-spacing: -0.02em;
+}
+.satoshi .font-mono-satoshi {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+/* Chiffres alignés dans les tableaux et KPI. */
+.satoshi .num {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* Défilement horizontal sans barre visible (onglets, dates). */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Panneaux du dashboard hôtel : verre sombre, une seule définition. */
+.hotel-panel {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-radius: 1.25rem;
+}
+.hotel-panel-solid {
+  background: rgba(8, 10, 14, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border-radius: 1.25rem;
+}
+
+/* Impression des QR codes : une planche par code, fond blanc, rien d'autre. */
+@media print {
+  .print-hide,
+  .hotel-shell-bg,
+  .hotel-shell-aside,
+  .hotel-shell-topbar { display: none !important; }
+  .hotel-shell,
+  .hotel-shell-main {
+    height: auto !important;
+    overflow: visible !important;
+    background: #fff !important;
+    padding: 0 !important;
+  }
+  .print-sheet {
+    background: #fff !important;
+    color: #000 !important;
+  }
+  .print-card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  @page { margin: 12mm; }
+}
+
 @keyframes moveBackground {
   from {
     background-position: 0% 0%;

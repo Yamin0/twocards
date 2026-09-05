@@ -1,34 +1,34 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
-  Home,
-  BedDouble,
+  LayoutDashboard,
+  QrCode,
   CalendarDays,
-  CreditCard,
+  Users,
+  Coins,
+  BarChart3,
   Settings,
+  LifeBuoy,
   LogOut,
-  HelpCircle,
   Menu,
   X,
   Hotel,
+  Plus,
+  Bell,
+  WifiOff,
+  type LucideIcon,
 } from "lucide-react";
 import { useAuthUser } from "@/hooks/use-auth-user";
 import { Avatar } from "@/components/shared/avatar";
+import { useHotelQrCodes, useHotelReservations, useHotelProfile } from "@/lib/hotel/store";
+import { todayIso } from "@/lib/hotel/format";
+import { cn } from "@/lib/utils";
 
-const mainNav = [
-  { icon: Home, label: "Accueil", href: "/hotel" },
-  { icon: BedDouble, label: "Chambres", href: "/hotel/chambres" },
-  { icon: CalendarDays, label: "Réservations", href: "/hotel/reservations" },
-  { icon: CreditCard, label: "Commissions", href: "/hotel/commissions" },
-];
-
-const adminNav = [
-  { icon: Settings, label: "Paramètres", href: "/hotel/settings" },
-];
+type NavItem = { icon: LucideIcon; label: string; href: string; badge?: number };
 
 /* Au niveau module et non dans le layout : un composant recréé à chaque
    rendu perd son état et son DOM à chaque navigation. */
@@ -39,7 +39,7 @@ function NavSection({
   onNavigate,
 }: {
   title: string;
-  items: typeof mainNav;
+  items: NavItem[];
   pathname: string;
   onNavigate: () => void;
 }) {
@@ -48,7 +48,7 @@ function NavSection({
 
   return (
     <div>
-      <h4 className="text-white/50 text-[0.6875rem] font-semibold uppercase tracking-wider mb-2 px-3">
+      <h4 className="mb-1.5 px-3 text-[10px] font-bold uppercase tracking-[0.2em] text-white/35">
         {title}
       </h4>
       <nav className="space-y-0.5">
@@ -60,14 +60,30 @@ function NavSection({
               key={item.href}
               href={item.href}
               onClick={onNavigate}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 hover:scale-[1.01] font-ui ${
+              aria-current={active ? "page" : undefined}
+              className={cn(
+                "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13.5px] font-medium transition-all duration-200",
                 active
-                  ? "bg-white/20 text-white border border-white/20"
-                  : "text-white/60 hover:bg-white/10 hover:text-white"
-              }`}
+                  ? "bg-white text-black shadow-[0_10px_30px_-12px_rgba(255,255,255,0.6)]"
+                  : "text-white/60 hover:bg-white/[0.08] hover:text-white"
+              )}
             >
-              <Icon size={18} strokeWidth={1.5} />
-              {item.label}
+              <Icon
+                size={17}
+                strokeWidth={active ? 2 : 1.75}
+                className={active ? "text-black" : "text-white/50 group-hover:text-white"}
+              />
+              <span className="flex-1 truncate">{item.label}</span>
+              {typeof item.badge === "number" && item.badge > 0 && (
+                <span
+                  className={cn(
+                    "num rounded-md px-1.5 py-0.5 text-[10px] font-bold",
+                    active ? "bg-black/10 text-black" : "bg-amber-400 text-black"
+                  )}
+                >
+                  {item.badge}
+                </span>
+              )}
             </Link>
           );
         })}
@@ -76,168 +92,260 @@ function NavSection({
   );
 }
 
-export default function HotelLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const pathname = usePathname();
-  const { fullName, venueName, initials, avatarUrl, isLoading } = useAuthUser();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+/* Alerte discrète quand une nouvelle demande arrive en temps réel, où que
+   l'on soit dans l'espace. La première charge n'en déclenche aucune. */
+function useNewReservationAlert() {
+  const { reservations, isLoading } = useHotelReservations();
+  const known = useRef<Set<string> | null>(null);
+  const [alert, setAlert] = useState<{ id: string; text: string } | null>(null);
 
   useEffect(() => {
-    if (sidebarOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
+    if (isLoading) return;
+    if (known.current === null) {
+      known.current = new Set(reservations.map((r) => r.id));
+      return;
     }
+    const fresh = reservations.filter((r) => !known.current!.has(r.id));
+    for (const r of reservations) known.current.add(r.id);
+    if (fresh.length > 0) {
+      const r = fresh[0];
+      setAlert({
+        id: r.id,
+        text:
+          fresh.length === 1
+            ? `${r.guest_name} · ${r.venue_name}${r.qr_label ? ` · ${r.qr_label}` : ""}`
+            : `${fresh.length} nouvelles demandes`,
+      });
+      const t = setTimeout(() => setAlert(null), 6000);
+      return () => clearTimeout(t);
+    }
+  }, [reservations, isLoading]);
+
+  return { alert, dismiss: () => setAlert(null) };
+}
+
+export default function HotelLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const { fullName, venueName, initials, avatarUrl, isLoading } = useAuthUser();
+  const { profile } = useHotelProfile();
+  const { reservations, failed: resFailed } = useHotelReservations();
+  const { qrCodes, failed: qrFailed } = useHotelQrCodes();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { alert, dismiss } = useNewReservationAlert();
+
+  useEffect(() => {
+    document.body.style.overflow = sidebarOpen ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
     };
   }, [sidebarOpen]);
 
   const closeSidebar = () => setSidebarOpen(false);
+  const hotelName = profile.hotel_name || venueName || "Mon hôtel";
+  const pending = reservations.filter((r) => r.status === "en attente").length;
+  const today = todayIso();
+  const todayCount = reservations.filter(
+    (r) => r.reservation_date === today && r.status !== "annulée"
+  ).length;
+
+  const mainNav: NavItem[] = [
+    { icon: LayoutDashboard, label: "Vue d'ensemble", href: "/hotel" },
+    { icon: QrCode, label: "Chambres & QR", href: "/hotel/chambres" },
+    { icon: CalendarDays, label: "Réservations", href: "/hotel/reservations", badge: pending },
+    { icon: Users, label: "Clients", href: "/hotel/clients" },
+  ];
+  const insightNav: NavItem[] = [
+    { icon: Coins, label: "Commissions", href: "/hotel/commissions" },
+    { icon: BarChart3, label: "Analyses", href: "/hotel/analyses" },
+  ];
+  const accountNav: NavItem[] = [
+    { icon: Settings, label: "Paramètres", href: "/hotel/settings" },
+    { icon: LifeBuoy, label: "Aide", href: "/hotel/aide" },
+  ];
+
+  const signOut = (
+    <form action="/auth/signout" method="post">
+      <button
+        type="submit"
+        className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-[13.5px] font-medium text-white/45 transition-all hover:bg-white/[0.08] hover:text-red-300"
+      >
+        <LogOut size={17} strokeWidth={1.75} />
+        Déconnexion
+      </button>
+    </form>
+  );
+
+  const brand = (
+    <Link href="/hotel" className="flex items-center gap-2.5">
+      <Image
+        src="/logo-header.png"
+        alt="twocards."
+        width={32}
+        height={32}
+        className="h-8 w-auto brightness-0 invert"
+      />
+      <span className="text-lg font-black tracking-tight text-white">
+        twocards<span className="text-sky-400">.</span>
+      </span>
+    </Link>
+  );
 
   return (
-    <div className="min-h-screen lg:h-screen relative lg:overflow-hidden bg-[#141210]">
+    <div className="satoshi hotel-shell relative min-h-screen bg-[#0d0f12] lg:h-screen lg:overflow-hidden">
       {/* Fond photo : vue aérienne sable / océan (public/dashboard-bg-ocean.jpg).
-         Photo claire (sable, écume) sous du texte blanc : un flou léger (4 px) sur la
-         photo garde l'image reconnaissable ; le backdrop-blur des panneaux lisse
-         le reste sous le texte, et le voile à 55 % ramène la luminance
-         sous le texte. Le scale compense les bords éclaircis par le flou. */}
+         Photo claire sous du texte blanc : flou léger (4 px) pour garder l'image
+         reconnaissable, voile à 55 % pour ramener la luminance sous le texte ;
+         le scale compense les bords éclaircis par le flou. */}
       <div
-        className="fixed inset-0 scale-105 bg-cover bg-center blur-sm"
+        className="hotel-shell-bg fixed inset-0 scale-105 bg-cover bg-center blur-sm"
         style={{ backgroundImage: "url(/dashboard-bg-ocean.jpg)" }}
       />
-      <div className="fixed inset-0 bg-black/55" />
-      <div className="fixed inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/40" />
+      <div className="hotel-shell-bg fixed inset-0 bg-black/55" />
+      <div className="hotel-shell-bg fixed inset-0 bg-gradient-to-br from-black/40 via-transparent to-black/60" />
 
-      <div className="relative z-10 p-4 lg:p-6 grid grid-cols-12 gap-4 lg:gap-6 lg:h-screen">
-        {/* Mobile top bar */}
-        <div className="col-span-12 lg:hidden flex items-center justify-between backdrop-blur-xl bg-white/10 border border-white/15 rounded-2xl px-4 py-3">
+      <div className="hotel-shell relative z-10 flex flex-col gap-4 p-4 lg:h-screen lg:flex-row lg:gap-5 lg:p-5">
+        {/* Barre mobile */}
+        <div className="hotel-shell-topbar flex items-center justify-between rounded-2xl border border-white/10 bg-black/50 px-3 py-2.5 backdrop-blur-2xl lg:hidden">
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-1.5 rounded-lg text-white/70 hover:text-white transition-colors"
-            aria-label="Menu"
+            className="rounded-lg p-2 text-white/70 transition-colors hover:text-white"
+            aria-label={sidebarOpen ? "Fermer le menu" : "Ouvrir le menu"}
           >
-            {sidebarOpen ? <X size={22} strokeWidth={1.5} /> : <Menu size={22} strokeWidth={1.5} />}
+            {sidebarOpen ? <X size={22} strokeWidth={1.75} /> : <Menu size={22} strokeWidth={1.75} />}
           </button>
-          <Link href="/hotel" className="flex items-center gap-2">
-            <Image src="/logo-header.png" alt="twocards." width={28} height={28} className="h-7 w-auto brightness-0 invert" />
-            <span className="text-lg font-bold tracking-tight font-[family-name:var(--font-nunito)] text-white">
-              twocards<span className="text-blue-400">.</span>
-            </span>
+          {brand}
+          <Link href="/hotel/reservations" onClick={closeSidebar} className="relative rounded-lg p-2 text-white/70" aria-label="Réservations en attente">
+            <Bell size={20} strokeWidth={1.75} />
+            {pending > 0 && (
+              <span className="num absolute -right-0.5 -top-0.5 rounded-full bg-amber-400 px-1.5 text-[10px] font-bold text-black">
+                {pending}
+              </span>
+            )}
           </Link>
-          <Avatar
-            url={avatarUrl}
-            initials={initials || "H"}
-            size={32}
-            textClassName="text-xs font-semibold text-white font-ui"
-          />
         </div>
 
-        {/* Mobile sidebar overlay */}
+        {/* Menu mobile */}
         {sidebarOpen && (
           <>
-            <div
-              className="fixed inset-0 bg-black/40 z-40 lg:hidden"
-              onClick={closeSidebar}
-            />
-            <div className="fixed top-20 left-4 right-4 z-50 lg:hidden backdrop-blur-xl bg-white/10 border border-white/15 rounded-3xl p-5 space-y-5 max-h-[70vh] overflow-y-auto">
-              <NavSection title="Navigation" items={mainNav} pathname={pathname} onNavigate={closeSidebar} />
-              <NavSection title="Compte" items={adminNav} pathname={pathname} onNavigate={closeSidebar} />
-              <div className="pt-3 border-t border-white/10">
-                <form action="/auth/signout" method="post">
-                  <button
-                    type="submit"
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-red-400/80 hover:text-red-400 hover:bg-white/10 transition-all w-full font-ui"
-                  >
-                    <LogOut size={18} strokeWidth={1.5} />
-                    Déconnexion
-                  </button>
-                </form>
+            <div className="fixed inset-0 z-40 bg-black/50 lg:hidden" onClick={closeSidebar} />
+            <div className="fixed inset-x-4 top-20 z-50 max-h-[75vh] space-y-5 overflow-y-auto rounded-3xl border border-white/12 bg-[#0e1116]/95 p-5 backdrop-blur-2xl lg:hidden">
+              <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.05] px-3 py-2.5">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10">
+                  <Hotel size={14} strokeWidth={1.75} className="text-white" />
+                </div>
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-bold text-white">{hotelName}</p>
+                  <p className="text-[11px] text-white/45">Espace hôtel</p>
+                </div>
               </div>
+              <NavSection title="Activité" items={mainNav} pathname={pathname} onNavigate={closeSidebar} />
+              <NavSection title="Performance" items={insightNav} pathname={pathname} onNavigate={closeSidebar} />
+              <NavSection title="Compte" items={accountNav} pathname={pathname} onNavigate={closeSidebar} />
+              <div className="border-t border-white/10 pt-3">{signOut}</div>
             </div>
           </>
         )}
 
-        {/* Desktop sidebar */}
-        <aside className="hidden lg:flex col-span-2 backdrop-blur-2xl bg-black/45 border border-white/10 rounded-3xl p-5 flex-col h-[calc(100vh-48px)] shadow-[0_20px_60px_-20px_rgba(0,0,0,0.6)] overflow-hidden">
-          {/* Logo */}
-          <div className="text-center mb-4 pb-4 border-b border-white/10">
-            <div className="flex items-center justify-center gap-2.5 mb-1">
-              <Image src="/logo-header.png" alt="twocards." width={36} height={36} className="h-9 w-auto brightness-0 invert" />
-              <span className="text-xl font-bold tracking-tight font-[family-name:var(--font-nunito)] text-white">
-                twocards<span className="text-blue-400">.</span>
-              </span>
+        {/* Barre latérale */}
+        <aside className="hotel-shell-aside hidden h-[calc(100vh-40px)] w-[248px] shrink-0 flex-col overflow-hidden rounded-3xl border border-white/10 bg-black/50 p-4 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.8)] backdrop-blur-2xl lg:flex">
+          <div className="px-2 pb-4 pt-1">{brand}</div>
+
+          <div className="mb-4 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.05] px-3 py-2.5">
+            <div
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-white"
+              style={{ background: profile.accent_color }}
+            >
+              <Hotel size={15} strokeWidth={1.75} />
             </div>
-            <p className="text-white/40 text-xs font-ui">Espace Hôtel</p>
-          </div>
-
-          {/* Hotel identity */}
-          <div className="mb-4 flex items-center gap-2 px-3 py-2.5 rounded-xl bg-white/5 border border-white/10">
-            <div className="w-6 h-6 rounded-full bg-white/15 flex items-center justify-center shrink-0">
-              <Hotel size={12} strokeWidth={1.5} className="text-white" />
+            <div className="min-w-0">
+              <p className="truncate text-[13px] font-bold text-white">
+                {isLoading ? "…" : hotelName}
+              </p>
+              <p className="truncate text-[11px] text-white/45">
+                {qrCodes.filter((q) => q.active).length} QR actifs
+                {todayCount > 0 ? ` · ${todayCount} sortie${todayCount > 1 ? "s" : ""} ce jour` : ""}
+              </p>
             </div>
-            <span className="text-sm font-medium text-white truncate font-ui">
-              {isLoading ? "…" : venueName || "Mon hôtel"}
-            </span>
           </div>
 
-          {/* Navigation */}
-          <div className="flex-1 overflow-y-auto space-y-5 scrollbar-thin">
-            <NavSection title="Navigation" items={mainNav} pathname={pathname} onNavigate={closeSidebar} />
-            <NavSection title="Compte" items={adminNav} pathname={pathname} onNavigate={closeSidebar} />
+          <Link
+            href="/hotel/chambres?nouveau=1"
+            className="mb-4 inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-sky-500 text-sm font-bold text-white transition-colors hover:bg-sky-400"
+          >
+            <Plus size={16} strokeWidth={2.25} />
+            Nouveau QR code
+          </Link>
+
+          <div className="flex-1 space-y-5 overflow-y-auto scrollbar-thin">
+            <NavSection title="Activité" items={mainNav} pathname={pathname} onNavigate={closeSidebar} />
+            <NavSection title="Performance" items={insightNav} pathname={pathname} onNavigate={closeSidebar} />
+            <NavSection title="Compte" items={accountNav} pathname={pathname} onNavigate={closeSidebar} />
           </div>
 
-          {/* Bottom */}
-          <div className="pt-4 mt-4 border-t border-white/10 space-y-2">
-            <div className="flex items-center gap-3 px-3 py-2">
+          <div className="mt-4 space-y-1 border-t border-white/10 pt-4">
+            <Link
+              href="/hotel/settings?onglet=compte"
+              className="flex items-center gap-3 rounded-xl px-2 py-2 transition-colors hover:bg-white/[0.06]"
+            >
               {isLoading ? (
-                <div className="w-9 h-9 rounded-full bg-white/10 animate-pulse shrink-0" />
+                <div className="h-9 w-9 shrink-0 animate-pulse rounded-full bg-white/10" />
               ) : (
                 <Avatar
                   url={avatarUrl}
                   initials={initials || "H"}
                   size={36}
-                  textClassName="text-sm font-semibold text-white font-ui"
+                  textClassName="text-sm font-bold text-white"
                 />
               )}
               <div className="min-w-0">
                 {isLoading ? (
-                  <div className="h-3 w-20 bg-white/10 rounded animate-pulse" />
+                  <div className="h-3 w-20 animate-pulse rounded bg-white/10" />
                 ) : (
-                  <p className="text-sm font-medium text-white truncate font-ui">
-                    {fullName || "Hôtelier"}
-                  </p>
+                  <>
+                    <p className="truncate text-[13px] font-bold text-white">{fullName || "Hôtelier"}</p>
+                    <p className="truncate text-[11px] text-white/40">Voir mon compte</p>
+                  </>
                 )}
               </div>
-            </div>
-
-            <Link
-              href="/hotel/settings"
-              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-white/40 hover:text-white/70 hover:bg-white/10 transition-all font-ui"
-            >
-              <HelpCircle size={18} strokeWidth={1.5} />
-              Aide
             </Link>
-            <form action="/auth/signout" method="post">
-              <button
-                type="submit"
-                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-red-400/70 hover:text-red-400 hover:bg-white/10 transition-all w-full font-ui"
-              >
-                <LogOut size={18} strokeWidth={1.5} />
-                Déconnexion
-              </button>
-            </form>
+            {signOut}
           </div>
         </aside>
 
-        {/* Main content */}
-        <main className="col-span-12 lg:col-span-10 lg:h-[calc(100vh-48px)] lg:overflow-y-auto overflow-x-hidden scrollbar-thin">
-          {children}
+        {/* Contenu */}
+        <main className="hotel-shell-main min-w-0 flex-1 overflow-x-hidden lg:h-[calc(100vh-40px)] lg:overflow-y-auto lg:pr-1 scrollbar-thin">
+          <div className="mx-auto w-full max-w-[1400px] space-y-6 pb-10">
+            {(resFailed || qrFailed) && (
+              <div className="flex items-center gap-3 rounded-2xl border border-red-400/20 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+                <WifiOff size={16} strokeWidth={1.75} className="shrink-0 text-red-300" />
+                <span>Impossible de charger vos données. Vérifiez votre connexion, puis rechargez la page.</span>
+                <button type="button" onClick={() => window.location.reload()} className="ml-auto shrink-0 text-xs font-bold text-red-200 hover:text-white">
+                  Recharger
+                </button>
+              </div>
+            )}
+            {children}
+          </div>
         </main>
       </div>
+
+      {alert && (
+        <Link
+          href="/hotel/reservations"
+          onClick={dismiss}
+          className="fixed bottom-6 right-6 z-[60] flex max-w-sm items-center gap-3 rounded-2xl border border-amber-400/25 bg-black/85 px-4 py-3 shadow-2xl backdrop-blur-xl animate-in fade-in slide-in-from-bottom-2"
+        >
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-400/20 text-amber-300">
+            <Bell size={16} strokeWidth={2} />
+          </span>
+          <span className="min-w-0">
+            <span className="block text-xs font-bold uppercase tracking-[0.14em] text-amber-300">
+              Nouvelle demande
+            </span>
+            <span className="block truncate text-sm text-white">{alert.text}</span>
+          </span>
+        </Link>
+      )}
     </div>
   );
 }
