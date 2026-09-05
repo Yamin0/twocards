@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { Check, ChevronDown, Loader2, Search, X, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -580,23 +581,34 @@ export function EmptyState({
   );
 }
 
+/* Les calques flottants (toast, modale, tiroir) sont montés sur <body> par
+   portail : posés dans l'arbre, un ancêtre avec backdrop-filter ou transform
+   (les panneaux de verre) deviendrait leur bloc conteneur et les piégerait
+   dans le panneau, hors de portée du défilement. */
+function Layer({ children }: { children: ReactNode }) {
+  if (typeof document === "undefined") return null;
+  return createPortal(children, document.body);
+}
+
 export function Toast({ message, tone = "success" }: { message: string | null; tone?: "success" | "error" }) {
   if (!message) return null;
   return (
-    <div
-      role="status"
-      className="fixed bottom-6 left-1/2 z-[60] flex -translate-x-1/2 items-center gap-2.5 rounded-xl border border-white/15 bg-black/80 px-4 py-3 text-sm font-medium text-white shadow-2xl backdrop-blur-xl animate-in fade-in slide-in-from-bottom-2"
-    >
-      <span
-        className={cn(
-          "flex h-5 w-5 items-center justify-center rounded-full",
-          tone === "success" ? "bg-emerald-500/20 text-emerald-300" : "bg-red-500/20 text-red-300"
-        )}
+    <Layer>
+      <div
+        role="status"
+        className="satoshi fixed bottom-6 left-1/2 z-[80] flex -translate-x-1/2 items-center gap-2.5 rounded-xl border border-white/15 bg-black/80 px-4 py-3 text-sm font-medium text-white shadow-2xl backdrop-blur-xl animate-in fade-in slide-in-from-bottom-2"
       >
-        {tone === "success" ? <Check size={12} strokeWidth={3} /> : <X size={12} strokeWidth={3} />}
-      </span>
-      {message}
-    </div>
+        <span
+          className={cn(
+            "flex h-5 w-5 items-center justify-center rounded-full",
+            tone === "success" ? "bg-emerald-500/20 text-emerald-300" : "bg-red-500/20 text-red-300"
+          )}
+        >
+          {tone === "success" ? <Check size={12} strokeWidth={3} /> : <X size={12} strokeWidth={3} />}
+        </span>
+        {message}
+      </div>
+    </Layer>
   );
 }
 
@@ -639,37 +651,43 @@ export function Modal({
   const id = useId();
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-[70] flex items-end justify-center sm:items-center">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={id}
-        className={cn(
-          "satoshi relative z-10 max-h-[92dvh] w-full overflow-y-auto rounded-t-3xl border border-white/15 bg-[#101318]/95 shadow-2xl backdrop-blur-2xl animate-in fade-in slide-in-from-bottom-4 sm:rounded-3xl",
-          size === "sm" ? "sm:max-w-md" : size === "lg" ? "sm:max-w-3xl" : "sm:max-w-xl"
-        )}
-      >
-        <div className="flex items-start justify-between gap-4 px-6 pt-6">
-          <div>
-            <h3 id={id} className="font-display text-lg font-bold text-white">
-              {title}
-            </h3>
-            {description && (
-              <p className="mt-1 text-sm leading-relaxed text-white/55">{description}</p>
-            )}
+    <Layer>
+      <div className="fixed inset-0 z-[70] flex items-end justify-center sm:items-center sm:p-4">
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+        {/* En-tête et pied restent visibles : seul le corps défile. */}
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={id}
+          className={cn(
+            "satoshi relative z-10 flex max-h-[92dvh] w-full flex-col rounded-t-3xl border border-white/15 bg-[#101318]/95 shadow-2xl backdrop-blur-2xl animate-in fade-in slide-in-from-bottom-4 sm:rounded-3xl",
+            size === "sm" ? "sm:max-w-md" : size === "lg" ? "sm:max-w-3xl" : "sm:max-w-xl"
+          )}
+        >
+          <div className="flex shrink-0 items-start justify-between gap-4 px-6 pb-4 pt-6">
+            <div>
+              <h3 id={id} className="font-display text-lg font-bold text-white">
+                {title}
+              </h3>
+              {description && (
+                <p className="mt-1 text-sm leading-relaxed text-white/55">{description}</p>
+              )}
+            </div>
+            <IconButton icon={X} label="Fermer" onClick={onClose} className="-mr-2 -mt-1" />
           </div>
-          <IconButton icon={X} label="Fermer" onClick={onClose} className="-mr-2 -mt-1" />
+          {children && (
+            <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-2 pt-1 scrollbar-thin">{children}</div>
+          )}
+          {footer ? (
+            <div className="flex shrink-0 flex-col-reverse gap-2 border-t border-white/10 px-6 py-4 sm:flex-row sm:justify-end">
+              {footer}
+            </div>
+          ) : (
+            <div className="shrink-0 pb-4" />
+          )}
         </div>
-        {children && <div className="px-6 pt-5">{children}</div>}
-        {footer && (
-          <div className="flex flex-col-reverse gap-2 px-6 pb-6 pt-6 sm:flex-row sm:justify-end">
-            {footer}
-          </div>
-        )}
-        {!footer && <div className="pb-6" />}
       </div>
-    </div>
+    </Layer>
   );
 }
 
@@ -731,6 +749,7 @@ export function Drawer({
   useEscape(open, onClose);
   if (!open) return null;
   return (
+    <Layer>
     <div className="fixed inset-0 z-[70] flex items-end justify-end sm:items-stretch">
       <div className="absolute inset-0 bg-black/55 backdrop-blur-sm" onClick={onClose} />
       <aside
@@ -755,6 +774,7 @@ export function Drawer({
         )}
       </aside>
     </div>
+    </Layer>
   );
 }
 
