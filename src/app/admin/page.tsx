@@ -346,6 +346,10 @@ export default function AdminPage() {
     null
   );
   const [reloadKey, setReloadKey] = useState(0);
+  /* Vrai entre le clic sur Actualiser et la réponse : le bouton tourne,
+     puis un toast confirme. Sans cela, un rechargement qui rend les mêmes
+     chiffres ne se voit pas. */
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     if (!toast) return;
@@ -358,8 +362,13 @@ export default function AdminPage() {
     let cancelled = false;
     createClient()
       .rpc("admin_account_overview")
-      .then(({ data }) => {
-        if (!cancelled) setAccounts((data ?? []) as Account[]);
+      .then(({ data, error }) => {
+        if (cancelled) return;
+        setAccounts((data ?? []) as Account[]);
+        setRefreshing((was) => {
+          if (was) setToast(error ? { kind: "error", msg: "Impossible d'actualiser" } : { kind: "ok", msg: "Données actualisées" });
+          return false;
+        });
       });
     return () => {
       cancelled = true;
@@ -367,6 +376,10 @@ export default function AdminPage() {
   }, [isLoading, isAdmin, reloadKey]);
 
   const reload = useCallback(() => setReloadKey((k) => k + 1), []);
+  const refresh = useCallback(() => {
+    setRefreshing(true);
+    reload();
+  }, [reload]);
   const notifyOk = useCallback(
     (msg: string) => {
       setToast({ kind: "ok", msg });
@@ -416,11 +429,12 @@ export default function AdminPage() {
           </div>
           {isAdmin && (
             <button
-              onClick={reload}
-              className="flex items-center gap-2 rounded-xl border border-white/[0.12] bg-white/[0.06] px-4 py-2.5 text-xs font-semibold text-white/70 transition-colors hover:bg-white/[0.12] hover:text-white"
+              onClick={refresh}
+              disabled={refreshing}
+              className="flex items-center gap-2 rounded-xl border border-white/[0.12] bg-white/[0.06] px-4 py-2.5 text-xs font-semibold text-white/70 transition-colors hover:bg-white/[0.12] hover:text-white disabled:opacity-60"
             >
-              <RefreshCw size={14} />
-              Actualiser
+              <RefreshCw size={14} className={refreshing ? "animate-spin" : ""} />
+              {refreshing ? "Actualisation…" : "Actualiser"}
             </button>
           )}
         </div>
@@ -452,7 +466,7 @@ export default function AdminPage() {
 
         {/* ── Catalogue des adresses proposées aux clients des hôtels ── */}
         {!isLoading && isAdmin && (
-          <CatalogAdmin userId={userId} panel={panel} onSaved={notifyOk} onError={notifyError} />
+          <CatalogAdmin userId={userId} panel={panel} onSaved={notifyOk} onError={notifyError} reloadKey={reloadKey} />
         )}
 
         {/* ── Sections par type de dashboard ── */}

@@ -1,8 +1,8 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import QRCode from "react-qr-code";
 import {
   ArrowRight,
   BedDouble,
@@ -18,10 +18,9 @@ import {
 
 const panel = "rounded-2xl border border-black/10 bg-white";
 
-/* Un vrai QR, scannable : il renvoie sur le site, avec le même format d'URL
-   que ceux générés depuis le tableau de bord hôtel (/?qr=<code>). */
-const DEMO_QR_URL = "https://twocardspro.com/?qr=demo";
-
+/* Le chevalet en chêne gravé, tel qu'il est posé sur le chevet : c'est le
+   support physique du QR, pas un carré généré. Le PNG est détouré, il se pose
+   donc directement sur le blanc de la carte. */
 function QrVisual() {
   const chips = [
     { icon: BedDouble, label: "En chambre" },
@@ -30,17 +29,14 @@ function QrVisual() {
   ];
   return (
     <div className={`${panel} flex flex-col items-center gap-4 p-5`}>
-      <div className="w-[112px] rounded-lg bg-white p-1.5">
-        <QRCode
-          value={DEMO_QR_URL}
-          size={112}
-          bgColor="#ffffff"
-          fgColor="#0d0d0d"
-          level="M"
-          style={{ height: "auto", maxWidth: "100%", width: "100%" }}
-          aria-label="QR code de démonstration TwoCards"
-        />
-      </div>
+      <Image
+        src="/qr-stand.png"
+        alt="Chevalet TwoCards en chêne, gravé du QR code, posé sur le chevet"
+        width={440}
+        height={795}
+        sizes="120px"
+        className="h-[140px] w-auto"
+      />
       <div className="flex flex-wrap justify-center gap-1.5">
         {chips.map((chip) => (
           <span

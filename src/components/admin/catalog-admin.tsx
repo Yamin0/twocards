@@ -6,7 +6,7 @@ import { ArrowDown, ArrowUp, BookOpen, Eye, EyeOff, MapPin, Pencil, Plus, Search
 import { createClient } from "@/lib/supabase/client";
 import { CATEGORY_KEYS, CATEGORY_LABELS, fallbackImage, type GuestCategoryKey } from "@/lib/guest-catalog";
 import { EMPTY_DRAFT, OfferEditor, type OfferDraft } from "@/components/hotel/offer-editor";
-import { ConfirmDialog, Segmented, Switch } from "@/components/hotel/ui";
+import { ConfirmDialog, Segmented, Select, Switch } from "@/components/hotel/ui";
 import { cn } from "@/lib/utils";
 
 /* Catalogue du réseau twocards, dans la console d'administration : les
@@ -51,11 +51,14 @@ export function CatalogAdmin({
   panel,
   onSaved,
   onError,
+  reloadKey = 0,
 }: {
   userId: string | null;
   panel: string;
   onSaved: (msg: string) => void;
   onError: (msg: string) => void;
+  /* Incrémenté par le bouton Actualiser de la console : relance la lecture. */
+  reloadKey?: number;
 }) {
   const [rows, setRows] = useState<CatalogRow[] | null>(null);
   const [filter, setFilter] = useState<Filter>("toutes");
@@ -93,7 +96,7 @@ export function CatalogAdmin({
     return () => {
       cancelled = true;
     };
-  }, [fetchRows, onError]);
+  }, [fetchRows, onError, reloadKey]);
 
   const cities = useMemo(
     () => [...new Set((rows ?? []).map((r) => r.city).filter((c): c is string => !!c))].sort(),
@@ -229,20 +232,17 @@ export function CatalogAdmin({
               className="h-9 w-56 rounded-lg border border-white/[0.1] bg-white/[0.05] pl-8 pr-3 text-xs text-white placeholder:text-white/25 focus:border-blue-400/40 focus:outline-none"
             />
           </div>
-          <select
+          <Select
+            label="Ville"
             value={city}
-            onChange={(e) => setCity(e.target.value)}
-            aria-label="Ville"
-            className="h-9 rounded-lg border border-white/[0.1] bg-white/[0.05] px-3 text-xs text-white focus:border-blue-400/40 focus:outline-none [color-scheme:dark]"
-          >
-            <option value="toutes">Toutes les villes</option>
-            <option value="partout">Sans ville (partout)</option>
-            {cities.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
+            onChange={setCity}
+            className="w-48"
+            options={[
+              { value: "toutes", label: "Toutes les villes" },
+              { value: "partout", label: "Sans ville (partout)" },
+              ...cities.map((c) => ({ value: c, label: c })),
+            ]}
+          />
         </div>
       </div>
 
