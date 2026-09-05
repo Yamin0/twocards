@@ -236,7 +236,6 @@ export default function HotelAddressesPage() {
                         key={o.id}
                         image={o.image}
                         name={o.name}
-                        tag={o.tag}
                         price={o.price}
                         active={!hidden.has(o.id)}
                         onToggle={() => toggleNetwork(o.id, o.name)}
@@ -284,7 +283,6 @@ export default function HotelAddressesPage() {
                 key={o.id}
                 image={o.image_url || fallbackImage(o.slug)}
                 name={o.name}
-                tag={o.tag}
                 price={o.price}
                 active={o.active}
                 onToggle={() => toggleMine(o)}

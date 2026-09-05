@@ -519,12 +519,11 @@ function OfferCard({ offer: o, showPrice, onPick }: { offer: GuestOffer; showPri
           </span>
         )}
       </div>
-      <div className="flex flex-1 flex-col px-4 pb-4 pt-3.5 sm:px-5 sm:pb-5 sm:pt-4">
-        {o.tag && (
-          <p className="text-[10px] font-medium uppercase tracking-[0.24em] text-neutral-400">{o.tag}</p>
-        )}
-        <p className="font-display mt-1 text-lg font-black leading-tight tracking-tight text-neutral-900 sm:text-xl">{o.name}</p>
-        <div className="mt-auto flex items-end justify-between gap-3 pt-4">
+      {/* Le nom seul : l'étiquette et la description attendent la fiche, qui
+          s'ouvre au clic. */}
+      <div className="flex flex-1 flex-col px-4 pb-4 pt-3.5 sm:px-5 sm:pb-4 sm:pt-4">
+        <p className="font-display text-lg font-black leading-tight tracking-tight text-neutral-900 sm:text-xl">{o.name}</p>
+        <div className="mt-auto flex items-end justify-between gap-3 pt-2.5">
           <span className="num text-sm font-light italic text-neutral-500">{showPrice && o.price ? o.price : ""}</span>
           <span className="inline-flex h-9 items-center gap-1.5 rounded-full bg-[var(--accent)] px-4 text-xs font-bold text-[var(--on-accent)] transition-transform group-hover:translate-x-0.5">
             Réserver

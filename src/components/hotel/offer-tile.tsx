@@ -6,13 +6,12 @@ import { Switch, Tag } from "@/components/hotel/ui";
 import { cn } from "@/lib/utils";
 
 /* Carte d'adresse du dashboard hôtel : même dessin que la carte du menu
-   client (photo en 4/3, étiquette en capitales espacées, nom en Satoshi
-   Black, prix en italique léger), en verre sombre, avec l'interrupteur
-   « proposée » à la place du bouton Réserver. */
+   client (photo en 4/3, nom en Satoshi Black, prix en italique léger), en
+   verre sombre, avec l'interrupteur « proposée » à la place du bouton
+   Réserver. */
 export function OfferTile({
   image,
   name,
-  tag,
   price,
   badges,
   active,
@@ -24,7 +23,6 @@ export function OfferTile({
 }: {
   image: string;
   name: string;
-  tag?: string | null;
   price?: string | null;
   badges?: ReactNode;
   active: boolean;
@@ -47,10 +45,9 @@ export function OfferTile({
         {badges && <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">{badges}</div>}
       </div>
       <div className="flex flex-1 flex-col px-4 pb-3 pt-3.5">
-        {tag && <p className="text-[10px] font-medium uppercase tracking-[0.24em] text-white/45">{tag}</p>}
-        <p className="font-display mt-1 text-base font-black leading-tight tracking-tight text-white">{name}</p>
-        <p className="num mt-1 min-h-[1.25rem] text-sm font-light italic text-white/55">{price ?? ""}</p>
-        <div className="mt-auto flex items-center gap-2 border-t border-white/[0.08] pt-3">
+        <p className="font-display text-base font-black leading-tight tracking-tight text-white">{name}</p>
+        <p className="num mt-0.5 min-h-[1.25rem] text-sm font-light italic text-white/55">{price ?? ""}</p>
+        <div className="mt-auto flex items-center gap-2 border-t border-white/[0.08] pt-2.5">
           <Switch size="sm" checked={active} disabled={disabled} onChange={onToggle} label={toggleLabel} />
           <span className="mr-auto truncate text-xs text-white/55">{hint ?? (active ? "Proposée" : "Masquée")}</span>
           {actions}
