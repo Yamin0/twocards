@@ -1,12 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import {
   BookOpen,
   Eye,
-  EyeOff,
   Info,
   MapPin,
   Music,
@@ -39,12 +37,11 @@ import {
   PageHeader,
   Panel,
   Segmented,
-  Switch,
-  Tag,
   Toast,
   inputClass,
 } from "@/components/hotel/ui";
 import { EMPTY_DRAFT, OfferEditor, type OfferDraft } from "@/components/hotel/offer-editor";
+import { OfferTile, TileBadge } from "@/components/hotel/offer-tile";
 import { PageSkeleton } from "@/components/hotel/skeleton";
 import { cn } from "@/lib/utils";
 
@@ -212,20 +209,20 @@ export default function HotelAddressesPage() {
             {networkTotal === 0 ? "Aucune adresse du réseau pour votre ville pour le moment." : "Aucune adresse ne correspond."}
           </p>
         ) : (
-          <div className="grid gap-3 md:grid-cols-2">
+          <div className="space-y-6">
             {networkVisible.map((cat) => {
               const Icon = CATEGORY_ICONS[cat.key];
               const ids = cat.offers.map((o) => o.id);
               const shown = ids.filter((id) => !hidden.has(id)).length;
               return (
-                <div key={cat.key} className="rounded-xl border border-white/10 bg-white/[0.03]">
-                  <div className="flex items-center justify-between gap-2 border-b border-white/[0.08] px-3.5 py-2.5">
+                <section key={cat.key}>
+                  <div className="mb-3 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2.5">
                       <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10">
                         <Icon size={15} strokeWidth={1.75} className="text-white/85" />
                       </span>
                       <div>
-                        <p className="text-sm font-bold text-white">{cat.label}</p>
+                        <p className="font-display text-sm font-bold uppercase tracking-[0.2em] text-white">{cat.label}</p>
                         <p className="num text-[11px] text-white/45">{shown}/{ids.length} proposée{shown > 1 ? "s" : ""}</p>
                       </div>
                     </div>
@@ -233,27 +230,22 @@ export default function HotelAddressesPage() {
                       {shown === ids.length ? "Tout retirer" : "Tout proposer"}
                     </button>
                   </div>
-                  <ul className="divide-y divide-white/[0.05] px-1.5 py-1">
-                    {cat.offers.map((o) => {
-                      const on = !hidden.has(o.id);
-                      return (
-                        <li key={o.id} className={cn("flex items-center gap-3 rounded-lg px-2 py-2 transition-opacity", !on && "opacity-50")}>
-                          <div className="relative h-10 w-14 shrink-0 overflow-hidden rounded-md bg-white/5">
-                            <Image src={o.image} alt="" fill unoptimized={o.image.startsWith("http")} sizes="56px" className="object-cover" />
-                          </div>
-                          <button type="button" onClick={() => toggleNetwork(o.id, o.name)} className="min-w-0 flex-1 text-left">
-                            <span className="block truncate text-[13px] font-medium text-white">{o.name}</span>
-                            <span className="block truncate text-[11px] text-white/45">
-                              {o.tag}
-                              {o.price ? ` · ${o.price}` : ""}
-                            </span>
-                          </button>
-                          <Switch size="sm" checked={on} onChange={() => toggleNetwork(o.id, o.name)} label={`Proposer ${o.name}`} />
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </div>
+                  <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+                    {cat.offers.map((o) => (
+                      <OfferTile
+                        key={o.id}
+                        image={o.image}
+                        name={o.name}
+                        tag={o.tag}
+                        price={o.price}
+                        active={!hidden.has(o.id)}
+                        onToggle={() => toggleNetwork(o.id, o.name)}
+                        toggleLabel={`Proposer ${o.name}`}
+                        badges={<TileBadge tone="muted">Réseau twocards</TileBadge>}
+                      />
+                    ))}
+                  </div>
+                </section>
               );
             })}
           </div>
@@ -286,37 +278,31 @@ export default function HotelAddressesPage() {
         ) : mine.length === 0 ? (
           <p className="py-6 text-center text-sm text-white/40">Aucune adresse maison ne correspond.</p>
         ) : (
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-            {mine.map((o) => {
-              const img = o.image_url || fallbackImage(o.slug);
-              return (
-                <div key={o.id} className={cn("flex flex-col overflow-hidden rounded-xl border border-white/10 bg-white/[0.03]", !o.active && "opacity-60")}>
-                  <div className="relative h-32">
-                    <Image src={img} alt="" fill unoptimized={img.startsWith("http")} sizes="400px" className="object-cover" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-                    <div className="absolute left-3 top-3 flex gap-1.5">
-                      <Tag className="bg-black/50 text-white backdrop-blur">{CATEGORY_LABELS[o.category]}</Tag>
-                      {!o.active && <Tag className="bg-black/50 text-white/70 backdrop-blur">Masquée</Tag>}
-                    </div>
-                    <div className="absolute inset-x-3 bottom-3">
-                      <p className="font-display truncate text-base font-bold text-white">{o.name}</p>
-                      <p className="truncate text-xs text-white/70">
-                        {o.tag}
-                        {o.price ? ` · ${o.price}` : ""}
-                      </p>
-                    </div>
-                  </div>
-                  <p className="line-clamp-2 px-4 pt-3 text-xs leading-relaxed text-white/55">{o.description || "Sans description."}</p>
-                  <div className="mt-auto flex items-center gap-1 px-3 pb-3 pt-3">
-                    <Switch size="sm" checked={o.active} onChange={() => toggleMine(o)} label={`Proposer ${o.name}`} />
-                    <span className="mr-auto text-xs text-white/50">{o.active ? "Proposée" : "Masquée"}</span>
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+            {mine.map((o) => (
+              <OfferTile
+                key={o.id}
+                image={o.image_url || fallbackImage(o.slug)}
+                name={o.name}
+                tag={o.tag}
+                price={o.price}
+                active={o.active}
+                onToggle={() => toggleMine(o)}
+                toggleLabel={`Proposer ${o.name}`}
+                badges={
+                  <>
+                    <TileBadge tone="accent">Maison</TileBadge>
+                    <TileBadge>{CATEGORY_LABELS[o.category]}</TileBadge>
+                  </>
+                }
+                actions={
+                  <>
                     <IconButton icon={Pencil} label="Modifier" size={14} className="h-8 w-8" onClick={() => setEditing({ offer: o })} />
-                    <IconButton icon={o.active ? EyeOff : Eye} label={o.active ? "Masquer" : "Proposer"} size={14} className="h-8 w-8" onClick={() => toggleMine(o)} />
                     <IconButton icon={Trash2} label="Supprimer" size={14} tone="danger" className="h-8 w-8" onClick={() => setToDelete(o)} />
-                  </div>
-                </div>
-              );
-            })}
+                  </>
+                }
+              />
+            ))}
           </div>
         )}
       </Panel>

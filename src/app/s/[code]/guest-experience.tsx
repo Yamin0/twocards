@@ -366,11 +366,12 @@ export function GuestExperience({
                       type="button"
                       onClick={() => pick("tous")}
                       aria-label="Retour aux catégories"
-                      className="absolute left-3 top-3 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-neutral-900 shadow transition-colors hover:bg-white sm:left-4 sm:top-4"
+                      className="absolute left-3 top-3 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-neutral-900 shadow transition-colors hover:bg-white sm:left-4 sm:top-4"
                     >
                       <ArrowLeft size={18} strokeWidth={2.25} />
                     </button>
-                    <div className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center">
+                    {/* Le calque du titre couvre tout le bandeau : il laisse passer les clics. */}
+                    <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-6 text-center">
                       <span className="font-display flex items-center gap-2 text-xl font-bold uppercase tracking-[0.35em] [text-shadow:0_2px_14px_rgba(0,0,0,0.6)] sm:text-2xl lg:text-3xl">
                         <Icon size={18} strokeWidth={2} className="hidden sm:block" />
                         {current.label}
