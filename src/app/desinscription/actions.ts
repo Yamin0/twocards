@@ -41,7 +41,7 @@ export async function unsubscribe(
     return {
       status: "error",
       message:
-        "L'enregistrement a échoué. Écrivez à yamin@twocardspro.com, nous vous retirons manuellement.",
+        "L'enregistrement a échoué. Écrivez à contact@twocardspro.com, nous vous retirons manuellement.",
       email,
     };
   }

@@ -56,10 +56,10 @@ export default async function DesinscriptionPage({
           Une question sur l&apos;origine de vos coordonnées ou une demande
           d&apos;effacement&nbsp;?{" "}
           <a
-            href="mailto:yamin@twocardspro.com"
+            href="mailto:contact@twocardspro.com"
             className="text-[var(--landing-ink)] underline underline-offset-2"
           >
-            yamin@twocardspro.com
+            contact@twocardspro.com
           </a>
         </p>
       </main>
