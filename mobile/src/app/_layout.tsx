@@ -1,0 +1,41 @@
+import { DarkTheme, Stack, ThemeProvider } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
+
+import { AnimatedSplashOverlay } from '@/components/animated-icon';
+import { AuthProvider, useAuth } from '@/lib/auth-context';
+import { WebSessionProvider } from '@/lib/web-session';
+
+SplashScreen.preventAutoHideAsync();
+
+function RootNavigator() {
+  const { session, loading } = useAuth();
+
+  if (loading) {
+    return null;
+  }
+
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Protected guard={!session}>
+        <Stack.Screen name="login" />
+      </Stack.Protected>
+
+      <Stack.Protected guard={!!session}>
+        <Stack.Screen name="(tabs)" />
+      </Stack.Protected>
+    </Stack>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <ThemeProvider value={DarkTheme}>
+      <AuthProvider>
+        <WebSessionProvider>
+          <AnimatedSplashOverlay />
+          <RootNavigator />
+        </WebSessionProvider>
+      </AuthProvider>
+    </ThemeProvider>
+  );
+}
