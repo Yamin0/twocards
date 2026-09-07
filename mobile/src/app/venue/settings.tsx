@@ -1,24 +1,29 @@
+import Constants from 'expo-constants'
 import { useCallback, useEffect, useState } from 'react'
-import { Alert, Linking, StyleSheet, Text, TextInput, View } from 'react-native'
+import { ActivityIndicator, Alert, Linking, Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 
-import { Avatar, Button, Card, Field, ListRow, StackScreen, inputStyle } from '@/components/venue/ui'
+import { Avatar, Button, Card, Field, Icon, ListRow, StackScreen, inputStyle } from '@/components/venue/ui'
 import { Light } from '@/constants/theme'
 import { useAuth } from '@/lib/auth-context'
+import { haptic } from '@/lib/haptics'
 import { pushStatus, registerPush, unregisterPush, type PushStatus } from '@/lib/push'
-import { roleLabels } from '@/lib/site'
+import { roleLabels, SITE_URL } from '@/lib/site'
 import { supabase } from '@/lib/supabase'
-import { updateProfile } from '@/lib/venue-data'
+import { useToast } from '@/lib/toast'
+import { updateAvatar, updatePassword, updateProfile } from '@/lib/venue-data'
 
-/* Profil et paramètres : les quatre champs qui comptent, les notifications,
-   la déconnexion. Le reste (mot de passe, portail) reste sur le site. */
+/* Profil et paramètres : la photo, les quatre champs qui comptent, le mot
+   de passe, les notifications, la déconnexion. */
 
 const CONTACT_EMAIL = 'contact@twocardspro.com'
 
 export default function SettingsScreen() {
-  const { session, role, tabRole, fullName, venueName } = useAuth()
+  const { session, role, tabRole, fullName, venueName, avatarUrl } = useAuth()
+  const toast = useToast()
   const userId = session?.user.id ?? null
   const email = session?.user.email ?? '—'
   const meta = session?.user.user_metadata ?? {}
+  const version = Constants.expoConfig?.version ?? '1.0.0'
 
   const [form, setForm] = useState({
     full_name: fullName ?? '',
@@ -27,8 +32,11 @@ export default function SettingsScreen() {
     phone: (meta.phone as string | undefined) ?? '',
   })
   const [saving, setSaving] = useState(false)
-  const [saved, setSaved] = useState<string | null>(null)
+  const [uploading, setUploading] = useState(false)
   const [push, setPush] = useState<PushStatus | null>(null)
+  const [pw, setPw] = useState({ next: '', confirm: '' })
+  const [pwSaving, setPwSaving] = useState(false)
+  const [pwError, setPwError] = useState('')
 
   useEffect(() => {
     let cancelled = false
@@ -53,6 +61,7 @@ export default function SettingsScreen() {
   const save = useCallback(async () => {
     if (!userId) return
     setSaving(true)
+    haptic.tap()
     const ok = await updateProfile(userId, {
       full_name: form.full_name.trim(),
       venue_name: form.venue_name.trim(),
@@ -60,8 +69,55 @@ export default function SettingsScreen() {
       phone: form.phone.trim(),
     })
     setSaving(false)
-    setSaved(ok ? 'Profil enregistré.' : "Enregistrement impossible. Vérifiez votre connexion.")
-  }, [userId, form])
+    if (ok) {
+      haptic.success()
+      toast.show({ message: 'Profil enregistré', tone: 'success' })
+    } else {
+      haptic.error()
+      toast.show({ message: 'Enregistrement impossible. Vérifiez votre connexion.', tone: 'danger' })
+    }
+  }, [userId, form, toast])
+
+  const changePhoto = async () => {
+    if (!userId || uploading) return
+    setUploading(true)
+    try {
+      const url = await updateAvatar(userId)
+      if (url === null) toast.show({ message: 'Photo non enregistrée. Réessayez.', tone: 'danger' })
+      else if (url) {
+        haptic.success()
+        toast.show({ message: 'Photo mise à jour', tone: 'success' })
+      }
+    } catch {
+      toast.show({ message: "Envoi de la photo impossible.", tone: 'danger' })
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  const changePassword = async () => {
+    if (pw.next.length < 8) {
+      setPwError('Huit caractères minimum.')
+      return
+    }
+    if (pw.next !== pw.confirm) {
+      setPwError('Les deux saisies ne correspondent pas.')
+      return
+    }
+    setPwSaving(true)
+    setPwError('')
+    haptic.tap()
+    const err = await updatePassword(pw.next)
+    setPwSaving(false)
+    if (err) {
+      haptic.error()
+      setPwError(err)
+      return
+    }
+    haptic.success()
+    setPw({ next: '', confirm: '' })
+    toast.show({ message: 'Mot de passe changé', tone: 'success' })
+  }
 
   const togglePush = useCallback(async () => {
     if (!userId || push === 'granted' || push === 'unsupported') return
@@ -72,10 +128,18 @@ export default function SettingsScreen() {
     setPush(await registerPush(userId))
   }, [userId, push])
 
-  const signOut = async () => {
-    await unregisterPush().catch(() => {})
-    await supabase.auth.signOut()
-  }
+  const signOut = () =>
+    Alert.alert('Se déconnecter ?', 'Vous ne recevrez plus de notifications sur ce téléphone.', [
+      { text: 'Rester', style: 'cancel' },
+      {
+        text: 'Se déconnecter',
+        style: 'destructive',
+        onPress: async () => {
+          await unregisterPush().catch(() => {})
+          await supabase.auth.signOut()
+        },
+      },
+    ])
 
   const requestDeletion = () => {
     const subject = encodeURIComponent('Suppression de mon compte twocards')
@@ -97,17 +161,26 @@ export default function SettingsScreen() {
   return (
     <StackScreen title="Paramètres">
       <Card style={styles.head}>
-        <Avatar name={form.full_name || form.venue_name || 'T'} size={56} />
+        <Pressable onPress={changePhoto} style={styles.avatarWrap} accessibilityLabel="Changer la photo">
+          <Avatar name={form.full_name || form.venue_name || 'T'} size={64} uri={avatarUrl} />
+          <View style={styles.avatarBadge}>
+            {uploading ? <ActivityIndicator size="small" color="#FFFFFF" /> : <Icon name="camera" size={12} color="#FFFFFF" />}
+          </View>
+        </Pressable>
         <View style={styles.headText}>
           <Text style={styles.headName} numberOfLines={1}>
             {form.venue_name || 'Votre établissement'}
           </Text>
-          <Text style={styles.headHint}>
+          <Text style={styles.headHint} numberOfLines={1}>
             {tabRole === 'activite' ? 'Activités & services' : roleLabels[role]} · {email}
           </Text>
+          <Pressable onPress={changePhoto} hitSlop={6}>
+            <Text style={styles.headLink}>{avatarUrl ? 'Changer la photo' : 'Ajouter une photo ou un logo'}</Text>
+          </Pressable>
         </View>
       </Card>
 
+      <Text style={styles.heading}>Établissement</Text>
       <Card style={styles.form}>
         <Field label="Nom du responsable">
           <TextInput
@@ -117,6 +190,7 @@ export default function SettingsScreen() {
             placeholder="Prénom Nom"
             placeholderTextColor={Light.faint}
             autoCapitalize="words"
+            textContentType="name"
           />
         </Field>
         <Field label="Établissement">
@@ -128,34 +202,69 @@ export default function SettingsScreen() {
             placeholderTextColor={Light.faint}
           />
         </Field>
-        <Field label="Ville">
-          <TextInput
-            value={form.city}
-            onChangeText={(v) => setForm({ ...form, city: v })}
-            style={inputStyle}
-            placeholder="Marrakech"
-            placeholderTextColor={Light.faint}
-            autoCapitalize="words"
-          />
-        </Field>
-        <Field label="Téléphone" hint="Celui que les hôtels et concierges peuvent appeler.">
-          <TextInput
-            value={form.phone}
-            onChangeText={(v) => setForm({ ...form, phone: v })}
-            style={inputStyle}
-            placeholder="+212 6 …"
-            placeholderTextColor={Light.faint}
-            keyboardType="phone-pad"
-          />
-        </Field>
-        {saved && <Text style={[styles.saved, saved.startsWith('Profil') ? styles.ok : styles.ko]}>{saved}</Text>}
-        <Button
-          label={saving ? 'Enregistrement…' : 'Enregistrer'}
-          onPress={save}
-          disabled={!dirty || saving}
-        />
+        <View style={styles.twoCols}>
+          <View style={styles.col}>
+            <Field label="Ville">
+              <TextInput
+                value={form.city}
+                onChangeText={(v) => setForm({ ...form, city: v })}
+                style={inputStyle}
+                placeholder="Marrakech"
+                placeholderTextColor={Light.faint}
+                autoCapitalize="words"
+              />
+            </Field>
+          </View>
+          <View style={styles.col}>
+            <Field label="Téléphone">
+              <TextInput
+                value={form.phone}
+                onChangeText={(v) => setForm({ ...form, phone: v })}
+                style={inputStyle}
+                placeholder="+212 6 …"
+                placeholderTextColor={Light.faint}
+                keyboardType="phone-pad"
+                textContentType="telephoneNumber"
+              />
+            </Field>
+          </View>
+        </View>
+        <Button label={saving ? 'Enregistrement…' : 'Enregistrer'} onPress={save} disabled={!dirty || saving} />
       </Card>
 
+      <Text style={styles.heading}>Sécurité</Text>
+      <Card style={styles.form}>
+        <Field label="Nouveau mot de passe" hint="Huit caractères minimum.">
+          <TextInput
+            value={pw.next}
+            onChangeText={(v) => setPw({ ...pw, next: v })}
+            style={inputStyle}
+            placeholder="••••••••"
+            placeholderTextColor={Light.faint}
+            secureTextEntry
+            textContentType="newPassword"
+            autoCapitalize="none"
+          />
+        </Field>
+        <Field label="Confirmer">
+          <TextInput
+            value={pw.confirm}
+            onChangeText={(v) => setPw({ ...pw, confirm: v })}
+            style={inputStyle}
+            placeholder="••••••••"
+            placeholderTextColor={Light.faint}
+            secureTextEntry
+            textContentType="newPassword"
+            autoCapitalize="none"
+            returnKeyType="done"
+            onSubmitEditing={changePassword}
+          />
+        </Field>
+        {pwError ? <Text style={styles.error}>{pwError}</Text> : null}
+        <Button label={pwSaving ? 'Changement…' : 'Changer le mot de passe'} tone="ghost" icon="lock" onPress={changePassword} disabled={pwSaving || !pw.next || !pw.confirm} />
+      </Card>
+
+      <Text style={styles.heading}>Application</Text>
       <Card style={styles.group}>
         <ListRow
           first
@@ -165,12 +274,9 @@ export default function SettingsScreen() {
           onPress={push === 'granted' || push === 'unsupported' ? undefined : togglePush}
           right={<View style={[styles.dot, { backgroundColor: push === 'granted' ? Light.success : Light.warning }]} />}
         />
-        <ListRow
-          icon="lock"
-          label="Mot de passe"
-          hint="Se change depuis le site, rubrique Paramètres"
-          onPress={() => Linking.openURL('https://www.twocardspro.com/dashboard/settings')}
-        />
+        <ListRow icon="file-text" label="Conditions d'utilisation" onPress={() => Linking.openURL(`${SITE_URL}/legal/cgu`)} />
+        <ListRow icon="shield" label="Politique de confidentialité" onPress={() => Linking.openURL(`${SITE_URL}/legal/confidentialite`)} />
+        <ListRow icon="info" label="Version" hint={`twocards ${version}`} />
       </Card>
 
       <Card style={styles.group}>
@@ -187,6 +293,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 14,
   },
+  avatarWrap: {
+    position: 'relative',
+  },
+  avatarBadge: {
+    position: 'absolute',
+    right: -2,
+    bottom: -2,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: Light.ink,
+    borderWidth: 2,
+    borderColor: Light.card,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   headText: {
     flex: 1,
     minWidth: 0,
@@ -201,17 +323,34 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: Light.muted,
   },
+  headLink: {
+    marginTop: 2,
+    fontSize: 12,
+    fontWeight: '600',
+    color: Light.accent,
+  },
+  heading: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: Light.muted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+    marginLeft: 4,
+    marginBottom: -6,
+    marginTop: 4,
+  },
   form: {
     gap: 14,
   },
-  saved: {
+  twoCols: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  col: {
+    flex: 1,
+  },
+  error: {
     fontSize: 13,
-    fontWeight: '600',
-  },
-  ok: {
-    color: Light.success,
-  },
-  ko: {
     color: Light.danger,
   },
   group: {

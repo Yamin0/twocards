@@ -21,6 +21,7 @@ export default function TabsLayout() {
 
   return (
     <NativeTabs
+      minimizeBehavior="onScrollDown"
       backgroundColor={Light.card}
       tintColor={Light.accent}
       badgeBackgroundColor={Light.accent}

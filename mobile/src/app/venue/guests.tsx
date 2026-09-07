@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
-import { ActivityIndicator, Linking, Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
+import { Linking, Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 
-import { Avatar, Card, Empty, Icon, Pill, StackScreen, inputStyle } from '@/components/venue/ui'
+import { Avatar, Card, Empty, Icon, Pill, ScreenSkeleton, StackScreen, inputStyle } from '@/components/venue/ui'
 import { Light } from '@/constants/theme'
 import { isOut, mad, shortDate, useVenueReservations } from '@/lib/venue-data'
 
@@ -70,7 +70,7 @@ export default function GuestsScreen() {
         clearButtonMode="while-editing"
       />
       {rows === null ? (
-        <ActivityIndicator color={Light.accent} />
+        <ScreenSkeleton title={false} bare />
       ) : guests.length === 0 ? (
         <Card>
           <Empty icon="users" title="Aucun client" body="Chaque réservation reçue crée ou enrichit une fiche client ici." />

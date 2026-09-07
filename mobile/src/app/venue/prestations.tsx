@@ -1,21 +1,8 @@
 import { Image } from 'expo-image'
 import { useState } from 'react'
-import {
-  ActivityIndicator,
-  Alert,
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Switch,
-  Text,
-  TextInput,
-  View,
-} from 'react-native'
+import { Alert, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native'
 
-import { Button, Card, Empty, Field, Icon, Pill, StackScreen, inputStyle } from '@/components/venue/ui'
+import { Button, Card, Empty, Field, Icon, IconButton, Pill, ScreenSkeleton, StackScreen, inputStyle } from '@/components/venue/ui'
 import { Light } from '@/constants/theme'
 import { useAuth } from '@/lib/auth-context'
 import { pickAndUploadImage, useVenueServices, type Service, type ServiceDraft } from '@/lib/venue-data'
@@ -44,12 +31,10 @@ export default function PrestationsScreen() {
       title="Prestations"
       subtitle={rows ? `${visible} visible${visible > 1 ? 's' : ''} sur le menu` : undefined}
       right={
-        <Pressable onPress={() => setEditor({ id: null, draft: EMPTY })} hitSlop={8} style={styles.addButton} accessibilityLabel="Nouvelle prestation">
-          <Icon name="plus" size={20} color="#FFFFFF" />
-        </Pressable>
+        <IconButton icon="plus" tone="accent" label="Nouvelle prestation" onPress={() => setEditor({ id: null, draft: EMPTY })} />
       }>
       {rows === null ? (
-        <ActivityIndicator color={Light.accent} />
+        <ScreenSkeleton title={false} bare />
       ) : rows.length === 0 ? (
         <Card>
           <Empty
@@ -237,14 +222,6 @@ function Editor({
 }
 
 const styles = StyleSheet.create({
-  addButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: Light.accent,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   card: {
     gap: 12,
   },

@@ -1,6 +1,7 @@
+import { useRouter } from 'expo-router'
 import { useMemo, useState } from 'react'
 import {
-  ActivityIndicator,
+  Alert,
   RefreshControl,
   ScrollView,
   SectionList,
@@ -12,18 +13,22 @@ import {
 
 import { AmountSheet } from '@/components/venue/amount-sheet'
 import { ReservationCard } from '@/components/venue/reservation-card'
-import { Chip, Empty, Screen } from '@/components/venue/ui'
+import { Chip, Empty, Icon, IconButton, LargeTitle, Screen, ScreenSkeleton } from '@/components/venue/ui'
 import { BottomTabInset, Light } from '@/constants/theme'
+import { haptic } from '@/lib/haptics'
+import { useToast } from '@/lib/toast'
 import {
   dayLabel,
   isOut,
+  mad,
   todayIso,
   useVenueReservations,
   type Reservation,
 } from '@/lib/venue-data'
 
 /* Réservations de l'établissement : accepter une demande doit prendre deux
-   gestes. En attente d'abord, puis le jour, puis le reste. */
+   gestes. En attente d'abord, puis le jour, puis le reste. Chaque décision
+   se confirme en bas d'écran et se défait d'un toucher. */
 
 export type Filter = 'pending' | 'today' | 'upcoming' | 'past' | 'all'
 
@@ -36,6 +41,8 @@ export function ReservationsList({
   /* Change à chaque demande, pour qu'une même valeur redemandée s'applique. */
   requestKey: string
 }) {
+  const router = useRouter()
+  const toast = useToast()
   const { rows, loading, refreshing, refresh, setStatus, checkIn, setAmount } =
     useVenueReservations()
   const [filter, setFilter] = useState<Filter>(requested ?? 'pending')
@@ -87,15 +94,51 @@ export function ReservationsList({
       arr.push(r)
       map.set(r.reservation_date, arr)
     }
-    return [...map.entries()].map(([date, data]) => ({ title: dayLabel(date), date, data }))
+    return [...map.entries()].map(([date, data]) => {
+      const live = data.filter((r) => !isOut(r))
+      const people = live.reduce((s, r) => s + r.party_size, 0)
+      const spent = live.reduce((s, r) => s + (r.amount_spent ?? 0), 0)
+      return { title: dayLabel(date), date, data, people, live: live.length, spent }
+    })
   }, [rows, filter, query, today])
+
+  const decide = async (r: Reservation, status: 'confirmée' | 'annulée') => {
+    haptic.tap()
+    const ok = await setStatus(r, status)
+    if (!ok) {
+      haptic.error()
+      toast.show({ message: 'Modification impossible. Vérifiez votre connexion.', tone: 'danger' })
+      return
+    }
+    haptic.success()
+    toast.show({
+      message: status === 'confirmée' ? `${r.guest_name} confirmé` : `${r.guest_name} refusé`,
+      tone: status === 'confirmée' ? 'success' : 'default',
+      action: { label: 'Annuler', onPress: () => void setStatus({ ...r, status }, 'en attente') },
+    })
+  }
+
+  const refuse = (r: Reservation) =>
+    Alert.alert('Refuser cette réservation ?', `${r.guest_name}, ${r.party_size} pers.${r.source === 'qr' ? " L'hôtel le verra aussi." : ''}`, [
+      { text: 'Garder', style: 'cancel' },
+      { text: 'Refuser', style: 'destructive', onPress: () => void decide(r, 'annulée') },
+    ])
+
+  const arrive = async (r: Reservation) => {
+    haptic.tap()
+    const ok = await checkIn(r)
+    if (ok) {
+      haptic.success()
+      toast.show({ message: `${r.guest_name} est arrivé`, tone: 'success' })
+    } else {
+      toast.show({ message: "Impossible d'enregistrer l'arrivée.", tone: 'danger' })
+    }
+  }
 
   if (loading) {
     return (
       <Screen>
-        <View style={styles.center}>
-          <ActivityIndicator color={Light.accent} />
-        </View>
+        <ScreenSkeleton />
       </Screen>
     )
   }
@@ -107,6 +150,7 @@ export function ReservationsList({
     past: ['Aucun historique', 'Les réservations passées apparaîtront ici.'],
     all: ['Aucune réservation', "Dès qu'un client réserve chez vous, il apparaît ici."],
   }
+  const searching = query.trim().length > 0
 
   return (
     <Screen>
@@ -116,24 +160,31 @@ export function ReservationsList({
         stickySectionHeadersEnabled={false}
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={Light.accent} />}
         ListHeaderComponent={
           <View style={styles.header}>
-            <Text style={styles.title}>Réservations</Text>
-            <Text style={styles.subtitle}>
-              {counts.pending > 0
-                ? `${counts.pending} demande${counts.pending > 1 ? 's' : ''} à confirmer`
-                : `${counts.today} aujourd'hui · ${counts.upcoming} à venir`}
-            </Text>
-            <TextInput
-              value={query}
-              onChangeText={setQuery}
-              placeholder="Rechercher un client ou un numéro"
-              placeholderTextColor={Light.faint}
-              autoCorrect={false}
-              clearButtonMode="while-editing"
-              style={styles.search}
+            <LargeTitle
+              title="Réservations"
+              subtitle={
+                counts.pending > 0
+                  ? `${counts.pending} demande${counts.pending > 1 ? 's' : ''} à confirmer`
+                  : `${counts.today} aujourd'hui · ${counts.upcoming} à venir`
+              }
+              right={<IconButton icon="plus" label="Nouvelle réservation" onPress={() => router.push('/venue/new-reservation')} />}
             />
+            <View style={styles.search}>
+              <Icon name="search" size={16} color={Light.faint} />
+              <TextInput
+                value={query}
+                onChangeText={setQuery}
+                placeholder="Nom ou numéro"
+                placeholderTextColor={Light.faint}
+                autoCorrect={false}
+                clearButtonMode="while-editing"
+                style={styles.searchInput}
+              />
+            </View>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
               <Chip label="En attente" count={counts.pending} active={filter === 'pending'} onPress={() => setFilter('pending')} />
               <Chip label="Aujourd'hui" count={counts.today} active={filter === 'today'} onPress={() => setFilter('today')} />
@@ -144,37 +195,52 @@ export function ReservationsList({
           </View>
         }
         renderSectionHeader={({ section }) => (
-          <Text style={[styles.day, section.date === today && styles.dayToday]}>{section.title}</Text>
+          <View style={styles.dayRow}>
+            <Text style={[styles.day, section.date === today && styles.dayToday]}>{section.title}</Text>
+            <Text style={styles.dayMeta}>
+              {section.live > 0 ? `${section.live} · ${section.people} pers.` : `${section.data.length}`}
+              {section.spent > 0 ? ` · ${mad(section.spent)}` : ''}
+            </Text>
+          </View>
         )}
         renderItem={({ item: r }) => (
           <View style={styles.item}>
             <ReservationCard
               r={r}
-              onConfirm={() => setStatus(r, 'confirmée')}
-              onRefuse={() => setStatus(r, 'annulée')}
-              onCheckIn={() => checkIn(r)}
+              onConfirm={() => void decide(r, 'confirmée')}
+              onRefuse={() => refuse(r)}
+              onCheckIn={() => void arrive(r)}
               onAmount={() => setAmountFor(r)}
             />
           </View>
         )}
-        ListEmptyComponent={<Empty title={emptyCopy[filter][0]} body={emptyCopy[filter][1]} />}
+        ListEmptyComponent={
+          searching ? (
+            <Empty icon="search" title="Aucun résultat" body={`Aucune réservation ne correspond à « ${query.trim()} » dans ce filtre.`} />
+          ) : (
+            <Empty icon={filter === 'pending' ? 'inbox' : 'calendar'} title={emptyCopy[filter][0]} body={emptyCopy[filter][1]} />
+          )
+        }
       />
       <AmountSheet
         key={amountFor?.id ?? 'none'}
         reservation={amountFor}
         onClose={() => setAmountFor(null)}
-        onSave={(n) => (amountFor ? setAmount(amountFor, n) : Promise.resolve(false))}
+        onSave={async (n) => {
+          if (!amountFor) return false
+          const ok = await setAmount(amountFor, n)
+          if (ok) {
+            haptic.success()
+            toast.show({ message: `Addition enregistrée : ${mad(n)}`, tone: 'success' })
+          }
+          return ok
+        }}
       />
     </Screen>
   )
 }
 
 const styles = StyleSheet.create({
-  center: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   content: {
     padding: 16,
     paddingBottom: BottomTabInset + 24,
@@ -182,24 +248,19 @@ const styles = StyleSheet.create({
   header: {
     gap: 12,
     marginBottom: 6,
-    paddingTop: 4,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: Light.ink,
-    letterSpacing: -0.6,
-  },
-  subtitle: {
-    marginTop: -8,
-    fontSize: 13,
-    color: Light.muted,
   },
   search: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
     height: 44,
     borderRadius: 12,
     backgroundColor: Light.card,
-    paddingHorizontal: 14,
+    paddingHorizontal: 12,
+  },
+  searchInput: {
+    flex: 1,
+    height: '100%',
     fontSize: 15,
     color: Light.ink,
   },
@@ -207,17 +268,28 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingVertical: 2,
   },
+  dayRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    justifyContent: 'space-between',
+    marginTop: 14,
+    marginBottom: 8,
+    paddingHorizontal: 2,
+  },
   day: {
     fontSize: 13,
     fontWeight: '700',
     color: Light.muted,
-    marginTop: 14,
-    marginBottom: 8,
     textTransform: 'uppercase',
     letterSpacing: 0.6,
   },
   dayToday: {
     color: Light.accent,
+  },
+  dayMeta: {
+    fontSize: 12,
+    color: Light.faint,
+    fontVariant: ['tabular-nums'],
   },
   item: {
     marginBottom: 10,

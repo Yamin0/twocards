@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native'
+import { Pressable, StyleSheet, Text, View } from 'react-native'
 
-import { Avatar, Card, Empty, Icon, Kpi, StackScreen } from '@/components/venue/ui'
+import { Avatar, Card, Empty, Icon, Kpi, ScreenSkeleton, StackScreen } from '@/components/venue/ui'
 import { Light } from '@/constants/theme'
 import {
   currentPeriod,
@@ -105,7 +105,7 @@ export default function CommissionsScreen() {
   if (rows === null || settlements === null) {
     return (
       <StackScreen title="Commissions">
-        <ActivityIndicator color={Light.accent} />
+        <ScreenSkeleton title={false} bare />
       </StackScreen>
     )
   }

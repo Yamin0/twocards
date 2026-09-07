@@ -1,7 +1,7 @@
 import { useRouter } from 'expo-router'
 import { useState } from 'react'
 import {
-  ActivityIndicator,
+  Alert,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -13,10 +13,13 @@ import {
 import { AmountSheet } from '@/components/venue/amount-sheet'
 import { BarChart } from '@/components/venue/bar-chart'
 import { ReservationCard } from '@/components/venue/reservation-card'
-import { Avatar, Card, Icon, Kpi, Screen, SectionTitle, type IconName } from '@/components/venue/ui'
+import { Avatar, Card, Icon, IconButton, Kpi, Screen, ScreenSkeleton, SectionTitle, type IconName } from '@/components/venue/ui'
 import { BottomTabInset, Light } from '@/constants/theme'
 import { useAuth } from '@/lib/auth-context'
+import { haptic } from '@/lib/haptics'
+import { useToast } from '@/lib/toast'
 import {
+  addDaysIso,
   isDue,
   isOut,
   lastDays,
@@ -31,8 +34,9 @@ import {
 /* Accueil de l'établissement : ce qui attend une réponse, les chiffres du
    mois, le rythme des demandes, et les raccourcis vers le reste. */
 export function VenueHome() {
-  const { fullName, venueName, tabRole } = useAuth()
+  const { fullName, venueName, tabRole, avatarUrl } = useAuth()
   const router = useRouter()
+  const toast = useToast()
   const activity = tabRole === 'activite'
   const { rows, loading, refreshing, refresh, setStatus, checkIn, setAmount } =
     useVenueReservations()
@@ -47,9 +51,7 @@ export function VenueHome() {
   if (loading || rows === null) {
     return (
       <Screen>
-        <View style={styles.center}>
-          <ActivityIndicator color={Light.accent} />
-        </View>
+        <ScreenSkeleton />
       </Screen>
     )
   }
@@ -73,6 +75,40 @@ export function VenueHome() {
   const chart = range === 'week' ? lastDays(rows, 7) : lastMonths(rows, 6)
   const chartTotal = chart.reduce((s, d) => s + d.value, 0)
   const firstName = fullName?.split(' ')[0]
+  const hour = new Date().getHours()
+  const greeting = hour < 5 || hour >= 18 ? 'Bonsoir' : 'Bonjour'
+  const dateLine = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })
+  const nowHm = `${String(hour).padStart(2, '0')}:${String(new Date().getMinutes()).padStart(2, '0')}`
+  const next = today
+    .filter((r) => r.status === 'confirmée' && !r.arrived_at && (r.reservation_time ?? '') >= nowHm)
+    .sort((a, b) => (a.reservation_time ?? '').localeCompare(b.reservation_time ?? ''))[0]
+  /* Tendance : les 7 derniers jours contre les 7 précédents. */
+  const since = (d: number) => addDaysIso(-d)
+  const thisWeek = rows.filter((r) => r.created_at.slice(0, 10) > since(7)).length
+  const lastWeek = rows.filter((r) => r.created_at.slice(0, 10) > since(14) && r.created_at.slice(0, 10) <= since(7)).length
+  const trend = lastWeek > 0 ? Math.round(((thisWeek - lastWeek) / lastWeek) * 100) : thisWeek > 0 ? 100 : 0
+
+  /* Chaque geste confirme en bas d'écran et se défait d'un toucher. */
+  const decide = async (r: Reservation, status: 'confirmée' | 'annulée') => {
+    haptic.tap()
+    const ok = await setStatus(r, status)
+    if (!ok) {
+      haptic.error()
+      toast.show({ message: 'Modification impossible. Vérifiez votre connexion.', tone: 'danger' })
+      return
+    }
+    haptic.success()
+    toast.show({
+      message: status === 'confirmée' ? `${r.guest_name} confirmé` : `${r.guest_name} refusé`,
+      tone: status === 'confirmée' ? 'success' : 'default',
+      action: { label: 'Annuler', onPress: () => void setStatus({ ...r, status }, 'en attente') },
+    })
+  }
+  const refuse = (r: Reservation) =>
+    Alert.alert('Refuser cette réservation ?', `${r.guest_name}, ${r.party_size} pers.`, [
+      { text: 'Garder', style: 'cancel' },
+      { text: 'Refuser', style: 'destructive', onPress: () => void decide(r, 'annulée') },
+    ])
   const visibleServices = (services ?? []).filter((s) => s.active)
 
   const tiles = activity
@@ -97,14 +133,15 @@ export function VenueHome() {
         {/* En-tête */}
         <View style={styles.header}>
           <View style={styles.headerText}>
-            <Text style={styles.title}>Accueil</Text>
+            <Text style={styles.title}>{firstName ? `${greeting} ${firstName}` : greeting}</Text>
             <Text style={styles.subtitle} numberOfLines={1}>
-              {firstName ? `Bonjour ${firstName}` : 'Bonjour'}
+              {dateLine.charAt(0).toUpperCase() + dateLine.slice(1)}
               {venueName ? ` · ${venueName}` : ''}
             </Text>
           </View>
-          <Pressable onPress={() => router.navigate('/hub')} hitSlop={8}>
-            <Avatar name={fullName ?? venueName ?? 'T'} size={40} />
+          <IconButton icon="plus" label="Nouvelle réservation" onPress={() => router.push('/venue/new-reservation')} />
+          <Pressable onPress={() => router.navigate('/hub')} hitSlop={8} accessibilityLabel="Menu">
+            <Avatar name={fullName ?? venueName ?? 'T'} size={40} uri={avatarUrl} />
           </Pressable>
         </View>
 
@@ -120,6 +157,13 @@ export function VenueHome() {
                     {' '}· {todayPeople} {activity ? 'participant' : 'couvert'}
                     {todayPeople > 1 ? 's' : ''}
                   </Text>
+                </Text>
+                <Text style={styles.todayNext} numberOfLines={1}>
+                  {next
+                    ? `Prochaine à ${(next.reservation_time ?? '').slice(0, 5)} · ${next.guest_name}, ${next.party_size} pers.`
+                    : today.length > 0
+                      ? 'Tout le monde est passé ou attendu sans heure'
+                      : 'Rien de prévu pour le moment'}
                 </Text>
               </View>
               <Icon name="chevron-right" size={22} color="rgba(255,255,255,0.6)" />
@@ -157,6 +201,14 @@ export function VenueHome() {
                 {chartTotal}
                 <Text style={styles.chartUnit}> sur {range === 'week' ? '7 jours' : '6 mois'}</Text>
               </Text>
+              {range === 'week' && (thisWeek > 0 || lastWeek > 0) && (
+                <View style={[styles.trend, trend < 0 && styles.trendDown]}>
+                  <Icon name={trend >= 0 ? 'trending-up' : 'trending-down'} size={12} color={trend >= 0 ? Light.success : Light.danger} />
+                  <Text style={[styles.trendText, trend < 0 && styles.trendTextDown]}>
+                    {trend > 0 ? '+' : ''}{trend} % vs semaine passée
+                  </Text>
+                </View>
+              )}
             </Pressable>
             <View style={styles.segment}>
               {(['week', 'month'] as const).map((k) => (
@@ -194,8 +246,8 @@ export function VenueHome() {
                   key={r.id}
                   r={r}
                   compact
-                  onConfirm={() => setStatus(r, 'confirmée')}
-                  onRefuse={() => setStatus(r, 'annulée')}
+                  onConfirm={() => void decide(r, 'confirmée')}
+                  onRefuse={() => refuse(r)}
                   onCheckIn={() => checkIn(r)}
                   onAmount={() => setAmountFor(r)}
                 />
@@ -278,7 +330,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    gap: 12,
+    gap: 10,
     paddingTop: 4,
   },
   headerText: {
@@ -328,6 +380,34 @@ const styles = StyleSheet.create({
   todayMuted: {
     fontWeight: '500',
     color: 'rgba(255,255,255,0.6)',
+  },
+  todayNext: {
+    marginTop: 8,
+    fontSize: 12,
+    fontWeight: '500',
+    color: 'rgba(255,255,255,0.75)',
+  },
+  trend: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    alignSelf: 'flex-start',
+    marginTop: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 999,
+    backgroundColor: Light.successSoft,
+  },
+  trendDown: {
+    backgroundColor: Light.dangerSoft,
+  },
+  trendText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: Light.success,
+  },
+  trendTextDown: {
+    color: Light.danger,
   },
   kpiRow: {
     flexDirection: 'row',

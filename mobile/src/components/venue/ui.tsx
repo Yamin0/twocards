@@ -1,19 +1,23 @@
 import Feather from '@expo/vector-icons/Feather'
+import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
-import type { ComponentProps, ReactNode } from 'react'
+import { useEffect, type ComponentProps, type ReactNode } from 'react'
 import {
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
   View,
+  type DimensionValue,
   type StyleProp,
   type ViewStyle,
 } from 'react-native'
+import Animated, { useAnimatedStyle, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { CardShadow, Light } from '@/constants/theme'
+import { haptic } from '@/lib/haptics'
 import { initials, type ReservationStatus } from '@/lib/venue-data'
 
 /* Briques des écrans clairs. Icônes en traits (Feather), jamais d'emoji :
@@ -230,11 +234,173 @@ export function Pill({ label, tone = 'muted' }: { label: string; tone?: 'muted' 
   )
 }
 
-export function Avatar({ name, size = 40 }: { name: string; size?: number }) {
+export function Avatar({ name, size = 40, uri }: { name: string; size?: number; uri?: string | null }) {
+  const shape = { width: size, height: size, borderRadius: size / 2 }
+  if (uri) {
+    return <Image source={{ uri }} style={[styles.avatar, shape]} contentFit="cover" alt="" />
+  }
   return (
-    <View style={[styles.avatar, { width: size, height: size, borderRadius: size / 2 }]}>
+    <View style={[styles.avatar, shape]}>
       <Text style={[styles.avatarText, { fontSize: size * 0.36 }]}>{initials(name) || '?'}</Text>
     </View>
+  )
+}
+
+/* Bouton rond à icône, pour les barres d'écran : ajouter, écrire, ouvrir. */
+export function IconButton({
+  icon,
+  onPress,
+  tone = 'soft',
+  size = 36,
+  label,
+  disabled,
+}: {
+  icon: IconName
+  onPress: () => void
+  tone?: 'soft' | 'accent' | 'plain'
+  size?: number
+  label: string
+  disabled?: boolean
+}) {
+  const bg = tone === 'accent' ? Light.accent : tone === 'soft' ? Light.accentSoft : 'transparent'
+  const fg = tone === 'accent' ? '#FFFFFF' : tone === 'soft' ? Light.accent : Light.ink
+  return (
+    <Pressable
+      onPress={() => {
+        haptic.tap()
+        onPress()
+      }}
+      disabled={disabled}
+      hitSlop={6}
+      accessibilityLabel={label}
+      accessibilityRole="button"
+      style={({ pressed }) => [
+        styles.iconButton,
+        { width: size, height: size, borderRadius: size / 2, backgroundColor: bg, opacity: disabled ? 0.4 : pressed ? 0.7 : 1 },
+      ]}>
+      <Icon name={icon} size={Math.round(size * 0.5)} color={fg} />
+    </Pressable>
+  )
+}
+
+/* En-tête des onglets : grand titre, ligne de contexte, une action à droite. */
+export function LargeTitle({ title, subtitle, right }: { title: string; subtitle?: string; right?: ReactNode }) {
+  return (
+    <View style={styles.largeTitleRow}>
+      <View style={styles.largeTitleText}>
+        <Text style={styles.largeTitle}>{title}</Text>
+        {subtitle ? (
+          <Text style={styles.largeSubtitle} numberOfLines={1}>
+            {subtitle}
+          </Text>
+        ) : null}
+      </View>
+      {right}
+    </View>
+  )
+}
+
+/* Bloc gris qui respire pendant le chargement, à la place d'un sablier :
+   l'écran montre déjà sa forme, le contenu vient s'y poser. */
+export function Skeleton({
+  width = '100%',
+  height = 14,
+  radius = 7,
+  style,
+}: {
+  width?: DimensionValue
+  height?: number
+  radius?: number
+  style?: StyleProp<ViewStyle>
+}) {
+  const pulse = useSharedValue(1)
+  useEffect(() => {
+    pulse.set(withRepeat(withTiming(0.45, { duration: 800 }), -1, true))
+  }, [pulse])
+  const animated = useAnimatedStyle(() => ({ opacity: pulse.get() }))
+  return <Animated.View style={[styles.skeleton, { width, height, borderRadius: radius }, animated, style]} />
+}
+
+/* Squelette d'un écran type : un titre, deux chiffres, une liste. */
+export function ScreenSkeleton({ title = true, bare }: { title?: boolean; bare?: boolean }) {
+  return (
+    <View style={[styles.skeletonScreen, bare && styles.skeletonBare]}>
+      {title && (
+        <View style={styles.skeletonHead}>
+          <Skeleton width={160} height={26} radius={8} />
+          <Skeleton width={220} height={12} />
+        </View>
+      )}
+      <View style={styles.skeletonRow}>
+        <View style={[styles.card, styles.skeletonKpi]}>
+          <Skeleton width={90} height={11} />
+          <Skeleton width={70} height={24} radius={8} />
+        </View>
+        <View style={[styles.card, styles.skeletonKpi]}>
+          <Skeleton width={90} height={11} />
+          <Skeleton width={70} height={24} radius={8} />
+        </View>
+      </View>
+      {[0, 1, 2].map((i) => (
+        <View key={i} style={[styles.card, styles.skeletonItem]}>
+          <Skeleton width={44} height={44} radius={12} />
+          <View style={styles.skeletonLines}>
+            <Skeleton width="60%" height={14} />
+            <Skeleton width="40%" height={11} />
+          </View>
+        </View>
+      ))}
+    </View>
+  )
+}
+
+/* Compteur − / + pour un nombre de couverts ou de participants. */
+export function Stepper({
+  value,
+  onChange,
+  min = 1,
+  max = 99,
+  unit,
+}: {
+  value: number
+  onChange: (v: number) => void
+  min?: number
+  max?: number
+  unit?: (n: number) => string
+}) {
+  const step = (d: number) => {
+    const next = Math.min(max, Math.max(min, value + d))
+    if (next !== value) {
+      haptic.select()
+      onChange(next)
+    }
+  }
+  return (
+    <View style={styles.stepper}>
+      <Pressable onPress={() => step(-1)} disabled={value <= min} hitSlop={6} style={[styles.stepperButton, value <= min && styles.stepperOff]} accessibilityLabel="Moins">
+        <Icon name="minus" size={18} color={Light.ink} />
+      </Pressable>
+      <Text style={styles.stepperValue}>
+        {value}
+        {unit ? <Text style={styles.stepperUnit}> {unit(value)}</Text> : null}
+      </Text>
+      <Pressable onPress={() => step(1)} disabled={value >= max} hitSlop={6} style={[styles.stepperButton, value >= max && styles.stepperOff]} accessibilityLabel="Plus">
+        <Icon name="plus" size={18} color={Light.ink} />
+      </Pressable>
+    </View>
+  )
+}
+
+/* Ligne libellé / valeur d'une fiche. */
+export function DetailRow({ icon, label, value, onPress }: { icon: IconName; label: string; value: string; onPress?: () => void }) {
+  return (
+    <Pressable onPress={onPress} disabled={!onPress} style={({ pressed }) => [styles.detailRow, pressed && styles.pressed]}>
+      <Icon name={icon} size={16} color={Light.faint} />
+      <Text style={styles.detailLabel}>{label}</Text>
+      <Text style={[styles.detailValue, onPress && styles.detailLink]} numberOfLines={2}>
+        {value}
+      </Text>
+    </Pressable>
   )
 }
 
@@ -616,5 +782,118 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: Light.faint,
     marginLeft: 2,
+  },
+  iconButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  largeTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+    paddingTop: 4,
+  },
+  largeTitleText: {
+    flex: 1,
+    minWidth: 0,
+  },
+  largeTitle: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: Light.ink,
+    letterSpacing: -0.6,
+  },
+  largeSubtitle: {
+    marginTop: 2,
+    fontSize: 13,
+    color: Light.muted,
+  },
+  skeleton: {
+    backgroundColor: Light.line,
+  },
+  skeletonScreen: {
+    padding: 16,
+    gap: 12,
+  },
+  skeletonBare: {
+    padding: 0,
+  },
+  skeletonHead: {
+    gap: 8,
+    paddingTop: 6,
+    marginBottom: 4,
+  },
+  skeletonRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  skeletonKpi: {
+    flex: 1,
+    minHeight: 92,
+    justifyContent: 'space-between',
+  },
+  skeletonItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  skeletonLines: {
+    flex: 1,
+    gap: 8,
+  },
+  stepper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    height: 46,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Light.line,
+    backgroundColor: Light.card,
+    paddingHorizontal: 4,
+  },
+  stepperButton: {
+    width: 40,
+    height: 38,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Light.bg,
+  },
+  stepperOff: {
+    opacity: 0.35,
+  },
+  stepperValue: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: Light.ink,
+    fontVariant: ['tabular-nums'],
+  },
+  stepperUnit: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: Light.muted,
+  },
+  detailRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingVertical: 10,
+  },
+  detailLabel: {
+    width: 96,
+    fontSize: 13,
+    color: Light.muted,
+  },
+  detailValue: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: '600',
+    color: Light.ink,
+    textAlign: 'right',
+  },
+  detailLink: {
+    color: Light.accent,
   },
 })

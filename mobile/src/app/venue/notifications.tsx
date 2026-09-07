@@ -1,7 +1,7 @@
 import { useRouter } from 'expo-router'
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native'
+import { Pressable, StyleSheet, Text, View } from 'react-native'
 
-import { Card, Empty, Icon, StackScreen, type IconName } from '@/components/venue/ui'
+import { Card, Empty, Icon, ScreenSkeleton, StackScreen, type IconName } from '@/components/venue/ui'
 import { Light } from '@/constants/theme'
 import { timeAgo, useNotifications, type Notification } from '@/lib/venue-data'
 
@@ -44,7 +44,7 @@ export default function NotificationsScreen() {
         ) : null
       }>
       {rows === null ? (
-        <ActivityIndicator color={Light.accent} />
+        <ScreenSkeleton title={false} bare />
       ) : rows.length === 0 ? (
         <Card>
           <Empty

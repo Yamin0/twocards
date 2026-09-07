@@ -133,6 +133,38 @@ export function useVenueReservations() {
   return { rows, loading: rows === null, refreshing, refresh, setStatus, checkIn, setAmount }
 }
 
+/* Réservation prise par l'établissement lui-même (téléphone, comptoir).
+   Sans commission, visible sur le plan de salle du site. */
+export type NewReservation = {
+  name: string
+  phone: string
+  date: string
+  time: string | null
+  party: number
+  notes: string | null
+}
+
+export async function createReservation(d: NewReservation): Promise<string | null> {
+  const { error } = await supabase.rpc('venue_create_reservation', {
+    p_guest_name: d.name.trim(),
+    p_guest_phone: d.phone.trim(),
+    p_date: d.date,
+    p_time: d.time,
+    p_party_size: d.party,
+    p_notes: d.notes,
+    p_table_id: null,
+  })
+  return error ? error.message : null
+}
+
+/* Un lien WhatsApp vers un numéro marocain ou international. */
+export function whatsappUrl(phone: string) {
+  let digits = phone.replace(/\D/g, '')
+  if (digits.startsWith('00')) digits = digits.slice(2)
+  else if (digits.startsWith('0') && digits.length === 10) digits = `212${digits.slice(1)}`
+  return `https://wa.me/${digits}`
+}
+
 /* ── Règlements de commissions (notés par twocards) ─────────────────── */
 
 export type Settlement = { period: string; hotel_id: string; amount: number; settled_at: string }
@@ -550,6 +582,25 @@ export function useReferrers() {
 }
 
 /* ── Profil ────────────────────────────────────────────────────────────── */
+
+/* Nouveau mot de passe : la session courante suffit, Supabase n'exige pas
+   l'ancien. Renvoie un message d'erreur lisible, ou null. */
+export async function updatePassword(password: string): Promise<string | null> {
+  const { error } = await supabase.auth.updateUser({ password })
+  if (!error) return null
+  if (/same password/i.test(error.message)) return "C'est déjà votre mot de passe actuel."
+  if (/at least/i.test(error.message)) return 'Huit caractères minimum.'
+  return 'Changement impossible pour le moment. Réessayez.'
+}
+
+/* Photo ou logo de l'établissement, gardé dans les métadonnées du compte :
+   le site le lit au même endroit. */
+export async function updateAvatar(userId: string): Promise<string | null | undefined> {
+  const url = await pickAndUploadImage(userId)
+  if (!url) return undefined
+  const { error } = await supabase.auth.updateUser({ data: { avatar_url: url } })
+  return error ? null : url
+}
 
 export async function updateProfile(
   userId: string,

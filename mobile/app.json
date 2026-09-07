@@ -6,8 +6,8 @@
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "twocards",
-    "userInterfaceStyle": "dark",
-    "backgroundColor": "#0d0f12",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#F3F4F6",
     "ios": {
       "bundleIdentifier": "com.twocards.app",
       "supportsTablet": false,
@@ -16,7 +16,8 @@
         "CFBundleDevelopmentRegion": "fr",
         "CFBundleLocalizations": [
           "fr"
-        ]
+        ],
+        "UIViewControllerBasedStatusBarAppearance": true
       }
     },
     "android": {
@@ -45,6 +46,13 @@
         {
           "color": "#0d0f12",
           "defaultChannel": "default"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "twocards accède à vos photos pour illustrer vos prestations et votre établissement.",
+          "cameraPermission": "twocards utilise l’appareil photo pour photographier une prestation."
         }
       ]
     ],

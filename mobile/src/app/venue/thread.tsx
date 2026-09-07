@@ -15,6 +15,7 @@ import {
 import { Icon, StackScreen } from '@/components/venue/ui'
 import { Light } from '@/constants/theme'
 import { useAuth } from '@/lib/auth-context'
+import { haptic } from '@/lib/haptics'
 import { hourOf, useThread } from '@/lib/venue-data'
 
 /* Un fil : les bulles, les vôtres à droite en bleu, la saisie en bas. */
@@ -39,9 +40,15 @@ export default function ThreadScreen() {
     const text = draft.trim()
     if (!text || sending) return
     setSending(true)
+    haptic.tap()
     const ok = await send(text)
     setSending(false)
-    if (ok) setDraft('')
+    if (ok) {
+      setDraft('')
+      haptic.success()
+    } else {
+      haptic.error()
+    }
   }
 
   const dayOf = (iso: string) => new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })

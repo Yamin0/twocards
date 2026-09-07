@@ -6,6 +6,7 @@ import { Alert, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'r
 import { Avatar, Card, Icon, ListRow, Screen } from '@/components/venue/ui'
 import { BottomTabInset, Light } from '@/constants/theme'
 import { useAuth } from '@/lib/auth-context'
+import { useBadgeCounts } from '@/lib/badges'
 import { pushStatus, registerPush, unregisterPush, type PushStatus } from '@/lib/push'
 import { HUB, isVenueTabRole, roleLabels, roleTabs, WEB_PAGES } from '@/lib/site'
 import { supabase } from '@/lib/supabase'
@@ -24,8 +25,12 @@ const statusLabels: Record<PushStatus, string> = {
 }
 
 export default function HubTab() {
-  const { session, role, tabRole, fullName, venueName } = useAuth()
+  const { session, role, tabRole, fullName, venueName, avatarUrl } = useAuth()
   const router = useRouter()
+  const counts = useBadgeCounts()
+  /* Pastilles sur les lignes qui attendent quelque chose. */
+  const badgeFor = (route?: string, path?: string) =>
+    route === '/venue/messages' || path?.endsWith('/messages') ? counts.messages : 0
   const email = session?.user.email ?? '—'
   const userId = session?.user.id ?? null
   const version = Constants.expoConfig?.version ?? '1.0.0'
@@ -86,7 +91,7 @@ export default function HubTab() {
         {/* Le compte → paramètres */}
         <Pressable onPress={openSettings} style={({ pressed }) => [pressed && styles.pressed]}>
           <Card style={styles.profile}>
-            <Avatar name={fullName ?? venueName ?? 'T'} size={48} />
+            <Avatar name={fullName ?? venueName ?? 'T'} size={48} uri={avatarUrl} />
             <View style={styles.profileText}>
               <Text style={styles.profileName} numberOfLines={1}>
                 {venueName ?? fullName ?? 'Votre espace'}
@@ -126,6 +131,16 @@ export default function HubTab() {
                   label={i.label}
                   hint={i.hint}
                   onPress={() => (i.route ? router.push(i.route as never) : i.path ? openWeb(i.path) : undefined)}
+                  right={
+                    badgeFor(i.route, i.path) > 0 ? (
+                      <View style={styles.badgeRow}>
+                        <View style={styles.badge}>
+                          <Text style={styles.badgeText}>{badgeFor(i.route, i.path)}</Text>
+                        </View>
+                        <Icon name="chevron-right" size={18} color={Light.faint} />
+                      </View>
+                    ) : undefined
+                  }
                 />
               ))}
             </Card>
@@ -186,6 +201,25 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
+  },
+  badgeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  badge: {
+    minWidth: 22,
+    height: 22,
+    borderRadius: 11,
+    paddingHorizontal: 6,
+    backgroundColor: Light.accent,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  badgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#FFFFFF',
   },
   groupTitle: {
     fontSize: 12,

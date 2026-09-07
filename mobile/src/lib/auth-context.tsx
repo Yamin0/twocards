@@ -20,6 +20,7 @@ type AuthState = {
   home: string
   fullName: string | null
   venueName: string | null
+  avatarUrl: string | null
 }
 
 const AuthContext = createContext<AuthState>({
@@ -30,6 +31,7 @@ const AuthContext = createContext<AuthState>({
   home: roleHome.etablissement,
   fullName: null,
   venueName: null,
+  avatarUrl: null,
 })
 
 /* Même lecture que le site : app_metadata prime (non modifiable côté client),
@@ -78,6 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         home: roleHome[role],
         fullName: (meta.full_name as string | undefined) ?? null,
         venueName: (meta.venue_name as string | undefined) ?? null,
+        avatarUrl: (meta.avatar_url as string | undefined) ?? null,
       }}>
       {children}
     </AuthContext.Provider>

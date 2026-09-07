@@ -1,12 +1,15 @@
-import { Linking, Pressable, StyleSheet, Text, View } from 'react-native'
+import { useRouter } from 'expo-router'
+import { Pressable, StyleSheet, Text, View } from 'react-native'
 
 import { Light } from '@/constants/theme'
-import { hourOf, isOut, mad, todayIso, type Reservation } from '@/lib/venue-data'
+import { haptic } from '@/lib/haptics'
+import { isOut, todayIso, type Reservation } from '@/lib/venue-data'
 
-import { Avatar, Button, StatusPill } from './ui'
+import { Button, Icon, StatusPill } from './ui'
 
-/* Une réservation, avec les gestes qui comptent en salle : confirmer,
-   refuser, dire que le client est là, saisir l'addition. */
+/* Une réservation dans une liste : l'heure d'abord, puisque c'est elle
+   qu'on cherche en salle, puis qui, combien, d'où. Les gestes qui comptent
+   restent sous le pouce ; le reste est dans la fiche, au toucher. */
 export function ReservationCard({
   r,
   onConfirm,
@@ -14,6 +17,7 @@ export function ReservationCard({
   onCheckIn,
   onAmount,
   compact,
+  showDate,
 }: {
   r: Reservation
   onConfirm: () => void
@@ -21,88 +25,87 @@ export function ReservationCard({
   onCheckIn: () => void
   onAmount: () => void
   compact?: boolean
+  /* Dans une liste sans en-tête de jour, la date accompagne l'heure. */
+  showDate?: boolean
 }) {
+  const router = useRouter()
   const today = todayIso()
   const past = r.reservation_date < today
-  const via =
-    r.source === 'qr' && r.referrer_name
-      ? `via ${r.referrer_name}`
-      : r.source === 'portal'
-        ? 'portail direct'
-        : r.source === 'venue'
-          ? 'réservation maison'
-          : null
-  const details = [
-    r.reservation_time ?? null,
-    `${r.party_size} pers.`,
-    r.service_name ?? null,
-  ]
-    .filter(Boolean)
-    .join(' · ')
+  const out = isOut(r)
+  const time = r.reservation_time ? r.reservation_time.slice(0, 5) : '—'
+  const people = `${r.party_size} pers.`
+  const origin =
+    r.source === 'qr' ? r.referrer_name ?? 'Hôtel partenaire' : r.source === 'portal' ? 'Portail direct' : 'Maison'
+  const originIcon = r.source === 'qr' ? 'briefcase' : r.source === 'portal' ? 'globe' : 'user'
 
   return (
-    <View style={styles.card}>
+    <Pressable
+      onPress={() => {
+        haptic.select()
+        router.push({ pathname: '/venue/reservation', params: { id: r.id } })
+      }}
+      style={({ pressed }) => [styles.card, out && styles.cardOut, pressed && styles.pressed]}
+      accessibilityRole="button"
+      accessibilityLabel={`Réservation de ${r.guest_name} à ${time}`}>
       <View style={styles.row}>
-        <Avatar name={r.guest_name} size={42} />
+        <View style={styles.time}>
+          <Text style={[styles.timeText, out && styles.timeOut]}>{time}</Text>
+          {showDate && <Text style={styles.dateText}>{shortDay(r.reservation_date)}</Text>}
+        </View>
         <View style={styles.body}>
           <View style={styles.titleRow}>
-            <Text style={styles.name} numberOfLines={1}>
+            <Text style={[styles.name, out && styles.nameOut]} numberOfLines={1}>
               {r.guest_name}
             </Text>
             <StatusPill status={r.status} />
           </View>
           <Text style={styles.details} numberOfLines={1}>
-            {details}
+            {people}
+            {r.service_name ? ` · ${r.service_name}` : ''}
+            {r.arrived_at ? ' · arrivé' : ''}
+            {r.amount_spent !== null ? ` · ${r.amount_spent.toLocaleString('fr-FR')} MAD` : ''}
           </Text>
-          {via && (
-            <Text style={styles.via} numberOfLines={1}>
-              {via}
+          <View style={styles.originRow}>
+            <Icon name={originIcon} size={12} color={r.source === 'qr' ? Light.accent : Light.faint} />
+            <Text style={[styles.origin, r.source === 'qr' && styles.originQr]} numberOfLines={1}>
+              {origin}
             </Text>
-          )}
-          {r.notes && !compact && (
-            <Text style={styles.notes} numberOfLines={2}>
-              « {r.notes} »
-            </Text>
-          )}
+            {r.notes && !compact ? (
+              <>
+                <Icon name="message-square" size={12} color={Light.faint} />
+                <Text style={styles.notes} numberOfLines={1}>
+                  {r.notes}
+                </Text>
+              </>
+            ) : null}
+          </View>
         </View>
+        <Icon name="chevron-right" size={16} color={Light.faint} />
       </View>
-
-      {!compact && (
-        <View style={styles.meta}>
-          <Pressable
-            onPress={() => Linking.openURL(`tel:${r.guest_phone.replace(/\s/g, '')}`)}
-            hitSlop={6}>
-            <Text style={styles.phone}>{r.guest_phone}</Text>
-          </Pressable>
-          {r.arrived_at && (
-            <Text style={styles.arrived}>Arrivé {hourOf(r.arrived_at)}</Text>
-          )}
-          {r.amount_spent !== null && (
-            <Text style={styles.amount}>{mad(r.amount_spent)}</Text>
-          )}
-        </View>
-      )}
 
       {r.status === 'en attente' ? (
         <View style={styles.actions}>
-          <Button label="Confirmer" tone="success" small onPress={onConfirm} style={styles.grow} />
-          <Button label="Refuser" tone="danger" small onPress={onRefuse} style={styles.grow} />
+          <Button label="Confirmer" tone="success" small icon="check" onPress={onConfirm} style={styles.grow} />
+          <Button label="Refuser" tone="danger" small icon="x" onPress={onRefuse} style={styles.grow} />
         </View>
-      ) : !isOut(r) && !compact ? (
+      ) : !out && !compact ? (
         <View style={styles.actions}>
-          {!r.arrived_at && (
-            <Button label="Client arrivé" tone="accent" small onPress={onCheckIn} style={styles.grow} />
+          {!r.arrived_at && !past && (
+            <Button label="Client arrivé" tone="accent" small icon="user-check" onPress={onCheckIn} style={styles.grow} />
           )}
           {(past || r.arrived_at) && r.amount_spent === null && (
-            <Button label="Saisir l'addition" tone="ghost" small onPress={onAmount} style={styles.grow} />
-          )}
-          {r.amount_spent !== null && (
-            <Button label="Modifier le montant" tone="ghost" small onPress={onAmount} style={styles.grow} />
+            <Button label="Saisir l'addition" tone={r.arrived_at ? 'accent' : 'ghost'} small icon="edit-3" onPress={onAmount} style={styles.grow} />
           )}
         </View>
       ) : null}
-    </View>
+    </Pressable>
   )
+}
+
+const DAYS = ['dim.', 'lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.']
+function shortDay(iso: string) {
+  const d = new Date(`${iso}T00:00:00`)
+  return `${DAYS[d.getDay()]} ${d.getDate()}`
 }
 
 const styles = StyleSheet.create({
@@ -112,9 +115,42 @@ const styles = StyleSheet.create({
     padding: 14,
     gap: 12,
   },
+  cardOut: {
+    opacity: 0.72,
+  },
+  pressed: {
+    opacity: 0.85,
+  },
   row: {
     flexDirection: 'row',
+    alignItems: 'center',
     gap: 12,
+  },
+  time: {
+    width: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 6,
+    borderRadius: 12,
+    backgroundColor: Light.bg,
+    alignSelf: 'stretch',
+  },
+  timeText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: Light.ink,
+    fontVariant: ['tabular-nums'],
+    letterSpacing: -0.3,
+  },
+  timeOut: {
+    color: Light.muted,
+  },
+  dateText: {
+    marginTop: 2,
+    fontSize: 10,
+    fontWeight: '600',
+    color: Light.muted,
+    textTransform: 'uppercase',
   },
   body: {
     flex: 1,
@@ -132,45 +168,37 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '700',
     color: Light.ink,
+    letterSpacing: -0.2,
+  },
+  nameOut: {
+    color: Light.muted,
+    textDecorationLine: 'line-through',
   },
   details: {
     fontSize: 13,
     color: Light.muted,
   },
-  via: {
+  originRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    marginTop: 1,
+  },
+  origin: {
     fontSize: 12,
-    color: Light.accent,
     fontWeight: '500',
+    color: Light.faint,
+    marginRight: 6,
+  },
+  originQr: {
+    color: Light.accent,
+    fontWeight: '600',
   },
   notes: {
+    flex: 1,
     fontSize: 12,
-    color: Light.muted,
+    color: Light.faint,
     fontStyle: 'italic',
-    marginTop: 2,
-  },
-  meta: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'center',
-    gap: 12,
-  },
-  phone: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: Light.ink,
-    textDecorationLine: 'underline',
-  },
-  arrived: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: Light.success,
-  },
-  amount: {
-    marginLeft: 'auto',
-    fontSize: 14,
-    fontWeight: '700',
-    color: Light.ink,
-    fontVariant: ['tabular-nums'],
   },
   actions: {
     flexDirection: 'row',

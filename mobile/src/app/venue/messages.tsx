@@ -2,7 +2,7 @@ import { useRouter } from 'expo-router'
 import { useState } from 'react'
 import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 
-import { Avatar, Card, Empty, Icon, StackScreen } from '@/components/venue/ui'
+import { Avatar, Card, Empty, Icon, IconButton, ScreenSkeleton, StackScreen } from '@/components/venue/ui'
 import { Light } from '@/constants/theme'
 import { useAuth } from '@/lib/auth-context'
 import { profileName, timeAgo, useContacts, useConversations } from '@/lib/venue-data'
@@ -31,12 +31,10 @@ export default function MessagesScreen() {
       title="Messages"
       subtitle="Concierges et hôtels"
       right={
-        <Pressable onPress={() => setPicker(true)} hitSlop={8} style={styles.newButton} accessibilityLabel="Nouveau message">
-          <Icon name="edit-3" size={18} color={Light.accent} />
-        </Pressable>
+        <IconButton icon="edit-3" label="Nouveau message" onPress={() => setPicker(true)} />
       }>
       {rows === null ? (
-        <ActivityIndicator color={Light.accent} />
+        <ScreenSkeleton title={false} bare />
       ) : rows.length === 0 ? (
         <Card>
           <Empty
@@ -116,14 +114,6 @@ export default function MessagesScreen() {
 }
 
 const styles = StyleSheet.create({
-  newButton: {
-    width: 40,
-    height: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 20,
-    backgroundColor: Light.accentSoft,
-  },
   list: {
     paddingVertical: 0,
   },

@@ -9,7 +9,7 @@ import {
   View,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { WebView, type WebViewNavigation } from 'react-native-webview'
+import { WebView, type WebViewNavigation, type WebViewProps } from 'react-native-webview'
 
 import { Light } from '@/constants/theme'
 import { SITE_URL, sitePath } from '@/lib/site'
@@ -21,10 +21,16 @@ import { useWebSession } from '@/lib/web-session'
 export function SiteWebView({
   path,
   inset = true,
+  onProgress,
+  reloadKey = 0,
 }: {
   path: string
   /* Faux quand l'écran parent gère déjà la zone de la barre d'état. */
   inset?: boolean
+  /* Avancement du chargement, de 0 à 1, pour une barre fine dans l'écran parent. */
+  onProgress?: (p: number) => void
+  /* Incrémenté par le parent pour recharger la page. */
+  reloadKey?: number
 }) {
   const ws = useWebSession()
   const { register, unregister } = ws
@@ -73,6 +79,8 @@ export function SiteWebView({
     }
   }
 
+  const onLoadProgress: NonNullable<WebViewProps['onLoadProgress']> = (e) => onProgress?.(e.nativeEvent.progress)
+
   if (ws.error) {
     return (
       <Shell inset={inset}>
@@ -99,9 +107,11 @@ export function SiteWebView({
   return (
     <Shell inset={inset}>
       <WebView
+        key={reloadKey}
         source={{ uri }}
         style={styles.web}
         onNavigationStateChange={onNavigationStateChange}
+        onLoadProgress={onLoadProgress}
         onShouldStartLoadWithRequest={(req) => {
           /* Le site reste dans l'app ; tout lien externe (WhatsApp, Google
              Business, PDF…) s'ouvre dans le navigateur ou l'app dédiée. */

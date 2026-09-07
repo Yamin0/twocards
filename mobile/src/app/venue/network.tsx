@@ -1,6 +1,6 @@
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, Text, View } from 'react-native'
 
-import { Avatar, Card, Empty, Icon, StackScreen } from '@/components/venue/ui'
+import { Avatar, Card, Empty, Icon, ScreenSkeleton, StackScreen } from '@/components/venue/ui'
 import { Light } from '@/constants/theme'
 import { mad, shortDate, useReferrers } from '@/lib/venue-data'
 
@@ -15,7 +15,7 @@ export default function NetworkScreen() {
       title="Réseau apporteurs"
       subtitle={rows ? `${rows.length} hôtel${rows.length > 1 ? 's' : ''} · ${total} sortie${total > 1 ? 's' : ''}` : undefined}>
       {rows === null ? (
-        <ActivityIndicator color={Light.accent} />
+        <ScreenSkeleton title={false} bare />
       ) : rows.length === 0 ? (
         <Card>
           <Empty

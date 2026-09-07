@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, Text, View } from 'react-native'
 
 import { BarChart } from '@/components/venue/bar-chart'
-import { Card, Kpi, Segmented, StackScreen } from '@/components/venue/ui'
+import { Card, Kpi, ScreenSkeleton, Segmented, StackScreen } from '@/components/venue/ui'
 import { Light } from '@/constants/theme'
 import { isOut, lastDays, lastMonths, mad, useVenueReservations, type Reservation } from '@/lib/venue-data'
 
@@ -23,7 +23,7 @@ export default function AnalyticsScreen() {
   if (rows === null) {
     return (
       <StackScreen title="Analyses">
-        <ActivityIndicator color={Light.accent} />
+        <ScreenSkeleton title={false} bare />
       </StackScreen>
     )
   }
