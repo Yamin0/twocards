@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar'
-import { useEffect, useId } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import {
   ActivityIndicator,
   Linking,
@@ -11,15 +11,29 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { WebView, type WebViewNavigation } from 'react-native-webview'
 
-import { SHELL_BG, SITE_URL, sitePath } from '@/lib/site'
+import { useAuth } from '@/lib/auth-context'
+import { clearSitePath, usePendingSitePath } from '@/lib/deep-link'
+import { SHELL_BG, SITE_URL, sitePath, tabIndexForPath } from '@/lib/site'
 import { useWebSession } from '@/lib/web-session'
 
 /* Une page du site, dans la coque native. `path` est le chemin de départ ;
    la navigation interne du site (menu, liens) reste libre à l'intérieur. */
-export function SiteWebView({ path }: { path: string }) {
+export function SiteWebView({
+  path,
+  tabIndex,
+}: {
+  path: string
+  tabIndex: number
+}) {
   const ws = useWebSession()
   const { register, unregister } = ws
+  const { role } = useAuth()
   const key = useId()
+
+  const [uri, setUri] = useState<string | null>(null)
+  const webRef = useRef<WebView>(null)
+  /* Page réellement affichée, pour ne pas recharger une page déjà ouverte. */
+  const shownRef = useRef<string | null>(null)
 
   /* Candidature au rôle de propriétaire du jeton : la première WebView
      affichée l'obtient et passe par la passerelle, les autres attendent. */
@@ -29,17 +43,41 @@ export function SiteWebView({ path }: { path: string }) {
   }, [register, unregister, key])
 
   const isOwner = ws.owner === key
-  /* Le propriétaire garde son URL de passerelle même une fois prêt : en
-     changer rechargerait la page qu'il affiche déjà. */
-  const uri = isOwner
+
+  /* Page de départ de l'onglet, figée dès qu'elle est connue : la
+     propriétaire passe par la passerelle, les autres attendent que la
+     session web soit posée. Changer cette adresse plus tard ferait
+     recharger la WebView sous les doigts de l'utilisateur. */
+  const first = isOwner
     ? ws.bridgeUrl(path)
     : ws.ready
       ? `${SITE_URL}${path}`
       : null
+  if (uri === null && first !== null) {
+    setUri(first)
+  }
+
+  /* Notification touchée : la cible revient à l'onglet qui la couvre. */
+  const pending = usePendingSitePath()
+  const mine =
+    pending !== null && Math.max(0, tabIndexForPath(role, pending)) === tabIndex
+
+  /* On attend que la session web soit établie : déplacer la WebView
+     pendant que la passerelle pose les cookies annulerait celle-ci. */
+  useEffect(() => {
+    if (!mine || pending === null || !ws.ready) return
+    if (shownRef.current !== pending) {
+      webRef.current?.injectJavaScript(
+        `window.location.href = ${JSON.stringify(SITE_URL + pending)}; true;`
+      )
+    }
+    clearSitePath()
+  }, [mine, pending, ws.ready])
 
   const onNavigationStateChange = (nav: WebViewNavigation) => {
     const pathname = sitePath(nav.url)
     if (!pathname) return
+    shownRef.current = pathname
 
     if (pathname === '/login') {
       if (isOwner && !ws.ready) {
@@ -83,6 +121,7 @@ export function SiteWebView({ path }: { path: string }) {
   return (
     <Shell>
       <WebView
+        ref={webRef}
         source={{ uri }}
         style={styles.web}
         onNavigationStateChange={onNavigationStateChange}

@@ -4,5 +4,5 @@ import { roleTabs } from '@/lib/site';
 
 export default function SecondTab() {
   const { role } = useAuth();
-  return <SiteWebView path={roleTabs[role][1].path} />;
+  return <SiteWebView path={roleTabs[role][1].path} tabIndex={1} />;
 }

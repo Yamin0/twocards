@@ -2,6 +2,7 @@ import { DarkTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
+import { PushBridge } from '@/components/push-bridge';
 import { AuthProvider, useAuth } from '@/lib/auth-context';
 import { WebSessionProvider } from '@/lib/web-session';
 
@@ -33,6 +34,7 @@ export default function RootLayout() {
       <AuthProvider>
         <WebSessionProvider>
           <AnimatedSplashOverlay />
+          <PushBridge />
           <RootNavigator />
         </WebSessionProvider>
       </AuthProvider>

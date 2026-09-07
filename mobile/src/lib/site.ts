@@ -168,6 +168,25 @@ export const roleTabs: Record<Role, [TabSpec, TabSpec, TabSpec, TabSpec]> = {
   ],
 }
 
+/* Adresses des quatre premiers onglets, dans l'ordre de roleTabs. */
+export const TAB_HREFS = ['/', '/slot-2', '/slot-3', '/slot-4'] as const
+
+/* Onglet auquel appartient une page du site — le préfixe le plus long
+   gagne, sans quoi « /dashboard/reservations » tomberait sur l'accueil.
+   Renvoie -1 quand aucun onglet ne couvre la page. */
+export function tabIndexForPath(role: Role, path: string): number {
+  let best = -1
+  let bestLength = 0
+  roleTabs[role].forEach((tab, i) => {
+    const matches = path === tab.path || path.startsWith(`${tab.path}/`)
+    if (matches && tab.path.length > bestLength) {
+      best = i
+      bestLength = tab.path.length
+    }
+  })
+  return best
+}
+
 /* Fond des dashboards du site (coque sombre, photo océan voilée). La zone
    de la barre d'état reprend cette couleur pour se fondre dans la page. */
 export const SHELL_BG = '#0d0f12'

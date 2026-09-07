@@ -1,22 +1,88 @@
 import Constants from 'expo-constants';
 import { StatusBar } from 'expo-status-bar';
-import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useEffect, useState } from 'react';
+import {
+  Alert,
+  Linking,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BottomTabInset, Spacing } from '@/constants/theme';
 import { useAuth } from '@/lib/auth-context';
+import { pushStatus, registerPush, unregisterPush, type PushStatus } from '@/lib/push';
 import { roleLabels, SHELL_BG, SITE_URL } from '@/lib/site';
 import { supabase } from '@/lib/supabase';
+
+const CONTACT_EMAIL = 'contact@twocardspro.com';
+
+const statusLabels: Record<PushStatus, string> = {
+  granted: 'Activées',
+  denied: 'Refusées',
+  undetermined: 'Pas encore autorisées',
+  unsupported: 'Indisponibles sur cet appareil',
+};
 
 export default function ProfileScreen() {
   const { session, role, home, fullName, venueName } = useAuth();
   const email = session?.user.email ?? '—';
   const version = Constants.expoConfig?.version ?? '1.0.0';
+  const userId = session?.user.id ?? null;
+
+  const [push, setPush] = useState<PushStatus | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    pushStatus()
+      .then((s) => {
+        if (!cancelled) setPush(s);
+      })
+      .catch(() => {
+        if (!cancelled) setPush('unsupported');
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const enablePush = useCallback(async () => {
+    if (!userId) return;
+    /* Une autorisation refusée ne peut plus être redemandée par l'app :
+       seuls les réglages du téléphone la rouvrent. */
+    if (push === 'denied') {
+      Linking.openSettings();
+      return;
+    }
+    setPush(await registerPush(userId));
+  }, [userId, push]);
+
+  const signOut = useCallback(async () => {
+    await unregisterPush().catch(() => {});
+    await supabase.auth.signOut();
+  }, []);
+
+  const requestDeletion = useCallback(() => {
+    const subject = encodeURIComponent('Suppression de mon compte twocards');
+    const body = encodeURIComponent(
+      `Bonjour,\n\nJe demande la suppression de mon compte twocards et des données associées.\n\nCompte : ${email}\n\nMerci.`
+    );
+    Linking.openURL(`mailto:${CONTACT_EMAIL}?subject=${subject}&body=${body}`).catch(
+      () =>
+        Alert.alert(
+          'Aucune application de messagerie',
+          `Écrivez à ${CONTACT_EMAIL} depuis votre adresse ${email}.`
+        )
+    );
+  }, [email]);
 
   return (
     <SafeAreaView style={styles.screen} edges={['top']}>
       <StatusBar style="light" />
-      <View style={styles.content}>
+      <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.title}>Profil</Text>
 
         <View style={styles.card}>
@@ -45,6 +111,28 @@ export default function ProfileScreen() {
           <Text style={styles.value}>{roleLabels[role]}</Text>
         </View>
 
+        <View style={styles.card}>
+          <Text style={styles.label}>NOTIFICATIONS</Text>
+          <Text style={styles.value}>
+            {push ? statusLabels[push] : 'Vérification…'}
+          </Text>
+          <Text style={styles.hint}>
+            Nouvelle réservation, avis client et nouveau message, même
+            téléphone verrouillé.
+          </Text>
+          {push === 'granted' || push === 'unsupported' ? null : (
+            <Pressable
+              onPress={enablePush}
+              style={({ pressed }) => [styles.inlineButton, pressed && styles.pressed]}>
+              <Text style={styles.inlineButtonText}>
+                {push === 'denied'
+                  ? 'Ouvrir les réglages'
+                  : 'Activer les notifications'}
+              </Text>
+            </Pressable>
+          )}
+        </View>
+
         <Pressable
           onPress={() => Linking.openURL(`${SITE_URL}${home}`)}
           style={({ pressed }) => [styles.secondary, pressed && styles.pressed]}>
@@ -52,13 +140,19 @@ export default function ProfileScreen() {
         </Pressable>
 
         <Pressable
-          onPress={() => supabase.auth.signOut()}
+          onPress={signOut}
           style={({ pressed }) => [styles.signOut, pressed && styles.pressed]}>
           <Text style={styles.signOutText}>Se déconnecter</Text>
         </Pressable>
 
+        <Pressable
+          onPress={requestDeletion}
+          style={({ pressed }) => [styles.quiet, pressed && styles.pressed]}>
+          <Text style={styles.quietText}>Demander la suppression de mon compte</Text>
+        </Pressable>
+
         <Text style={styles.version}>twocards · v{version}</Text>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -69,7 +163,6 @@ const styles = StyleSheet.create({
     backgroundColor: SHELL_BG,
   },
   content: {
-    flex: 1,
     padding: Spacing.four,
     paddingBottom: BottomTabInset + Spacing.four,
     gap: Spacing.three,
@@ -99,10 +192,29 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#ffffff',
   },
+  hint: {
+    marginTop: 6,
+    fontSize: 13,
+    lineHeight: 19,
+    color: 'rgba(255,255,255,0.45)',
+  },
   divider: {
     height: 1,
     backgroundColor: 'rgba(255,255,255,0.08)',
     marginVertical: Spacing.three,
+  },
+  inlineButton: {
+    marginTop: Spacing.three,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.22)',
+    borderRadius: 999,
+    paddingVertical: 11,
+    alignItems: 'center',
+  },
+  inlineButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#ffffff',
   },
   secondary: {
     borderWidth: 1,
@@ -131,8 +243,17 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#f87171',
   },
+  quiet: {
+    paddingVertical: 6,
+    alignItems: 'center',
+  },
+  quietText: {
+    fontSize: 13,
+    color: 'rgba(255,255,255,0.4)',
+    textDecorationLine: 'underline',
+  },
   version: {
-    marginTop: 'auto',
+    marginTop: Spacing.three,
     textAlign: 'center',
     fontSize: 12,
     color: 'rgba(255,255,255,0.35)',
