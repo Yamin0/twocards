@@ -166,6 +166,7 @@ export function buildGuestMenu({
   catalog,
   hotelOffers = [],
   categoryImages = {},
+  hiddenCategories = [],
 }: {
   city: string | null;
   hidden: string[];
@@ -173,8 +174,11 @@ export function buildGuestMenu({
   hotelOffers?: OfferRow[];
   /* Photos de bandeau choisies par l'hôtel ; sinon celles de twocards. */
   categoryImages?: Partial<Record<GuestCategoryKey, string>>;
+  /* Catégories entières retirées de ce QR (une famille sans clubs…). */
+  hiddenCategories?: string[];
 }): GuestCategory[] {
   const hiddenSet = new Set(hidden);
+  const hiddenCats = new Set(hiddenCategories);
   const hotelCity = city ? normalizeCity(city) : null;
   const byCategory = new Map<GuestCategoryKey, GuestOffer[]>(CATEGORY_KEYS.map((k) => [k, []]));
 
@@ -198,7 +202,7 @@ export function buildGuestMenu({
     ...CATEGORY_META[key],
     image: categoryImages[key] || CATEGORY_META[key].image,
     offers: byCategory.get(key)!.filter((o) => !hiddenSet.has(o.id)),
-  })).filter((cat) => cat.offers.length > 0);
+  })).filter((cat) => cat.offers.length > 0 && !hiddenCats.has(cat.key));
 }
 
 /* Côté hôtel : le catalogue configurable est celui de sa ville, adresses

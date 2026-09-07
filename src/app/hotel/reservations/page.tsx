@@ -310,6 +310,11 @@ function ReservationsContent() {
                         {r.commission > 0 && (
                           <span className="num hidden shrink-0 text-xs font-bold text-amber-300 sm:inline">+{formatMad(r.commission)}</span>
                         )}
+                        {r.arrived_at && (
+                          <span className="num hidden shrink-0 items-center gap-1 rounded-md bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-bold text-emerald-300 sm:inline-flex">
+                            Arrivé {new Date(r.arrived_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+                          </span>
+                        )}
                         <StatusPill status={r.status} />
                       </button>
                     </li>

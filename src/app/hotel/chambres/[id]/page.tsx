@@ -37,9 +37,9 @@ import {
 import { useAuthUser } from "@/hooks/use-auth-user";
 import { useToast } from "@/hooks/use-toast";
 import { useHotelSpace } from "@/lib/hotel/store";
-import { cityCatalog } from "@/lib/guest-catalog";
+import { CATEGORY_KEYS, CATEGORY_LABELS, cityCatalog, type GuestCategoryKey } from "@/lib/guest-catalog";
 import { averageRating, conversionRate, isLive } from "@/lib/hotel/analytics";
-import { formatDate, formatMad, formatNumber, formatPercent, plural, timeAgo, whatsappLink } from "@/lib/hotel/format";
+import { formatDate, formatMad, formatNumber, formatPercent, plural, timeAgo, todayIso, whatsappLink } from "@/lib/hotel/format";
 import { downloadPng, downloadSvg, guestUrl, shareByEmail, shareByWhatsapp } from "@/lib/qr";
 import {
   Button,
@@ -91,10 +91,18 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [preview, setPreview] = useState(false);
+  /* Filtres par catégorie de ce QR, avec échéance facultative. */
+  const [cats, setCats] = useState<Set<string> | null>(null);
+  const [until, setUntil] = useState<string | null>(null);
+  const [savingRules, setSavingRules] = useState(false);
 
   /* Ajustement d'état pendant le rendu plutôt qu'un effet : l'édition part
      des offres masquées enregistrées dès que le QR est connu. */
   if (qr && hidden === null) setHidden(new Set(qr.hidden_offers));
+  if (qr && cats === null) {
+    setCats(new Set(qr.hidden_categories));
+    setUntil(qr.hidden_until);
+  }
 
   const hotelName = profile.hotel_name || venueName;
   const hotelCity = profile.city || city;
@@ -103,7 +111,7 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
     [hotelCity, catalog, hotelOffers]
   );
 
-  if (authLoading || isLoading || (qr && hidden === null)) return <PageSkeleton kpis={4} table />;
+  if (authLoading || isLoading || (qr && (hidden === null || cats === null))) return <PageSkeleton kpis={4} table />;
 
   if (!qr) {
     return (
@@ -137,6 +145,26 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
   const totalOffers = menuCatalog.reduce((s, c) => s + c.offers.length, 0);
   const shownOffers = menuCatalog.reduce((s, c) => s + c.offers.filter((o) => !hiddenSet.has(o.id)).length, 0);
   const q = menuSearch.trim().toLowerCase();
+
+  const catSet = cats ?? new Set<string>();
+  const today = todayIso();
+  const rulesDirty =
+    JSON.stringify([...catSet].sort()) !== JSON.stringify([...qr.hidden_categories].sort()) ||
+    (until ?? null) !== (qr.hidden_until ?? null);
+  const rulesExpired = !!qr.hidden_until && qr.hidden_until < today;
+  const toggleCat = (key: string) =>
+    setCats((prev) => {
+      const next = new Set(prev ?? []);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  const saveRules = async () => {
+    setSavingRules(true);
+    const ok = await update(qr.id, { hidden_categories: [...catSet], hidden_until: until || null });
+    setSavingRules(false);
+    showToast(ok ? "Filtres enregistrés, visibles dès le prochain scan" : "Impossible d'enregistrer les filtres");
+  };
 
   const toggleOffer = (offerId: string) =>
     setHidden((prev) => {
@@ -308,6 +336,100 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
                 />
               </div>
             </div>
+          )}
+        </Panel>
+
+        {/* Filtres : une catégorie entière, le temps d'un séjour */}
+        <Panel
+          title="Filtres du menu"
+          description="Retirez une catégorie entière de ce QR, le temps d'un séjour ou pour de bon. Pour une famille, un geste : plus de clubs."
+          actions={
+            <>
+              {rulesDirty && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  icon={RotateCcw}
+                  onClick={() => {
+                    setCats(new Set(qr.hidden_categories));
+                    setUntil(qr.hidden_until);
+                  }}
+                >
+                  Annuler
+                </Button>
+              )}
+              <Button size="sm" variant={rulesDirty ? "primary" : "secondary"} icon={Check} onClick={saveRules} loading={savingRules} disabled={!rulesDirty}>
+                Enregistrer
+              </Button>
+            </>
+          }
+          className="xl:col-span-3"
+        >
+          <div className="flex flex-wrap gap-2">
+            {CATEGORY_KEYS.map((key) => {
+              const Icon = CATEGORY_ICONS[key];
+              const off = catSet.has(key);
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => toggleCat(key)}
+                  aria-pressed={off}
+                  className={cn(
+                    "flex items-center gap-2 rounded-xl border px-3.5 py-2.5 text-sm font-bold transition-colors",
+                    off
+                      ? "border-red-400/40 bg-red-500/15 text-red-100"
+                      : "border-white/10 bg-white/[0.04] text-white hover:bg-white/[0.08]"
+                  )}
+                >
+                  <Icon size={15} strokeWidth={1.75} />
+                  <span className={cn(off && "line-through decoration-red-300/70")}>{CATEGORY_LABELS[key]}</span>
+                  <span className="text-[10px] font-medium uppercase tracking-wider opacity-60">{off ? "retirée" : "proposée"}</span>
+                </button>
+              );
+            })}
+          </div>
+          <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                size="sm"
+                variant="secondary"
+                icon={Music}
+                disabled={catSet.has("clubs")}
+                onClick={() => setCats((prev) => new Set([...(prev ?? []), "clubs"]))}
+              >
+                Famille : retirer les clubs
+              </Button>
+              {catSet.size > 0 && (
+                <Button size="sm" variant="ghost" onClick={() => setCats(new Set())}>
+                  Tout proposer
+                </Button>
+              )}
+            </div>
+            <label className="flex flex-wrap items-center gap-2 text-xs text-white/60">
+              Jusqu&apos;au
+              <input
+                type="date"
+                value={until ?? ""}
+                min={today}
+                onChange={(e) => setUntil(e.target.value || null)}
+                className={cn(inputClass, "h-9 w-auto py-0 text-[13px]")}
+              />
+              {until ? (
+                <button type="button" onClick={() => setUntil(null)} className="text-[11px] font-bold text-sky-300 hover:text-sky-200">
+                  sans limite
+                </button>
+              ) : (
+                <span className="text-[11px] text-white/35">sans limite</span>
+              )}
+            </label>
+          </div>
+          {qr.hidden_categories.length > 0 && (
+            <p className="mt-3 text-xs text-white/45">
+              {rulesExpired
+                ? "L'échéance est passée : le menu de ce QR est de nouveau complet."
+                : `Actuellement retiré : ${qr.hidden_categories.map((k) => CATEGORY_LABELS[k as GuestCategoryKey] ?? k).join(", ")}${qr.hidden_until ? ` · jusqu'au ${formatDate(qr.hidden_until, "long")}` : " · sans limite"}.`}
+            </p>
           )}
         </Panel>
 

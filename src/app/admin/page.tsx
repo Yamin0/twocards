@@ -1,31 +1,50 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ArrowUpRight,
+  BookOpen,
   Building2,
+  CalendarDays,
   Check,
   ChevronDown,
+  Coins,
   Hotel,
+  LayoutDashboard,
   Loader2,
   LogIn,
   LogOut,
   MessageSquare,
   RefreshCw,
+  Search,
   Shield,
   UserCheck,
+  Users,
   X,
+  type LucideIcon,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useAuthUser } from "@/hooks/use-auth-user";
 import { formatTimestamp } from "@/hooks/use-messaging";
 import { startImpersonation } from "@/lib/impersonation";
 import { CatalogAdmin } from "@/components/admin/catalog-admin";
+import {
+  CommissionsAdmin,
+  currentPeriod,
+  isDue,
+  mad,
+  type LedgerRow,
+  type Settlement,
+} from "@/components/admin/commissions-admin";
 
-/* Console d'administration : tous les comptes de la plateforme, leur
-   activité réelle et leurs échanges. La garde est en base — policies et
-   fonctions exigent le drapeau admin du JWT (app_metadata, hors de portée
-   du client) ; la page ne fait que refléter ce droit. */
+/* Console d'administration : le réseau vu d'en haut. Quatre onglets —
+   la vue d'ensemble, les comptes (avec « se connecter en tant que »), le
+   catalogue des adresses proposées aux clients des hôtels, et les
+   commissions : qui doit combien à qui, et ce qui est réglé.
+
+   La garde est en base — policies et fonctions exigent le drapeau admin du
+   JWT (app_metadata, hors de portée du client) ; la page ne fait que
+   refléter ce droit. */
 
 type Account = {
   id: string;
@@ -48,6 +67,15 @@ type ThreadMessage = {
   sender_id: string;
   conversation_id: string;
 };
+
+type Tab = "overview" | "accounts" | "catalog" | "commissions";
+
+const TABS: { key: Tab; label: string; icon: LucideIcon }[] = [
+  { key: "overview", label: "Vue d'ensemble", icon: LayoutDashboard },
+  { key: "accounts", label: "Comptes", icon: Users },
+  { key: "catalog", label: "Catalogue", icon: BookOpen },
+  { key: "commissions", label: "Commissions", icon: Coins },
+];
 
 const SECTIONS = [
   { role: "etablissement", title: "Établissements", icon: Building2, home: "/dashboard" },
@@ -185,7 +213,6 @@ function AccountRow({
 
   return (
     <div className="rounded-2xl border border-white/[0.08] bg-white/5">
-      {/* En-tête cliquable */}
       <button
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
@@ -294,7 +321,6 @@ function AccountRow({
             )}
           </div>
 
-          {/* Échanges du compte */}
           <div className="rounded-xl border border-white/[0.08] bg-black/30 p-3">
             <p className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-white/40">
               <MessageSquare size={12} />
@@ -340,16 +366,114 @@ function AccountRow({
   );
 }
 
+const STATUS_TONE: Record<string, string> = {
+  "en attente": "bg-amber-500/15 text-amber-300",
+  confirmée: "bg-emerald-500/15 text-emerald-300",
+  annulée: "bg-red-500/15 text-red-300",
+  "no-show": "bg-white/10 text-white/50",
+};
+
+function Overview({
+  accounts,
+  ledger,
+  settlements,
+  onOpenTab,
+}: {
+  accounts: Account[] | null;
+  ledger: LedgerRow[];
+  settlements: Settlement[];
+  onOpenTab: (t: Tab) => void;
+}) {
+  const now = currentPeriod();
+  const byRole = (role: string) => (accounts ?? []).filter((a) => a.role === role).length;
+  const thisMonth = ledger.filter((r) => r.period === now);
+  const due = ledger.filter(isDue);
+  const dueMonth = due.filter((r) => r.period === now);
+  const settledKeys = new Set(settlements.map((s) => `${s.period}|${s.venue_owner_id}|${s.hotel_id}`));
+  const remaining = due
+    .filter((r) => !(r.venue_owner_id && r.hotel_id && settledKeys.has(`${r.period}|${r.venue_owner_id}|${r.hotel_id}`)))
+    .reduce((s, r) => s + r.commission, 0);
+  const pending = ledger.filter((r) => r.status === "en attente").length;
+  const recent = [...ledger]
+    .sort((a, b) => (a.created_at < b.created_at ? 1 : -1))
+    .slice(0, 8);
+
+  const kpis = [
+    { label: "Comptes", value: String(accounts?.length ?? "…"), hint: `${byRole("etablissement")} établ. · ${byRole("hotel")} hôtels · ${byRole("concierge")} concierges`, icon: Users, tab: "accounts" as Tab },
+    { label: "Réservations ce mois", value: String(thisMonth.length), hint: `${ledger.length} au total · ${pending} en attente`, icon: CalendarDays, tab: "commissions" as Tab },
+    { label: "Commissions ce mois", value: mad(dueMonth.reduce((s, r) => s + r.commission, 0)), hint: `${mad(dueMonth.reduce((s, r) => s + (r.amount_spent ?? 0), 0))} dépensés`, icon: Coins, tab: "commissions" as Tab },
+    { label: "Restant à régler", value: mad(remaining), hint: "tous mois confondus", icon: Check, tab: "commissions" as Tab },
+  ];
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {kpis.map((k) => {
+          const Icon = k.icon;
+          return (
+            <button
+              key={k.label}
+              type="button"
+              onClick={() => onOpenTab(k.tab)}
+              className={`${panel} p-4 text-left transition-colors hover:bg-white/[0.06] sm:p-5`}
+            >
+              <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-xl bg-white/10">
+                <Icon size={16} className="text-blue-300" />
+              </div>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-white/45">{k.label}</p>
+              <p className="mt-1 text-2xl font-light text-white tabular-nums">{k.value}</p>
+              <p className="mt-0.5 text-[11px] text-white/40">{k.hint}</p>
+            </button>
+          );
+        })}
+      </div>
+
+      <div className={`${panel} p-5 sm:p-6`}>
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-semibold text-white">Dernières réservations</h2>
+            <p className="text-xs text-white/35">Toutes les demandes du réseau, les plus récentes en premier.</p>
+          </div>
+        </div>
+        {recent.length === 0 ? (
+          <p className="py-6 text-center text-sm text-white/35">Aucune réservation pour le moment.</p>
+        ) : (
+          <ul className="divide-y divide-white/[0.06]">
+            {recent.map((r) => (
+              <li key={r.id} className="flex items-center justify-between gap-3 py-3">
+                <div className="min-w-0">
+                  <p className="truncate text-sm text-white">
+                    {r.guest_name}
+                    <span className="text-white/45"> · {r.venue_name}</span>
+                    {r.service_name && <span className="text-blue-300/80"> · {r.service_name}</span>}
+                  </p>
+                  <p className="text-xs text-white/40">
+                    {new Date(`${r.reservation_date}T00:00:00`).toLocaleDateString("fr-FR")}
+                    {r.hotel_name ? ` · via ${r.hotel_name}` : r.source === "portal" ? " · portail" : " · maison"}
+                    {r.amount_spent !== null ? ` · ${mad(r.amount_spent)}` : ""}
+                  </p>
+                </div>
+                <span className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${STATUS_TONE[r.status] ?? "bg-white/10 text-white/60"}`}>
+                  {r.status}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function AdminPage() {
   const { isAdmin, isLoading, email, userId } = useAuthUser();
+  const [tab, setTab] = useState<Tab>("overview");
   const [accounts, setAccounts] = useState<Account[] | null>(null);
-  const [toast, setToast] = useState<{ kind: "ok" | "error"; msg: string } | null>(
-    null
-  );
+  const [ledger, setLedger] = useState<LedgerRow[] | null>(null);
+  const [settlements, setSettlements] = useState<Settlement[] | null>(null);
+  const [search, setSearch] = useState("");
+  const [toast, setToast] = useState<{ kind: "ok" | "error"; msg: string } | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
-  /* Vrai entre le clic sur Actualiser et la réponse : le bouton tourne,
-     puis un toast confirme. Sans cela, un rechargement qui rend les mêmes
-     chiffres ne se voit pas. */
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
@@ -361,16 +485,22 @@ export default function AdminPage() {
   useEffect(() => {
     if (isLoading || !isAdmin) return;
     let cancelled = false;
-    createClient()
-      .rpc("admin_account_overview")
-      .then(({ data, error }) => {
-        if (cancelled) return;
-        setAccounts((data ?? []) as Account[]);
-        setRefreshing((was) => {
-          if (was) setToast(error ? { kind: "error", msg: "Impossible d'actualiser" } : { kind: "ok", msg: "Données actualisées" });
-          return false;
-        });
+    const supabase = createClient();
+    Promise.all([
+      supabase.rpc("admin_account_overview"),
+      supabase.rpc("admin_commission_ledger"),
+      supabase.from("commission_settlements").select("id, period, venue_owner_id, hotel_id, amount, note, settled_at"),
+    ]).then(([acc, led, set]) => {
+      if (cancelled) return;
+      setAccounts((acc.data ?? []) as Account[]);
+      setLedger((led.data ?? []) as LedgerRow[]);
+      setSettlements((set.data ?? []) as Settlement[]);
+      const failed = acc.error || led.error || set.error;
+      setRefreshing((was) => {
+        if (was) setToast(failed ? { kind: "error", msg: "Impossible d'actualiser" } : { kind: "ok", msg: "Données actualisées" });
+        return false;
       });
+    });
     return () => {
       cancelled = true;
     };
@@ -388,19 +518,23 @@ export default function AdminPage() {
     },
     [reload]
   );
-  const notifyError = useCallback(
-    (msg: string) => setToast({ kind: "error", msg }),
-    []
+  const notifyError = useCallback((msg: string) => setToast({ kind: "error", msg }), []);
+
+  const q = search.trim().toLowerCase();
+  const filteredAccounts = useMemo(
+    () =>
+      (accounts ?? []).filter(
+        (a) =>
+          !q ||
+          a.email.toLowerCase().includes(q) ||
+          (a.venue_name ?? "").toLowerCase().includes(q) ||
+          (a.full_name ?? "").toLowerCase().includes(q) ||
+          (a.city ?? "").toLowerCase().includes(q)
+      ),
+    [accounts, q]
   );
 
-  /* Les messages sont comptés par expéditeur : les additionner donne le
-     total réel des échanges, sans double comptage. */
-  const totals = accounts
-    ? {
-        comptes: accounts.length,
-        messages: accounts.reduce((s, a) => s + a.message_count, 0),
-      }
-    : null;
+  const ready = !isLoading && isAdmin;
 
   return (
     <div className="min-h-screen bg-[#141210]">
@@ -410,60 +544,54 @@ export default function AdminPage() {
       />
       <div className="fixed inset-0 bg-black/60" />
 
-      <div className="relative z-10 mx-auto max-w-5xl space-y-6 p-4 lg:p-8">
-        {/* ── En-tête ── */}
-        <div className={`${panel} flex flex-wrap items-center justify-between gap-4 p-6`}>
+      <div className="relative z-10 mx-auto max-w-6xl space-y-4 p-4 lg:p-8">
+        {/* En-tête */}
+        <div className={`${panel} flex flex-wrap items-center justify-between gap-4 p-5 sm:p-6`}>
           <div className="flex items-center gap-4">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-500/20">
               <Shield size={22} className="text-blue-400" />
             </div>
             <div>
-              <h1 className="text-2xl font-extrabold text-white">
-                Administration
-              </h1>
+              <h1 className="text-2xl font-extrabold text-white">Administration</h1>
               <p className="text-sm text-white/40">
-                {totals
-                  ? `${totals.comptes} comptes · ${totals.messages} messages échangés`
-                  : "Tous les comptes de la plateforme"}
+                {accounts
+                  ? `${accounts.length} comptes · ${ledger?.length ?? 0} réservations sur le réseau`
+                  : "Le réseau twocards, vu d'en haut"}
               </p>
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-          {isAdmin && (
-            <button
-              onClick={refresh}
-              disabled={refreshing}
-              className="flex items-center gap-2 rounded-xl border border-white/[0.12] bg-white/[0.06] px-4 py-2.5 text-xs font-semibold text-white/70 transition-colors hover:bg-white/[0.12] hover:text-white disabled:opacity-60"
-            >
-              <RefreshCw size={14} className={refreshing ? "animate-spin" : ""} />
-              {refreshing ? "Actualisation…" : "Actualiser"}
-            </button>
-          )}
-          {email && (
-            <form action="/auth/signout" method="post">
+            {isAdmin && (
               <button
-                type="submit"
-                className="flex items-center gap-2 rounded-xl border border-white/[0.12] bg-white/[0.06] px-4 py-2.5 text-xs font-semibold text-white/70 transition-colors hover:border-red-400/30 hover:bg-red-500/15 hover:text-red-200"
+                onClick={refresh}
+                disabled={refreshing}
+                className="flex items-center gap-2 rounded-xl border border-white/[0.12] bg-white/[0.06] px-4 py-2.5 text-xs font-semibold text-white/70 transition-colors hover:bg-white/[0.12] hover:text-white disabled:opacity-60"
               >
-                <LogOut size={14} />
-                Déconnexion
+                <RefreshCw size={14} className={refreshing ? "animate-spin" : ""} />
+                {refreshing ? "Actualisation…" : "Actualiser"}
               </button>
-            </form>
-          )}
+            )}
+            {email && (
+              <form action="/auth/signout" method="post">
+                <button
+                  type="submit"
+                  className="flex items-center gap-2 rounded-xl border border-white/[0.12] bg-white/[0.06] px-4 py-2.5 text-xs font-semibold text-white/70 transition-colors hover:border-red-400/30 hover:bg-red-500/15 hover:text-red-200"
+                >
+                  <LogOut size={14} />
+                  Déconnexion
+                </button>
+              </form>
+            )}
           </div>
         </div>
 
-        {/* ── Gardes ── */}
+        {/* Gardes */}
         {isLoading && (
-          <div className={`${panel} p-10 text-center text-sm text-white/40`}>
-            Chargement…
-          </div>
+          <div className={`${panel} p-10 text-center text-sm text-white/40`}>Chargement…</div>
         )}
         {!isLoading && !isAdmin && (
           <div className={`${panel} p-10 text-center`}>
-            <p className="text-sm font-semibold text-white/70">
-              Accès réservé à l&apos;administrateur.
-            </p>
+            <p className="text-sm font-semibold text-white/70">Accès réservé à l&apos;administrateur.</p>
             <p className="mt-2 text-xs text-white/40">
               {email
                 ? `Le compte ${email} n'a pas le drapeau administrateur.`
@@ -478,71 +606,108 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* ── Catalogue des adresses proposées aux clients des hôtels ── */}
-        {!isLoading && isAdmin && (
+        {/* Onglets */}
+        {ready && (
+          <div className={`${panel} no-scrollbar flex gap-1 overflow-x-auto p-1.5`}>
+            {TABS.map((t) => {
+              const Icon = t.icon;
+              const active = tab === t.key;
+              return (
+                <button
+                  key={t.key}
+                  type="button"
+                  onClick={() => setTab(t.key)}
+                  className={`flex shrink-0 items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-semibold transition-colors ${
+                    active ? "bg-white text-black" : "text-white/60 hover:bg-white/10 hover:text-white"
+                  }`}
+                >
+                  <Icon size={15} strokeWidth={1.75} />
+                  {t.label}
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {ready && tab === "overview" && (
+          <Overview accounts={accounts} ledger={ledger ?? []} settlements={settlements ?? []} onOpenTab={setTab} />
+        )}
+
+        {ready && tab === "catalog" && (
           <CatalogAdmin userId={userId} panel={panel} onSaved={notifyOk} onError={notifyError} reloadKey={reloadKey} />
         )}
 
-        {/* ── Sections par type de dashboard ── */}
-        {!isLoading &&
-          isAdmin &&
-          SECTIONS.map((section) => {
-            const Icon = section.icon;
-            const rows = (accounts ?? []).filter((a) => a.role === section.role);
-            if (section.role === "admin" && rows.length === 0) return null;
-            return (
-              <div key={section.role} className={`${panel} p-6`}>
-                <div className="mb-4 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10">
-                      <Icon size={17} className="text-blue-300" />
-                    </div>
-                    <div>
-                      <h2 className="text-lg font-semibold text-white">
-                        {section.title}
-                      </h2>
-                      <p className="text-xs text-white/35">
-                        {accounts === null
-                          ? "Chargement…"
-                          : `${rows.length} compte${rows.length > 1 ? "s" : ""}`}
-                      </p>
-                    </div>
-                  </div>
-                  {section.role !== "admin" && (
-                    /* Balise <a> : /hotel peut ne pas exister dans l'arbre
-                       déployé, les routes typées feraient échouer le build. */
-                    <a
-                      href={section.home}
-                      className="flex items-center gap-1.5 rounded-lg border border-white/[0.12] bg-white/[0.06] px-3 py-2 text-[11px] font-semibold text-white/60 transition-colors hover:bg-white/[0.12] hover:text-white"
-                    >
-                      Ouvrir cet espace
-                      <ArrowUpRight size={12} />
-                    </a>
-                  )}
-                </div>
+        {ready && tab === "commissions" && (
+          ledger === null || settlements === null ? (
+            <div className={`${panel} p-10 text-center text-sm text-white/40`}>Chargement…</div>
+          ) : (
+            <CommissionsAdmin ledger={ledger} settlements={settlements} panel={panel} onChanged={notifyOk} onError={notifyError} />
+          )
+        )}
 
-                {accounts !== null && rows.length === 0 && (
-                  <p className="py-6 text-center text-sm text-white/35">
-                    Aucun compte de ce type.
-                  </p>
-                )}
-                <div className="space-y-2">
-                  {rows.map((a) => (
-                    <AccountRow
-                      key={`${a.id}-${a.role}-${a.venue_name}-${a.full_name}-${a.city}`}
-                      account={a}
-                      selfId={userId}
-                      onSaved={notifyOk}
-                      onError={notifyError}
-                    />
-                  ))}
-                </div>
+        {ready && tab === "accounts" && (
+          <>
+            <div className={`${panel} p-3`}>
+              <div className="relative">
+                <Search size={14} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-white/35" />
+                <input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Rechercher un compte : enseigne, e-mail, ville…"
+                  className={`${inputCls} pl-9`}
+                />
               </div>
-            );
-          })}
+            </div>
+            {SECTIONS.map((section) => {
+              const Icon = section.icon;
+              const rows = filteredAccounts.filter((a) => a.role === section.role);
+              if (section.role === "admin" && rows.length === 0) return null;
+              if (q && rows.length === 0) return null;
+              return (
+                <div key={section.role} className={`${panel} p-5 sm:p-6`}>
+                  <div className="mb-4 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10">
+                        <Icon size={17} className="text-blue-300" />
+                      </div>
+                      <div>
+                        <h2 className="text-lg font-semibold text-white">{section.title}</h2>
+                        <p className="text-xs text-white/35">
+                          {accounts === null ? "Chargement…" : `${rows.length} compte${rows.length > 1 ? "s" : ""}`}
+                        </p>
+                      </div>
+                    </div>
+                    {section.role !== "admin" && (
+                      <a
+                        href={section.home}
+                        className="flex items-center gap-1.5 rounded-lg border border-white/[0.12] bg-white/[0.06] px-3 py-2 text-[11px] font-semibold text-white/60 transition-colors hover:bg-white/[0.12] hover:text-white"
+                      >
+                        Ouvrir cet espace
+                        <ArrowUpRight size={12} />
+                      </a>
+                    )}
+                  </div>
+                  {accounts !== null && rows.length === 0 && (
+                    <p className="py-6 text-center text-sm text-white/35">Aucun compte de ce type.</p>
+                  )}
+                  <div className="space-y-2">
+                    {rows.map((a) => (
+                      <AccountRow
+                        key={`${a.id}-${a.role}-${a.venue_name}-${a.full_name}-${a.city}`}
+                        account={a}
+                        selfId={userId}
+                        onSaved={notifyOk}
+                        onError={notifyError}
+                      />
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </>
+        )}
       </div>
 
-      {/* ── Toast ── */}
       {toast && (
         <div
           className={`fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-xl border px-5 py-3 text-sm font-medium backdrop-blur-xl ${
@@ -551,11 +716,7 @@ export default function AdminPage() {
               : "border-red-400/30 bg-red-500/15 text-red-200"
           }`}
         >
-          {toast.kind === "ok" ? (
-            <Check size={16} className="text-blue-400" />
-          ) : (
-            <X size={16} />
-          )}
+          {toast.kind === "ok" ? <Check size={16} className="text-blue-400" /> : <X size={16} />}
           {toast.msg}
         </div>
       )}

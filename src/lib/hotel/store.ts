@@ -22,6 +22,10 @@ export type HotelQrCode = {
   active: boolean;
   scans: number;
   hidden_offers: string[];
+  /* Catégories entières retirées de ce QR (clubs, activités…), jusqu'à
+     hidden_until inclus ; sans date, sans limite. */
+  hidden_categories: string[];
+  hidden_until: string | null;
   created_at: string;
 };
 
@@ -220,7 +224,7 @@ function realtimeOn(table: string, channel: string) {
 
 /* ─── QR codes ─────────────────────────────────────────────────────────────── */
 
-const QR_SELECT = "id, label, code, active, scans, hidden_offers, created_at";
+const QR_SELECT = "id, label, code, active, scans, hidden_offers, hidden_categories, hidden_until, created_at";
 
 const qrStore = createStore<HotelQrCode[]>(async () => {
   const { data, error } = await createClient()
@@ -267,7 +271,7 @@ export function useHotelQrCodes() {
   }, []);
 
   const update = useCallback(
-    async (id: string, patch: Partial<Pick<HotelQrCode, "label" | "active" | "hidden_offers">>) => {
+    async (id: string, patch: Partial<Pick<HotelQrCode, "label" | "active" | "hidden_offers" | "hidden_categories" | "hidden_until">>) => {
       const { error } = await createClient()
         .from("hotel_qr_codes")
         .update(patch)

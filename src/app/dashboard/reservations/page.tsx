@@ -36,6 +36,22 @@ import {
   Minus,
 } from "lucide-react";
 
+/* Boutons d'action d'une réservation : lisibles au pouce, en salle, sans
+   avoir à deviner une icône. La couleur dit le sens — vert on accepte, rouge
+   on refuse, bleu le client est là. */
+const ACTION = {
+  confirm:
+    "font-ui inline-flex h-9 items-center gap-1.5 rounded-full bg-emerald-500 px-3.5 text-xs font-bold text-black transition-colors hover:bg-emerald-400",
+  refuse:
+    "font-ui inline-flex h-9 items-center gap-1.5 rounded-full border border-red-400/40 bg-red-500/10 px-3.5 text-xs font-bold text-red-200 transition-colors hover:bg-red-500/20",
+  arrive:
+    "font-ui inline-flex h-9 items-center gap-1.5 rounded-full bg-blue-500 px-3.5 text-xs font-bold text-white transition-colors hover:bg-blue-400",
+  ghost:
+    "font-ui inline-flex h-9 items-center gap-1.5 rounded-full border border-white/15 px-3 text-xs font-medium text-white/70 transition-colors hover:bg-white/10 hover:text-white",
+  icon:
+    "flex h-9 w-9 items-center justify-center rounded-full text-white/35 transition-colors hover:bg-red-500/15 hover:text-red-300",
+};
+
 const localISODate = () => {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
@@ -516,6 +532,11 @@ export default function VenueQrReservationsPage() {
                               QR hôtel
                             </span>
                           )}
+                          {r.source === "qr" && r.referrer_name && (
+                            <span className="font-ui ml-2 text-[11px] font-normal text-white/45">
+                              via {r.referrer_name}
+                            </span>
+                          )}
                         </p>
                         <p className="text-xs text-white/40 font-ui">
                           {r.guest_phone}
@@ -681,55 +702,64 @@ export default function VenueQrReservationsPage() {
                         )}
                       </td>
                       <td data-actions className="px-4 py-3 whitespace-nowrap">
-                        <div className="flex items-center gap-1">
+                        <div className="flex flex-wrap items-center justify-end gap-1.5">
                           {isOut(r) ? (
                             <button
                               onClick={() => setStatus(r, "confirmée")}
-                              title="Rétablir la réservation"
                               aria-label={`Rétablir la réservation de ${r.guest_name}`}
-                              className="flex h-7 w-7 items-center justify-center rounded-lg text-white/30 hover:bg-white/10 hover:text-white transition-colors"
+                              className={ACTION.ghost}
                             >
-                              <RotateCcw size={13} strokeWidth={1.5} />
+                              <RotateCcw size={13} strokeWidth={1.75} />
+                              Rétablir
                             </button>
+                          ) : r.status === "en attente" ? (
+                            <>
+                              <button
+                                onClick={() => setStatus(r, "confirmée")}
+                                aria-label={`Confirmer la réservation de ${r.guest_name}`}
+                                className={ACTION.confirm}
+                              >
+                                <Check size={14} strokeWidth={2.5} />
+                                Confirmer
+                              </button>
+                              <button
+                                onClick={() => setStatus(r, "annulée")}
+                                aria-label={`Refuser la réservation de ${r.guest_name}`}
+                                className={ACTION.refuse}
+                              >
+                                <XCircle size={14} strokeWidth={2} />
+                                Refuser
+                              </button>
+                            </>
                           ) : (
                             <>
-                              {r.status === "en attente" && (
-                                <button
-                                  onClick={() => setStatus(r, "confirmée")}
-                                  title="Confirmer"
-                                  aria-label={`Confirmer la réservation de ${r.guest_name}`}
-                                  className="flex h-7 w-7 items-center justify-center rounded-lg text-emerald-400/60 hover:bg-emerald-500/15 hover:text-emerald-400 transition-colors"
-                                >
-                                  <Check size={14} strokeWidth={2} />
-                                </button>
-                              )}
                               {!r.arrived_at && (
                                 <button
                                   onClick={() => checkIn(r)}
-                                  title="Check-in, le client est arrivé"
                                   aria-label={`Check-in de ${r.guest_name}`}
-                                  className="flex h-7 w-7 items-center justify-center rounded-lg text-blue-400/60 hover:bg-blue-500/15 hover:text-blue-400 transition-colors"
+                                  className={ACTION.arrive}
                                 >
-                                  <LogIn size={13} strokeWidth={1.5} />
+                                  <LogIn size={14} strokeWidth={2} />
+                                  Client arrivé
                                 </button>
                               )}
                               {!r.arrived_at && (
                                 <button
                                   onClick={() => setStatus(r, "no-show")}
-                                  title="No-show, le client n'est pas venu"
                                   aria-label={`No-show pour ${r.guest_name}`}
-                                  className="flex h-7 w-7 items-center justify-center rounded-lg text-white/30 hover:bg-white/10 hover:text-white transition-colors"
+                                  className={ACTION.ghost}
                                 >
-                                  <UserX size={13} strokeWidth={1.5} />
+                                  <UserX size={13} strokeWidth={1.75} />
+                                  No-show
                                 </button>
                               )}
                               <button
                                 onClick={() => setStatus(r, "annulée")}
                                 title="Annuler la réservation"
                                 aria-label={`Annuler la réservation de ${r.guest_name}`}
-                                className="flex h-7 w-7 items-center justify-center rounded-lg text-white/30 hover:bg-red-500/15 hover:text-red-400 transition-colors"
+                                className={ACTION.icon}
                               >
-                                <XCircle size={13} strokeWidth={1.5} />
+                                <XCircle size={15} strokeWidth={1.75} />
                               </button>
                             </>
                           )}

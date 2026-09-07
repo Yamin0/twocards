@@ -124,6 +124,7 @@ export function GuestExperience({
     showPrices: true,
   });
   const [hidden, setHidden] = useState<string[]>([]);
+  const [hiddenCategories, setHiddenCategories] = useState<string[]>([]);
   /* Catalogue du réseau et adresses maison de l'hôtel, livrés avec le menu. */
   const [catalog, setCatalog] = useState<OfferRow[]>([]);
   const [hotelOffers, setHotelOffers] = useState<OfferRow[]>([]);
@@ -149,6 +150,7 @@ export function GuestExperience({
             return;
           }
           setHidden(row.hidden_offers ?? []);
+          setHiddenCategories(Array.isArray(row.hidden_categories) ? (row.hidden_categories as string[]) : []);
           setCatalog(Array.isArray(row.catalog) ? (row.catalog as OfferRow[]) : []);
           setHotelOffers(Array.isArray(row.hotel_offers) ? (row.hotel_offers as OfferRow[]) : []);
           setCategoryImages(
@@ -179,8 +181,8 @@ export function GuestExperience({
   }, [code, fallbackHotelName, fallbackCity, preview]);
 
   const menu = useMemo(
-    () => buildGuestMenu({ city: info.city, hidden, catalog, hotelOffers, categoryImages }),
-    [info.city, hidden, catalog, hotelOffers, categoryImages]
+    () => buildGuestMenu({ city: info.city, hidden, catalog, hotelOffers, categoryImages, hiddenCategories }),
+    [info.city, hidden, catalog, hotelOffers, categoryImages, hiddenCategories]
   );
   const total = menu.reduce((s, c) => s + c.offers.length, 0);
   const q = search.trim().toLowerCase();
