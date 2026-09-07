@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar'
-import { useEffect, useId, useRef, useState } from 'react'
+import { useEffect, useId, useState } from 'react'
 import {
   ActivityIndicator,
   Linking,
@@ -11,32 +11,25 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { WebView, type WebViewNavigation } from 'react-native-webview'
 
-import { useAuth } from '@/lib/auth-context'
-import { clearSitePath, usePendingSitePath } from '@/lib/deep-link'
-import { SHELL_BG, SITE_URL, sitePath, tabIndexForPath } from '@/lib/site'
+import { Light } from '@/constants/theme'
+import { SITE_URL, sitePath } from '@/lib/site'
 import { useWebSession } from '@/lib/web-session'
 
-/* Une page du site, dans la coque native. `path` est le chemin de départ ;
-   la navigation interne du site (menu, liens) reste libre à l'intérieur. */
+/* Une page du site, dans la coque native. Le site reconnaît l'app à son
+   agent utilisateur et s'affiche en clair, sans sa propre navigation :
+   c'est l'app qui la porte. */
 export function SiteWebView({
   path,
-  tabIndex,
   inset = true,
 }: {
   path: string
-  tabIndex: number
   /* Faux quand l'écran parent gère déjà la zone de la barre d'état. */
   inset?: boolean
 }) {
   const ws = useWebSession()
   const { register, unregister } = ws
-  const { tabRole } = useAuth()
   const key = useId()
-
   const [uri, setUri] = useState<string | null>(null)
-  const webRef = useRef<WebView>(null)
-  /* Page réellement affichée, pour ne pas recharger une page déjà ouverte. */
-  const shownRef = useRef<string | null>(null)
 
   /* Candidature au rôle de propriétaire du jeton : la première WebView
      affichée l'obtient et passe par la passerelle, les autres attendent. */
@@ -47,10 +40,10 @@ export function SiteWebView({
 
   const isOwner = ws.owner === key
 
-  /* Page de départ de l'onglet, figée dès qu'elle est connue : la
-     propriétaire passe par la passerelle, les autres attendent que la
-     session web soit posée. Changer cette adresse plus tard ferait
-     recharger la WebView sous les doigts de l'utilisateur. */
+  /* Page de départ, figée dès qu'elle est connue : la propriétaire passe
+     par la passerelle, les autres attendent que la session web soit posée.
+     Changer cette adresse plus tard ferait recharger la WebView sous les
+     doigts de l'utilisateur. */
   const first = isOwner
     ? ws.bridgeUrl(path)
     : ws.ready
@@ -60,34 +53,16 @@ export function SiteWebView({
     setUri(first)
   }
 
-  /* Notification touchée : la cible revient à l'onglet qui la couvre. */
-  const pending = usePendingSitePath()
-  const mine =
-    pending !== null && Math.max(0, tabIndexForPath(tabRole, pending)) === tabIndex
-
-  /* On attend que la session web soit établie : déplacer la WebView
-     pendant que la passerelle pose les cookies annulerait celle-ci. */
-  useEffect(() => {
-    if (!mine || pending === null || !ws.ready) return
-    if (shownRef.current !== pending) {
-      webRef.current?.injectJavaScript(
-        `window.location.href = ${JSON.stringify(SITE_URL + pending)}; true;`
-      )
-    }
-    clearSitePath()
-  }, [mine, pending, ws.ready])
-
   const onNavigationStateChange = (nav: WebViewNavigation) => {
     const pathname = sitePath(nav.url)
     if (!pathname) return
-    shownRef.current = pathname
 
     if (pathname === '/login') {
       if (isOwner && !ws.ready) {
         /* Le jeton n'a pas été accepté : on en demande un autre. */
         ws.retry()
       } else {
-        /* Déconnexion depuis le menu du site : l'app suit. */
+        /* Déconnexion depuis le site : l'app suit. */
         ws.loggedOut()
       }
       return
@@ -115,7 +90,7 @@ export function SiteWebView({
     return (
       <Shell inset={inset}>
         <View style={styles.center}>
-          <ActivityIndicator color="#ffffff" />
+          <ActivityIndicator color={Light.accent} />
         </View>
       </Shell>
     )
@@ -124,7 +99,6 @@ export function SiteWebView({
   return (
     <Shell inset={inset}>
       <WebView
-        ref={webRef}
         source={{ uri }}
         style={styles.web}
         onNavigationStateChange={onNavigationStateChange}
@@ -147,7 +121,7 @@ export function SiteWebView({
         startInLoadingState
         renderLoading={() => (
           <View style={[styles.center, StyleSheet.absoluteFill]}>
-            <ActivityIndicator color="#ffffff" />
+            <ActivityIndicator color={Light.accent} />
           </View>
         )}
         renderError={() => (
@@ -165,7 +139,7 @@ export function SiteWebView({
 function Shell({ children, inset }: { children: React.ReactNode; inset: boolean }) {
   return (
     <SafeAreaView style={styles.safe} edges={inset ? ['top'] : []}>
-      {inset && <StatusBar style="light" />}
+      {inset && <StatusBar style="dark" />}
       {children}
     </SafeAreaView>
   )
@@ -174,11 +148,11 @@ function Shell({ children, inset }: { children: React.ReactNode; inset: boolean 
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: SHELL_BG,
+    backgroundColor: Light.bg,
   },
   web: {
     flex: 1,
-    backgroundColor: SHELL_BG,
+    backgroundColor: Light.bg,
   },
   center: {
     flex: 1,
@@ -186,23 +160,24 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 24,
     gap: 16,
-    backgroundColor: SHELL_BG,
+    backgroundColor: Light.bg,
   },
   errorText: {
-    color: 'rgba(255,255,255,0.7)',
+    color: Light.muted,
     fontSize: 14,
     textAlign: 'center',
     lineHeight: 20,
   },
   retry: {
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.25)',
+    borderColor: Light.line,
+    backgroundColor: Light.card,
     borderRadius: 999,
     paddingHorizontal: 20,
     paddingVertical: 10,
   },
   retryText: {
-    color: '#ffffff',
+    color: Light.ink,
     fontSize: 14,
     fontWeight: '600',
   },

@@ -27,7 +27,7 @@ export default function WebScreen() {
         </Text>
         <View style={styles.back} />
       </View>
-      <SiteWebView path={target} tabIndex={-1} inset={false} />
+      <SiteWebView path={target} inset={false} />
     </SafeAreaView>
   )
 }

@@ -47,11 +47,14 @@ export function Kpi({
   value,
   hint,
   tone = 'default',
+  onPress,
 }: {
   label: string
   value: string
   hint?: string
   tone?: 'default' | 'accent' | 'warning' | 'success'
+  /* Chaque chiffre mène quelque part : la liste qu'il résume. */
+  onPress?: () => void
 }) {
   const color =
     tone === 'accent'
@@ -62,13 +65,16 @@ export function Kpi({
           ? Light.success
           : Light.ink
   return (
-    <View style={[styles.card, styles.kpi]}>
+    <Pressable
+      onPress={onPress}
+      disabled={!onPress}
+      style={({ pressed }) => [styles.card, styles.kpi, pressed && styles.pressed]}>
       <Text style={styles.kpiLabel}>{label}</Text>
       <Text style={[styles.kpiValue, { color }]} numberOfLines={1} adjustsFontSizeToFit>
         {value}
       </Text>
-      {hint ? <Text style={styles.kpiHint}>{hint}</Text> : null}
-    </View>
+      <Text style={styles.kpiHint}>{hint ?? (onPress ? 'Voir ›' : ' ')}</Text>
+    </Pressable>
   )
 }
 
@@ -204,6 +210,9 @@ const styles = StyleSheet.create({
     flex: 1,
     minHeight: 92,
     justifyContent: 'space-between',
+  },
+  pressed: {
+    opacity: 0.7,
   },
   kpiLabel: {
     fontSize: 12,

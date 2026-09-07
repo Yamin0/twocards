@@ -3,15 +3,14 @@ import { useRouter } from 'expo-router'
 import { useEffect } from 'react'
 
 import { useAuth } from '@/lib/auth-context'
-import { openSitePath } from '@/lib/deep-link'
 import { registerPush } from '@/lib/push'
-import { isVenueTabRole, TAB_HREFS, tabIndexForPath, WEB_PAGES } from '@/lib/site'
+import { roleTabs, WEB_PAGES } from '@/lib/site'
 
 /* Fait le lien entre les notifications du système et la navigation.
 
    À la connexion, ce téléphone s'enregistre auprès du compte. Quand une
-   notification est touchée, l'app bascule sur l'onglet qui couvre la page
-   visée et la lui transmet. */
+   notification est touchée, l'app ouvre l'onglet Réservations ou Accueil
+   si la page visée est la leur, sinon la page du site par-dessus. */
 export function PushBridge() {
   const { session, tabRole } = useAuth()
   const router = useRouter()
@@ -31,17 +30,14 @@ export function PushBridge() {
     const handle = (response: Notifications.NotificationResponse) => {
       const url = response.notification.request.content.data?.url
       if (typeof url !== 'string' || !url.startsWith('/')) return
-      if (isVenueTabRole(tabRole)) {
-        /* Écrans natifs : réservations et accueil ont leur onglet, le reste
-           s'ouvre dans l'app par-dessus. */
-        if (url.startsWith('/dashboard/reservations')) router.navigate('/reservations')
-        else if (url === '/dashboard') router.navigate('/')
-        else router.push({ pathname: '/web', params: { path: url, title: WEB_PAGES[url] ?? '' } })
-        return
+      const tabs = roleTabs[tabRole]
+      if (tabs.reservations && url.startsWith(tabs.reservations)) {
+        router.navigate({ pathname: '/reservations', params: { filter: 'pending', t: String(Date.now()) } })
+      } else if (url === tabs.home) {
+        router.navigate('/')
+      } else {
+        router.push({ pathname: '/web', params: { path: url, title: WEB_PAGES[url] ?? '' } })
       }
-      openSitePath(url)
-      const index = tabIndexForPath(tabRole, url)
-      router.navigate(TAB_HREFS[index < 0 ? 0 : index])
     }
 
     /* Notification qui a réveillé l'app : elle attend d'être relevée, et

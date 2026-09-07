@@ -43,6 +43,9 @@ export function VenueHome() {
 
   const openWeb = (path: string) =>
     router.push({ pathname: '/web', params: { path, title: WEB_PAGES[path] ?? '' } })
+  /* Chaque chiffre mène à la liste qu'il résume, filtrée. */
+  const openReservations = (filter: 'pending' | 'today' | 'upcoming' | 'past' | 'all') =>
+    router.navigate({ pathname: '/reservations', params: { filter, t: String(Date.now()) } })
 
   if (loading || rows === null) {
     return (
@@ -108,43 +111,56 @@ export function VenueHome() {
           </Pressable>
         </View>
 
-        {/* Aujourd'hui */}
-        <Card style={styles.todayCard}>
-          <Text style={styles.todayLabel}>{activity ? "Aujourd'hui" : 'Ce soir'}</Text>
-          <Text style={styles.todayValue}>
-            {today.length} réservation{today.length > 1 ? 's' : ''}
-            <Text style={styles.todayMuted}>
-              {' '}· {todayPeople} {activity ? 'participant' : 'couvert'}
-              {todayPeople > 1 ? 's' : ''}
-            </Text>
-          </Text>
-        </Card>
+        {/* Aujourd'hui → la liste du jour */}
+        <Pressable onPress={() => openReservations('today')} style={({ pressed }) => [pressed && styles.pressed]}>
+          <Card style={styles.todayCard}>
+            <View style={styles.todayRow}>
+              <View style={styles.todayText}>
+                <Text style={styles.todayLabel}>{activity ? "Aujourd'hui" : 'Ce soir'}</Text>
+                <Text style={styles.todayValue}>
+                  {today.length} réservation{today.length > 1 ? 's' : ''}
+                  <Text style={styles.todayMuted}>
+                    {' '}· {todayPeople} {activity ? 'participant' : 'couvert'}
+                    {todayPeople > 1 ? 's' : ''}
+                  </Text>
+                </Text>
+              </View>
+              <Text style={styles.todayChevron}>›</Text>
+            </View>
+          </Card>
+        </Pressable>
 
-        {/* KPI */}
+        {/* KPI, chacun cliquable */}
         <View style={styles.kpiRow}>
-          <Kpi label="Réservations du mois" value={String(thisMonth.length)} hint={`${rows.length} au total`} />
+          <Kpi
+            label="Réservations du mois"
+            value={String(thisMonth.length)}
+            hint={`${rows.length} au total ›`}
+            onPress={() => openReservations('all')}
+          />
           <Kpi
             label="En attente"
             value={String(pending.length)}
-            hint={pending.length > 0 ? 'à confirmer' : 'rien à traiter'}
+            hint={pending.length > 0 ? 'à confirmer ›' : 'rien à traiter ›'}
             tone={pending.length > 0 ? 'warning' : 'success'}
+            onPress={() => openReservations('pending')}
           />
         </View>
         <View style={styles.kpiRow}>
-          <Kpi label="CA apporté" value={mad(revenue)} hint="additions saisies" tone="accent" />
-          <Kpi label="Commissions du mois" value={mad(commissionsMonth)} hint="à reverser" />
+          <Kpi label="CA apporté" value={mad(revenue)} hint="additions saisies ›" tone="accent" onPress={() => openWeb('/dashboard/analytics')} />
+          <Kpi label="Commissions du mois" value={mad(commissionsMonth)} hint="à reverser ›" onPress={() => openWeb('/dashboard/commissions')} />
         </View>
 
-        {/* Rythme */}
+        {/* Rythme → toutes les réservations */}
         <Card>
           <View style={styles.chartHead}>
-            <View>
-              <Text style={styles.chartTitle}>Demandes reçues</Text>
+            <Pressable onPress={() => openReservations('all')} hitSlop={8}>
+              <Text style={styles.chartTitle}>Demandes reçues ›</Text>
               <Text style={styles.chartValue}>
                 {chartTotal}
                 <Text style={styles.chartUnit}> sur {range === 'week' ? '7 jours' : '6 mois'}</Text>
               </Text>
-            </View>
+            </Pressable>
             <View style={styles.segment}>
               {(['week', 'month'] as const).map((k) => (
                 <Pressable
@@ -166,7 +182,7 @@ export function VenueHome() {
           <SectionTitle
             title="À traiter"
             action={pending.length > 0 ? 'Tout voir' : undefined}
-            onAction={() => router.navigate('/reservations')}
+            onAction={() => openReservations('pending')}
           />
           {pending.length === 0 ? (
             <Card>
@@ -282,6 +298,20 @@ const styles = StyleSheet.create({
   },
   todayCard: {
     backgroundColor: Light.ink,
+  },
+  todayRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  todayText: {
+    flex: 1,
+    minWidth: 0,
+  },
+  todayChevron: {
+    fontSize: 26,
+    color: 'rgba(255,255,255,0.5)',
+    marginTop: -2,
   },
   todayLabel: {
     fontSize: 12,

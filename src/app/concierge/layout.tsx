@@ -137,18 +137,18 @@ export default function ConciergeLayout({
   const badges = { "/concierge/messages": unreadMessages };
 
   return (
-    <div className="min-h-screen lg:h-screen relative lg:overflow-hidden bg-[#141210]">
+    <div className="tc-shell min-h-screen lg:h-screen relative lg:overflow-hidden bg-[#141210]">
       {/* Fond photo : vue aérienne sable / océan (public/dashboard-bg-ocean.jpg).
          Photo claire (sable, écume) sous du texte blanc : un flou léger (4 px) sur la
          photo garde l'image reconnaissable ; le backdrop-blur des panneaux lisse
          le reste sous le texte, et le voile à 55 % ramène la luminance
          sous le texte. Le scale compense les bords éclaircis par le flou. */}
       <div
-        className="fixed inset-0 scale-105 bg-cover bg-center blur-sm"
+        className="tc-app-bg fixed inset-0 scale-105 bg-cover bg-center blur-sm"
         style={{ backgroundImage: "url(/dashboard-bg-ocean.jpg)" }}
       />
-      <div className="fixed inset-0 bg-black/55" />
-      <div className="fixed inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/40" />
+      <div className="tc-app-bg fixed inset-0 bg-black/55" />
+      <div className="tc-app-bg fixed inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/40" />
 
       <div className="relative z-10 p-4 lg:p-6 grid grid-cols-12 gap-4 lg:gap-6 lg:h-screen">
         {/* Mobile top bar */}

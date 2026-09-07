@@ -1,6 +1,3 @@
-import type { NativeTabs } from 'expo-router/unstable-native-tabs'
-import type { ComponentProps } from 'react'
-
 /* Le site twocards, dont l'app affiche les dashboards. Adresse canonique :
    twocardspro.com redirige vers www, autant partir directement dessus pour
    éviter une redirection à chaque chargement. */
@@ -30,9 +27,9 @@ export function sitePath(url: string): string | null {
 
 export type Role = 'etablissement' | 'hotel' | 'concierge' | 'admin'
 
-/* Jeu d'onglets. Un établissement d'activité ou de service (quad, hammam,
-   chauffeur…) reste un « etablissement » pour le site, mais ses onglets
-   montrent ses prestations à la place du reste. */
+/* Jeu d'écrans. Un établissement d'activité ou de service (quad, hammam,
+   chauffeur…) reste un « etablissement » pour le site, mais son menu montre
+   ses prestations à la place du plan de salle. */
 export type TabRole = Role | 'activite'
 
 export const roleLabels: Record<Role, string> = {
@@ -50,170 +47,28 @@ export const roleHome: Record<Role, string> = {
   admin: '/admin',
 }
 
-/* Les props de l'icône sont une union d'intersections ; on en extrait les
-   variantes SF Symbols (iOS) et Material (Android), noms vérifiés par les
-   types. */
-type IconProps = ComponentProps<typeof NativeTabs.Trigger.Icon>
-type SfIcon = NonNullable<Extract<IconProps, { sf?: unknown }>['sf']>
-type MdIcon = NonNullable<Extract<IconProps, { md?: unknown }>['md']>
-
-/* Compteur affiché en pastille sur l'onglet, quand il y en a un. */
+/* Compteurs affichés en pastille sur les onglets. */
 export type BadgeKind = 'reservations' | 'messages'
 
-export type TabSpec = {
-  label: string
-  path: string
-  sf: SfIcon
-  md: MdIcon
-  badge?: BadgeKind
-}
-
-/* Quatre onglets par rôle, puis le profil natif. Le reste des sections reste
-   accessible par le menu du site, à l'intérieur de la WebView. */
-export const roleTabs: Record<TabRole, [TabSpec, TabSpec, TabSpec, TabSpec]> = {
-  etablissement: [
-    {
-      label: 'Accueil',
-      path: '/dashboard',
-      sf: { default: 'house', selected: 'house.fill' },
-      md: 'home',
-    },
-    {
-      label: 'Réservations',
-      path: '/dashboard/reservations',
-      sf: { default: 'calendar', selected: 'calendar' },
-      md: 'event',
-      badge: 'reservations',
-    },
-    {
-      label: 'Messages',
-      path: '/dashboard/messages',
-      sf: { default: 'bubble.left', selected: 'bubble.left.fill' },
-      md: 'chat',
-      badge: 'messages',
-    },
-    {
-      label: 'Plus',
-      path: '/dashboard/plus',
-      sf: { default: 'ellipsis.circle', selected: 'ellipsis.circle.fill' },
-      md: 'more_horiz',
-    },
-  ],
-  activite: [
-    {
-      label: 'Accueil',
-      path: '/dashboard',
-      sf: { default: 'house', selected: 'house.fill' },
-      md: 'home',
-    },
-    {
-      label: 'Réservations',
-      path: '/dashboard/reservations',
-      sf: { default: 'calendar', selected: 'calendar' },
-      md: 'event',
-      badge: 'reservations',
-    },
-    {
-      label: 'Prestations',
-      path: '/dashboard/prestations',
-      sf: { default: 'tag', selected: 'tag.fill' },
-      md: 'sell',
-    },
-    {
-      label: 'Messages',
-      path: '/dashboard/messages',
-      sf: { default: 'bubble.left', selected: 'bubble.left.fill' },
-      md: 'chat',
-      badge: 'messages',
-    },
-  ],
-  hotel: [
-    {
-      label: 'Accueil',
-      path: '/hotel',
-      sf: { default: 'house', selected: 'house.fill' },
-      md: 'home',
-    },
-    {
-      label: 'Réservations',
-      path: '/hotel/reservations',
-      sf: { default: 'calendar', selected: 'calendar' },
-      md: 'event',
-      badge: 'reservations',
-    },
-    {
-      label: 'Chambres',
-      path: '/hotel/chambres',
-      sf: { default: 'qrcode', selected: 'qrcode' },
-      md: 'qr_code',
-    },
-    {
-      label: 'Adresses',
-      path: '/hotel/adresses',
-      sf: { default: 'mappin.and.ellipse', selected: 'mappin.and.ellipse' },
-      md: 'place',
-    },
-  ],
-  concierge: [
-    {
-      label: 'Accueil',
-      path: '/concierge',
-      sf: { default: 'house', selected: 'house.fill' },
-      md: 'home',
-    },
-    {
-      label: 'Calendrier',
-      path: '/concierge/reservations',
-      sf: { default: 'calendar', selected: 'calendar' },
-      md: 'event',
-    },
-    {
-      label: 'Lieux',
-      path: '/concierge/venues',
-      sf: { default: 'building.2', selected: 'building.2.fill' },
-      md: 'apartment',
-    },
-    {
-      label: 'Messages',
-      path: '/concierge/messages',
-      sf: { default: 'bubble.left', selected: 'bubble.left.fill' },
-      md: 'chat',
-      badge: 'messages',
-    },
-  ],
-  admin: [
-    {
-      label: 'Admin',
-      path: '/admin',
-      sf: { default: 'shield', selected: 'shield.fill' },
-      md: 'shield',
-    },
-    {
-      label: 'Établissement',
-      path: '/dashboard',
-      sf: { default: 'fork.knife', selected: 'fork.knife' },
-      md: 'restaurant',
-    },
-    {
-      label: 'Hôtel',
-      path: '/hotel',
-      sf: { default: 'bed.double', selected: 'bed.double.fill' },
-      md: 'hotel',
-    },
-    {
-      label: 'Concierge',
-      path: '/concierge',
-      sf: { default: 'person.2', selected: 'person.2.fill' },
-      md: 'groups',
-    },
-  ],
-}
-
-/* L'établissement a ses écrans natifs ; les pages secondaires du site
-   s'ouvrent depuis le menu, sous ces titres. */
+/* L'établissement a ses écrans natifs ; les autres rôles affichent le
+   site, en clair, dans les mêmes onglets. */
 export const isVenueTabRole = (r: TabRole) => r === 'etablissement' || r === 'activite'
 
+/* Trois onglets pour tout le monde : Réservations, Accueil, Menu. Chaque
+   rôle indique la page du site derrière les deux premiers ; l'admin n'a
+   pas de réservations. */
+export const roleTabs: Record<TabRole, { home: string; reservations: string | null }> = {
+  etablissement: { home: '/dashboard', reservations: '/dashboard/reservations' },
+  activite: { home: '/dashboard', reservations: '/dashboard/reservations' },
+  hotel: { home: '/hotel', reservations: '/hotel/reservations' },
+  concierge: { home: '/concierge', reservations: '/concierge/reservations' },
+  admin: { home: '/admin', reservations: null },
+}
+
+/* Titres des pages du site ouvertes dans l'app. */
 export const WEB_PAGES: Record<string, string> = {
+  '/dashboard': 'Accueil',
+  '/dashboard/reservations': 'Réservations',
   '/dashboard/messages': 'Messages',
   '/dashboard/commissions': 'Commissions',
   '/dashboard/network': 'Réseau apporteurs',
@@ -228,29 +83,131 @@ export const WEB_PAGES: Record<string, string> = {
   '/dashboard/notifications': 'Notifications',
   '/dashboard/help': 'Aide',
   '/dashboard/plus': 'Plus',
-  '/dashboard/reservations': 'Réservations',
-  '/dashboard': 'Accueil',
+  '/hotel': 'Accueil',
+  '/hotel/reservations': 'Réservations',
+  '/hotel/chambres': 'Chambres & QR codes',
+  '/hotel/adresses': 'Mes adresses',
+  '/hotel/clients': 'Clients',
+  '/hotel/commissions': 'Commissions',
+  '/hotel/analyses': 'Analyses',
+  '/hotel/settings': 'Paramètres',
+  '/hotel/aide': 'Aide',
+  '/concierge': 'Accueil',
+  '/concierge/reservations': 'Calendrier',
+  '/concierge/clients': 'CRM Clients',
+  '/concierge/commissions': 'Commissions',
+  '/concierge/stats': 'Statistiques',
+  '/concierge/messages': 'Messages',
+  '/concierge/venues': 'Établissements',
+  '/concierge/ai': 'Assistant IA',
+  '/concierge/settings': 'Paramètres',
+  '/admin': 'Administration',
 }
 
-/* Adresses des quatre premiers onglets, dans l'ordre de roleTabs. */
-export const TAB_HREFS = ['/', '/slot-2', '/slot-3', '/slot-4'] as const
+/* Le menu (troisième onglet) : chaque section, avec son émoticône. */
+export type HubItem = { emoji: string; label: string; hint: string; path: string }
+export type HubGroup = { title: string; items: HubItem[] }
 
-/* Onglet auquel appartient une page du site — le préfixe le plus long
-   gagne, sans quoi « /dashboard/reservations » tomberait sur l'accueil.
-   Renvoie -1 quand aucun onglet ne couvre la page. */
-export function tabIndexForPath(role: TabRole, path: string): number {
-  let best = -1
-  let bestLength = 0
-  roleTabs[role].forEach((tab, i) => {
-    const matches = path === tab.path || path.startsWith(`${tab.path}/`)
-    if (matches && tab.path.length > bestLength) {
-      best = i
-      bestLength = tab.path.length
-    }
-  })
-  return best
+const VENUE_ACTIVITY: HubGroup = {
+  title: 'Activité',
+  items: [
+    { emoji: '💬', label: 'Messages', hint: 'Hôtels et concierges', path: '/dashboard/messages' },
+    { emoji: '💰', label: 'Commissions', hint: 'À régler ce mois, historique par hôtel', path: '/dashboard/commissions' },
+    { emoji: '🏨', label: 'Réseau apporteurs', hint: 'Quels hôtels vous envoient des clients', path: '/dashboard/network' },
+    { emoji: '📊', label: 'Analyses', hint: 'Volumes, panier moyen, tendances', path: '/dashboard/analytics' },
+    { emoji: '👥', label: 'Clients', hint: 'Historique et fidélité', path: '/dashboard/guests' },
+  ],
 }
 
-/* Fond des dashboards du site (coque sombre, photo océan voilée). La zone
-   de la barre d'état reprend cette couleur pour se fondre dans la page. */
+const VENUE_ACCOUNT: HubGroup = {
+  title: 'Compte',
+  items: [
+    { emoji: '⚙️', label: 'Paramètres', hint: 'Profil, établissement, sécurité', path: '/dashboard/settings' },
+    { emoji: '🔔', label: 'Notifications', hint: "Tout ce qui s'est passé, dans l'ordre", path: '/dashboard/notifications' },
+    { emoji: '❓', label: 'Aide', hint: 'Guides et contact', path: '/dashboard/help' },
+  ],
+}
+
+export const HUB: Record<TabRole, HubGroup[]> = {
+  etablissement: [
+    VENUE_ACTIVITY,
+    {
+      title: 'Outils',
+      items: [
+        { emoji: '🌐', label: 'Portail de réservation', hint: 'Votre page de réservation directe, sans commission', path: '/dashboard/portal' },
+        { emoji: '🎉', label: 'Événements', hint: 'Soirées et programmation', path: '/dashboard/events' },
+        { emoji: '🪑', label: 'Plan de salle', hint: 'Vos tables et leur occupation', path: '/dashboard/floor-plan' },
+        { emoji: '💳', label: 'Caisse (POS)', hint: 'Rapprochement automatique des tickets', path: '/dashboard/integrations' },
+      ],
+    },
+    VENUE_ACCOUNT,
+  ],
+  activite: [
+    {
+      title: 'Activité',
+      items: [
+        { emoji: '🏷️', label: 'Prestations', hint: 'Ce que vos clients réservent, visible sur le menu', path: '/dashboard/prestations' },
+        ...VENUE_ACTIVITY.items,
+      ],
+    },
+    {
+      title: 'Outils',
+      items: [
+        { emoji: '🌐', label: 'Portail de réservation', hint: 'Votre page de réservation directe, sans commission', path: '/dashboard/portal' },
+      ],
+    },
+    VENUE_ACCOUNT,
+  ],
+  hotel: [
+    {
+      title: 'Activité',
+      items: [
+        { emoji: '🛏️', label: 'Chambres & QR codes', hint: 'Un QR par chambre, le menu de chacun', path: '/hotel/chambres' },
+        { emoji: '📍', label: 'Mes adresses', hint: 'Vos adresses maison sur le menu', path: '/hotel/adresses' },
+        { emoji: '👥', label: 'Clients', hint: 'Qui a réservé quoi', path: '/hotel/clients' },
+        { emoji: '💰', label: 'Commissions', hint: 'Ce que vous recevez, mois par mois', path: '/hotel/commissions' },
+        { emoji: '📊', label: 'Analyses', hint: 'Scans, conversions, tendances', path: '/hotel/analyses' },
+      ],
+    },
+    {
+      title: 'Compte',
+      items: [
+        { emoji: '⚙️', label: 'Paramètres', hint: "Profil de l'hôtel, couleurs, menu client", path: '/hotel/settings' },
+        { emoji: '❓', label: 'Aide', hint: 'Guides et contact', path: '/hotel/aide' },
+      ],
+    },
+  ],
+  concierge: [
+    {
+      title: 'Activité',
+      items: [
+        { emoji: '👥', label: 'CRM Clients', hint: 'Vos clients et leurs habitudes', path: '/concierge/clients' },
+        { emoji: '💰', label: 'Commissions', hint: 'Ce que vous recevez', path: '/concierge/commissions' },
+        { emoji: '📈', label: 'Statistiques', hint: 'Couverts, commissions, croissance', path: '/concierge/stats' },
+        { emoji: '💬', label: 'Messages', hint: 'Échanges avec les établissements', path: '/concierge/messages' },
+        { emoji: '🏛️', label: 'Établissements', hint: 'Le réseau et ses tables', path: '/concierge/venues' },
+        { emoji: '🤖', label: 'Assistant IA', hint: 'Une recommandation en quelques mots', path: '/concierge/ai' },
+      ],
+    },
+    {
+      title: 'Compte',
+      items: [
+        { emoji: '⚙️', label: 'Paramètres', hint: 'Profil et sécurité', path: '/concierge/settings' },
+      ],
+    },
+  ],
+  admin: [
+    {
+      title: 'Réseau',
+      items: [
+        { emoji: '🛡️', label: 'Console admin', hint: 'Comptes, catalogue, commissions', path: '/admin' },
+        { emoji: '🍽️', label: 'Espace établissement', hint: 'Tel que le voit un restaurant', path: '/dashboard' },
+        { emoji: '🏨', label: 'Espace hôtel', hint: "Tel que le voit un hôtel", path: '/hotel' },
+        { emoji: '🤝', label: 'Espace concierge', hint: 'Tel que le voit une conciergerie', path: '/concierge' },
+      ],
+    },
+  ],
+}
+
+/* Fond de la coque sombre du site, pour les pages ouvertes par-dessus. */
 export const SHELL_BG = '#0d0f12'

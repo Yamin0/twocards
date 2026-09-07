@@ -7,50 +7,18 @@ import { Avatar, Card, Screen } from '@/components/venue/ui'
 import { BottomTabInset, Light } from '@/constants/theme'
 import { useAuth } from '@/lib/auth-context'
 import { pushStatus, registerPush, unregisterPush, type PushStatus } from '@/lib/push'
-import { roleLabels, WEB_PAGES } from '@/lib/site'
+import { HUB, roleLabels, WEB_PAGES } from '@/lib/site'
 import { supabase } from '@/lib/supabase'
 
-/* Troisième onglet : tout le reste. Les sections du site, le compte, les
-   notifications, la déconnexion. Chaque section s'ouvre dans l'app. */
+/* Troisième onglet, commun à tous les rôles : le compte, les
+   notifications, puis chaque section de l'espace, avec son émoticône.
+   Chaque section s'ouvre dans l'app. */
 
 const CONTACT_EMAIL = 'contact@twocardspro.com'
 
-type Item = { label: string; hint: string; path: string; activityOnly?: boolean; restaurantOnly?: boolean }
-
-const GROUPS: { title: string; items: Item[] }[] = [
-  {
-    title: 'Activité',
-    items: [
-      { label: 'Prestations', hint: 'Ce que vos clients réservent, visible sur le menu', path: '/dashboard/prestations', activityOnly: true },
-      { label: 'Messages', hint: 'Hôtels et concierges', path: '/dashboard/messages' },
-      { label: 'Commissions', hint: 'À régler ce mois, historique par hôtel', path: '/dashboard/commissions' },
-      { label: 'Réseau apporteurs', hint: 'Quels hôtels vous envoient des clients', path: '/dashboard/network' },
-      { label: 'Analyses', hint: 'Volumes, panier moyen, tendances', path: '/dashboard/analytics' },
-      { label: 'Clients', hint: 'Historique et fidélité', path: '/dashboard/guests' },
-    ],
-  },
-  {
-    title: 'Outils',
-    items: [
-      { label: 'Portail de réservation', hint: 'Votre page de réservation directe, sans commission', path: '/dashboard/portal' },
-      { label: 'Événements', hint: 'Soirées et programmation', path: '/dashboard/events', restaurantOnly: true },
-      { label: 'Plan de salle', hint: 'Vos tables et leur occupation', path: '/dashboard/floor-plan', restaurantOnly: true },
-      { label: 'Caisse (POS)', hint: 'Rapprochement automatique des tickets', path: '/dashboard/integrations', restaurantOnly: true },
-    ],
-  },
-  {
-    title: 'Compte',
-    items: [
-      { label: 'Paramètres', hint: 'Profil, établissement, sécurité', path: '/dashboard/settings' },
-      { label: 'Notifications', hint: "Tout ce qui s'est passé, dans l'ordre", path: '/dashboard/notifications' },
-      { label: 'Aide', hint: 'Guides et contact', path: '/dashboard/help' },
-    ],
-  },
-]
-
 const statusLabels: Record<PushStatus, string> = {
   granted: 'Activées',
-  denied: 'Refusées, ouvrir les réglages',
+  denied: 'Refusées, toucher pour ouvrir les réglages',
   undetermined: 'Toucher pour activer',
   unsupported: 'Indisponibles sur cet appareil',
 }
@@ -60,7 +28,6 @@ export default function HubTab() {
   const router = useRouter()
   const email = session?.user.email ?? '—'
   const userId = session?.user.id ?? null
-  const activity = tabRole === 'activite'
   const version = Constants.expoConfig?.version ?? '1.0.0'
   const [push, setPush] = useState<PushStatus | null>(null)
 
@@ -105,21 +72,22 @@ export default function HubTab() {
     )
   }
 
+  const spaceLabel = tabRole === 'activite' ? 'Activités & services' : roleLabels[role]
+
   return (
     <Screen>
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.title}>Menu</Text>
 
-        {/* Compte */}
         <Card style={styles.profile}>
           <Avatar name={fullName ?? venueName ?? 'T'} size={48} />
           <View style={styles.profileText}>
             <Text style={styles.profileName} numberOfLines={1}>
-              {venueName ?? fullName ?? 'Votre établissement'}
+              {venueName ?? fullName ?? 'Votre espace'}
             </Text>
             <Text style={styles.profileHint} numberOfLines={1}>
               {fullName ? `${fullName} · ` : ''}
-              {activity ? 'Activités & services' : roleLabels[role]}
+              {spaceLabel}
             </Text>
             <Text style={styles.profileHint} numberOfLines={1}>
               {email}
@@ -127,43 +95,39 @@ export default function HubTab() {
           </View>
         </Card>
 
-        {/* Notifications */}
         <Pressable onPress={togglePush} style={({ pressed }) => [pressed && styles.pressed]}>
-          <Card style={styles.pushRow}>
-            <View style={styles.pushText}>
-              <Text style={styles.rowLabel}>Notifications</Text>
+          <Card style={styles.row}>
+            <Text style={styles.emoji}>🔔</Text>
+            <View style={styles.rowText}>
+              <Text style={styles.rowLabel}>Notifications push</Text>
               <Text style={styles.rowHint}>{push ? statusLabels[push] : 'Vérification…'}</Text>
             </View>
             <View style={[styles.dot, { backgroundColor: push === 'granted' ? Light.success : Light.warning }]} />
           </Card>
         </Pressable>
 
-        {GROUPS.map((g) => {
-          const items = g.items.filter(
-            (i) => !(i.activityOnly && !activity) && !(i.restaurantOnly && activity)
-          )
-          return (
-            <View key={g.title}>
-              <Text style={styles.groupTitle}>{g.title}</Text>
-              <Card style={styles.group}>
-                {items.map((i, idx) => (
-                  <Pressable
-                    key={i.path}
-                    onPress={() => openWeb(i.path)}
-                    style={({ pressed }) => [styles.row, idx > 0 && styles.rowBorder, pressed && styles.pressed]}>
-                    <View style={styles.rowText}>
-                      <Text style={styles.rowLabel}>{i.label}</Text>
-                      <Text style={styles.rowHint} numberOfLines={1}>
-                        {i.hint}
-                      </Text>
-                    </View>
-                    <Text style={styles.chevron}>›</Text>
-                  </Pressable>
-                ))}
-              </Card>
-            </View>
-          )
-        })}
+        {HUB[tabRole].map((g) => (
+          <View key={g.title}>
+            <Text style={styles.groupTitle}>{g.title}</Text>
+            <Card style={styles.group}>
+              {g.items.map((i, idx) => (
+                <Pressable
+                  key={i.path}
+                  onPress={() => openWeb(i.path)}
+                  style={({ pressed }) => [styles.row, idx > 0 && styles.rowBorder, pressed && styles.pressed]}>
+                  <Text style={styles.emoji}>{i.emoji}</Text>
+                  <View style={styles.rowText}>
+                    <Text style={styles.rowLabel}>{i.label}</Text>
+                    <Text style={styles.rowHint} numberOfLines={1}>
+                      {i.hint}
+                    </Text>
+                  </View>
+                  <Text style={styles.chevron}>›</Text>
+                </Pressable>
+              ))}
+            </Card>
+          </View>
+        ))}
 
         <Pressable onPress={signOut} style={({ pressed }) => [styles.signOut, pressed && styles.pressed]}>
           <Text style={styles.signOutText}>Se déconnecter</Text>
@@ -209,15 +173,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: Light.muted,
   },
-  pushRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    paddingVertical: 14,
-  },
-  pushText: {
-    flex: 1,
-  },
   dot: {
     width: 10,
     height: 10,
@@ -233,18 +188,27 @@ const styles = StyleSheet.create({
     marginLeft: 4,
   },
   group: {
-    padding: 0,
-    paddingHorizontal: 16,
+    paddingVertical: 0,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    paddingVertical: 14,
+    paddingVertical: 13,
   },
   rowBorder: {
     borderTopWidth: 1,
     borderTopColor: Light.line,
+  },
+  emoji: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: Light.bg,
+    textAlign: 'center',
+    lineHeight: 36,
+    fontSize: 18,
+    overflow: 'hidden',
   },
   rowText: {
     flex: 1,

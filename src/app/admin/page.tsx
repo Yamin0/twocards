@@ -561,12 +561,12 @@ export default function AdminPage() {
   const ready = !isLoading && isAdmin;
 
   return (
-    <div className="min-h-screen bg-[#141210]">
+    <div className="tc-shell min-h-screen bg-[#141210]">
       <div
-        className="fixed inset-0 scale-105 bg-cover bg-center blur-sm"
+        className="tc-app-bg fixed inset-0 scale-105 bg-cover bg-center blur-sm"
         style={{ backgroundImage: "url(/dashboard-bg-ocean.jpg)" }}
       />
-      <div className="fixed inset-0 bg-black/60" />
+      <div className="tc-app-bg fixed inset-0 bg-black/60" />
 
       <div className="relative z-10 mx-auto max-w-6xl space-y-4 p-4 lg:p-8">
         {/* En-tête */}

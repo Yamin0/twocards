@@ -193,7 +193,7 @@ export default function HotelLayout({ children }: { children: React.ReactNode })
   );
 
   return (
-    <div className="satoshi hotel-shell relative min-h-screen bg-[#0d0f12] lg:h-screen lg:overflow-hidden">
+    <div className="satoshi hotel-shell tc-shell relative min-h-screen bg-[#0d0f12] lg:h-screen lg:overflow-hidden">
       {/* Fond photo : vue aérienne sable / océan (public/dashboard-bg-ocean.jpg).
          Photo claire sous du texte blanc : flou léger (4 px) pour garder l'image
          reconnaissable, voile à 55 % pour ramener la luminance sous le texte ;
