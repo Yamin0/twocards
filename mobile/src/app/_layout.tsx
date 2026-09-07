@@ -23,6 +23,7 @@ function RootNavigator() {
 
       <Stack.Protected guard={!!session}>
         <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="web" options={{ presentation: 'card' }} />
       </Stack.Protected>
     </Stack>
   );

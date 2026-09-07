@@ -21,9 +21,12 @@ import { useWebSession } from '@/lib/web-session'
 export function SiteWebView({
   path,
   tabIndex,
+  inset = true,
 }: {
   path: string
   tabIndex: number
+  /* Faux quand l'écran parent gère déjà la zone de la barre d'état. */
+  inset?: boolean
 }) {
   const ws = useWebSession()
   const { register, unregister } = ws
@@ -97,7 +100,7 @@ export function SiteWebView({
 
   if (ws.error) {
     return (
-      <Shell>
+      <Shell inset={inset}>
         <View style={styles.center}>
           <Text style={styles.errorText}>{ws.error}</Text>
           <Pressable onPress={ws.retry} style={styles.retry}>
@@ -110,7 +113,7 @@ export function SiteWebView({
 
   if (!uri) {
     return (
-      <Shell>
+      <Shell inset={inset}>
         <View style={styles.center}>
           <ActivityIndicator color="#ffffff" />
         </View>
@@ -119,7 +122,7 @@ export function SiteWebView({
   }
 
   return (
-    <Shell>
+    <Shell inset={inset}>
       <WebView
         ref={webRef}
         source={{ uri }}
@@ -159,10 +162,10 @@ export function SiteWebView({
   )
 }
 
-function Shell({ children }: { children: React.ReactNode }) {
+function Shell({ children, inset }: { children: React.ReactNode; inset: boolean }) {
   return (
-    <SafeAreaView style={styles.safe} edges={['top']}>
-      <StatusBar style="light" />
+    <SafeAreaView style={styles.safe} edges={inset ? ['top'] : []}>
+      {inset && <StatusBar style="light" />}
       {children}
     </SafeAreaView>
   )

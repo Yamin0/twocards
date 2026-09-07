@@ -5,7 +5,7 @@ import { useEffect } from 'react'
 import { useAuth } from '@/lib/auth-context'
 import { openSitePath } from '@/lib/deep-link'
 import { registerPush } from '@/lib/push'
-import { TAB_HREFS, tabIndexForPath } from '@/lib/site'
+import { isVenueTabRole, TAB_HREFS, tabIndexForPath, WEB_PAGES } from '@/lib/site'
 
 /* Fait le lien entre les notifications du système et la navigation.
 
@@ -31,6 +31,14 @@ export function PushBridge() {
     const handle = (response: Notifications.NotificationResponse) => {
       const url = response.notification.request.content.data?.url
       if (typeof url !== 'string' || !url.startsWith('/')) return
+      if (isVenueTabRole(tabRole)) {
+        /* Écrans natifs : réservations et accueil ont leur onglet, le reste
+           s'ouvre dans l'app par-dessus. */
+        if (url.startsWith('/dashboard/reservations')) router.navigate('/reservations')
+        else if (url === '/dashboard') router.navigate('/')
+        else router.push({ pathname: '/web', params: { path: url, title: WEB_PAGES[url] ?? '' } })
+        return
+      }
       openSitePath(url)
       const index = tabIndexForPath(tabRole, url)
       router.navigate(TAB_HREFS[index < 0 ? 0 : index])

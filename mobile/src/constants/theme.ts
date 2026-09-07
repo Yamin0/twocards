@@ -70,3 +70,36 @@ export const Spacing = {
 
 export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
 export const MaxContentWidth = 800;
+
+/* Fond de la coque sombre des espaces hôtel et concierge (le site). */
+export const SHELL_BG_DARK = '#0d0f12';
+
+/* Palette claire des écrans natifs de l'établissement : fond gris perle,
+   cartes blanches, encre presque noire, un seul bleu d'accent — le registre
+   d'une app de gestion qu'on ouvre entre deux services, pas d'un site. */
+export const Light = {
+  bg: '#F3F4F6',
+  card: '#FFFFFF',
+  ink: '#0F172A',
+  muted: '#6B7280',
+  faint: '#9CA3AF',
+  line: '#E5E7EB',
+  accent: '#2F5BEA',
+  accentSoft: '#E8EDFF',
+  success: '#059669',
+  successSoft: '#D1FAE5',
+  warning: '#D97706',
+  warningSoft: '#FEF3C7',
+  danger: '#DC2626',
+  dangerSoft: '#FEE2E2',
+} as const;
+
+export const CardShadow = Platform.select({
+  ios: {
+    shadowColor: '#0F172A',
+    shadowOpacity: 0.06,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 4 },
+  },
+  default: { elevation: 2 },
+}) as object;

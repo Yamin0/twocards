@@ -209,6 +209,29 @@ export const roleTabs: Record<TabRole, [TabSpec, TabSpec, TabSpec, TabSpec]> = {
   ],
 }
 
+/* L'établissement a ses écrans natifs ; les pages secondaires du site
+   s'ouvrent depuis le menu, sous ces titres. */
+export const isVenueTabRole = (r: TabRole) => r === 'etablissement' || r === 'activite'
+
+export const WEB_PAGES: Record<string, string> = {
+  '/dashboard/messages': 'Messages',
+  '/dashboard/commissions': 'Commissions',
+  '/dashboard/network': 'Réseau apporteurs',
+  '/dashboard/analytics': 'Analyses',
+  '/dashboard/guests': 'Clients',
+  '/dashboard/prestations': 'Prestations',
+  '/dashboard/portal': 'Portail de réservation',
+  '/dashboard/events': 'Événements',
+  '/dashboard/floor-plan': 'Plan de salle',
+  '/dashboard/integrations': 'Caisse (POS)',
+  '/dashboard/settings': 'Paramètres',
+  '/dashboard/notifications': 'Notifications',
+  '/dashboard/help': 'Aide',
+  '/dashboard/plus': 'Plus',
+  '/dashboard/reservations': 'Réservations',
+  '/dashboard': 'Accueil',
+}
+
 /* Adresses des quatre premiers onglets, dans l'ordre de roleTabs. */
 export const TAB_HREFS = ['/', '/slot-2', '/slot-3', '/slot-4'] as const
 
