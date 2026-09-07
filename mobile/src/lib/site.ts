@@ -1,12 +1,32 @@
 import type { NativeTabs } from 'expo-router/unstable-native-tabs'
 import type { ComponentProps } from 'react'
 
-/* Le site twocards, dont l'app affiche les dashboards. */
+/* Le site twocards, dont l'app affiche les dashboards. Adresse canonique :
+   twocardspro.com redirige vers www, autant partir directement dessus pour
+   éviter une redirection à chaque chargement. */
 export const SITE_URL = (
-  process.env.EXPO_PUBLIC_SITE_URL ?? 'https://twocardspro.com'
+  process.env.EXPO_PUBLIC_SITE_URL ?? 'https://www.twocardspro.com'
 ).replace(/\/$/, '')
 
-export const SITE_HOST = SITE_URL.replace(/^https?:\/\//, '')
+const SITE_HOST = SITE_URL.replace(/^https?:\/\//, '')
+
+/* Les deux écritures du domaine mènent au même site : un lien vers la forme
+   nue doit rester dans l'app, pas partir dans le navigateur. */
+const SITE_HOSTS = new Set([
+  SITE_HOST,
+  SITE_HOST.startsWith('www.') ? SITE_HOST.slice(4) : `www.${SITE_HOST}`,
+])
+
+/* Appelée à chaque navigation de WebView : l'expression vit hors de la
+   fonction pour n'être compilée qu'une fois. */
+const URL_PARTS = /^https?:\/\/([^/?#]+)([^?#]*)/
+
+/* Chemin de l'URL si elle appartient au site, sinon null. */
+export function sitePath(url: string): string | null {
+  const m = URL_PARTS.exec(url)
+  if (!m || !SITE_HOSTS.has(m[1].toLowerCase())) return null
+  return m[2] || '/'
+}
 
 export type Role = 'etablissement' | 'hotel' | 'concierge' | 'admin'
 

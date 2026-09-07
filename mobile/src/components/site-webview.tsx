@@ -11,7 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { WebView, type WebViewNavigation } from 'react-native-webview'
 
-import { SHELL_BG, SITE_HOST, SITE_URL } from '@/lib/site'
+import { SHELL_BG, SITE_URL, sitePath } from '@/lib/site'
 import { useWebSession } from '@/lib/web-session'
 
 /* Une page du site, dans la coque native. `path` est le chemin de départ ;
@@ -38,9 +38,8 @@ export function SiteWebView({ path }: { path: string }) {
       : null
 
   const onNavigationStateChange = (nav: WebViewNavigation) => {
-    const m = nav.url.match(/^https?:\/\/([^/]+)(\/[^?#]*)?/)
-    if (!m || m[1] !== SITE_HOST) return
-    const pathname = m[2] ?? '/'
+    const pathname = sitePath(nav.url)
+    if (!pathname) return
 
     if (pathname === '/login') {
       if (isOwner && !ws.ready) {
@@ -90,7 +89,7 @@ export function SiteWebView({ path }: { path: string }) {
         onShouldStartLoadWithRequest={(req) => {
           /* Le site reste dans l'app ; tout lien externe (WhatsApp, Google
              Business, PDF…) s'ouvre dans le navigateur ou l'app dédiée. */
-          if (req.url.startsWith(SITE_URL) || req.url.startsWith('about:')) {
+          if (sitePath(req.url) !== null || req.url.startsWith('about:')) {
             return true
           }
           Linking.openURL(req.url).catch(() => {})
