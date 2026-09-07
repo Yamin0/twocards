@@ -13,7 +13,7 @@ import { TAB_HREFS, tabIndexForPath } from '@/lib/site'
    notification est touchée, l'app bascule sur l'onglet qui couvre la page
    visée et la lui transmet. */
 export function PushBridge() {
-  const { session, role } = useAuth()
+  const { session, tabRole } = useAuth()
   const router = useRouter()
   const userId = session?.user.id ?? null
 
@@ -32,7 +32,7 @@ export function PushBridge() {
       const url = response.notification.request.content.data?.url
       if (typeof url !== 'string' || !url.startsWith('/')) return
       openSitePath(url)
-      const index = tabIndexForPath(role, url)
+      const index = tabIndexForPath(tabRole, url)
       router.navigate(TAB_HREFS[index < 0 ? 0 : index])
     }
 
@@ -48,7 +48,7 @@ export function PushBridge() {
 
     const sub = Notifications.addNotificationResponseReceivedListener(handle)
     return () => sub.remove()
-  }, [userId, role, router])
+  }, [userId, tabRole, router])
 
   return null
 }

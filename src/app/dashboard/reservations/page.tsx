@@ -44,7 +44,7 @@ const localISODate = () => {
 };
 
 export default function VenueQrReservationsPage() {
-  const { isLoading } = useAuthUser();
+  const { isLoading, isActivityVenue } = useAuthUser();
   const { reservations, isLoading: loadingData } = useVenueQrReservations();
   const { toast, showToast } = useToast();
   /* Saisie locale du montant, par réservation. Les mises à jour confirmées
@@ -452,7 +452,10 @@ export default function VenueQrReservationsPage() {
             <table className="w-full text-left">
               <thead>
                 <tr className="border-b border-white/10">
-                  {["Client", "Date", "Pers.", "Note", "Table", "Statut", "Montant dépensé", "Commission", "Avis", ""].map(
+                  {["Client", "Date", "Pers.", "Note", "Table", "Statut", "Montant dépensé", "Commission", "Avis", ""]
+                    /* Une activité n'a pas de plan de salle. */
+                    .filter((h) => h !== "Table" || !isActivityVenue)
+                    .map(
                     (h) => (
                       <th
                         key={h}
@@ -468,7 +471,7 @@ export default function VenueQrReservationsPage() {
                 {filtered.length === 0 && (
                   <tr>
                     <td
-                      colSpan={10}
+                      colSpan={isActivityVenue ? 9 : 10}
                       className="px-4 py-10 text-center text-sm text-white/40 font-ui"
                     >
                       Aucune réservation ne correspond aux filtres.
@@ -517,6 +520,11 @@ export default function VenueQrReservationsPage() {
                         <p className="text-xs text-white/40 font-ui">
                           {r.guest_phone}
                         </p>
+                        {r.service_name && (
+                          <p className="font-ui mt-0.5 text-xs font-medium text-blue-300/80">
+                            {r.service_name}
+                          </p>
+                        )}
                       </td>
                       <td data-label="Date" className="px-4 py-3 text-sm text-white/70 font-ui whitespace-nowrap">
                         {new Date(
@@ -533,7 +541,8 @@ export default function VenueQrReservationsPage() {
                       <td data-label="Note" className="px-4 py-3 text-xs text-white/50 font-ui max-w-[180px] truncate">
                         {r.notes ?? "—"}
                       </td>
-                      <td data-label="Table" className="px-4 py-3">
+                      {!isActivityVenue && (
+                        <td data-label="Table" className="px-4 py-3">
                         {r.status === "annulée" ? (
                           <span className="text-sm text-white/30">—</span>
                         ) : (
@@ -558,6 +567,7 @@ export default function VenueQrReservationsPage() {
                           </select>
                         )}
                       </td>
+                      )}
                       <td data-label="Statut" className="px-4 py-3">
                         <StatusBadge status={r.status} />
                         {r.arrived_at && !isOut(r) && (

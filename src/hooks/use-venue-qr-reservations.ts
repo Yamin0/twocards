@@ -12,6 +12,8 @@ export type VenueQrReservation = {
   reservation_time: string | null;
   party_size: number;
   notes: string | null;
+  /* Prestation choisie par le client (activités et services). */
+  service_name: string | null;
   status: "en attente" | "confirmée" | "annulée" | "no-show";
   commission: number;
   commission_rate: number;
@@ -29,7 +31,7 @@ export type VenueQrReservation = {
    L'établissement voit le client et la sortie, pas la chambre d'origine. */
 const SELECT =
   "id, category, guest_name, guest_phone, reservation_date, " +
-  "reservation_time, party_size, notes, status, commission, " +
+  "reservation_time, party_size, notes, service_name, status, commission, " +
   "commission_rate, amount_spent, amount_source, source, table_id, " +
   "arrived_at, rating, rating_comment, created_at";
 

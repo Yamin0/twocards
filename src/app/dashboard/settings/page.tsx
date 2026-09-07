@@ -46,6 +46,11 @@ const VENUE_TYPE_LABELS: Record<string, string> = {
   club: "Club",
   "restaurant-bar": "Restaurant-Bar",
   lounge: "Lounge",
+  rooftop: "Rooftop",
+  "beach-club": "Beach club",
+  "hotel-riad": "Hôtel / Riad",
+  activite: "Activité",
+  service: "Service",
 };
 
 const DELETE_MAILTO = `mailto:support@twocards.io?subject=${encodeURIComponent(

@@ -17,7 +17,7 @@ export const CATEGORY_META: Record<
   restaurants: {
     label: "Restaurants",
     tagline: "Tables raffinées et dîners d'exception",
-    image: "/images/carousel/07.jpg",
+    image: "/images/menu/restaurants.png",
   },
   activites: {
     label: "Activités",
@@ -27,7 +27,7 @@ export const CATEGORY_META: Record<
   clubs: {
     label: "Clubs",
     tagline: "Les nuits les plus courues du pays",
-    image: "/images/carousel/03.jpg",
+    image: "/images/menu/clubs.jpg",
   },
   services: {
     label: "Services",
@@ -39,6 +39,27 @@ export const CATEGORY_META: Record<
 export const CATEGORY_LABELS = Object.fromEntries(
   CATEGORY_KEYS.map((k) => [k, CATEGORY_META[k].label])
 ) as Record<GuestCategoryKey, string>;
+
+/* Prestation tenue par l'établissement lui-même (venue_services) : une
+   balade en quad d'une heure, un transfert aéroport… Le client la choisit
+   en même temps que la date. */
+export type ServiceRow = {
+  id: string;
+  name: string;
+  description?: string | null;
+  duration?: string | null;
+  price?: string | null;
+  image_url?: string | null;
+};
+
+export type GuestService = {
+  id: string;
+  name: string;
+  description: string;
+  duration: string;
+  price: string;
+  image?: string;
+};
 
 /* Ligne telle que renvoyée par la base (catalog_offers, hotel_offers ou le
    JSON de qr_get_menu). */
@@ -55,6 +76,8 @@ export type OfferRow = {
   images?: string[] | null;
   sort_order?: number | null;
   active?: boolean;
+  /* Prestations actives de l'établissement, dans l'ordre choisi par lui. */
+  services?: ServiceRow[] | null;
 };
 
 export type GuestOffer = {
@@ -70,6 +93,9 @@ export type GuestOffer = {
   images: string[];
   /* réseau twocards ou adresse ajoutée par l'hôtel */
   source: "reseau" | "hotel";
+  /* Vide pour un restaurant ou un club ; une balade, un transfert… pour
+     une activité ou un service. */
+  services: GuestService[];
 };
 
 export type GuestCategory = {
@@ -92,16 +118,28 @@ export function fallbackImage(slug: string) {
 
 export function toOffer(row: OfferRow, source: GuestOffer["source"]): GuestOffer {
   const cover = row.image_url || fallbackImage(row.slug);
+  const services: GuestService[] = (row.services ?? []).map((s) => ({
+    id: s.id,
+    name: s.name,
+    description: s.description ?? "",
+    duration: s.duration ?? "",
+    price: s.price ?? "",
+    image: s.image_url ?? undefined,
+  }));
+  /* Sans prix de fiche, la carte annonce la première prestation — c'est
+     l'établissement qui décide de l'ordre, donc de ce qui s'affiche. */
+  const firstPrice = services.find((s) => s.price)?.price;
   return {
     id: row.slug,
     name: row.name,
     city: row.city ?? undefined,
     description: row.description ?? "",
     tag: row.tag || (source === "hotel" ? "Adresse de l'hôtel" : ""),
-    price: row.price ?? undefined,
+    price: row.price ?? (firstPrice ? `dès ${firstPrice}` : undefined),
     image: cover,
     images: [cover, ...(row.images ?? []).filter(Boolean)],
     source,
+    services,
   };
 }
 

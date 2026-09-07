@@ -27,7 +27,7 @@ export function SiteWebView({
 }) {
   const ws = useWebSession()
   const { register, unregister } = ws
-  const { role } = useAuth()
+  const { tabRole } = useAuth()
   const key = useId()
 
   const [uri, setUri] = useState<string | null>(null)
@@ -60,7 +60,7 @@ export function SiteWebView({
   /* Notification touchée : la cible revient à l'onglet qui la couvre. */
   const pending = usePendingSitePath()
   const mine =
-    pending !== null && Math.max(0, tabIndexForPath(role, pending)) === tabIndex
+    pending !== null && Math.max(0, tabIndexForPath(tabRole, pending)) === tabIndex
 
   /* On attend que la session web soit établie : déplacer la WebView
      pendant que la passerelle pose les cookies annulerait celle-ci. */

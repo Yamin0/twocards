@@ -8,6 +8,7 @@ import {
   type GuestCategory,
   type GuestCategoryKey,
   type GuestOffer,
+  type GuestService,
   type OfferRow,
 } from "@/lib/guest-catalog";
 import {
@@ -305,7 +306,17 @@ export function GuestExperience({
       {state === "inactive" ? (
         <Inactive reception={info.reception} hotelName={hotelName} />
       ) : (
-        <div ref={listRef} className="mx-auto w-full max-w-6xl px-3 pb-2 pt-3 sm:px-8 sm:pt-6 lg:px-10 lg:pt-8">
+        <div
+          ref={listRef}
+          className={cn(
+            "mx-auto w-full pb-2 pt-3 sm:pt-6 lg:pt-8",
+            /* Les bandeaux de catégories s'étirent presque bord à bord ;
+               les listes d'adresses gardent la largeur de lecture. */
+            category === "tous"
+              ? "max-w-[1800px] px-2 sm:px-3 lg:px-4"
+              : "max-w-6xl px-3 sm:px-8 lg:px-10"
+          )}
+        >
           {state === "loading" ? (
             <div className="space-y-3 sm:space-y-4" aria-busy>
               {[1, 2, 3, 4].map((i) => (
@@ -330,7 +341,7 @@ export function GuestExperience({
                     fill
                     unoptimized={c.image.startsWith("http")}
                     priority={i < 2}
-                    sizes="(max-width: 1152px) 100vw, 1152px"
+                    sizes="(max-width: 1800px) 100vw, 1800px"
                     className="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
                   />
                   <div className="absolute inset-0 bg-black/30 transition-colors group-hover:bg-black/40" />
@@ -668,6 +679,9 @@ function ReservationSheet({
   }, []);
   const [step, setStep] = useState<Step>("details");
   const [partySize, setPartySize] = useState(2);
+  /* La première prestation est proposée d'office : c'est l'établissement
+     qui a choisi l'ordre, et le client peut en changer d'un geste. */
+  const [service, setService] = useState<GuestService | null>(offer.services[0] ?? null);
   const [date, setDate] = useState(isoDay(days[0]));
   const [time, setTime] = useState<string | null>(null);
   const [customTime, setCustomTime] = useState("");
@@ -725,6 +739,8 @@ function ReservationSheet({
       /* Slug du catalogue : relie la réservation au compte de
          l'établissement, qui saisira le montant dépensé. */
       p_venue_slug: offer.id,
+      /* La prestation choisie, telle que l'établissement la nomme. */
+      p_service: service?.name ?? null,
     });
     setSending(false);
     if (error) {
@@ -760,7 +776,8 @@ function ReservationSheet({
             </div>
             <h3 className="font-display text-2xl font-black tracking-tight">Demande envoyée</h3>
             <p className="mx-auto mt-3 max-w-xs text-[15px] leading-relaxed text-neutral-600">
-              <span className="font-bold text-neutral-900">{offer.name}</span>, {dateLabel}
+              <span className="font-bold text-neutral-900">{offer.name}</span>
+              {service ? ` — ${service.name}` : ""}, {dateLabel}
               {chosenTime ? ` à ${chosenTime}` : ""}, pour {partySize} personne{partySize > 1 ? "s" : ""}.
             </p>
             <p className="mx-auto mt-3 max-w-xs text-sm leading-relaxed text-neutral-500">
@@ -814,6 +831,44 @@ function ReservationSheet({
                     )}
                   </div>
                 </section>
+
+                {/* Prestation : quad ou buggy, une heure ou une demi-journée */}
+                {offer.services.length > 0 && (
+                  <section>
+                    <p className="mb-2.5 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-neutral-500">
+                      <Sparkles size={12} strokeWidth={2.25} /> Prestation
+                    </p>
+                    <div className="space-y-2">
+                      {offer.services.map((s) => {
+                        const active = service?.id === s.id;
+                        return (
+                          <button
+                            key={s.id}
+                            type="button"
+                            onClick={() => setService(s)}
+                            aria-pressed={active}
+                            className={cn(
+                              "flex w-full items-center gap-3 rounded-xl border px-4 py-3 text-left transition-colors",
+                              active
+                                ? "border-[var(--accent)] bg-white ring-1 ring-[var(--accent)]"
+                                : "border-black/[0.08] bg-white hover:bg-neutral-50"
+                            )}
+                          >
+                            <div className="min-w-0 flex-1">
+                              <p className="text-[15px] font-bold leading-tight text-neutral-900">{s.name}</p>
+                              {(s.duration || s.description) && (
+                                <p className="mt-0.5 text-xs leading-relaxed text-neutral-500">
+                                  {[s.duration, s.description].filter(Boolean).join(" · ")}
+                                </p>
+                              )}
+                            </div>
+                            {s.price && <span className="num shrink-0 text-sm font-bold text-neutral-900">{s.price}</span>}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </section>
+                )}
 
                 {/* Couverts */}
                 <section>
@@ -926,6 +981,7 @@ function ReservationSheet({
               <div className="space-y-4 px-5 pb-5 pt-5 sm:px-7">
                 <div className="flex items-center justify-between rounded-xl bg-[#f7f6f3] px-4 py-3 text-sm">
                   <span className="text-neutral-600">
+                    {service ? `${service.name} · ` : ""}
                     <span className="num font-bold text-neutral-900">{partySize}</span> pers. · {dateLabel}
                     {chosenTime ? ` · ${chosenTime}` : ""}
                   </span>

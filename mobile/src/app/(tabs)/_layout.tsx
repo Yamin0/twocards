@@ -9,8 +9,8 @@ import { roleTabs, SHELL_BG } from '@/lib/site';
 const SLOTS = ['index', 'slot-2', 'slot-3', 'slot-4'] as const;
 
 export default function TabsLayout() {
-  const { role } = useAuth();
-  const tabs = roleTabs[role];
+  const { tabRole } = useAuth();
+  const tabs = roleTabs[tabRole];
   const counts = useBadgeCounts();
 
   return (

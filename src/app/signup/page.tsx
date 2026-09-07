@@ -30,7 +30,11 @@ type VenueType =
   | "lounge"
   | "bar"
   | "beach-club"
-  | "hotel-riad";
+  | "hotel-riad"
+  /* Activité (quad, hammam, excursion…) ou service (chauffeur,
+     photographe…) : l'espace montre des prestations, pas des tables. */
+  | "activite"
+  | "service";
 
 const inputClass =
   "w-full rounded-xl border border-black/15 bg-white px-11 py-3.5 text-sm text-[var(--landing-ink)] outline-none transition-all placeholder:text-black/30 focus:border-black/40 focus:ring-1 focus:ring-black/10";
@@ -445,6 +449,8 @@ function SignupForm() {
                         { value: "bar", label: "Bar" },
                         { value: "beach-club", label: "Beach club" },
                         { value: "hotel-riad", label: "Hôtel / Riad" },
+                        { value: "activite", label: "Activité" },
+                        { value: "service", label: "Service" },
                       ] as const
                     ).map((type) => (
                       <label key={type.value} className="cursor-pointer">

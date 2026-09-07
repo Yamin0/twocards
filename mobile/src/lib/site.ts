@@ -30,6 +30,11 @@ export function sitePath(url: string): string | null {
 
 export type Role = 'etablissement' | 'hotel' | 'concierge' | 'admin'
 
+/* Jeu d'onglets. Un établissement d'activité ou de service (quad, hammam,
+   chauffeur…) reste un « etablissement » pour le site, mais ses onglets
+   montrent ses prestations à la place du reste. */
+export type TabRole = Role | 'activite'
+
 export const roleLabels: Record<Role, string> = {
   etablissement: 'Établissement',
   hotel: 'Hôtel',
@@ -65,7 +70,7 @@ export type TabSpec = {
 
 /* Quatre onglets par rôle, puis le profil natif. Le reste des sections reste
    accessible par le menu du site, à l'intérieur de la WebView. */
-export const roleTabs: Record<Role, [TabSpec, TabSpec, TabSpec, TabSpec]> = {
+export const roleTabs: Record<TabRole, [TabSpec, TabSpec, TabSpec, TabSpec]> = {
   etablissement: [
     {
       label: 'Accueil',
@@ -81,10 +86,38 @@ export const roleTabs: Record<Role, [TabSpec, TabSpec, TabSpec, TabSpec]> = {
       badge: 'reservations',
     },
     {
-      label: 'Événements',
-      path: '/dashboard/events',
-      sf: { default: 'sparkles', selected: 'sparkles' },
-      md: 'celebration',
+      label: 'Messages',
+      path: '/dashboard/messages',
+      sf: { default: 'bubble.left', selected: 'bubble.left.fill' },
+      md: 'chat',
+      badge: 'messages',
+    },
+    {
+      label: 'Plus',
+      path: '/dashboard/plus',
+      sf: { default: 'ellipsis.circle', selected: 'ellipsis.circle.fill' },
+      md: 'more_horiz',
+    },
+  ],
+  activite: [
+    {
+      label: 'Accueil',
+      path: '/dashboard',
+      sf: { default: 'house', selected: 'house.fill' },
+      md: 'home',
+    },
+    {
+      label: 'Réservations',
+      path: '/dashboard/reservations',
+      sf: { default: 'calendar', selected: 'calendar' },
+      md: 'event',
+      badge: 'reservations',
+    },
+    {
+      label: 'Prestations',
+      path: '/dashboard/prestations',
+      sf: { default: 'tag', selected: 'tag.fill' },
+      md: 'sell',
     },
     {
       label: 'Messages',
@@ -182,7 +215,7 @@ export const TAB_HREFS = ['/', '/slot-2', '/slot-3', '/slot-4'] as const
 /* Onglet auquel appartient une page du site — le préfixe le plus long
    gagne, sans quoi « /dashboard/reservations » tomberait sur l'accueil.
    Renvoie -1 quand aucun onglet ne couvre la page. */
-export function tabIndexForPath(role: Role, path: string): number {
+export function tabIndexForPath(role: TabRole, path: string): number {
   let best = -1
   let bestLength = 0
   roleTabs[role].forEach((tab, i) => {

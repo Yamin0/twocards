@@ -12,6 +12,7 @@ type AuthSnapshot = {
   fullName: string | null;
   role: string | null;
   venueName: string | null;
+  venueType: string | null;
   city: string | null;
   phone: string | null;
   roomsCount: number | null;
@@ -47,6 +48,7 @@ function toSnapshot(
       (user.user_metadata?.role as string) ??
       null,
     venueName: (user.user_metadata?.venue_name as string) ?? null,
+    venueType: (user.user_metadata?.venue_type as string) ?? null,
     city: (user.user_metadata?.city as string) ?? null,
     phone: (user.user_metadata?.phone as string) ?? null,
     roomsCount: (user.user_metadata?.rooms_count as number) ?? null,
@@ -109,6 +111,10 @@ export function useAuthUser() {
 
   const isDemoVenue = email !== null && DEMO_VENUE_EMAILS.includes(email);
   const isDemoConcierge = email === DEMO_CONCIERGE_EMAIL;
+  const venueType = snap?.venueType ?? null;
+  /* Un loueur de quads ou un chauffeur privé ne gère ni tables ni soirées :
+     son espace montre ses prestations à la place. */
+  const isActivityVenue = venueType === "activite" || venueType === "service";
 
   return {
     userId: snap?.id ?? null,
@@ -116,6 +122,8 @@ export function useAuthUser() {
     fullName,
     role: snap?.role ?? null,
     venueName: snap?.venueName ?? null,
+    venueType,
+    isActivityVenue,
     city: snap?.city ?? null,
     phone: snap?.phone ?? null,
     roomsCount: snap?.roomsCount ?? null,

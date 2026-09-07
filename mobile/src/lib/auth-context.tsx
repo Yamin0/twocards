@@ -7,13 +7,16 @@ import {
   type ReactNode,
 } from 'react'
 
-import { roleHome, type Role } from '@/lib/site'
+import { roleHome, type Role, type TabRole } from '@/lib/site'
 import { supabase } from '@/lib/supabase'
 
 type AuthState = {
   session: Session | null
   loading: boolean
   role: Role
+  /* Jeu d'onglets : un établissement d'activité ou de service n'a pas les
+     mêmes que restaurant ou club. */
+  tabRole: TabRole
   home: string
   fullName: string | null
   venueName: string | null
@@ -23,6 +26,7 @@ const AuthContext = createContext<AuthState>({
   session: null,
   loading: true,
   role: 'etablissement',
+  tabRole: 'etablissement',
   home: roleHome.etablissement,
   fullName: null,
   venueName: null,
@@ -58,6 +62,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const role = roleOf(session)
   const meta = session?.user.user_metadata ?? {}
+  const venueType = meta.venue_type as string | undefined
+  const tabRole: TabRole =
+    role === 'etablissement' && (venueType === 'activite' || venueType === 'service')
+      ? 'activite'
+      : role
 
   return (
     <AuthContext.Provider
@@ -65,6 +74,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         session,
         loading,
         role,
+        tabRole,
         home: roleHome[role],
         fullName: (meta.full_name as string | undefined) ?? null,
         venueName: (meta.venue_name as string | undefined) ?? null,

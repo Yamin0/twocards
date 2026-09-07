@@ -3,6 +3,6 @@ import { useAuth } from '@/lib/auth-context';
 import { roleTabs } from '@/lib/site';
 
 export default function SecondTab() {
-  const { role } = useAuth();
-  return <SiteWebView path={roleTabs[role][1].path} tabIndex={1} />;
+  const { tabRole } = useAuth();
+  return <SiteWebView path={roleTabs[tabRole][1].path} tabIndex={1} />;
 }
