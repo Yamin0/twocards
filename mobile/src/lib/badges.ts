@@ -60,7 +60,7 @@ export function useBadgeCounts(): BadgeCounts {
     refresh()
 
     const channel = supabase
-      .channel('twocards-badges')
+      .channel(`twocards-badges-${Date.now()}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'qr_reservations' },

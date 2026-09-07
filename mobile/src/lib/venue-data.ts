@@ -42,6 +42,11 @@ const fetchRows = () =>
     .order('reservation_date', { ascending: false })
     .order('reservation_time', { ascending: false })
 
+/* Accueil et Réservations montent chacun ce hook : le client Supabase
+   refuse deux abonnements sur un même nom de canal, chaque instance
+   prend donc le sien. */
+let channelSeq = 0
+
 export function useVenueReservations() {
   const [rows, setRows] = useState<Reservation[] | null>(null)
   const [refreshing, setRefreshing] = useState(false)
@@ -59,7 +64,7 @@ export function useVenueReservations() {
       })
     apply()
     const channel = supabase
-      .channel('venue-reservations-native')
+      .channel(`venue-reservations-${++channelSeq}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'qr_reservations' },
