@@ -448,7 +448,7 @@ export default function VenueQrReservationsPage() {
             </p>
           </div>
         ) : (
-          <div className="backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-2xl overflow-x-auto">
+          <div className="tc-stack backdrop-blur-xl bg-white/[0.07] border border-white/[0.12] rounded-2xl overflow-x-auto">
             <table className="w-full text-left">
               <thead>
                 <tr className="border-b border-white/10">
@@ -484,7 +484,7 @@ export default function VenueQrReservationsPage() {
                       key={r.id}
                       className="border-b border-white/[0.06] last:border-0"
                     >
-                      <td className="px-4 py-3">
+                      <td data-head className="px-4 py-3">
                         <p className="text-sm text-white font-ui">
                           {r.guest_name}
                           {/* Origine de la réservation : chaque ligne porte son badge */}
@@ -518,22 +518,22 @@ export default function VenueQrReservationsPage() {
                           {r.guest_phone}
                         </p>
                       </td>
-                      <td className="px-4 py-3 text-sm text-white/70 font-ui whitespace-nowrap">
+                      <td data-label="Date" className="px-4 py-3 text-sm text-white/70 font-ui whitespace-nowrap">
                         {new Date(
                           r.reservation_date + "T00:00:00"
                         ).toLocaleDateString("fr-FR")}
                         {r.reservation_time ? ` · ${r.reservation_time}` : ""}
                       </td>
-                      <td className="px-4 py-3 text-sm text-white/70 font-ui">
+                      <td data-label="Pers." className="px-4 py-3 text-sm text-white/70 font-ui">
                         <span className="inline-flex items-center gap-1">
                           <Users size={12} strokeWidth={1.5} />
                           {r.party_size}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-xs text-white/50 font-ui max-w-[180px] truncate">
+                      <td data-label="Note" className="px-4 py-3 text-xs text-white/50 font-ui max-w-[180px] truncate">
                         {r.notes ?? "—"}
                       </td>
-                      <td className="px-4 py-3">
+                      <td data-label="Table" className="px-4 py-3">
                         {r.status === "annulée" ? (
                           <span className="text-sm text-white/30">—</span>
                         ) : (
@@ -558,7 +558,7 @@ export default function VenueQrReservationsPage() {
                           </select>
                         )}
                       </td>
-                      <td className="px-4 py-3">
+                      <td data-label="Statut" className="px-4 py-3">
                         <StatusBadge status={r.status} />
                         {r.arrived_at && !isOut(r) && (
                           <p className="font-ui mt-1 text-[10px] text-emerald-400/80">
@@ -570,7 +570,7 @@ export default function VenueQrReservationsPage() {
                           </p>
                         )}
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap">
+                      <td data-label="Montant" className="px-4 py-3 whitespace-nowrap">
                         {r.status === "annulée" ? (
                           <span className="text-sm text-white/40">—</span>
                         ) : isEditing ? (
@@ -644,12 +644,12 @@ export default function VenueQrReservationsPage() {
                           </div>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-sm font-bold text-purple-300 font-ui whitespace-nowrap">
+                      <td data-label="Commission" className="px-4 py-3 text-sm font-bold text-purple-300 font-ui whitespace-nowrap">
                         {r.commission > 0
                           ? `${r.commission.toLocaleString()} MAD`
                           : "—"}
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap">
+                      <td data-label="Avis" className="px-4 py-3 whitespace-nowrap">
                         {r.rating !== null ? (
                           <button
                             onClick={() => setReviewOf(r)}
@@ -670,7 +670,7 @@ export default function VenueQrReservationsPage() {
                           <span className="text-sm text-white/30">—</span>
                         )}
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap">
+                      <td data-actions className="px-4 py-3 whitespace-nowrap">
                         <div className="flex items-center gap-1">
                           {isOut(r) ? (
                             <button

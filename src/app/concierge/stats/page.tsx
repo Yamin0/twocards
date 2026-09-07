@@ -161,7 +161,7 @@ export default function ConciergeStatsPage() {
           <h3 className="text-lg font-bold text-white mb-4">
             Détail mensuel
           </h3>
-          <div className="overflow-x-auto">
+          <div className="tc-stack overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-white/[0.1]">
@@ -183,16 +183,16 @@ export default function ConciergeStatsPage() {
                 {monthlyData.length > 0 ? (
                   monthlyData.map((m) => (
                     <tr key={m.month} className="border-b border-white/[0.06] hover:bg-white/[0.03] transition-colors">
-                      <td className="px-4 py-3.5 font-semibold text-white font-ui">
+                      <td data-head className="px-4 py-3.5 font-semibold text-white font-ui">
                         {m.month}
                       </td>
-                      <td className="px-4 py-3.5 text-center text-white/70 font-ui">
+                      <td data-label="Couverts" className="px-4 py-3.5 text-center text-white/70 font-ui">
                         {m.covers}
                       </td>
-                      <td className="px-4 py-3.5 text-right font-bold text-white font-ui">
+                      <td data-label="Commission" className="px-4 py-3.5 text-right font-bold text-white font-ui">
                         {m.commission} MAD
                       </td>
-                      <td className="px-4 py-3.5 text-right">
+                      <td data-label="Croissance" className="px-4 py-3.5 text-right">
                         {m.growth > 0 ? (
                           <span className="inline-flex items-center gap-1 text-emerald-400 font-semibold text-xs">
                             <ArrowUpRight size={12} strokeWidth={2} />

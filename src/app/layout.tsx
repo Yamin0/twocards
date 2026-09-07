@@ -106,6 +106,16 @@ export default function RootLayout({
       className={`${manrope.variable} ${inter.variable} ${nunito.variable} ${gotham.variable} ${suisse.variable} ${satoshi.variable} scroll-smooth`}
     >
       <body>
+        {/* L'application mobile affiche ces mêmes pages dans une WebView et
+            porte déjà le logo, le compte et la navigation par onglets. Elle
+            s'annonce par son agent utilisateur ; la classe est posée avant
+            le rendu du contenu pour éviter tout clignotement. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{if(navigator.userAgent.indexOf('TwocardsApp')>-1)document.documentElement.classList.add('tc-app')}catch(e){}",
+          }}
+        />
         <ImpersonationBanner />
         {children}
       </body>

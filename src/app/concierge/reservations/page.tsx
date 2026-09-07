@@ -168,7 +168,7 @@ function ConciergeReservations() {
       {/* Table */}
       <div className="px-8 pb-8">
         <div className="bg-white/[0.07] rounded-md editorial-shadow overflow-hidden">
-          <div className="overflow-x-auto">
+          <div className="tc-stack overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-white/[0.05]">
@@ -184,21 +184,21 @@ function ConciergeReservations() {
               <tbody>
                 {filtered.map((res, i) => (
                   <tr key={res.id} className={i % 2 === 0 ? "bg-white/[0.07]" : "bg-white/[0.05]/50"}>
-                    <td className="px-6 py-3.5">
+                    <td data-head className="px-6 py-3.5">
                       <p className="text-white font-medium">{res.venue}</p>
                       <p className="text-xs text-white/60">{res.city}</p>
                     </td>
-                    <td className="px-6 py-3.5 text-white">{res.client}</td>
-                    <td className="px-6 py-3.5 text-white">{res.guests}</td>
-                    <td className="px-6 py-3.5 text-white">{res.table}</td>
-                    <td className="px-6 py-3.5 text-white/60">{res.date} - {res.time}</td>
-                    <td className="px-6 py-3.5">
+                    <td data-label="Client" className="px-6 py-3.5 text-white">{res.client}</td>
+                    <td data-label="Couverts" className="px-6 py-3.5 text-white">{res.guests}</td>
+                    <td data-label="Table" className="px-6 py-3.5 text-white">{res.table}</td>
+                    <td data-label="Date" className="px-6 py-3.5 text-white/60">{res.date} - {res.time}</td>
+                    <td data-label="Statut" className="px-6 py-3.5">
                       <span className={`inline-flex items-center gap-1 text-[0.625rem] font-semibold px-2 py-0.5 rounded-full ${statusBadge(res.status)}`}>
                         {statusIcon(res.status)}
                         {res.status}
                       </span>
                     </td>
-                    <td className="px-6 py-3.5 text-white font-medium">{res.commission}</td>
+                    <td data-label="Commission" className="px-6 py-3.5 text-white font-medium">{res.commission}</td>
                   </tr>
                 ))}
                 {filtered.length === 0 && (

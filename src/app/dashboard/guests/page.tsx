@@ -448,7 +448,7 @@ export default function GuestsPage() {
           </p>
         </div>
       ) : (
-        <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl overflow-x-auto">
+        <div className="tc-stack backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl overflow-x-auto">
           <table className="w-full text-left">
             <thead>
               <tr className="border-b border-white/10">
@@ -483,34 +483,34 @@ export default function GuestsPage() {
                   }
                   className="border-b border-white/[0.06] last:border-0 cursor-pointer hover:bg-white/[0.06] transition-colors"
                 >
-                  <td className="px-4 py-3">
+                  <td data-head className="px-4 py-3">
                     <p className="font-ui text-sm font-medium text-white">
                       {g.name}
                     </p>
                     <p className="font-ui text-xs text-white/40">{g.phone}</p>
                   </td>
-                  <td className="font-ui px-4 py-3 text-sm text-white tabular-nums">
+                  <td data-label="Visites" className="font-ui px-4 py-3 text-sm text-white tabular-nums">
                     {g.visits}
                   </td>
-                  <td className="font-ui px-4 py-3 text-sm text-white tabular-nums whitespace-nowrap">
+                  <td data-label="Total dépensé" className="font-ui px-4 py-3 text-sm text-white tabular-nums whitespace-nowrap">
                     {g.totalSpent > 0
                       ? `${g.totalSpent.toLocaleString()} MAD`
                       : "—"}
                   </td>
-                  <td className="font-ui px-4 py-3 text-sm text-white/70 tabular-nums whitespace-nowrap">
+                  <td data-label="Panier moyen" className="font-ui px-4 py-3 text-sm text-white/70 tabular-nums whitespace-nowrap">
                     {g.avgBasket !== null
                       ? `${Math.round(g.avgBasket).toLocaleString()} MAD`
                       : "—"}
                   </td>
-                  <td className="font-ui px-4 py-3 text-sm text-white/70 whitespace-nowrap">
+                  <td data-label="Dernière visite" className="font-ui px-4 py-3 text-sm text-white/70 whitespace-nowrap">
                     {g.lastVisit ? fmtDate(g.lastVisit) : "—"}
                   </td>
-                  <td className="font-ui px-4 py-3 text-sm text-white/70 whitespace-nowrap">
+                  <td data-label="Prochaine résa" className="font-ui px-4 py-3 text-sm text-white/70 whitespace-nowrap">
                     {g.nextReservation
                       ? fmtDate(g.nextReservation.reservation_date)
                       : "—"}
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap">
+                  <td data-label="Note" className="px-4 py-3 whitespace-nowrap">
                     {g.avgRating !== null ? (
                       <span className="inline-flex items-center gap-1.5">
                         <RatingStars value={g.avgRating} size={12} />
@@ -522,7 +522,7 @@ export default function GuestsPage() {
                       <span className="text-white/25">—</span>
                     )}
                   </td>
-                  <td className="px-4 py-3">
+                  <td data-label="Canaux" className="px-4 py-3">
                     <span className="flex flex-wrap gap-1">
                       {g.sources.map((s) => (
                         <span
@@ -534,7 +534,7 @@ export default function GuestsPage() {
                       ))}
                     </span>
                   </td>
-                  <td className="px-4 py-3">
+                  <td data-label="Segment" className="px-4 py-3">
                     <SegmentBadges segments={g.segments} />
                   </td>
                 </tr>

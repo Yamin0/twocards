@@ -172,7 +172,7 @@ export default function ConciergeCommissionsPage() {
       {/* Table */}
       <div className="px-4 sm:px-6 pb-8">
         <div className="bg-white/[0.07] rounded-xl border border-white/10/10 overflow-hidden">
-          <div className="overflow-x-auto">
+          <div className="tc-stack overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-white/10/10">
@@ -204,24 +204,24 @@ export default function ConciergeCommissionsPage() {
                       i % 2 === 0 ? "" : "bg-transparent/30"
                     }`}
                   >
-                    <td className="px-4 py-3.5 text-white font-medium font-ui">
+                    <td data-head className="px-4 py-3.5 text-white font-medium font-ui">
                       {c.venue}
                     </td>
-                    <td className="px-4 py-3.5">
+                    <td data-label="Événement" className="px-4 py-3.5">
                       <span className="text-xs font-bold text-white/60/80 font-ui">
                         {c.event}
                       </span>
                     </td>
-                    <td className="px-4 py-3.5 text-white font-ui">
+                    <td data-label="Client" className="px-4 py-3.5 text-white font-ui">
                       {c.client}
                     </td>
-                    <td className="px-4 py-3.5 text-white/60 font-ui">
+                    <td data-label="Date" className="px-4 py-3.5 text-white/60 font-ui">
                       {c.date}
                     </td>
-                    <td className="px-4 py-3.5 text-right text-white font-bold font-ui">
+                    <td data-label="Montant" className="px-4 py-3.5 text-right text-white font-bold font-ui">
                       {c.montant}
                     </td>
-                    <td className="px-4 py-3.5">
+                    <td data-label="Statut" className="px-4 py-3.5">
                       <span
                         className={`text-[10px] font-semibold px-2.5 py-1 rounded-full ${
                           c.status === "versé"

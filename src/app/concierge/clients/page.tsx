@@ -160,7 +160,7 @@ export default function ConciergeClientsPage() {
       {/* Client list - table style */}
       <div className="px-4 sm:px-6 pb-8">
         <div className="bg-white/[0.07] rounded-xl border border-white/10/10 overflow-hidden">
-          <div className="overflow-x-auto">
+          <div className="tc-stack overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-white/10/10">
@@ -193,7 +193,7 @@ export default function ConciergeClientsPage() {
                       i % 2 === 0 ? "" : "bg-transparent/30"
                     }`}
                   >
-                    <td className="px-4 py-3.5">
+                    <td data-head className="px-4 py-3.5">
                       <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-full bg-white/15 flex items-center justify-center shrink-0">
                           <span className="text-xs font-bold text-white/70 font-ui">
@@ -222,7 +222,7 @@ export default function ConciergeClientsPage() {
                         </div>
                       </div>
                     </td>
-                    <td className="hidden sm:table-cell px-4 py-3.5">
+                    <td data-label="Contact" className="hidden sm:table-cell px-4 py-3.5">
                       <div className="flex items-center gap-3">
                         <a
                           href={`tel:${client.phone}`}
@@ -233,22 +233,22 @@ export default function ConciergeClientsPage() {
                         </a>
                       </div>
                     </td>
-                    <td className="px-4 py-3.5 text-center">
+                    <td data-label="Visites" className="px-4 py-3.5 text-center">
                       <span className="font-bold text-white font-ui">
                         {client.visits}
                       </span>
                     </td>
-                    <td className="px-4 py-3.5">
+                    <td data-label="Dépenses" className="px-4 py-3.5">
                       <span className="font-semibold text-white font-ui">
                         {client.totalSpent}
                       </span>
                     </td>
-                    <td className="hidden sm:table-cell px-4 py-3.5 text-center">
+                    <td data-label="Grp. moy." className="hidden sm:table-cell px-4 py-3.5 text-center">
                       <span className="text-white/60 font-ui">
                         {client.avgGroup}
                       </span>
                     </td>
-                    <td className="px-4 py-3.5">
+                    <td data-label="Tags" className="px-4 py-3.5">
                       <div className="flex items-center gap-1">
                         {client.tags.map((tag) => (
                           <span
@@ -268,7 +268,7 @@ export default function ConciergeClientsPage() {
                         ))}
                       </div>
                     </td>
-                    <td className="px-4 py-3.5 relative">
+                    <td data-actions className="px-4 py-3.5 relative">
                       <button
                         onClick={() => setMenuOpen(menuOpen === client.id ? null : client.id)}
                         className="p-1 rounded-lg text-white/60/40 hover:text-white/60 hover:bg-white/[0.05] transition-colors"

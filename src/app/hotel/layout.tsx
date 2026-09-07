@@ -207,7 +207,7 @@ export default function HotelLayout({ children }: { children: React.ReactNode })
 
       <div className="hotel-shell relative z-10 flex flex-col gap-4 p-4 lg:h-screen lg:flex-row lg:gap-5 lg:p-5">
         {/* Barre mobile */}
-        <div className="hotel-shell-topbar flex items-center justify-between rounded-2xl border border-white/10 bg-black/50 px-3 py-2.5 backdrop-blur-2xl lg:hidden">
+        <div className="hotel-shell-topbar tc-app-topbar flex items-center justify-between rounded-2xl border border-white/10 bg-black/50 px-3 py-2.5 backdrop-blur-2xl lg:hidden">
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
             className="rounded-lg p-2 text-white/70 transition-colors hover:text-white"
@@ -215,8 +215,9 @@ export default function HotelLayout({ children }: { children: React.ReactNode })
           >
             {sidebarOpen ? <X size={22} strokeWidth={1.75} /> : <Menu size={22} strokeWidth={1.75} />}
           </button>
-          {brand}
-          <Link href="/hotel/reservations" onClick={closeSidebar} className="relative rounded-lg p-2 text-white/70" aria-label="Réservations en attente">
+          <span className="tc-app-hide">{brand}</span>
+          {/* Dans l'app, l'onglet Réservations porte déjà ce compteur. */}
+          <Link href="/hotel/reservations" onClick={closeSidebar} className="tc-app-hide relative rounded-lg p-2 text-white/70" aria-label="Réservations en attente">
             <Bell size={20} strokeWidth={1.75} />
             {pending > 0 && (
               <span className="num absolute -right-0.5 -top-0.5 rounded-full bg-amber-400 px-1.5 text-[10px] font-bold text-black">
@@ -315,7 +316,7 @@ export default function HotelLayout({ children }: { children: React.ReactNode })
         </aside>
 
         {/* Contenu */}
-        <main className="hotel-shell-main min-w-0 flex-1 overflow-x-hidden lg:h-[calc(100vh-40px)] lg:overflow-y-auto lg:pr-1 scrollbar-thin">
+        <main className="hotel-shell-main tc-app-scroll min-w-0 flex-1 overflow-x-hidden lg:h-[calc(100vh-40px)] lg:overflow-y-auto lg:pr-1 scrollbar-thin">
           <div className="mx-auto w-full max-w-[1400px] space-y-6 pb-10">
             {(resFailed || qrFailed) && (
               <div className="flex items-center gap-3 rounded-2xl border border-red-400/20 bg-red-500/10 px-4 py-3 text-sm text-red-100">

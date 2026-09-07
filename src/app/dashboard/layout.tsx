@@ -148,7 +148,7 @@ export default function DashboardLayout({
 
         <div className="relative z-10 p-4 lg:p-6 grid grid-cols-12 gap-4 lg:gap-6 lg:h-screen">
           {/* Mobile top bar */}
-          <div className="col-span-12 lg:hidden flex items-center justify-between backdrop-blur-2xl bg-black/45 border border-white/10 rounded-2xl px-4 py-3">
+          <div className="tc-app-topbar col-span-12 lg:hidden flex items-center justify-between backdrop-blur-2xl bg-black/45 border border-white/10 rounded-2xl px-4 py-3">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
               className="p-1.5 rounded-lg text-white/70 hover:text-white transition-colors"
@@ -156,18 +156,20 @@ export default function DashboardLayout({
             >
               {sidebarOpen ? <X size={22} strokeWidth={1.5} /> : <Menu size={22} strokeWidth={1.5} />}
             </button>
-            <Link href="/dashboard" className="flex items-center gap-2">
+            <Link href="/dashboard" className="tc-app-hide flex items-center gap-2">
               <Image src="/logo-header.png" alt="twocards." width={28} height={28} className="h-7 w-auto brightness-0 invert" />
               <span className="text-lg font-bold tracking-tight font-[family-name:var(--font-nunito)] text-white">
                 twocards<span className="text-blue-400">.</span>
               </span>
             </Link>
-            <Avatar
-              url={avatarUrl}
-              initials={initials || "U"}
-              size={32}
-              textClassName="text-xs font-semibold text-white font-ui"
-            />
+            <span className="tc-app-hide">
+              <Avatar
+                url={avatarUrl}
+                initials={initials || "U"}
+                size={32}
+                textClassName="text-xs font-semibold text-white font-ui"
+              />
+            </span>
           </div>
 
           {/* Mobile sidebar overlay */}
@@ -270,7 +272,7 @@ export default function DashboardLayout({
           </aside>
 
           {/* Main content */}
-          <main className="col-span-12 lg:col-span-10 lg:h-[calc(100vh-48px)] lg:overflow-y-auto overflow-x-hidden scrollbar-thin">
+          <main className="tc-app-scroll col-span-12 lg:col-span-10 lg:h-[calc(100vh-48px)] lg:overflow-y-auto overflow-x-hidden scrollbar-thin">
             {children}
           </main>
       </div>

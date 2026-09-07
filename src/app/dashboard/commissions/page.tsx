@@ -154,7 +154,7 @@ export default function VenueCommissionsPage() {
           </p>
         </div>
       ) : (
-        <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl overflow-x-auto">
+        <div className="tc-stack backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl overflow-x-auto">
           <table className="w-full text-left">
             <thead>
               <tr className="border-b border-white/10">
@@ -181,18 +181,18 @@ export default function VenueCommissionsPage() {
                   key={r.id}
                   className="border-b border-white/[0.06] last:border-0"
                 >
-                  <td className="font-ui px-4 py-3 text-sm text-white/70 whitespace-nowrap">
+                  <td data-label="Date" className="font-ui px-4 py-3 text-sm text-white/70 whitespace-nowrap">
                     {new Date(
                       r.reservation_date + "T00:00:00"
                     ).toLocaleDateString("fr-FR")}
                   </td>
-                  <td className="font-ui px-4 py-3 text-sm text-white">
+                  <td data-head className="font-ui px-4 py-3 text-sm text-white">
                     {r.guest_name}
                   </td>
-                  <td className="font-ui px-4 py-3 text-sm text-white/70 whitespace-nowrap">
+                  <td data-label="Montant" className="font-ui px-4 py-3 text-sm text-white/70 whitespace-nowrap">
                     {(r.amount_spent ?? 0).toLocaleString()} MAD
                   </td>
-                  <td className="px-4 py-3">
+                  <td data-label="Origine" className="px-4 py-3">
                     <span
                       className={`font-ui rounded-md px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider ${
                         r.amount_source === "pos"
@@ -203,10 +203,10 @@ export default function VenueCommissionsPage() {
                       {r.amount_source === "pos" ? "caisse" : "manuel"}
                     </span>
                   </td>
-                  <td className="font-ui px-4 py-3 text-sm text-white/70">
+                  <td data-label="Taux" className="font-ui px-4 py-3 text-sm text-white/70">
                     {Math.round(r.commission_rate * 100)}%
                   </td>
-                  <td className="font-display px-4 py-3 text-sm text-amber-400 tabular-nums whitespace-nowrap">
+                  <td data-label="Commission" className="font-display px-4 py-3 text-sm text-amber-400 tabular-nums whitespace-nowrap">
                     {r.commission.toLocaleString()} MAD
                   </td>
                 </tr>

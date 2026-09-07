@@ -52,11 +52,15 @@ type IconProps = ComponentProps<typeof NativeTabs.Trigger.Icon>
 type SfIcon = NonNullable<Extract<IconProps, { sf?: unknown }>['sf']>
 type MdIcon = NonNullable<Extract<IconProps, { md?: unknown }>['md']>
 
+/* Compteur affiché en pastille sur l'onglet, quand il y en a un. */
+export type BadgeKind = 'reservations' | 'messages'
+
 export type TabSpec = {
   label: string
   path: string
   sf: SfIcon
   md: MdIcon
+  badge?: BadgeKind
 }
 
 /* Quatre onglets par rôle, puis le profil natif. Le reste des sections reste
@@ -74,6 +78,7 @@ export const roleTabs: Record<Role, [TabSpec, TabSpec, TabSpec, TabSpec]> = {
       path: '/dashboard/reservations',
       sf: { default: 'calendar', selected: 'calendar' },
       md: 'event',
+      badge: 'reservations',
     },
     {
       label: 'Événements',
@@ -86,6 +91,7 @@ export const roleTabs: Record<Role, [TabSpec, TabSpec, TabSpec, TabSpec]> = {
       path: '/dashboard/messages',
       sf: { default: 'bubble.left', selected: 'bubble.left.fill' },
       md: 'chat',
+      badge: 'messages',
     },
   ],
   hotel: [
@@ -100,6 +106,7 @@ export const roleTabs: Record<Role, [TabSpec, TabSpec, TabSpec, TabSpec]> = {
       path: '/hotel/reservations',
       sf: { default: 'calendar', selected: 'calendar' },
       md: 'event',
+      badge: 'reservations',
     },
     {
       label: 'Chambres',
@@ -138,6 +145,7 @@ export const roleTabs: Record<Role, [TabSpec, TabSpec, TabSpec, TabSpec]> = {
       path: '/concierge/messages',
       sf: { default: 'bubble.left', selected: 'bubble.left.fill' },
       md: 'chat',
+      badge: 'messages',
     },
   ],
   admin: [
