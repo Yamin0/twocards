@@ -145,16 +145,27 @@ export default function VenueCommissionsPage() {
   const [settlements, setSettlements] = useState<Settlement[] | null>(null);
   const [open, setOpen] = useState<Set<string>>(() => new Set());
 
+  /* Les règlements sont notés par twocards ; on les suit en direct pour que
+     « à régler » passe à « réglé » sans recharger. */
   useEffect(() => {
     let cancelled = false;
-    createClient()
-      .from("commission_settlements")
-      .select("period, hotel_id, amount, settled_at, note")
-      .then(({ data }) => {
-        if (!cancelled) setSettlements((data as Settlement[] | null) ?? []);
-      });
+    const supabase = createClient();
+    const load = () => {
+      supabase
+        .from("commission_settlements")
+        .select("period, hotel_id, amount, settled_at, note")
+        .then(({ data }) => {
+          if (!cancelled) setSettlements((data as Settlement[] | null) ?? []);
+        });
+    };
+    load();
+    const channel = supabase
+      .channel("venue-settlements")
+      .on("postgres_changes", { event: "*", schema: "public", table: "commission_settlements" }, load)
+      .subscribe();
     return () => {
       cancelled = true;
+      supabase.removeChannel(channel);
     };
   }, []);
 

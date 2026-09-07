@@ -475,6 +475,9 @@ export default function AdminPage() {
   const [toast, setToast] = useState<{ kind: "ok" | "error"; msg: string } | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
+  /* Incrémenté par le flux temps réel : un montant saisi par un
+     établissement ou un règlement noté relance la lecture, sans toast. */
+  const [liveKey, setLiveKey] = useState(0);
 
   useEffect(() => {
     if (!toast) return;
@@ -504,7 +507,28 @@ export default function AdminPage() {
     return () => {
       cancelled = true;
     };
-  }, [isLoading, isAdmin, reloadKey]);
+  }, [isLoading, isAdmin, reloadKey, liveKey]);
+
+  /* Temps réel : réservations (montants, statuts) et règlements. Les
+     événements arrivent en rafale à la saisie d'un montant ; on regroupe. */
+  useEffect(() => {
+    if (isLoading || !isAdmin) return;
+    const supabase = createClient();
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const bump = () => {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => setLiveKey((k) => k + 1), 400);
+    };
+    const channel = supabase
+      .channel("admin-live")
+      .on("postgres_changes", { event: "*", schema: "public", table: "qr_reservations" }, bump)
+      .on("postgres_changes", { event: "*", schema: "public", table: "commission_settlements" }, bump)
+      .subscribe();
+    return () => {
+      if (timer) clearTimeout(timer);
+      supabase.removeChannel(channel);
+    };
+  }, [isLoading, isAdmin]);
 
   const reload = useCallback(() => setReloadKey((k) => k + 1), []);
   const refresh = useCallback(() => {
