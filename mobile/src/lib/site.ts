@@ -1,6 +1,9 @@
-/* Le site twocards, dont l'app affiche les dashboards. Adresse canonique :
-   twocardspro.com redirige vers www, autant partir directement dessus pour
-   éviter une redirection à chaque chargement. */
+import type Feather from '@expo/vector-icons/Feather'
+import type { ComponentProps } from 'react'
+
+/* Le site twocards, dont l'app affiche encore certaines pages. Adresse
+   canonique : twocardspro.com redirige vers www, autant partir directement
+   dessus pour éviter une redirection à chaque chargement. */
 export const SITE_URL = (
   process.env.EXPO_PUBLIC_SITE_URL ?? 'https://www.twocardspro.com'
 ).replace(/\/$/, '')
@@ -57,12 +60,12 @@ export const isVenueTabRole = (r: TabRole) => r === 'etablissement' || r === 'ac
 /* Trois onglets pour tout le monde : Réservations, Accueil, Menu. Chaque
    rôle indique la page du site derrière les deux premiers ; l'admin n'a
    pas de réservations. */
-export const roleTabs: Record<TabRole, { home: string; reservations: string | null }> = {
-  etablissement: { home: '/dashboard', reservations: '/dashboard/reservations' },
-  activite: { home: '/dashboard', reservations: '/dashboard/reservations' },
-  hotel: { home: '/hotel', reservations: '/hotel/reservations' },
-  concierge: { home: '/concierge', reservations: '/concierge/reservations' },
-  admin: { home: '/admin', reservations: null },
+export const roleTabs: Record<TabRole, { home: string; reservations: string | null; settings: string }> = {
+  etablissement: { home: '/dashboard', reservations: '/dashboard/reservations', settings: '/dashboard/settings' },
+  activite: { home: '/dashboard', reservations: '/dashboard/reservations', settings: '/dashboard/settings' },
+  hotel: { home: '/hotel', reservations: '/hotel/reservations', settings: '/hotel/settings' },
+  concierge: { home: '/concierge', reservations: '/concierge/reservations', settings: '/concierge/settings' },
+  admin: { home: '/admin', reservations: null, settings: '/admin' },
 }
 
 /* Titres des pages du site ouvertes dans l'app. */
@@ -82,7 +85,6 @@ export const WEB_PAGES: Record<string, string> = {
   '/dashboard/settings': 'Paramètres',
   '/dashboard/notifications': 'Notifications',
   '/dashboard/help': 'Aide',
-  '/dashboard/plus': 'Plus',
   '/hotel': 'Accueil',
   '/hotel/reservations': 'Réservations',
   '/hotel/chambres': 'Chambres & QR codes',
@@ -104,76 +106,65 @@ export const WEB_PAGES: Record<string, string> = {
   '/admin': 'Administration',
 }
 
-/* Le menu (troisième onglet) : chaque section, avec son émoticône. */
-export type HubItem = { emoji: string; label: string; hint: string; path: string }
+/* Le menu (troisième onglet) : chaque section avec son icône en traits.
+   `route` ouvre un écran natif, `path` une page du site. */
+export type IconName = ComponentProps<typeof Feather>['name']
+export type HubItem = { icon: IconName; label: string; hint: string; route?: string; path?: string }
 export type HubGroup = { title: string; items: HubItem[] }
 
-const VENUE_ACTIVITY: HubGroup = {
-  title: 'Activité',
+const VENUE_ACTIVITY: HubItem[] = [
+  { icon: 'message-circle', label: 'Messages', hint: 'Hôtels et concierges', route: '/venue/messages' },
+  { icon: 'dollar-sign', label: 'Commissions', hint: 'À régler ce mois, historique par hôtel', route: '/venue/commissions' },
+  { icon: 'share-2', label: 'Réseau apporteurs', hint: 'Quels hôtels vous envoient des clients', route: '/venue/network' },
+  { icon: 'bar-chart-2', label: 'Analyses', hint: 'Volumes, panier moyen, tendances', route: '/venue/analytics' },
+  { icon: 'users', label: 'Clients', hint: 'Historique et fidélité', route: '/venue/guests' },
+]
+
+const VENUE_TOOLS_GROUP: HubGroup = {
+  title: 'Outils',
   items: [
-    { emoji: '💬', label: 'Messages', hint: 'Hôtels et concierges', path: '/dashboard/messages' },
-    { emoji: '💰', label: 'Commissions', hint: 'À régler ce mois, historique par hôtel', path: '/dashboard/commissions' },
-    { emoji: '🏨', label: 'Réseau apporteurs', hint: 'Quels hôtels vous envoient des clients', path: '/dashboard/network' },
-    { emoji: '📊', label: 'Analyses', hint: 'Volumes, panier moyen, tendances', path: '/dashboard/analytics' },
-    { emoji: '👥', label: 'Clients', hint: 'Historique et fidélité', path: '/dashboard/guests' },
+    { icon: 'grid', label: 'Plus', hint: 'Portail, événements, plan de salle, caisse', route: '/venue/tools' },
   ],
 }
 
 const VENUE_ACCOUNT: HubGroup = {
   title: 'Compte',
   items: [
-    { emoji: '⚙️', label: 'Paramètres', hint: 'Profil, établissement, sécurité', path: '/dashboard/settings' },
-    { emoji: '🔔', label: 'Notifications', hint: "Tout ce qui s'est passé, dans l'ordre", path: '/dashboard/notifications' },
-    { emoji: '❓', label: 'Aide', hint: 'Guides et contact', path: '/dashboard/help' },
+    { icon: 'settings', label: 'Paramètres', hint: 'Profil, établissement, sécurité', route: '/venue/settings' },
+    { icon: 'bell', label: 'Notifications', hint: "Tout ce qui s'est passé, dans l'ordre", route: '/venue/notifications' },
+    { icon: 'help-circle', label: 'Aide', hint: 'Guides et contact', route: '/venue/help' },
   ],
 }
 
 export const HUB: Record<TabRole, HubGroup[]> = {
-  etablissement: [
-    VENUE_ACTIVITY,
-    {
-      title: 'Outils',
-      items: [
-        { emoji: '🌐', label: 'Portail de réservation', hint: 'Votre page de réservation directe, sans commission', path: '/dashboard/portal' },
-        { emoji: '🎉', label: 'Événements', hint: 'Soirées et programmation', path: '/dashboard/events' },
-        { emoji: '🪑', label: 'Plan de salle', hint: 'Vos tables et leur occupation', path: '/dashboard/floor-plan' },
-        { emoji: '💳', label: 'Caisse (POS)', hint: 'Rapprochement automatique des tickets', path: '/dashboard/integrations' },
-      ],
-    },
-    VENUE_ACCOUNT,
-  ],
+  etablissement: [{ title: 'Activité', items: VENUE_ACTIVITY }, VENUE_TOOLS_GROUP, VENUE_ACCOUNT],
   activite: [
     {
       title: 'Activité',
       items: [
-        { emoji: '🏷️', label: 'Prestations', hint: 'Ce que vos clients réservent, visible sur le menu', path: '/dashboard/prestations' },
-        ...VENUE_ACTIVITY.items,
+        { icon: 'tag', label: 'Prestations', hint: 'Ce que vos clients réservent, visible sur le menu', route: '/venue/prestations' },
+        ...VENUE_ACTIVITY,
       ],
     },
-    {
-      title: 'Outils',
-      items: [
-        { emoji: '🌐', label: 'Portail de réservation', hint: 'Votre page de réservation directe, sans commission', path: '/dashboard/portal' },
-      ],
-    },
+    { title: 'Outils', items: [{ icon: 'grid', label: 'Plus', hint: 'Portail de réservation', route: '/venue/tools' }] },
     VENUE_ACCOUNT,
   ],
   hotel: [
     {
       title: 'Activité',
       items: [
-        { emoji: '🛏️', label: 'Chambres & QR codes', hint: 'Un QR par chambre, le menu de chacun', path: '/hotel/chambres' },
-        { emoji: '📍', label: 'Mes adresses', hint: 'Vos adresses maison sur le menu', path: '/hotel/adresses' },
-        { emoji: '👥', label: 'Clients', hint: 'Qui a réservé quoi', path: '/hotel/clients' },
-        { emoji: '💰', label: 'Commissions', hint: 'Ce que vous recevez, mois par mois', path: '/hotel/commissions' },
-        { emoji: '📊', label: 'Analyses', hint: 'Scans, conversions, tendances', path: '/hotel/analyses' },
+        { icon: 'key', label: 'Chambres & QR codes', hint: 'Un QR par chambre, le menu de chacun', path: '/hotel/chambres' },
+        { icon: 'map-pin', label: 'Mes adresses', hint: 'Vos adresses maison sur le menu', path: '/hotel/adresses' },
+        { icon: 'users', label: 'Clients', hint: 'Qui a réservé quoi', path: '/hotel/clients' },
+        { icon: 'dollar-sign', label: 'Commissions', hint: 'Ce que vous recevez, mois par mois', path: '/hotel/commissions' },
+        { icon: 'bar-chart-2', label: 'Analyses', hint: 'Scans, conversions, tendances', path: '/hotel/analyses' },
       ],
     },
     {
       title: 'Compte',
       items: [
-        { emoji: '⚙️', label: 'Paramètres', hint: "Profil de l'hôtel, couleurs, menu client", path: '/hotel/settings' },
-        { emoji: '❓', label: 'Aide', hint: 'Guides et contact', path: '/hotel/aide' },
+        { icon: 'settings', label: 'Paramètres', hint: "Profil de l'hôtel, couleurs, menu client", path: '/hotel/settings' },
+        { icon: 'help-circle', label: 'Aide', hint: 'Guides et contact', path: '/hotel/aide' },
       ],
     },
   ],
@@ -181,31 +172,42 @@ export const HUB: Record<TabRole, HubGroup[]> = {
     {
       title: 'Activité',
       items: [
-        { emoji: '👥', label: 'CRM Clients', hint: 'Vos clients et leurs habitudes', path: '/concierge/clients' },
-        { emoji: '💰', label: 'Commissions', hint: 'Ce que vous recevez', path: '/concierge/commissions' },
-        { emoji: '📈', label: 'Statistiques', hint: 'Couverts, commissions, croissance', path: '/concierge/stats' },
-        { emoji: '💬', label: 'Messages', hint: 'Échanges avec les établissements', path: '/concierge/messages' },
-        { emoji: '🏛️', label: 'Établissements', hint: 'Le réseau et ses tables', path: '/concierge/venues' },
-        { emoji: '🤖', label: 'Assistant IA', hint: 'Une recommandation en quelques mots', path: '/concierge/ai' },
+        { icon: 'users', label: 'CRM Clients', hint: 'Vos clients et leurs habitudes', path: '/concierge/clients' },
+        { icon: 'dollar-sign', label: 'Commissions', hint: 'Ce que vous recevez', path: '/concierge/commissions' },
+        { icon: 'trending-up', label: 'Statistiques', hint: 'Couverts, commissions, croissance', path: '/concierge/stats' },
+        { icon: 'message-circle', label: 'Messages', hint: 'Échanges avec les établissements', path: '/concierge/messages' },
+        { icon: 'home', label: 'Établissements', hint: 'Le réseau et ses tables', path: '/concierge/venues' },
+        { icon: 'zap', label: 'Assistant IA', hint: 'Une recommandation en quelques mots', path: '/concierge/ai' },
       ],
     },
     {
       title: 'Compte',
-      items: [
-        { emoji: '⚙️', label: 'Paramètres', hint: 'Profil et sécurité', path: '/concierge/settings' },
-      ],
+      items: [{ icon: 'settings', label: 'Paramètres', hint: 'Profil et sécurité', path: '/concierge/settings' }],
     },
   ],
   admin: [
     {
       title: 'Réseau',
       items: [
-        { emoji: '🛡️', label: 'Console admin', hint: 'Comptes, catalogue, commissions', path: '/admin' },
-        { emoji: '🍽️', label: 'Espace établissement', hint: 'Tel que le voit un restaurant', path: '/dashboard' },
-        { emoji: '🏨', label: 'Espace hôtel', hint: "Tel que le voit un hôtel", path: '/hotel' },
-        { emoji: '🤝', label: 'Espace concierge', hint: 'Tel que le voit une conciergerie', path: '/concierge' },
+        { icon: 'shield', label: 'Console admin', hint: 'Comptes, catalogue, commissions', path: '/admin' },
+        { icon: 'coffee', label: 'Espace établissement', hint: 'Tel que le voit un restaurant', path: '/dashboard' },
+        { icon: 'briefcase', label: 'Espace hôtel', hint: 'Tel que le voit un hôtel', path: '/hotel' },
+        { icon: 'user-check', label: 'Espace concierge', hint: 'Tel que le voit une conciergerie', path: '/concierge' },
       ],
     },
+  ],
+}
+
+/* Les outils rares, derrière « Plus » : encore des pages du site. */
+export const VENUE_TOOLS: Record<'etablissement' | 'activite', HubItem[]> = {
+  etablissement: [
+    { icon: 'globe', label: 'Portail de réservation', hint: 'Votre page de réservation directe, sans commission', path: '/dashboard/portal' },
+    { icon: 'calendar', label: 'Événements', hint: 'Soirées et programmation', path: '/dashboard/events' },
+    { icon: 'layout', label: 'Plan de salle', hint: 'Vos tables et leur occupation', path: '/dashboard/floor-plan' },
+    { icon: 'credit-card', label: 'Caisse (POS)', hint: 'Rapprochement automatique des tickets', path: '/dashboard/integrations' },
+  ],
+  activite: [
+    { icon: 'globe', label: 'Portail de réservation', hint: 'Votre page de réservation directe, sans commission', path: '/dashboard/portal' },
   ],
 }
 

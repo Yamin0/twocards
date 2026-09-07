@@ -3,16 +3,16 @@ import { useRouter } from 'expo-router'
 import { useCallback, useEffect, useState } from 'react'
 import { Alert, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 
-import { Avatar, Card, Screen } from '@/components/venue/ui'
+import { Avatar, Card, Icon, ListRow, Screen } from '@/components/venue/ui'
 import { BottomTabInset, Light } from '@/constants/theme'
 import { useAuth } from '@/lib/auth-context'
 import { pushStatus, registerPush, unregisterPush, type PushStatus } from '@/lib/push'
-import { HUB, roleLabels, WEB_PAGES } from '@/lib/site'
+import { HUB, isVenueTabRole, roleLabels, roleTabs, WEB_PAGES } from '@/lib/site'
 import { supabase } from '@/lib/supabase'
 
 /* Troisième onglet, commun à tous les rôles : le compte, les
-   notifications, puis chaque section de l'espace, avec son émoticône.
-   Chaque section s'ouvre dans l'app. */
+   notifications, puis chaque section de l'espace. Toucher le compte ouvre
+   les paramètres. */
 
 const CONTACT_EMAIL = 'contact@twocardspro.com'
 
@@ -30,6 +30,7 @@ export default function HubTab() {
   const userId = session?.user.id ?? null
   const version = Constants.expoConfig?.version ?? '1.0.0'
   const [push, setPush] = useState<PushStatus | null>(null)
+  const venue = isVenueTabRole(tabRole)
 
   useEffect(() => {
     let cancelled = false
@@ -57,6 +58,9 @@ export default function HubTab() {
   const openWeb = (path: string) =>
     router.push({ pathname: '/web', params: { path, title: WEB_PAGES[path] ?? '' } })
 
+  const openSettings = () =>
+    venue ? router.push('/venue/settings') : openWeb(roleTabs[tabRole].settings)
+
   const signOut = async () => {
     await unregisterPush().catch(() => {})
     await supabase.auth.signOut()
@@ -79,59 +83,58 @@ export default function HubTab() {
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.title}>Menu</Text>
 
-        <Card style={styles.profile}>
-          <Avatar name={fullName ?? venueName ?? 'T'} size={48} />
-          <View style={styles.profileText}>
-            <Text style={styles.profileName} numberOfLines={1}>
-              {venueName ?? fullName ?? 'Votre espace'}
-            </Text>
-            <Text style={styles.profileHint} numberOfLines={1}>
-              {fullName ? `${fullName} · ` : ''}
-              {spaceLabel}
-            </Text>
-            <Text style={styles.profileHint} numberOfLines={1}>
-              {email}
-            </Text>
-          </View>
-        </Card>
-
-        <Pressable onPress={togglePush} style={({ pressed }) => [pressed && styles.pressed]}>
-          <Card style={styles.row}>
-            <Text style={styles.emoji}>🔔</Text>
-            <View style={styles.rowText}>
-              <Text style={styles.rowLabel}>Notifications push</Text>
-              <Text style={styles.rowHint}>{push ? statusLabels[push] : 'Vérification…'}</Text>
+        {/* Le compte → paramètres */}
+        <Pressable onPress={openSettings} style={({ pressed }) => [pressed && styles.pressed]}>
+          <Card style={styles.profile}>
+            <Avatar name={fullName ?? venueName ?? 'T'} size={48} />
+            <View style={styles.profileText}>
+              <Text style={styles.profileName} numberOfLines={1}>
+                {venueName ?? fullName ?? 'Votre espace'}
+              </Text>
+              <Text style={styles.profileHint} numberOfLines={1}>
+                {fullName ? `${fullName} · ` : ''}
+                {spaceLabel}
+              </Text>
+              <Text style={styles.profileLink}>Voir le profil et les paramètres</Text>
             </View>
-            <View style={[styles.dot, { backgroundColor: push === 'granted' ? Light.success : Light.warning }]} />
+            <Icon name="chevron-right" size={18} color={Light.faint} />
           </Card>
         </Pressable>
+
+        <Card style={styles.group}>
+          <ListRow
+            first
+            icon="bell"
+            label="Notifications push"
+            hint={push ? statusLabels[push] : 'Vérification…'}
+            onPress={push === 'granted' || push === 'unsupported' ? undefined : togglePush}
+            right={
+              <View style={[styles.dot, { backgroundColor: push === 'granted' ? Light.success : Light.warning }]} />
+            }
+          />
+        </Card>
 
         {HUB[tabRole].map((g) => (
           <View key={g.title}>
             <Text style={styles.groupTitle}>{g.title}</Text>
             <Card style={styles.group}>
               {g.items.map((i, idx) => (
-                <Pressable
-                  key={i.path}
-                  onPress={() => openWeb(i.path)}
-                  style={({ pressed }) => [styles.row, idx > 0 && styles.rowBorder, pressed && styles.pressed]}>
-                  <Text style={styles.emoji}>{i.emoji}</Text>
-                  <View style={styles.rowText}>
-                    <Text style={styles.rowLabel}>{i.label}</Text>
-                    <Text style={styles.rowHint} numberOfLines={1}>
-                      {i.hint}
-                    </Text>
-                  </View>
-                  <Text style={styles.chevron}>›</Text>
-                </Pressable>
+                <ListRow
+                  key={i.route ?? i.path ?? i.label}
+                  first={idx === 0}
+                  icon={i.icon}
+                  label={i.label}
+                  hint={i.hint}
+                  onPress={() => (i.route ? router.push(i.route as never) : i.path ? openWeb(i.path) : undefined)}
+                />
               ))}
             </Card>
           </View>
         ))}
 
-        <Pressable onPress={signOut} style={({ pressed }) => [styles.signOut, pressed && styles.pressed]}>
-          <Text style={styles.signOutText}>Se déconnecter</Text>
-        </Pressable>
+        <Card style={styles.group}>
+          <ListRow first icon="log-out" label="Se déconnecter" tone="danger" onPress={signOut} />
+        </Card>
         <Pressable onPress={requestDeletion} style={({ pressed }) => [styles.quiet, pressed && styles.pressed]}>
           <Text style={styles.quietText}>Demander la suppression de mon compte</Text>
         </Pressable>
@@ -173,6 +176,12 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: Light.muted,
   },
+  profileLink: {
+    marginTop: 2,
+    fontSize: 12,
+    fontWeight: '600',
+    color: Light.accent,
+  },
   dot: {
     width: 10,
     height: 10,
@@ -190,60 +199,8 @@ const styles = StyleSheet.create({
   group: {
     paddingVertical: 0,
   },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    paddingVertical: 13,
-  },
-  rowBorder: {
-    borderTopWidth: 1,
-    borderTopColor: Light.line,
-  },
-  emoji: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: Light.bg,
-    textAlign: 'center',
-    lineHeight: 36,
-    fontSize: 18,
-    overflow: 'hidden',
-  },
-  rowText: {
-    flex: 1,
-    minWidth: 0,
-    gap: 2,
-  },
-  rowLabel: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: Light.ink,
-  },
-  rowHint: {
-    fontSize: 12,
-    color: Light.muted,
-  },
-  chevron: {
-    fontSize: 22,
-    color: Light.faint,
-    marginTop: -2,
-  },
   pressed: {
     opacity: 0.6,
-  },
-  signOut: {
-    marginTop: 8,
-    height: 48,
-    borderRadius: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: Light.dangerSoft,
-  },
-  signOutText: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: Light.danger,
   },
   quiet: {
     alignItems: 'center',

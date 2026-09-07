@@ -13,10 +13,9 @@ import {
 import { AmountSheet } from '@/components/venue/amount-sheet'
 import { BarChart } from '@/components/venue/bar-chart'
 import { ReservationCard } from '@/components/venue/reservation-card'
-import { Avatar, Card, Kpi, Screen, SectionTitle } from '@/components/venue/ui'
+import { Avatar, Card, Icon, Kpi, Screen, SectionTitle, type IconName } from '@/components/venue/ui'
 import { BottomTabInset, Light } from '@/constants/theme'
 import { useAuth } from '@/lib/auth-context'
-import { WEB_PAGES } from '@/lib/site'
 import {
   isDue,
   isOut,
@@ -37,12 +36,10 @@ export function VenueHome() {
   const activity = tabRole === 'activite'
   const { rows, loading, refreshing, refresh, setStatus, checkIn, setAmount } =
     useVenueReservations()
-  const services = useVenueServices(activity)
+  const { rows: services } = useVenueServices(activity)
   const [range, setRange] = useState<'week' | 'month'>('week')
   const [amountFor, setAmountFor] = useState<Reservation | null>(null)
 
-  const openWeb = (path: string) =>
-    router.push({ pathname: '/web', params: { path, title: WEB_PAGES[path] ?? '' } })
   /* Chaque chiffre mène à la liste qu'il résume, filtrée. */
   const openReservations = (filter: 'pending' | 'today' | 'upcoming' | 'past' | 'all') =>
     router.navigate({ pathname: '/reservations', params: { filter, t: String(Date.now()) } })
@@ -80,16 +77,16 @@ export function VenueHome() {
 
   const tiles = activity
     ? [
-        { label: 'Prestations', hint: 'Ce que vos clients réservent', path: '/dashboard/prestations' },
-        { label: 'Messages', hint: 'Hôtels et concierges', path: '/dashboard/messages' },
-        { label: 'Commissions', hint: 'À régler, réglé', path: '/dashboard/commissions' },
-        { label: 'Analyses', hint: 'Tendances et panier moyen', path: '/dashboard/analytics' },
+        { icon: 'tag' as IconName, label: 'Prestations', hint: 'Ce que vos clients réservent', path: '/venue/prestations' },
+        { icon: 'message-circle' as IconName, label: 'Messages', hint: 'Hôtels et concierges', path: '/venue/messages' },
+        { icon: 'dollar-sign' as IconName, label: 'Commissions', hint: 'À régler, réglé', path: '/venue/commissions' },
+        { icon: 'bar-chart-2' as IconName, label: 'Analyses', hint: 'Tendances et panier moyen', path: '/venue/analytics' },
       ]
     : [
-        { label: 'Messages', hint: 'Hôtels et concierges', path: '/dashboard/messages' },
-        { label: 'Commissions', hint: 'À régler, réglé', path: '/dashboard/commissions' },
-        { label: 'Réseau', hint: 'Qui vous envoie des clients', path: '/dashboard/network' },
-        { label: 'Analyses', hint: 'Tendances et panier moyen', path: '/dashboard/analytics' },
+        { icon: 'message-circle' as IconName, label: 'Messages', hint: 'Hôtels et concierges', path: '/venue/messages' },
+        { icon: 'dollar-sign' as IconName, label: 'Commissions', hint: 'À régler, réglé', path: '/venue/commissions' },
+        { icon: 'share-2' as IconName, label: 'Réseau', hint: 'Qui vous envoie des clients', path: '/venue/network' },
+        { icon: 'bar-chart-2' as IconName, label: 'Analyses', hint: 'Tendances et panier moyen', path: '/venue/analytics' },
       ]
 
   return (
@@ -125,7 +122,7 @@ export function VenueHome() {
                   </Text>
                 </Text>
               </View>
-              <Text style={styles.todayChevron}>›</Text>
+              <Icon name="chevron-right" size={22} color="rgba(255,255,255,0.6)" />
             </View>
           </Card>
         </Pressable>
@@ -135,27 +132,27 @@ export function VenueHome() {
           <Kpi
             label="Réservations du mois"
             value={String(thisMonth.length)}
-            hint={`${rows.length} au total ›`}
+            hint={`${rows.length} au total`}
             onPress={() => openReservations('all')}
           />
           <Kpi
             label="En attente"
             value={String(pending.length)}
-            hint={pending.length > 0 ? 'à confirmer ›' : 'rien à traiter ›'}
+            hint={pending.length > 0 ? 'à confirmer' : 'rien à traiter'}
             tone={pending.length > 0 ? 'warning' : 'success'}
             onPress={() => openReservations('pending')}
           />
         </View>
         <View style={styles.kpiRow}>
-          <Kpi label="CA apporté" value={mad(revenue)} hint="additions saisies ›" tone="accent" onPress={() => openWeb('/dashboard/analytics')} />
-          <Kpi label="Commissions du mois" value={mad(commissionsMonth)} hint="à reverser ›" onPress={() => openWeb('/dashboard/commissions')} />
+          <Kpi label="CA apporté" value={mad(revenue)} hint="additions saisies" tone="accent" onPress={() => router.push('/venue/analytics')} />
+          <Kpi label="Commissions du mois" value={mad(commissionsMonth)} hint="à reverser" onPress={() => router.push('/venue/commissions')} />
         </View>
 
         {/* Rythme → toutes les réservations */}
         <Card>
           <View style={styles.chartHead}>
             <Pressable onPress={() => openReservations('all')} hitSlop={8}>
-              <Text style={styles.chartTitle}>Demandes reçues ›</Text>
+              <Text style={styles.chartTitle}>Demandes reçues</Text>
               <Text style={styles.chartValue}>
                 {chartTotal}
                 <Text style={styles.chartUnit}> sur {range === 'week' ? '7 jours' : '6 mois'}</Text>
@@ -210,7 +207,7 @@ export function VenueHome() {
         {/* Prestations */}
         {activity && services !== null && (
           <View>
-            <SectionTitle title="Vos prestations" action="Gérer" onAction={() => openWeb('/dashboard/prestations')} />
+            <SectionTitle title="Vos prestations" action="Gérer" onAction={() => router.push('/venue/prestations')} />
             <Card>
               {visibleServices.length === 0 ? (
                 <Text style={styles.emptyText}>
@@ -241,8 +238,11 @@ export function VenueHome() {
             {tiles.map((t) => (
               <Pressable
                 key={t.path}
-                onPress={() => openWeb(t.path)}
+                onPress={() => router.push(t.path as never)}
                 style={({ pressed }) => [styles.tile, pressed && styles.pressed]}>
+                <View style={styles.tileIcon}>
+                  <Icon name={t.icon} size={18} color={Light.accent} />
+                </View>
                 <Text style={styles.tileLabel}>{t.label}</Text>
                 <Text style={styles.tileHint} numberOfLines={2}>
                   {t.hint}
@@ -434,6 +434,15 @@ const styles = StyleSheet.create({
   },
   pressed: {
     opacity: 0.7,
+  },
+  tileIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: Light.accentSoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 6,
   },
   tileLabel: {
     fontSize: 15,

@@ -4,13 +4,26 @@ import { useEffect } from 'react'
 
 import { useAuth } from '@/lib/auth-context'
 import { registerPush } from '@/lib/push'
-import { roleTabs, WEB_PAGES } from '@/lib/site'
+import { isVenueTabRole, roleTabs, WEB_PAGES } from '@/lib/site'
+
+/* Pages du site qui ont leur écran natif chez l'établissement. */
+const NATIVE: Record<string, string> = {
+  '/dashboard/messages': '/venue/messages',
+  '/dashboard/commissions': '/venue/commissions',
+  '/dashboard/notifications': '/venue/notifications',
+  '/dashboard/network': '/venue/network',
+  '/dashboard/analytics': '/venue/analytics',
+  '/dashboard/guests': '/venue/guests',
+  '/dashboard/prestations': '/venue/prestations',
+  '/dashboard/settings': '/venue/settings',
+}
 
 /* Fait le lien entre les notifications du système et la navigation.
 
    À la connexion, ce téléphone s'enregistre auprès du compte. Quand une
    notification est touchée, l'app ouvre l'onglet Réservations ou Accueil
-   si la page visée est la leur, sinon la page du site par-dessus. */
+   si la page visée est la leur, l'écran natif correspondant, ou à défaut
+   la page du site par-dessus. */
 export function PushBridge() {
   const { session, tabRole } = useAuth()
   const router = useRouter()
@@ -35,6 +48,8 @@ export function PushBridge() {
         router.navigate({ pathname: '/reservations', params: { filter: 'pending', t: String(Date.now()) } })
       } else if (url === tabs.home) {
         router.navigate('/')
+      } else if (isVenueTabRole(tabRole) && NATIVE[url]) {
+        router.push(NATIVE[url] as never)
       } else {
         router.push({ pathname: '/web', params: { path: url, title: WEB_PAGES[url] ?? '' } })
       }

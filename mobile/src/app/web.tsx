@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { SiteWebView } from '@/components/site-webview'
+import { Icon } from '@/components/venue/ui'
 import { Light } from '@/constants/theme'
 import { WEB_PAGES } from '@/lib/site'
 
@@ -20,7 +21,7 @@ export default function WebScreen() {
       <StatusBar style="dark" />
       <View style={styles.bar}>
         <Pressable onPress={() => router.back()} hitSlop={10} style={styles.back}>
-          <Text style={styles.backText}>‹</Text>
+          <Icon name="chevron-left" size={26} color={Light.accent} />
         </Pressable>
         <Text style={styles.title} numberOfLines={1}>
           {heading}
