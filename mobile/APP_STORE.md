@@ -123,5 +123,5 @@ captures, dans cet ordre suggéré :
 4. Commissions.
 5. Menu.
 
-Astuce : connectez-vous avec le compte Table du Marché pour avoir des
+Astuce : connectez-vous avec le compte Restaurant Hivernage (tablemarche@venue.com) pour avoir des
 données réalistes. Aucune donnée personnelle réelle ne doit apparaître.

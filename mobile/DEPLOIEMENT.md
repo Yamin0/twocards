@@ -76,7 +76,7 @@ Tous les textes à coller sont dans `APP_STORE.md`. Dans App Store Connect →
 twocards → onglet **App Store** :
 
 1. **Captures d'écran** : 3 à 5, prises dans TestFlight avec le compte
-   Table du Marché.
+   Restaurant Hivernage (tablemarche@venue.com).
 2. **Description**, texte promotionnel, mots-clés, URL d'assistance et de
    confidentialité, catégorie.
 3. **Confidentialité de l'app** : questionnaire (tableau dans
