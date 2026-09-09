@@ -7,8 +7,8 @@ prêts à l'emploi ; ajustez le ton si besoin.
 
 | Champ | Valeur |
 | --- | --- |
-| Nom | twocards |
-| Sous-titre (30 car. max) | Réservations entre hôtels et adresses |
+| Nom | twocards Pro (« twocards » seul est déjà pris sur l'App Store) |
+| Sous-titre (30 car. max) | Réservations hôtels & adresses |
 | Bundle ID | com.twocards.app |
 | SKU | twocards-ios |
 | Catégorie principale | Économie et entreprise |
