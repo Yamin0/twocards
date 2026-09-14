@@ -41,6 +41,8 @@ lien public et coller le lien dans la réponse.
 ```
 Thank you for reviewing twocards Pro. Please find the requested information below. A screen recording made on a physical iPhone (iOS, latest version) is attached: it starts with the app launch and shows login, the main reservation flow, commissions, messaging, the account deletion request and logout.
 
+While preparing this recording, our own QA found that signing out from the Settings screen did not return to the login screen. This is fixed in build 1.0.0 (2), which is now attached to this version; the recording was made with that build.
+
 1. SCREEN RECORDING
 Attached to this reply. The app has no in-app account registration (accounts are created by twocards when a partner joins the network), no user-generated public content, and no paid content or in-app purchases. Account deletion can be requested from Menu > Paramètres > "Demander la suppression de mon compte", which is shown in the recording.
 
