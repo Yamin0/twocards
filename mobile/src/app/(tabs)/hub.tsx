@@ -7,9 +7,9 @@ import { Avatar, Card, Icon, ListRow, Screen } from '@/components/venue/ui'
 import { BottomTabInset, Light } from '@/constants/theme'
 import { useAuth } from '@/lib/auth-context'
 import { useBadgeCounts } from '@/lib/badges'
-import { pushStatus, registerPush, unregisterPush, type PushStatus } from '@/lib/push'
+import { pushStatus, registerPush, type PushStatus } from '@/lib/push'
+import { signOut as signOutEverywhere } from '@/lib/sign-out'
 import { HUB, isVenueTabRole, roleLabels, roleTabs, WEB_PAGES } from '@/lib/site'
-import { supabase } from '@/lib/supabase'
 
 /* Troisième onglet, commun à tous les rôles : le compte, les
    notifications, puis chaque section de l'espace. Toucher le compte ouvre
@@ -66,10 +66,11 @@ export default function HubTab() {
   const openSettings = () =>
     venue ? router.push('/venue/settings') : openWeb(roleTabs[tabRole].settings)
 
-  const signOut = async () => {
-    await unregisterPush().catch(() => {})
-    await supabase.auth.signOut()
-  }
+  const signOut = () =>
+    Alert.alert('Se déconnecter ?', 'Vous ne recevrez plus de notifications sur ce téléphone.', [
+      { text: 'Rester', style: 'cancel' },
+      { text: 'Se déconnecter', style: 'destructive', onPress: () => void signOutEverywhere() },
+    ])
 
   const requestDeletion = () => {
     const subject = encodeURIComponent('Suppression de mon compte twocards')

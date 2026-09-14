@@ -6,9 +6,9 @@ import { Avatar, Button, Card, Field, Icon, ListRow, StackScreen, inputStyle } f
 import { Light } from '@/constants/theme'
 import { useAuth } from '@/lib/auth-context'
 import { haptic } from '@/lib/haptics'
-import { pushStatus, registerPush, unregisterPush, type PushStatus } from '@/lib/push'
+import { pushStatus, registerPush, type PushStatus } from '@/lib/push'
+import { signOut as signOutEverywhere } from '@/lib/sign-out'
 import { roleLabels, SITE_URL } from '@/lib/site'
-import { supabase } from '@/lib/supabase'
 import { useToast } from '@/lib/toast'
 import { updateAvatar, updatePassword, updateProfile } from '@/lib/venue-data'
 
@@ -134,9 +134,8 @@ export default function SettingsScreen() {
       {
         text: 'Se déconnecter',
         style: 'destructive',
-        onPress: async () => {
-          await unregisterPush().catch(() => {})
-          await supabase.auth.signOut()
+        onPress: () => {
+          void signOutEverywhere()
         },
       },
     ])

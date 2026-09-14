@@ -14,6 +14,24 @@ import { WebSessionProvider } from '@/lib/web-session'
 
 SplashScreen.preventAutoHideAsync()
 
+/* Écrans empilés de l'établissement. Tous doivent être déclarés dans le
+   groupe protégé : un écran oublié ici resterait affiché après la
+   déconnexion au lieu de laisser place à la connexion. */
+const VENUE_SCREENS = [
+  'venue/analytics',
+  'venue/commissions',
+  'venue/guests',
+  'venue/help',
+  'venue/messages',
+  'venue/network',
+  'venue/notifications',
+  'venue/prestations',
+  'venue/reservation',
+  'venue/settings',
+  'venue/thread',
+  'venue/tools',
+] as const
+
 /* Thème de navigation clair : le fond gris perle apparaît pendant les
    transitions, jamais un noir qui clignote. */
 const AppTheme: Theme = {
@@ -45,6 +63,9 @@ function RootNavigator() {
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="web" options={{ presentation: 'card' }} />
         <Stack.Screen name="venue/new-reservation" options={{ presentation: 'modal' }} />
+        {VENUE_SCREENS.map((name) => (
+          <Stack.Screen key={name} name={name} />
+        ))}
       </Stack.Protected>
     </Stack>
   )
