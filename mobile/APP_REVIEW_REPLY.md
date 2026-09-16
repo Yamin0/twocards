@@ -91,3 +91,42 @@ Réponse courte à envoyer :
 ```
 The app is not intended for a single business or its employees. It serves independent restaurants, activity providers, hotels and concierge services that join an open partner network; any qualifying business in a city can join. Public App Store distribution lets these small, unrelated businesses find and install the app, exactly like other B2B marketplace apps. Enterprise or custom-app distribution would require each of them to run Apple Business Manager, which is not realistic for independent restaurants.
 ```
+
+## Deuxième retour d'Apple (16 septembre 2026) : 2.1(b), 2.1(a), 2.3
+
+Revue faite sur iPad Air 11 pouces, iPadOS 27, build 1.0.0 (2). Les journaux
+Supabase montrent la connexion du testeur à 09:33 UTC et aucune requête en
+échec. Correctifs : nom de l'app sans « (bdd684) », bandeau Hors ligne
+confirmé par un appel serveur (build 3). Réponse envoyée :
+
+```
+Hello, thank you for the detailed feedback. Here are our answers and fixes.
+
+GUIDELINE 2.3 - METADATA
+The app name has been corrected to "twocards Pro". The "(bdd684)" suffix was a placeholder added automatically when the app record was created.
+
+GUIDELINE 2.1(a) - ERROR MESSAGE AFTER LOGIN
+Our server logs show that every request made during your session on the iPad succeeded, so the message was not caused by a server error. The cause we identified is the app's connectivity indicator: on some devices and networks, the system network status briefly reports "no connection" right after launch, and the app then displayed an "Hors ligne" (offline) badge although everything worked. Build 1.0.0 (3) fixes this: the badge now appears only after an actual request to our server has failed.
+
+GUIDELINE 2.1(b) - BUSINESS MODEL
+twocards Pro contains no paid digital content, no subscription and no feature that is unlocked by a payment, inside or outside the app.
+
+1. Who are the users that will use the paid features in the app?
+There are no paid features in the app. All users (restaurants, activity providers, hotels, concierge services) have access to the same features free of charge.
+
+2. Where can users purchase the features that can be accessed in the app?
+Nowhere: nothing can be purchased. The app is free and account creation is free.
+
+3. What specific types of previously purchased features can a user access in the app?
+None.
+
+4. What paid content, subscriptions, or features are unlocked within the app that do not use In-App Purchase?
+None. The only money involved in the service is outside the app and relates to physical, real-world services: a hotel guest dines at a partner restaurant and pays the restaurant directly on site. The restaurant then owes the referring hotel a referral commission (a percentage of the real bill). The app only records and displays these amounts so both businesses can track them; no payment is made, requested or processed in the app, and settlements happen between the businesses by bank transfer, outside the app. This corresponds to goods and services consumed outside of the app (guideline 3.1.3(e)). During the current pilot phase twocards charges nothing to its partners.
+
+5. How do users obtain an account? Do users have to pay a fee to create an account?
+Businesses register for free on our website twocardspro.com (restaurants, activities and hotels) and are verified by the twocards team before their account is activated; some accounts are created directly by our team when a partner joins the network. There is no fee to create or keep an account. The app itself has no sign-up; it only offers login for existing partners.
+
+The demo account remains available: tablemarche@venue.com / Twocards2026!
+
+Thank you, we remain available for any further question.
+```
