@@ -2,6 +2,7 @@ import * as Notifications from 'expo-notifications'
 import { useEffect, useState } from 'react'
 
 import { useAuth } from '@/lib/auth-context'
+import { subscribe } from '@/lib/realtime'
 import type { BadgeKind } from '@/lib/site'
 import { supabase } from '@/lib/supabase'
 
@@ -59,23 +60,14 @@ export function useBadgeCounts(): BadgeCounts {
 
     refresh()
 
-    const channel = supabase
-      .channel(`twocards-badges-${Date.now()}`)
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'qr_reservations' },
-        refresh
-      )
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'messages' },
-        refresh
-      )
-      .subscribe()
+    const unsubscribe = subscribe('twocards-badges', [
+      { table: 'qr_reservations', onChange: refresh },
+      { table: 'messages', onChange: refresh },
+    ])
 
     return () => {
       cancelled = true
-      supabase.removeChannel(channel)
+      unsubscribe()
     }
   }, [userId])
 

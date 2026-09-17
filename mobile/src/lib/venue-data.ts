@@ -1,6 +1,7 @@
 import * as ImagePicker from 'expo-image-picker'
 import { useCallback, useEffect, useState } from 'react'
 
+import { subscribe } from '@/lib/realtime'
 import { supabase } from '@/lib/supabase'
 
 /* Données de l'établissement, lues directement dans Supabase : la RLS ne
@@ -45,22 +46,11 @@ const fetchRows = () =>
     .order('reservation_date', { ascending: false })
     .order('reservation_time', { ascending: false })
 
-/* Plusieurs écrans montent ce hook : le client Supabase refuse deux
-   abonnements sur un même nom de canal, chaque instance prend le sien. */
-let channelSeq = 0
-const channelName = (prefix: string) => `${prefix}-${++channelSeq}-${Date.now()}`
-
 /* Abonnement générique : relance `apply` à chaque changement d'une table. */
 function useRealtime(table: string, apply: () => void, enabled = true) {
   useEffect(() => {
     if (!enabled) return
-    const channel = supabase
-      .channel(channelName(table))
-      .on('postgres_changes', { event: '*', schema: 'public', table }, () => apply())
-      .subscribe()
-    return () => {
-      supabase.removeChannel(channel)
-    }
+    return subscribe(`twocards-${table}`, [{ table, onChange: apply }])
   }, [table, apply, enabled])
 }
 
