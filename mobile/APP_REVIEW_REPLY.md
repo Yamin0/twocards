@@ -106,7 +106,7 @@ GUIDELINE 2.3 - METADATA
 The app name has been corrected to "twocards Pro". The "(bdd684)" suffix was a placeholder added automatically when the app record was created.
 
 GUIDELINE 2.1(a) - ERROR MESSAGE AFTER LOGIN
-Our server logs show that every request made during your session on the iPad succeeded, so the message was not caused by a server error. The cause we identified is the app's connectivity indicator: on some devices and networks, the system network status briefly reports "no connection" right after launch, and the app then displayed an "Hors ligne" (offline) badge although everything worked. Build 1.0.0 (3) fixes this: the badge now appears only after an actual request to our server has failed.
+Our server logs show that every request made during your session on the iPad succeeded, so the message did not come from a server error, and we could not reproduce it on our devices. The most likely cause we found is the app's connectivity indicator, which could briefly show an "Hors ligne" (offline) badge right after launch on some devices and networks although everything worked. Build 1.0.0 (3) now shows it only after an actual request to our server has failed. This build also records any error message displayed in the app, with the device and system version, so that we can fix it immediately if anything else appears. If the issue persists, a screenshot of the message would be very helpful.
 
 GUIDELINE 2.1(b) - BUSINESS MODEL
 twocards Pro contains no paid digital content, no subscription and no feature that is unlocked by a payment, inside or outside the app.
