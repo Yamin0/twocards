@@ -1,12 +1,18 @@
-import { useRouter } from 'expo-router'
+import { usePathname, useRouter } from 'expo-router'
+import { useEffect } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 
 import { Button, Icon, Screen } from '@/components/venue/ui'
 import { Light } from '@/constants/theme'
+import { reportError } from '@/lib/report-error'
 
 /* Un lien qui ne mène nulle part : retour à l'accueil, sans drame. */
 export default function NotFoundScreen() {
   const router = useRouter()
+  const pathname = usePathname()
+  useEffect(() => {
+    reportError('message', 'Page introuvable', `not-found:${pathname}`)
+  }, [pathname])
   return (
     <Screen>
       <View style={styles.center}>

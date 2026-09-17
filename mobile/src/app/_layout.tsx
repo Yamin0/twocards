@@ -1,5 +1,6 @@
 import { DefaultTheme, Stack, ThemeProvider, type Theme } from 'expo-router'
 import * as SplashScreen from 'expo-splash-screen'
+import { useEffect } from 'react'
 import { StyleSheet, Text, View, Pressable } from 'react-native'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 
@@ -9,10 +10,12 @@ import { PushBridge } from '@/components/push-bridge'
 import { Icon } from '@/components/venue/ui'
 import { Light } from '@/constants/theme'
 import { AuthProvider, useAuth } from '@/lib/auth-context'
+import { installGlobalErrorReporter, reportError } from '@/lib/report-error'
 import { ToastProvider } from '@/lib/toast'
 import { WebSessionProvider } from '@/lib/web-session'
 
 SplashScreen.preventAutoHideAsync()
+installGlobalErrorReporter()
 
 /* Écrans empilés de l'établissement. Tous doivent être déclarés dans le
    groupe protégé : un écran oublié ici resterait affiché après la
@@ -92,7 +95,10 @@ export default function RootLayout() {
 
 /* Écran de secours si un écran plante : un mot, un bouton, pas de trace
    rouge. */
-export function ErrorBoundary({ retry }: { error: Error; retry: () => Promise<void> }) {
+export function ErrorBoundary({ error, retry }: { error: Error; retry: () => Promise<void> }) {
+  useEffect(() => {
+    reportError('crash', error.message, 'error-boundary', error.stack)
+  }, [error])
   return (
     <View style={styles.error}>
       <View style={styles.errorIcon}>

@@ -5,6 +5,7 @@ import Animated, { FadeInDown, FadeOutDown } from 'react-native-reanimated'
 
 import { Icon, type IconName } from '@/components/venue/ui'
 import { BottomTabInset, Light } from '@/constants/theme'
+import { reportError } from '@/lib/report-error'
 
 /* Un mot de confirmation en bas de l'écran, qui s'efface seul. Quand
    l'action se défait, le toast porte un bouton « Annuler » : refuser une
@@ -34,6 +35,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
   const show = useCallback(
     (t: Toast) => {
+      if (t.tone === 'danger') reportError('message', t.message, 'toast')
       if (timer.current) clearTimeout(timer.current)
       seq.current += 1
       setCurrent({ ...t, key: seq.current })

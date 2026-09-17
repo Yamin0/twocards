@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Icon } from '@/components/venue/ui'
 import { Light } from '@/constants/theme'
+import { reportError } from '@/lib/report-error'
 
 /* Bandeau discret quand le téléphone n'a vraiment plus de réseau.
 
@@ -51,6 +52,7 @@ export function OfflineBanner() {
         const online = await serverReachable()
         if (cancelled) return
         setConfirmedOffline(!online)
+        if (!online) reportError('message', 'Hors ligne', `offline-banner:${net.type ?? '?'}`)
         check(15000)
       }, delay)
     }
@@ -62,7 +64,7 @@ export function OfflineBanner() {
       /* Le réseau est revenu : la prochaine alerte repartira d'une vraie vérification. */
       setConfirmedOffline(false)
     }
-  }, [systemSaysOffline])
+  }, [systemSaysOffline, net.type])
 
   if (!systemSaysOffline || !confirmedOffline) return null
   return (

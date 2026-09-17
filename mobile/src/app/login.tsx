@@ -20,6 +20,7 @@ import logo from '@/assets/images/logo.png'
 import { Icon } from '@/components/venue/ui'
 import { CardShadow, Light } from '@/constants/theme'
 import { haptic } from '@/lib/haptics'
+import { reportError } from '@/lib/report-error'
 import { SITE_URL } from '@/lib/site'
 import { supabase } from '@/lib/supabase'
 
@@ -61,6 +62,7 @@ export default function LoginScreen() {
       if (error) {
         haptic.error()
         setError(ERRORS[error.message] ?? "L'envoi a échoué. Vérifiez l'adresse et réessayez.")
+        reportError('message', error.message, 'login:reset')
         return
       }
       haptic.success()
@@ -72,6 +74,7 @@ export default function LoginScreen() {
     if (error) {
       haptic.error()
       setError(ERRORS[error.message] ?? 'Connexion impossible. Vérifiez votre réseau et réessayez.')
+      if (!ERRORS[error.message]) reportError('message', error.message, 'login')
       setPassword('')
       setLoading(false)
       return

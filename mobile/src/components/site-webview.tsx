@@ -12,6 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { WebView, type WebViewNavigation, type WebViewProps } from 'react-native-webview'
 
 import { Light } from '@/constants/theme'
+import { reportError } from '@/lib/report-error'
 import { SITE_URL, sitePath } from '@/lib/site'
 import { useWebSession } from '@/lib/web-session'
 
@@ -82,6 +83,7 @@ export function SiteWebView({
   const onLoadProgress: NonNullable<WebViewProps['onLoadProgress']> = (e) => onProgress?.(e.nativeEvent.progress)
 
   if (ws.error) {
+    reportError('message', ws.error, `webview-session:${path}`)
     return (
       <Shell inset={inset}>
         <View style={styles.center}>
@@ -134,6 +136,7 @@ export function SiteWebView({
             <ActivityIndicator color={Light.accent} />
           </View>
         )}
+        onError={(e) => reportError('message', e.nativeEvent.description ?? 'erreur de chargement', `webview:${path}`)}
         renderError={() => (
           <View style={[styles.center, StyleSheet.absoluteFill]}>
             <Text style={styles.errorText}>
