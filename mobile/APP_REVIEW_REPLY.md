@@ -130,3 +130,37 @@ The demo account remains available: tablemarche@venue.com / Twocards2026!
 
 Thank you, we remain available for any further question.
 ```
+
+## Troisième soumission (19 septembre 2026), build 1.0.0 (3) : réponse complète à envoyer
+
+```
+Hello, thank you for the detailed feedback and the screenshot. Here are our answers and fixes, all included in build 1.0.0 (3).
+
+GUIDELINE 2.3 - METADATA
+The app name has been corrected to "twocards Pro". The "(bdd684)" suffix was a placeholder added automatically when the app record was created.
+
+GUIDELINE 2.1(a) - ERROR SCREEN AFTER LOGIN
+Your screenshot allowed us to find the exact cause. Right after login, two parts of the interface (the tab bar and the Menu tab) each open a live-update connection to our server. Their names were based on the current time in milliseconds; on your iPad both started within the same millisecond, received the same name, and the second one raised an error, which displayed the "Un imprévu est survenu" screen. We reproduced this exact error in a test. Build 3 gives every connection a unique name and makes a failed live-update connection harmless: the screen keeps working and the error is logged instead of being shown. During a full review of the app we also fixed saving the bill amount on a reservation and made photo uploads more reliable.
+
+GUIDELINE 2.1(b) - BUSINESS MODEL
+twocards Pro contains no paid digital content, no subscription and no feature unlocked by a payment, inside or outside the app.
+
+1. Who are the users that will use the paid features in the app?
+There are no paid features. All users (restaurants, activity providers, hotels, concierge services) have access to the same features free of charge.
+
+2. Where can users purchase the features that can be accessed in the app?
+Nowhere: nothing can be purchased. The app is free and accounts are free.
+
+3. What specific types of previously purchased features can a user access in the app?
+None.
+
+4. What paid content, subscriptions, or features are unlocked within the app that do not use In-App Purchase?
+None. The only money involved in the service relates to physical, real-world services outside the app: a hotel guest dines at a partner restaurant and pays the restaurant on site. The restaurant then owes the referring hotel a referral commission (a percentage of the real bill). The app only records and displays these amounts so both businesses can track them; no payment is made, requested or processed in the app, and settlements happen between the businesses by bank transfer. This corresponds to goods and services consumed outside of the app (guideline 3.1.3(e)).
+
+5. How do users obtain an account? Do users have to pay a fee to create an account?
+Accounts are opened outside the app, free of charge: businesses register on our website twocardspro.com and are verified by the twocards team, or the team creates the account when a partner joins the network. There is no fee to create or keep an account. The app has no sign-up; it only offers login for existing partners, and account deletion can be requested from Menu > Paramètres.
+
+Demo account: tablemarche@venue.com / Twocards2026!
+
+Thank you, we remain available for any further question.
+```
