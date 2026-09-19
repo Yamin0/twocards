@@ -1,3 +1,4 @@
+import { ImageManipulator, SaveFormat } from 'expo-image-manipulator'
 import * as ImagePicker from 'expo-image-picker'
 import { useCallback, useEffect, useState } from 'react'
 
@@ -110,9 +111,12 @@ export function useVenueReservations() {
   const setAmount = useCallback(
     async (r: Reservation, amount: number) => {
       patch(r.id, { amount_spent: amount, amount_source: 'manuel' })
+      /* Seules colonnes ouvertes à l'établissement : amount_spent, status,
+         arrived_at, table_id. La source du montant et la commission sont
+         fixées côté base. */
       const { error } = await supabase
         .from('qr_reservations')
-        .update({ amount_spent: amount, amount_source: 'manuel' })
+        .update({ amount_spent: amount })
         .eq('id', r.id)
       if (error) patch(r.id, { amount_spent: r.amount_spent, amount_source: r.amount_source })
       return !error
@@ -298,8 +302,10 @@ export function useVenueServices(enabled = true) {
   return { rows, save, toggle, remove, move, reload: load }
 }
 
-/* Photo d'une prestation : choisie dans la pellicule, envoyée dans le
-   même bucket que le site, sous le dossier du compte. */
+/* Photo d'une prestation ou du profil : choisie dans la pellicule, ramenée
+   à 1600 px de large et recompressée (le bucket refuse plus de 2 Mo, une
+   photo d'iPhone recadrée les dépasse souvent), puis envoyée dans le même
+   bucket que le site, sous le dossier du compte. */
 export async function pickAndUploadImage(userId: string): Promise<string | null> {
   const perm = await ImagePicker.requestMediaLibraryPermissionsAsync()
   if (!perm.granted) return null
@@ -311,12 +317,16 @@ export async function pickAndUploadImage(userId: string): Promise<string | null>
   })
   if (res.canceled || !res.assets[0]) return null
   const asset = res.assets[0]
-  const response = await fetch(asset.uri)
+  let context = ImageManipulator.manipulate(asset.uri)
+  if (!asset.width || asset.width > 1600) context = context.resize({ width: 1600 })
+  const rendered = await context.renderAsync()
+  const saved = await rendered.saveAsync({ compress: 0.72, format: SaveFormat.JPEG })
+  const response = await fetch(saved.uri)
   const buffer = await response.arrayBuffer()
   const path = `${userId}/service-${Date.now()}.jpg`
   const { error } = await supabase.storage
     .from('avatars')
-    .upload(path, buffer, { contentType: asset.mimeType ?? 'image/jpeg' })
+    .upload(path, buffer, { contentType: 'image/jpeg' })
   if (error) throw error
   return supabase.storage.from('avatars').getPublicUrl(path).data.publicUrl
 }

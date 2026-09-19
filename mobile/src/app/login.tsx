@@ -5,7 +5,6 @@ import {
   ActivityIndicator,
   Keyboard,
   KeyboardAvoidingView,
-  Linking,
   Platform,
   Pressable,
   ScrollView,
@@ -199,11 +198,11 @@ export default function LoginScreen() {
             )}
           </View>
 
-          <Pressable onPress={() => Linking.openURL(`${SITE_URL}/signup`)} hitSlop={8} style={styles.footer}>
-            <Text style={styles.footerText}>
-              Pas encore de compte ? <Text style={styles.footerLink}>Inscrivez votre établissement</Text>
-            </Text>
-          </Pressable>
+          {/* Pas d'inscription dans l'app : les comptes partenaires sont ouverts
+              par l'équipe twocards, hors de l'app. */}
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>Accès réservé aux partenaires du réseau twocards.</Text>
+          </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -375,9 +374,5 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: Light.muted,
     textAlign: 'center',
-  },
-  footerLink: {
-    fontWeight: '600',
-    color: Light.accent,
   },
 })
