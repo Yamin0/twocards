@@ -13,7 +13,17 @@ type Context = {
   venue_name: string;
   reservation_date: string;
   already_rated: boolean;
+  /* Lien « Demander des avis » de la fiche Google de l'établissement, saisi
+     dans ses réglages. Absent tant que la migration
+     20261110120000_google_review_link n'est pas passée, ou si
+     l'établissement ne l'a pas renseigné : l'invitation ne s'affiche pas. */
+  google_review_url?: string | null;
 };
+
+/* Seul un lien https est rendu (le champ vient des réglages de
+   l'établissement, jamais d'un schéma javascript: ou autre). */
+const safeReviewUrl = (url?: string | null) =>
+  url && /^https:\/\/\S+$/i.test(url) ? url : null;
 
 type Phase = "loading" | "form" | "sending" | "done" | "invalid";
 
@@ -125,6 +135,28 @@ export function RatingExperience({ reservationId }: { reservationId: string }) {
             <p className="mt-2 text-sm leading-relaxed text-neutral-500">
               Il aide {context?.venue_name ?? "l'établissement"} et votre hôtel à rendre chaque sortie meilleure.
             </p>
+
+            {/* Invitation Google proposée à tous les clients, quelle que soit
+                leur note : la réserver aux 5 étoiles (« review gating ») est
+                interdit par les règles d'avis de Google. */}
+            {safeReviewUrl(context?.google_review_url) && (
+              <div className="mt-7 rounded-2xl border border-black/[0.06] bg-[#f7f6f3] p-5">
+                <p className="text-[15px] font-bold leading-snug">
+                  Partager votre expérience sur Google ?
+                </p>
+                <p className="mt-1 text-sm text-neutral-500">
+                  Votre avis aide d&apos;autres voyageurs à trouver {context?.venue_name ?? "cette adresse"}.
+                </p>
+                <a
+                  href={safeReviewUrl(context?.google_review_url)!}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-4 flex h-11 w-full items-center justify-center rounded-xl bg-neutral-900 text-[14px] font-bold text-white transition-opacity hover:opacity-90"
+                >
+                  Laisser un avis Google
+                </a>
+              </div>
+            )}
           </>
         )}
 

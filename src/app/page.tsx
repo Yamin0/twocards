@@ -1,13 +1,14 @@
 import { QrHero } from "@/components/landing/qr-hero";
-import { QrFlow, QrAudiences } from "@/components/landing/qr-system";
+import { QrFlow } from "@/components/landing/qr-system";
+import { QrAudiences } from "@/components/landing/qr-audiences";
 import { Activity } from "@/components/landing/activity";
 import { Differentiators } from "@/components/landing/differentiators";
 import { FaqHome } from "@/components/landing/faq-home";
 import { CtaBanner } from "@/components/landing/cta-banner";
 import { Footer } from "@/components/layout/footer";
 
-/* La page d'accueil porte le système QR : héros en deux volets avec la
-   vidéo de présentation, puis le parcours du QR et les métiers qu'il sert.
+/* La page d'accueil porte le système QR : héros avec le film de marque en
+   grand, puis le parcours du QR et les métiers qu'il sert.
    Les sections notifications et différenciateurs descendent ensuite, sur
    fond ivoire — la vidéo des portes pilotée par le scroll est passée sur la
    page Influenceurs.

@@ -3,44 +3,41 @@
 import type { ReactElement } from "react";
 import { motion } from "framer-motion";
 import { EyeOff, Check } from "lucide-react";
+import {
+  CONTAINER,
+  SECTION,
+  STAGE,
+  SectionHeader,
+} from "@/components/landing/section-header";
 
-/* Mini-visuels simulés, style écran sombre.
-   Posés sur une carte en verre sombre (onDark), ils reçoivent un liseré
-   clair : sans lui les panneaux noirs se confondraient avec la carte. */
+/* Les quatre outils propres au réseau. Même écriture que le parcours QR :
+   le texte, puis une scène sable qui porte un mini-écran simulé. */
 
-type VisualProps = { onDark?: boolean };
-
-const darkPanel = (onDark: boolean) =>
-  `rounded-2xl bg-[#111] ${
-    onDark
-      ? "border border-white/15"
-      : "shadow-[0_16px_40px_-16px_rgba(0,0,0,0.4)]"
-  }`;
-
-const lightPanel = "rounded-2xl border border-black/10 bg-white";
+const panel =
+  "w-full rounded-2xl border border-black/[0.08] bg-white shadow-[0_24px_60px_-30px_rgba(60,40,10,0.35)]";
 
 function DropVisual() {
   return (
-    <div className={`${lightPanel} p-4 text-left`}>
-      <div className="mb-2 flex items-center justify-between">
-        <span className="rounded-md bg-amber-400/20 px-2 py-0.5 text-[10px] font-medium text-amber-700">
+    <div className={`${panel} p-5 text-left`}>
+      <div className="mb-3 flex items-center justify-between">
+        <span className="rounded-md bg-amber-400/20 px-2 py-1 text-[11px] font-medium text-amber-700">
           Dernière minute
         </span>
-        <span className="text-[10px] text-[var(--landing-ink)]/40">
+        <span className="text-[12px] text-[var(--landing-ink)]/40">
           ce soir
         </span>
       </div>
-      <p className="text-[13px] font-medium text-[var(--landing-ink)]">
+      <p className="text-[15px] font-medium text-[var(--landing-ink)]">
         Table de 6 · 23:00 · Rooftop
       </p>
-      <p className="mt-0.5 text-[11px] text-[var(--landing-ink)]/55">
+      <p className="mt-1 text-[12px] text-[var(--landing-ink)]/55">
         Min. 8 000 MAD · acompte 20 % · commission 8 %
       </p>
-      <div className="mt-3 flex gap-2">
-        <span className="flex-1 rounded-lg bg-[var(--landing-ink)] py-1.5 text-center text-[11px] font-semibold text-[var(--landing-ivory)]">
+      <div className="mt-4 flex gap-2">
+        <span className="flex-1 rounded-lg bg-[var(--landing-ink)] py-2 text-center text-[12px] font-semibold text-[var(--landing-ivory)]">
           Proposer à un client
         </span>
-        <span className="rounded-lg bg-black/[0.06] px-3 py-1.5 text-[11px] text-[var(--landing-ink)]/60">
+        <span className="rounded-lg bg-black/[0.06] px-3.5 py-2 text-[12px] text-[var(--landing-ink)]/60">
           Passer
         </span>
       </div>
@@ -48,24 +45,22 @@ function DropVisual() {
   );
 }
 
-function ReverseVisual({ onDark = false }: VisualProps) {
+function ReverseVisual() {
   return (
-    <div className="flex flex-col gap-2 text-left">
-      <div
-        className={`max-w-[85%] self-start rounded-bl-md p-3 ${darkPanel(onDark)}`}
-      >
-        <p className="text-[11px] font-medium text-white">
+    <div className="flex flex-col gap-2.5 text-left">
+      <div className="max-w-[85%] self-start rounded-2xl rounded-bl-md bg-[#111] p-3.5 shadow-[0_16px_40px_-16px_rgba(0,0,0,0.4)]">
+        <p className="text-[13px] font-medium text-white">
           8 personnes · restaurant festif · 23:00
         </p>
-        <p className="text-[10px] text-white/50">
+        <p className="mt-0.5 text-[12px] text-white/50">
           Budget 12 000 MAD · client Priority
         </p>
       </div>
-      <div className="max-w-[85%] self-end rounded-2xl rounded-br-md border border-black/10 bg-white p-3">
-        <p className="text-[11px] font-medium text-[var(--landing-ink)]">
+      <div className="max-w-[85%] self-end rounded-2xl rounded-br-md border border-black/10 bg-white p-3.5">
+        <p className="text-[13px] font-medium text-[var(--landing-ink)]">
           Disponible · terrasse, 23:15
         </p>
-        <p className="text-[10px] text-[var(--landing-ink)]/50">
+        <p className="mt-0.5 text-[12px] text-[var(--landing-ink)]/50">
           2 offres reçues en 9 min
         </p>
       </div>
@@ -75,7 +70,7 @@ function ReverseVisual({ onDark = false }: VisualProps) {
 
 function PrivacyVisual() {
   return (
-    <div className={`${lightPanel} p-4 text-left`}>
+    <div className={`${panel} p-5 text-left`}>
       {[
         ["Client", "M. B•••••", true],
         ["Téléphone", "+212 6•• ••• •12", true],
@@ -83,27 +78,27 @@ function PrivacyVisual() {
       ].map(([label, value, masked]) => (
         <div
           key={label as string}
-          className="flex items-center justify-between border-b border-black/[0.07] py-2 last:border-b-0"
+          className="flex items-center justify-between border-b border-black/[0.07] py-2.5 last:border-b-0"
         >
-          <span className="text-[10px] uppercase tracking-wide text-[var(--landing-ink)]/45">
+          <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--landing-ink)]/45">
             {label}
           </span>
-          <span className="flex items-center gap-1.5 text-[12px] font-medium text-[var(--landing-ink)]">
+          <span className="flex items-center gap-1.5 text-[13px] font-medium text-[var(--landing-ink)]">
             {masked && (
-              <EyeOff size={11} className="text-[var(--landing-ink)]/40" />
+              <EyeOff size={12} className="text-[var(--landing-ink)]/40" />
             )}
             {value}
           </span>
         </div>
       ))}
-      <p className="mt-2.5 text-[10px] text-[var(--landing-ink)]/45">
+      <p className="mt-3 text-[12px] text-[var(--landing-ink)]/45">
         Coordonnées révélées après confirmation uniquement
       </p>
     </div>
   );
 }
 
-function PassportVisual({ onDark = false }: VisualProps) {
+function PassportVisual() {
   return (
     <div className="text-left">
       <div className="mb-3 flex flex-wrap gap-1.5">
@@ -111,14 +106,10 @@ function PassportVisual({ onDark = false }: VisualProps) {
           (city, i) => (
             <span
               key={city}
-              className={`rounded-full px-2.5 py-1 text-[10px] font-medium ${
+              className={`rounded-full px-3 py-1 text-[12px] font-medium ${
                 i === 0
-                  ? onDark
-                    ? "bg-white text-black"
-                    : "bg-[var(--landing-ink)] text-[var(--landing-ivory)]"
-                  : onDark
-                    ? "border border-white/30 text-white"
-                    : "border border-black/15 text-[var(--landing-ink)]/60"
+                  ? "bg-[var(--landing-ink)] text-[var(--landing-ivory)]"
+                  : "border border-black/15 bg-white text-[var(--landing-ink)]/60"
               }`}
             >
               {city}
@@ -126,7 +117,7 @@ function PassportVisual({ onDark = false }: VisualProps) {
           )
         )}
       </div>
-      <div className="rounded-2xl border border-black/10 bg-white p-3.5">
+      <div className={`${panel} p-4`}>
         {[
           ["Taux de présence", "96 %"],
           ["Litiges", "0 sur 124 réservations"],
@@ -134,11 +125,11 @@ function PassportVisual({ onDark = false }: VisualProps) {
         ].map(([label, value]) => (
           <div
             key={label}
-            className="flex items-center justify-between py-1.5 text-[12px]"
+            className="flex items-center justify-between py-2 text-[13px]"
           >
             <span className="text-[var(--landing-ink)]/50">{label}</span>
-            <span className="flex items-center gap-1 font-medium text-[var(--landing-ink)]">
-              <Check size={11} className="text-emerald-600" />
+            <span className="flex items-center gap-1.5 font-medium text-[var(--landing-ink)]">
+              <Check size={12} className="text-emerald-600" />
               {value}
             </span>
           </div>
@@ -148,12 +139,10 @@ function PassportVisual({ onDark = false }: VisualProps) {
   );
 }
 
-/* Type explicite : les visuels clairs n'ont pas besoin de onDark, mais le
-   point d'appel le transmet uniformément aux quatre. */
 const FEATURES: {
   title: string;
   description: string;
-  visual: (props: VisualProps) => ReactElement;
+  visual: () => ReactElement;
 }[] = [
   {
     title: "Dernière minute",
@@ -181,28 +170,22 @@ const FEATURES: {
   },
 ];
 
-export function Differentiators({
-  variant = "light",
-}: {
-  variant?: "light" | "overlay";
-}) {
-  const onVideo = variant === "overlay";
-
+export function Differentiators() {
   return (
-    <section
-      className={`px-6 font-body ${
-        onVideo
-          ? "bg-transparent py-16 md:px-16 md:py-20"
-          : "border-t border-black/[0.06] bg-[var(--landing-ivory)] py-24 md:px-16 md:py-32"
-      }`}
-    >
-      <div className="mx-auto max-w-6xl">
-        {/* Sans carte, ce sont les gouttières qui séparent les blocs */}
-        <div
-          className={`grid grid-cols-1 md:grid-cols-2 ${
-            onVideo ? "gap-14 md:gap-x-16 md:gap-y-20" : "gap-5"
-          }`}
-        >
+    <section className={SECTION}>
+      <div className={CONTAINER}>
+        <SectionHeader
+          title={
+            <>
+              Pensé pour
+              <br />
+              <em className="font-light italic">le terrain</em>.
+            </>
+          }
+          intro="Les outils qui manquaient entre établissements et apporteurs : la table libérée au dernier moment, l'appel d'offres, la confidentialité du client, la réputation."
+        />
+
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {FEATURES.map((f, i) => (
             <motion.article
               key={f.title}
@@ -210,37 +193,22 @@ export function Differentiators({
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-60px" }}
               transition={{ duration: 0.55, delay: (i % 2) * 0.1 }}
-              /* Sur la vidéo : aucun habillage. Ni fond, ni bordure, ni flou —
-                 le contenu est posé à même l'image. Seule l'ombre portée du
-                 texte (.text-on-video) assure la lisibilité, faute de carte. */
-              className={`flex flex-col justify-between gap-8 ${
-                onVideo
-                  ? ""
-                  : "rounded-2xl border border-black/[0.08] bg-white/50 p-7 md:p-9"
-              }`}
+              className="flex flex-col rounded-3xl border border-black/[0.08] bg-white p-3"
             >
-              <div>
-                <h3
-                  className={`mb-4 font-title text-[23px] font-semibold tracking-[-0.02em] md:text-[28px] md:leading-[1.2] ${
-                    onVideo
-                      ? "text-on-video text-white"
-                      : "text-[var(--landing-ink)]"
-                  }`}
-                >
+              <div className="px-5 pb-7 pt-6 md:px-7 md:pt-8">
+                <h3 className="text-[22px] font-semibold leading-snug tracking-[-0.015em] text-[var(--landing-ink)] md:text-[24px]">
                   {f.title}
                 </h3>
-                <p
-                  className={`text-[16px] font-normal leading-relaxed md:text-[17px] ${
-                    onVideo
-                      ? "text-on-video text-white"
-                      : "text-[var(--landing-ink)]/70"
-                  }`}
-                >
+                <p className="mt-3 text-[16px] leading-relaxed text-[var(--landing-ink)]/65">
                   {f.description}
                 </p>
               </div>
-              <div className="mx-auto w-full max-w-xs">
-                <f.visual onDark={onVideo} />
+              <div
+                className={`${STAGE} mt-auto flex h-[260px] items-center justify-center rounded-[20px] px-6 sm:h-[280px] sm:px-12`}
+              >
+                <div className="w-full max-w-[21rem]">
+                  <f.visual />
+                </div>
               </div>
             </motion.article>
           ))}

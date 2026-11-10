@@ -132,6 +132,7 @@ export default function SettingsPage() {
     description: "",
     hours: "",
     minSpend: "",
+    googleReviewUrl: "",
   });
 
   /* ---- Notifications toggles ---- */
@@ -173,6 +174,7 @@ export default function SettingsPage() {
         description: str("description"),
         hours: str("hours"),
         minSpend: str("min_spend"),
+        googleReviewUrl: str("google_review_url"),
       });
       const prefs = meta.notif_prefs;
       if (prefs && typeof prefs === "object") {
@@ -192,6 +194,13 @@ export default function SettingsPage() {
 
   /* ---- Persistance réelle : profil + établissement ---- */
   const handleSave = async () => {
+    /* Le lien d'avis Google est rendu tel quel sur une page publique : on
+       n'accepte qu'une adresse https, jamais javascript: ou autre schéma. */
+    const googleReviewUrl = form.googleReviewUrl.trim();
+    if (googleReviewUrl && !/^https:\/\/\S+$/i.test(googleReviewUrl)) {
+      showToast("Le lien d'avis Google doit commencer par https://", "error");
+      return;
+    }
     setSaving(true);
     const supabase = createClient();
     const { error } = await supabase.auth.updateUser({
@@ -204,6 +213,7 @@ export default function SettingsPage() {
         description: form.description.trim(),
         hours: form.hours.trim(),
         min_spend: form.minSpend.trim(),
+        google_review_url: googleReviewUrl,
       },
     });
     setSaving(false);
@@ -450,6 +460,25 @@ export default function SettingsPage() {
             placeholder="Ex: Table Standard: 500 MAD"
             className={inputCls}
           />
+        </div>
+
+        {/* Lien « Demander des avis » de la fiche Google : proposé à chaque
+            client après sa note, sur la page /avis/[id]. */}
+        <div>
+          <label className={labelCls}>Lien d&apos;avis Google</label>
+          <input
+            type="url"
+            inputMode="url"
+            value={form.googleReviewUrl}
+            onChange={(e) => updateForm("googleReviewUrl", e.target.value)}
+            placeholder="https://g.page/r/…/review"
+            className={inputCls}
+          />
+          <p className={managedNoteCls}>
+            Dans votre fiche Google Business Profile, « Demander des avis »,
+            puis copiez le lien. Après avoir noté sa soirée, chaque client est
+            invité à laisser un avis Google.
+          </p>
         </div>
       </div>
 

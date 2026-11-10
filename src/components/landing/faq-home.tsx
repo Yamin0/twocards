@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Plus } from "lucide-react";
+import { CONTAINER, SECTION, TITLE } from "@/components/landing/section-header";
 
 const FAQ = [
   {
@@ -36,35 +37,50 @@ const FAQ = [
 
 export function FaqHome() {
   return (
-    <section className="border-t border-black/[0.06] bg-[var(--landing-ivory)] px-6 py-24 md:px-16 md:py-32 font-body">
-      <div className="mx-auto max-w-3xl">
+    <section className={SECTION}>
+      <div
+        className={`${CONTAINER} grid gap-12 md:grid-cols-[1fr_1.5fr] md:gap-20`}
+      >
+        {/* Le titre reste à l'écran pendant qu'on parcourt les questions. */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.6 }}
-          className="mb-14 text-center"
+          className="md:sticky md:top-28 md:self-start"
         >
-          <h2 className="font-title text-3xl font-bold leading-tight tracking-[-0.03em] text-[var(--landing-ink)] md:text-4xl">
-            Avant de nous <em className="italic">rejoindre</em>.
+          <h2 className={TITLE}>
+            Avant de nous
+            <br />
+            <em className="font-light italic">rejoindre</em>.
           </h2>
+          <p className="mt-6 max-w-xs text-[16px] leading-relaxed text-[var(--landing-ink)]/65">
+            Une autre question ?{" "}
+            <a
+              href="#contact"
+              className="font-medium text-[var(--landing-ink)] underline decoration-black/20 underline-offset-4 hover:decoration-black/60"
+            >
+              Parlons-en
+            </a>
+            .
+          </p>
         </motion.div>
 
         <div className="flex flex-col">
           {FAQ.map((item) => (
             <details
               key={item.q}
-              className="group border-t border-black/[0.08] last:border-b"
+              className="group border-t border-black/[0.1] last:border-b"
             >
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-5 text-[15px] font-medium text-[var(--landing-ink)] [&::-webkit-details-marker]:hidden">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-6 text-[17px] font-medium text-[var(--landing-ink)] md:text-[18px] [&::-webkit-details-marker]:hidden">
                 {item.q}
                 <Plus
-                  size={16}
+                  size={18}
                   strokeWidth={1.5}
                   className="shrink-0 text-[var(--landing-mute)] transition-transform duration-300 group-open:rotate-45"
                 />
               </summary>
-              <p className="pb-6 pr-10 text-[14px] font-normal leading-relaxed text-[var(--landing-ink)]/65">
+              <p className="-mt-1 pb-7 pr-10 text-[16px] leading-relaxed text-[var(--landing-ink)]/65">
                 {item.a}
               </p>
             </details>
