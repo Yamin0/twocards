@@ -25,6 +25,8 @@ import {
 } from "lucide-react";
 import { useAuthUser } from "@/hooks/use-auth-user";
 import { Avatar } from "@/components/shared/avatar";
+import { LanguageSwitcher } from "@/components/shared/language-switcher";
+import { useT } from "@/lib/i18n/client";
 import { useHotelQrCodes, useHotelReservations, useHotelProfile } from "@/lib/hotel/store";
 import { todayIso } from "@/lib/hotel/format";
 import { cn } from "@/lib/utils";
@@ -96,6 +98,7 @@ function NavSection({
 /* Alerte discrète quand une nouvelle demande arrive en temps réel, où que
    l'on soit dans l'espace. La première charge n'en déclenche aucune. */
 function useNewReservationAlert() {
+  const tr = useT();
   const { reservations, isLoading } = useHotelReservations();
   const known = useRef<Set<string> | null>(null);
   const [alert, setAlert] = useState<{ id: string; text: string } | null>(null);
@@ -115,18 +118,19 @@ function useNewReservationAlert() {
         text:
           fresh.length === 1
             ? `${r.guest_name} · ${r.venue_name}${r.qr_label ? ` · ${r.qr_label}` : ""}`
-            : `${fresh.length} nouvelles demandes`,
+            : tr(`${fresh.length} nouvelles demandes`, `${fresh.length} new requests`),
       });
       const t = setTimeout(() => setAlert(null), 6000);
       return () => clearTimeout(t);
     }
-  }, [reservations, isLoading]);
+  }, [reservations, isLoading, tr]);
 
   return { alert, dismiss: () => setAlert(null) };
 }
 
 export default function HotelLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const t = useT();
   const { fullName, venueName, initials, avatarUrl, isLoading } = useAuthUser();
   const { profile } = useHotelProfile();
   const { reservations, failed: resFailed } = useHotelReservations();
@@ -142,7 +146,7 @@ export default function HotelLayout({ children }: { children: React.ReactNode })
   }, [sidebarOpen]);
 
   const closeSidebar = () => setSidebarOpen(false);
-  const hotelName = profile.hotel_name || venueName || "Mon hôtel";
+  const hotelName = profile.hotel_name || venueName || t("Mon hôtel", "My hotel");
   const pending = reservations.filter((r) => r.status === "en attente").length;
   const today = todayIso();
   const todayCount = reservations.filter(
@@ -150,19 +154,19 @@ export default function HotelLayout({ children }: { children: React.ReactNode })
   ).length;
 
   const mainNav: NavItem[] = [
-    { icon: LayoutDashboard, label: "Vue d'ensemble", href: "/hotel" },
-    { icon: QrCode, label: "Chambres & QR", href: "/hotel/chambres" },
-    { icon: MapPin, label: "Mes adresses", href: "/hotel/adresses" },
-    { icon: CalendarDays, label: "Réservations", href: "/hotel/reservations", badge: pending },
-    { icon: Users, label: "Clients", href: "/hotel/clients" },
+    { icon: LayoutDashboard, label: t("Vue d'ensemble", "Overview"), href: "/hotel" },
+    { icon: QrCode, label: t("Chambres & QR", "Rooms & QR"), href: "/hotel/chambres" },
+    { icon: MapPin, label: t("Mes adresses", "My places"), href: "/hotel/adresses" },
+    { icon: CalendarDays, label: t("Réservations", "Reservations"), href: "/hotel/reservations", badge: pending },
+    { icon: Users, label: t("Clients", "Guests"), href: "/hotel/clients" },
   ];
   const insightNav: NavItem[] = [
     { icon: Coins, label: "Commissions", href: "/hotel/commissions" },
-    { icon: BarChart3, label: "Analyses", href: "/hotel/analyses" },
+    { icon: BarChart3, label: t("Analyses", "Analytics"), href: "/hotel/analyses" },
   ];
   const accountNav: NavItem[] = [
-    { icon: Settings, label: "Paramètres", href: "/hotel/settings" },
-    { icon: LifeBuoy, label: "Aide", href: "/hotel/aide" },
+    { icon: Settings, label: t("Paramètres", "Settings"), href: "/hotel/settings" },
+    { icon: LifeBuoy, label: t("Aide", "Help"), href: "/hotel/aide" },
   ];
 
   const signOut = (
@@ -172,7 +176,7 @@ export default function HotelLayout({ children }: { children: React.ReactNode })
         className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-[13.5px] font-medium text-white/45 transition-all hover:bg-white/[0.08] hover:text-red-300"
       >
         <LogOut size={17} strokeWidth={1.75} />
-        Déconnexion
+        {t("Déconnexion", "Log out")}
       </button>
     </form>
   );
@@ -211,13 +215,13 @@ export default function HotelLayout({ children }: { children: React.ReactNode })
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
             className="rounded-lg p-2 text-white/70 transition-colors hover:text-white"
-            aria-label={sidebarOpen ? "Fermer le menu" : "Ouvrir le menu"}
+            aria-label={sidebarOpen ? t("Fermer le menu", "Close menu") : t("Ouvrir le menu", "Open menu")}
           >
             {sidebarOpen ? <X size={22} strokeWidth={1.75} /> : <Menu size={22} strokeWidth={1.75} />}
           </button>
           <span className="tc-app-hide">{brand}</span>
           {/* Dans l'app, l'onglet Réservations porte déjà ce compteur. */}
-          <Link href="/hotel/reservations" onClick={closeSidebar} className="tc-app-hide relative rounded-lg p-2 text-white/70" aria-label="Réservations en attente">
+          <Link href="/hotel/reservations" onClick={closeSidebar} className="tc-app-hide relative rounded-lg p-2 text-white/70" aria-label={t("Réservations en attente", "Pending reservations")}>
             <Bell size={20} strokeWidth={1.75} />
             {pending > 0 && (
               <span className="num absolute -right-0.5 -top-0.5 rounded-full bg-amber-400 px-1.5 text-[10px] font-bold text-black">
@@ -238,13 +242,16 @@ export default function HotelLayout({ children }: { children: React.ReactNode })
                 </div>
                 <div className="min-w-0">
                   <p className="truncate text-sm font-bold text-white">{hotelName}</p>
-                  <p className="text-[11px] text-white/45">Espace hôtel</p>
+                  <p className="text-[11px] text-white/45">{t("Espace hôtel", "Hotel workspace")}</p>
                 </div>
               </div>
-              <NavSection title="Activité" items={mainNav} pathname={pathname} onNavigate={closeSidebar} />
-              <NavSection title="Performance" items={insightNav} pathname={pathname} onNavigate={closeSidebar} />
-              <NavSection title="Compte" items={accountNav} pathname={pathname} onNavigate={closeSidebar} />
-              <div className="border-t border-white/10 pt-3">{signOut}</div>
+              <NavSection title={t("Activité", "Activity")} items={mainNav} pathname={pathname} onNavigate={closeSidebar} />
+              <NavSection title={t("Performance", "Performance")} items={insightNav} pathname={pathname} onNavigate={closeSidebar} />
+              <NavSection title={t("Compte", "Account")} items={accountNav} pathname={pathname} onNavigate={closeSidebar} />
+              <div className="flex items-center justify-between gap-3 border-t border-white/10 pt-3">
+                <div className="min-w-0 flex-1">{signOut}</div>
+                <LanguageSwitcher tone="dark" className="shrink-0" />
+              </div>
             </div>
           </>
         )}
@@ -265,8 +272,16 @@ export default function HotelLayout({ children }: { children: React.ReactNode })
                 {isLoading ? "…" : hotelName}
               </p>
               <p className="truncate text-[11px] text-white/45">
-                {qrCodes.filter((q) => q.active).length} QR actifs
-                {todayCount > 0 ? ` · ${todayCount} sortie${todayCount > 1 ? "s" : ""} ce jour` : ""}
+                {t(
+                  `${qrCodes.filter((q) => q.active).length} QR actifs`,
+                  `${qrCodes.filter((q) => q.active).length} active QR`
+                )}
+                {todayCount > 0
+                  ? t(
+                      ` · ${todayCount} sortie${todayCount > 1 ? "s" : ""} ce jour`,
+                      ` · ${todayCount} outing${todayCount === 1 ? "" : "s"} today`
+                    )
+                  : ""}
               </p>
             </div>
           </div>
@@ -276,13 +291,13 @@ export default function HotelLayout({ children }: { children: React.ReactNode })
             className="mb-4 inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-sky-500 text-sm font-bold text-white transition-colors hover:bg-sky-400"
           >
             <Plus size={16} strokeWidth={2.25} />
-            Nouveau QR code
+            {t("Nouveau QR code", "New QR code")}
           </Link>
 
           <div className="flex-1 space-y-5 overflow-y-auto scrollbar-thin">
-            <NavSection title="Activité" items={mainNav} pathname={pathname} onNavigate={closeSidebar} />
-            <NavSection title="Performance" items={insightNav} pathname={pathname} onNavigate={closeSidebar} />
-            <NavSection title="Compte" items={accountNav} pathname={pathname} onNavigate={closeSidebar} />
+            <NavSection title={t("Activité", "Activity")} items={mainNav} pathname={pathname} onNavigate={closeSidebar} />
+            <NavSection title={t("Performance", "Performance")} items={insightNav} pathname={pathname} onNavigate={closeSidebar} />
+            <NavSection title={t("Compte", "Account")} items={accountNav} pathname={pathname} onNavigate={closeSidebar} />
           </div>
 
           <div className="mt-4 space-y-1 border-t border-white/10 pt-4">
@@ -305,13 +320,16 @@ export default function HotelLayout({ children }: { children: React.ReactNode })
                   <div className="h-3 w-20 animate-pulse rounded bg-white/10" />
                 ) : (
                   <>
-                    <p className="truncate text-[13px] font-bold text-white">{fullName || "Hôtelier"}</p>
-                    <p className="truncate text-[11px] text-white/40">Voir mon compte</p>
+                    <p className="truncate text-[13px] font-bold text-white">{fullName || t("Hôtelier", "Hotelier")}</p>
+                    <p className="truncate text-[11px] text-white/40">{t("Voir mon compte", "View my account")}</p>
                   </>
                 )}
               </div>
             </Link>
-            {signOut}
+            <div className="flex items-center justify-between gap-2">
+              <div className="min-w-0 flex-1">{signOut}</div>
+              <LanguageSwitcher tone="dark" className="shrink-0" />
+            </div>
           </div>
         </aside>
 
@@ -321,9 +339,14 @@ export default function HotelLayout({ children }: { children: React.ReactNode })
             {(resFailed || qrFailed) && (
               <div className="flex items-center gap-3 rounded-2xl border border-red-400/20 bg-red-500/10 px-4 py-3 text-sm text-red-100">
                 <WifiOff size={16} strokeWidth={1.75} className="shrink-0 text-red-300" />
-                <span>Impossible de charger vos données. Vérifiez votre connexion, puis rechargez la page.</span>
+                <span>
+                  {t(
+                    "Impossible de charger vos données. Vérifiez votre connexion, puis rechargez la page.",
+                    "We couldn't load your data. Check your connection, then reload the page."
+                  )}
+                </span>
                 <button type="button" onClick={() => window.location.reload()} className="ml-auto shrink-0 text-xs font-bold text-red-200 hover:text-white">
-                  Recharger
+                  {t("Recharger", "Reload")}
                 </button>
               </div>
             )}
@@ -343,7 +366,7 @@ export default function HotelLayout({ children }: { children: React.ReactNode })
           </span>
           <span className="min-w-0">
             <span className="block text-xs font-bold uppercase tracking-[0.14em] text-amber-300">
-              Nouvelle demande
+              {t("Nouvelle demande", "New request")}
             </span>
             <span className="block truncate text-sm text-white">{alert.text}</span>
           </span>

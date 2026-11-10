@@ -12,15 +12,21 @@ import {
   ArrowLeft,
   ArrowRight,
 } from "lucide-react";
+import type { Translate } from "@/lib/i18n";
+import { useIntlLocale, useT } from "@/lib/i18n/client";
+import { LanguageSwitcher } from "@/components/shared/language-switcher";
 
-const steps = [
-  { number: 1, label: "Profil" },
-  { number: 2, label: "Tables" },
-  { number: 3, label: "Équipe" },
-  { number: 4, label: "Lancement" },
+const getSteps = (t: Translate) => [
+  { number: 1, label: t("Profil", "Profile") },
+  { number: 2, label: t("Tables", "Tables") },
+  { number: 3, label: t("Équipe", "Team") },
+  { number: 4, label: t("Lancement", "Launch") },
 ];
 
 export default function OnboardingPage() {
+  const t = useT();
+  const intl = useIntlLocale();
+  const steps = getSteps(t);
   const currentStep = 2;
   const [activeTab, setActiveTab] = useState<"rapide" | "personnalise">(
     "rapide"
@@ -90,10 +96,13 @@ export default function OnboardingPage() {
             })}
           </nav>
 
-          {/* Mobile step indicator */}
-          <span className="sm:hidden text-xs font-medium text-on-surface-variant font-[family-name:var(--font-inter)]">
-            Étape {currentStep} / {steps.length}
-          </span>
+          <div className="flex items-center gap-3">
+            {/* Mobile step indicator */}
+            <span className="sm:hidden text-xs font-medium text-on-surface-variant font-[family-name:var(--font-inter)]">
+              {t(`Étape ${currentStep} / ${steps.length}`, `Step ${currentStep} / ${steps.length}`)}
+            </span>
+            <LanguageSwitcher />
+          </div>
         </div>
       </header>
 
@@ -104,15 +113,17 @@ export default function OnboardingPage() {
           <div className="bg-white rounded-md editorial-shadow p-6 sm:p-8">
             {/* Step label */}
             <span className="inline-block px-2.5 py-1 rounded-full bg-primary/5 text-primary text-xs font-medium font-[family-name:var(--font-inter)] mb-4">
-              Étape 2 sur 4
+              {t("Étape 2 sur 4", "Step 2 of 4")}
             </span>
 
             <h1 className="text-xl font-bold text-primary-dark font-[family-name:var(--font-manrope)] mb-1">
-              Configurez vos tables
+              {t("Configurez vos tables", "Set up your tables")}
             </h1>
             <p className="text-sm text-on-surface-variant font-[family-name:var(--font-inter)] mb-6">
-              Définissez le nombre de tables et les minimums de dépense pour
-              votre établissement.
+              {t(
+                "Définissez le nombre de tables et les minimums de dépense pour votre établissement.",
+                "Set the number of tables and the minimum spend for your venue.",
+              )}
             </p>
 
             {/* Tabs */}
@@ -125,7 +136,7 @@ export default function OnboardingPage() {
                     : "text-on-surface-variant hover:text-on-background"
                 }`}
               >
-                Configuration Rapide
+                {t("Configuration Rapide", "Quick setup")}
               </button>
               <button
                 onClick={() => setActiveTab("personnalise")}
@@ -135,7 +146,7 @@ export default function OnboardingPage() {
                     : "text-on-surface-variant hover:text-on-background"
                 }`}
               >
-                Plan Personnalisé
+                {t("Plan Personnalisé", "Custom floor plan")}
               </button>
             </div>
 
@@ -154,14 +165,14 @@ export default function OnboardingPage() {
                         />
                       </div>
                       <h3 className="text-sm font-semibold text-on-background font-[family-name:var(--font-manrope)]">
-                        Tables VIP
+                        {t("Tables VIP", "VIP tables")}
                       </h3>
                     </div>
 
                     {/* Count */}
                     <div className="space-y-1.5">
                       <label className="block font-[family-name:var(--font-inter)] text-xs uppercase tracking-wider text-on-surface-variant">
-                        Nombre de tables
+                        {t("Nombre de tables", "Number of tables")}
                       </label>
                       <div className="flex items-center gap-3">
                         <button
@@ -189,7 +200,7 @@ export default function OnboardingPage() {
                     {/* Min spend */}
                     <div className="space-y-1.5">
                       <label className="block font-[family-name:var(--font-inter)] text-xs uppercase tracking-wider text-on-surface-variant">
-                        Minimum de dépense
+                        {t("Minimum de dépense", "Minimum spend")}
                       </label>
                       <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/60 text-sm">
@@ -218,14 +229,14 @@ export default function OnboardingPage() {
                         />
                       </div>
                       <h3 className="text-sm font-semibold text-on-background font-[family-name:var(--font-manrope)]">
-                        Tables Standard
+                        {t("Tables Standard", "Standard tables")}
                       </h3>
                     </div>
 
                     {/* Count */}
                     <div className="space-y-1.5">
                       <label className="block font-[family-name:var(--font-inter)] text-xs uppercase tracking-wider text-on-surface-variant">
-                        Nombre de tables
+                        {t("Nombre de tables", "Number of tables")}
                       </label>
                       <div className="flex items-center gap-3">
                         <button
@@ -253,7 +264,7 @@ export default function OnboardingPage() {
                     {/* Min spend */}
                     <div className="space-y-1.5">
                       <label className="block font-[family-name:var(--font-inter)] text-xs uppercase tracking-wider text-on-surface-variant">
-                        Minimum de dépense
+                        {t("Minimum de dépense", "Minimum spend")}
                       </label>
                       <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/60 text-sm">
@@ -275,7 +286,7 @@ export default function OnboardingPage() {
                 {/* Summary preview */}
                 <div className="bg-black/[0.04] rounded-sm p-5">
                   <h3 className="text-xs font-[family-name:var(--font-inter)] uppercase tracking-wider text-on-surface-variant mb-3">
-                    Aperçu de la configuration
+                    {t("Aperçu de la configuration", "Setup preview")}
                   </h3>
                   <div className="grid grid-cols-3 gap-4">
                     <div>
@@ -283,7 +294,7 @@ export default function OnboardingPage() {
                         {totalTables}
                       </p>
                       <p className="text-xs text-on-surface-variant font-[family-name:var(--font-inter)]">
-                        Tables au total
+                        {t("Tables au total", "Total tables")}
                       </p>
                     </div>
                     <div>
@@ -291,15 +302,15 @@ export default function OnboardingPage() {
                         ~{totalCapacity}
                       </p>
                       <p className="text-xs text-on-surface-variant font-[family-name:var(--font-inter)]">
-                        Capacité estimée
+                        {t("Capacité estimée", "Estimated capacity")}
                       </p>
                     </div>
                     <div>
                       <p className="text-2xl font-bold text-primary-dark font-[family-name:var(--font-manrope)]">
-                        {potentialRevenue.toLocaleString("fr-FR")} MAD
+                        {potentialRevenue.toLocaleString(intl)} MAD
                       </p>
                       <p className="text-xs text-on-surface-variant font-[family-name:var(--font-inter)]">
-                        Revenu potentiel / soir
+                        {t("Revenu potentiel / soir", "Potential revenue / night")}
                       </p>
                     </div>
                   </div>
@@ -310,8 +321,10 @@ export default function OnboardingPage() {
             {activeTab === "personnalise" && (
               <div className="flex items-center justify-center py-16">
                 <p className="text-sm text-on-surface-variant font-[family-name:var(--font-inter)]">
-                  L&apos;éditeur de plan personnalisé sera disponible
-                  prochainement.
+                  {t(
+                    <>L&apos;éditeur de plan personnalisé sera disponible prochainement.</>,
+                    <>The custom floor plan editor is coming soon.</>,
+                  )}
                 </p>
               </div>
             )}
@@ -323,13 +336,13 @@ export default function OnboardingPage() {
                 className="flex items-center gap-1.5 text-sm text-on-surface-variant font-[family-name:var(--font-inter)] hover:text-on-background transition-colors"
               >
                 <ArrowLeft size={14} strokeWidth={1.5} />
-                Retour
+                {t("Retour", "Back")}
               </Link>
               <Link
                 href="/dashboard"
                 className="flex items-center gap-1.5 px-6 py-2.5 bg-primary text-white rounded-sm text-sm font-semibold font-[family-name:var(--font-inter)] hover:bg-primary-dark transition-colors"
               >
-                Continuer
+                {t("Continuer", "Continue")}
                 <ArrowRight size={14} strokeWidth={1.5} />
               </Link>
             </div>
@@ -348,16 +361,20 @@ export default function OnboardingPage() {
                 />
               </div>
               <h3 className="text-sm font-semibold text-primary-dark font-[family-name:var(--font-manrope)]">
-                Conseil d&apos;expert
+                {t(<>Conseil d&apos;expert</>, <>Expert tip</>)}
               </h3>
             </div>
             <p className="text-xs text-on-surface-variant font-[family-name:var(--font-inter)] leading-relaxed mb-3">
-              Les établissements qui configurent un ratio de 1 table VIP pour 2
-              tables standard constatent un revenu par soirée 30% plus élevé.
+              {t(
+                "Les établissements qui configurent un ratio de 1 table VIP pour 2 tables standard constatent un revenu par soirée 30% plus élevé.",
+                "Venues that set a ratio of 1 VIP table for every 2 standard tables see 30% higher revenue per night.",
+              )}
             </p>
             <p className="text-xs text-on-surface-variant/60 font-[family-name:var(--font-inter)]">
-              Vous pourrez toujours modifier cette configuration plus tard
-              depuis les paramètres.
+              {t(
+                "Vous pourrez toujours modifier cette configuration plus tard depuis les paramètres.",
+                "You can always change this setup later in Settings.",
+              )}
             </p>
           </div>
         </aside>

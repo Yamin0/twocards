@@ -1,6 +1,7 @@
 "use client";
 
 import { Star } from "lucide-react";
+import { useT } from "@/lib/i18n/client";
 
 /* Graphes légers des dashboards — pas de dépendance, du DOM et c'est tout.
    L'échelle est relative au maximum de la série ; une série vide affiche des
@@ -15,6 +16,7 @@ export function MiniBars({
   color?: string;
   format?: (n: number) => string;
 }) {
+  const t = useT();
   const max = Math.max(...data.map((d) => d.value), 1);
   return (
     <div className="flex items-end gap-1.5 h-28">
@@ -22,7 +24,7 @@ export function MiniBars({
         <div
           key={`${d.label}-${i}`}
           className="flex-1 flex flex-col items-center gap-1 min-w-0"
-          title={`${d.label} : ${format(d.value)}`}
+          title={t(`${d.label} : ${format(d.value)}`, `${d.label}: ${format(d.value)}`)}
         >
           <span className="text-[9px] text-white/50 font-ui tabular-nums">
             {d.value > 0 ? format(d.value) : ""}
@@ -74,6 +76,7 @@ export function SplitBar({
 }: {
   segments: { label: string; value: number; color: string }[];
 }) {
+  const t = useT();
   const total = segments.reduce((s, x) => s + x.value, 0);
   if (total === 0)
     return (
@@ -89,7 +92,7 @@ export function SplitBar({
               key={s.label}
               className={s.color}
               style={{ width: `${(s.value / total) * 100}%` }}
-              title={`${s.label} : ${s.value}`}
+              title={t(`${s.label} : ${s.value}`, `${s.label}: ${s.value}`)}
             />
           ))}
       </div>

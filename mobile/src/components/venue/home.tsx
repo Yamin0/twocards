@@ -17,6 +17,7 @@ import { Avatar, Card, Icon, IconButton, Kpi, Screen, ScreenSkeleton, SectionTit
 import { BottomTabInset, Light } from '@/constants/theme'
 import { useAuth } from '@/lib/auth-context'
 import { haptic } from '@/lib/haptics'
+import { intlLocale, useLocale, useT } from '@/lib/i18n'
 import { useToast } from '@/lib/toast'
 import {
   addDaysIso,
@@ -37,6 +38,8 @@ export function VenueHome() {
   const { fullName, venueName, tabRole, avatarUrl } = useAuth()
   const router = useRouter()
   const toast = useToast()
+  const t = useT()
+  const locale = useLocale()
   const activity = tabRole === 'activite'
   const { rows, loading, refreshing, refresh, setStatus, checkIn, setAmount } =
     useVenueReservations()
@@ -72,12 +75,12 @@ export function VenueHome() {
     .reduce((s, r) => s + r.commission, 0)
   const today = active.filter((r) => r.reservation_date === todayIso())
   const todayPeople = today.reduce((s, r) => s + r.party_size, 0)
-  const chart = range === 'week' ? lastDays(rows, 7) : lastMonths(rows, 6)
+  const chart = range === 'week' ? lastDays(rows, 7, locale) : lastMonths(rows, 6, locale)
   const chartTotal = chart.reduce((s, d) => s + d.value, 0)
   const firstName = fullName?.split(' ')[0]
   const hour = new Date().getHours()
-  const greeting = hour < 5 || hour >= 18 ? 'Bonsoir' : 'Bonjour'
-  const dateLine = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })
+  const greeting = hour < 5 || hour >= 18 ? t('Bonsoir', 'Good evening') : hour < 12 ? t('Bonjour', 'Good morning') : t('Bonjour', 'Good afternoon')
+  const dateLine = new Date().toLocaleDateString(intlLocale(locale), { weekday: 'long', day: 'numeric', month: 'long' })
   const nowHm = `${String(hour).padStart(2, '0')}:${String(new Date().getMinutes()).padStart(2, '0')}`
   const next = today
     .filter((r) => r.status === 'confirmée' && !r.arrived_at && (r.reservation_time ?? '') >= nowHm)
@@ -94,35 +97,38 @@ export function VenueHome() {
     const ok = await setStatus(r, status)
     if (!ok) {
       haptic.error()
-      toast.show({ message: 'Modification impossible. Vérifiez votre connexion.', tone: 'danger' })
+      toast.show({ message: t('Modification impossible. Vérifiez votre connexion.', "Couldn't update. Check your connection."), tone: 'danger' })
       return
     }
     haptic.success()
     toast.show({
-      message: status === 'confirmée' ? `${r.guest_name} confirmé` : `${r.guest_name} refusé`,
+      message:
+        status === 'confirmée'
+          ? t(`${r.guest_name} confirmé`, `${r.guest_name} confirmed`)
+          : t(`${r.guest_name} refusé`, `${r.guest_name} declined`),
       tone: status === 'confirmée' ? 'success' : 'default',
-      action: { label: 'Annuler', onPress: () => void setStatus({ ...r, status }, 'en attente') },
+      action: { label: t('Annuler', 'Undo'), onPress: () => void setStatus({ ...r, status }, 'en attente') },
     })
   }
   const refuse = (r: Reservation) =>
-    Alert.alert('Refuser cette réservation ?', `${r.guest_name}, ${r.party_size} pers.`, [
-      { text: 'Garder', style: 'cancel' },
-      { text: 'Refuser', style: 'destructive', onPress: () => void decide(r, 'annulée') },
+    Alert.alert(t('Refuser cette réservation ?', 'Decline this reservation?'), `${r.guest_name}, ${r.party_size} ${t('pers.', r.party_size === 1 ? 'guest' : 'guests')}`, [
+      { text: t('Garder', 'Keep'), style: 'cancel' },
+      { text: t('Refuser', 'Decline'), style: 'destructive', onPress: () => void decide(r, 'annulée') },
     ])
   const visibleServices = (services ?? []).filter((s) => s.active)
 
   const tiles = activity
     ? [
-        { icon: 'tag' as IconName, label: 'Prestations', hint: 'Ce que vos clients réservent', path: '/venue/prestations' },
-        { icon: 'message-circle' as IconName, label: 'Messages', hint: 'Hôtels et concierges', path: '/venue/messages' },
-        { icon: 'dollar-sign' as IconName, label: 'Commissions', hint: 'À régler, réglé', path: '/venue/commissions' },
-        { icon: 'bar-chart-2' as IconName, label: 'Analyses', hint: 'Tendances et panier moyen', path: '/venue/analytics' },
+        { icon: 'tag' as IconName, label: t('Prestations', 'Services'), hint: t('Ce que vos clients réservent', 'What your guests book'), path: '/venue/prestations' },
+        { icon: 'message-circle' as IconName, label: 'Messages', hint: t('Hôtels et concierges', 'Hotels and concierges'), path: '/venue/messages' },
+        { icon: 'dollar-sign' as IconName, label: 'Commissions', hint: t('À régler, réglé', 'Due, settled'), path: '/venue/commissions' },
+        { icon: 'bar-chart-2' as IconName, label: t('Analyses', 'Analytics'), hint: t('Tendances et panier moyen', 'Trends and average spend'), path: '/venue/analytics' },
       ]
     : [
-        { icon: 'message-circle' as IconName, label: 'Messages', hint: 'Hôtels et concierges', path: '/venue/messages' },
-        { icon: 'dollar-sign' as IconName, label: 'Commissions', hint: 'À régler, réglé', path: '/venue/commissions' },
-        { icon: 'share-2' as IconName, label: 'Réseau', hint: 'Qui vous envoie des clients', path: '/venue/network' },
-        { icon: 'bar-chart-2' as IconName, label: 'Analyses', hint: 'Tendances et panier moyen', path: '/venue/analytics' },
+        { icon: 'message-circle' as IconName, label: 'Messages', hint: t('Hôtels et concierges', 'Hotels and concierges'), path: '/venue/messages' },
+        { icon: 'dollar-sign' as IconName, label: 'Commissions', hint: t('À régler, réglé', 'Due, settled'), path: '/venue/commissions' },
+        { icon: 'share-2' as IconName, label: t('Réseau', 'Network'), hint: t('Qui vous envoie des clients', 'Who sends you guests'), path: '/venue/network' },
+        { icon: 'bar-chart-2' as IconName, label: t('Analyses', 'Analytics'), hint: t('Tendances et panier moyen', 'Trends and average spend'), path: '/venue/analytics' },
       ]
 
   return (
@@ -139,7 +145,7 @@ export function VenueHome() {
               {venueName ? ` · ${venueName}` : ''}
             </Text>
           </View>
-          <IconButton icon="plus" label="Nouvelle réservation" onPress={() => router.push('/venue/new-reservation')} />
+          <IconButton icon="plus" label={t('Nouvelle réservation', 'New reservation')} onPress={() => router.push('/venue/new-reservation')} />
           <Pressable onPress={() => router.navigate('/hub')} hitSlop={8} accessibilityLabel="Menu">
             <Avatar name={fullName ?? venueName ?? 'T'} size={40} uri={avatarUrl} />
           </Pressable>
@@ -150,20 +156,28 @@ export function VenueHome() {
           <Card style={styles.todayCard}>
             <View style={styles.todayRow}>
               <View style={styles.todayText}>
-                <Text style={styles.todayLabel}>{activity ? "Aujourd'hui" : 'Ce soir'}</Text>
+                <Text style={styles.todayLabel}>{activity ? t("Aujourd'hui", 'Today') : t('Ce soir', 'Tonight')}</Text>
                 <Text style={styles.todayValue}>
-                  {today.length} réservation{today.length > 1 ? 's' : ''}
+                  {t(
+                    `${today.length} réservation${today.length > 1 ? 's' : ''}`,
+                    `${today.length} reservation${today.length === 1 ? '' : 's'}`
+                  )}
                   <Text style={styles.todayMuted}>
-                    {' '}· {todayPeople} {activity ? 'participant' : 'couvert'}
-                    {todayPeople > 1 ? 's' : ''}
+                    {' '}·{' '}
+                    {activity
+                      ? t(`${todayPeople} participant${todayPeople > 1 ? 's' : ''}`, `${todayPeople} participant${todayPeople === 1 ? '' : 's'}`)
+                      : t(`${todayPeople} couvert${todayPeople > 1 ? 's' : ''}`, `${todayPeople} cover${todayPeople === 1 ? '' : 's'}`)}
                   </Text>
                 </Text>
                 <Text style={styles.todayNext} numberOfLines={1}>
                   {next
-                    ? `Prochaine à ${(next.reservation_time ?? '').slice(0, 5)} · ${next.guest_name}, ${next.party_size} pers.`
+                    ? t(
+                        `Prochaine à ${(next.reservation_time ?? '').slice(0, 5)} · ${next.guest_name}, ${next.party_size} pers.`,
+                        `Next at ${(next.reservation_time ?? '').slice(0, 5)} · ${next.guest_name}, party of ${next.party_size}`
+                      )
                     : today.length > 0
-                      ? 'Tout le monde est passé ou attendu sans heure'
-                      : 'Rien de prévu pour le moment'}
+                      ? t('Tout le monde est passé ou attendu sans heure', 'Everyone has arrived or is expected with no set time')
+                      : t('Rien de prévu pour le moment', 'Nothing planned for now')}
                 </Text>
               </View>
               <Icon name="chevron-right" size={22} color="rgba(255,255,255,0.6)" />
@@ -174,38 +188,39 @@ export function VenueHome() {
         {/* KPI, chacun cliquable */}
         <View style={styles.kpiRow}>
           <Kpi
-            label="Réservations du mois"
+            label={t('Réservations du mois', 'Reservations this month')}
             value={String(thisMonth.length)}
-            hint={`${rows.length} au total`}
+            hint={t(`${rows.length} au total`, `${rows.length} in total`)}
             onPress={() => openReservations('all')}
           />
           <Kpi
-            label="En attente"
+            label={t('En attente', 'Pending')}
             value={String(pending.length)}
-            hint={pending.length > 0 ? 'à confirmer' : 'rien à traiter'}
+            hint={pending.length > 0 ? t('à confirmer', 'to confirm') : t('rien à traiter', 'nothing to handle')}
             tone={pending.length > 0 ? 'warning' : 'success'}
             onPress={() => openReservations('pending')}
           />
         </View>
         <View style={styles.kpiRow}>
-          <Kpi label="CA apporté" value={mad(revenue)} hint="additions saisies" tone="accent" onPress={() => router.push('/venue/analytics')} />
-          <Kpi label="Commissions du mois" value={mad(commissionsMonth)} hint="à reverser" onPress={() => router.push('/venue/commissions')} />
+          <Kpi label={t('CA apporté', 'Revenue brought')} value={mad(revenue, locale)} hint={t('additions saisies', 'bills entered')} tone="accent" onPress={() => router.push('/venue/analytics')} />
+          <Kpi label={t('Commissions du mois', 'Commissions this month')} value={mad(commissionsMonth, locale)} hint={t('à reverser', 'to pay out')} onPress={() => router.push('/venue/commissions')} />
         </View>
 
         {/* Rythme → toutes les réservations */}
         <Card>
           <View style={styles.chartHead}>
             <Pressable onPress={() => openReservations('all')} hitSlop={8}>
-              <Text style={styles.chartTitle}>Demandes reçues</Text>
+              <Text style={styles.chartTitle}>{t('Demandes reçues', 'Requests received')}</Text>
               <Text style={styles.chartValue}>
                 {chartTotal}
-                <Text style={styles.chartUnit}> sur {range === 'week' ? '7 jours' : '6 mois'}</Text>
+                <Text style={styles.chartUnit}> {range === 'week' ? t('sur 7 jours', 'over 7 days') : t('sur 6 mois', 'over 6 months')}</Text>
               </Text>
               {range === 'week' && (thisWeek > 0 || lastWeek > 0) && (
                 <View style={[styles.trend, trend < 0 && styles.trendDown]}>
                   <Icon name={trend >= 0 ? 'trending-up' : 'trending-down'} size={12} color={trend >= 0 ? Light.success : Light.danger} />
                   <Text style={[styles.trendText, trend < 0 && styles.trendTextDown]}>
-                    {trend > 0 ? '+' : ''}{trend} % vs semaine passée
+                    {trend > 0 ? '+' : ''}
+                    {t(`${trend} % vs semaine passée`, `${trend}% vs last week`)}
                   </Text>
                 </View>
               )}
@@ -217,7 +232,7 @@ export function VenueHome() {
                   onPress={() => setRange(k)}
                   style={[styles.segmentItem, range === k && styles.segmentActive]}>
                   <Text style={[styles.segmentText, range === k && styles.segmentTextActive]}>
-                    {k === 'week' ? 'Semaine' : 'Mois'}
+                    {k === 'week' ? t('Semaine', 'Week') : t('Mois', 'Month')}
                   </Text>
                 </Pressable>
               ))}
@@ -229,14 +244,17 @@ export function VenueHome() {
         {/* À traiter */}
         <View>
           <SectionTitle
-            title="À traiter"
-            action={pending.length > 0 ? 'Tout voir' : undefined}
+            title={t('À traiter', 'To handle')}
+            action={pending.length > 0 ? t('Tout voir', 'See all') : undefined}
             onAction={() => openReservations('pending')}
           />
           {pending.length === 0 ? (
             <Card>
               <Text style={styles.emptyText}>
-                Rien en attente. Chaque nouvelle demande arrive ici, et sur votre téléphone en notification.
+                {t(
+                  'Rien en attente. Chaque nouvelle demande arrive ici, et sur votre téléphone en notification.',
+                  'Nothing pending. Every new request lands here, and on your phone as a notification.'
+                )}
               </Text>
             </Card>
           ) : (
@@ -259,12 +277,14 @@ export function VenueHome() {
         {/* Prestations */}
         {activity && services !== null && (
           <View>
-            <SectionTitle title="Vos prestations" action="Gérer" onAction={() => router.push('/venue/prestations')} />
+            <SectionTitle title={t('Vos prestations', 'Your services')} action={t('Gérer', 'Manage')} onAction={() => router.push('/venue/prestations')} />
             <Card>
               {visibleServices.length === 0 ? (
                 <Text style={styles.emptyText}>
-                  Aucune prestation visible : votre fiche n&apos;affiche que son nom. Ajoutez une balade, un
-                  transfert, un massage…
+                  {t(
+                    "Aucune prestation visible : votre fiche n'affiche que son nom. Ajoutez une balade, un transfert, un massage…",
+                    'No visible services: your listing only shows its name. Add a ride, a transfer, a massage…'
+                  )}
                 </Text>
               ) : (
                 visibleServices.slice(0, 4).map((s, i) => (
@@ -285,19 +305,19 @@ export function VenueHome() {
 
         {/* Raccourcis */}
         <View>
-          <SectionTitle title="Fonctionnalités" action="Tout le menu" onAction={() => router.navigate('/hub')} />
+          <SectionTitle title={t('Fonctionnalités', 'Features')} action={t('Tout le menu', 'Full menu')} onAction={() => router.navigate('/hub')} />
           <View style={styles.tiles}>
-            {tiles.map((t) => (
+            {tiles.map((tile) => (
               <Pressable
-                key={t.path}
-                onPress={() => router.push(t.path as never)}
+                key={tile.path}
+                onPress={() => router.push(tile.path as never)}
                 style={({ pressed }) => [styles.tile, pressed && styles.pressed]}>
                 <View style={styles.tileIcon}>
-                  <Icon name={t.icon} size={18} color={Light.accent} />
+                  <Icon name={tile.icon} size={18} color={Light.accent} />
                 </View>
-                <Text style={styles.tileLabel}>{t.label}</Text>
+                <Text style={styles.tileLabel}>{tile.label}</Text>
                 <Text style={styles.tileHint} numberOfLines={2}>
-                  {t.hint}
+                  {tile.hint}
                 </Text>
               </Pressable>
             ))}

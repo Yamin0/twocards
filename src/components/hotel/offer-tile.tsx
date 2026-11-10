@@ -4,6 +4,7 @@ import Image from "next/image";
 import type { ReactNode } from "react";
 import { Switch, Tag } from "@/components/hotel/ui";
 import { cn } from "@/lib/utils";
+import { useT } from "@/lib/i18n/client";
 
 /* Carte d'adresse du dashboard hôtel : même dessin que la carte du menu
    client (photo en 4/3, nom en Satoshi Black, prix en italique léger), en
@@ -32,6 +33,7 @@ export function OfferTile({
   disabled?: boolean;
   hint?: string;
 }) {
+  const t = useT();
   return (
     <div
       className={cn(
@@ -49,7 +51,7 @@ export function OfferTile({
         <p className="num mt-0.5 min-h-[1.25rem] text-sm font-light italic text-white/55">{price ?? ""}</p>
         <div className="mt-auto flex items-center gap-2 border-t border-white/[0.08] pt-2.5">
           <Switch size="sm" checked={active} disabled={disabled} onChange={onToggle} label={toggleLabel} />
-          <span className="mr-auto truncate text-xs text-white/55">{hint ?? (active ? "Proposée" : "Masquée")}</span>
+          <span className="mr-auto truncate text-xs text-white/55">{hint ?? (active ? t("Proposée", "Offered") : t("Masquée", "Hidden"))}</span>
           {actions}
         </div>
       </div>

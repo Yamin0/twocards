@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { Messenger } from "@/components/shared/messenger";
 import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
 import { useAuthUser } from "@/hooks/use-auth-user";
+import { useT } from "@/lib/i18n/client";
 
 /* Messagerie de l'établissement : conversations réelles avec les concierges
    du réseau (Supabase + temps réel). L'interface vit dans le composant
@@ -13,6 +14,7 @@ import { useAuthUser } from "@/hooks/use-auth-user";
 
 function MessagesContent() {
   const { isLoading } = useAuthUser();
+  const t = useT();
   const searchParams = useSearchParams();
   const withId = searchParams.get("with");
 
@@ -22,11 +24,13 @@ function MessagesContent() {
     <Messenger
       initialCounterpartId={withId}
       labels={{
-        searchPlaceholder: "Rechercher un concierge...",
-        counterpartHint: "Concierge du réseau",
-        emptyHint:
+        searchPlaceholder: t("Rechercher un concierge...", "Search concierges..."),
+        counterpartHint: t("Concierge du réseau", "Network concierge"),
+        emptyHint: t(
           "Démarrez une conversation avec un concierge du réseau via le bouton « Nouvelle ».",
-        directoryEmpty: "Aucun concierge inscrit pour le moment.",
+          "Start a conversation with a network concierge using the “New” button.",
+        ),
+        directoryEmpty: t("Aucun concierge inscrit pour le moment.", "No concierges have signed up yet."),
       }}
     />
   );

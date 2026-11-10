@@ -4,7 +4,8 @@ import { useEffect } from 'react'
 
 import { useAuth } from '@/lib/auth-context'
 import { registerPush } from '@/lib/push'
-import { isVenueTabRole, roleTabs, WEB_PAGES } from '@/lib/site'
+import { getT } from '@/lib/i18n'
+import { getWebPages, isVenueTabRole, roleTabs } from '@/lib/site'
 
 /* Pages du site qui ont leur écran natif chez l'établissement. */
 const NATIVE: Record<string, string> = {
@@ -51,7 +52,7 @@ export function PushBridge() {
       } else if (isVenueTabRole(tabRole) && NATIVE[url]) {
         router.push(NATIVE[url] as never)
       } else {
-        router.push({ pathname: '/web', params: { path: url, title: WEB_PAGES[url] ?? '' } })
+        router.push({ pathname: '/web', params: { path: url, title: getWebPages(getT())[url] ?? '' } })
       }
     }
 

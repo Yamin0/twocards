@@ -5,6 +5,7 @@ import { Alert, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, St
 import { Button, Card, Empty, Field, Icon, IconButton, Pill, ScreenSkeleton, StackScreen, inputStyle } from '@/components/venue/ui'
 import { Light } from '@/constants/theme'
 import { useAuth } from '@/lib/auth-context'
+import { useT } from '@/lib/i18n'
 import { pickAndUploadImage, useVenueServices, type Service, type ServiceDraft } from '@/lib/venue-data'
 
 /* Prestations d'une activité ou d'un service : une balade en quad d'une
@@ -18,20 +19,25 @@ export default function PrestationsScreen() {
   const userId = session?.user.id ?? null
   const { rows, save, toggle, remove, move } = useVenueServices()
   const [editor, setEditor] = useState<{ id: string | null; draft: ServiceDraft } | null>(null)
+  const t = useT()
   const visible = (rows ?? []).filter((s) => s.active).length
 
   const confirmRemove = (s: Service) =>
-    Alert.alert('Supprimer cette prestation ?', `« ${s.name} » disparaît du menu immédiatement.`, [
-      { text: 'Annuler', style: 'cancel' },
-      { text: 'Supprimer', style: 'destructive', onPress: () => remove(s.id) },
-    ])
+    Alert.alert(
+      t('Supprimer cette prestation ?', 'Delete this service?'),
+      t(`« ${s.name} » disparaît du menu immédiatement.`, `“${s.name}” will be removed from the menu immediately.`),
+      [
+        { text: t('Annuler', 'Cancel'), style: 'cancel' },
+        { text: t('Supprimer', 'Delete'), style: 'destructive', onPress: () => remove(s.id) },
+      ]
+    )
 
   return (
     <StackScreen
-      title="Prestations"
-      subtitle={rows ? `${visible} visible${visible > 1 ? 's' : ''} sur le menu` : undefined}
+      title={t('Prestations', 'Services')}
+      subtitle={rows ? t(`${visible} visible${visible > 1 ? 's' : ''} sur le menu`, `${visible} visible on the menu`) : undefined}
       right={
-        <IconButton icon="plus" tone="accent" label="Nouvelle prestation" onPress={() => setEditor({ id: null, draft: EMPTY })} />
+        <IconButton icon="plus" tone="accent" label={t('Nouvelle prestation', 'New service')} onPress={() => setEditor({ id: null, draft: EMPTY })} />
       }>
       {rows === null ? (
         <ScreenSkeleton title={false} bare />
@@ -39,10 +45,13 @@ export default function PrestationsScreen() {
         <Card>
           <Empty
             icon="tag"
-            title="Aucune prestation"
-            body="Par exemple « Balade en quad, 1 h, 450 MAD ». Dès qu'elle est enregistrée, les clients des hôtels partenaires peuvent la réserver."
+            title={t('Aucune prestation', 'No services')}
+            body={t(
+              "Par exemple « Balade en quad, 1 h, 450 MAD ». Dès qu'elle est enregistrée, les clients des hôtels partenaires peuvent la réserver.",
+              'For example “Quad bike ride, 1 h, 450 MAD”. Once it is saved, guests of partner hotels can book it.'
+            )}
           />
-          <Button label="Ajouter ma première prestation" icon="plus" onPress={() => setEditor({ id: null, draft: EMPTY })} />
+          <Button label={t('Ajouter ma première prestation', 'Add my first service')} icon="plus" onPress={() => setEditor({ id: null, draft: EMPTY })} />
         </Card>
       ) : (
         rows.map((s, i) => (
@@ -60,9 +69,9 @@ export default function PrestationsScreen() {
                   <Text style={styles.name} numberOfLines={1}>
                     {s.name}
                   </Text>
-                  {!s.active && <Pill label="Masquée" />}
+                  {!s.active && <Pill label={t('Masquée', 'Hidden')} />}
                 </View>
-                <Text style={styles.hint}>{[s.duration, s.price].filter(Boolean).join(' · ') || 'Durée et prix à préciser'}</Text>
+                <Text style={styles.hint}>{[s.duration, s.price].filter(Boolean).join(' · ') || t('Durée et prix à préciser', 'Duration and price to be set')}</Text>
                 {s.description ? (
                   <Text style={styles.desc} numberOfLines={2}>
                     {s.description}
@@ -71,21 +80,21 @@ export default function PrestationsScreen() {
               </View>
             </View>
             <View style={styles.actions}>
-              <Button label="Modifier" tone="ghost" small icon="edit-2" onPress={() => setEditor({ id: s.id, draft: { ...s } })} />
+              <Button label={t('Modifier', 'Edit')} tone="ghost" small icon="edit-2" onPress={() => setEditor({ id: s.id, draft: { ...s } })} />
               <View style={styles.switchRow}>
-                <Text style={styles.switchLabel}>{s.active ? 'Visible' : 'Masquée'}</Text>
+                <Text style={styles.switchLabel}>{s.active ? t('Visible', 'Visible') : t('Masquée', 'Hidden')}</Text>
                 <Switch value={s.active} onValueChange={() => {
                     void toggle(s)
                   }} trackColor={{ true: Light.accent, false: Light.line }} />
               </View>
               <View style={styles.order}>
-                <Pressable onPress={() => move(s, -1)} disabled={i === 0} style={[styles.orderButton, i === 0 && styles.off]} accessibilityLabel="Monter">
+                <Pressable onPress={() => move(s, -1)} disabled={i === 0} style={[styles.orderButton, i === 0 && styles.off]} accessibilityLabel={t('Monter', 'Move up')}>
                   <Icon name="arrow-up" size={15} color={Light.muted} />
                 </Pressable>
-                <Pressable onPress={() => move(s, 1)} disabled={i === rows.length - 1} style={[styles.orderButton, i === rows.length - 1 && styles.off]} accessibilityLabel="Descendre">
+                <Pressable onPress={() => move(s, 1)} disabled={i === rows.length - 1} style={[styles.orderButton, i === rows.length - 1 && styles.off]} accessibilityLabel={t('Descendre', 'Move down')}>
                   <Icon name="arrow-down" size={15} color={Light.muted} />
                 </Pressable>
-                <Pressable onPress={() => confirmRemove(s)} style={styles.orderButton} accessibilityLabel="Supprimer">
+                <Pressable onPress={() => confirmRemove(s)} style={styles.orderButton} accessibilityLabel={t('Supprimer', 'Delete')}>
                   <Icon name="trash-2" size={15} color={Light.danger} />
                 </Pressable>
               </View>
@@ -129,6 +138,7 @@ function Editor({
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
+  const t = useT()
 
   const pick = async () => {
     setUploading(true)
@@ -136,7 +146,7 @@ function Editor({
       const url = await pickAndUploadImage(userId)
       if (url) setDraft({ ...draft, image_url: url })
     } catch {
-      setError('Envoi de la photo impossible. Réessayez.')
+      setError(t('Envoi de la photo impossible. Réessayez.', "Couldn't upload the photo. Please try again."))
     } finally {
       setUploading(false)
     }
@@ -144,14 +154,14 @@ function Editor({
 
   const submit = async () => {
     if (!draft.name.trim()) {
-      setError('Donnez un nom à la prestation.')
+      setError(t('Donnez un nom à la prestation.', 'Give the service a name.'))
       return
     }
     setSaving(true)
     setError('')
     const ok = await onSave(draft)
     setSaving(false)
-    if (!ok) setError('Enregistrement impossible. Vérifiez votre connexion.')
+    if (!ok) setError(t('Enregistrement impossible. Vérifiez votre connexion.', "Couldn't save. Check your connection."))
   }
 
   return (
@@ -160,59 +170,66 @@ function Editor({
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.sheetWrap} pointerEvents="box-none">
         <View style={styles.sheet}>
           <View style={styles.sheetHead}>
-            <Text style={styles.sheetTitle}>{isNew ? 'Nouvelle prestation' : 'Modifier la prestation'}</Text>
-            <Pressable onPress={onClose} hitSlop={8}>
+            <Text style={styles.sheetTitle}>{isNew ? t('Nouvelle prestation', 'New service') : t('Modifier la prestation', 'Edit service')}</Text>
+            <Pressable onPress={onClose} hitSlop={8} accessibilityLabel={t('Fermer', 'Close')}>
               <Icon name="x" size={20} color={Light.muted} />
             </Pressable>
           </View>
           <ScrollView contentContainerStyle={styles.form} keyboardShouldPersistTaps="handled">
-            <Field label="Nom">
-              <TextInput value={draft.name} onChangeText={(v) => setDraft({ ...draft, name: v })} style={inputStyle} placeholder="Balade en quad" placeholderTextColor={Light.faint} maxLength={80} autoFocus />
+            <Field label={t('Nom', 'Name')}>
+              <TextInput value={draft.name} onChangeText={(v) => setDraft({ ...draft, name: v })} style={inputStyle} placeholder={t('Balade en quad', 'Quad bike ride')} placeholderTextColor={Light.faint} maxLength={80} autoFocus />
             </Field>
             <View style={styles.twoCols}>
               <View style={styles.col}>
-                <Field label="Durée">
+                <Field label={t('Durée', 'Duration')}>
                   <TextInput value={draft.duration} onChangeText={(v) => setDraft({ ...draft, duration: v })} style={inputStyle} placeholder="1 h" placeholderTextColor={Light.faint} maxLength={40} />
                 </Field>
               </View>
               <View style={styles.col}>
-                <Field label="Prix">
+                <Field label={t('Prix', 'Price')}>
                   <TextInput value={draft.price} onChangeText={(v) => setDraft({ ...draft, price: v })} style={inputStyle} placeholder="450 MAD" placeholderTextColor={Light.faint} maxLength={40} />
                 </Field>
               </View>
             </View>
-            <Field label="Description" hint="Facultatif, 300 caractères.">
+            <Field label="Description" hint={t('Facultatif, 300 caractères.', 'Optional, 300 characters.')}>
               <TextInput
                 value={draft.description}
                 onChangeText={(v) => setDraft({ ...draft, description: v })}
                 style={[inputStyle, styles.textarea]}
-                placeholder="Départ de la Palmeraie, casque et lunettes fournis, guide francophone."
+                placeholder={t(
+                  'Départ de la Palmeraie, casque et lunettes fournis, guide francophone.',
+                  'Departs from the Palmeraie, helmet and goggles provided, English-speaking guide.'
+                )}
                 placeholderTextColor={Light.faint}
                 maxLength={300}
                 multiline
               />
             </Field>
-            <Field label="Photo" hint="Facultative. Sans photo, celle de votre fiche est utilisée.">
+            <Field label="Photo" hint={t('Facultative. Sans photo, celle de votre fiche est utilisée.', "Optional. Without one, your listing's photo is used.")}>
               <View style={styles.photoRow}>
                 <View style={styles.thumb}>
                   {draft.image_url ? <Image source={{ uri: draft.image_url }} style={styles.thumbImage} contentFit="cover" alt="" /> : <Icon name="image" size={20} color={Light.faint} />}
                 </View>
-                <Button label={uploading ? 'Envoi…' : draft.image_url ? 'Changer' : 'Choisir une photo'} tone="ghost" small icon="camera" onPress={pick} disabled={uploading} />
+                <Button
+                  label={uploading ? t('Envoi…', 'Uploading…') : draft.image_url ? t('Changer', 'Change') : t('Choisir une photo', 'Choose a photo')}
+                 tone="ghost" small icon="camera" onPress={pick} disabled={uploading} />
                 {draft.image_url && (
-                  <Pressable onPress={() => setDraft({ ...draft, image_url: null })} hitSlop={8} accessibilityLabel="Retirer la photo">
+                  <Pressable onPress={() => setDraft({ ...draft, image_url: null })} hitSlop={8} accessibilityLabel={t('Retirer la photo', 'Remove photo')}>
                     <Icon name="x-circle" size={18} color={Light.muted} />
                   </Pressable>
                 )}
               </View>
             </Field>
             <View style={styles.switchRow}>
-              <Text style={styles.switchText}>Visible sur le menu des hôtels</Text>
+              <Text style={styles.switchText}>{t('Visible sur le menu des hôtels', "Visible on hotels' menus")}</Text>
               <Switch value={draft.active} onValueChange={(v) => setDraft({ ...draft, active: v })} trackColor={{ true: Light.accent, false: Light.line }} />
             </View>
             {error ? <Text style={styles.error}>{error}</Text> : null}
             <View style={styles.sheetActions}>
-              <Button label="Annuler" tone="ghost" onPress={onClose} style={styles.grow} />
-              <Button label={saving ? 'Enregistrement…' : isNew ? 'Ajouter au menu' : 'Enregistrer'} onPress={submit} disabled={saving} style={styles.grow} />
+              <Button label={t('Annuler', 'Cancel')} tone="ghost" onPress={onClose} style={styles.grow} />
+              <Button
+                label={saving ? t('Enregistrement…', 'Saving…') : isNew ? t('Ajouter au menu', 'Add to the menu') : t('Enregistrer', 'Save')}
+               onPress={submit} disabled={saving} style={styles.grow} />
             </View>
           </ScrollView>
         </View>

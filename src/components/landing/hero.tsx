@@ -10,16 +10,20 @@ import {
 } from "lucide-react";
 import { GlassEffect, GlassButton, GlassFilter } from "@/components/ui/liquid-glass";
 import { WarpOverlay } from "@/components/ui/wrap-shader";
+import { useT } from "@/lib/i18n/client";
+import type { Translate } from "@/lib/i18n";
 
-const modules = [
-  { icon: CalendarCheck, label: "Réservations" },
-  { icon: QrCode, label: "Check-in" },
-  { icon: ReceiptText, label: "Factures" },
-  { icon: Percent, label: "Commissions" },
-  { icon: Scale, label: "Litiges" },
+const getModules = (t: Translate) => [
+  { icon: CalendarCheck, label: t("Réservations", "Reservations") },
+  { icon: QrCode, label: t("Check-in", "Check-in") },
+  { icon: ReceiptText, label: t("Factures", "Invoices") },
+  { icon: Percent, label: t("Commissions", "Commissions") },
+  { icon: Scale, label: t("Litiges", "Disputes") },
 ];
 
 export function Hero() {
+  const t = useT();
+  const modules = getModules(t);
   return (
     <section className="relative bg-[var(--landing-ivory)] text-[var(--landing-ink)] font-body">
       <GlassFilter />
@@ -40,7 +44,10 @@ export function Hero() {
 
         <div className="relative z-10 flex flex-col items-center gap-8">
           <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-white/80">
-            Une seule plateforme, de la demande au paiement
+            {t(
+              "Une seule plateforme, de la demande au paiement",
+              "One platform, from request to payout"
+            )}
           </p>
 
           {/* Glass dock of modules */}
@@ -70,7 +77,7 @@ export function Hero() {
 
           <GlassButton href="/signup">
             <p className="text-base font-normal tracking-wide text-white">
-              Découvrir TwoCards
+              {t("Découvrir TwoCards", "Discover TwoCards")}
             </p>
           </GlassButton>
         </div>
@@ -80,17 +87,26 @@ export function Hero() {
       <div className="border-b border-black/[0.06] px-6 py-20 md:px-16 md:py-28">
         <div className="mx-auto max-w-5xl">
           <p className="mb-3 text-center text-[11px] font-medium uppercase tracking-[0.28em] text-[var(--landing-mute)]">
-            Le produit
+            {t("Le produit", "The product")}
           </p>
           <h2 className="mx-auto mb-12 max-w-2xl text-center font-title text-3xl font-normal leading-tight md:text-4xl">
-            Qui remplit vos tables,
-            <br />
-            <em className="italic">noir sur blanc</em>.
+            {t(
+              <>
+                Qui remplit vos tables,
+                <br />
+                <em className="italic">noir sur blanc</em>.
+              </>,
+              <>
+                Who fills your tables,
+                <br />
+                <em className="italic">in black and white</em>.
+              </>
+            )}
           </h2>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/dashboard-preview-v2.png"
-            alt="Dashboard TwoCards"
+            alt={t("Dashboard TwoCards", "TwoCards dashboard")}
             className="w-full rounded-lg border border-black/10 shadow-[0_30px_80px_-40px_rgba(13,13,13,0.35)]"
           />
         </div>

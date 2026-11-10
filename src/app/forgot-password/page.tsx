@@ -4,8 +4,11 @@ import Link from "next/link";
 import { useState } from "react";
 import { Mail, AlertCircle, Loader2, CheckCircle, ArrowLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { useT } from "@/lib/i18n/client";
+import { LanguageSwitcher } from "@/components/shared/language-switcher";
 
 export default function ForgotPasswordPage() {
+  const t = useT();
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -22,7 +25,14 @@ export default function ForgotPasswordPage() {
     });
 
     if (error) {
-      setError(error.message);
+      setError(
+        /rate limit|security purposes/i.test(error.message)
+          ? t(
+              "Trop de demandes. Patientez un instant avant de réessayer.",
+              "Too many requests. Please wait a moment before trying again.",
+            )
+          : error.message,
+      );
       setLoading(false);
       return;
     }
@@ -32,13 +42,16 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="relative flex min-h-screen items-center justify-center bg-[var(--landing-ivory)] px-4 py-12 font-body text-[var(--landing-ink)]">
+      <div className="absolute right-4 top-4 sm:right-6 sm:top-6">
+        <LanguageSwitcher />
+      </div>
       <div className="relative w-full max-w-md">
         <div className="mb-10 flex flex-col items-center">
           <Link href="/" className="font-title text-3xl font-medium tracking-tight">
             twocards<span className="text-[var(--landing-mute)]">.</span>
           </Link>
           <p className="mt-2 text-[11px] font-medium uppercase tracking-[0.28em] text-[var(--landing-mute)]">
-            Mot de passe oublié
+            {t("Mot de passe oublié", "Forgot password")}
           </p>
         </div>
 
@@ -49,25 +62,42 @@ export default function ForgotPasswordPage() {
                 <CheckCircle size={32} strokeWidth={1.5} className="text-emerald-600" />
               </div>
               <h1 className="mb-3 font-title text-2xl font-normal">
-                Email envoyé
+                {t("Email envoyé", "Email sent")}
               </h1>
               <p className="mb-6 text-sm leading-relaxed text-[var(--landing-ink)]/60">
-                Si un compte existe pour{" "}
-                <strong className="text-[var(--landing-ink)]">{email}</strong>,
-                vous recevrez un lien pour définir un nouveau mot de passe.
+                {t(
+                  <>
+                    Si un compte existe pour{" "}
+                    <strong className="text-[var(--landing-ink)]">{email}</strong>,
+                    vous recevrez un lien pour définir un nouveau mot de passe.
+                  </>,
+                  <>
+                    If an account exists for{" "}
+                    <strong className="text-[var(--landing-ink)]">{email}</strong>,
+                    you&apos;ll receive a link to set a new password.
+                  </>,
+                )}
               </p>
               <Link
                 href="/login"
                 className="inline-block rounded-full bg-[var(--landing-ink)] px-6 py-3 text-sm font-semibold text-[var(--landing-ivory)] transition-opacity hover:opacity-85"
               >
-                Retour à la connexion
+                {t("Retour à la connexion", "Back to log in")}
               </Link>
             </div>
           ) : (
             <>
               <p className="mb-6 text-sm leading-relaxed text-[var(--landing-ink)]/60">
-                Indiquez l&apos;email de votre compte : nous vous enverrons un
-                lien sécurisé pour définir un nouveau mot de passe.
+                {t(
+                  <>
+                    Indiquez l&apos;email de votre compte : nous vous enverrons un
+                    lien sécurisé pour définir un nouveau mot de passe.
+                  </>,
+                  <>
+                    Enter your account email and we&apos;ll send you a secure
+                    link to set a new password.
+                  </>,
+                )}
               </p>
 
               {error && (
@@ -94,7 +124,7 @@ export default function ForgotPasswordPage() {
                     <input
                       id="email"
                       type="email"
-                      placeholder="nom@entreprise.com"
+                      placeholder={t("nom@entreprise.com", "name@company.com")}
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
@@ -109,7 +139,7 @@ export default function ForgotPasswordPage() {
                   className="flex w-full items-center justify-center gap-2 rounded-full bg-[var(--landing-ink)] py-3.5 text-sm font-semibold text-[var(--landing-ivory)] transition-opacity hover:opacity-85 disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   {loading && <Loader2 size={16} className="animate-spin" />}
-                  {loading ? "Envoi..." : "Envoyer le lien"}
+                  {loading ? t("Envoi...", "Sending...") : t("Envoyer le lien", "Send link")}
                 </button>
               </form>
 
@@ -118,7 +148,7 @@ export default function ForgotPasswordPage() {
                 className="mt-6 flex items-center justify-center gap-2 text-sm text-[var(--landing-ink)]/55 transition-colors hover:text-[var(--landing-ink)]"
               >
                 <ArrowLeft size={14} />
-                Retour à la connexion
+                {t("Retour à la connexion", "Back to log in")}
               </Link>
             </>
           )}

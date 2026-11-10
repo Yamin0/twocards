@@ -1,6 +1,10 @@
 /* Formats et dates de l'espace hôtel. Toutes les comparaisons de dates se
    font sur la valeur ISO stockée (yyyy-mm-dd), jamais sur une chaîne
-   affichée ; le fuseau est celui du navigateur de l'hôtelier. */
+   affichée ; le fuseau est celui du navigateur de l'hôtelier.
+   Les fonctions d'affichage prennent la langue en dernier paramètre
+   (français par défaut) : passer `useLocale()` depuis les composants. */
+
+import { intlLocale, type Locale } from "@/lib/i18n";
 
 export function parseIsoDate(iso: string) {
   const [y, m, d] = iso.slice(0, 10).split("-").map(Number);
@@ -40,9 +44,9 @@ export function monthKey(iso: string) {
   return iso.slice(0, 7);
 }
 
-export function monthLabel(key: string, long = false) {
+export function monthLabel(key: string, long = false, locale: Locale = "fr") {
   const [y, m] = key.split("-").map(Number);
-  return new Date(y, m - 1, 1).toLocaleDateString("fr-FR", {
+  return new Date(y, m - 1, 1).toLocaleDateString(intlLocale(locale), {
     month: long ? "long" : "short",
     year: "numeric",
   });
@@ -50,41 +54,44 @@ export function monthLabel(key: string, long = false) {
 
 export function formatDate(
   iso: string,
-  style: "short" | "medium" | "long" | "weekday" = "medium"
+  style: "short" | "medium" | "long" | "weekday" = "medium",
+  locale: Locale = "fr"
 ) {
   const d = parseIsoDate(iso);
+  const L = intlLocale(locale);
   switch (style) {
     case "short":
-      return d.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" });
+      return d.toLocaleDateString(L, { day: "2-digit", month: "2-digit" });
     case "long":
-      return d.toLocaleDateString("fr-FR", {
+      return d.toLocaleDateString(L, {
         day: "numeric",
         month: "long",
         year: "numeric",
       });
     case "weekday":
-      return d.toLocaleDateString("fr-FR", {
+      return d.toLocaleDateString(L, {
         weekday: "long",
         day: "numeric",
         month: "long",
       });
     default:
-      return d.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
+      return d.toLocaleDateString(L, { day: "numeric", month: "short" });
   }
 }
 
 /* « Aujourd'hui », « Demain », « Hier », sinon la date courte. */
-export function relativeDay(iso: string, now = new Date()) {
+export function relativeDay(iso: string, now = new Date(), locale: Locale = "fr") {
+  const en = locale === "en";
   const today = isoDay(now);
-  if (iso === today) return "Aujourd'hui";
-  if (iso === isoDay(addDays(now, 1))) return "Demain";
-  if (iso === isoDay(addDays(now, -1))) return "Hier";
-  return formatDate(iso, "weekday");
+  if (iso === today) return en ? "Today" : "Aujourd'hui";
+  if (iso === isoDay(addDays(now, 1))) return en ? "Tomorrow" : "Demain";
+  if (iso === isoDay(addDays(now, -1))) return en ? "Yesterday" : "Hier";
+  return formatDate(iso, "weekday", locale);
 }
 
-export function formatTimestamp(ts: string) {
+export function formatTimestamp(ts: string, locale: Locale = "fr") {
   const d = new Date(ts);
-  return d.toLocaleString("fr-FR", {
+  return d.toLocaleString(intlLocale(locale), {
     day: "numeric",
     month: "short",
     hour: "2-digit",
@@ -92,37 +99,41 @@ export function formatTimestamp(ts: string) {
   });
 }
 
-export function timeAgo(ts: string, now = new Date()) {
+export function timeAgo(ts: string, now = new Date(), locale: Locale = "fr") {
+  const en = locale === "en";
   const diff = Math.max(0, now.getTime() - new Date(ts).getTime());
   const min = Math.round(diff / 60000);
-  if (min < 1) return "à l'instant";
-  if (min < 60) return `il y a ${min} min`;
+  if (min < 1) return en ? "just now" : "à l'instant";
+  if (min < 60) return en ? `${min} min ago` : `il y a ${min} min`;
   const h = Math.round(min / 60);
-  if (h < 24) return `il y a ${h} h`;
+  if (h < 24) return en ? `${h} h ago` : `il y a ${h} h`;
   const d = Math.round(h / 24);
-  if (d < 7) return `il y a ${d} j`;
-  return formatTimestamp(ts);
+  if (d < 7) return en ? `${d} d ago` : `il y a ${d} j`;
+  return formatTimestamp(ts, locale);
 }
 
-export function formatMad(amount: number, compact = false) {
+export function formatMad(amount: number, compact = false, locale: Locale = "fr") {
+  const L = intlLocale(locale);
   if (compact && Math.abs(amount) >= 10000) {
-    return `${(amount / 1000).toLocaleString("fr-FR", { maximumFractionDigits: 1 })} k MAD`;
+    return `${(amount / 1000).toLocaleString(L, { maximumFractionDigits: 1 })} k MAD`;
   }
-  return `${Math.round(amount).toLocaleString("fr-FR")} MAD`;
+  return `${Math.round(amount).toLocaleString(L)} MAD`;
 }
 
-export function formatNumber(n: number) {
-  return n.toLocaleString("fr-FR");
+export function formatNumber(n: number, locale: Locale = "fr") {
+  return n.toLocaleString(intlLocale(locale));
 }
 
-export function formatPercent(ratio: number, digits = 0) {
-  return `${(ratio * 100).toLocaleString("fr-FR", {
+export function formatPercent(ratio: number, digits = 0, locale: Locale = "fr") {
+  const v = (ratio * 100).toLocaleString(intlLocale(locale), {
     maximumFractionDigits: digits,
-  })} %`;
+  });
+  return locale === "en" ? `${v}%` : `${v} %`;
 }
 
-export function plural(n: number, singular: string, pluralForm?: string) {
-  return n > 1 ? (pluralForm ?? `${singular}s`) : singular;
+/* Français : 0 et 1 au singulier. Anglais : seul 1 est au singulier. */
+export function plural(n: number, singular: string, pluralForm?: string, locale: Locale = "fr") {
+  return (locale === "en" ? n !== 1 : n > 1) ? (pluralForm ?? `${singular}s`) : singular;
 }
 
 /* Un QR posé dans une chambre, une suite ou un riad — par opposition aux

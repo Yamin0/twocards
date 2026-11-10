@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { Crown, MessageCircle, Phone, Repeat, Star, Users, UserPlus, Coins, Download } from "lucide-react";
 import { useAuthUser } from "@/hooks/use-auth-user";
 import { useHotelSpace } from "@/lib/hotel/store";
-import { guestsFromReservations, isLive, type GuestProfile } from "@/lib/hotel/analytics";
+import { guestsFromReservations, isLive, reservationCategoryLabel, type GuestProfile } from "@/lib/hotel/analytics";
 import { formatDate, formatMad, formatNumber, plural, relativeDay, todayIso, whatsappLink } from "@/lib/hotel/format";
 import {
   Avatar,
@@ -23,12 +23,29 @@ import {
 } from "@/components/hotel/ui";
 import { RatingStars } from "@/components/hotel/charts";
 import { PageSkeleton } from "@/components/hotel/skeleton";
+import { intlLocale, type Locale, type Translate } from "@/lib/i18n";
+import { useLocale, useT } from "@/lib/i18n/client";
 
 type Filter = "tous" | "fideles" | "avenir" | "notes";
 type Sort = "recent" | "visites" | "depense" | "nom";
 
-function exportCsv(guests: GuestProfile[]) {
-  const header = ["Client", "Téléphone", "Sorties", "Première", "Dernière", "Prochaine", "Dépensé (MAD)", "Commissions (MAD)", "Note", "Adresse préférée", "Emplacements"];
+/* Une décimale, au format de la langue (4,5 / 4.5). */
+const fmt1 = (n: number, locale: Locale) => n.toLocaleString(intlLocale(locale), { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+
+function exportCsv(guests: GuestProfile[], t: Translate) {
+  const header = [
+    t("Client", "Guest"),
+    t("Téléphone", "Phone"),
+    t("Sorties", "Outings"),
+    t("Première", "First"),
+    t("Dernière", "Last"),
+    t("Prochaine", "Next"),
+    t("Dépensé (MAD)", "Spent (MAD)"),
+    t("Commissions (MAD)", "Commissions (MAD)"),
+    t("Note", "Rating"),
+    t("Adresse préférée", "Favourite place"),
+    t("Emplacements", "Locations"),
+  ];
   const lines = guests.map((g) =>
     [g.name, g.phone, g.visits, g.firstVisit, g.lastVisit, g.nextVisit ?? "", Math.round(g.totalSpent), Math.round(g.totalCommission), g.rating?.toFixed(1) ?? "", g.favoriteVenue ?? "", g.rooms.join(" / ")]
       .map((v) => `"${String(v).replace(/"/g, '""')}"`)
@@ -38,7 +55,7 @@ function exportCsv(guests: GuestProfile[]) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `clients-${todayIso()}.csv`;
+  a.download = `${t("clients", "guests")}-${todayIso()}.csv`;
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -50,6 +67,8 @@ export default function HotelClientsPage() {
   const [sort, setSort] = useState<Sort>("recent");
   const [search, setSearch] = useState("");
   const [openKey, setOpenKey] = useState<string | null>(null);
+  const t = useT();
+  const locale = useLocale();
 
   const guests = useMemo(() => guestsFromReservations(reservations), [reservations]);
 
@@ -70,12 +89,12 @@ export default function HotelClientsPage() {
           case "depense":
             return b.totalSpent - a.totalSpent;
           case "nom":
-            return a.name.localeCompare(b.name, "fr");
+            return a.name.localeCompare(b.name, locale);
           default:
             return b.lastVisit.localeCompare(a.lastVisit);
         }
       });
-  }, [guests, filter, sort, search]);
+  }, [guests, filter, sort, search, locale]);
 
   if (authLoading || isLoading) return <PageSkeleton kpis={4} table />;
 
@@ -88,22 +107,25 @@ export default function HotelClientsPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Clients"
-        title="Vos clients et leurs sorties"
-        description="Un profil par client, reconstitué à partir de ses réservations : sorties passées et à venir, adresses préférées, montant dépensé, avis. Le carnet d'adresses d'une conciergerie, sans rien saisir."
+        eyebrow={t("Clients", "Guests")}
+        title={t("Vos clients et leurs sorties", "Your guests and their outings")}
+        description={t(
+          "Un profil par client, reconstitué à partir de ses réservations : sorties passées et à venir, adresses préférées, montant dépensé, avis. Le carnet d'adresses d'une conciergerie, sans rien saisir.",
+          "One profile per guest, built from their reservations: past and upcoming outings, favourite places, amount spent, reviews. A concierge desk's little black book, with nothing to type in."
+        )}
         actions={
-          <Button icon={Download} onClick={() => exportCsv(filtered)} disabled={filtered.length === 0}>
-            Exporter ({filtered.length})
+          <Button icon={Download} onClick={() => exportCsv(filtered, t)} disabled={filtered.length === 0}>
+            {t("Exporter", "Export")} ({filtered.length})
           </Button>
         }
       />
 
       <KpiGrid
         items={[
-          { label: "Clients", value: formatNumber(guests.length), hint: "ayant réservé au moins une fois", icon: Users, tone: "sky" },
-          { label: "Fidèles", value: formatNumber(loyal), hint: "2 sorties ou plus", icon: Repeat, tone: "violet" },
-          { label: "Sortie à venir", value: formatNumber(upcoming), hint: "clients avec une réservation future", icon: UserPlus, tone: "emerald" },
-          { label: "Satisfaction", value: avg !== null ? `${avg.toFixed(1).replace(".", ",")}/5` : "—", hint: `${rated.length} ${plural(rated.length, "client noté", "clients notés")}`, icon: Star, tone: "amber" },
+          { label: t("Clients", "Guests"), value: formatNumber(guests.length, locale), hint: t("ayant réservé au moins une fois", "who have booked at least once"), icon: Users, tone: "sky" },
+          { label: t("Fidèles", "Regulars"), value: formatNumber(loyal, locale), hint: t("2 sorties ou plus", "2 or more outings"), icon: Repeat, tone: "violet" },
+          { label: t("Sortie à venir", "Upcoming outing"), value: formatNumber(upcoming, locale), hint: t("clients avec une réservation future", "guests with a future reservation"), icon: UserPlus, tone: "emerald" },
+          { label: t("Satisfaction", "Satisfaction"), value: avg !== null ? `${fmt1(avg, locale)}/5` : "—", hint: t(`${rated.length} ${plural(rated.length, "client noté", "clients notés")}`, `${rated.length} ${plural(rated.length, "guest rated", "guests rated", "en")}`), icon: Star, tone: "amber" },
         ]}
       />
 
@@ -112,24 +134,24 @@ export default function HotelClientsPage() {
           value={filter}
           onChange={setFilter}
           options={[
-            { value: "tous", label: "Tous", count: guests.length },
-            { value: "fideles", label: "Fidèles", count: loyal },
-            { value: "avenir", label: "Sortie à venir", count: upcoming },
-            { value: "notes", label: "Ont laissé un avis", count: rated.length },
+            { value: "tous", label: t("Tous", "All"), count: guests.length },
+            { value: "fideles", label: t("Fidèles", "Regulars"), count: loyal },
+            { value: "avenir", label: t("Sortie à venir", "Upcoming outing"), count: upcoming },
+            { value: "notes", label: t("Ont laissé un avis", "Left a review"), count: rated.length },
           ]}
         />
         <div className="flex flex-wrap items-center gap-2">
-          <SearchInput value={search} onChange={setSearch} placeholder="Nom, téléphone, adresse…" className="w-full sm:w-60" />
+          <SearchInput value={search} onChange={setSearch} placeholder={t("Nom, téléphone, adresse…", "Name, phone, place…")} className="w-full sm:w-60" />
           <Select<Sort>
-            label="Trier"
+            label={t("Trier", "Sort")}
             value={sort}
             onChange={setSort}
             className="w-44"
             options={[
-              { value: "recent", label: "Dernière sortie" },
-              { value: "visites", label: "Plus de sorties" },
-              { value: "depense", label: "Plus dépensé" },
-              { value: "nom", label: "Nom (A → Z)" },
+              { value: "recent", label: t("Dernière sortie", "Latest outing") },
+              { value: "visites", label: t("Plus de sorties", "Most outings") },
+              { value: "depense", label: t("Plus dépensé", "Highest spend") },
+              { value: "nom", label: t("Nom (A → Z)", "Name (A → Z)") },
             ]}
           />
         </div>
@@ -139,13 +161,16 @@ export default function HotelClientsPage() {
         <Panel solid>
           <EmptyState
             icon={Users}
-            title={guests.length === 0 ? "Aucun client pour le moment" : "Aucun client ne correspond"}
+            title={guests.length === 0 ? t("Aucun client pour le moment", "No guests yet") : t("Aucun client ne correspond", "No guests match")}
             description={
               guests.length === 0
-                ? "Les profils se créent tout seuls à la première réservation passée depuis un de vos QR codes."
-                : "Essayez un autre filtre ou une autre recherche."
+                ? t(
+                    "Les profils se créent tout seuls à la première réservation passée depuis un de vos QR codes.",
+                    "Profiles are created automatically with the first reservation made from one of your QR codes."
+                  )
+                : t("Essayez un autre filtre ou une autre recherche.", "Try another filter or search.")
             }
-            action={guests.length === 0 ? <LinkButton href="/hotel/chambres" variant="primary">Mes QR codes</LinkButton> : undefined}
+            action={guests.length === 0 ? <LinkButton href="/hotel/chambres" variant="primary">{t("Mes QR codes", "My QR codes")}</LinkButton> : undefined}
           />
         </Panel>
       ) : (
@@ -170,9 +195,9 @@ export default function HotelClientsPage() {
               </div>
               <dl className="num mt-4 grid grid-cols-3 gap-2 text-center">
                 {[
-                  { l: "Sorties", v: formatNumber(g.liveVisits) },
-                  { l: "Dépensé", v: g.totalSpent > 0 ? formatMad(g.totalSpent, true) : "—" },
-                  { l: "Commission", v: g.totalCommission > 0 ? formatMad(g.totalCommission, true) : "—" },
+                  { l: t("Sorties", "Outings"), v: formatNumber(g.liveVisits, locale) },
+                  { l: t("Dépensé", "Spent"), v: g.totalSpent > 0 ? formatMad(g.totalSpent, true, locale) : "—" },
+                  { l: t("Commission", "Commission"), v: g.totalCommission > 0 ? formatMad(g.totalCommission, true, locale) : "—" },
                 ].map((s) => (
                   <div key={s.l} className="rounded-lg bg-white/[0.05] py-1.5">
                     <dt className="text-[10px] font-medium uppercase tracking-wider text-white/40">{s.l}</dt>
@@ -182,9 +207,9 @@ export default function HotelClientsPage() {
               </dl>
               <div className="mt-3 flex flex-wrap items-center gap-1.5 text-[11px] text-white/50">
                 {g.nextVisit ? (
-                  <Tag className="bg-emerald-500/15 text-emerald-300">Prochaine : {relativeDay(g.nextVisit)}</Tag>
+                  <Tag className="bg-emerald-500/15 text-emerald-300">{t("Prochaine :", "Next:")} {relativeDay(g.nextVisit, undefined, locale)}</Tag>
                 ) : (
-                  <Tag>Dernière : {formatDate(g.lastVisit)}</Tag>
+                  <Tag>{t("Dernière :", "Last:")} {formatDate(g.lastVisit, "medium", locale)}</Tag>
                 )}
                 {g.favoriteVenue && <span className="truncate">♥ {g.favoriteVenue}</span>}
               </div>
@@ -199,31 +224,36 @@ export default function HotelClientsPage() {
 }
 
 function GuestDrawer({ guest: g, onClose }: { guest: GuestProfile | null; onClose: () => void }) {
+  const t = useT();
+  const locale = useLocale();
   if (!g) return null;
   const today = todayIso();
   return (
     <Drawer
       open
       onClose={onClose}
-      eyebrow={`${g.liveVisits} ${plural(g.liveVisits, "sortie")} · client depuis le ${formatDate(g.firstVisit)}`}
+      eyebrow={t(
+        `${g.liveVisits} ${plural(g.liveVisits, "sortie")} · client depuis le ${formatDate(g.firstVisit)}`,
+        `${g.liveVisits} ${plural(g.liveVisits, "outing", undefined, "en")} · guest since ${formatDate(g.firstVisit, "medium", "en")}`
+      )}
       title={g.name}
       footer={
         <>
-          <LinkButton href={whatsappLink(g.phone, `Bonjour ${g.name.split(" ")[0]}, `)} external icon={MessageCircle} variant="primary" size="sm">
+          <LinkButton href={whatsappLink(g.phone, t(`Bonjour ${g.name.split(" ")[0]}, `, `Hello ${g.name.split(" ")[0]}, `))} external icon={MessageCircle} variant="primary" size="sm">
             WhatsApp
           </LinkButton>
           <LinkButton href={`tel:${g.phone.replace(/\s/g, "")}`} external icon={Phone} size="sm">
-            Appeler
+            {t("Appeler", "Call")}
           </LinkButton>
         </>
       }
     >
       <div className="grid grid-cols-2 gap-2">
         {[
-          { l: "Dépensé", v: g.totalSpent > 0 ? formatMad(g.totalSpent) : "—", icon: Coins },
-          { l: "Commissions", v: g.totalCommission > 0 ? formatMad(g.totalCommission) : "—", icon: Coins },
-          { l: "Taille moyenne", v: `${g.averageParty.toFixed(1).replace(".", ",")} pers.`, icon: Users },
-          { l: "Note moyenne", v: g.rating !== null ? `${g.rating.toFixed(1).replace(".", ",")}/5` : "—", icon: Star },
+          { l: t("Dépensé", "Spent"), v: g.totalSpent > 0 ? formatMad(g.totalSpent, false, locale) : "—", icon: Coins },
+          { l: t("Commissions", "Commissions"), v: g.totalCommission > 0 ? formatMad(g.totalCommission, false, locale) : "—", icon: Coins },
+          { l: t("Taille moyenne", "Average party"), v: t(`${fmt1(g.averageParty, locale)} pers.`, `${fmt1(g.averageParty, locale)} guests`), icon: Users },
+          { l: t("Note moyenne", "Average rating"), v: g.rating !== null ? `${fmt1(g.rating, locale)}/5` : "—", icon: Star },
         ].map((s) => (
           <div key={s.l} className="rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-3">
             <p className="text-[10px] font-medium uppercase tracking-wider text-white/40">{s.l}</p>
@@ -234,14 +264,14 @@ function GuestDrawer({ guest: g, onClose }: { guest: GuestProfile | null; onClos
 
       <div className="mt-4 flex flex-wrap gap-1.5">
         {g.categories.map((c) => (
-          <Tag key={c}>{c}</Tag>
+          <Tag key={c}>{reservationCategoryLabel(c, locale)}</Tag>
         ))}
         {g.rooms.map((r) => (
           <Tag key={r} className="bg-sky-500/15 text-sky-200">{r}</Tag>
         ))}
       </div>
 
-      <p className="mb-2 mt-6 text-[11px] font-bold uppercase tracking-[0.14em] text-white/40">Historique des sorties</p>
+      <p className="mb-2 mt-6 text-[11px] font-bold uppercase tracking-[0.14em] text-white/40">{t("Historique des sorties", "Outing history")}</p>
       <ul className="divide-y divide-white/[0.06] rounded-xl border border-white/10 bg-white/[0.03]">
         {g.reservations.map((r) => (
           <li key={r.id} className="px-4 py-3">
@@ -249,13 +279,13 @@ function GuestDrawer({ guest: g, onClose }: { guest: GuestProfile | null; onClos
               <div className="min-w-0">
                 <p className="truncate text-sm font-bold text-white">{r.venue_name}</p>
                 <p className="num text-xs text-white/50">
-                  {r.reservation_date >= today ? relativeDay(r.reservation_date) : formatDate(r.reservation_date, "long")}
-                  {r.reservation_time ? ` · ${r.reservation_time}` : ""} · {r.party_size} pers.
+                  {r.reservation_date >= today ? relativeDay(r.reservation_date, undefined, locale) : formatDate(r.reservation_date, "long", locale)}
+                  {r.reservation_time ? ` · ${r.reservation_time}` : ""} · {r.party_size} {t("pers.", r.party_size === 1 ? "guest" : "guests")}
                 </p>
               </div>
               <div className="flex shrink-0 flex-col items-end gap-1">
                 <StatusPill status={r.status} />
-                {r.commission > 0 && isLive(r) && <span className="num text-[11px] font-bold text-amber-300">+{formatMad(r.commission)}</span>}
+                {r.commission > 0 && isLive(r) && <span className="num text-[11px] font-bold text-amber-300">+{formatMad(r.commission, false, locale)}</span>}
               </div>
             </div>
             {r.rating !== null && (

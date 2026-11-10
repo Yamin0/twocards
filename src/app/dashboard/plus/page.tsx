@@ -17,6 +17,8 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { useAuthUser } from "@/hooks/use-auth-user";
+import { useT } from "@/lib/i18n/client";
+import type { Translate } from "@/lib/i18n";
 
 /* Tout ce qui n'a pas sa place dans les premiers onglets. Au lancement,
    un établissement vit dans Réservations et Messages ; le reste est là,
@@ -31,87 +33,87 @@ type Entry = {
   restaurantOnly?: boolean;
 };
 
-const GROUPS: { title: string; entries: Entry[] }[] = [
+const getGroups = (t: Translate): { title: string; entries: Entry[] }[] => [
   {
-    title: "Votre activité",
+    title: t("Votre activité", "Your business"),
     entries: [
       {
         icon: Network,
-        label: "Réseau apporteurs",
-        description: "Quels hôtels et conciergeries vous envoient des clients",
+        label: t("Réseau apporteurs", "Referral network"),
+        description: t("Quels hôtels et conciergeries vous envoient des clients", "Which hotels and concierge desks send you guests"),
         href: "/dashboard/network",
       },
       {
         icon: CreditCard,
-        label: "Commissions",
-        description: "Ce que vous reversez, réservation par réservation",
+        label: t("Commissions", "Commissions"),
+        description: t("Ce que vous reversez, réservation par réservation", "What you pay out, reservation by reservation"),
         href: "/dashboard/commissions",
       },
       {
         icon: BarChart3,
-        label: "Analyses",
-        description: "Volumes, panier moyen, tendances",
+        label: t("Analyses", "Analytics"),
+        description: t("Volumes, panier moyen, tendances", "Volumes, average spend, trends"),
         href: "/dashboard/analytics",
       },
       {
         icon: Users,
-        label: "Clients",
-        description: "Historique et fidélité de vos convives",
+        label: t("Clients", "Guests"),
+        description: t("Historique et fidélité de vos convives", "Your guests' history and loyalty"),
         href: "/dashboard/guests",
       },
     ],
   },
   {
-    title: "Outils",
+    title: t("Outils", "Tools"),
     entries: [
       {
         icon: Globe,
-        label: "Portail de réservation",
-        description: "Votre page de réservation directe, sans commission",
+        label: t("Portail de réservation", "Booking portal"),
+        description: t("Votre page de réservation directe, sans commission", "Your direct booking page, commission-free"),
         href: "/dashboard/portal",
       },
       {
         icon: Ticket,
-        label: "Événements",
-        description: "Soirées et programmation",
+        label: t("Événements", "Events"),
+        description: t("Soirées et programmation", "Nights and line-up"),
         href: "/dashboard/events",
         restaurantOnly: true,
       },
       {
         icon: Grid3X3,
-        label: "Plan de salle",
-        description: "Vos tables et leur occupation",
+        label: t("Plan de salle", "Floor plan"),
+        description: t("Vos tables et leur occupation", "Your tables and their occupancy"),
         href: "/dashboard/floor-plan",
         restaurantOnly: true,
       },
       {
         icon: Plug,
-        label: "Caisse (POS)",
-        description: "Rapprochement automatique des tickets",
+        label: t("Caisse (POS)", "Point of sale (POS)"),
+        description: t("Rapprochement automatique des tickets", "Automatic ticket matching"),
         href: "/dashboard/integrations",
         restaurantOnly: true,
       },
     ],
   },
   {
-    title: "Compte",
+    title: t("Compte", "Account"),
     entries: [
       {
         icon: Settings,
-        label: "Paramètres",
-        description: "Profil, établissement, sécurité",
+        label: t("Paramètres", "Settings"),
+        description: t("Profil, établissement, sécurité", "Profile, venue, security"),
         href: "/dashboard/settings",
       },
       {
         icon: Bell,
-        label: "Notifications",
-        description: "Tout ce qui s'est passé, dans l'ordre",
+        label: t("Notifications", "Notifications"),
+        description: t("Tout ce qui s'est passé, dans l'ordre", "Everything that happened, in order"),
         href: "/dashboard/notifications",
       },
       {
         icon: HelpCircle,
-        label: "Aide",
-        description: "Guides et contact",
+        label: t("Aide", "Help"),
+        description: t("Guides et contact", "Guides and contact"),
         href: "/dashboard/help",
       },
     ],
@@ -120,13 +122,18 @@ const GROUPS: { title: string; entries: Entry[] }[] = [
 
 export default function PlusPage() {
   const { isActivityVenue } = useAuthUser();
+  const t = useT();
+  const GROUPS = getGroups(t);
 
   return (
     <div className="space-y-6">
       <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
-        <h1 className="font-display text-3xl font-light text-white">Plus</h1>
+        <h1 className="font-display text-3xl font-light text-white">{t("Plus", "More")}</h1>
         <p className="font-ui text-sm text-white/60 mt-2">
-          Les sections que vous n&apos;ouvrez pas tous les jours.
+          {t(
+            <>Les sections que vous n&apos;ouvrez pas tous les jours.</>,
+            <>The sections you don&apos;t open every day.</>
+          )}
         </p>
       </div>
 

@@ -16,9 +16,10 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import logo from '@/assets/images/logo.png'
-import { Icon } from '@/components/venue/ui'
+import { Icon, Segmented } from '@/components/venue/ui'
 import { CardShadow, Light } from '@/constants/theme'
 import { haptic } from '@/lib/haptics'
+import { useLocaleChoice, useT, type Locale, type Translate } from '@/lib/i18n'
 import { reportError } from '@/lib/report-error'
 import { SITE_URL } from '@/lib/site'
 import { supabase } from '@/lib/supabase'
@@ -28,15 +29,21 @@ import { supabase } from '@/lib/supabase'
 
 type Mode = 'login' | 'forgot' | 'sent'
 
-const ERRORS: Record<string, string> = {
-  'Invalid login credentials': 'E-mail ou mot de passe incorrect.',
-  'Email not confirmed': "Confirmez d'abord votre e-mail : un lien vous a été envoyé à l'inscription.",
-  'Too many requests': 'Trop de tentatives. Patientez une minute avant de réessayer.',
-}
+const getErrors = (t: Translate): Record<string, string> => ({
+  'Invalid login credentials': t('E-mail ou mot de passe incorrect.', 'Incorrect email or password.'),
+  'Email not confirmed': t(
+    "Confirmez d'abord votre e-mail : un lien vous a été envoyé à l'inscription.",
+    'Please confirm your email first: a link was sent to you when you signed up.'
+  ),
+  'Too many requests': t('Trop de tentatives. Patientez une minute avant de réessayer.', 'Too many attempts. Wait a minute before trying again.'),
+})
 
 const isEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim())
 
 export default function LoginScreen() {
+  const t = useT()
+  const { locale, setLocale } = useLocaleChoice()
+  const ERRORS = getErrors(t)
   const [mode, setMode] = useState<Mode>('login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -60,7 +67,7 @@ export default function LoginScreen() {
       setLoading(false)
       if (error) {
         haptic.error()
-        setError(ERRORS[error.message] ?? "L'envoi a échoué. Vérifiez l'adresse et réessayez.")
+        setError(ERRORS[error.message] ?? t("L'envoi a échoué. Vérifiez l'adresse et réessayez.", "Sending failed. Check the address and try again."))
         reportError('message', error.message, 'login:reset')
         return
       }
@@ -72,7 +79,7 @@ export default function LoginScreen() {
     const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password })
     if (error) {
       haptic.error()
-      setError(ERRORS[error.message] ?? 'Connexion impossible. Vérifiez votre réseau et réessayez.')
+      setError(ERRORS[error.message] ?? t('Connexion impossible. Vérifiez votre réseau et réessayez.', "Couldn't log in. Check your connection and try again."))
       if (!ERRORS[error.message]) reportError('message', error.message, 'login')
       setPassword('')
       setLoading(false)
@@ -101,7 +108,9 @@ export default function LoginScreen() {
               <Image source={logo} style={styles.logo} contentFit="contain" alt="twocards" />
             </View>
             <Text style={styles.wordmark}>twocards</Text>
-            <Text style={styles.tagline}>Réservations, commissions et messages, entre deux services.</Text>
+            <Text style={styles.tagline}>
+              {t('Réservations, commissions et messages, entre deux services.', 'Reservations, commissions and messages, between two services.')}
+            </Text>
           </View>
 
           <View style={styles.card}>
@@ -110,22 +119,26 @@ export default function LoginScreen() {
                 <View style={styles.sentIcon}>
                   <Icon name="mail" size={22} color={Light.success} />
                 </View>
-                <Text style={styles.sentTitle}>Vérifiez votre boîte mail</Text>
+                <Text style={styles.sentTitle}>{t('Vérifiez votre boîte mail', 'Check your inbox')}</Text>
                 <Text style={styles.sentBody}>
-                  Un lien pour choisir un nouveau mot de passe vient de partir à{' '}
-                  <Text style={styles.sentEmail}>{email.trim()}</Text>. Il est valable une heure.
+                  {t('Un lien pour choisir un nouveau mot de passe vient de partir à ', "We've just sent a link to choose a new password to ")}
+                  <Text style={styles.sentEmail}>{email.trim()}</Text>
+                  {t('. Il est valable une heure.', '. It is valid for one hour.')}
                 </Text>
                 <Pressable onPress={() => switchMode('login')} style={styles.submit}>
-                  <Text style={styles.submitText}>Retour à la connexion</Text>
+                  <Text style={styles.submitText}>{t('Retour à la connexion', 'Back to log in')}</Text>
                 </Pressable>
               </View>
             ) : (
               <>
-                <Text style={styles.cardTitle}>{mode === 'login' ? 'Connexion' : 'Mot de passe oublié'}</Text>
+                <Text style={styles.cardTitle}>{mode === 'login' ? t('Connexion', 'Log in') : t('Mot de passe oublié', 'Forgot password')}</Text>
                 <Text style={styles.cardHint}>
                   {mode === 'login'
-                    ? 'Votre compte twocards, le même que sur le site.'
-                    : "Indiquez l'adresse du compte : vous recevrez un lien pour en choisir un nouveau."}
+                    ? t('Votre compte twocards, le même que sur le site.', 'Your twocards account, the same as on the website.')
+                    : t(
+                        "Indiquez l'adresse du compte : vous recevrez un lien pour en choisir un nouveau.",
+                        "Enter your account's email: you'll receive a link to choose a new one."
+                      )}
                 </Text>
 
                 {error ? (
@@ -139,7 +152,7 @@ export default function LoginScreen() {
                   <Icon name="mail" size={17} color={Light.faint} />
                   <TextInput
                     style={styles.input}
-                    placeholder="Adresse e-mail"
+                    placeholder={t('Adresse e-mail', 'Email address')}
                     placeholderTextColor={Light.faint}
                     autoCapitalize="none"
                     autoComplete="email"
@@ -158,7 +171,7 @@ export default function LoginScreen() {
                     <Icon name="lock" size={17} color={Light.faint} />
                     <TextInput
                       style={styles.input}
-                      placeholder="Mot de passe"
+                      placeholder={t('Mot de passe', 'Password')}
                       placeholderTextColor={Light.faint}
                       secureTextEntry={!showPassword}
                       autoComplete="password"
@@ -169,7 +182,7 @@ export default function LoginScreen() {
                       onChangeText={setPassword}
                     />
                     <Pressable
-                      accessibilityLabel={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
+                      accessibilityLabel={showPassword ? t('Masquer le mot de passe', 'Hide password') : t('Afficher le mot de passe', 'Show password')}
                       onPress={() => setShowPassword((v) => !v)}
                       hitSlop={8}>
                       <Icon name={showPassword ? 'eye-off' : 'eye'} size={18} color={Light.muted} />
@@ -184,7 +197,7 @@ export default function LoginScreen() {
                   {loading ? (
                     <ActivityIndicator size="small" color="#FFFFFF" />
                   ) : (
-                    <Text style={styles.submitText}>{mode === 'login' ? 'Se connecter' : 'Envoyer le lien'}</Text>
+                    <Text style={styles.submitText}>{mode === 'login' ? t('Se connecter', 'Log in') : t('Envoyer le lien', 'Send the link')}</Text>
                   )}
                 </Pressable>
 
@@ -192,7 +205,7 @@ export default function LoginScreen() {
                   onPress={() => switchMode(mode === 'login' ? 'forgot' : 'login')}
                   hitSlop={8}
                   style={styles.link}>
-                  <Text style={styles.linkText}>{mode === 'login' ? 'Mot de passe oublié ?' : 'Retour à la connexion'}</Text>
+                  <Text style={styles.linkText}>{mode === 'login' ? t('Mot de passe oublié ?', 'Forgot your password?') : t('Retour à la connexion', 'Back to log in')}</Text>
                 </Pressable>
               </>
             )}
@@ -201,7 +214,17 @@ export default function LoginScreen() {
           {/* Pas d'inscription dans l'app : les comptes partenaires sont ouverts
               par l'équipe twocards, hors de l'app. */}
           <View style={styles.footer}>
-            <Text style={styles.footerText}>Accès réservé aux partenaires du réseau twocards.</Text>
+            <Text style={styles.footerText}>
+              {t('Accès réservé aux partenaires du réseau twocards.', 'Access reserved for twocards network partners.')}
+            </Text>
+            <Segmented<Locale>
+              options={[
+                { value: 'fr', label: 'Français' },
+                { value: 'en', label: 'English' },
+              ]}
+              value={locale}
+              onChange={setLocale}
+            />
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -368,6 +391,8 @@ const styles = StyleSheet.create({
   },
   footer: {
     alignSelf: 'center',
+    alignItems: 'center',
+    gap: 14,
     paddingVertical: 8,
   },
   footerText: {

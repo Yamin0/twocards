@@ -3,6 +3,7 @@ import { Linking, Pressable, StyleSheet, Text, TextInput, View } from 'react-nat
 
 import { Avatar, Card, Empty, Icon, Pill, ScreenSkeleton, StackScreen, inputStyle } from '@/components/venue/ui'
 import { Light } from '@/constants/theme'
+import { useLocale, useT } from '@/lib/i18n'
 import { isOut, mad, shortDate, useVenueReservations } from '@/lib/venue-data'
 
 /* Clients : un numéro de téléphone, une personne. Ses visites, ce qu'elle
@@ -22,6 +23,8 @@ type Guest = {
 export default function GuestsScreen() {
   const { rows } = useVenueReservations()
   const [query, setQuery] = useState('')
+  const t = useT()
+  const locale = useLocale()
 
   const guests = useMemo(() => {
     const map = new Map<string, Guest>()
@@ -58,12 +61,19 @@ export default function GuestsScreen() {
 
   return (
     <StackScreen
-      title="Clients"
-      subtitle={rows ? `${guests.length} client${guests.length > 1 ? 's' : ''} · ${loyal} fidèle${loyal > 1 ? 's' : ''}` : undefined}>
+      title={t('Clients', 'Guests')}
+      subtitle={
+        rows
+          ? t(
+              `${guests.length} client${guests.length > 1 ? 's' : ''} · ${loyal} fidèle${loyal > 1 ? 's' : ''}`,
+              `${guests.length} guest${guests.length === 1 ? '' : 's'} · ${loyal} regular${loyal === 1 ? '' : 's'}`
+            )
+          : undefined
+      }>
       <TextInput
         value={query}
         onChangeText={setQuery}
-        placeholder="Rechercher un nom ou un numéro"
+        placeholder={t('Rechercher un nom ou un numéro', 'Search a name or number')}
         placeholderTextColor={Light.faint}
         style={inputStyle}
         autoCorrect={false}
@@ -73,7 +83,11 @@ export default function GuestsScreen() {
         <ScreenSkeleton title={false} bare />
       ) : guests.length === 0 ? (
         <Card>
-          <Empty icon="users" title="Aucun client" body="Chaque réservation reçue crée ou enrichit une fiche client ici." />
+          <Empty
+            icon="users"
+            title={t('Aucun client', 'No guests')}
+            body={t('Chaque réservation reçue crée ou enrichit une fiche client ici.', 'Every reservation received creates or updates a guest profile here.')}
+          />
         </Card>
       ) : (
         <Card style={styles.list}>
@@ -88,15 +102,22 @@ export default function GuestsScreen() {
                   <Text style={styles.name} numberOfLines={1}>
                     {g.name}
                   </Text>
-                  {g.visits >= 3 ? <Pill label="Habitué" tone="accent" /> : g.visits === 2 ? <Pill label="Revenu" tone="success" /> : null}
+                  {g.visits >= 3 ? (
+                    <Pill label={t('Habitué', 'Regular')} tone="accent" />
+                  ) : g.visits === 2 ? (
+                    <Pill label={t('Revenu', 'Returning')} tone="success" />
+                  ) : null}
                 </View>
                 <Text style={styles.hint} numberOfLines={1}>
-                  {g.visits} visite{g.visits > 1 ? 's' : ''} · dernière le {shortDate(g.last)}
+                  {t(
+                    `${g.visits} visite${g.visits > 1 ? 's' : ''} · dernière le ${shortDate(g.last, locale)}`,
+                    `${g.visits} visit${g.visits === 1 ? '' : 's'} · last on ${shortDate(g.last, locale)}`
+                  )}
                   {g.via ? ` · via ${g.via}` : ''}
                 </Text>
               </View>
               <View style={styles.right}>
-                <Text style={styles.spent}>{g.spent > 0 ? mad(g.spent) : '—'}</Text>
+                <Text style={styles.spent}>{g.spent > 0 ? mad(g.spent, locale) : '—'}</Text>
                 {g.rating !== null && (
                   <View style={styles.rating}>
                     <Icon name="star" size={11} color={Light.warning} />

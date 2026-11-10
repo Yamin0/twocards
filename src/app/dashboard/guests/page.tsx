@@ -11,6 +11,8 @@ import {
 import { TableSkeleton } from "@/components/shared/loading-skeleton";
 import { StatStrip } from "@/components/shared/stat-strip";
 import { RatingStars } from "@/components/shared/mini-charts";
+import { useLocale, useT } from "@/lib/i18n/client";
+import { intlLocale, makeT, type Locale, type Translate } from "@/lib/i18n";
 import {
   ArrowDown,
   ArrowUp,
@@ -64,11 +66,19 @@ type GuestProfile = {
   segments: string[];
 };
 
-function sourceLabel(source: string) {
-  if (source === "qr") return "Réseau QR";
-  if (source === "portal") return "Portail";
-  if (source === "venue") return "Sur place";
+function sourceLabel(source: string, t: Translate) {
+  if (source === "qr") return t("Réseau QR", "QR network");
+  if (source === "portal") return t("Portail", "Portal");
+  if (source === "venue") return t("Sur place", "In-house");
   return source;
+}
+
+/* Libellé affiché d'un segment (la clé reste en français). */
+function segmentLabel(s: string, t: Translate) {
+  if (s === "Habitué") return t("Habitué", "Regular");
+  if (s === "Nouveau") return t("Nouveau", "New");
+  if (s === "À risque") return t("À risque", "At risk");
+  return s;
 }
 
 const DAY_MS = 86_400_000;
@@ -162,6 +172,7 @@ const SEGMENT_STYLES: Record<string, string> = {
 };
 
 function SegmentBadges({ segments }: { segments: string[] }) {
+  const t = useT();
   if (segments.length === 0) return <span className="text-white/25">—</span>;
   return (
     <span className="flex flex-wrap gap-1">
@@ -170,32 +181,33 @@ function SegmentBadges({ segments }: { segments: string[] }) {
           key={s}
           className={`font-ui inline-flex rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${SEGMENT_STYLES[s] ?? "bg-white/10 text-white/50 border-white/10"}`}
         >
-          {s}
+          {segmentLabel(s, t)}
         </span>
       ))}
     </span>
   );
 }
 
-const fmtDate = (iso: string) =>
-  new Date(iso + "T00:00:00").toLocaleDateString("fr-FR", {
+const fmtDate = (iso: string, locale: Locale = "fr") =>
+  new Date(iso + "T00:00:00").toLocaleDateString(intlLocale(locale), {
     day: "numeric",
     month: "short",
     year: "numeric",
   });
 
-function exportCsv(guests: GuestProfile[]) {
+function exportCsv(guests: GuestProfile[], locale: Locale = "fr") {
+  const t = makeT(locale);
   const header = [
-    "Nom",
-    "Téléphone",
-    "Visites",
-    "Total dépensé (MAD)",
-    "Panier moyen (MAD)",
-    "Dernière visite",
-    "Prochaine réservation",
-    "Note moyenne",
-    "Segments",
-    "Canaux",
+    t("Nom", "Name"),
+    t("Téléphone", "Phone"),
+    t("Visites", "Visits"),
+    t("Total dépensé (MAD)", "Total spent (MAD)"),
+    t("Panier moyen (MAD)", "Average spend (MAD)"),
+    t("Dernière visite", "Last visit"),
+    t("Prochaine réservation", "Next reservation"),
+    t("Note moyenne", "Average rating"),
+    t("Segments", "Segments"),
+    t("Canaux", "Channels"),
   ];
   const lines = guests.map((g) =>
     [
@@ -207,8 +219,8 @@ function exportCsv(guests: GuestProfile[]) {
       g.lastVisit ?? "",
       g.nextReservation?.reservation_date ?? "",
       g.avgRating !== null ? g.avgRating.toFixed(1) : "",
-      g.segments.join(", "),
-      g.sources.map(sourceLabel).join(", "),
+      g.segments.map((s) => segmentLabel(s, t)).join(", "),
+      g.sources.map((s) => sourceLabel(s, t)).join(", "),
     ]
       .map((v) => `"${String(v).replace(/"/g, '""')}"`)
       .join(";")
@@ -228,6 +240,9 @@ type SortField = "visites" | "depense" | "derniereVisite";
 const SEGMENT_FILTERS = ["VIP", "Habitué", "Nouveau", "À risque"] as const;
 
 export default function GuestsPage() {
+  const t = useT();
+  const locale = useLocale();
+  const intl = intlLocale(locale);
   const router = useRouter();
   const { isLoading } = useAuthUser();
   const { reservations, isLoading: loadingData } = useVenueQrReservations();
@@ -289,22 +304,28 @@ export default function GuestsPage() {
       : null;
 
   const stats = [
-    { label: "Clients uniques", value: guests.length },
-    { label: "Nouveaux ce mois", value: newThisMonth },
+    { label: t("Clients uniques", "Unique guests"), value: guests.length },
+    { label: t("Nouveaux ce mois", "New this month"), value: newThisMonth },
     {
-      label: "Note moyenne",
-      value: globalRating !== null ? globalRating.toFixed(1).replace(".", ",") : "—",
+      label: t("Note moyenne", "Average rating"),
+      value:
+        globalRating !== null
+          ? globalRating.toLocaleString(intl, { minimumFractionDigits: 1, maximumFractionDigits: 1 })
+          : "—",
       hint:
         allRated.length > 0
-          ? `${allRated.length} avis`
-          : "aucun avis pour le moment",
+          ? t(`${allRated.length} avis`, `${allRated.length} review${allRated.length === 1 ? "" : "s"}`)
+          : t("aucun avis pour le moment", "no reviews yet"),
     },
     {
-      label: "Clients qui reviennent",
+      label: t("Clients qui reviennent", "Returning guests"),
       value: returnRate !== null ? `${returnRate}%` : "—",
       hint:
         visited.length > 0
-          ? `${returning.length} sur ${visited.length} clients venus`
+          ? t(
+              `${returning.length} sur ${visited.length} clients venus`,
+              `${returning.length} of ${visited.length} guests who visited`
+            )
           : undefined,
     },
   ];
@@ -340,11 +361,13 @@ export default function GuestsPage() {
       <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="font-display text-3xl font-light text-white">
-            Clients
+            {t("Clients", "Guests")}
           </h1>
           <p className="font-ui text-sm text-white/60 mt-1.5">
-            Votre base clients, construite automatiquement à partir des
-            réservations, un client naît d&apos;une réservation.
+            {t(
+              "Votre base clients, construite automatiquement à partir des réservations, un client naît d'une réservation.",
+              "Your guest database, built automatically from reservations: every reservation creates a guest."
+            )}
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
@@ -353,15 +376,15 @@ export default function GuestsPage() {
             className="font-ui flex items-center gap-2 bg-white/10 hover:bg-white/15 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors"
           >
             <CalendarPlus size={16} strokeWidth={1.5} />
-            Réservations
+            {t("Réservations", "Reservations")}
           </Link>
           {filtered.length > 0 && (
             <button
-              onClick={() => exportCsv(filtered)}
+              onClick={() => exportCsv(filtered, locale)}
               className="font-ui flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors shadow-lg shadow-blue-500/20"
             >
               <Download size={16} strokeWidth={1.5} />
-              Exporter CSV
+              {t("Exporter CSV", "Export CSV")}
             </button>
           )}
         </div>
@@ -378,7 +401,7 @@ export default function GuestsPage() {
         />
         <input
           type="text"
-          placeholder="Rechercher un client par nom ou téléphone..."
+          placeholder={t("Rechercher un client par nom ou téléphone...", "Search guests by name or phone...")}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="font-ui w-full bg-white/[0.05] border border-white/[0.1] rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-blue-400/40 transition-colors"
@@ -392,7 +415,7 @@ export default function GuestsPage() {
             onClick={() => setSegmentFilter(null)}
             className={`font-ui rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${segmentFilter === null ? "bg-white text-black" : "bg-white/[0.07] text-white/50 border border-white/[0.1] hover:bg-white/[0.1]"}`}
           >
-            Tous · {guests.length}
+            {t("Tous", "All")} · {guests.length}
           </button>
           {SEGMENT_FILTERS.map((s) => {
             const count = guests.filter((g) => g.segments.includes(s)).length;
@@ -404,18 +427,18 @@ export default function GuestsPage() {
                 }
                 className={`font-ui rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${segmentFilter === s ? "bg-white text-black" : "bg-white/[0.07] text-white/50 border border-white/[0.1] hover:bg-white/[0.1]"}`}
               >
-                {s} · {count}
+                {segmentLabel(s, t)} · {count}
               </button>
             );
           })}
         </div>
         <div className="ml-auto flex flex-wrap items-center gap-2">
           <span className="font-ui text-[10px] uppercase tracking-wider text-white/30">
-            Trier
+            {t("Trier", "Sort")}
           </span>
-          {sortButton("derniereVisite", "Dernière visite")}
-          {sortButton("visites", "Visites")}
-          {sortButton("depense", "Dépense totale")}
+          {sortButton("derniereVisite", t("Dernière visite", "Last visit"))}
+          {sortButton("visites", t("Visites", "Visits"))}
+          {sortButton("depense", t("Dépense totale", "Total spend"))}
         </div>
       </div>
 
@@ -426,25 +449,26 @@ export default function GuestsPage() {
             <Users size={26} strokeWidth={1.5} className="text-blue-400" />
           </div>
           <h2 className="font-display text-xl font-normal text-white mb-2">
-            Aucun client pour le moment
+            {t("Aucun client pour le moment", "No guests yet")}
           </h2>
           <p className="font-ui text-sm text-white/50 max-w-md mx-auto">
-            Votre base clients se construit toute seule : dès qu&apos;une
-            réservation arrive, QR du réseau ou portail direct, le client
-            apparaît ici avec ses visites, ses dépenses et ses avis.
+            {t(
+              "Votre base clients se construit toute seule : dès qu'une réservation arrive, QR du réseau ou portail direct, le client apparaît ici avec ses visites, ses dépenses et ses avis.",
+              "Your guest database builds itself: as soon as a reservation comes in, via the QR network or your direct portal, the guest appears here with their visits, spend and reviews."
+            )}
           </p>
           <Link
             href="/dashboard/reservations"
             className="font-ui inline-flex items-center gap-2 mt-6 bg-white/10 hover:bg-white/15 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors"
           >
             <CalendarPlus size={16} strokeWidth={1.5} />
-            Voir les réservations
+            {t("Voir les réservations", "View reservations")}
           </Link>
         </div>
       ) : filtered.length === 0 ? (
         <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-10 text-center">
           <p className="font-ui text-sm text-white/50">
-            Aucun client ne correspond à cette recherche.
+            {t("Aucun client ne correspond à cette recherche.", "No guests match this search.")}
           </p>
         </div>
       ) : (
@@ -453,15 +477,15 @@ export default function GuestsPage() {
             <thead>
               <tr className="border-b border-white/10">
                 {[
-                  "Client",
-                  "Visites",
-                  "Total dépensé",
-                  "Panier moyen",
-                  "Dernière visite",
-                  "Prochaine résa",
-                  "Note",
-                  "Canaux",
-                  "Segment",
+                  t("Client", "Guest"),
+                  t("Visites", "Visits"),
+                  t("Total dépensé", "Total spent"),
+                  t("Panier moyen", "Average spend"),
+                  t("Dernière visite", "Last visit"),
+                  t("Prochaine résa", "Next booking"),
+                  t("Note", "Rating"),
+                  t("Canaux", "Channels"),
+                  t("Segment", "Segment"),
                 ].map((h) => (
                   <th
                     key={h}
@@ -489,52 +513,52 @@ export default function GuestsPage() {
                     </p>
                     <p className="font-ui text-xs text-white/40">{g.phone}</p>
                   </td>
-                  <td data-label="Visites" className="font-ui px-4 py-3 text-sm text-white tabular-nums">
+                  <td data-label={t("Visites", "Visits")} className="font-ui px-4 py-3 text-sm text-white tabular-nums">
                     {g.visits}
                   </td>
-                  <td data-label="Total dépensé" className="font-ui px-4 py-3 text-sm text-white tabular-nums whitespace-nowrap">
+                  <td data-label={t("Total dépensé", "Total spent")} className="font-ui px-4 py-3 text-sm text-white tabular-nums whitespace-nowrap">
                     {g.totalSpent > 0
-                      ? `${g.totalSpent.toLocaleString()} MAD`
+                      ? `${g.totalSpent.toLocaleString(intl)} MAD`
                       : "—"}
                   </td>
-                  <td data-label="Panier moyen" className="font-ui px-4 py-3 text-sm text-white/70 tabular-nums whitespace-nowrap">
+                  <td data-label={t("Panier moyen", "Average spend")} className="font-ui px-4 py-3 text-sm text-white/70 tabular-nums whitespace-nowrap">
                     {g.avgBasket !== null
-                      ? `${Math.round(g.avgBasket).toLocaleString()} MAD`
+                      ? `${Math.round(g.avgBasket).toLocaleString(intl)} MAD`
                       : "—"}
                   </td>
-                  <td data-label="Dernière visite" className="font-ui px-4 py-3 text-sm text-white/70 whitespace-nowrap">
-                    {g.lastVisit ? fmtDate(g.lastVisit) : "—"}
+                  <td data-label={t("Dernière visite", "Last visit")} className="font-ui px-4 py-3 text-sm text-white/70 whitespace-nowrap">
+                    {g.lastVisit ? fmtDate(g.lastVisit, locale) : "—"}
                   </td>
-                  <td data-label="Prochaine résa" className="font-ui px-4 py-3 text-sm text-white/70 whitespace-nowrap">
+                  <td data-label={t("Prochaine résa", "Next booking")} className="font-ui px-4 py-3 text-sm text-white/70 whitespace-nowrap">
                     {g.nextReservation
-                      ? fmtDate(g.nextReservation.reservation_date)
+                      ? fmtDate(g.nextReservation.reservation_date, locale)
                       : "—"}
                   </td>
-                  <td data-label="Note" className="px-4 py-3 whitespace-nowrap">
+                  <td data-label={t("Note", "Rating")} className="px-4 py-3 whitespace-nowrap">
                     {g.avgRating !== null ? (
                       <span className="inline-flex items-center gap-1.5">
                         <RatingStars value={g.avgRating} size={12} />
                         <span className="font-ui text-xs text-white/60 tabular-nums">
-                          {g.avgRating.toFixed(1)}
+                          {g.avgRating.toLocaleString(intl, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
                         </span>
                       </span>
                     ) : (
                       <span className="text-white/25">—</span>
                     )}
                   </td>
-                  <td data-label="Canaux" className="px-4 py-3">
+                  <td data-label={t("Canaux", "Channels")} className="px-4 py-3">
                     <span className="flex flex-wrap gap-1">
                       {g.sources.map((s) => (
                         <span
                           key={s}
                           className="font-ui rounded-md bg-white/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white/50 whitespace-nowrap"
                         >
-                          {sourceLabel(s)}
+                          {sourceLabel(s, t)}
                         </span>
                       ))}
                     </span>
                   </td>
-                  <td data-label="Segment" className="px-4 py-3">
+                  <td data-label={t("Segment", "Segment")} className="px-4 py-3">
                     <SegmentBadges segments={g.segments} />
                   </td>
                 </tr>
@@ -547,9 +571,10 @@ export default function GuestsPage() {
       {/* Lecture des segments */}
       {guests.length > 0 && (
         <p className="font-ui text-xs text-white/40 max-w-3xl">
-          Segments calculés sur vos réservations réelles : « Nouveau » = 1
-          visite, « Habitué » = 3 visites ou plus, « À risque » = habitué sans
-          visite depuis 60 jours, « VIP » = top 10 % des dépenses totales.
+          {t(
+            "Segments calculés sur vos réservations réelles : « Nouveau » = 1 visite, « Habitué » = 3 visites ou plus, « À risque » = habitué sans visite depuis 60 jours, « VIP » = top 10 % des dépenses totales.",
+            "Segments are based on your actual reservations: “New” = 1 visit, “Regular” = 3 or more visits, “At risk” = a regular with no visit in 60 days, “VIP” = top 10% by total spend."
+          )}
         </p>
       )}
     </div>

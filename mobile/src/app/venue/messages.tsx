@@ -5,6 +5,7 @@ import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, Text, View
 import { Avatar, Card, Empty, Icon, IconButton, ScreenSkeleton, StackScreen } from '@/components/venue/ui'
 import { Light } from '@/constants/theme'
 import { useAuth } from '@/lib/auth-context'
+import { useLocale, useT } from '@/lib/i18n'
 import { profileName, timeAgo, useContacts, useConversations } from '@/lib/venue-data'
 
 /* Messagerie : un fil par concierge. Le dernier message en aperçu, le
@@ -17,6 +18,8 @@ export default function MessagesScreen() {
   const contacts = useContacts('concierge')
   const [picker, setPicker] = useState(false)
   const [opening, setOpening] = useState<string | null>(null)
+  const t = useT()
+  const locale = useLocale()
 
   const start = async (contactId: string, name: string) => {
     setOpening(contactId)
@@ -29,9 +32,9 @@ export default function MessagesScreen() {
   return (
     <StackScreen
       title="Messages"
-      subtitle="Concierges et hôtels"
+      subtitle={t('Concierges et hôtels', 'Concierges and hotels')}
       right={
-        <IconButton icon="edit-3" label="Nouveau message" onPress={() => setPicker(true)} />
+        <IconButton icon="edit-3" label={t('Nouveau message', 'New message')} onPress={() => setPicker(true)} />
       }>
       {rows === null ? (
         <ScreenSkeleton title={false} bare />
@@ -39,8 +42,11 @@ export default function MessagesScreen() {
         <Card>
           <Empty
             icon="message-circle"
-            title="Aucune conversation"
-            body="Écrivez à une conciergerie du réseau : une table à bloquer, un client à préparer, une question."
+            title={t('Aucune conversation', 'No conversations')}
+            body={t(
+              'Écrivez à une conciergerie du réseau : une table à bloquer, un client à préparer, une question.',
+              'Write to a concierge desk in the network: a table to hold, a guest to prepare for, a question.'
+            )}
           />
         </Card>
       ) : (
@@ -56,10 +62,12 @@ export default function MessagesScreen() {
                   <Text style={[styles.name, c.unread > 0 && styles.nameUnread]} numberOfLines={1}>
                     {profileName(c.counterpart)}
                   </Text>
-                  {c.last && <Text style={styles.time}>{timeAgo(c.last.created_at)}</Text>}
+                  {c.last && <Text style={styles.time}>{timeAgo(c.last.created_at, locale)}</Text>}
                 </View>
                 <Text style={[styles.preview, c.unread > 0 && styles.previewUnread]} numberOfLines={1}>
-                  {c.last ? `${c.last.sender_id === userId ? 'Vous : ' : ''}${c.last.body}` : 'Nouvelle conversation'}
+                  {c.last
+                    ? `${c.last.sender_id === userId ? t('Vous : ', 'You: ') : ''}${c.last.body}`
+                    : t('Nouvelle conversation', 'New conversation')}
                 </Text>
               </View>
               {c.unread > 0 && (
@@ -76,8 +84,8 @@ export default function MessagesScreen() {
         <Pressable style={styles.backdrop} onPress={() => setPicker(false)} />
         <View style={styles.sheet}>
           <View style={styles.sheetHead}>
-            <Text style={styles.sheetTitle}>Écrire à</Text>
-            <Pressable onPress={() => setPicker(false)} hitSlop={8}>
+            <Text style={styles.sheetTitle}>{t('Écrire à', 'Write to')}</Text>
+            <Pressable onPress={() => setPicker(false)} hitSlop={8} accessibilityLabel={t('Fermer', 'Close')}>
               <Icon name="x" size={20} color={Light.muted} />
             </Pressable>
           </View>
@@ -85,7 +93,7 @@ export default function MessagesScreen() {
             {contacts === null ? (
               <ActivityIndicator color={Light.accent} />
             ) : contacts.length === 0 ? (
-              <Text style={styles.sheetEmpty}>Aucune conciergerie inscrite pour le moment.</Text>
+              <Text style={styles.sheetEmpty}>{t('Aucune conciergerie inscrite pour le moment.', 'No concierge desks have signed up yet.')}</Text>
             ) : (
               contacts.map((p, i) => (
                 <Pressable
@@ -99,7 +107,7 @@ export default function MessagesScreen() {
                       {profileName(p)}
                     </Text>
                     <Text style={styles.preview} numberOfLines={1}>
-                      {[p.full_name, p.city].filter(Boolean).join(' · ') || 'Conciergerie'}
+                      {[p.full_name, p.city].filter(Boolean).join(' · ') || t('Conciergerie', 'Concierge desk')}
                     </Text>
                   </View>
                   {opening === p.id ? <ActivityIndicator color={Light.accent} /> : <Icon name="chevron-right" size={18} color={Light.faint} />}

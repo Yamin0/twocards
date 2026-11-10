@@ -36,6 +36,9 @@ import {
   type LedgerRow,
   type Settlement,
 } from "@/components/admin/commissions-admin";
+import { LanguageSwitcher } from "@/components/shared/language-switcher";
+import type { Translate } from "@/lib/i18n";
+import { useIntlLocale, useLocale, useT } from "@/lib/i18n/client";
 
 /* Console d'administration : le réseau vu d'en haut. Quatre onglets —
    la vue d'ensemble, les comptes (avec « se connecter en tant que »), le
@@ -70,24 +73,24 @@ type ThreadMessage = {
 
 type Tab = "overview" | "accounts" | "catalog" | "commissions";
 
-const TABS: { key: Tab; label: string; icon: LucideIcon }[] = [
-  { key: "overview", label: "Vue d'ensemble", icon: LayoutDashboard },
-  { key: "accounts", label: "Comptes", icon: Users },
-  { key: "catalog", label: "Catalogue", icon: BookOpen },
-  { key: "commissions", label: "Commissions", icon: Coins },
+const getTabs = (t: Translate): { key: Tab; label: string; icon: LucideIcon }[] => [
+  { key: "overview", label: t("Vue d'ensemble", "Overview"), icon: LayoutDashboard },
+  { key: "accounts", label: t("Comptes", "Accounts"), icon: Users },
+  { key: "catalog", label: t("Catalogue", "Catalogue"), icon: BookOpen },
+  { key: "commissions", label: t("Commissions", "Commissions"), icon: Coins },
 ];
 
-const SECTIONS = [
-  { role: "etablissement", title: "Établissements", icon: Building2, home: "/dashboard" },
-  { role: "hotel", title: "Hôtels", icon: Hotel, home: "/hotel" },
-  { role: "concierge", title: "Concierges", icon: UserCheck, home: "/concierge" },
-  { role: "admin", title: "Administration", icon: Shield, home: "/admin" },
+const getSections = (t: Translate) => [
+  { role: "etablissement", title: t("Établissements", "Venues"), icon: Building2, home: "/dashboard" },
+  { role: "hotel", title: t("Hôtels", "Hotels"), icon: Hotel, home: "/hotel" },
+  { role: "concierge", title: t("Concierges", "Concierges"), icon: UserCheck, home: "/concierge" },
+  { role: "admin", title: t("Administration", "Admin"), icon: Shield, home: "/admin" },
 ];
 
-const ROLE_OPTIONS = [
-  { value: "etablissement", label: "Établissement" },
-  { value: "hotel", label: "Hôtel" },
-  { value: "concierge", label: "Concierge" },
+const getRoleOptions = (t: Translate) => [
+  { value: "etablissement", label: t("Établissement", "Venue") },
+  { value: "hotel", label: t("Hôtel", "Hotel") },
+  { value: "concierge", label: t("Concierge", "Concierge") },
 ];
 
 const panel =
@@ -116,6 +119,9 @@ function AccountRow({
   onSaved: (msg: string) => void;
   onError: (msg: string) => void;
 }) {
+  const t = useT();
+  const intl = useIntlLocale();
+  const locale = useLocale();
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [thread, setThread] = useState<ThreadMessage[] | null>(null);
@@ -205,10 +211,10 @@ function AccountRow({
 
     setSaving(false);
     if (updateError || roleError) {
-      onError(roleError ?? "La modification a été refusée.");
+      onError(roleError ?? t("La modification a été refusée.", "The change was rejected."));
       return;
     }
-    onSaved("Compte mis à jour");
+    onSaved(t("Compte mis à jour", "Account updated"));
   };
 
   return (
@@ -223,7 +229,7 @@ function AccountRow({
         </div>
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-semibold text-white">
-            {account.venue_name || account.full_name || "Sans nom"}
+            {account.venue_name || account.full_name || t("Sans nom", "Unnamed")}
           </p>
           <p className="truncate text-[11px] text-white/40">{account.email}</p>
         </div>
@@ -233,8 +239,11 @@ function AccountRow({
           </p>
           <p className="text-[10px] text-white/30">
             {account.last_sign_in_at
-              ? `Vu le ${new Date(account.last_sign_in_at).toLocaleDateString("fr-FR")}`
-              : "Jamais connecté"}
+              ? t(
+                  `Vu le ${new Date(account.last_sign_in_at).toLocaleDateString(intl)}`,
+                  `Last seen ${new Date(account.last_sign_in_at).toLocaleDateString(intl)}`
+                )
+              : t("Jamais connecté", "Never logged in")}
           </p>
         </div>
         <ChevronDown
@@ -247,7 +256,7 @@ function AccountRow({
         <div className="space-y-4 border-t border-white/[0.08] p-4">
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <label className="block">
-              <span className={labelCls}>Nom du responsable</span>
+              <span className={labelCls}>{t("Nom du responsable", "Manager name")}</span>
               <input
                 value={form.full_name}
                 onChange={(e) => setForm({ ...form, full_name: e.target.value })}
@@ -255,7 +264,7 @@ function AccountRow({
               />
             </label>
             <label className="block">
-              <span className={labelCls}>Enseigne</span>
+              <span className={labelCls}>{t("Enseigne", "Business name")}</span>
               <input
                 value={form.venue_name}
                 onChange={(e) => setForm({ ...form, venue_name: e.target.value })}
@@ -263,7 +272,7 @@ function AccountRow({
               />
             </label>
             <label className="block">
-              <span className={labelCls}>Ville</span>
+              <span className={labelCls}>{t("Ville", "City")}</span>
               <input
                 value={form.city}
                 onChange={(e) => setForm({ ...form, city: e.target.value })}
@@ -271,7 +280,7 @@ function AccountRow({
               />
             </label>
             <label className="block">
-              <span className={labelCls}>Type de dashboard</span>
+              <span className={labelCls}>{t("Type de dashboard", "Dashboard type")}</span>
               <select
                 value={form.role}
                 onChange={(e) => setForm({ ...form, role: e.target.value })}
@@ -279,8 +288,8 @@ function AccountRow({
                 className={`${inputCls} disabled:opacity-40`}
               >
                 {(account.role === "admin"
-                  ? [{ value: "admin", label: "Administrateur" }]
-                  : ROLE_OPTIONS
+                  ? [{ value: "admin", label: t("Administrateur", "Administrator") }]
+                  : getRoleOptions(t)
                 ).map((r) => (
                   <option key={r.value} value={r.value} className="bg-[#1a1a2e]">
                     {r.label}
@@ -302,7 +311,7 @@ function AccountRow({
                 ) : (
                   <Check size={13} strokeWidth={2} />
                 )}
-                Enregistrer
+                {t("Enregistrer", "Save")}
               </button>
             )}
             {canImpersonate && (
@@ -316,7 +325,7 @@ function AccountRow({
                 ) : (
                   <LogIn size={13} strokeWidth={2} />
                 )}
-                Se connecter en tant que ce compte
+                {t("Se connecter en tant que ce compte", "Log in as this account")}
               </button>
             )}
           </div>
@@ -324,18 +333,20 @@ function AccountRow({
           <div className="rounded-xl border border-white/[0.08] bg-black/30 p-3">
             <p className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-white/40">
               <MessageSquare size={12} />
-              Échanges
+              {t("Échanges", "Messages")}
               {account.unread_count > 0 && (
                 <span className="rounded-full bg-blue-500 px-1.5 text-[10px] text-white">
-                  {account.unread_count} non lu
-                  {account.unread_count > 1 ? "s" : ""}
+                  {t(
+                    `${account.unread_count} non lu${account.unread_count > 1 ? "s" : ""}`,
+                    `${account.unread_count} unread`
+                  )}
                 </span>
               )}
             </p>
             {account.conversation_count === 0 ? (
-              <p className="py-2 text-xs text-white/30">Aucune conversation.</p>
+              <p className="py-2 text-xs text-white/30">{t("Aucune conversation.", "No conversations.")}</p>
             ) : thread === null ? (
-              <p className="py-2 text-xs text-white/30">Chargement…</p>
+              <p className="py-2 text-xs text-white/30">{t("Chargement…", "Loading…")}</p>
             ) : (
               <div className="max-h-48 space-y-1.5 overflow-y-auto scrollbar-thin">
                 {thread.map((m) => (
@@ -347,13 +358,13 @@ function AccountRow({
                           : "bg-white/10 text-white/50"
                       }`}
                     >
-                      {m.sender_id === account.id ? "envoyé" : "reçu"}
+                      {m.sender_id === account.id ? t("envoyé", "sent") : t("reçu", "received")}
                     </span>
                     <p className="min-w-0 flex-1 break-words text-white/70">
                       {m.body}
                     </p>
                     <span className="shrink-0 text-[10px] text-white/25">
-                      {formatTimestamp(m.created_at)}
+                      {formatTimestamp(m.created_at, locale)}
                     </span>
                   </div>
                 ))}
@@ -373,6 +384,15 @@ const STATUS_TONE: Record<string, string> = {
   "no-show": "bg-white/10 text-white/50",
 };
 
+/* Libellé affiché du statut (la valeur en base reste en français). */
+const statusLabel = (status: string, t: Translate) =>
+  ({
+    "en attente": t("en attente", "pending"),
+    confirmée: t("confirmée", "confirmed"),
+    annulée: t("annulée", "cancelled"),
+    "no-show": t("no-show", "no-show"),
+  })[status] ?? status;
+
 function Overview({
   accounts,
   ledger,
@@ -384,6 +404,9 @@ function Overview({
   settlements: Settlement[];
   onOpenTab: (t: Tab) => void;
 }) {
+  const t = useT();
+  const locale = useLocale();
+  const intl = useIntlLocale();
   const now = currentPeriod();
   const byRole = (role: string) => (accounts ?? []).filter((a) => a.role === role).length;
   const thisMonth = ledger.filter((r) => r.period === now);
@@ -399,10 +422,10 @@ function Overview({
     .slice(0, 8);
 
   const kpis = [
-    { label: "Comptes", value: String(accounts?.length ?? "…"), hint: `${byRole("etablissement")} établ. · ${byRole("hotel")} hôtels · ${byRole("concierge")} concierges`, icon: Users, tab: "accounts" as Tab },
-    { label: "Réservations ce mois", value: String(thisMonth.length), hint: `${ledger.length} au total · ${pending} en attente`, icon: CalendarDays, tab: "commissions" as Tab },
-    { label: "Commissions ce mois", value: mad(dueMonth.reduce((s, r) => s + r.commission, 0)), hint: `${mad(dueMonth.reduce((s, r) => s + (r.amount_spent ?? 0), 0))} dépensés`, icon: Coins, tab: "commissions" as Tab },
-    { label: "Restant à régler", value: mad(remaining), hint: "tous mois confondus", icon: Check, tab: "commissions" as Tab },
+    { label: t("Comptes", "Accounts"), value: String(accounts?.length ?? "…"), hint: t(`${byRole("etablissement")} établ. · ${byRole("hotel")} hôtels · ${byRole("concierge")} concierges`, `${byRole("etablissement")} venues · ${byRole("hotel")} hotels · ${byRole("concierge")} concierges`), icon: Users, tab: "accounts" as Tab },
+    { label: t("Réservations ce mois", "Reservations this month"), value: String(thisMonth.length), hint: t(`${ledger.length} au total · ${pending} en attente`, `${ledger.length} in total · ${pending} pending`), icon: CalendarDays, tab: "commissions" as Tab },
+    { label: t("Commissions ce mois", "Commissions this month"), value: mad(dueMonth.reduce((s, r) => s + r.commission, 0), locale), hint: t(`${mad(dueMonth.reduce((s, r) => s + (r.amount_spent ?? 0), 0), locale)} dépensés`, `${mad(dueMonth.reduce((s, r) => s + (r.amount_spent ?? 0), 0), locale)} spent`), icon: Coins, tab: "commissions" as Tab },
+    { label: t("Restant à régler", "Outstanding"), value: mad(remaining, locale), hint: t("tous mois confondus", "across all months"), icon: Check, tab: "commissions" as Tab },
   ];
 
   return (
@@ -431,12 +454,12 @@ function Overview({
       <div className={`${panel} p-5 sm:p-6`}>
         <div className="mb-4 flex items-center justify-between gap-3">
           <div>
-            <h2 className="text-lg font-semibold text-white">Dernières réservations</h2>
-            <p className="text-xs text-white/35">Toutes les demandes du réseau, les plus récentes en premier.</p>
+            <h2 className="text-lg font-semibold text-white">{t("Dernières réservations", "Latest reservations")}</h2>
+            <p className="text-xs text-white/35">{t("Toutes les demandes du réseau, les plus récentes en premier.", "Every request across the network, newest first.")}</p>
           </div>
         </div>
         {recent.length === 0 ? (
-          <p className="py-6 text-center text-sm text-white/35">Aucune réservation pour le moment.</p>
+          <p className="py-6 text-center text-sm text-white/35">{t("Aucune réservation pour le moment.", "No reservations yet.")}</p>
         ) : (
           <ul className="divide-y divide-white/[0.06]">
             {recent.map((r) => (
@@ -448,13 +471,13 @@ function Overview({
                     {r.service_name && <span className="text-blue-300/80"> · {r.service_name}</span>}
                   </p>
                   <p className="text-xs text-white/40">
-                    {new Date(`${r.reservation_date}T00:00:00`).toLocaleDateString("fr-FR")}
-                    {r.hotel_name ? ` · via ${r.hotel_name}` : r.source === "portal" ? " · portail" : " · maison"}
-                    {r.amount_spent !== null ? ` · ${mad(r.amount_spent)}` : ""}
+                    {new Date(`${r.reservation_date}T00:00:00`).toLocaleDateString(intl)}
+                    {r.hotel_name ? ` · via ${r.hotel_name}` : r.source === "portal" ? t(" · portail", " · portal") : t(" · maison", " · direct")}
+                    {r.amount_spent !== null ? ` · ${mad(r.amount_spent, locale)}` : ""}
                   </p>
                 </div>
                 <span className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${STATUS_TONE[r.status] ?? "bg-white/10 text-white/60"}`}>
-                  {r.status}
+                  {statusLabel(r.status, t)}
                 </span>
               </li>
             ))}
@@ -467,6 +490,7 @@ function Overview({
 
 export default function AdminPage() {
   const { isAdmin, isLoading, email, userId } = useAuthUser();
+  const t = useT();
   const [tab, setTab] = useState<Tab>("overview");
   const [accounts, setAccounts] = useState<Account[] | null>(null);
   const [ledger, setLedger] = useState<LedgerRow[] | null>(null);
@@ -481,8 +505,8 @@ export default function AdminPage() {
 
   useEffect(() => {
     if (!toast) return;
-    const t = setTimeout(() => setToast(null), 3000);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setToast(null), 3000);
+    return () => clearTimeout(timer);
   }, [toast]);
 
   useEffect(() => {
@@ -500,14 +524,19 @@ export default function AdminPage() {
       setSettlements((set.data ?? []) as Settlement[]);
       const failed = acc.error || led.error || set.error;
       setRefreshing((was) => {
-        if (was) setToast(failed ? { kind: "error", msg: "Impossible d'actualiser" } : { kind: "ok", msg: "Données actualisées" });
+        if (was)
+          setToast(
+            failed
+              ? { kind: "error", msg: t("Impossible d'actualiser", "Couldn’t refresh") }
+              : { kind: "ok", msg: t("Données actualisées", "Data refreshed") }
+          );
         return false;
       });
     });
     return () => {
       cancelled = true;
     };
-  }, [isLoading, isAdmin, reloadKey, liveKey]);
+  }, [isLoading, isAdmin, reloadKey, liveKey, t]);
 
   /* Temps réel : réservations (montants, statuts) et règlements. Les
      événements arrivent en rafale à la saisie d'un montant ; on regroupe. */
@@ -576,15 +605,19 @@ export default function AdminPage() {
               <Shield size={22} className="text-blue-400" />
             </div>
             <div>
-              <h1 className="text-2xl font-extrabold text-white">Administration</h1>
+              <h1 className="text-2xl font-extrabold text-white">{t("Administration", "Admin")}</h1>
               <p className="text-sm text-white/40">
                 {accounts
-                  ? `${accounts.length} comptes · ${ledger?.length ?? 0} réservations sur le réseau`
-                  : "Le réseau twocards, vu d'en haut"}
+                  ? t(
+                      `${accounts.length} comptes · ${ledger?.length ?? 0} réservations sur le réseau`,
+                      `${accounts.length} accounts · ${ledger?.length ?? 0} reservations across the network`
+                    )
+                  : t("Le réseau twocards, vu d'en haut", "The twocards network at a glance")}
               </p>
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
+            <LanguageSwitcher tone="dark" />
             {isAdmin && (
               <button
                 onClick={refresh}
@@ -592,7 +625,7 @@ export default function AdminPage() {
                 className="flex items-center gap-2 rounded-xl border border-white/[0.12] bg-white/[0.06] px-4 py-2.5 text-xs font-semibold text-white/70 transition-colors hover:bg-white/[0.12] hover:text-white disabled:opacity-60"
               >
                 <RefreshCw size={14} className={refreshing ? "animate-spin" : ""} />
-                {refreshing ? "Actualisation…" : "Actualiser"}
+                {refreshing ? t("Actualisation…", "Refreshing…") : t("Actualiser", "Refresh")}
               </button>
             )}
             {email && (
@@ -602,7 +635,7 @@ export default function AdminPage() {
                   className="flex items-center gap-2 rounded-xl border border-white/[0.12] bg-white/[0.06] px-4 py-2.5 text-xs font-semibold text-white/70 transition-colors hover:border-red-400/30 hover:bg-red-500/15 hover:text-red-200"
                 >
                   <LogOut size={14} />
-                  Déconnexion
+                  {t("Déconnexion", "Log out")}
                 </button>
               </form>
             )}
@@ -611,21 +644,21 @@ export default function AdminPage() {
 
         {/* Gardes */}
         {isLoading && (
-          <div className={`${panel} p-10 text-center text-sm text-white/40`}>Chargement…</div>
+          <div className={`${panel} p-10 text-center text-sm text-white/40`}>{t("Chargement…", "Loading…")}</div>
         )}
         {!isLoading && !isAdmin && (
           <div className={`${panel} p-10 text-center`}>
-            <p className="text-sm font-semibold text-white/70">Accès réservé à l&apos;administrateur.</p>
+            <p className="text-sm font-semibold text-white/70">{t("Accès réservé à l'administrateur.", "Admin access only.")}</p>
             <p className="mt-2 text-xs text-white/40">
               {email
-                ? `Le compte ${email} n'a pas le drapeau administrateur.`
-                : "Connectez-vous avec l'identifiant administrateur."}
+                ? t(`Le compte ${email} n'a pas le drapeau administrateur.`, `The account ${email} doesn’t have admin rights.`)
+                : t("Connectez-vous avec l'identifiant administrateur.", "Log in with the admin credentials.")}
             </p>
             <a
               href={email ? "/" : "/login"}
               className="mt-5 inline-block rounded-xl bg-blue-500 px-5 py-2.5 text-xs font-semibold text-white hover:bg-blue-600"
             >
-              {email ? "Retour à l'accueil" : "Se connecter"}
+              {email ? t("Retour à l'accueil", "Back to home") : t("Se connecter", "Log in")}
             </a>
           </div>
         )}
@@ -633,20 +666,20 @@ export default function AdminPage() {
         {/* Onglets */}
         {ready && (
           <div className={`${panel} no-scrollbar flex gap-1 overflow-x-auto p-1.5`}>
-            {TABS.map((t) => {
-              const Icon = t.icon;
-              const active = tab === t.key;
+            {getTabs(t).map((item) => {
+              const Icon = item.icon;
+              const active = tab === item.key;
               return (
                 <button
-                  key={t.key}
+                  key={item.key}
                   type="button"
-                  onClick={() => setTab(t.key)}
+                  onClick={() => setTab(item.key)}
                   className={`flex shrink-0 items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-semibold transition-colors ${
                     active ? "bg-white text-black" : "text-white/60 hover:bg-white/10 hover:text-white"
                   }`}
                 >
                   <Icon size={15} strokeWidth={1.75} />
-                  {t.label}
+                  {item.label}
                 </button>
               );
             })}
@@ -663,7 +696,7 @@ export default function AdminPage() {
 
         {ready && tab === "commissions" && (
           ledger === null || settlements === null ? (
-            <div className={`${panel} p-10 text-center text-sm text-white/40`}>Chargement…</div>
+            <div className={`${panel} p-10 text-center text-sm text-white/40`}>{t("Chargement…", "Loading…")}</div>
           ) : (
             <CommissionsAdmin ledger={ledger} settlements={settlements} panel={panel} onChanged={notifyOk} onError={notifyError} />
           )
@@ -677,12 +710,12 @@ export default function AdminPage() {
                 <input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Rechercher un compte : enseigne, e-mail, ville…"
+                  placeholder={t("Rechercher un compte : enseigne, e-mail, ville…", "Search accounts: business name, email, city…")}
                   className={`${inputCls} pl-9`}
                 />
               </div>
             </div>
-            {SECTIONS.map((section) => {
+            {getSections(t).map((section) => {
               const Icon = section.icon;
               const rows = filteredAccounts.filter((a) => a.role === section.role);
               if (section.role === "admin" && rows.length === 0) return null;
@@ -697,7 +730,9 @@ export default function AdminPage() {
                       <div>
                         <h2 className="text-lg font-semibold text-white">{section.title}</h2>
                         <p className="text-xs text-white/35">
-                          {accounts === null ? "Chargement…" : `${rows.length} compte${rows.length > 1 ? "s" : ""}`}
+                          {accounts === null
+                            ? t("Chargement…", "Loading…")
+                            : t(`${rows.length} compte${rows.length > 1 ? "s" : ""}`, `${rows.length} account${rows.length === 1 ? "" : "s"}`)}
                         </p>
                       </div>
                     </div>
@@ -706,13 +741,13 @@ export default function AdminPage() {
                         href={section.home}
                         className="flex items-center gap-1.5 rounded-lg border border-white/[0.12] bg-white/[0.06] px-3 py-2 text-[11px] font-semibold text-white/60 transition-colors hover:bg-white/[0.12] hover:text-white"
                       >
-                        Ouvrir cet espace
+                        {t("Ouvrir cet espace", "Open this dashboard")}
                         <ArrowUpRight size={12} />
                       </a>
                     )}
                   </div>
                   {accounts !== null && rows.length === 0 && (
-                    <p className="py-6 text-center text-sm text-white/35">Aucun compte de ce type.</p>
+                    <p className="py-6 text-center text-sm text-white/35">{t("Aucun compte de ce type.", "No accounts of this type.")}</p>
                   )}
                   <div className="space-y-2">
                     {rows.map((a) => (

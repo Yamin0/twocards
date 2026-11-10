@@ -8,6 +8,7 @@ import {
 } from 'react'
 
 import { useAuth } from '@/lib/auth-context'
+import { getT } from '@/lib/i18n'
 import { SITE_URL } from '@/lib/site'
 import { supabase } from '@/lib/supabase'
 
@@ -45,7 +46,9 @@ type WebSessionState = {
   register: (key: string) => void
   unregister: (key: string) => void
   /* URL de la passerelle pour le propriétaire, null tant que le jeton
-     n'est pas arrivé. */
+     n'est pas arrivé. `next` porte déjà `?lang=` : la route /auth/mobile
+     n'est pas vue par le proxy du site, c'est la page d'arrivée qui pose
+     le cookie de langue. */
   bridgeUrl: (next: string) => string | null
   markReady: () => void
   retry: () => void
@@ -77,7 +80,10 @@ export function WebSessionProvider({ children }: { children: ReactNode }) {
             ...s,
             error:
               data?.error ??
-              "Impossible d'ouvrir votre espace. Vérifiez votre connexion et réessayez.",
+              getT()(
+                "Impossible d'ouvrir votre espace. Vérifiez votre connexion et réessayez.",
+                "Couldn't open your workspace. Check your connection and try again."
+              ),
           }))
           return
         }

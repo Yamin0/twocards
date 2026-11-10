@@ -12,6 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { WebView, type WebViewNavigation, type WebViewProps } from 'react-native-webview'
 
 import { Light } from '@/constants/theme'
+import { useLocale, useT, withLang } from '@/lib/i18n'
 import { reportError } from '@/lib/report-error'
 import { SITE_URL, sitePath } from '@/lib/site'
 import { useWebSession } from '@/lib/web-session'
@@ -36,7 +37,13 @@ export function SiteWebView({
   const ws = useWebSession()
   const { register, unregister } = ws
   const key = useId()
+  const t = useT()
+  const locale = useLocale()
   const [uri, setUri] = useState<string | null>(null)
+  const [uriLocale, setUriLocale] = useState(locale)
+  /* La page s'ouvre dans la langue de l'app (`?lang=`, que le site retire
+     après avoir posé son cookie). */
+  const target = withLang(path, locale)
 
   /* Candidature au rôle de propriétaire du jeton : la première WebView
      affichée l'obtient et passe par la passerelle, les autres attendent. */
@@ -52,12 +59,19 @@ export function SiteWebView({
      Changer cette adresse plus tard ferait recharger la WebView sous les
      doigts de l'utilisateur. */
   const first = isOwner
-    ? ws.bridgeUrl(path)
+    ? ws.bridgeUrl(target)
     : ws.ready
-      ? `${SITE_URL}${path}`
+      ? `${SITE_URL}${target}`
       : null
   if (uri === null && first !== null) {
     setUri(first)
+    setUriLocale(locale)
+  }
+  /* Langue changée dans les Paramètres : la page se recharge dans la
+     nouvelle langue, une fois la session web posée. */
+  if (uri !== null && uriLocale !== locale && ws.ready) {
+    setUri(`${SITE_URL}${target}`)
+    setUriLocale(locale)
   }
 
   const onNavigationStateChange = (nav: WebViewNavigation) => {
@@ -89,7 +103,7 @@ export function SiteWebView({
         <View style={styles.center}>
           <Text style={styles.errorText}>{ws.error}</Text>
           <Pressable onPress={ws.retry} style={styles.retry}>
-            <Text style={styles.retryText}>Réessayer</Text>
+            <Text style={styles.retryText}>{t('Réessayer', 'Try again')}</Text>
           </Pressable>
         </View>
       </Shell>
@@ -140,7 +154,7 @@ export function SiteWebView({
         renderError={() => (
           <View style={[styles.center, StyleSheet.absoluteFill]}>
             <Text style={styles.errorText}>
-              {"La page n'a pas pu être chargée. Vérifiez votre connexion."}
+              {t("La page n'a pas pu être chargée. Vérifiez votre connexion.", "The page couldn't load. Check your connection.")}
             </Text>
           </View>
         )}

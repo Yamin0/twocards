@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import gsap from "gsap";
+import { useT } from "@/lib/i18n/client";
 
 export interface CardItem {
   imgUrl: string;
@@ -69,6 +70,7 @@ const ARROW_CLASSES =
   "relative flex items-center justify-center rounded-full border-[1.5px] border-black/10 bg-black/5 backdrop-blur-[16px] text-black/40 cursor-pointer shrink-0 z-30 outline-none shadow-[0_4px_20px_rgba(0,0,0,0.1)] hover:border-black/25 hover:text-black/70 active:opacity-70 transition-colors duration-300 before:content-[''] before:absolute before:inset-[3px] before:rounded-full before:border before:border-black/[0.04] before:pointer-events-none";
 
 export default function SocialCards({ cards }: SocialCardsProps) {
+  const t = useT();
   const containerRef = useRef<HTMLDivElement>(null);
   const isAnimating = useRef(false);
   const hasEntered = useRef(false);
@@ -398,7 +400,7 @@ export default function SocialCards({ cards }: SocialCardsProps) {
           <button
             className={`${ARROW_CLASSES} h-10 w-10 md:h-12 md:w-12`}
             onClick={() => cycle("left")}
-            aria-label="Précédent"
+            aria-label={t("Précédent", "Previous")}
           >
             {chevron("left")}
           </button>
@@ -415,7 +417,7 @@ export default function SocialCards({ cards }: SocialCardsProps) {
           <button
             className={`${ARROW_CLASSES} h-10 w-10 md:h-12 md:w-12`}
             onClick={() => cycle("right")}
-            aria-label="Suivant"
+            aria-label={t("Suivant", "Next")}
           >
             {chevron("right")}
           </button>

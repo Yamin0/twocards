@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native'
 
 import { Card, Empty, Icon, ScreenSkeleton, StackScreen, type IconName } from '@/components/venue/ui'
 import { Light } from '@/constants/theme'
+import { useLocale, useT } from '@/lib/i18n'
 import { timeAgo, useNotifications, type Notification } from '@/lib/venue-data'
 
 /* La cloche du site, en natif : ce qui s'est passé, dans l'ordre. Toucher
@@ -21,6 +22,8 @@ const requestKey = () => String(Date.now())
 export default function NotificationsScreen() {
   const { rows, markRead, markAllRead, clearAll } = useNotifications()
   const router = useRouter()
+  const t = useT()
+  const locale = useLocale()
   const unread = (rows ?? []).filter((n) => !n.read).length
 
   const open = (n: Notification) => {
@@ -35,11 +38,11 @@ export default function NotificationsScreen() {
   return (
     <StackScreen
       title="Notifications"
-      subtitle={unread > 0 ? `${unread} non lue${unread > 1 ? 's' : ''}` : undefined}
+      subtitle={unread > 0 ? t(`${unread} non lue${unread > 1 ? 's' : ''}`, `${unread} unread`) : undefined}
       right={
         rows && rows.length > 0 ? (
           <Pressable onPress={unread > 0 ? markAllRead : clearAll} hitSlop={8}>
-            <Text style={styles.action}>{unread > 0 ? 'Tout lu' : 'Vider'}</Text>
+            <Text style={styles.action}>{unread > 0 ? t('Tout lu', 'Mark all read') : t('Vider', 'Clear')}</Text>
           </Pressable>
         ) : null
       }>
@@ -49,8 +52,11 @@ export default function NotificationsScreen() {
         <Card>
           <Empty
             icon="bell"
-            title="Rien pour le moment"
-            body="Nouvelle réservation, avis client, ticket de caisse à rapprocher : tout arrive ici, et sur votre téléphone."
+            title={t('Rien pour le moment', 'Nothing yet')}
+            body={t(
+              'Nouvelle réservation, avis client, ticket de caisse à rapprocher : tout arrive ici, et sur votre téléphone.',
+              'New reservation, guest review, till receipt to match: everything lands here, and on your phone.'
+            )}
           />
         </Card>
       ) : (
@@ -72,7 +78,7 @@ export default function NotificationsScreen() {
                   <Text style={styles.body} numberOfLines={2}>
                     {n.body}
                   </Text>
-                  <Text style={styles.time}>{timeAgo(n.created_at)}</Text>
+                  <Text style={styles.time}>{timeAgo(n.created_at, locale)}</Text>
                 </View>
                 {!n.read && <View style={styles.dot} />}
               </Pressable>

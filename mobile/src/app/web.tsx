@@ -7,7 +7,8 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { SiteWebView } from '@/components/site-webview'
 import { Icon, IconButton } from '@/components/venue/ui'
 import { Light } from '@/constants/theme'
-import { SITE_URL, WEB_PAGES } from '@/lib/site'
+import { useLocale, useT, withLang } from '@/lib/i18n'
+import { SITE_URL, getWebPages } from '@/lib/site'
 
 /* Une page du site ouverte depuis le menu : barre de titre native, retour,
    fil de chargement, et le site en dessous. Le bouton de droite recharge la
@@ -15,8 +16,10 @@ import { SITE_URL, WEB_PAGES } from '@/lib/site'
 export default function WebScreen() {
   const { path, title } = useLocalSearchParams<{ path?: string; title?: string }>()
   const router = useRouter()
+  const t = useT()
+  const locale = useLocale()
   const target = typeof path === 'string' && path.startsWith('/') ? path : '/dashboard'
-  const heading = (typeof title === 'string' && title) || WEB_PAGES[target] || 'twocards'
+  const heading = (typeof title === 'string' && title) || getWebPages(t)[target] || 'twocards'
   const [progress, setProgress] = useState(0)
   const [reloadKey, setReloadKey] = useState(0)
 
@@ -24,17 +27,17 @@ export default function WebScreen() {
     <SafeAreaView style={styles.safe} edges={['top']}>
       <StatusBar style="dark" />
       <View style={styles.bar}>
-        <Pressable onPress={() => (router.canGoBack() ? router.back() : router.navigate('/hub'))} hitSlop={10} style={styles.back} accessibilityLabel="Retour">
+        <Pressable onPress={() => (router.canGoBack() ? router.back() : router.navigate('/hub'))} hitSlop={10} style={styles.back} accessibilityLabel={t('Retour', 'Back')}>
           <Icon name="chevron-left" size={26} color={Light.ink} />
         </Pressable>
         <Text style={styles.title} numberOfLines={1}>
           {heading}
         </Text>
         <Pressable
-          onLongPress={() => Linking.openURL(`${SITE_URL}${target}`)}
+          onLongPress={() => Linking.openURL(`${SITE_URL}${withLang(target, locale)}`)}
           style={styles.right}
-          accessibilityLabel="Recharger. Appui long : ouvrir dans Safari">
-          <IconButton icon="rotate-cw" tone="plain" size={36} label="Recharger" onPress={() => setReloadKey((k) => k + 1)} />
+          accessibilityLabel={t('Recharger. Appui long : ouvrir dans Safari', 'Reload. Long press: open in Safari')}>
+          <IconButton icon="rotate-cw" tone="plain" size={36} label={t('Recharger', 'Reload')} onPress={() => setReloadKey((k) => k + 1)} />
         </Pressable>
       </View>
       <View style={styles.track}>

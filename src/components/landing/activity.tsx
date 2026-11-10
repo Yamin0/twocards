@@ -8,6 +8,8 @@ import {
   SECTION,
   SectionHeader,
 } from "@/components/landing/section-header";
+import { useT } from "@/lib/i18n/client";
+import type { Translate } from "@/lib/i18n";
 
 /* Les trois cartes empilées du parcours (réservation, check-in,
    commission), reprises telles quelles de la version précédente. Le
@@ -20,57 +22,79 @@ const cardBase =
 const washed =
   "md:before:absolute md:before:w-[100%] md:before:outline-1 md:before:rounded-xl md:before:outline-border md:before:h-[100%] md:before:content-[''] md:before:bg-blend-overlay md:before:bg-background/50 md:grayscale-[100%] md:hover:before:opacity-0 md:before:transition-opacity md:before:duration-700 md:hover:grayscale-0 md:before:left-0 md:before:top-0";
 
-const CARDS = [
+const getCards = (t: Translate) => [
   {
     icon: <CalendarCheck className="size-4 text-[var(--landing-ivory)]" />,
-    title: "Réservation confirmée",
-    description: "Sam. 23h · table de 4 · acompte payé",
-    date: "hier, 18:42",
+    title: t("Réservation confirmée", "Reservation confirmed"),
+    description: t("Sam. 23h · table de 4 · acompte payé", "Sat 11 pm · table for 4 · deposit paid"),
+    date: t("hier, 18:42", "yesterday, 18:42"),
     iconClassName: "bg-[var(--landing-ink)]",
     titleClassName: "text-[var(--landing-ink)]",
     className: `[grid-area:stack] hover:-translate-y-10 ${washed} ${cardBase}`,
   },
   {
     icon: <QrCode className="size-4 text-[var(--landing-ivory)]" />,
-    title: "Check-in validé",
-    description: "8 invités arrivés · Rooftop",
-    date: "ce soir, 23:17",
+    title: t("Check-in validé", "Check-in confirmed"),
+    description: t("8 invités arrivés · Rooftop", "8 guests arrived · Rooftop"),
+    date: t("ce soir, 23:17", "tonight, 23:17"),
     iconClassName: "bg-[var(--landing-ink)]",
     titleClassName: "text-[var(--landing-ink)]",
     className: `[grid-area:stack] translate-x-10 translate-y-10 hover:-translate-y-1 ${washed} ${cardBase}`,
   },
   {
     icon: <BadgePercent className="size-4 text-[var(--landing-ivory)]" />,
-    title: "Commission validée",
-    description: "+ 480 MAD · facture vérifiée",
-    date: "à l'instant",
+    title: t("Commission validée", "Commission validated"),
+    description: t("+ 480 MAD · facture vérifiée", "+ 480 MAD · bill verified"),
+    date: t("à l'instant", "just now"),
     iconClassName: "bg-[var(--landing-ink)]",
     titleClassName: "text-[var(--landing-ink)]",
     className: `[grid-area:stack] translate-x-20 translate-y-20 hover:translate-y-10 ${cardBase}`,
   },
 ];
 
-const POINTS = [
-  "Le concierge sait quand son client est arrivé, sans appeler la porte",
-  "L'établissement voit qui a généré la table avant même le service",
-  "La commission apparaît validée dès que la facture est vérifiée",
+const getPoints = (t: Translate) => [
+  t(
+    "Le concierge sait quand son client est arrivé, sans appeler la porte",
+    "The concierge knows the guest has arrived, without calling the door"
+  ),
+  t(
+    "L'établissement voit qui a généré la table avant même le service",
+    "The venue sees who brought the table in before service even starts"
+  ),
+  t(
+    "La commission apparaît validée dès que la facture est vérifiée",
+    "Commission shows as validated the moment the bill is verified"
+  ),
 ];
 
 export function Activity() {
+  const t = useT();
+  const CARDS = getCards(t);
+  const POINTS = getPoints(t);
   return (
     <section className={`${SECTION} overflow-x-clip`}>
       <div className={CONTAINER}>
         <SectionHeader
-          title={
+          title={t(
             <>
               Votre soirée se déroule.
               <br />
               <em className="font-light italic">
                 Vous êtes déjà au courant.
               </em>
+            </>,
+            <>
+              The night unfolds.
+              <br />
+              <em className="font-light italic">
+                You already know.
+              </em>
             </>
-          }
-          intro="Confirmation, arrivée du client, validation de la facture : chaque étape vous est notifiée à l'instant où elle se produit. Côté concierge comme côté établissement, plus personne ne relance personne."
+          )}
+          intro={t(
+            "Confirmation, arrivée du client, validation de la facture : chaque étape vous est notifiée à l'instant où elle se produit. Côté concierge comme côté établissement, plus personne ne relance personne.",
+            "Confirmation, guest arrival, bill verified: you're notified of every step the moment it happens. Concierges and venues alike, nobody has to chase anybody any more."
+          )}
         />
       </div>
 

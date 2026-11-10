@@ -15,7 +15,8 @@
         "ITSAppUsesNonExemptEncryption": false,
         "CFBundleDevelopmentRegion": "fr",
         "CFBundleLocalizations": [
-          "fr"
+          "fr",
+          "en"
         ],
         "UIViewControllerBasedStatusBarAppearance": true
       }

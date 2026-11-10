@@ -7,6 +7,7 @@ import {
   parseImpersonation,
   stopImpersonation,
 } from "@/lib/impersonation";
+import { useT } from "@/lib/i18n/client";
 
 /* Le drapeau ne change qu'au prix d'un rechargement (bascule ou retour) :
    un abonnement vide suffit, getServerSnapshot rend null pour l'hydratation. */
@@ -18,6 +19,7 @@ const subscribe = () => () => {};
    leurs layouts. Invisible hors usurpation, donc sans effet pour les
    utilisateurs normaux. */
 export function ImpersonationBanner() {
+  const t = useT();
   const raw = useSyncExternalStore(
     subscribe,
     impersonationRaw,
@@ -32,7 +34,7 @@ export function ImpersonationBanner() {
     <div className="fixed inset-x-0 top-0 z-[200] flex items-center justify-center gap-3 bg-amber-500 px-4 py-2 text-[13px] font-semibold text-black shadow-lg">
       <Eye size={15} strokeWidth={2} className="shrink-0" />
       <span className="truncate">
-        Vue administrateur, connecté en tant que{" "}
+        {t("Vue administrateur, connecté en tant que", "Admin view, logged in as")}{" "}
         <span className="font-bold">{flag.email}</span>
       </span>
       <button
@@ -48,7 +50,7 @@ export function ImpersonationBanner() {
         ) : (
           <LogOut size={12} strokeWidth={2.5} />
         )}
-        Revenir à l&apos;administration
+        {t(<>Revenir à l&apos;administration</>, <>Back to admin</>)}
       </button>
     </div>
   );

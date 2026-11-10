@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useT } from "@/lib/i18n/client";
 
 /* Photo de profil de l'utilisateur, avec repli sur ses initiales tant
    qu'aucune image n'est envoyée. Partagé par les trois espaces
@@ -19,6 +20,7 @@ export function Avatar({
   className?: string;
   textClassName?: string;
 }) {
+  const t = useT();
   return (
     <div
       className={`relative shrink-0 overflow-hidden rounded-full bg-white/15 flex items-center justify-center ${className}`}
@@ -31,7 +33,7 @@ export function Avatar({
            figurer dans les domaines autorisés de next.config. */
         <Image
           src={url}
-          alt="Photo de profil"
+          alt={t("Photo de profil", "Profile photo")}
           fill
           sizes={`${size}px`}
           unoptimized

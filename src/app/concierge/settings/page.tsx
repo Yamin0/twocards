@@ -4,10 +4,13 @@ import { useState, useEffect } from "react";
 import { useAuthUser } from "@/hooks/use-auth-user";
 import { ConciergeSkeleton } from "@/components/shared/loading-skeleton";
 import { AvatarUploader } from "@/components/shared/avatar-uploader";
-import { User, Mail, Phone, MapPin, Save, CheckCircle, Loader2 } from "lucide-react";
+import { User, Mail, Phone, MapPin, Save, CheckCircle, Loader2, Languages } from "lucide-react";
+import { useT } from "@/lib/i18n/client";
+import { LanguageSwitcher } from "@/components/shared/language-switcher";
 
 export default function ConciergeSettingsPage() {
   const { fullName, email, isDemoConcierge, isLoading } = useAuthUser();
+  const t = useT();
   const [form, setForm] = useState({
     fullname: "",
     email: "",
@@ -21,8 +24,8 @@ export default function ConciergeSettingsPage() {
 
   useEffect(() => {
     if (notice) {
-      const t = setTimeout(() => setNotice(null), 3000);
-      return () => clearTimeout(t);
+      const timer = setTimeout(() => setNotice(null), 3000);
+      return () => clearTimeout(timer);
     }
   }, [notice]);
 
@@ -51,7 +54,7 @@ export default function ConciergeSettingsPage() {
     await new Promise((resolve) => setTimeout(resolve, 600));
 
     setSaving(false);
-    setNotice("Vos informations ont été enregistrées avec succès.");
+    setNotice(t("Vos informations ont été enregistrées avec succès.", "Your details have been saved."));
   };
 
   if (isLoading) return <ConciergeSkeleton />;
@@ -60,10 +63,10 @@ export default function ConciergeSettingsPage() {
     <div className="bg-transparent min-h-screen">
       <div className="px-8 pt-8 pb-6">
         <h1 className="text-white text-2xl font-extrabold">
-          Paramètres
+          {t("Paramètres", "Settings")}
         </h1>
         <p className="text-white/60 mt-1 text-sm">
-          Gérez votre profil et vos préférences.
+          {t("Gérez votre profil et vos préférences.", "Manage your profile and preferences.")}
         </p>
       </div>
 
@@ -79,16 +82,31 @@ export default function ConciergeSettingsPage() {
           <AvatarUploader onMessage={setNotice} />
         </div>
 
+        {/* Langue de l'interface : aussi visible dans l'app mobile, où la
+            barre latérale est masquée. */}
+        <div className="bg-white/[0.07] rounded-md editorial-shadow p-8 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <Languages size={18} strokeWidth={1.5} className="text-white/60" />
+            <div>
+              <h2 className="text-sm font-semibold text-white">{t("Langue", "Language")}</h2>
+              <p className="text-xs text-white/50 mt-0.5">
+                {t("Langue de l'interface", "Interface language")}
+              </p>
+            </div>
+          </div>
+          <LanguageSwitcher tone="dark" />
+        </div>
+
         <div className="bg-white/[0.07] rounded-md editorial-shadow p-8">
           <h2 className="text-sm font-semibold text-white mb-6">
-            Informations personnelles
+            {t("Informations personnelles", "Personal details")}
           </h2>
 
           <form className="space-y-5" onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <label className="block font-ui text-xs uppercase tracking-wider text-white/60">
-                  Nom complet
+                  {t("Nom complet", "Full name")}
                 </label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={16} strokeWidth={1.5} />
@@ -103,7 +121,7 @@ export default function ConciergeSettingsPage() {
 
               <div className="space-y-1.5">
                 <label className="block font-ui text-xs uppercase tracking-wider text-white/60">
-                  Email
+                  {t("Email", "Email")}
                 </label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={16} strokeWidth={1.5} />
@@ -118,7 +136,7 @@ export default function ConciergeSettingsPage() {
 
               <div className="space-y-1.5">
                 <label className="block font-ui text-xs uppercase tracking-wider text-white/60">
-                  Téléphone
+                  {t("Téléphone", "Phone")}
                 </label>
                 <div className="relative">
                   <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={16} strokeWidth={1.5} />
@@ -133,7 +151,7 @@ export default function ConciergeSettingsPage() {
 
               <div className="space-y-1.5">
                 <label className="block font-ui text-xs uppercase tracking-wider text-white/60">
-                  Ville
+                  {t("Ville", "City")}
                 </label>
                 <div className="relative">
                   <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={16} strokeWidth={1.5} />
@@ -157,7 +175,7 @@ export default function ConciergeSettingsPage() {
               ) : (
                 <Save size={16} strokeWidth={1.5} />
               )}
-              {saving ? "Enregistrement..." : "Enregistrer"}
+              {saving ? t("Enregistrement...", "Saving...") : t("Enregistrer", "Save")}
             </button>
           </form>
         </div>

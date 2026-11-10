@@ -3,6 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useT } from "@/lib/i18n/client";
+import type { Translate } from "@/lib/i18n";
 
 /* Bandeau final pleine largeur, bord à bord : une terrasse de Marrakech la
    nuit, sous un plafond de lanternes, la Koutoubia au loin (photo Unsplash,
@@ -17,25 +19,39 @@ type CtaBannerProps = {
   secondary?: { label: string; href: string } | null;
 };
 
-const DEFAULTS = {
-  title: (
+const getDefaults = (t: Translate) => ({
+  title: t(
     <>
       Digitalisez les relations
       <br />
       qui <em className="font-light italic">existent déjà</em>.
+    </>,
+    <>
+      Digitise the relationships
+      <br />
+      you <em className="font-light italic">already have</em>.
     </>
   ),
-  text: "Installation gratuite pendant le pilote, import de votre réseau existant et rapport de performance hebdomadaire. Le payant ne commence qu'après la preuve du retour sur investissement.",
-  primary: { label: "Demander un accès", href: "/signup" },
-  secondary: { label: "Je suis concierge / RP", href: "/signup?role=concierge" },
-};
+  text: t(
+    "Installation gratuite pendant le pilote, import de votre réseau existant et rapport de performance hebdomadaire. Le payant ne commence qu'après la preuve du retour sur investissement.",
+    "Free setup during the pilot, import of your existing network and a weekly performance report. You only start paying once the return on investment is proven."
+  ),
+  primary: { label: t("Demander un accès", "Request access"), href: "/signup" },
+  secondary: {
+    label: t("Je suis concierge / RP", "I'm a concierge / PR"),
+    href: "/signup?role=concierge",
+  },
+});
 
-export function CtaBanner({
-  title = DEFAULTS.title,
-  text = DEFAULTS.text,
-  primary = DEFAULTS.primary,
-  secondary = DEFAULTS.secondary,
-}: CtaBannerProps = {}) {
+export function CtaBanner(props: CtaBannerProps = {}) {
+  const t = useT();
+  const DEFAULTS = getDefaults(t);
+  const {
+    title = DEFAULTS.title,
+    text = DEFAULTS.text,
+    primary = DEFAULTS.primary,
+    secondary = DEFAULTS.secondary,
+  } = props;
   return (
     <section
       id="contact"

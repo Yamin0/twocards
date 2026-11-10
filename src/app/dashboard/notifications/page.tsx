@@ -8,6 +8,8 @@ import {
   type VenueNotificationKind,
 } from "@/hooks/use-venue-notifications";
 import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
+import { useLocale, useT } from "@/lib/i18n/client";
+import { intlLocale, type Locale, type Translate } from "@/lib/i18n";
 
 const KIND_CONFIG: Record<
   VenueNotificationKind,
@@ -18,21 +20,23 @@ const KIND_CONFIG: Record<
   pos: { color: "text-emerald-400", bg: "bg-emerald-500/20", icon: Receipt },
 };
 
-const FILTER_TABS = [
-  { key: "all", label: "Toutes" },
-  { key: "unread", label: "Non lues" },
-] as const;
+const getFilterTabs = (t: Translate) =>
+  [
+    { key: "all", label: t("Toutes", "All") },
+    { key: "unread", label: t("Non lues", "Unread") },
+  ] as const;
 
-type FilterKey = (typeof FILTER_TABS)[number]["key"];
+type FilterKey = ReturnType<typeof getFilterTabs>[number]["key"];
 
 /* Horodatage relatif recalculé à chaque rendu — jamais de texte figé. */
-function relativeTime(iso: string): string {
+function relativeTime(iso: string, locale: Locale = "fr"): string {
+  const en = locale === "en";
   const elapsedMin = Math.floor((Date.now() - new Date(iso).getTime()) / 60_000);
-  if (elapsedMin < 1) return "à l’instant";
-  if (elapsedMin < 60) return `il y a ${elapsedMin} min`;
+  if (elapsedMin < 1) return en ? "just now" : "à l’instant";
+  if (elapsedMin < 60) return en ? `${elapsedMin} min ago` : `il y a ${elapsedMin} min`;
   const hours = Math.floor(elapsedMin / 60);
-  if (hours < 24) return `il y a ${hours} h`;
-  return new Date(iso).toLocaleDateString("fr-FR", {
+  if (hours < 24) return en ? `${hours} h ago` : `il y a ${hours} h`;
+  return new Date(iso).toLocaleDateString(intlLocale(locale), {
     day: "numeric",
     month: "short",
     hour: "2-digit",
@@ -43,6 +47,9 @@ function relativeTime(iso: string): string {
 export default function NotificationsPage() {
   const { notifications, unreadCount, isLoading, markRead, markAllRead, clearAll } =
     useVenueNotifications();
+  const t = useT();
+  const locale = useLocale();
+  const FILTER_TABS = getFilterTabs(t);
   const [activeFilter, setActiveFilter] = useState<FilterKey>("all");
 
   /* Re-rendu chaque minute pour que « il y a X min » reste vrai. */
@@ -69,7 +76,7 @@ export default function NotificationsPage() {
             </h1>
             {unreadCount > 0 && (
               <p className="text-sm text-white/40 mt-1 font-ui">
-                {unreadCount} non lue{unreadCount > 1 ? "s" : ""}
+                {t(`${unreadCount} non lue${unreadCount > 1 ? "s" : ""}`, `${unreadCount} unread`)}
               </p>
             )}
           </div>
@@ -77,20 +84,20 @@ export default function NotificationsPage() {
             <button
               onClick={markAllRead}
               disabled={unreadCount === 0}
-              aria-label="Tout marquer lu"
+              aria-label={t("Tout marquer lu", "Mark all as read")}
               className="flex items-center gap-2 px-4 py-2.5 bg-blue-500 text-white rounded-xl text-xs font-semibold hover:bg-blue-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed font-ui"
             >
               <Check size={14} strokeWidth={2} />
-              Tout marquer lu
+              {t("Tout marquer lu", "Mark all as read")}
             </button>
             <button
               onClick={clearAll}
               disabled={items.length === 0}
-              aria-label="Tout effacer"
+              aria-label={t("Tout effacer", "Clear all")}
               className="flex items-center gap-2 px-4 py-2.5 backdrop-blur-2xl bg-black/45 border border-white/[0.12] text-white/60 rounded-xl text-xs font-semibold hover:bg-white/[0.12] hover:text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed font-ui"
             >
               <Trash2 size={14} strokeWidth={2} />
-              Tout effacer
+              {t("Tout effacer", "Clear all")}
             </button>
           </div>
         </div>
@@ -123,13 +130,16 @@ export default function NotificationsPage() {
             </div>
             <p className="text-sm font-semibold text-white/60 font-ui">
               {activeFilter === "unread"
-                ? "Aucune notification non lue"
-                : "Aucune notification"}
+                ? t("Aucune notification non lue", "No unread notifications")
+                : t("Aucune notification", "No notifications")}
             </p>
             <p className="text-xs text-white/30 mt-1 max-w-xs font-ui">
               {activeFilter === "unread"
-                ? "Tout est lu, rien ne vous attend."
-                : "Les nouvelles réservations, avis clients et alertes caisse apparaîtront ici."}
+                ? t("Tout est lu, rien ne vous attend.", "You're all caught up.")
+                : t(
+                    "Les nouvelles réservations, avis clients et alertes caisse apparaîtront ici.",
+                    "New reservations, guest reviews and till alerts will appear here.",
+                  )}
             </p>
           </div>
         ) : (
@@ -162,7 +172,7 @@ export default function NotificationsPage() {
                       {!notif.read && (
                         <span
                           className="w-2 h-2 rounded-full bg-blue-500 shrink-0"
-                          aria-label="Non lue"
+                          aria-label={t("Non lue", "Unread")}
                         />
                       )}
                     </div>
@@ -172,7 +182,7 @@ export default function NotificationsPage() {
                       </p>
                     )}
                     <span className="text-[11px] text-white/25 mt-2 block font-ui">
-                      {relativeTime(notif.created_at)}
+                      {relativeTime(notif.created_at, locale)}
                     </span>
                   </div>
                 </Link>

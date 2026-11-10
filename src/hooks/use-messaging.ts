@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useAuthUser } from "@/hooks/use-auth-user";
+import { intlLocale, pick, type Locale } from "@/lib/i18n";
+import { useT } from "@/lib/i18n/client";
 
 /* Messagerie temps réel établissement <-> concierge, sur les tables
    public.profiles / conversations / messages (RLS : seuls les deux
@@ -41,17 +43,17 @@ export type ConversationSummary = {
 
 /* Nom affichable d'un profil : un établissement s'identifie par son
    enseigne, une personne par son nom. */
-export function displayName(p: Profile | null | undefined): string {
-  if (!p) return "Compte supprimé";
+export function displayName(p: Profile | null | undefined, locale: Locale = "fr"): string {
+  if (!p) return pick(locale, "Compte supprimé", "Deleted account");
   return (
     (p.role === "etablissement" || p.role === "hotel"
       ? p.venue_name || p.full_name
-      : p.full_name || p.venue_name) || "Sans nom"
+      : p.full_name || p.venue_name) || pick(locale, "Sans nom", "No name")
   );
 }
 
-export function initialsOf(p: Profile | null | undefined): string {
-  return displayName(p)
+export function initialsOf(p: Profile | null | undefined, locale: Locale = "fr"): string {
+  return displayName(p, locale)
     .split(" ")
     .filter(Boolean)
     .map((w) => w[0])
@@ -61,13 +63,13 @@ export function initialsOf(p: Profile | null | undefined): string {
 }
 
 /* Heure pour aujourd'hui, date courte sinon. */
-export function formatTimestamp(iso: string): string {
+export function formatTimestamp(iso: string, locale: Locale = "fr"): string {
   const d = new Date(iso);
   const now = new Date();
   if (d.toDateString() === now.toDateString()) {
-    return d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+    return d.toLocaleTimeString(intlLocale(locale), { hour: "2-digit", minute: "2-digit" });
   }
-  return d.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
+  return d.toLocaleDateString(intlLocale(locale), { day: "numeric", month: "short" });
 }
 
 type ConversationRow = {
@@ -174,6 +176,7 @@ export function useMessaging(options?: { openWith?: string | null }) {
   /* Profil à ouvrir d'office (lien « Message » de l'annuaire) : consommé une
      seule fois, au premier chargement des conversations. */
   const openWith = options?.openWith ?? null;
+  const t = useT();
   const { userId, role, isLoading: authLoading } = useAuthUser();
   /* Un établissement parle à des concierges, et réciproquement. */
   const side: "venue" | "concierge" =
@@ -199,7 +202,7 @@ export function useMessaging(options?: { openWith?: string | null }) {
     fetchSummaries(userId, side).then(async (summaries) => {
       if (cancelled) return;
       if (summaries === null) {
-        setError("Impossible de charger les conversations.");
+        setError(t("Impossible de charger les conversations.", "Couldn’t load conversations."));
         setConversations([]);
         return;
       }
@@ -228,7 +231,7 @@ export function useMessaging(options?: { openWith?: string | null }) {
     return () => {
       cancelled = true;
     };
-  }, [authLoading, userId, side, openWith]);
+  }, [authLoading, userId, side, openWith, t]);
 
   /* Marque lus les messages reçus d'une conversation, en base et en local. */
   const markRead = useCallback(
@@ -323,7 +326,7 @@ export function useMessaging(options?: { openWith?: string | null }) {
         .select()
         .single();
       if (sendError || !data) {
-        setError("Le message n'a pas pu être envoyé.");
+        setError(t("Le message n'a pas pu être envoyé.", "Your message couldn’t be sent."));
         return;
       }
       const msg = data as ChatMessage;
@@ -340,7 +343,7 @@ export function useMessaging(options?: { openWith?: string | null }) {
           : prev
       );
     },
-    [activeId, userId]
+    [activeId, userId, t]
   );
 
   /* Annuaire des interlocuteurs possibles : les rôles d'en face. */
@@ -366,14 +369,14 @@ export function useMessaging(options?: { openWith?: string | null }) {
         counterpartId
       );
       if (!conversationId) {
-        setError("Impossible d'ouvrir la conversation.");
+        setError(t("Impossible d'ouvrir la conversation.", "Couldn’t open the conversation."));
         return;
       }
       const summaries = await fetchSummaries(userId, side);
       if (summaries) setConversations(summaries);
       setActiveId(conversationId);
     },
-    [userId, side]
+    [userId, side, t]
   );
 
   /* États dérivés du fil : voir le commentaire de `thread`. */

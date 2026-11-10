@@ -26,6 +26,7 @@ import {
 import { createClient } from "@/lib/supabase/client";
 import { useAuthUser } from "@/hooks/use-auth-user";
 import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
+import { useIntlLocale, useT } from "@/lib/i18n/client";
 
 /* ── types ──────────────────────────────────────────────── */
 
@@ -129,6 +130,8 @@ function tableColor(status: string, vip: boolean, selected: boolean) {
 
 export default function FloorPlanPage() {
   const { isLoading } = useAuthUser();
+  const t = useT();
+  const intl = useIntlLocale();
   const [tablesList, setTablesList] = useState<TableData[] | null>(null);
   const [selectedTable, setSelectedTable] = useState<number | null>(null);
   const [zoom, setZoom] = useState(1);
@@ -227,7 +230,7 @@ export default function FloorPlanPage() {
               partySize: r.party_size,
               arrival:
                 new Date(r.reservation_date + "T00:00:00").toLocaleDateString(
-                  "fr-FR"
+                  intl
                 ) + (r.reservation_time ? ` · ${r.reservation_time}` : ""),
               time: r.reservation_time,
               source: r.source,
@@ -253,7 +256,7 @@ export default function FloorPlanPage() {
       cancelled = true;
       supabase.removeChannel(channel);
     };
-  }, [selectedDate]);
+  }, [selectedDate, intl]);
 
   if (isLoading || tablesList === null) return <DashboardSkeleton />;
 
@@ -281,7 +284,7 @@ export default function FloorPlanPage() {
       .update(patch)
       .eq("id", tableId);
     if (error) {
-      showToast("Échec de l'enregistrement");
+      showToast(t("Échec de l'enregistrement", "Couldn't save"));
       const { data } = await createClient()
         .from("venue_tables")
         .select("id, label, x, y, shape, status, vip, capacity")
@@ -314,12 +317,12 @@ export default function FloorPlanPage() {
       .select("id, label, x, y, shape, status, vip, capacity")
       .single();
     if (error || !data) {
-      showToast("Impossible d'ajouter la table");
+      showToast(t("Impossible d'ajouter la table", "Couldn't add the table"));
       return;
     }
     setTablesList((prev) => [...(prev ?? []), rowToTable(data as TableRow)]);
     setSelectedTable((data as TableRow).id);
-    showToast(`Table ${label} ajoutée`);
+    showToast(t(`Table ${label} ajoutée`, `Table ${label} added`));
   };
 
   /* ── delete table (persistée, avec garde-fou) ── */
@@ -330,8 +333,11 @@ export default function FloorPlanPage() {
     if (
       !window.confirm(
         hasRes
-          ? `Supprimer la table ${table.label} ? Ses réservations du jour perdront leur assignation.`
-          : `Supprimer la table ${table.label} ?`
+          ? t(
+              `Supprimer la table ${table.label} ? Ses réservations du jour perdront leur assignation.`,
+              `Delete table ${table.label}? Today's reservations on it will lose their table.`,
+            )
+          : t(`Supprimer la table ${table.label} ?`, `Delete table ${table.label}?`)
       )
     )
       return;
@@ -341,8 +347,8 @@ export default function FloorPlanPage() {
       .from("venue_tables")
       .delete()
       .eq("id", tableId);
-    if (error) showToast("Échec de la suppression");
-    else showToast(`Table ${table.label} supprimée`);
+    if (error) showToast(t("Échec de la suppression", "Couldn't delete"));
+    else showToast(t(`Table ${table.label} supprimée`, `Table ${table.label} deleted`));
   };
 
   /* Check-in persisté : l'heure d'arrivée est en base, partagée entre
@@ -362,8 +368,8 @@ export default function FloorPlanPage() {
       .from("qr_reservations")
       .update({ arrived_at })
       .eq("id", res.resId);
-    if (error) showToast("Impossible d'enregistrer l'arrivée");
-    else showToast(`${res.client}, arrivée enregistrée`);
+    if (error) showToast(t("Impossible d'enregistrer l'arrivée", "Couldn't record the arrival"));
+    else showToast(t(`${res.client}, arrivée enregistrée`, `${res.client}, arrival recorded`));
   };
 
   /* Walk-in : un client se présente, on l'installe sur une table libre.
@@ -387,7 +393,7 @@ export default function FloorPlanPage() {
     });
     if (error || !data) {
       setSeating(false);
-      showToast("Impossible d'installer le client");
+      showToast(t("Impossible d'installer le client", "Couldn't seat the guest"));
       return;
     }
     await supabase
@@ -396,7 +402,10 @@ export default function FloorPlanPage() {
       .eq("id", data as string);
     setSeating(false);
     showToast(
-      `${walkInParty} couvert${walkInParty > 1 ? "s" : ""} installés, table ${selected.label}`
+      t(
+        `${walkInParty} couvert${walkInParty > 1 ? "s" : ""} installés, table ${selected.label}`,
+        `${walkInParty} cover${walkInParty === 1 ? "" : "s"} seated, table ${selected.label}`,
+      )
     );
   };
 
@@ -485,14 +494,17 @@ export default function FloorPlanPage() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="font-display text-3xl font-light text-white">
-              Plan de salle
+              {t("Plan de salle", "Floor plan")}
             </h1>
             <p className="font-ui text-white/50 text-sm mt-1">
               {selectedDate === today
-                ? "Occupation d'aujourd'hui, choisissez une date pour voir un autre service"
-                : `Occupation du ${new Date(
+                ? t(
+                    "Occupation d'aujourd'hui, choisissez une date pour voir un autre service",
+                    "Today's occupancy; pick a date to see another service",
+                  )
+                : `${t("Occupation du", "Occupancy for")} ${new Date(
                     selectedDate + "T00:00:00"
-                  ).toLocaleDateString("fr-FR", {
+                  ).toLocaleDateString(intl, {
                     weekday: "long",
                     day: "numeric",
                     month: "long",
@@ -504,7 +516,7 @@ export default function FloorPlanPage() {
             <div className="flex items-center gap-1 backdrop-blur-2xl bg-black/45 border border-white/[0.15] rounded-xl px-1.5 py-1">
               <button
                 onClick={() => setSelectedDate((d) => shiftISODate(d, -1))}
-                aria-label="Jour précédent"
+                aria-label={t("Jour précédent", "Previous day")}
                 className="h-8 w-8 rounded-lg flex items-center justify-center text-white/50 hover:text-white hover:bg-white/[0.1] transition-all"
               >
                 <ChevronLeft size={16} strokeWidth={1.5} />
@@ -517,13 +529,13 @@ export default function FloorPlanPage() {
                   onChange={(e) => {
                     if (e.target.value) setSelectedDate(e.target.value);
                   }}
-                  aria-label="Date du plan de salle"
+                  aria-label={t("Date du plan de salle", "Floor plan date")}
                   className="bg-transparent text-sm text-white font-ui [color-scheme:dark] focus:outline-none"
                 />
               </div>
               <button
                 onClick={() => setSelectedDate((d) => shiftISODate(d, 1))}
-                aria-label="Jour suivant"
+                aria-label={t("Jour suivant", "Next day")}
                 className="h-8 w-8 rounded-lg flex items-center justify-center text-white/50 hover:text-white hover:bg-white/[0.1] transition-all"
               >
                 <ChevronRight size={16} strokeWidth={1.5} />
@@ -534,7 +546,7 @@ export default function FloorPlanPage() {
                 onClick={() => setSelectedDate(today)}
                 className="px-3 py-2.5 rounded-xl text-sm font-medium backdrop-blur-2xl bg-black/45 border border-white/[0.15] text-white/60 hover:bg-white/[0.1] hover:text-white transition-all"
               >
-                Aujourd&apos;hui
+                {t("Aujourd'hui", "Today")}
               </button>
             )}
             {/* Edit mode toggle */}
@@ -553,12 +565,12 @@ export default function FloorPlanPage() {
               {editMode ? (
                 <>
                   <Pencil size={16} strokeWidth={1.5} />
-                  Mode édition
+                  {t("Mode édition", "Edit mode")}
                 </>
               ) : (
                 <>
                   <Lock size={16} strokeWidth={1.5} />
-                  Modifier
+                  {t("Modifier", "Edit")}
                 </>
               )}
             </button>
@@ -571,25 +583,25 @@ export default function FloorPlanPage() {
       {currentTables.length > 0 && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl p-4">
-            <p className="text-white/40 text-xs">Tables occupées</p>
+            <p className="text-white/40 text-xs">{t("Tables occupées", "Tables occupied")}</p>
             <p className="text-xl font-bold text-white mt-1 font-ui">
               {occupiedCount}/{currentTables.length}
             </p>
           </div>
           <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl p-4">
-            <p className="text-white/40 text-xs">Disponibles</p>
+            <p className="text-white/40 text-xs">{t("Disponibles", "Available")}</p>
             <p className="text-xl font-bold text-green-400 mt-1 font-ui">
               {availableCount}
             </p>
           </div>
           <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl p-4">
-            <p className="text-white/40 text-xs">Couverts réservés</p>
+            <p className="text-white/40 text-xs">{t("Couverts réservés", "Covers booked")}</p>
             <p className="text-xl font-bold text-white mt-1 font-ui">
               {occupiedCapacity}
             </p>
           </div>
           <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl p-4">
-            <p className="text-white/40 text-xs">Capacité totale</p>
+            <p className="text-white/40 text-xs">{t("Capacité totale", "Total capacity")}</p>
             <p className="text-xl font-bold text-white mt-1 font-ui">
               {totalCapacity}
             </p>
@@ -601,24 +613,24 @@ export default function FloorPlanPage() {
       <div className="flex items-center gap-5 flex-wrap">
         <div className="flex items-center gap-1.5">
           <span className="h-3 w-3 rounded-full bg-white/[0.06] border border-white/[0.12]" />
-          <span className="text-xs text-white/40">Disponible</span>
+          <span className="text-xs text-white/40">{t("Disponible", "Available")}</span>
         </div>
         <div className="flex items-center gap-1.5">
           <span className="h-3 w-3 rounded-full bg-blue-400/15 border border-blue-400/30" />
-          <span className="text-xs text-white/40">Occupée</span>
+          <span className="text-xs text-white/40">{t("Occupée", "Occupied")}</span>
         </div>
         <div className="flex items-center gap-1.5">
           <span className="h-3 w-3 rounded bg-amber-400/15 border border-amber-400/30" />
-          <span className="text-xs text-white/40">VIP Occupée</span>
+          <span className="text-xs text-white/40">{t("VIP Occupée", "VIP occupied")}</span>
         </div>
         <div className="flex items-center gap-1.5">
           <span className="h-3 w-3 rounded bg-white/[0.04] border border-white/10" />
-          <span className="text-xs text-white/40">Bloquée</span>
+          <span className="text-xs text-white/40">{t("Bloquée", "Blocked")}</span>
         </div>
         {editMode && (
           <div className="flex items-center gap-1.5">
             <GripVertical size={12} className="text-blue-400" />
-            <span className="text-xs text-blue-400 font-medium">Glisser pour déplacer · Clic droit pour options</span>
+            <span className="text-xs text-blue-400 font-medium">{t("Glisser pour déplacer · Clic droit pour options", "Drag to move · Right-click for options")}</span>
           </div>
         )}
       </div>
@@ -635,8 +647,8 @@ export default function FloorPlanPage() {
               <div className="bg-blue-500/10 border-b border-blue-400/20 px-4 py-2 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Pencil size={13} strokeWidth={1.5} className="text-blue-400" />
-                  <span className="text-xs font-medium text-blue-400">Mode édition actif</span>
-                  <span className="text-xs text-blue-400/50">Déplacez les tables ou faites clic droit pour ajouter/supprimer</span>
+                  <span className="text-xs font-medium text-blue-400">{t("Mode édition actif", "Edit mode on")}</span>
+                  <span className="text-xs text-blue-400/50">{t("Déplacez les tables ou faites clic droit pour ajouter/supprimer", "Move tables, or right-click to add/delete")}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <button
@@ -648,7 +660,7 @@ export default function FloorPlanPage() {
                     className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-400/30 rounded-lg text-xs font-medium text-blue-300 transition-all"
                   >
                     <Plus size={13} strokeWidth={2} />
-                    Nouvelle table
+                    {t("Nouvelle table", "New table")}
                   </button>
                   {selectedTable !== null && (
                     <button
@@ -656,7 +668,7 @@ export default function FloorPlanPage() {
                       className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 border border-red-400/20 rounded-lg text-xs font-medium text-red-400 transition-all"
                     >
                       <Trash2 size={13} strokeWidth={2} />
-                      Supprimer
+                      {t("Supprimer", "Delete")}
                     </button>
                   )}
                 </div>
@@ -695,7 +707,7 @@ export default function FloorPlanPage() {
               <div className="absolute left-6 top-1/2 -translate-y-1/2 bg-white/[0.06] border border-white/[0.1] rounded-xl px-2 py-6 flex flex-col items-center gap-1">
                 <DoorOpen size={14} strokeWidth={1.5} className="text-white/30" />
                 <span className="text-[0.5rem] font-medium text-white/30 uppercase tracking-wider [writing-mode:vertical-lr]">
-                  Entrée
+                  {t("Entrée", "Entrance")}
                 </span>
               </div>
 
@@ -703,7 +715,9 @@ export default function FloorPlanPage() {
               {currentTables.length === 0 && (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <p className="text-sm text-white/30">
-                    {editMode ? "Clic droit ou bouton + pour ajouter une table" : "Aucune table configurée"}
+                    {editMode
+                      ? t("Clic droit ou bouton + pour ajouter une table", "Right-click or use the + button to add a table")
+                      : t("Aucune table configurée", "No tables set up")}
                   </p>
                 </div>
               )}
@@ -766,7 +780,7 @@ export default function FloorPlanPage() {
                     className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-white/80 hover:bg-white/10 hover:text-white transition-all"
                   >
                     <Plus size={15} strokeWidth={1.5} className="text-blue-400" />
-                    Nouvelle table ici
+                    {t("Nouvelle table ici", "New table here")}
                   </button>
                   {contextMenu.tableId !== null && (
                     <button
@@ -777,7 +791,8 @@ export default function FloorPlanPage() {
                       className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-red-400/80 hover:bg-red-400/10 hover:text-red-400 transition-all"
                     >
                       <Trash2 size={15} strokeWidth={1.5} />
-                      Supprimer table {currentTables.find((t) => t.id === contextMenu.tableId)?.label}
+                      {t("Supprimer table", "Delete table")}{" "}
+                      {currentTables.find((x) => x.id === contextMenu.tableId)?.label}
                     </button>
                   )}
                 </div>
@@ -821,15 +836,21 @@ export default function FloorPlanPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="bg-white/[0.04] rounded-xl p-3">
-                    <p className="text-[0.625rem] text-white/30 uppercase tracking-wider">Capacité</p>
-                    <p className="text-sm font-medium text-white mt-0.5">{selected.capacity} pers.</p>
+                    <p className="text-[0.625rem] text-white/30 uppercase tracking-wider">{t("Capacité", "Capacity")}</p>
+                    <p className="text-sm font-medium text-white mt-0.5">
+                      {selected.capacity} {t("pers.", selected.capacity === 1 ? "guest" : "guests")}
+                    </p>
                   </div>
                   <div className="bg-white/[0.04] rounded-xl p-3">
-                    <p className="text-[0.625rem] text-white/30 uppercase tracking-wider">Statut</p>
+                    <p className="text-[0.625rem] text-white/30 uppercase tracking-wider">{t("Statut", "Status")}</p>
                     <p className={`text-sm font-medium mt-0.5 ${
                       selected.status === "occupied" ? "text-blue-400" : selected.status === "available" ? "text-green-400" : "text-white/30"
                     }`}>
-                      {selected.status === "occupied" ? "Occupée" : selected.status === "available" ? "Disponible" : "Bloquée"}
+                      {selected.status === "occupied"
+                        ? t("Occupée", "Occupied")
+                        : selected.status === "available"
+                          ? t("Disponible", "Available")
+                          : t("Bloquée", "Blocked")}
                     </p>
                   </div>
                 </div>
@@ -840,8 +861,11 @@ export default function FloorPlanPage() {
                 <div className="space-y-3">
                   <p className="text-[0.625rem] text-white/30 uppercase tracking-wider font-semibold">
                     {selectedReservations.length > 1
-                      ? `${selectedReservations.length} réservations ce jour`
-                      : "Réservation"}
+                      ? t(
+                          `${selectedReservations.length} réservations ce jour`,
+                          `${selectedReservations.length} reservations this day`,
+                        )
+                      : t("Réservation", "Reservation")}
                   </p>
                   {selectedReservations.map((res) => (
                     <div
@@ -861,17 +885,17 @@ export default function FloorPlanPage() {
                           {res.source === "portal" ? (
                             <span className="inline-flex items-center gap-1 mt-0.5 rounded-md bg-purple-500/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-purple-300">
                               <Globe size={9} strokeWidth={2} />
-                              Direct
+                              {t("Direct", "direct")}
                             </span>
                           ) : res.source === "venue" ? (
                             <span className="inline-flex items-center gap-1 mt-0.5 rounded-md bg-emerald-500/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-emerald-300">
                               <Phone size={9} strokeWidth={2} />
-                              Maison
+                              {t("Maison", "in-house")}
                             </span>
                           ) : (
                             <span className="inline-flex items-center gap-1 mt-0.5 rounded-md bg-blue-500/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-blue-300">
                               <QrCode size={9} strokeWidth={2} />
-                              QR hôtel
+                              {t("QR hôtel", "hotel QR")}
                             </span>
                           )}
                         </div>
@@ -880,14 +904,19 @@ export default function FloorPlanPage() {
                       <div className="space-y-2">
                         <div className="flex items-center gap-2 text-white/50 text-sm">
                           <Users size={14} strokeWidth={1.5} />
-                          <span>{res.partySize} personnes</span>
+                          <span>
+                            {t(
+                              `${res.partySize} personne${res.partySize > 1 ? "s" : ""}`,
+                              `${res.partySize} guest${res.partySize === 1 ? "" : "s"}`,
+                            )}
+                          </span>
                         </div>
                         <div className="flex items-center gap-2 text-white/50 text-sm">
                           <Clock size={14} strokeWidth={1.5} />
                           <span>
                             {res.time
-                              ? `Arrivée : ${res.time.slice(0, 5)}`
-                              : "Heure non précisée"}
+                              ? t(`Arrivée : ${res.time.slice(0, 5)}`, `Arrival: ${res.time.slice(0, 5)}`)
+                              : t("Heure non précisée", "No time given")}
                           </span>
                         </div>
                       </div>
@@ -897,9 +926,9 @@ export default function FloorPlanPage() {
                         (res.arrivedAt ? (
                           <div className="flex items-center gap-2 rounded-xl bg-green-400/10 border border-green-400/20 px-3 py-2 text-xs font-medium text-green-400">
                             <LogIn size={13} strokeWidth={1.5} />
-                            Arrivé à{" "}
+                            {t("Arrivé à", "Arrived at")}{" "}
                             {new Date(res.arrivedAt).toLocaleTimeString(
-                              "fr-FR",
+                              intl,
                               { hour: "2-digit", minute: "2-digit" }
                             )}
                           </div>
@@ -910,14 +939,14 @@ export default function FloorPlanPage() {
                               className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-blue-500 hover:bg-blue-400 px-3 py-2 text-xs font-medium text-white transition-colors"
                             >
                               <LogIn size={13} strokeWidth={1.5} />
-                              Check-in
+                              {t("Check-in", "Check in")}
                             </button>
                           )
                         ))}
 
                       {res.notes && (
                         <div className="pt-2 border-t border-white/[0.06]">
-                          <p className="text-[0.625rem] text-white/30 uppercase tracking-wider mb-1">Notes</p>
+                          <p className="text-[0.625rem] text-white/30 uppercase tracking-wider mb-1">{t("Notes", "Notes")}</p>
                           <p className="text-xs text-white/50 leading-relaxed">{res.notes}</p>
                         </div>
                       )}
@@ -927,8 +956,8 @@ export default function FloorPlanPage() {
               ) : (
                 <div className="bg-white/[0.04] border border-white/[0.08] rounded-2xl p-5 space-y-4">
                   <p className="text-xs text-white/30 text-center">
-                    Aucune réservation sur cette table le{" "}
-                    {new Date(selectedDate + "T00:00:00").toLocaleDateString("fr-FR")}
+                    {t("Aucune réservation sur cette table le", "No reservations on this table on")}{" "}
+                    {new Date(selectedDate + "T00:00:00").toLocaleDateString(intl)}
                   </p>
                   {/* Walk-in : installer immédiatement un client qui se présente */}
                   {!editMode &&
@@ -936,13 +965,13 @@ export default function FloorPlanPage() {
                     selectedDate === today && (
                       <div className="space-y-3 pt-1 border-t border-white/[0.06]">
                         <div className="flex items-center justify-between pt-2">
-                          <span className="text-xs text-white/50">Couverts</span>
+                          <span className="text-xs text-white/50">{t("Couverts", "Covers")}</span>
                           <div className="flex items-center gap-3">
                             <button
                               onClick={() =>
                                 setWalkInParty((p) => Math.max(1, p - 1))
                               }
-                              aria-label="Moins de couverts"
+                              aria-label={t("Moins de couverts", "Fewer covers")}
                               className="h-7 w-7 rounded-lg bg-white/10 text-white/70 hover:bg-white/15 flex items-center justify-center"
                             >
                               <Minus size={13} strokeWidth={2} />
@@ -954,7 +983,7 @@ export default function FloorPlanPage() {
                               onClick={() =>
                                 setWalkInParty((p) => Math.min(50, p + 1))
                               }
-                              aria-label="Plus de couverts"
+                              aria-label={t("Plus de couverts", "More covers")}
                               className="h-7 w-7 rounded-lg bg-white/10 text-white/70 hover:bg-white/15 flex items-center justify-center"
                             >
                               <Plus size={13} strokeWidth={2} />
@@ -967,7 +996,7 @@ export default function FloorPlanPage() {
                           className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-blue-500 hover:bg-blue-400 px-3 py-2.5 text-xs font-medium text-white transition-colors disabled:opacity-60"
                         >
                           <LogIn size={13} strokeWidth={1.5} />
-                          {seating ? "Installation…" : "Installer un walk-in"}
+                          {seating ? t("Installation…", "Seating…") : t("Installer un walk-in", "Seat a walk-in")}
                         </button>
                       </div>
                     )}
@@ -988,7 +1017,7 @@ export default function FloorPlanPage() {
                           .update({ table_id: null })
                           .in("id", ids);
                         if (error) {
-                          showToast("Impossible de libérer la table");
+                          showToast(t("Impossible de libérer la table", "Couldn't free up the table"));
                           return;
                         }
                       }
@@ -998,12 +1027,12 @@ export default function FloorPlanPage() {
                         return next;
                       });
                       setSelectedTable(null);
-                      showToast(`Table ${selected.label} libérée`);
+                      showToast(t(`Table ${selected.label} libérée`, `Table ${selected.label} freed up`));
                     }}
                     className="w-full inline-flex items-center justify-center gap-2 text-sm text-white/30 hover:text-red-400 transition-colors py-2 rounded-xl hover:bg-red-400/5"
                   >
                     <X size={14} strokeWidth={1.5} />
-                    Libérer la table
+                    {t("Libérer la table", "Free up table")}
                   </button>
                 </div>
               )}
@@ -1013,7 +1042,7 @@ export default function FloorPlanPage() {
                 <div className="space-y-2">
                   <div className="bg-white/[0.04] border border-white/[0.08] rounded-2xl p-4 space-y-4">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-white/50">Capacité</span>
+                      <span className="text-xs text-white/50">{t("Capacité", "Capacity")}</span>
                       <div className="flex items-center gap-3">
                         <button
                           onClick={() =>
@@ -1021,7 +1050,7 @@ export default function FloorPlanPage() {
                               capacity: Math.max(1, selected.capacity - 1),
                             })
                           }
-                          aria-label="Réduire la capacité"
+                          aria-label={t("Réduire la capacité", "Decrease capacity")}
                           className="h-7 w-7 rounded-lg bg-white/10 text-white/70 hover:bg-white/15 flex items-center justify-center"
                         >
                           <Minus size={13} strokeWidth={2} />
@@ -1035,7 +1064,7 @@ export default function FloorPlanPage() {
                               capacity: Math.min(50, selected.capacity + 1),
                             })
                           }
-                          aria-label="Augmenter la capacité"
+                          aria-label={t("Augmenter la capacité", "Increase capacity")}
                           className="h-7 w-7 rounded-lg bg-white/10 text-white/70 hover:bg-white/15 flex items-center justify-center"
                         >
                           <Plus size={13} strokeWidth={2} />
@@ -1043,14 +1072,14 @@ export default function FloorPlanPage() {
                       </div>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-white/50">Table VIP</span>
+                      <span className="text-xs text-white/50">{t("Table VIP", "VIP table")}</span>
                       <button
                         onClick={() =>
                           patchTable(selected.id, { vip: !selected.vip })
                         }
                         role="switch"
                         aria-checked={selected.vip}
-                        aria-label="Table VIP"
+                        aria-label={t("Table VIP", "VIP table")}
                         className={`relative h-5 w-9 rounded-full transition-colors ${
                           selected.vip ? "bg-amber-400/80" : "bg-white/15"
                         }`}
@@ -1063,7 +1092,7 @@ export default function FloorPlanPage() {
                       </button>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-white/50">Forme</span>
+                      <span className="text-xs text-white/50">{t("Forme", "Shape")}</span>
                       <div className="flex gap-1.5">
                         {(["round", "rect"] as const).map((sh) => (
                           <button
@@ -1075,19 +1104,19 @@ export default function FloorPlanPage() {
                                 : "bg-white/[0.06] text-white/40 hover:text-white/70"
                             }`}
                           >
-                            {sh === "round" ? "Ronde" : "Rectangle"}
+                            {sh === "round" ? t("Ronde", "Round") : t("Rectangle", "Rectangle")}
                           </button>
                         ))}
                       </div>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-white/50">Statut</span>
+                      <span className="text-xs text-white/50">{t("Statut", "Status")}</span>
                       <div className="flex gap-1.5">
                         {(
                           [
-                            ["available", "Libre"],
-                            ["occupied", "Occupée"],
-                            ["blocked", "Bloquée"],
+                            ["available", t("Libre", "Free")],
+                            ["occupied", t("Occupée", "Occupied")],
+                            ["blocked", t("Bloquée", "Blocked")],
                           ] as const
                         ).map(([st, lab]) => (
                           <button
@@ -1110,7 +1139,7 @@ export default function FloorPlanPage() {
                     className="w-full inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium bg-red-500/10 hover:bg-red-500/20 border border-red-400/20 text-red-400 transition-all"
                   >
                     <Trash2 size={16} strokeWidth={1.5} />
-                    Supprimer cette table
+                    {t("Supprimer cette table", "Delete this table")}
                   </button>
                 </div>
               )}
@@ -1126,13 +1155,13 @@ export default function FloorPlanPage() {
               </div>
               <p className="text-sm text-white/40">
                 {editMode
-                  ? "Sélectionnez une table pour la modifier"
-                  : "Sélectionnez une table pour voir les détails"}
+                  ? t("Sélectionnez une table pour la modifier", "Select a table to edit it")
+                  : t("Sélectionnez une table pour voir les détails", "Select a table to see its details")}
               </p>
               <p className="text-xs text-white/20 mt-1">
                 {editMode
-                  ? "Clic droit sur le plan pour ajouter/supprimer"
-                  : "Cliquez sur \"Modifier\" pour réorganiser le plan"}
+                  ? t("Clic droit sur le plan pour ajouter/supprimer", "Right-click the plan to add/delete")
+                  : t("Cliquez sur \"Modifier\" pour réorganiser le plan", "Click \"Edit\" to rearrange the plan")}
               </p>
             </div>
           )}

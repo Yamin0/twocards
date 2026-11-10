@@ -27,6 +27,7 @@ import {
   countBy,
   isLive,
   qrPerformance,
+  reservationCategoryLabel,
   sumBy,
   topN,
   weeklySeries,
@@ -55,13 +56,24 @@ import {
 } from "@/components/hotel/ui";
 import { Bars, RankedBars, RatingStars, Ring, SplitBar } from "@/components/hotel/charts";
 import { PageSkeleton } from "@/components/hotel/skeleton";
+import type { Translate } from "@/lib/i18n";
+import { useIntlLocale, useLocale, useT } from "@/lib/i18n/client";
 
-const greeting = () => {
+const greeting = (t: Translate) => {
   const h = new Date().getHours();
-  return h < 5 ? "Bonne nuit" : h < 12 ? "Bonjour" : h < 18 ? "Bon après-midi" : "Bonsoir";
+  return h < 5
+    ? t("Bonne nuit", "Good night")
+    : h < 12
+      ? t("Bonjour", "Good morning")
+      : h < 18
+        ? t("Bon après-midi", "Good afternoon")
+        : t("Bonsoir", "Good evening");
 };
 
 export default function HotelHomePage() {
+  const t = useT();
+  const locale = useLocale();
+  const intl = useIntlLocale();
   const { fullName, isLoading: authLoading } = useAuthUser();
   const { qrCodes, reservations, profile, isLoading } = useHotelSpace();
 
@@ -95,7 +107,7 @@ export default function HotelHomePage() {
   const rating = averageRating(reservations);
   const weekly = weeklySeries(live.map((r) => r.reservation_date), 8);
   const byCategory = CATEGORIES.map((label) => ({
-    label,
+    label: reservationCategoryLabel(label, locale),
     value: live.filter((r) => r.category === label).length,
     color: CATEGORY_COLORS[label],
   }));
@@ -103,7 +115,7 @@ export default function HotelHomePage() {
     .filter((q) => q.liveReservations > 0)
     .sort((a, b) => b.liveReservations - a.liveReservations)
     .slice(0, 5)
-    .map((q) => ({ id: q.id, label: q.label, value: q.liveReservations, sub: `${q.scans} scans` }));
+    .map((q) => ({ id: q.id, label: q.label, value: q.liveReservations, sub: `${formatNumber(q.scans, locale)} scans` }));
   const topVenues = topN(countBy(live, (r) => r.venue_name), 5);
   const recent = [...reservations]
     .sort((a, b) => b.created_at.localeCompare(a.created_at))
@@ -112,34 +124,37 @@ export default function HotelHomePage() {
 
   const kpis = [
     {
-      label: "Réservations · 30 j",
-      value: formatNumber(resa30.current),
+      label: t("Réservations · 30 j", "Reservations · 30 d"),
+      value: formatNumber(resa30.current, locale),
       delta: resa30.ratio,
-      deltaLabel: "première période",
-      hint: "vs 30 j précédents",
+      deltaLabel: t("première période", "first period"),
+      hint: t("vs 30 j précédents", "vs previous 30 d"),
       icon: CalendarDays,
       tone: "sky" as const,
     },
     {
-      label: "Commissions du mois",
-      value: formatMad(commissionMonth, true),
+      label: t("Commissions du mois", "Commissions this month"),
+      value: formatMad(commissionMonth, true, locale),
       delta: commissionPrev > 0 ? (commissionMonth - commissionPrev) / commissionPrev : null,
-      deltaLabel: "premier mois",
-      hint: "vs mois précédent",
+      deltaLabel: t("premier mois", "first month"),
+      hint: t("vs mois précédent", "vs last month"),
       icon: Coins,
       tone: "amber" as const,
     },
     {
-      label: "Scans cumulés",
-      value: formatNumber(scans),
-      hint: `${activeQr} QR ${plural(activeQr, "actif")} sur ${qrCodes.length}`,
+      label: t("Scans cumulés", "Total scans"),
+      value: formatNumber(scans, locale),
+      hint: t(
+        `${activeQr} QR ${plural(activeQr, "actif")} sur ${qrCodes.length}`,
+        `${activeQr} of ${qrCodes.length} QR active`
+      ),
       icon: ScanLine,
       tone: "emerald" as const,
     },
     {
-      label: "Taux de conversion",
-      value: formatPercent(conversion, 1),
-      hint: "scans devenus réservations",
+      label: t("Taux de conversion", "Conversion rate"),
+      value: formatPercent(conversion, 1, locale),
+      hint: t("scans devenus réservations", "scans turned into reservations"),
       icon: TrendingUp,
       tone: "violet" as const,
     },
@@ -150,31 +165,40 @@ export default function HotelHomePage() {
   return (
     <>
       <PageHeader
-        eyebrow={new Date().toLocaleDateString("fr-FR", {
+        eyebrow={new Date().toLocaleDateString(intl, {
           weekday: "long",
           day: "numeric",
           month: "long",
         })}
         title={
           <>
-            {greeting()}
+            {greeting(t)}
             {firstName ? `, ${firstName}` : ""}
           </>
         }
         description={
           pending.length > 0
-            ? `${pending.length} ${plural(pending.length, "demande")} en attente de confirmation par l'établissement, ${todays.length} ${plural(todays.length, "sortie")} aujourd'hui.`
+            ? t(
+                `${pending.length} ${plural(pending.length, "demande")} en attente de confirmation par l'établissement, ${todays.length} ${plural(todays.length, "sortie")} aujourd'hui.`,
+                `${pending.length} ${plural(pending.length, "request", undefined, "en")} awaiting confirmation from the venue, ${todays.length} ${plural(todays.length, "outing", undefined, "en")} today.`
+              )
             : todays.length > 0
-              ? `${todays.length} ${plural(todays.length, "sortie")} de vos clients aujourd'hui. Tout est à jour.`
-              : "Vos clients scannent, réservent leurs sorties, et chaque sortie vous rapporte une commission."
+              ? t(
+                  `${todays.length} ${plural(todays.length, "sortie")} de vos clients aujourd'hui. Tout est à jour.`,
+                  `${todays.length} guest ${plural(todays.length, "outing", undefined, "en")} today. Everything is up to date.`
+                )
+              : t(
+                  "Vos clients scannent, réservent leurs sorties, et chaque sortie vous rapporte une commission.",
+                  "Your guests scan, book their outings, and every outing earns you a commission."
+                )
         }
         actions={
           <>
             <LinkButton href="/hotel/chambres/imprimer" icon={Printer} variant="secondary">
-              Imprimer les QR
+              {t("Imprimer les QR", "Print QR codes")}
             </LinkButton>
             <LinkButton href="/hotel/chambres?nouveau=1" icon={QrCode} variant="primary">
-              Nouveau QR code
+              {t("Nouveau QR code", "New QR code")}
             </LinkButton>
           </>
         }
@@ -186,16 +210,28 @@ export default function HotelHomePage() {
           <div className="grid gap-6 md:grid-cols-[1fr_auto] md:items-center">
             <div>
               <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.2em] text-sky-300">
-                Bienvenue sur twocards
+                {t("Bienvenue sur twocards", "Welcome to twocards")}
               </p>
               <h2 className="font-display text-2xl font-bold text-white">
-                Trois étapes pour vos premières commissions
+                {t("Trois étapes pour vos premières commissions", "Three steps to your first commissions")}
               </h2>
               <ol className="mt-4 grid gap-3 sm:grid-cols-3">
                 {[
-                  { n: "1", t: "Créez vos QR codes", d: "Un par chambre, suite ou espace commun (lobby, spa, piscine)." },
-                  { n: "2", t: "Choisissez le menu", d: "Les restaurants, activités, clubs et services proposés au client." },
-                  { n: "3", t: "Imprimez, posez, encaissez", d: "Chaque réservation vous rapporte 10 % du montant dépensé." },
+                  {
+                    n: "1",
+                    t: t("Créez vos QR codes", "Create your QR codes"),
+                    d: t("Un par chambre, suite ou espace commun (lobby, spa, piscine).", "One per room, suite or common area (lobby, spa, pool)."),
+                  },
+                  {
+                    n: "2",
+                    t: t("Choisissez le menu", "Choose the menu"),
+                    d: t("Les restaurants, activités, clubs et services proposés au client.", "The restaurants, activities, clubs and services offered to guests."),
+                  },
+                  {
+                    n: "3",
+                    t: t("Imprimez, posez, encaissez", "Print, place, get paid"),
+                    d: t("Chaque réservation vous rapporte 10 % du montant dépensé.", "Every reservation earns you 10% of the amount spent."),
+                  },
                 ].map((s) => (
                   <li key={s.n} className="rounded-xl border border-white/10 bg-white/[0.04] p-4">
                     <span className="num text-xs font-black text-sky-300">{s.n}</span>
@@ -206,7 +242,7 @@ export default function HotelHomePage() {
               </ol>
             </div>
             <LinkButton href="/hotel/chambres?nouveau=1" icon={QrCode} variant="primary" size="lg">
-              Créer mon premier QR
+              {t("Créer mon premier QR", "Create my first QR")}
             </LinkButton>
           </div>
         </Panel>
@@ -217,15 +253,18 @@ export default function HotelHomePage() {
       <div className="grid gap-4 xl:grid-cols-3">
         {/* Aujourd'hui */}
         <Panel
-          title="Sorties du jour"
+          title={t("Sorties du jour", "Today's outings")}
           description={
             todays.length > 0
-              ? `${todays.length} ${plural(todays.length, "client")} de l'hôtel ${plural(todays.length, "sort", "sortent")} aujourd'hui`
-              : "Aucune sortie prévue aujourd'hui"
+              ? t(
+                  `${todays.length} ${plural(todays.length, "client")} de l'hôtel ${plural(todays.length, "sort", "sortent")} aujourd'hui`,
+                  `${todays.length} hotel ${plural(todays.length, "guest", undefined, "en")} going out today`
+                )
+              : t("Aucune sortie prévue aujourd'hui", "No outings planned today")
           }
           actions={
             <Link href="/hotel/reservations?periode=aujourdhui" className="text-xs font-bold text-sky-300 hover:text-sky-200">
-              Tout voir
+              {t("Tout voir", "View all")}
             </Link>
           }
           className="xl:col-span-2"
@@ -234,8 +273,11 @@ export default function HotelHomePage() {
           {todays.length === 0 && upcoming.length === 0 ? (
             <EmptyState
               icon={Clock}
-              title="Calme plat pour aujourd'hui"
-              description="Les sorties du jour et à venir de vos clients s'affichent ici, avec l'heure, l'établissement et la chambre."
+              title={t("Calme plat pour aujourd'hui", "All quiet today")}
+              description={t(
+                "Les sorties du jour et à venir de vos clients s'affichent ici, avec l'heure, l'établissement et la chambre.",
+                "Your guests' outings for today and the days ahead appear here, with the time, venue and room."
+              )}
               compact
             />
           ) : (
@@ -244,17 +286,17 @@ export default function HotelHomePage() {
                 <li key={r.id} className="flex items-center gap-4 px-5 py-3 sm:px-6">
                   <div className="num flex w-14 shrink-0 flex-col items-center rounded-xl border border-white/10 bg-white/[0.04] py-1.5">
                     <span className="text-[10px] font-bold uppercase text-white/45">
-                      {r.reservation_date === today ? "Auj." : formatDate(r.reservation_date, "short")}
+                      {r.reservation_date === today ? t("Auj.", "Today") : formatDate(r.reservation_date, "short", locale)}
                     </span>
                     <span className="text-sm font-black text-white">{r.reservation_time ?? "—"}</span>
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-bold text-white">
                       {r.venue_name}
-                      <span className="ml-2 text-xs font-medium text-white/45">{r.category}</span>
+                      <span className="ml-2 text-xs font-medium text-white/45">{reservationCategoryLabel(r.category, locale)}</span>
                     </p>
                     <p className="truncate text-xs text-white/55">
-                      {r.guest_name} · {r.party_size} pers.
+                      {r.guest_name} · {r.party_size} {t("pers.", r.party_size === 1 ? "guest" : "guests")}
                       {r.qr_label ? ` · ${r.qr_label}` : ""}
                     </p>
                   </div>
@@ -267,35 +309,50 @@ export default function HotelHomePage() {
 
         {/* Satisfaction + conversion */}
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-1">
-          <Panel title="Satisfaction">
+          <Panel title={t("Satisfaction", "Satisfaction")}>
             {rating.average !== null ? (
               <div className="flex items-center gap-4">
                 <p className="num font-display text-5xl font-black leading-none text-white">
-                  {rating.average.toFixed(1).replace(".", ",")}
+                  {locale === "en" ? rating.average.toFixed(1) : rating.average.toFixed(1).replace(".", ",")}
                 </p>
                 <div>
                   <RatingStars value={rating.average} size={16} />
                   <p className="mt-1 text-xs text-white/50">
-                    {rating.count} {plural(rating.count, "avis")} client
+                    {t(
+                      `${rating.count} ${plural(rating.count, "avis")} client`,
+                      `${rating.count} guest ${plural(rating.count, "review", undefined, "en")}`
+                    )}
                   </p>
                 </div>
               </div>
             ) : (
               <div className="flex items-center gap-3 text-xs leading-relaxed text-white/50">
                 <Star size={18} strokeWidth={1.5} className="shrink-0 text-white/30" />
-                Aucun avis pour le moment. Chaque client peut noter sa sortie après coup ; la moyenne apparaîtra ici.
+                {t(
+                  "Aucun avis pour le moment. Chaque client peut noter sa sortie après coup ; la moyenne apparaîtra ici.",
+                  "No reviews yet. Guests can rate their outing afterwards; the average will appear here."
+                )}
               </div>
             )}
           </Panel>
-          <Panel title="Conversion">
+          <Panel title={t("Conversion", "Conversion")}>
             <div className="flex items-center gap-4">
               <Ring ratio={Math.min(conversion * 4, 1)} size={72} color="#a78bfa">
-                <span className="num text-xs font-black text-white">{formatPercent(conversion, 0)}</span>
+                <span className="num text-xs font-black text-white">{formatPercent(conversion, 0, locale)}</span>
               </Ring>
               <p className="text-xs leading-relaxed text-white/55">
-                <span className="num font-bold text-white">{formatNumber(live.length)}</span> réservations pour{" "}
-                <span className="num font-bold text-white">{formatNumber(scans)}</span> scans. Un menu court et des
-                adresses proches font grimper ce taux.
+                {t(
+                  <>
+                    <span className="num font-bold text-white">{formatNumber(live.length, locale)}</span> réservations pour{" "}
+                    <span className="num font-bold text-white">{formatNumber(scans, locale)}</span> scans. Un menu court et des
+                    adresses proches font grimper ce taux.
+                  </>,
+                  <>
+                    <span className="num font-bold text-white">{formatNumber(live.length, locale)}</span> reservations from{" "}
+                    <span className="num font-bold text-white">{formatNumber(scans, locale)}</span> scans. A short menu and
+                    nearby places push this rate up.
+                  </>
+                )}
               </p>
             </div>
           </Panel>
@@ -303,40 +360,44 @@ export default function HotelHomePage() {
       </div>
 
       <div className="grid gap-4 xl:grid-cols-3">
-        <Panel title="Réservations par semaine" description="8 dernières semaines, hors annulations" className="xl:col-span-2">
+        <Panel
+          title={t("Réservations par semaine", "Reservations per week")}
+          description={t("8 dernières semaines, hors annulations", "Last 8 weeks, excluding cancellations")}
+          className="xl:col-span-2"
+        >
           <Bars data={weekly} color="bg-sky-400" height={150} />
           <div className="mt-5 border-t border-white/[0.08] pt-4">
             <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.16em] text-white/45">
-              Répartition par catégorie
+              {t("Répartition par catégorie", "Breakdown by category")}
             </p>
             <SplitBar segments={byCategory} />
           </div>
         </Panel>
 
         <Panel
-          title="Emplacements les plus actifs"
-          description="Réservations générées par QR"
+          title={t("Emplacements les plus actifs", "Most active locations")}
+          description={t("Réservations générées par QR", "Reservations generated per QR")}
           actions={
             <Link href="/hotel/chambres?tri=resas" className="text-xs font-bold text-sky-300 hover:text-sky-200">
-              Tous
+              {t("Tous", "All")}
             </Link>
           }
         >
           <RankedBars
             items={topRooms}
             href={(id) => `/hotel/chambres/${id}`}
-            empty="Dès qu'un scan devient une réservation, l'emplacement apparaît ici."
+            empty={t("Dès qu'un scan devient une réservation, l'emplacement apparaît ici.", "As soon as a scan becomes a reservation, the location shows up here.")}
           />
         </Panel>
       </div>
 
       <div className="grid gap-4 xl:grid-cols-3">
         <Panel
-          title="Dernières demandes"
-          description="Au fil de l'eau, en temps réel"
+          title={t("Dernières demandes", "Latest requests")}
+          description={t("Au fil de l'eau, en temps réel", "As they come in, in real time")}
           actions={
             <Link href="/hotel/reservations" className="inline-flex items-center gap-1 text-xs font-bold text-sky-300 hover:text-sky-200">
-              Toutes <ArrowRight size={12} strokeWidth={2} />
+              {t("Toutes", "All")} <ArrowRight size={12} strokeWidth={2} />
             </Link>
           }
           className="xl:col-span-2"
@@ -345,8 +406,11 @@ export default function HotelHomePage() {
           {recent.length === 0 ? (
             <EmptyState
               icon={QrCode}
-              title="Aucune demande pour le moment"
-              description="Dès qu'un client scanne un QR et réserve, la demande apparaît ici instantanément."
+              title={t("Aucune demande pour le moment", "No requests yet")}
+              description={t(
+                "Dès qu'un client scanne un QR et réserve, la demande apparaît ici instantanément.",
+                "As soon as a guest scans a QR and books, the request appears here instantly."
+              )}
               compact
             />
           ) : (
@@ -364,15 +428,16 @@ export default function HotelHomePage() {
                         <span className="font-medium text-white/45"> · {r.venue_name}</span>
                       </p>
                       <p className="truncate text-xs text-white/50">
-                        {relativeDay(r.reservation_date)}
-                        {r.reservation_time ? ` à ${r.reservation_time}` : ""} · {r.party_size} pers.
-                        {r.qr_label ? ` · ${r.qr_label}` : ""} · reçue {timeAgo(r.created_at)}
+                        {relativeDay(r.reservation_date, undefined, locale)}
+                        {r.reservation_time ? t(` à ${r.reservation_time}`, ` at ${r.reservation_time}`) : ""} · {r.party_size}{" "}
+                        {t("pers.", r.party_size === 1 ? "guest" : "guests")}
+                        {r.qr_label ? ` · ${r.qr_label}` : ""} · {t("reçue", "received")} {timeAgo(r.created_at, undefined, locale)}
                       </p>
                     </div>
                     <div className="flex shrink-0 items-center gap-3">
                       {r.commission > 0 && (
                         <span className="num hidden text-xs font-bold text-amber-300 sm:inline">
-                          +{formatMad(r.commission)}
+                          +{formatMad(r.commission, false, locale)}
                         </span>
                       )}
                       <StatusPill status={r.status} />
@@ -385,26 +450,42 @@ export default function HotelHomePage() {
         </Panel>
 
         <div className="space-y-4">
-          <Panel title="Adresses préférées" description="Vos clients y réservent le plus">
-            <RankedBars items={topVenues} color="bg-emerald-400/80" empty="Aucune réservation pour le moment." />
+          <Panel
+            title={t("Adresses préférées", "Favourite places")}
+            description={t("Vos clients y réservent le plus", "Where your guests book the most")}
+          >
+            <RankedBars
+              items={topVenues}
+              color="bg-emerald-400/80"
+              empty={t("Aucune réservation pour le moment.", "No reservations yet.")}
+            />
             {commissionByVenue.length > 0 && (
               <p className="mt-4 border-t border-white/[0.08] pt-3 text-[11px] leading-relaxed text-white/45">
-                Plus rentable : <span className="font-bold text-white/80">{commissionByVenue[0].label}</span> ({formatMad(commissionByVenue[0].value)} de commissions).
+                {t(
+                  <>
+                    Plus rentable : <span className="font-bold text-white/80">{commissionByVenue[0].label}</span> (
+                    {formatMad(commissionByVenue[0].value, false, locale)} de commissions).
+                  </>,
+                  <>
+                    Most profitable: <span className="font-bold text-white/80">{commissionByVenue[0].label}</span> (
+                    {formatMad(commissionByVenue[0].value, false, locale)} in commissions).
+                  </>
+                )}
               </p>
             )}
           </Panel>
 
-          <Panel title="Raccourcis">
+          <Panel title={t("Raccourcis", "Shortcuts")}>
             <ul className="space-y-1">
               {[
-                { href: "/hotel/chambres", icon: BedDouble, label: "Gérer les chambres et espaces" },
-                { href: "/hotel/adresses", icon: MapPin, label: "Ajouter une adresse maison au menu" },
-                { href: "/hotel/settings?onglet=menu", icon: Sparkles, label: "Personnaliser le menu client" },
-                { href: "/hotel/clients", icon: Users, label: "Voir mes clients fidèles" },
+                { href: "/hotel/chambres", icon: BedDouble, label: t("Gérer les chambres et espaces", "Manage rooms and spaces") },
+                { href: "/hotel/adresses", icon: MapPin, label: t("Ajouter une adresse maison au menu", "Add your own place to the menu") },
+                { href: "/hotel/settings?onglet=menu", icon: Sparkles, label: t("Personnaliser le menu client", "Customise the guest menu") },
+                { href: "/hotel/clients", icon: Users, label: t("Voir mes clients fidèles", "See my loyal guests") },
                 {
                   href: qrCodes[0] ? `/s/${qrCodes[0].code}` : "/hotel/chambres",
                   icon: Eye,
-                  label: "Ouvrir le menu tel que le voit un client",
+                  label: t("Ouvrir le menu tel que le voit un client", "Open the menu as a guest sees it"),
                   external: !!qrCodes[0],
                 },
               ].map((s) => (
@@ -433,11 +514,22 @@ export default function HotelHomePage() {
             </ul>
             {!profile.hotel_name && (
               <p className="mt-3 rounded-xl border border-amber-400/15 bg-amber-500/[0.07] px-3 py-2 text-[11px] leading-relaxed text-white/60">
-                Renseignez le nom et la ville de l&apos;hôtel dans les{" "}
-                <Link href="/hotel/settings" className="font-bold text-amber-300">
-                  paramètres
-                </Link>{" "}
-                : ils s&apos;affichent sur le menu client.
+                {t(
+                  <>
+                    Renseignez le nom et la ville de l&apos;hôtel dans les{" "}
+                    <Link href="/hotel/settings" className="font-bold text-amber-300">
+                      paramètres
+                    </Link>{" "}
+                    : ils s&apos;affichent sur le menu client.
+                  </>,
+                  <>
+                    Add the hotel&apos;s name and city in{" "}
+                    <Link href="/hotel/settings" className="font-bold text-amber-300">
+                      settings
+                    </Link>
+                    : they appear on the guest menu.
+                  </>
+                )}
               </p>
             )}
           </Panel>
@@ -446,12 +538,15 @@ export default function HotelHomePage() {
 
       {reservations.length > 0 && (
         <p className="text-center text-[11px] text-white/30">
-          {formatNumber(reservations.length)} {plural(reservations.length, "réservation")} depuis le{" "}
+          {formatNumber(reservations.length, locale)}{" "}
+          {t(plural(reservations.length, "réservation"), plural(reservations.length, "reservation", undefined, "en"))}{" "}
+          {t("depuis le", "since")}{" "}
           {formatDate(
             reservations.reduce((min, r) => (r.reservation_date < min ? r.reservation_date : min), reservations[0].reservation_date),
-            "long"
+            "long",
+            locale
           )}{" "}
-          · {formatNumber(live.filter((r) => isWithinDays(r.reservation_date, 7)).length)} cette semaine
+          · {formatNumber(live.filter((r) => isWithinDays(r.reservation_date, 7)).length, locale)} {t("cette semaine", "this week")}
         </p>
       )}
     </>

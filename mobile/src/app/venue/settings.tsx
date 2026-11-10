@@ -2,13 +2,14 @@ import Constants from 'expo-constants'
 import { useCallback, useEffect, useState } from 'react'
 import { ActivityIndicator, Alert, Linking, Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 
-import { Avatar, Button, Card, Field, Icon, ListRow, StackScreen, inputStyle } from '@/components/venue/ui'
+import { Avatar, Button, Card, Field, Icon, ListRow, Segmented, StackScreen, inputStyle } from '@/components/venue/ui'
 import { Light } from '@/constants/theme'
 import { useAuth } from '@/lib/auth-context'
 import { haptic } from '@/lib/haptics'
+import { useLocaleChoice, useT, withLang, type Locale } from '@/lib/i18n'
 import { pushStatus, registerPush, type PushStatus } from '@/lib/push'
 import { signOut as signOutEverywhere } from '@/lib/sign-out'
-import { roleLabels, SITE_URL } from '@/lib/site'
+import { getRoleLabels, SITE_URL } from '@/lib/site'
 import { useToast } from '@/lib/toast'
 import { updateAvatar, updatePassword, updateProfile } from '@/lib/venue-data'
 
@@ -20,6 +21,8 @@ const CONTACT_EMAIL = 'contact@twocardspro.com'
 export default function SettingsScreen() {
   const { session, role, tabRole, fullName, venueName, avatarUrl } = useAuth()
   const toast = useToast()
+  const t = useT()
+  const { locale, setLocale } = useLocaleChoice()
   const userId = session?.user.id ?? null
   const email = session?.user.email ?? '—'
   const meta = session?.user.user_metadata ?? {}
@@ -71,25 +74,25 @@ export default function SettingsScreen() {
     setSaving(false)
     if (ok) {
       haptic.success()
-      toast.show({ message: 'Profil enregistré', tone: 'success' })
+      toast.show({ message: t('Profil enregistré', 'Profile saved'), tone: 'success' })
     } else {
       haptic.error()
-      toast.show({ message: 'Enregistrement impossible. Vérifiez votre connexion.', tone: 'danger' })
+      toast.show({ message: t('Enregistrement impossible. Vérifiez votre connexion.', "Couldn't save. Check your connection."), tone: 'danger' })
     }
-  }, [userId, form, toast])
+  }, [userId, form, toast, t])
 
   const changePhoto = async () => {
     if (!userId || uploading) return
     setUploading(true)
     try {
       const url = await updateAvatar(userId)
-      if (url === null) toast.show({ message: 'Photo non enregistrée. Réessayez.', tone: 'danger' })
+      if (url === null) toast.show({ message: t('Photo non enregistrée. Réessayez.', 'Photo not saved. Please try again.'), tone: 'danger' })
       else if (url) {
         haptic.success()
-        toast.show({ message: 'Photo mise à jour', tone: 'success' })
+        toast.show({ message: t('Photo mise à jour', 'Photo updated'), tone: 'success' })
       }
     } catch {
-      toast.show({ message: "Envoi de la photo impossible.", tone: 'danger' })
+      toast.show({ message: t("Envoi de la photo impossible.", "Couldn't upload the photo."), tone: 'danger' })
     } finally {
       setUploading(false)
     }
@@ -97,17 +100,17 @@ export default function SettingsScreen() {
 
   const changePassword = async () => {
     if (pw.next.length < 8) {
-      setPwError('Huit caractères minimum.')
+      setPwError(t('Huit caractères minimum.', 'At least eight characters.'))
       return
     }
     if (pw.next !== pw.confirm) {
-      setPwError('Les deux saisies ne correspondent pas.')
+      setPwError(t('Les deux saisies ne correspondent pas.', "The two entries don't match."))
       return
     }
     setPwSaving(true)
     setPwError('')
     haptic.tap()
-    const err = await updatePassword(pw.next)
+    const err = await updatePassword(pw.next, t)
     setPwSaving(false)
     if (err) {
       haptic.error()
@@ -116,7 +119,7 @@ export default function SettingsScreen() {
     }
     haptic.success()
     setPw({ next: '', confirm: '' })
-    toast.show({ message: 'Mot de passe changé', tone: 'success' })
+    toast.show({ message: t('Mot de passe changé', 'Password changed'), tone: 'success' })
   }
 
   const togglePush = useCallback(async () => {
@@ -129,10 +132,10 @@ export default function SettingsScreen() {
   }, [userId, push])
 
   const signOut = () =>
-    Alert.alert('Se déconnecter ?', 'Vous ne recevrez plus de notifications sur ce téléphone.', [
-      { text: 'Rester', style: 'cancel' },
+    Alert.alert(t('Se déconnecter ?', 'Log out?'), t('Vous ne recevrez plus de notifications sur ce téléphone.', "You'll stop receiving notifications on this phone."), [
+      { text: t('Rester', 'Stay'), style: 'cancel' },
       {
-        text: 'Se déconnecter',
+        text: t('Se déconnecter', 'Log out'),
         style: 'destructive',
         onPress: () => {
           void signOutEverywhere()
@@ -141,26 +144,32 @@ export default function SettingsScreen() {
     ])
 
   const requestDeletion = () => {
-    const subject = encodeURIComponent('Suppression de mon compte twocards')
+    const subject = encodeURIComponent(t('Suppression de mon compte twocards', 'Delete my twocards account'))
     const body = encodeURIComponent(
-      `Bonjour,\n\nJe demande la suppression de mon compte twocards et des données associées.\n\nCompte : ${email}\n\nMerci.`
+      t(
+        `Bonjour,\n\nJe demande la suppression de mon compte twocards et des données associées.\n\nCompte : ${email}\n\nMerci.`,
+        `Hello,\n\nI would like my twocards account and all associated data to be deleted.\n\nAccount: ${email}\n\nThank you.`
+      )
     )
     Linking.openURL(`mailto:${CONTACT_EMAIL}?subject=${subject}&body=${body}`).catch(() =>
-      Alert.alert('Aucune application de messagerie', `Écrivez à ${CONTACT_EMAIL} depuis votre adresse ${email}.`)
+      Alert.alert(
+        t('Aucune application de messagerie', 'No email app'),
+        t(`Écrivez à ${CONTACT_EMAIL} depuis votre adresse ${email}.`, `Write to ${CONTACT_EMAIL} from your address ${email}.`)
+      )
     )
   }
 
   const pushLabel: Record<PushStatus, string> = {
-    granted: 'Activées sur ce téléphone',
-    denied: 'Refusées, toucher pour ouvrir les réglages',
-    undetermined: 'Toucher pour activer',
-    unsupported: 'Indisponibles sur cet appareil',
+    granted: t('Activées sur ce téléphone', 'On for this phone'),
+    denied: t('Refusées, toucher pour ouvrir les réglages', 'Blocked, tap to open Settings'),
+    undetermined: t('Toucher pour activer', 'Tap to turn on'),
+    unsupported: t('Indisponibles sur cet appareil', 'Not available on this device'),
   }
 
   return (
-    <StackScreen title="Paramètres">
+    <StackScreen title={t('Paramètres', 'Settings')}>
       <Card style={styles.head}>
-        <Pressable onPress={changePhoto} style={styles.avatarWrap} accessibilityLabel="Changer la photo">
+        <Pressable onPress={changePhoto} style={styles.avatarWrap} accessibilityLabel={t('Changer la photo', 'Change photo')}>
           <Avatar name={form.full_name || form.venue_name || 'T'} size={64} uri={avatarUrl} />
           <View style={styles.avatarBadge}>
             {uploading ? <ActivityIndicator size="small" color="#FFFFFF" /> : <Icon name="camera" size={12} color="#FFFFFF" />}
@@ -168,42 +177,42 @@ export default function SettingsScreen() {
         </Pressable>
         <View style={styles.headText}>
           <Text style={styles.headName} numberOfLines={1}>
-            {form.venue_name || 'Votre établissement'}
+            {form.venue_name || t('Votre établissement', 'Your venue')}
           </Text>
           <Text style={styles.headHint} numberOfLines={1}>
-            {tabRole === 'activite' ? 'Activités & services' : roleLabels[role]} · {email}
+            {tabRole === 'activite' ? t('Activités & services', 'Activities & services') : getRoleLabels(t)[role]} · {email}
           </Text>
           <Pressable onPress={changePhoto} hitSlop={6}>
-            <Text style={styles.headLink}>{avatarUrl ? 'Changer la photo' : 'Ajouter une photo ou un logo'}</Text>
+            <Text style={styles.headLink}>{avatarUrl ? t('Changer la photo', 'Change photo') : t('Ajouter une photo ou un logo', 'Add a photo or logo')}</Text>
           </Pressable>
         </View>
       </Card>
 
-      <Text style={styles.heading}>Établissement</Text>
+      <Text style={styles.heading}>{t('Établissement', 'Venue')}</Text>
       <Card style={styles.form}>
-        <Field label="Nom du responsable">
+        <Field label={t('Nom du responsable', 'Manager name')}>
           <TextInput
             value={form.full_name}
             onChangeText={(v) => setForm({ ...form, full_name: v })}
             style={inputStyle}
-            placeholder="Prénom Nom"
+            placeholder={t('Prénom Nom', 'First Last')}
             placeholderTextColor={Light.faint}
             autoCapitalize="words"
             textContentType="name"
           />
         </Field>
-        <Field label="Établissement">
+        <Field label={t('Établissement', 'Venue')}>
           <TextInput
             value={form.venue_name}
             onChangeText={(v) => setForm({ ...form, venue_name: v })}
             style={inputStyle}
-            placeholder="Nom affiché aux hôtels"
+            placeholder={t('Nom affiché aux hôtels', 'Name shown to hotels')}
             placeholderTextColor={Light.faint}
           />
         </Field>
         <View style={styles.twoCols}>
           <View style={styles.col}>
-            <Field label="Ville">
+            <Field label={t('Ville', 'City')}>
               <TextInput
                 value={form.city}
                 onChangeText={(v) => setForm({ ...form, city: v })}
@@ -215,7 +224,7 @@ export default function SettingsScreen() {
             </Field>
           </View>
           <View style={styles.col}>
-            <Field label="Téléphone">
+            <Field label={t('Téléphone', 'Phone')}>
               <TextInput
                 value={form.phone}
                 onChangeText={(v) => setForm({ ...form, phone: v })}
@@ -228,12 +237,12 @@ export default function SettingsScreen() {
             </Field>
           </View>
         </View>
-        <Button label={saving ? 'Enregistrement…' : 'Enregistrer'} onPress={save} disabled={!dirty || saving} />
+        <Button label={saving ? t('Enregistrement…', 'Saving…') : t('Enregistrer', 'Save')} onPress={save} disabled={!dirty || saving} />
       </Card>
 
-      <Text style={styles.heading}>Sécurité</Text>
+      <Text style={styles.heading}>{t('Sécurité', 'Security')}</Text>
       <Card style={styles.form}>
-        <Field label="Nouveau mot de passe" hint="Huit caractères minimum.">
+        <Field label={t('Nouveau mot de passe', 'New password')} hint={t('Huit caractères minimum.', 'At least eight characters.')}>
           <TextInput
             value={pw.next}
             onChangeText={(v) => setPw({ ...pw, next: v })}
@@ -245,7 +254,7 @@ export default function SettingsScreen() {
             autoCapitalize="none"
           />
         </Field>
-        <Field label="Confirmer">
+        <Field label={t('Confirmer', 'Confirm')}>
           <TextInput
             value={pw.confirm}
             onChangeText={(v) => setPw({ ...pw, confirm: v })}
@@ -260,27 +269,47 @@ export default function SettingsScreen() {
           />
         </Field>
         {pwError ? <Text style={styles.error}>{pwError}</Text> : null}
-        <Button label={pwSaving ? 'Changement…' : 'Changer le mot de passe'} tone="ghost" icon="lock" onPress={changePassword} disabled={pwSaving || !pw.next || !pw.confirm} />
+        <Button label={pwSaving ? t('Changement…', 'Changing…') : t('Changer le mot de passe', 'Change password')} tone="ghost" icon="lock" onPress={changePassword} disabled={pwSaving || !pw.next || !pw.confirm} />
       </Card>
 
-      <Text style={styles.heading}>Application</Text>
+      <Text style={styles.heading}>{t('Application', 'App')}</Text>
       <Card style={styles.group}>
         <ListRow
           first
           icon="bell"
-          label="Notifications push"
-          hint={push ? pushLabel[push] : 'Vérification…'}
+          label={t('Notifications push', 'Push notifications')}
+          hint={push ? pushLabel[push] : t('Vérification…', 'Checking…')}
           onPress={push === 'granted' || push === 'unsupported' ? undefined : togglePush}
           right={<View style={[styles.dot, { backgroundColor: push === 'granted' ? Light.success : Light.warning }]} />}
         />
-        <ListRow icon="file-text" label="Conditions d'utilisation" onPress={() => Linking.openURL(`${SITE_URL}/legal/cgu`)} />
-        <ListRow icon="shield" label="Politique de confidentialité" onPress={() => Linking.openURL(`${SITE_URL}/legal/confidentialite`)} />
+        <ListRow
+          icon="globe"
+          label={t('Langue', 'Language')}
+          hint={t("Aussi pour les pages du site dans l'app", 'Also applies to website pages in the app')}
+          right={
+            <Segmented<Locale>
+              options={[
+                { value: 'fr', label: 'FR' },
+                { value: 'en', label: 'EN' },
+              ]}
+              value={locale}
+              onChange={setLocale}
+            />
+          }
+        />
+        <ListRow icon="file-text" label={t("Conditions d'utilisation", 'Terms of use')} onPress={() => Linking.openURL(`${SITE_URL}${withLang('/legal/cgu', locale)}`)} />
+        <ListRow icon="shield" label={t('Politique de confidentialité', 'Privacy policy')} onPress={() => Linking.openURL(`${SITE_URL}${withLang('/legal/confidentialite', locale)}`)} />
         <ListRow icon="info" label="Version" hint={`twocards ${version}`} />
       </Card>
 
       <Card style={styles.group}>
-        <ListRow first icon="log-out" label="Se déconnecter" tone="danger" onPress={signOut} />
-        <ListRow icon="trash-2" label="Demander la suppression de mon compte" hint="Par e-mail à twocards" onPress={requestDeletion} />
+        <ListRow first icon="log-out" label={t('Se déconnecter', 'Log out')} tone="danger" onPress={signOut} />
+        <ListRow
+          icon="trash-2"
+          label={t('Demander la suppression de mon compte', 'Request account deletion')}
+          hint={t('Par e-mail à twocards', 'By email to twocards')}
+          onPress={requestDeletion}
+        />
       </Card>
     </StackScreen>
   )

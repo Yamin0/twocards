@@ -11,6 +11,8 @@ import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
 import { StatStrip } from "@/components/shared/stat-strip";
 import { RatingStars } from "@/components/shared/mini-charts";
 import { StatusBadge } from "@/components/shared/status-badge";
+import { useLocale, useT } from "@/lib/i18n/client";
+import { intlLocale, type Locale, type Translate } from "@/lib/i18n";
 import {
   ArrowLeft,
   Clock,
@@ -100,21 +102,30 @@ const SEGMENT_STYLES: Record<string, string> = {
   "À risque": "bg-red-500/15 text-red-400 border-red-400/20",
 };
 
-const sourceLabel = (source: string) => {
-  if (source === "qr") return "Réseau QR";
-  if (source === "portal") return "Portail";
-  if (source === "venue") return "Sur place";
+/* Libellé affiché d'un segment (la clé reste en français). */
+const segmentLabel = (s: string, t: Translate) => {
+  if (s === "Habitué") return t("Habitué", "Regular");
+  if (s === "Nouveau") return t("Nouveau", "New");
+  if (s === "À risque") return t("À risque", "At risk");
+  return s;
+};
+
+const sourceLabel = (source: string, t: Translate) => {
+  if (source === "qr") return t("Réseau QR", "QR network");
+  if (source === "portal") return t("Portail", "Portal");
+  if (source === "venue") return t("Sur place", "In-house");
   return source;
 };
 
-const fmtDate = (iso: string) =>
-  new Date(iso + "T00:00:00").toLocaleDateString("fr-FR", {
+const fmtDate = (iso: string, locale: Locale = "fr") =>
+  new Date(iso + "T00:00:00").toLocaleDateString(intlLocale(locale), {
     day: "numeric",
     month: "short",
     year: "numeric",
   });
 
-const fmtTime = (t: string | null) => (t ? t.slice(0, 5).replace(":", "h") : "—");
+const fmtTime = (t: string | null, locale: Locale = "fr") =>
+  t ? (locale === "en" ? t.slice(0, 5) : t.slice(0, 5).replace(":", "h")) : "—";
 
 export default function GuestProfilePage({
   params,
@@ -123,6 +134,9 @@ export default function GuestProfilePage({
 }) {
   const { id } = use(params);
   const phone = normalizePhone(decodeURIComponent(id));
+  const t = useT();
+  const locale = useLocale();
+  const intl = intlLocale(locale);
 
   const { isLoading } = useAuthUser();
   const { reservations, isLoading: loadingData } = useVenueQrReservations();
@@ -151,19 +165,20 @@ export default function GuestProfilePage({
           className="font-ui inline-flex items-center gap-2 text-sm text-white/50 hover:text-white transition-colors"
         >
           <ArrowLeft size={16} strokeWidth={1.5} />
-          Retour aux clients
+          {t("Retour aux clients", "Back to guests")}
         </Link>
         <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-12 text-center">
           <div className="w-14 h-14 rounded-2xl bg-white/[0.07] border border-white/[0.12] flex items-center justify-center mx-auto mb-5">
             <UserX size={26} strokeWidth={1.5} className="text-white/50" />
           </div>
           <h1 className="font-display text-xl font-normal text-white mb-2">
-            Client introuvable
+            {t("Client introuvable", "Guest not found")}
           </h1>
           <p className="font-ui text-sm text-white/50 max-w-md mx-auto">
-            Aucune réservation ne correspond à ce numéro pour votre
-            établissement. La fiche a peut-être été ouverte depuis un ancien
-            lien.
+            {t(
+              "Aucune réservation ne correspond à ce numéro pour votre établissement. La fiche a peut-être été ouverte depuis un ancien lien.",
+              "No reservation matches this number at your venue. The profile may have been opened from an old link."
+            )}
           </p>
         </div>
       </div>
@@ -212,22 +227,28 @@ export default function GuestProfilePage({
     .slice(0, 2);
 
   const stats = [
-    { label: "Visites", value: visits.length },
+    { label: t("Visites", "Visits"), value: visits.length },
     {
-      label: "Total dépensé",
-      value: totalSpent > 0 ? `${totalSpent.toLocaleString()} MAD` : "—",
+      label: t("Total dépensé", "Total spent"),
+      value: totalSpent > 0 ? `${totalSpent.toLocaleString(intl)} MAD` : "—",
     },
     {
-      label: "Panier moyen",
+      label: t("Panier moyen", "Average spend"),
       value:
         spentRows.length > 0
-          ? `${Math.round(totalSpent / spentRows.length).toLocaleString()} MAD`
+          ? `${Math.round(totalSpent / spentRows.length).toLocaleString(intl)} MAD`
           : "—",
     },
     {
-      label: "Note moyenne",
-      value: avgRating !== null ? avgRating.toFixed(1).replace(".", ",") : "—",
-      hint: rated.length > 0 ? `${rated.length} avis` : "aucun avis",
+      label: t("Note moyenne", "Average rating"),
+      value:
+        avgRating !== null
+          ? avgRating.toLocaleString(intl, { minimumFractionDigits: 1, maximumFractionDigits: 1 })
+          : "—",
+      hint:
+        rated.length > 0
+          ? t(`${rated.length} avis`, `${rated.length} review${rated.length === 1 ? "" : "s"}`)
+          : t("aucun avis", "no reviews"),
     },
   ];
 
@@ -239,7 +260,7 @@ export default function GuestProfilePage({
         className="font-ui inline-flex items-center gap-2 text-sm text-white/50 hover:text-white transition-colors"
       >
         <ArrowLeft size={16} strokeWidth={1.5} />
-        Retour aux clients
+        {t("Retour aux clients", "Back to guests")}
       </Link>
 
       {/* En-tête */}
@@ -259,7 +280,7 @@ export default function GuestProfilePage({
                 key={s}
                 className={`font-ui inline-flex rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${SEGMENT_STYLES[s] ?? "bg-white/10 text-white/50 border-white/10"}`}
               >
-                {s}
+                {segmentLabel(s, t)}
               </span>
             ))}
           </div>
@@ -275,7 +296,7 @@ export default function GuestProfilePage({
           className="font-ui inline-flex items-center gap-2 bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-400/20 text-emerald-400 text-sm font-medium px-4 py-2.5 rounded-xl transition-colors shrink-0"
         >
           <MessageCircle size={16} strokeWidth={1.5} />
-          Contacter sur WhatsApp
+          {t("Contacter sur WhatsApp", "Message on WhatsApp")}
         </a>
       </div>
 
@@ -287,20 +308,30 @@ export default function GuestProfilePage({
         <div className="xl:col-span-2 backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl overflow-hidden">
           <div className="px-5 pt-5 pb-3">
             <h2 className="font-ui text-base font-semibold text-white">
-              Historique des visites
+              {t("Historique des visites", "Visit history")}
             </h2>
           </div>
           {history.length === 0 ? (
             <p className="font-ui px-5 pb-6 text-sm text-white/40">
-              Pas encore de visite passée, la première réservation de ce
-              client est à venir.
+              {t(
+                "Pas encore de visite passée, la première réservation de ce client est à venir.",
+                "No past visits yet. This guest's first reservation is still to come."
+              )}
             </p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left">
                 <thead>
                   <tr className="border-y border-white/10 bg-white/[0.04]">
-                    {["Date", "Heure", "Couverts", "Montant", "Statut", "Canal", "Avis"].map(
+                    {[
+                      t("Date", "Date"),
+                      t("Heure", "Time"),
+                      t("Couverts", "Covers"),
+                      t("Montant", "Amount"),
+                      t("Statut", "Status"),
+                      t("Canal", "Channel"),
+                      t("Avis", "Review"),
+                    ].map(
                       (h) => (
                         <th
                           key={h}
@@ -319,17 +350,17 @@ export default function GuestProfilePage({
                       className="border-b border-white/[0.06] last:border-0"
                     >
                       <td className="font-ui px-4 py-3 text-sm text-white whitespace-nowrap">
-                        {fmtDate(r.reservation_date)}
+                        {fmtDate(r.reservation_date, locale)}
                       </td>
                       <td className="font-ui px-4 py-3 text-sm text-white/70 whitespace-nowrap">
-                        {fmtTime(r.reservation_time)}
+                        {fmtTime(r.reservation_time, locale)}
                       </td>
                       <td className="font-ui px-4 py-3 text-sm text-white/70 tabular-nums">
                         {r.party_size}
                       </td>
                       <td className="font-ui px-4 py-3 text-sm text-white tabular-nums whitespace-nowrap">
                         {r.amount_spent !== null
-                          ? `${r.amount_spent.toLocaleString()} MAD`
+                          ? `${r.amount_spent.toLocaleString(intl)} MAD`
                           : "—"}
                       </td>
                       <td className="px-4 py-3">
@@ -337,7 +368,7 @@ export default function GuestProfilePage({
                       </td>
                       <td className="px-4 py-3">
                         <span className="font-ui rounded-md bg-white/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white/50 whitespace-nowrap">
-                          {sourceLabel(r.source)}
+                          {sourceLabel(r.source, t)}
                         </span>
                       </td>
                       <td className="px-4 py-3 min-w-[9rem]">
@@ -346,7 +377,7 @@ export default function GuestProfilePage({
                             <RatingStars value={r.rating} size={12} />
                             {r.rating_comment && (
                               <p className="font-ui mt-1 text-xs text-white/50 leading-snug max-w-[16rem]">
-                                « {r.rating_comment} »
+                                {t(`« ${r.rating_comment} »`, `“${r.rating_comment}”`)}
                               </p>
                             )}
                           </div>
@@ -367,11 +398,11 @@ export default function GuestProfilePage({
           {/* Réservations à venir */}
           <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl p-5">
             <h2 className="font-ui text-base font-semibold text-white mb-4">
-              Réservations à venir
+              {t("Réservations à venir", "Upcoming reservations")}
             </h2>
             {upcoming.length === 0 ? (
               <p className="font-ui text-sm text-white/40">
-                Aucune réservation à venir pour ce client.
+                {t("Aucune réservation à venir pour ce client.", "No upcoming reservations for this guest.")}
               </p>
             ) : (
               <div className="space-y-3">
@@ -382,18 +413,18 @@ export default function GuestProfilePage({
                   >
                     <div>
                       <p className="font-ui text-sm font-medium text-white">
-                        {fmtDate(r.reservation_date)}
+                        {fmtDate(r.reservation_date, locale)}
                       </p>
                       <div className="flex items-center gap-3 mt-1 text-xs text-white/50 font-ui">
                         <span className="inline-flex items-center gap-1">
                           <Clock size={12} strokeWidth={1.5} />
-                          {fmtTime(r.reservation_time)}
+                          {fmtTime(r.reservation_time, locale)}
                         </span>
                         <span className="inline-flex items-center gap-1">
                           <Users size={12} strokeWidth={1.5} />
-                          {r.party_size} pers.
+                          {r.party_size} {t("pers.", "guests")}
                         </span>
-                        <span>{sourceLabel(r.source)}</span>
+                        <span>{sourceLabel(r.source, t)}</span>
                       </div>
                     </div>
                     <StatusBadge status={r.status} />
@@ -407,11 +438,14 @@ export default function GuestProfilePage({
           <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl p-5">
             <h2 className="font-ui text-base font-semibold text-white mb-4 inline-flex items-center gap-2">
               <StickyNote size={15} strokeWidth={1.5} className="text-white/50" />
-              Notes du client
+              {t("Notes du client", "Guest notes")}
             </h2>
             {clientNotes.length === 0 ? (
               <p className="font-ui text-sm text-white/40">
-                Ce client n&apos;a laissé aucune note avec ses réservations.
+                {t(
+                  "Ce client n'a laissé aucune note avec ses réservations.",
+                  "This guest hasn't left any notes with their reservations."
+                )}
               </p>
             ) : (
               <div className="space-y-3">
@@ -421,7 +455,7 @@ export default function GuestProfilePage({
                     className="bg-white/[0.05] rounded-xl p-3"
                   >
                     <p className="font-ui text-xs text-white/40 mb-1">
-                      {fmtDate(r.reservation_date)}
+                      {fmtDate(r.reservation_date, locale)}
                     </p>
                     <p className="font-ui text-sm text-white/70 leading-relaxed">
                       {r.notes}

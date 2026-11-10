@@ -21,12 +21,13 @@ import { useToast } from "@/hooks/use-toast";
 import { useHotelOffers, useHotelSpace, type HotelOffer } from "@/lib/hotel/store";
 import {
   CATEGORY_KEYS,
-  CATEGORY_LABELS,
+  categoryLabel,
   cityCatalog,
   fallbackImage,
   type GuestCategoryKey,
 } from "@/lib/guest-catalog";
 import { plural } from "@/lib/hotel/format";
+import { useLocale, useT } from "@/lib/i18n/client";
 import {
   Button,
   ConfirmDialog,
@@ -82,11 +83,14 @@ export default function HotelAddressesPage() {
   const [editing, setEditing] = useState<{ offer: HotelOffer | null } | null>(null);
   const [toDelete, setToDelete] = useState<HotelOffer | null>(null);
   const [saving, setSaving] = useState(false);
+  const t = useT();
+  const locale = useLocale();
+  const catLabel = (k: GuestCategoryKey) => categoryLabel(k, locale);
 
   const hotelCity = profile.city || authCity || null;
   /* Catalogue réseau seul : les adresses maison ont leur propre section et
      leur propre interrupteur (active). */
-  const network = useMemo(() => cityCatalog(hotelCity, catalog, []), [hotelCity, catalog]);
+  const network = useMemo(() => cityCatalog(hotelCity, catalog, [], locale), [hotelCity, catalog, locale]);
 
   if (authLoading || isLoading) return <PageSkeleton kpis={3} table />;
 
@@ -106,7 +110,7 @@ export default function HotelAddressesPage() {
 
   const setHidden = async (next: Set<string>, message: string) => {
     const ok = await saveProfile({ hidden_offers: [...next] });
-    showToast(ok ? message : "Impossible d'enregistrer. Réessayez dans un instant.");
+    showToast(ok ? message : t("Impossible d'enregistrer. Réessayez dans un instant.", "Couldn't save. Please try again in a moment."));
   };
 
   const toggleNetwork = (id: string, name: string) => {
@@ -114,7 +118,12 @@ export default function HotelAddressesPage() {
     const wasHidden = next.has(id);
     if (wasHidden) next.delete(id);
     else next.add(id);
-    void setHidden(next, wasHidden ? `« ${name} » proposée à vos clients` : `« ${name} » retirée de votre menu`);
+    void setHidden(
+      next,
+      wasHidden
+        ? t(`« ${name} » proposée à vos clients`, `“${name}” now offered to your guests`)
+        : t(`« ${name} » retirée de votre menu`, `“${name}” removed from your menu`)
+    );
   };
 
   const setCategory = (ids: string[], propose: boolean, label: string) => {
@@ -123,7 +132,7 @@ export default function HotelAddressesPage() {
       if (propose) next.delete(id);
       else next.add(id);
     }
-    void setHidden(next, propose ? `${label} : tout proposé` : `${label} : tout retiré`);
+    void setHidden(next, propose ? t(`${label} : tout proposé`, `${label}: all offered`) : t(`${label} : tout retiré`, `${label}: all removed`));
   };
 
   const save = async (draft: OfferDraft) => {
@@ -140,33 +149,46 @@ export default function HotelAddressesPage() {
     };
     const ok = editing?.offer ? await update(editing.offer.id, input) : (await create(input)) !== null;
     setSaving(false);
-    if (!ok) return "Impossible d'enregistrer. Réessayez dans un instant.";
+    if (!ok) return t("Impossible d'enregistrer. Réessayez dans un instant.", "Couldn't save. Please try again in a moment.");
     setEditing(null);
-    showToast(editing?.offer ? "Adresse mise à jour" : "Adresse ajoutée, proposée dès le prochain scan");
+    showToast(
+      editing?.offer
+        ? t("Adresse mise à jour", "Place updated")
+        : t("Adresse ajoutée, proposée dès le prochain scan", "Place added, offered from the next scan")
+    );
     return null;
   };
 
   const toggleMine = async (o: HotelOffer) => {
     const ok = await update(o.id, { active: !o.active });
-    showToast(ok ? (o.active ? `« ${o.name} » masquée` : `« ${o.name} » proposée`) : "Échec de la mise à jour");
+    showToast(
+      ok
+        ? o.active
+          ? t(`« ${o.name} » masquée`, `“${o.name}” hidden`)
+          : t(`« ${o.name} » proposée`, `“${o.name}” offered`)
+        : t("Échec de la mise à jour", "Update failed")
+    );
   };
 
   const confirmDelete = async () => {
     if (!toDelete) return;
     const ok = await remove(toDelete.id);
     setToDelete(null);
-    showToast(ok ? "Adresse supprimée" : "Échec de la suppression");
+    showToast(ok ? t("Adresse supprimée", "Place deleted") : t("Échec de la suppression", "Delete failed"));
   };
 
   return (
     <>
       <PageHeader
-        eyebrow="Mes adresses"
-        title="Le menu de votre hôtel"
-        description="Choisissez ce que vos clients voient après un scan : les adresses du réseau twocards de votre ville, que vous proposez ou retirez d'un geste, et vos adresses maison, que vous créez vous-même. Les deux se cumulent."
+        eyebrow={t("Mes adresses", "My places")}
+        title={t("Le menu de votre hôtel", "Your hotel's menu")}
+        description={t(
+          "Choisissez ce que vos clients voient après un scan : les adresses du réseau twocards de votre ville, que vous proposez ou retirez d'un geste, et vos adresses maison, que vous créez vous-même. Les deux se cumulent.",
+          "Choose what your guests see after a scan: places from the twocards network in your city, which you offer or remove in one tap, and your own in-house places, which you create yourself. The two add up."
+        )}
         actions={
           <Button variant="primary" icon={Plus} onClick={() => setEditing({ offer: null })}>
-            Ajouter une adresse maison
+            {t("Ajouter une adresse maison", "Add an in-house place")}
           </Button>
         }
       />
@@ -174,9 +196,9 @@ export default function HotelAddressesPage() {
       <KpiGrid
         columns={3}
         items={[
-          { label: "Catalogue réseau", value: `${networkShown}/${networkTotal}`, hint: hotelCity ? `adresses proposées à ${hotelCity}` : "renseignez votre ville", icon: BookOpen, tone: "violet" },
-          { label: "Adresses maison", value: offers.length, hint: `${active} ${plural(active, "proposée")}`, icon: MapPin, tone: "sky" },
-          { label: "Menu client", value: networkShown + active, hint: "adresses visibles au scan", icon: Eye, tone: "emerald" },
+          { label: t("Catalogue réseau", "Network catalogue"), value: `${networkShown}/${networkTotal}`, hint: hotelCity ? t(`adresses proposées à ${hotelCity}`, `places offered in ${hotelCity}`) : t("renseignez votre ville", "add your city"), icon: BookOpen, tone: "violet" },
+          { label: t("Adresses maison", "In-house places"), value: offers.length, hint: t(`${active} ${plural(active, "proposée")}`, `${active} offered`), icon: MapPin, tone: "sky" },
+          { label: t("Menu client", "Guest menu"), value: networkShown + active, hint: t("adresses visibles au scan", "places visible on scan"), icon: Eye, tone: "emerald" },
         ]}
       />
 
@@ -185,30 +207,38 @@ export default function HotelAddressesPage() {
           value={filter}
           onChange={setFilter}
           options={[
-            { value: "toutes", label: "Toutes" },
-            ...CATEGORY_KEYS.map((k) => ({ value: k, label: CATEGORY_LABELS[k] })),
+            { value: "toutes", label: t("Toutes", "All") },
+            ...CATEGORY_KEYS.map((k) => ({ value: k, label: catLabel(k) })),
           ]}
         />
         <div className="relative w-full lg:w-64">
           <Search size={14} strokeWidth={1.75} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
-          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Rechercher une adresse…" className={cn(inputClass, "h-10 py-0 pl-9")} />
+          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("Rechercher une adresse…", "Search for a place…")} className={cn(inputClass, "h-10 py-0 pl-9")} />
         </div>
       </div>
 
       {/* ─── Catalogue réseau ──────────────────────────────────────────────── */}
       <Panel
-        title="Catalogue twocards"
+        title={t("Catalogue twocards", "twocards catalogue")}
         description={
           hotelCity ? (
-            <>Les adresses du réseau à {hotelCity}. Retirez celles que vous ne souhaitez pas proposer : le retrait vaut pour tous vos QR codes. Pour une exception chambre par chambre, passez par la fiche du QR.</>
+            t(
+              <>Les adresses du réseau à {hotelCity}. Retirez celles que vous ne souhaitez pas proposer : le retrait vaut pour tous vos QR codes. Pour une exception chambre par chambre, passez par la fiche du QR.</>,
+              <>Network places in {hotelCity}. Remove any you&apos;d rather not offer: removal applies to all your QR codes. For a room-by-room exception, use the QR code&apos;s page.</>
+            )
           ) : (
-            <>Indiquez la ville de l&apos;hôtel dans les <Link href="/hotel/settings" className="font-bold text-sky-300">paramètres</Link> pour limiter le catalogue à votre ville. En attendant, tout le réseau est proposé.</>
+            t(
+              <>Indiquez la ville de l&apos;hôtel dans les <Link href="/hotel/settings" className="font-bold text-sky-300">paramètres</Link> pour limiter le catalogue à votre ville. En attendant, tout le réseau est proposé.</>,
+              <>Add the hotel&apos;s city in <Link href="/hotel/settings" className="font-bold text-sky-300">settings</Link> to limit the catalogue to your city. Until then, the whole network is offered.</>
+            )
           )
         }
       >
         {networkVisible.length === 0 ? (
           <p className="py-6 text-center text-sm text-white/40">
-            {networkTotal === 0 ? "Aucune adresse du réseau pour votre ville pour le moment." : "Aucune adresse ne correspond."}
+            {networkTotal === 0
+              ? t("Aucune adresse du réseau pour votre ville pour le moment.", "No network places in your city yet.")
+              : t("Aucune adresse ne correspond.", "No places match.")}
           </p>
         ) : (
           <div className="space-y-6">
@@ -224,12 +254,12 @@ export default function HotelAddressesPage() {
                         <Icon size={15} strokeWidth={1.75} className="text-white/85" />
                       </span>
                       <div>
-                        <p className="font-display text-sm font-bold uppercase tracking-[0.2em] text-white">{cat.label}</p>
-                        <p className="num text-[11px] text-white/45">{shown}/{ids.length} proposée{shown > 1 ? "s" : ""}</p>
+                        <p className="font-display text-sm font-bold uppercase tracking-[0.2em] text-white">{catLabel(cat.key)}</p>
+                        <p className="num text-[11px] text-white/45">{shown}/{ids.length} {t(`proposée${shown > 1 ? "s" : ""}`, "offered")}</p>
                       </div>
                     </div>
-                    <button type="button" onClick={() => setCategory(ids, shown !== ids.length, cat.label)} className="text-[11px] font-bold text-sky-300 hover:text-sky-200">
-                      {shown === ids.length ? "Tout retirer" : "Tout proposer"}
+                    <button type="button" onClick={() => setCategory(ids, shown !== ids.length, catLabel(cat.key))} className="text-[11px] font-bold text-sky-300 hover:text-sky-200">
+                      {shown === ids.length ? t("Tout retirer", "Remove all") : t("Tout proposer", "Offer all")}
                     </button>
                   </div>
                   <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
@@ -241,8 +271,8 @@ export default function HotelAddressesPage() {
                         price={o.price}
                         active={!hidden.has(o.id)}
                         onToggle={() => toggleNetwork(o.id, o.name)}
-                        toggleLabel={`Proposer ${o.name}`}
-                        badges={<TileBadge tone="muted">Réseau twocards</TileBadge>}
+                        toggleLabel={t(`Proposer ${o.name}`, `Offer ${o.name}`)}
+                        badges={<TileBadge tone="muted">{t("Réseau twocards", "twocards network")}</TileBadge>}
                       />
                     ))}
                   </div>
@@ -255,11 +285,14 @@ export default function HotelAddressesPage() {
 
       {/* ─── Adresses maison ───────────────────────────────────────────────── */}
       <Panel
-        title="Vos adresses maison"
-        description="Votre restaurant, votre spa, votre chauffeur, un partenaire de confiance : en tête de leur catégorie sur vos QR codes, et nulle part ailleurs. Les demandes vous arrivent directement, sans commission."
+        title={t("Vos adresses maison", "Your in-house places")}
+        description={t(
+          "Votre restaurant, votre spa, votre chauffeur, un partenaire de confiance : en tête de leur catégorie sur vos QR codes, et nulle part ailleurs. Les demandes vous arrivent directement, sans commission.",
+          "Your restaurant, your spa, your driver, a trusted partner: top of their category on your QR codes, and nowhere else. Requests come straight to you, commission-free."
+        )}
         actions={
           <Button size="sm" variant="primary" icon={Plus} onClick={() => setEditing({ offer: null })}>
-            Ajouter
+            {t("Ajouter", "Add")}
           </Button>
         }
         padded={offers.length > 0}
@@ -267,17 +300,20 @@ export default function HotelAddressesPage() {
         {offers.length === 0 ? (
           <EmptyState
             icon={MapPin}
-            title="Aucune adresse maison pour le moment"
-            description="Ajoutez ce qui vous est propre : votre restaurant, votre spa, un chauffeur, un guide que vous recommandez. Photo, description, prix indicatif, et c'est en ligne."
+            title={t("Aucune adresse maison pour le moment", "No in-house places yet")}
+            description={t(
+              "Ajoutez ce qui vous est propre : votre restaurant, votre spa, un chauffeur, un guide que vous recommandez. Photo, description, prix indicatif, et c'est en ligne.",
+              "Add what's yours: your restaurant, your spa, a driver, a guide you recommend. Photo, description, indicative price, and it's live."
+            )}
             action={
               <Button variant="primary" icon={Plus} onClick={() => setEditing({ offer: null })}>
-                Ajouter ma première adresse
+                {t("Ajouter ma première adresse", "Add my first place")}
               </Button>
             }
             compact
           />
         ) : mine.length === 0 ? (
-          <p className="py-6 text-center text-sm text-white/40">Aucune adresse maison ne correspond.</p>
+          <p className="py-6 text-center text-sm text-white/40">{t("Aucune adresse maison ne correspond.", "No in-house places match.")}</p>
         ) : (
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
             {mine.map((o) => (
@@ -288,17 +324,17 @@ export default function HotelAddressesPage() {
                 price={o.price}
                 active={o.active}
                 onToggle={() => toggleMine(o)}
-                toggleLabel={`Proposer ${o.name}`}
+                toggleLabel={t(`Proposer ${o.name}`, `Offer ${o.name}`)}
                 badges={
                   <>
-                    <TileBadge tone="accent">Maison</TileBadge>
-                    <TileBadge>{CATEGORY_LABELS[o.category]}</TileBadge>
+                    <TileBadge tone="accent">{t("Maison", "In-house")}</TileBadge>
+                    <TileBadge>{catLabel(o.category)}</TileBadge>
                   </>
                 }
                 actions={
                   <>
-                    <IconButton icon={Pencil} label="Modifier" size={14} className="h-8 w-8" onClick={() => setEditing({ offer: o })} />
-                    <IconButton icon={Trash2} label="Supprimer" size={14} tone="danger" className="h-8 w-8" onClick={() => setToDelete(o)} />
+                    <IconButton icon={Pencil} label={t("Modifier", "Edit")} size={14} className="h-8 w-8" onClick={() => setEditing({ offer: o })} />
+                    <IconButton icon={Trash2} label={t("Supprimer", "Delete")} size={14} tone="danger" className="h-8 w-8" onClick={() => setToDelete(o)} />
                   </>
                 }
               />
@@ -308,11 +344,22 @@ export default function HotelAddressesPage() {
       </Panel>
 
       <InfoNote icon={Info} tone="sky">
-        Les réglages de cette page valent pour tous vos QR codes. Pour proposer une adresse à certaines chambres seulement, ouvrez la chambre dans{" "}
-        <Link href="/hotel/chambres" className="font-bold text-sky-300">
-          Chambres &amp; QR
-        </Link>{" "}
-        et réglez son menu.
+        {t(
+          <>
+            Les réglages de cette page valent pour tous vos QR codes. Pour proposer une adresse à certaines chambres seulement, ouvrez la chambre dans{" "}
+            <Link href="/hotel/chambres" className="font-bold text-sky-300">
+              Chambres &amp; QR
+            </Link>{" "}
+            et réglez son menu.
+          </>,
+          <>
+            Settings on this page apply to all your QR codes. To offer a place to certain rooms only, open the room in{" "}
+            <Link href="/hotel/chambres" className="font-bold text-sky-300">
+              Rooms &amp; QR
+            </Link>{" "}
+            and adjust its menu.
+          </>
+        )}
       </InfoNote>
 
       {editing && (
@@ -324,7 +371,7 @@ export default function HotelAddressesPage() {
           saving={saving}
           userId={userId}
           uploadPrefix="offer"
-          title={editing.offer ? `Modifier « ${editing.offer.name} »` : "Nouvelle adresse maison"}
+          title={editing.offer ? t(`Modifier « ${editing.offer.name} »`, `Edit “${editing.offer.name}”`) : t("Nouvelle adresse maison", "New in-house place")}
         />
       )}
 
@@ -333,9 +380,12 @@ export default function HotelAddressesPage() {
         onCancel={() => setToDelete(null)}
         onConfirm={confirmDelete}
         danger
-        confirmLabel="Supprimer"
-        title={toDelete ? `Supprimer « ${toDelete.name} » ?` : ""}
-        description="L'adresse disparaît de vos QR codes. Les réservations déjà passées dessus restent dans votre historique. Pour une pause, préférez « Masquer »."
+        confirmLabel={t("Supprimer", "Delete")}
+        title={toDelete ? t(`Supprimer « ${toDelete.name} » ?`, `Delete “${toDelete.name}”?`) : ""}
+        description={t(
+          "L'adresse disparaît de vos QR codes. Les réservations déjà passées dessus restent dans votre historique. Pour une pause, préférez « Masquer ».",
+          "The place disappears from your QR codes. Reservations already made through it stay in your history. For a break, use “Hide” instead."
+        )}
       />
 
       <Toast message={toast} />

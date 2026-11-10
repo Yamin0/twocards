@@ -25,97 +25,99 @@ import {
   Plus,
   Sparkles,
 } from "lucide-react";
+import { useT, useIntlLocale } from "@/lib/i18n/client";
+import type { Translate } from "@/lib/i18n";
 
 const VENUE_ROLES = ["etablissement", "hotel"];
 
-const ROLE_LABELS: Record<string, string> = {
-  etablissement: "Établissement",
-  hotel: "Hôtel",
-};
+const getRoleLabels = (t: Translate): Record<string, string> => ({
+  etablissement: t("Établissement", "Venue"),
+  hotel: t("Hôtel", "Hotel"),
+});
 
-const folders = [
+const getFolders = (t: Translate) => [
   {
-    label: "Calendrier",
-    description: "Événements à venir et passés",
+    label: t("Calendrier", "Calendar"),
+    description: t("Événements à venir et passés", "Upcoming and past events"),
     href: "/concierge/reservations",
     icon: CalendarDays,
     iconColor: "text-blue-400",
-    preview: ["12 événements cette semaine", "OPENING NIGHT · Jeu. 24"],
+    preview: [t("12 événements cette semaine", "12 events this week"), t("OPENING NIGHT · Jeu. 24", "OPENING NIGHT · Thu 24")],
   },
   {
-    label: "CRM Clients",
-    description: "Base de données et suivi clients",
+    label: t("CRM Clients", "Guest CRM"),
+    description: t("Base de données et suivi clients", "Guest database and follow-up"),
     href: "/concierge/clients",
     icon: Users,
     iconColor: "text-green-400",
-    preview: ["326 clients actifs", "48 nouveaux ce mois"],
+    preview: [t("326 clients actifs", "326 active guests"), t("48 nouveaux ce mois", "48 new this month")],
   },
   {
-    label: "Commissions",
-    description: "Suivi de vos gains et paiements",
+    label: t("Commissions", "Commissions"),
+    description: t("Suivi de vos gains et paiements", "Track your earnings and payouts"),
     href: "/concierge/commissions",
     icon: CreditCard,
     iconColor: "text-amber-400",
-    preview: ["124 000 MAD ce mois", "8 paiements en attente"],
+    preview: [t("124 000 MAD ce mois", "124,000 MAD this month"), t("8 paiements en attente", "8 payouts pending")],
   },
   {
-    label: "Statistiques",
-    description: "Performances et analyses",
+    label: t("Statistiques", "Stats"),
+    description: t("Performances et analyses", "Performance and analytics"),
     href: "/concierge/stats",
     icon: BarChart3,
     iconColor: "text-purple-400",
-    preview: ["+22% de listes vs mois dernier", "Taux de conversion: 68%"],
+    preview: [t("+22% de listes vs mois dernier", "+22% lists vs last month"), t("Taux de conversion: 68%", "Conversion rate: 68%")],
   },
   {
-    label: "Messages",
-    description: "Conversations avec les établissements",
+    label: t("Messages", "Messages"),
+    description: t("Conversations avec les établissements", "Conversations with venues"),
     href: "/concierge/messages",
     icon: MessageSquare,
     iconColor: "text-indigo-400",
-    preview: ["3 messages non lus", "Le Comptoir · Confirmation VIP"],
+    preview: [t("3 messages non lus", "3 unread messages"), t("Le Comptoir · Confirmation VIP", "Le Comptoir · VIP confirmation")],
   },
   {
-    label: "Établissements",
-    description: "Vos partenaires et lieux affiliés",
+    label: t("Établissements", "Venues"),
+    description: t("Vos partenaires et lieux affiliés", "Your partners and affiliated venues"),
     href: "/concierge/venues",
     icon: Building2,
     iconColor: "text-sky-400",
-    preview: ["4 établissements actifs", "Le Comptoir, Sky Bar, Le Lotus..."],
+    preview: [t("4 établissements actifs", "4 active venues"), "Le Comptoir, Sky Bar, Le Lotus..."],
   },
   {
-    label: "Assistant IA",
-    description: "Votre assistant intelligent twocards",
+    label: t("Assistant IA", "AI assistant"),
+    description: t("Votre assistant intelligent twocards", "Your smart twocards assistant"),
     href: "/concierge/ai",
     icon: Sparkles,
     iconColor: "text-blue-400",
-    preview: ["Créer des réservations par commande", "Résumé de soirée automatique"],
+    preview: [t("Créer des réservations par commande", "Create reservations by command"), t("Résumé de soirée automatique", "Automatic night summary")],
   },
 ];
 
-const DEMO_STATS = [
+const getDemoStats = (t: Translate) => [
   {
-    label: "Listes cette semaine",
+    label: t("Listes cette semaine", "Lists this week"),
     value: "18",
     icon: Ticket,
     trend: "+5",
     color: "text-blue-400",
   },
   {
-    label: "Entrées confirmées",
+    label: t("Entrées confirmées", "Confirmed entries"),
     value: "142",
     icon: Users,
     trend: "+22%",
     color: "text-green-400",
   },
   {
-    label: "Événements à venir",
+    label: t("Événements à venir", "Upcoming events"),
     value: "12",
     icon: CalendarDays,
     trend: null,
     color: "text-purple-400",
   },
   {
-    label: "Gains du mois",
+    label: t("Gains du mois", "Earnings this month"),
     value: "124K MAD",
     icon: TrendingUp,
     trend: "+18%",
@@ -125,6 +127,8 @@ const DEMO_STATS = [
 
 export default function ConciergePage() {
   const { isDemoConcierge, isLoading, fullName } = useAuthUser();
+  const t = useT();
+  const intl = useIntlLocale();
   const [query, setQuery] = useState("");
   /* Annuaire réel des établissements (table profiles), tenu à jour en
      direct : chaque nouveau compte apparaît dès sa création, sans
@@ -156,7 +160,7 @@ export default function ConciergePage() {
             !prev || prev.some((v) => v.id === p.id)
               ? prev
               : [...prev, p].sort((a, b) =>
-                  displayName(a).localeCompare(displayName(b), "fr")
+                  displayName(a).localeCompare(displayName(b), intl)
                 )
           );
         }
@@ -167,11 +171,13 @@ export default function ConciergePage() {
       cancelled = true;
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [intl]);
 
   if (isLoading) return <ConciergeSkeleton />;
 
-  const stats = isDemoConcierge ? DEMO_STATS : [];
+  const stats = isDemoConcierge ? getDemoStats(t) : [];
+  const folders = getFolders(t);
+  const roleLabels = getRoleLabels(t);
 
   /* La recherche filtre les espaces : c'est la seule chose cherchable ici,
      et le champ ne filtrait rien du tout. */
@@ -191,17 +197,17 @@ export default function ConciergePage() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-white">
-              Bonjour, {fullName || "Concierge"}.
+              {t("Bonjour", "Hello")}, {fullName || "Concierge"}.
             </h1>
             <p className="text-white/50 text-sm mt-1">
-              Votre espace concierge en un coup d&apos;œil
+              {t("Votre espace concierge en un coup d'œil", "Your concierge workspace at a glance")}
             </p>
           </div>
           <div className="flex items-center gap-3">
             <div className="relative hidden sm:block">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30 h-4 w-4" />
               <input
-                placeholder="Rechercher un espace..."
+                placeholder={t("Rechercher un espace...", "Search a section...")}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 className="pl-10 pr-4 py-2.5 bg-white/5 border border-white/15 rounded-xl text-sm text-white placeholder:text-white/30 focus:border-white/30 focus:bg-white/10 focus:outline-none transition-all w-48"
@@ -215,7 +221,7 @@ export default function ConciergePage() {
               className="flex items-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-white/15 border border-white/15 hover:border-white/25 text-white rounded-xl text-sm font-medium transition-all duration-300 hover:scale-[1.02]"
             >
               <Plus size={16} strokeWidth={1.5} />
-              <span className="hidden sm:inline">Nouvelle réservation</span>
+              <span className="hidden sm:inline">{t("Nouvelle réservation", "New reservation")}</span>
             </Link>
           </div>
         </div>
@@ -254,20 +260,25 @@ export default function ConciergePage() {
         <div className="mb-5 flex items-center justify-between">
           <div>
             <h2 className="text-xl font-semibold text-white">
-              Établissements du réseau
+              {t("Établissements du réseau", "Network venues")}
             </h2>
             <p className="text-white/40 text-sm mt-0.5">
               {venues === null
-                ? "Chargement de l'annuaire…"
-                : `${venues.length} établissement${venues.length > 1 ? "s" : ""} référencé${venues.length > 1 ? "s" : ""}, mis à jour en direct`}
+                ? t("Chargement de l'annuaire…", "Loading directory…")
+                : t(
+                    `${venues.length} établissement${venues.length > 1 ? "s" : ""} référencé${venues.length > 1 ? "s" : ""}, mis à jour en direct`,
+                    `${venues.length} venue${venues.length === 1 ? "" : "s"} listed, updated live`,
+                  )}
             </p>
           </div>
         </div>
 
         {venues !== null && venues.length === 0 && (
           <p className="py-8 text-center text-sm text-white/40">
-            Aucun établissement inscrit pour le moment. Ils apparaîtront ici
-            dès la création de leur compte.
+            {t(
+              "Aucun établissement inscrit pour le moment. Ils apparaîtront ici dès la création de leur compte.",
+              "No venues have signed up yet. They'll appear here as soon as their account is created.",
+            )}
           </p>
         )}
 
@@ -286,7 +297,7 @@ export default function ConciergePage() {
                     {displayName(v)}
                   </p>
                   <p className="truncate text-xs text-white/40">
-                    {[ROLE_LABELS[v.role] ?? v.role, v.city]
+                    {[roleLabels[v.role] ?? v.role, v.city]
                       .filter(Boolean)
                       .join(" · ")}
                   </p>
@@ -298,14 +309,14 @@ export default function ConciergePage() {
                   className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-white/15 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-white/25"
                 >
                   <CalendarPlus size={13} strokeWidth={2} />
-                  Réserver
+                  {t("Réserver", "Book")}
                 </Link>
                 <Link
                   href={`/concierge/messages?to=${v.id}`}
                   className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-xs font-semibold text-white/80 transition-colors hover:bg-white/10 hover:text-white"
                 >
                   <MessageSquare size={13} strokeWidth={2} />
-                  Message
+                  {t("Message", "Message")}
                 </Link>
               </div>
             </div>
@@ -317,14 +328,14 @@ export default function ConciergePage() {
       {isDemoConcierge && (
         <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
           <h2 className="text-lg font-semibold text-white mb-4">
-            Activité récente
+            {t("Activité récente", "Recent activity")}
           </h2>
           <div className="space-y-3">
             {[
-              { text: "Réservation confirmée · Famille Tazi, 6 pers. au Comptoir", time: "Il y a 12 min", color: "bg-green-400" },
-              { text: "Commission versée · 9 820 MAD (Le Comptoir, Mars)", time: "Il y a 2h", color: "bg-amber-400" },
-              { text: "Nouveau client ajouté · Sarah Bennis (VIP)", time: "Il y a 5h", color: "bg-blue-400" },
-              { text: "No-show déclaré · Réda F. au Sky Bar", time: "Hier", color: "bg-red-400" },
+              { text: t("Réservation confirmée · Famille Tazi, 6 pers. au Comptoir", "Reservation confirmed · Tazi family, party of 6 at Le Comptoir"), time: t("Il y a 12 min", "12 min ago"), color: "bg-green-400" },
+              { text: t("Commission versée · 9 820 MAD (Le Comptoir, Mars)", "Commission paid · 9,820 MAD (Le Comptoir, March)"), time: t("Il y a 2h", "2h ago"), color: "bg-amber-400" },
+              { text: t("Nouveau client ajouté · Sarah Bennis (VIP)", "New guest added · Sarah Bennis (VIP)"), time: t("Il y a 5h", "5h ago"), color: "bg-blue-400" },
+              { text: t("No-show déclaré · Réda F. au Sky Bar", "No-show reported · Réda F. at Sky Bar"), time: t("Hier", "Yesterday"), color: "bg-red-400" },
             ].map((a, i) => (
               <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] transition-colors">
                 <div className={`w-2 h-2 rounded-full ${a.color} shrink-0`} />
@@ -341,16 +352,16 @@ export default function ConciergePage() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-xl font-semibold text-white">
-              Vos espaces
+              {t("Vos espaces", "Your sections")}
             </h2>
-            <p className="text-white/40 text-sm mt-0.5">Cliquez pour accéder à un espace</p>
+            <p className="text-white/40 text-sm mt-0.5">{t("Cliquez pour accéder à un espace", "Click to open a section")}</p>
           </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
           {visibleFolders.length === 0 && (
             <p className="col-span-full py-8 text-center text-sm text-white/40">
-              Aucun espace ne correspond à « {query} ».
+              {t(<>Aucun espace ne correspond à « {query} ».</>, <>No section matches “{query}”.</>)}
             </p>
           )}
           {visibleFolders.map((folder) => {

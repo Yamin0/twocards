@@ -1,4 +1,6 @@
-export function LegalArticle({
+import { getT } from "@/lib/i18n/server";
+
+export async function LegalArticle({
   label,
   title,
   updated,
@@ -9,6 +11,7 @@ export function LegalArticle({
   updated: string;
   sections: { heading: string; body: string[] }[];
 }) {
+  const t = await getT();
   return (
     <article>
       <p className="mb-3 text-[11px] font-medium uppercase tracking-[0.28em] text-[var(--landing-mute)]">
@@ -18,7 +21,7 @@ export function LegalArticle({
         {title}
       </h1>
       <p className="mt-3 text-[12px] text-[var(--landing-mute)]">
-        Dernière mise à jour : {updated}
+        {t("Dernière mise à jour :", "Last updated:")} {updated}
       </p>
 
       <div className="mt-12 flex flex-col gap-10">

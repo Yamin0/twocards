@@ -1,6 +1,8 @@
 /* Outils autour du QR code affiché par react-qr-code : le SVG rendu est
    sérialisé tel quel, le fichier téléchargé est identique au QR affiché. */
 
+import type { Locale } from "@/lib/i18n";
+
 const slug = (label: string) =>
   label
     .normalize("NFD")
@@ -93,12 +95,20 @@ export function guestUrl(
   return `${base}/s/${code}${qs ? `?${qs}` : ""}`;
 }
 
-export function shareByWhatsapp(link: string, hotelName?: string | null) {
-  const text = `${hotelName ? `${hotelName} · ` : ""}Réservez vos sorties (restaurants, activités, clubs, services) en quelques secondes : ${link}`;
+export function shareByWhatsapp(link: string, hotelName?: string | null, locale: Locale = "fr") {
+  const text =
+    locale === "en"
+      ? `${hotelName ? `${hotelName} · ` : ""}Book your outings (restaurants, activities, clubs, services) in seconds: ${link}`
+      : `${hotelName ? `${hotelName} · ` : ""}Réservez vos sorties (restaurants, activités, clubs, services) en quelques secondes : ${link}`;
   return `https://wa.me/?text=${encodeURIComponent(text)}`;
 }
 
-export function shareByEmail(link: string, hotelName?: string | null) {
+export function shareByEmail(link: string, hotelName?: string | null, locale: Locale = "fr") {
+  if (locale === "en") {
+    const subject = `${hotelName ?? "Your hotel"}: outings to book`;
+    const body = `Hello,\n\nDiscover our selection of restaurants, activities, clubs and services, and book in seconds:\n${link}\n\nSee you soon,\n${hotelName ?? ""}`;
+    return `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  }
   const subject = `${hotelName ?? "Votre hôtel"} : vos sorties à réserver`;
   const body = `Bonjour,\n\nDécouvrez notre sélection de restaurants, activités, clubs et services, et réservez en quelques secondes :\n${link}\n\nÀ très vite,\n${hotelName ?? ""}`;
   return `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;

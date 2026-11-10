@@ -8,6 +8,8 @@ import {
   type VenueQrReservation,
 } from "@/hooks/use-venue-qr-reservations";
 import { TableSkeleton } from "@/components/shared/loading-skeleton";
+import { useLocale, useT } from "@/lib/i18n/client";
+import { intlLocale, makeT, type Locale, type Translate } from "@/lib/i18n";
 import { StatStrip } from "@/components/shared/stat-strip";
 import {
   Check,
@@ -49,18 +51,18 @@ const currentPeriod = () => {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
 };
 
-const monthLabel = (period: string) => {
-  const label = new Date(`${period}-01T00:00:00`).toLocaleDateString("fr-FR", {
+const monthLabel = (period: string, locale: Locale = "fr") => {
+  const label = new Date(`${period}-01T00:00:00`).toLocaleDateString(intlLocale(locale), {
     month: "long",
     year: "numeric",
   });
   return label.charAt(0).toUpperCase() + label.slice(1);
 };
 
-const mad = (n: number) => `${Math.round(n).toLocaleString("fr-FR")} MAD`;
+const mad = (n: number, locale: Locale = "fr") => `${Math.round(n).toLocaleString(intlLocale(locale))} MAD`;
 
-const fmtDate = (iso: string) =>
-  new Date(`${iso}T00:00:00`).toLocaleDateString("fr-FR", {
+const fmtDate = (iso: string, locale: Locale = "fr") =>
+  new Date(`${iso}T00:00:00`).toLocaleDateString(intlLocale(locale), {
     day: "numeric",
     month: "short",
   });
@@ -81,14 +83,14 @@ type MonthGroup = {
   hotels: HotelGroup[];
 };
 
-function groupByHotel(rows: VenueQrReservation[]): HotelGroup[] {
+function groupByHotel(rows: VenueQrReservation[], t: Translate): HotelGroup[] {
   const map = new Map<string, HotelGroup>();
   for (const r of rows) {
     const key = r.referrer_id ?? "inconnu";
     const g = map.get(key) ?? {
       key,
       hotelId: r.referrer_id,
-      name: r.referrer_name ?? "Hôtel partenaire",
+      name: r.referrer_name ?? t("Hôtel partenaire", "Partner hotel"),
       rows: [],
       spent: 0,
       commission: 0,
@@ -101,17 +103,18 @@ function groupByHotel(rows: VenueQrReservation[]): HotelGroup[] {
   return [...map.values()].sort((a, b) => b.commission - a.commission);
 }
 
-function exportCsv(rows: VenueQrReservation[]) {
+function exportCsv(rows: VenueQrReservation[], locale: Locale = "fr") {
+  const t = makeT(locale);
   const header = [
-    "Mois",
-    "Date sortie",
-    "Client",
-    "Hôtel d'origine",
-    "Prestation",
-    "Montant dépensé (MAD)",
-    "Taux",
-    "Commission reversée (MAD)",
-    "Origine du montant",
+    t("Mois", "Month"),
+    t("Date sortie", "Outing date"),
+    t("Client", "Guest"),
+    t("Hôtel d'origine", "Referring hotel"),
+    t("Prestation", "Service"),
+    t("Montant dépensé (MAD)", "Amount spent (MAD)"),
+    t("Taux", "Rate"),
+    t("Commission reversée (MAD)", "Commission paid (MAD)"),
+    t("Origine du montant", "Amount source"),
   ];
   const lines = rows.map((r) =>
     [
@@ -123,7 +126,7 @@ function exportCsv(rows: VenueQrReservation[]) {
       r.amount_spent ?? "",
       `${Math.round(r.commission_rate * 100)}%`,
       r.commission,
-      r.amount_source === "pos" ? "caisse" : "saisie manuelle",
+      r.amount_source === "pos" ? t("caisse", "POS") : t("saisie manuelle", "manual entry"),
     ]
       .map((v) => `"${String(v).replace(/"/g, '""')}"`)
       .join(";")
@@ -140,6 +143,8 @@ function exportCsv(rows: VenueQrReservation[]) {
 }
 
 export default function VenueCommissionsPage() {
+  const t = useT();
+  const locale = useLocale();
   const { isLoading } = useAuthUser();
   const { reservations, isLoading: loadingData } = useVenueQrReservations();
   const [settlements, setSettlements] = useState<Settlement[] | null>(null);
@@ -187,7 +192,7 @@ export default function VenueCommissionsPage() {
         period,
         rows,
         commission: rows.reduce((s, r) => s + r.commission, 0),
-        hotels: groupByHotel(rows),
+        hotels: groupByHotel(rows, t),
       };
     });
 
@@ -213,20 +218,29 @@ export default function VenueCommissionsPage() {
 
   const stats = [
     {
-      label: "À régler ce mois",
-      value: mad(thisMonthToSettle),
-      hint: thisMonth ? `${thisMonth.rows.length} sortie${thisMonth.rows.length > 1 ? "s" : ""} commissionnée${thisMonth.rows.length > 1 ? "s" : ""}` : "aucune sortie ce mois",
+      label: t("À régler ce mois", "Due this month"),
+      value: mad(thisMonthToSettle, locale),
+      hint: thisMonth
+        ? t(
+            `${thisMonth.rows.length} sortie${thisMonth.rows.length > 1 ? "s" : ""} commissionnée${thisMonth.rows.length > 1 ? "s" : ""}`,
+            `${thisMonth.rows.length} commissionable outing${thisMonth.rows.length === 1 ? "" : "s"}`
+          )
+        : t("aucune sortie ce mois", "no outings this month"),
     },
     {
-      label: "Restant dû",
-      value: mad(toSettle),
-      hint: toSettle > 0 ? "tous mois confondus" : "vous êtes à jour",
+      label: t("Restant dû", "Outstanding"),
+      value: mad(toSettle, locale),
+      hint: toSettle > 0 ? t("tous mois confondus", "across all months") : t("vous êtes à jour", "you're all settled"),
     },
-    { label: "Réglé", value: mad(settledTotal), hint: `${mad(total)} reversés au total` },
     {
-      label: "En attente de montant",
+      label: t("Réglé", "Settled"),
+      value: mad(settledTotal, locale),
+      hint: t(`${mad(total, locale)} reversés au total`, `${mad(total, locale)} paid out in total`),
+    },
+    {
+      label: t("En attente de montant", "Awaiting amount"),
       value: awaiting,
-      hint: awaiting > 0 ? "saisissez l'addition pour solder" : undefined,
+      hint: awaiting > 0 ? t("saisissez l'addition pour solder", "enter the bill to settle") : undefined,
     },
   ];
 
@@ -244,16 +258,19 @@ export default function VenueCommissionsPage() {
         <div>
           <h1 className="font-display text-3xl font-light text-white">Commissions</h1>
           <p className="font-ui text-sm text-white/60 mt-1.5">
-            Ce que vous reversez à chaque hôtel qui vous envoie des clients, mois par mois.
+            {t(
+              "Ce que vous reversez à chaque hôtel qui vous envoie des clients, mois par mois.",
+              "What you pay each hotel that sends you guests, month by month."
+            )}
           </p>
         </div>
         {due.length > 0 && (
           <button
-            onClick={() => exportCsv(due)}
+            onClick={() => exportCsv(due, locale)}
             className="font-ui flex items-center gap-2 bg-white/10 hover:bg-white/15 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors shrink-0"
           >
             <Download size={16} strokeWidth={1.5} />
-            Exporter en CSV
+            {t("Exporter en CSV", "Export as CSV")}
           </button>
         )}
       </div>
@@ -263,13 +280,16 @@ export default function VenueCommissionsPage() {
       {/* Ce mois-ci */}
       <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
         <div className="mb-1 flex items-center justify-between gap-3">
-          <h2 className="font-display text-lg font-normal text-white">{monthLabel(now)}</h2>
+          <h2 className="font-display text-lg font-normal text-white">{monthLabel(now, locale)}</h2>
           <span className="font-display text-lg text-amber-300 tabular-nums">
-            {mad(thisMonth?.commission ?? 0)}
+            {mad(thisMonth?.commission ?? 0, locale)}
           </span>
         </div>
         <p className="font-ui text-xs text-white/40 mb-4">
-          Par hôtel d&apos;origine. Le règlement se fait au mois clôturé, consolidé par twocards.
+          {t(
+            "Par hôtel d'origine. Le règlement se fait au mois clôturé, consolidé par twocards.",
+            "By referring hotel. Settlement happens once the month closes, consolidated by twocards."
+          )}
         </p>
         {thisMonth ? (
           <HotelList
@@ -280,17 +300,27 @@ export default function VenueCommissionsPage() {
           />
         ) : (
           <p className="font-ui text-sm text-white/40 leading-relaxed">
-            Aucune sortie commissionnée ce mois-ci pour le moment.
-            {awaiting > 0 && ` ${awaiting} sortie${awaiting > 1 ? "s" : ""} du réseau attend${awaiting > 1 ? "ent" : ""} encore un montant.`}
+            {t(
+              "Aucune sortie commissionnée ce mois-ci pour le moment.",
+              "No commissionable outings this month yet."
+            )}
+            {awaiting > 0 &&
+              t(
+                ` ${awaiting} sortie${awaiting > 1 ? "s" : ""} du réseau attend${awaiting > 1 ? "ent" : ""} encore un montant.`,
+                ` ${awaiting} network outing${awaiting === 1 ? " is" : "s are"} still awaiting an amount.`
+              )}
           </p>
         )}
       </div>
 
       {/* Historique */}
       <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
-        <h2 className="font-display text-lg font-normal text-white mb-1">Historique</h2>
+        <h2 className="font-display text-lg font-normal text-white mb-1">{t("Historique", "History")}</h2>
         <p className="font-ui text-xs text-white/40 mb-4">
-          Un mois, puis chaque hôtel, puis chaque sortie. Touchez pour déplier.
+          {t(
+            "Un mois, puis chaque hôtel, puis chaque sortie. Touchez pour déplier.",
+            "Each month, then each hotel, then each outing. Tap to expand."
+          )}
         </p>
         {history.length === 0 ? (
           <div className="py-8 text-center">
@@ -298,7 +328,10 @@ export default function VenueCommissionsPage() {
               <Coins size={22} strokeWidth={1.5} className="text-amber-400" />
             </div>
             <p className="font-ui text-sm text-white/45 max-w-md mx-auto">
-              Les mois passés apparaîtront ici avec, pour chacun, ce qui a été reversé à chaque hôtel.
+              {t(
+                "Les mois passés apparaîtront ici avec, pour chacun, ce qui a été reversé à chaque hôtel.",
+                "Past months will appear here, each showing what was paid to every hotel."
+              )}
             </p>
           </div>
         ) : (
@@ -320,15 +353,20 @@ export default function VenueCommissionsPage() {
                       className={`shrink-0 text-white/40 transition-transform ${isOpen ? "rotate-180" : ""}`}
                     />
                     <div className="min-w-0 flex-1">
-                      <p className="font-ui text-sm font-semibold text-white">{monthLabel(m.period)}</p>
+                      <p className="font-ui text-sm font-semibold text-white">{monthLabel(m.period, locale)}</p>
                       <p className="font-ui text-xs text-white/45">
-                        {m.rows.length} sortie{m.rows.length > 1 ? "s" : ""} · {m.hotels.length} hôtel{m.hotels.length > 1 ? "s" : ""}
+                        {t(
+                          `${m.rows.length} sortie${m.rows.length > 1 ? "s" : ""} · ${m.hotels.length} hôtel${m.hotels.length > 1 ? "s" : ""}`,
+                          `${m.rows.length} outing${m.rows.length === 1 ? "" : "s"} · ${m.hotels.length} hotel${m.hotels.length === 1 ? "" : "s"}`
+                        )}
                       </p>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className="font-display text-base text-white tabular-nums">{mad(m.commission)}</p>
+                      <p className="font-display text-base text-white tabular-nums">{mad(m.commission, locale)}</p>
                       <p className={`font-ui text-[11px] ${remaining > 0 ? "text-amber-300" : "text-emerald-300"}`}>
-                        {remaining > 0 ? `${mad(remaining)} à régler` : "réglé"}
+                        {remaining > 0
+                          ? t(`${mad(remaining, locale)} à régler`, `${mad(remaining, locale)} due`)
+                          : t("réglé", "settled")}
                       </p>
                     </div>
                   </button>
@@ -347,10 +385,10 @@ export default function VenueCommissionsPage() {
       <div className="flex items-start gap-3 rounded-2xl border border-amber-400/15 bg-amber-500/[0.07] backdrop-blur-xl p-4">
         <Percent size={16} strokeWidth={1.5} className="text-amber-400 shrink-0 mt-0.5" />
         <p className="font-ui text-xs leading-relaxed text-white/60 max-w-2xl">
-          Vous reversez un pourcentage du montant réellement dépensé, 10 % par défaut, uniquement sur les
-          clients apportés par un hôtel du réseau. La commission se calcule dès que l&apos;addition est saisie
-          ou remontée par votre caisse. Les réservations de votre portail direct et celles prises par vous-même
-          ne sont jamais commissionnées. Le même détail, ligne par ligne, est celui que voit l&apos;hôtel.
+          {t(
+            "Vous reversez un pourcentage du montant réellement dépensé, 10 % par défaut, uniquement sur les clients apportés par un hôtel du réseau. La commission se calcule dès que l'addition est saisie ou remontée par votre caisse. Les réservations de votre portail direct et celles prises par vous-même ne sont jamais commissionnées. Le même détail, ligne par ligne, est celui que voit l'hôtel.",
+            "You pay a percentage of the amount actually spent, 10% by default, only on guests sent by a hotel in the network. Commission is calculated as soon as the bill is entered or synced from your POS. Reservations from your direct portal and those you take yourself are never commissioned. The hotel sees exactly the same line-by-line breakdown."
+          )}
         </p>
       </div>
     </div>
@@ -368,6 +406,8 @@ function HotelList({
   open: Set<string>;
   toggle: (key: string) => void;
 }) {
+  const t = useT();
+  const locale = useLocale();
   return (
     <ul className="space-y-2">
       {month.hotels.map((h) => {
@@ -388,20 +428,23 @@ function HotelList({
               <div className="min-w-0 flex-1">
                 <p className="font-ui text-sm font-semibold text-white truncate">{h.name}</p>
                 <p className="font-ui text-xs text-white/45">
-                  {h.rows.length} sortie{h.rows.length > 1 ? "s" : ""} · {mad(h.spent)} dépensés
+                  {t(
+                    `${h.rows.length} sortie${h.rows.length > 1 ? "s" : ""} · ${mad(h.spent, locale)} dépensés`,
+                    `${h.rows.length} outing${h.rows.length === 1 ? "" : "s"} · ${mad(h.spent, locale)} spent`
+                  )}
                 </p>
               </div>
               <div className="text-right shrink-0">
-                <p className="font-display text-base text-amber-300 tabular-nums">{mad(h.commission)}</p>
+                <p className="font-display text-base text-amber-300 tabular-nums">{mad(h.commission, locale)}</p>
                 {s ? (
                   <p className="font-ui inline-flex items-center gap-1 text-[11px] text-emerald-300">
                     <Check size={11} strokeWidth={2.5} />
-                    réglé le {new Date(s.settled_at).toLocaleDateString("fr-FR")}
+                    {t("réglé le", "settled on")} {new Date(s.settled_at).toLocaleDateString(intlLocale(locale))}
                   </p>
                 ) : (
                   <p className="font-ui inline-flex items-center gap-1 text-[11px] text-amber-300/90">
                     <Clock size={11} strokeWidth={2} />
-                    à régler
+                    {t("à régler", "due")}
                   </p>
                 )}
               </div>
@@ -421,11 +464,11 @@ function HotelList({
                         {r.service_name && <span className="text-blue-300/80"> · {r.service_name}</span>}
                       </p>
                       <p className="font-ui text-xs text-white/45">
-                        {fmtDate(r.reservation_date)} · {mad(r.amount_spent ?? 0)} dépensés · {Math.round(r.commission_rate * 100)} %
-                        {r.amount_source === "pos" ? " · caisse" : ""}
+                        {fmtDate(r.reservation_date, locale)} · {mad(r.amount_spent ?? 0, locale)} {t("dépensés", "spent")} · {Math.round(r.commission_rate * 100)}{t(" %", "%")}
+                        {r.amount_source === "pos" ? t(" · caisse", " · POS") : ""}
                       </p>
                     </div>
-                    <span className="font-display shrink-0 text-sm text-amber-300 tabular-nums">{mad(r.commission)}</span>
+                    <span className="font-display shrink-0 text-sm text-amber-300 tabular-nums">{mad(r.commission, locale)}</span>
                   </li>
                 ))}
               </ul>

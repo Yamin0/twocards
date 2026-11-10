@@ -7,9 +7,10 @@ import { Avatar, Card, Icon, ListRow, Screen } from '@/components/venue/ui'
 import { BottomTabInset, Light } from '@/constants/theme'
 import { useAuth } from '@/lib/auth-context'
 import { useBadgeCounts } from '@/lib/badges'
+import { useT, type Translate } from '@/lib/i18n'
 import { pushStatus, registerPush, type PushStatus } from '@/lib/push'
 import { signOut as signOutEverywhere } from '@/lib/sign-out'
-import { HUB, isVenueTabRole, roleLabels, roleTabs, WEB_PAGES } from '@/lib/site'
+import { getHub, getRoleLabels, getWebPages, isVenueTabRole, roleTabs } from '@/lib/site'
 
 /* Troisième onglet, commun à tous les rôles : le compte, les
    notifications, puis chaque section de l'espace. Toucher le compte ouvre
@@ -17,16 +18,17 @@ import { HUB, isVenueTabRole, roleLabels, roleTabs, WEB_PAGES } from '@/lib/site
 
 const CONTACT_EMAIL = 'contact@twocardspro.com'
 
-const statusLabels: Record<PushStatus, string> = {
-  granted: 'Activées',
-  denied: 'Refusées, toucher pour ouvrir les réglages',
-  undetermined: 'Toucher pour activer',
-  unsupported: 'Indisponibles sur cet appareil',
-}
+const getStatusLabels = (t: Translate): Record<PushStatus, string> => ({
+  granted: t('Activées', 'On'),
+  denied: t('Refusées, toucher pour ouvrir les réglages', 'Blocked, tap to open Settings'),
+  undetermined: t('Toucher pour activer', 'Tap to turn on'),
+  unsupported: t('Indisponibles sur cet appareil', 'Not available on this device'),
+})
 
 export default function HubTab() {
   const { session, role, tabRole, fullName, venueName, avatarUrl } = useAuth()
   const router = useRouter()
+  const t = useT()
   const counts = useBadgeCounts()
   /* Pastilles sur les lignes qui attendent quelque chose. */
   const badgeFor = (route?: string, path?: string) =>
@@ -61,28 +63,38 @@ export default function HubTab() {
   }, [userId, push])
 
   const openWeb = (path: string) =>
-    router.push({ pathname: '/web', params: { path, title: WEB_PAGES[path] ?? '' } })
+    router.push({ pathname: '/web', params: { path, title: getWebPages(t)[path] ?? '' } })
 
   const openSettings = () =>
     venue ? router.push('/venue/settings') : openWeb(roleTabs[tabRole].settings)
 
   const signOut = () =>
-    Alert.alert('Se déconnecter ?', 'Vous ne recevrez plus de notifications sur ce téléphone.', [
-      { text: 'Rester', style: 'cancel' },
-      { text: 'Se déconnecter', style: 'destructive', onPress: () => void signOutEverywhere() },
-    ])
+    Alert.alert(
+      t('Se déconnecter ?', 'Log out?'),
+      t('Vous ne recevrez plus de notifications sur ce téléphone.', "You'll stop receiving notifications on this phone."),
+      [
+        { text: t('Rester', 'Stay'), style: 'cancel' },
+        { text: t('Se déconnecter', 'Log out'), style: 'destructive', onPress: () => void signOutEverywhere() },
+      ]
+    )
 
   const requestDeletion = () => {
-    const subject = encodeURIComponent('Suppression de mon compte twocards')
+    const subject = encodeURIComponent(t('Suppression de mon compte twocards', 'Delete my twocards account'))
     const body = encodeURIComponent(
-      `Bonjour,\n\nJe demande la suppression de mon compte twocards et des données associées.\n\nCompte : ${email}\n\nMerci.`
+      t(
+        `Bonjour,\n\nJe demande la suppression de mon compte twocards et des données associées.\n\nCompte : ${email}\n\nMerci.`,
+        `Hello,\n\nI would like my twocards account and all associated data to be deleted.\n\nAccount: ${email}\n\nThank you.`
+      )
     )
     Linking.openURL(`mailto:${CONTACT_EMAIL}?subject=${subject}&body=${body}`).catch(() =>
-      Alert.alert('Aucune application de messagerie', `Écrivez à ${CONTACT_EMAIL} depuis votre adresse ${email}.`)
+      Alert.alert(
+        t('Aucune application de messagerie', 'No email app'),
+        t(`Écrivez à ${CONTACT_EMAIL} depuis votre adresse ${email}.`, `Write to ${CONTACT_EMAIL} from your address ${email}.`)
+      )
     )
   }
 
-  const spaceLabel = tabRole === 'activite' ? 'Activités & services' : roleLabels[role]
+  const spaceLabel = tabRole === 'activite' ? t('Activités & services', 'Activities & services') : getRoleLabels(t)[role]
 
   return (
     <Screen>
@@ -95,13 +107,13 @@ export default function HubTab() {
             <Avatar name={fullName ?? venueName ?? 'T'} size={48} uri={avatarUrl} />
             <View style={styles.profileText}>
               <Text style={styles.profileName} numberOfLines={1}>
-                {venueName ?? fullName ?? 'Votre espace'}
+                {venueName ?? fullName ?? t('Votre espace', 'Your workspace')}
               </Text>
               <Text style={styles.profileHint} numberOfLines={1}>
                 {fullName ? `${fullName} · ` : ''}
                 {spaceLabel}
               </Text>
-              <Text style={styles.profileLink}>Voir le profil et les paramètres</Text>
+              <Text style={styles.profileLink}>{t('Voir le profil et les paramètres', 'View profile and settings')}</Text>
             </View>
             <Icon name="chevron-right" size={18} color={Light.faint} />
           </Card>
@@ -111,8 +123,8 @@ export default function HubTab() {
           <ListRow
             first
             icon="bell"
-            label="Notifications push"
-            hint={push ? statusLabels[push] : 'Vérification…'}
+            label={t('Notifications push', 'Push notifications')}
+            hint={push ? getStatusLabels(t)[push] : t('Vérification…', 'Checking…')}
             onPress={push === 'granted' || push === 'unsupported' ? undefined : togglePush}
             right={
               <View style={[styles.dot, { backgroundColor: push === 'granted' ? Light.success : Light.warning }]} />
@@ -120,7 +132,7 @@ export default function HubTab() {
           />
         </Card>
 
-        {HUB[tabRole].map((g) => (
+        {getHub(t)[tabRole].map((g) => (
           <View key={g.title}>
             <Text style={styles.groupTitle}>{g.title}</Text>
             <Card style={styles.group}>
@@ -149,10 +161,10 @@ export default function HubTab() {
         ))}
 
         <Card style={styles.group}>
-          <ListRow first icon="log-out" label="Se déconnecter" tone="danger" onPress={signOut} />
+          <ListRow first icon="log-out" label={t('Se déconnecter', 'Log out')} tone="danger" onPress={signOut} />
         </Card>
         <Pressable onPress={requestDeletion} style={({ pressed }) => [styles.quiet, pressed && styles.pressed]}>
-          <Text style={styles.quietText}>Demander la suppression de mon compte</Text>
+          <Text style={styles.quietText}>{t('Demander la suppression de mon compte', 'Request account deletion')}</Text>
         </Pressable>
         <Text style={styles.version}>twocards · v{version}</Text>
       </ScrollView>

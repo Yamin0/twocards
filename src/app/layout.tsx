@@ -3,6 +3,8 @@ import { Manrope, Inter, Nunito } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 import { ImpersonationBanner } from "@/components/shared/impersonation-banner";
+import { LocaleProvider } from "@/lib/i18n/client";
+import { getLocale } from "@/lib/i18n/server";
 
 const manrope = Manrope({
   variable: "--font-manrope",
@@ -74,35 +76,46 @@ export const viewport: Viewport = {
   themeColor: "#0a0a0a",
 };
 
-export const metadata: Metadata = {
-  metadataBase: new URL("https://twocardspro.com"),
-  title: "twocards. | Un seul QR code, de la chambre à la commission",
-  description:
-    "Un QR en chambre, un lien par e-mail ou WhatsApp : votre client découvre votre sélection, réserve en quelques secondes, et vous suivez tout, arrivée, facture vérifiée, commission.",
-  openGraph: {
-    type: "website",
-    locale: "fr_FR",
-    siteName: "twocards.",
-    title: "twocards. | Le channel manager des concierges & RP",
-    description:
-      "Chaque recommandation devient une réservation traçable : attribution, acomptes, check-in, factures vérifiées et commissions automatisées.",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "twocards. | Le channel manager des concierges & RP",
-    description:
-      "Chaque recommandation devient une réservation traçable : attribution, acomptes, check-in, factures vérifiées et commissions automatisées.",
-  },
-};
+/* Titre et description dans la langue du visiteur. */
+export async function generateMetadata(): Promise<Metadata> {
+  const en = (await getLocale()) === "en";
+  const title = en
+    ? "twocards. | One QR code, from the room to the commission"
+    : "twocards. | Un seul QR code, de la chambre à la commission";
+  const description = en
+    ? "A QR code in the room, a link by email or WhatsApp: your guest discovers your selection, books in seconds, and you track everything: arrival, verified bill, commission."
+    : "Un QR en chambre, un lien par e-mail ou WhatsApp : votre client découvre votre sélection, réserve en quelques secondes, et vous suivez tout, arrivée, facture vérifiée, commission.";
+  const ogTitle = en
+    ? "twocards. | The channel manager for concierges & PRs"
+    : "twocards. | Le channel manager des concierges & RP";
+  const ogDescription = en
+    ? "Every recommendation becomes a trackable booking: attribution, deposits, check-in, verified bills and automated commissions."
+    : "Chaque recommandation devient une réservation traçable : attribution, acomptes, check-in, factures vérifiées et commissions automatisées.";
+  return {
+    metadataBase: new URL("https://twocardspro.com"),
+    title,
+    description,
+    openGraph: {
+      type: "website",
+      locale: en ? "en_GB" : "fr_FR",
+      alternateLocale: en ? "fr_FR" : "en_GB",
+      siteName: "twocards.",
+      title: ogTitle,
+      description: ogDescription,
+    },
+    twitter: { card: "summary_large_image", title: ogTitle, description: ogDescription },
+  };
+}
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
   return (
     <html
-      lang="fr"
+      lang={locale}
       className={`${manrope.variable} ${inter.variable} ${nunito.variable} ${gotham.variable} ${suisse.variable} ${satoshi.variable} scroll-smooth`}
     >
       <body>
@@ -116,8 +129,10 @@ export default function RootLayout({
               "try{if(navigator.userAgent.indexOf('TwocardsApp')>-1)document.documentElement.classList.add('tc-app')}catch(e){}",
           }}
         />
-        <ImpersonationBanner />
-        {children}
+        <LocaleProvider locale={locale}>
+          <ImpersonationBanner />
+          {children}
+        </LocaleProvider>
       </body>
     </html>
   );

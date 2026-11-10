@@ -3,6 +3,8 @@
 import { useMemo, useState } from "react";
 import { ArrowRight, Check, Loader2, RotateCcw } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { intlLocale, type Locale } from "@/lib/i18n";
+import { useIntlLocale, useLocale, useT } from "@/lib/i18n/client";
 
 /* Commissions vues du réseau : qui doit combien à qui. Chaque sortie
    apportée par un QR d'hôtel, avec addition connue, crée une dette de
@@ -52,15 +54,16 @@ export const currentPeriod = () => {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
 };
 
-export const monthLabel = (period: string) => {
-  const label = new Date(`${period}-01T00:00:00`).toLocaleDateString("fr-FR", {
+export const monthLabel = (period: string, locale: Locale = "fr") => {
+  const label = new Date(`${period}-01T00:00:00`).toLocaleDateString(intlLocale(locale), {
     month: "long",
     year: "numeric",
   });
   return label.charAt(0).toUpperCase() + label.slice(1);
 };
 
-export const mad = (n: number) => `${Math.round(n).toLocaleString("fr-FR")} MAD`;
+export const mad = (n: number, locale: Locale = "fr") =>
+  `${Math.round(n).toLocaleString(intlLocale(locale))} MAD`;
 
 type Pair = {
   key: string;
@@ -99,6 +102,9 @@ export function CommissionsAdmin({
   onChanged: (msg: string) => void;
   onError: (msg: string) => void;
 }) {
+  const t = useT();
+  const locale = useLocale();
+  const intl = useIntlLocale();
   const due = useMemo(() => ledger.filter(isDue), [ledger]);
   const periods = useMemo(
     () => [...new Set(due.map((r) => r.period))].sort().reverse(),
@@ -129,7 +135,7 @@ export function CommissionsAdmin({
         venueOwnerId: r.venue_owner_id,
         venueLabel: r.venue_account ?? r.venue_name,
         hotelId: r.hotel_id,
-        hotelLabel: r.hotel_name ?? "Hôtel partenaire",
+        hotelLabel: r.hotel_name ?? t("Hôtel partenaire", "Partner hotel"),
         count: 0,
         spent: 0,
         commission: 0,
@@ -157,7 +163,7 @@ export function CommissionsAdmin({
     return [...map.values()].sort((a, b) => b.commission - a.commission);
   };
   const venues = sides((r) => ({ id: r.venue_owner_id, label: r.venue_account ?? r.venue_name }));
-  const hotels = sides((r) => ({ id: r.hotel_id, label: r.hotel_name ?? "Hôtel partenaire" }));
+  const hotels = sides((r) => ({ id: r.hotel_id, label: r.hotel_name ?? t("Hôtel partenaire", "Partner hotel") }));
 
   const total = rows.reduce((s, r) => s + r.commission, 0);
   const settledTotal = rows.filter(isSettled).reduce((s, r) => s + r.commission, 0);
@@ -177,10 +183,15 @@ export function CommissionsAdmin({
       );
     setBusy(null);
     if (error) {
-      onError("Impossible de noter le règlement.");
+      onError(t("Impossible de noter le règlement.", "Couldn’t record the settlement."));
       return;
     }
-    onChanged(`${p.venueLabel} → ${p.hotelLabel} : ${mad(p.commission)} notés réglés pour ${monthLabel(period)}`);
+    onChanged(
+      t(
+        `${p.venueLabel} → ${p.hotelLabel} : ${mad(p.commission, locale)} notés réglés pour ${monthLabel(period, locale)}`,
+        `${p.venueLabel} → ${p.hotelLabel}: ${mad(p.commission, locale)} marked as settled for ${monthLabel(period, locale)}`
+      )
+    );
   };
 
   const unmark = async (p: Pair) => {
@@ -190,10 +201,10 @@ export function CommissionsAdmin({
     const { error } = await createClient().from("commission_settlements").delete().eq("id", s.id);
     setBusy(null);
     if (error) {
-      onError("Impossible d'annuler le règlement.");
+      onError(t("Impossible d'annuler le règlement.", "Couldn’t undo the settlement."));
       return;
     }
-    onChanged("Règlement annulé");
+    onChanged(t("Règlement annulé", "Settlement undone"));
   };
 
   const th = "font-ui px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/50 text-left";
@@ -206,23 +217,23 @@ export function CommissionsAdmin({
     <div className="space-y-4">
       {/* Mois */}
       <div className={`${panel} p-4 sm:p-5`}>
-        <p className="font-ui mb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-white/45">Période</p>
+        <p className="font-ui mb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-white/45">{t("Période", "Period")}</p>
         <div className="flex flex-wrap gap-1.5">
           {periods.map((p) => (
             <button key={p} type="button" onClick={() => setPeriod(p)} className={tabBtn(period === p)}>
-              {monthLabel(p)}
+              {monthLabel(p, locale)}
             </button>
           ))}
           <button type="button" onClick={() => setPeriod("all")} className={tabBtn(period === "all")}>
-            Tout
+            {t("Tout", "All")}
           </button>
         </div>
         <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {[
-            { label: "Commissions", value: mad(total), hint: `${rows.length} sortie${rows.length > 1 ? "s" : ""}` },
-            { label: "Réglées", value: mad(settledTotal), hint: "notées par twocards" },
-            { label: "Restant à régler", value: mad(total - settledTotal), hint: "à collecter puis reverser" },
-            { label: "Couples", value: String(pairs.length), hint: "établissement → hôtel" },
+            { label: t("Commissions", "Commissions"), value: mad(total, locale), hint: t(`${rows.length} sortie${rows.length > 1 ? "s" : ""}`, `${rows.length} outing${rows.length === 1 ? "" : "s"}`) },
+            { label: t("Réglées", "Settled"), value: mad(settledTotal, locale), hint: t("notées par twocards", "recorded by twocards") },
+            { label: t("Restant à régler", "Outstanding"), value: mad(total - settledTotal, locale), hint: t("à collecter puis reverser", "to collect, then pay out") },
+            { label: t("Couples", "Pairs"), value: String(pairs.length), hint: t("établissement → hôtel", "venue → hotel") },
           ].map((k) => (
             <div key={k.label} className="rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-3">
               <p className="font-ui text-[10px] font-bold uppercase tracking-wider text-white/45">{k.label}</p>
@@ -238,37 +249,37 @@ export function CommissionsAdmin({
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap gap-1.5">
             <button type="button" onClick={() => setView("pairs")} className={tabBtn(view === "pairs")}>
-              Qui doit à qui
+              {t("Qui doit à qui", "Who owes whom")}
             </button>
             <button type="button" onClick={() => setView("venues")} className={tabBtn(view === "venues")}>
-              Établissements
+              {t("Établissements", "Venues")}
             </button>
             <button type="button" onClick={() => setView("hotels")} className={tabBtn(view === "hotels")}>
-              Hôtels
+              {t("Hôtels", "Hotels")}
             </button>
           </div>
           <p className="font-ui text-xs text-white/40">
             {view === "pairs"
-              ? "L'établissement paie, twocards reverse à l'hôtel."
+              ? t("L'établissement paie, twocards reverse à l'hôtel.", "The venue pays; twocards passes it on to the hotel.")
               : view === "venues"
-                ? "Ce que chaque établissement doit."
-                : "Ce que chaque hôtel doit recevoir."}
+                ? t("Ce que chaque établissement doit.", "What each venue owes.")
+                : t("Ce que chaque hôtel doit recevoir.", "What each hotel is owed.")}
           </p>
         </div>
 
         {rows.length === 0 ? (
-          <p className="py-8 text-center font-ui text-sm text-white/40">Aucune commission sur cette période.</p>
+          <p className="py-8 text-center font-ui text-sm text-white/40">{t("Aucune commission sur cette période.", "No commissions for this period.")}</p>
         ) : view === "pairs" ? (
           <div className="tc-stack overflow-x-auto rounded-xl border border-white/[0.08]">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-white/10">
-                  <th className={th}>Établissement</th>
-                  <th className={th}>Hôtel</th>
-                  <th className={th}>Sorties</th>
-                  <th className={th}>Dépensé</th>
-                  <th className={th}>Commission</th>
-                  <th className={th}>Règlement</th>
+                  <th className={th}>{t("Établissement", "Venue")}</th>
+                  <th className={th}>{t("Hôtel", "Hotel")}</th>
+                  <th className={th}>{t("Sorties", "Outings")}</th>
+                  <th className={th}>{t("Dépensé", "Spent")}</th>
+                  <th className={th}>{t("Commission", "Commission")}</th>
+                  <th className={th}>{t("Règlement", "Settlement")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -280,30 +291,30 @@ export function CommissionsAdmin({
                       <td data-head className="px-4 py-3">
                         <p className="font-ui text-sm font-semibold text-white">{p.venueLabel}</p>
                         {!p.venueOwnerId && (
-                          <p className="font-ui text-[11px] text-amber-300/90">fiche sans compte relié</p>
+                          <p className="font-ui text-[11px] text-amber-300/90">{t("fiche sans compte relié", "listing with no linked account")}</p>
                         )}
                       </td>
-                      <td data-label="Hôtel" className="px-4 py-3">
+                      <td data-label={t("Hôtel", "Hotel")} className="px-4 py-3">
                         <span className="font-ui inline-flex items-center gap-1.5 text-sm text-white/80">
                           <ArrowRight size={12} strokeWidth={2} className="text-white/35" />
                           {p.hotelLabel}
                         </span>
                       </td>
-                      <td data-label="Sorties" className="font-ui px-4 py-3 text-sm text-white/70 tabular-nums">{p.count}</td>
-                      <td data-label="Dépensé" className="font-ui px-4 py-3 text-sm text-white/70 tabular-nums whitespace-nowrap">{mad(p.spent)}</td>
-                      <td data-label="Commission" className="font-display px-4 py-3 text-sm text-amber-300 tabular-nums whitespace-nowrap">{mad(p.commission)}</td>
+                      <td data-label={t("Sorties", "Outings")} className="font-ui px-4 py-3 text-sm text-white/70 tabular-nums">{p.count}</td>
+                      <td data-label={t("Dépensé", "Spent")} className="font-ui px-4 py-3 text-sm text-white/70 tabular-nums whitespace-nowrap">{mad(p.spent, locale)}</td>
+                      <td data-label={t("Commission", "Commission")} className="font-display px-4 py-3 text-sm text-amber-300 tabular-nums whitespace-nowrap">{mad(p.commission, locale)}</td>
                       <td data-actions className="px-4 py-3">
                         {s ? (
                           <div className="flex items-center justify-end gap-2">
                             <span className="font-ui inline-flex items-center gap-1 text-xs text-emerald-300">
                               <Check size={12} strokeWidth={2.5} />
-                              réglé le {new Date(s.settled_at).toLocaleDateString("fr-FR")}
+                              {t("réglé le", "settled on")} {new Date(s.settled_at).toLocaleDateString(intl)}
                             </span>
                             <button
                               type="button"
                               onClick={() => unmark(p)}
                               disabled={busy === p.key}
-                              aria-label="Annuler le règlement"
+                              aria-label={t("Annuler le règlement", "Undo settlement")}
                               className="flex h-8 w-8 items-center justify-center rounded-lg text-white/40 hover:bg-white/10 hover:text-white disabled:opacity-50"
                             >
                               {busy === p.key ? <Loader2 size={13} className="animate-spin" /> : <RotateCcw size={13} strokeWidth={1.75} />}
@@ -314,11 +325,11 @@ export function CommissionsAdmin({
                             type="button"
                             onClick={() => markSettled(p)}
                             disabled={!canSettle || busy === p.key}
-                            title={!canSettle ? (period === "all" ? "Choisissez un mois" : "Fiche sans compte relié") : undefined}
+                            title={!canSettle ? (period === "all" ? t("Choisissez un mois", "Pick a month") : t("Fiche sans compte relié", "Listing with no linked account")) : undefined}
                             className="font-ui inline-flex h-8 items-center gap-1.5 rounded-full bg-white px-3 text-xs font-bold text-black transition-colors hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-40"
                           >
                             {busy === p.key ? <Loader2 size={13} className="animate-spin" /> : <Check size={13} strokeWidth={2.5} />}
-                            Marquer réglé
+                            {t("Marquer réglé", "Mark as settled")}
                           </button>
                         )}
                       </td>
@@ -333,12 +344,12 @@ export function CommissionsAdmin({
             <table className="w-full">
               <thead>
                 <tr className="border-b border-white/10">
-                  <th className={th}>{view === "venues" ? "Établissement" : "Hôtel"}</th>
-                  <th className={th}>Sorties</th>
-                  <th className={th}>Dépensé</th>
-                  <th className={th}>{view === "venues" ? "Doit payer" : "Doit recevoir"}</th>
-                  <th className={th}>Réglé</th>
-                  <th className={th}>Restant</th>
+                  <th className={th}>{view === "venues" ? t("Établissement", "Venue") : t("Hôtel", "Hotel")}</th>
+                  <th className={th}>{t("Sorties", "Outings")}</th>
+                  <th className={th}>{t("Dépensé", "Spent")}</th>
+                  <th className={th}>{view === "venues" ? t("Doit payer", "Owes") : t("Doit recevoir", "Is owed")}</th>
+                  <th className={th}>{t("Réglé", "Settled")}</th>
+                  <th className={th}>{t("Restant", "Outstanding")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -346,13 +357,13 @@ export function CommissionsAdmin({
                   <tr key={s.key} className="border-b border-white/[0.06] last:border-0">
                     <td data-head className="px-4 py-3">
                       <p className="font-ui text-sm font-semibold text-white">{s.label}</p>
-                      {!s.id && <p className="font-ui text-[11px] text-amber-300/90">sans compte relié</p>}
+                      {!s.id && <p className="font-ui text-[11px] text-amber-300/90">{t("sans compte relié", "no linked account")}</p>}
                     </td>
-                    <td data-label="Sorties" className="font-ui px-4 py-3 text-sm text-white/70 tabular-nums">{s.count}</td>
-                    <td data-label="Dépensé" className="font-ui px-4 py-3 text-sm text-white/70 tabular-nums whitespace-nowrap">{mad(s.spent)}</td>
-                    <td data-label={view === "venues" ? "Doit payer" : "Doit recevoir"} className="font-display px-4 py-3 text-sm text-amber-300 tabular-nums whitespace-nowrap">{mad(s.commission)}</td>
-                    <td data-label="Réglé" className="font-ui px-4 py-3 text-sm text-emerald-300 tabular-nums whitespace-nowrap">{mad(s.settledAmount)}</td>
-                    <td data-label="Restant" className="font-ui px-4 py-3 text-sm text-white tabular-nums whitespace-nowrap">{mad(s.commission - s.settledAmount)}</td>
+                    <td data-label={t("Sorties", "Outings")} className="font-ui px-4 py-3 text-sm text-white/70 tabular-nums">{s.count}</td>
+                    <td data-label={t("Dépensé", "Spent")} className="font-ui px-4 py-3 text-sm text-white/70 tabular-nums whitespace-nowrap">{mad(s.spent, locale)}</td>
+                    <td data-label={view === "venues" ? t("Doit payer", "Owes") : t("Doit recevoir", "Is owed")} className="font-display px-4 py-3 text-sm text-amber-300 tabular-nums whitespace-nowrap">{mad(s.commission, locale)}</td>
+                    <td data-label={t("Réglé", "Settled")} className="font-ui px-4 py-3 text-sm text-emerald-300 tabular-nums whitespace-nowrap">{mad(s.settledAmount, locale)}</td>
+                    <td data-label={t("Restant", "Outstanding")} className="font-ui px-4 py-3 text-sm text-white tabular-nums whitespace-nowrap">{mad(s.commission - s.settledAmount, locale)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -362,9 +373,18 @@ export function CommissionsAdmin({
       </div>
 
       <p className="font-ui text-xs leading-relaxed text-white/40">
-        Un règlement noté vaut pour les deux mouvements : l&apos;établissement a payé, l&apos;hôtel a été reversé.
-        Il apparaît aussitôt comme « réglé » dans l&apos;espace de chacun. Une fiche « sans compte relié » est une adresse
-        du catalogue dont personne ne gère encore l&apos;espace : reliez-la depuis le catalogue pour pouvoir noter ses règlements.
+        {t(
+          <>
+            Un règlement noté vaut pour les deux mouvements : l&apos;établissement a payé, l&apos;hôtel a été reversé.
+            Il apparaît aussitôt comme « réglé » dans l&apos;espace de chacun. Une fiche « sans compte relié » est une adresse
+            du catalogue dont personne ne gère encore l&apos;espace : reliez-la depuis le catalogue pour pouvoir noter ses règlements.
+          </>,
+          <>
+            A recorded settlement covers both legs: the venue has paid and the hotel has been paid out.
+            It shows as &ldquo;settled&rdquo; in both dashboards straight away. A listing with &ldquo;no linked account&rdquo; is a catalogue
+            place nobody manages yet: link it from the catalogue to record its settlements.
+          </>
+        )}
       </p>
     </div>
   );

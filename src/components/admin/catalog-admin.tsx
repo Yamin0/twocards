@@ -8,6 +8,7 @@ import { CATEGORY_KEYS, CATEGORY_LABELS, fallbackImage, type GuestCategoryKey } 
 import { EMPTY_DRAFT, OfferEditor, type OfferDraft } from "@/components/hotel/offer-editor";
 import { ConfirmDialog, Segmented, Select, Switch } from "@/components/hotel/ui";
 import { cn } from "@/lib/utils";
+import { useLocale, useT } from "@/lib/i18n/client";
 
 /* Catalogue du réseau twocards, dans la console d'administration : les
    adresses proposées à tous les hôtels (filtrées par ville côté client).
@@ -63,6 +64,11 @@ export function CatalogAdmin({
   /* Incrémenté par le bouton Actualiser de la console : relance la lecture. */
   reloadKey?: number;
 }) {
+  const t = useT();
+  const locale = useLocale();
+  /* Libellé affiché de la catégorie (la clé en base ne change pas). */
+  const categoryLabel = (k: GuestCategoryKey) =>
+    t(CATEGORY_LABELS[k], k === "activites" ? "Activities" : CATEGORY_LABELS[k]);
   const [rows, setRows] = useState<CatalogRow[] | null>(null);
   const [filter, setFilter] = useState<Filter>("toutes");
   const [city, setCity] = useState("toutes");
@@ -85,21 +91,21 @@ export function CatalogAdmin({
 
   const load = useCallback(async () => {
     const next = await fetchRows();
-    if (next === null) onError("Impossible de charger le catalogue");
+    if (next === null) onError(t("Impossible de charger le catalogue", "Couldn’t load the catalogue"));
     setRows(next ?? []);
-  }, [fetchRows, onError]);
+  }, [fetchRows, onError, t]);
 
   useEffect(() => {
     let cancelled = false;
     fetchRows().then((next) => {
       if (cancelled) return;
-      if (next === null) onError("Impossible de charger le catalogue");
+      if (next === null) onError(t("Impossible de charger le catalogue", "Couldn’t load the catalogue"));
       setRows(next ?? []);
     });
     return () => {
       cancelled = true;
     };
-  }, [fetchRows, onError, reloadKey]);
+  }, [fetchRows, onError, reloadKey, t]);
 
   const cities = useMemo(
     () => [...new Set((rows ?? []).map((r) => r.city).filter((c): c is string => !!c))].sort(),
@@ -140,27 +146,31 @@ export function CatalogAdmin({
     setSaving(false);
     if (error) {
       return error.code === "23505"
-        ? "Cet identifiant existe déjà : choisissez-en un autre."
-        : `Impossible d'enregistrer : ${error.message}`;
+        ? t("Cet identifiant existe déjà : choisissez-en un autre.", "This ID is already taken: choose another one.")
+        : t(`Impossible d'enregistrer : ${error.message}`, `Couldn’t save: ${error.message}`);
     }
     setEditing(null);
-    onSaved(editing?.row ? "Adresse mise à jour" : "Adresse ajoutée au catalogue");
+    onSaved(editing?.row ? t("Adresse mise à jour", "Place updated") : t("Adresse ajoutée au catalogue", "Place added to the catalogue"));
     await load();
     return null;
   };
 
   const toggle = async (r: CatalogRow) => {
     const { error } = await createClient().from("catalog_offers").update({ active: !r.active }).eq("slug", r.slug);
-    if (error) onError("Échec de la mise à jour");
+    if (error) onError(t("Échec de la mise à jour", "Update failed"));
     else {
       setRows((prev) => (prev ?? []).map((x) => (x.slug === r.slug ? { ...x, active: !r.active } : x)));
-      onSaved(r.active ? `« ${r.name} » retirée du menu` : `« ${r.name} » proposée`);
+      onSaved(
+        r.active
+          ? t(`« ${r.name} » retirée du menu`, `“${r.name}” removed from the menu`)
+          : t(`« ${r.name} » proposée`, `“${r.name}” now on offer`)
+      );
     }
   };
 
   /* Ordre au sein d'une catégorie : on échange les sort_order de deux voisins. */
   const move = async (r: CatalogRow, dir: -1 | 1) => {
-    const siblings = (rows ?? []).filter((x) => x.category === r.category).sort((a, b) => a.sort_order - b.sort_order || a.name.localeCompare(b.name));
+    const siblings = (rows ?? []).filter((x) => x.category === r.category).sort((a, b) => a.sort_order - b.sort_order || a.name.localeCompare(b.name, locale));
     const i = siblings.findIndex((x) => x.slug === r.slug);
     const j = i + dir;
     if (j < 0 || j >= siblings.length) return;
@@ -173,7 +183,7 @@ export function CatalogAdmin({
       supabase.from("catalog_offers").update({ sort_order: a }).eq("slug", r.slug),
       supabase.from("catalog_offers").update({ sort_order: b }).eq("slug", other.slug),
     ]);
-    if (e1 || e2) onError("Échec du réordonnancement");
+    if (e1 || e2) onError(t("Échec du réordonnancement", "Reordering failed"));
     await load();
   };
 
@@ -181,10 +191,10 @@ export function CatalogAdmin({
     if (!toDelete) return;
     const { error } = await createClient().from("catalog_offers").delete().eq("slug", toDelete.slug);
     setToDelete(null);
-    if (error) onError("Échec de la suppression");
+    if (error) onError(t("Échec de la suppression", "Deletion failed"));
     else {
       setRows((prev) => (prev ?? []).filter((x) => x.slug !== toDelete.slug));
-      onSaved("Adresse supprimée du catalogue");
+      onSaved(t("Adresse supprimée du catalogue", "Place removed from the catalogue"));
     }
   };
 
@@ -198,11 +208,14 @@ export function CatalogAdmin({
             <BookOpen size={17} className="text-blue-300" />
           </div>
           <div>
-            <h2 className="text-lg font-semibold text-white">Catalogue réseau</h2>
+            <h2 className="text-lg font-semibold text-white">{t("Catalogue réseau", "Network catalogue")}</h2>
             <p className="text-xs text-white/35">
               {rows === null
-                ? "Chargement…"
-                : `${rows.length} adresse${rows.length > 1 ? "s" : ""} · ${activeCount} proposée${activeCount > 1 ? "s" : ""} aux hôtels, filtrées par ville`}
+                ? t("Chargement…", "Loading…")
+                : t(
+                    `${rows.length} adresse${rows.length > 1 ? "s" : ""} · ${activeCount} proposée${activeCount > 1 ? "s" : ""} aux hôtels, filtrées par ville`,
+                    `${rows.length} place${rows.length === 1 ? "" : "s"} · ${activeCount} offered to hotels, filtered by city`
+                  )}
             </p>
           </div>
         </div>
@@ -212,7 +225,7 @@ export function CatalogAdmin({
           className="flex items-center gap-2 rounded-xl bg-blue-500 px-4 py-2.5 text-xs font-semibold text-white transition-colors hover:bg-blue-600"
         >
           <Plus size={14} />
-          Nouvelle adresse
+          {t("Nouvelle adresse", "New place")}
         </button>
       </div>
 
@@ -222,8 +235,8 @@ export function CatalogAdmin({
           value={filter}
           onChange={setFilter}
           options={[
-            { value: "toutes", label: "Toutes", count: rows?.length ?? 0 },
-            ...CATEGORY_KEYS.map((k) => ({ value: k, label: CATEGORY_LABELS[k], count: (rows ?? []).filter((r) => r.category === k).length })),
+            { value: "toutes", label: t("Toutes", "All"), count: rows?.length ?? 0 },
+            ...CATEGORY_KEYS.map((k) => ({ value: k, label: categoryLabel(k), count: (rows ?? []).filter((r) => r.category === k).length })),
           ]}
         />
         <div className="flex flex-wrap items-center gap-2">
@@ -232,18 +245,18 @@ export function CatalogAdmin({
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Nom, étiquette, identifiant…"
+              placeholder={t("Nom, étiquette, identifiant…", "Name, tag, ID…")}
               className="h-9 w-56 rounded-lg border border-white/[0.1] bg-white/[0.05] pl-8 pr-3 text-xs text-white placeholder:text-white/25 focus:border-blue-400/40 focus:outline-none"
             />
           </div>
           <Select
-            label="Ville"
+            label={t("Ville", "City")}
             value={city}
             onChange={setCity}
             className="w-48"
             options={[
-              { value: "toutes", label: "Toutes les villes" },
-              { value: "partout", label: "Sans ville (partout)" },
+              { value: "toutes", label: t("Toutes les villes", "All cities") },
+              { value: "partout", label: t("Sans ville (partout)", "No city (everywhere)") },
               ...cities.map((c) => ({ value: c, label: c })),
             ]}
           />
@@ -252,7 +265,7 @@ export function CatalogAdmin({
 
       {rows !== null && shown.length === 0 && (
         <p className="py-8 text-center text-sm text-white/35">
-          {rows.length === 0 ? "Le catalogue est vide." : "Aucune adresse ne correspond."}
+          {rows.length === 0 ? t("Le catalogue est vide.", "The catalogue is empty.") : t("Aucune adresse ne correspond.", "No places match.")}
         </p>
       )}
 
@@ -274,15 +287,15 @@ export function CatalogAdmin({
                 <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
                   <p className="truncate text-sm font-bold text-white">{r.name}</p>
                   <span className="rounded-md bg-white/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white/60">
-                    {CATEGORY_LABELS[r.category]}
+                    {categoryLabel(r.category)}
                   </span>
-                  {!r.active && <span className="text-[10px] font-bold uppercase tracking-wider text-amber-300">Masquée</span>}
+                  {!r.active && <span className="text-[10px] font-bold uppercase tracking-wider text-amber-300">{t("Masquée", "Hidden")}</span>}
                 </div>
                 <p className="truncate text-xs text-white/45">
-                  {r.tag || "Sans étiquette"}
+                  {r.tag || t("Sans étiquette", "No tag")}
                   {" · "}
                   <span className="inline-flex items-center gap-0.5">
-                    <MapPin size={10} /> {r.city ?? "toutes villes"}
+                    <MapPin size={10} /> {r.city ?? t("toutes villes", "all cities")}
                   </span>
                   {r.price ? ` · ${r.price}` : ""}
                   {r.images?.length ? ` · ${r.images.length + 1} photos` : ""}
@@ -290,22 +303,22 @@ export function CatalogAdmin({
                 </p>
               </div>
               <div className="flex shrink-0 items-center gap-0.5">
-                <button type="button" onClick={() => move(r, -1)} aria-label="Monter" className="rounded-lg p-1.5 text-white/40 hover:bg-white/10 hover:text-white">
+                <button type="button" onClick={() => move(r, -1)} aria-label={t("Monter", "Move up")} className="rounded-lg p-1.5 text-white/40 hover:bg-white/10 hover:text-white">
                   <ArrowUp size={14} />
                 </button>
-                <button type="button" onClick={() => move(r, 1)} aria-label="Descendre" className="rounded-lg p-1.5 text-white/40 hover:bg-white/10 hover:text-white">
+                <button type="button" onClick={() => move(r, 1)} aria-label={t("Descendre", "Move down")} className="rounded-lg p-1.5 text-white/40 hover:bg-white/10 hover:text-white">
                   <ArrowDown size={14} />
                 </button>
                 <span className="mx-1 hidden sm:inline-flex">
-                  <Switch size="sm" checked={r.active} onChange={() => toggle(r)} label={`Proposer ${r.name}`} />
+                  <Switch size="sm" checked={r.active} onChange={() => toggle(r)} label={t(`Proposer ${r.name}`, `Offer ${r.name}`)} />
                 </span>
-                <button type="button" onClick={() => toggle(r)} aria-label={r.active ? "Masquer" : "Proposer"} className="rounded-lg p-1.5 text-white/40 hover:bg-white/10 hover:text-white sm:hidden">
+                <button type="button" onClick={() => toggle(r)} aria-label={r.active ? t("Masquer", "Hide") : t("Proposer", "Offer")} className="rounded-lg p-1.5 text-white/40 hover:bg-white/10 hover:text-white sm:hidden">
                   {r.active ? <EyeOff size={14} /> : <Eye size={14} />}
                 </button>
-                <button type="button" onClick={() => setEditing({ row: r })} aria-label="Modifier" className="rounded-lg p-1.5 text-white/60 hover:bg-white/10 hover:text-white">
+                <button type="button" onClick={() => setEditing({ row: r })} aria-label={t("Modifier", "Edit")} className="rounded-lg p-1.5 text-white/60 hover:bg-white/10 hover:text-white">
                   <Pencil size={14} />
                 </button>
-                <button type="button" onClick={() => setToDelete(r)} aria-label="Supprimer" className="rounded-lg p-1.5 text-white/40 hover:bg-red-500/15 hover:text-red-300">
+                <button type="button" onClick={() => setToDelete(r)} aria-label={t("Supprimer", "Delete")} className="rounded-lg p-1.5 text-white/40 hover:bg-red-500/15 hover:text-red-300">
                   <Trash2 size={14} />
                 </button>
               </div>
@@ -324,7 +337,7 @@ export function CatalogAdmin({
           saving={saving}
           userId={userId}
           uploadPrefix="catalog"
-          title={editing.row ? `Modifier « ${editing.row.name} »` : "Nouvelle adresse du catalogue"}
+          title={editing.row ? t(`Modifier « ${editing.row.name} »`, `Edit “${editing.row.name}”`) : t("Nouvelle adresse du catalogue", "New catalogue place")}
         />
       )}
 
@@ -333,9 +346,12 @@ export function CatalogAdmin({
         onCancel={() => setToDelete(null)}
         onConfirm={confirmDelete}
         danger
-        confirmLabel="Supprimer du catalogue"
-        title={toDelete ? `Supprimer « ${toDelete.name} » ?` : ""}
-        description="L'adresse disparaît du menu de tous les hôtels. Sa fiche établissement et les réservations passées sont conservées. Pour la retirer temporairement, désactivez-la plutôt."
+        confirmLabel={t("Supprimer du catalogue", "Remove from catalogue")}
+        title={toDelete ? t(`Supprimer « ${toDelete.name} » ?`, `Delete “${toDelete.name}”?`) : ""}
+        description={t(
+          "L'adresse disparaît du menu de tous les hôtels. Sa fiche établissement et les réservations passées sont conservées. Pour la retirer temporairement, désactivez-la plutôt.",
+          "The place disappears from every hotel’s menu. Its venue listing and past reservations are kept. To remove it temporarily, switch it off instead."
+        )}
       />
     </div>
   );

@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { getT } from "@/lib/i18n/server";
 
 export type OptoutState = {
   status: "idle" | "done" | "error";
@@ -21,11 +22,12 @@ export async function unsubscribe(
     .trim()
     .toLowerCase();
   const reason = String(formData.get("reason") ?? "").trim().slice(0, 500);
+  const t = await getT();
 
   if (!EMAIL.test(email) || email.length > 320) {
     return {
       status: "error",
-      message: "Cette adresse e-mail ne semble pas valide.",
+      message: t("Cette adresse e-mail ne semble pas valide.", "This email address doesn’t look valid."),
       email,
     };
   }
@@ -40,8 +42,10 @@ export async function unsubscribe(
   if (error && error.code !== ALREADY_OPTED_OUT) {
     return {
       status: "error",
-      message:
+      message: t(
         "L'enregistrement a échoué. Écrivez à contact@twocardspro.com, nous vous retirons manuellement.",
+        "We couldn’t save your request. Email contact@twocardspro.com and we’ll remove you manually.",
+      ),
       email,
     };
   }

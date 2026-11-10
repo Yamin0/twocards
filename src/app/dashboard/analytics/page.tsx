@@ -16,6 +16,8 @@ import {
   type VenueQrReservation,
 } from "@/hooks/use-venue-qr-reservations";
 import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
+import { useLocale, useT } from "@/lib/i18n/client";
+import { intlLocale, makeT, pick, type Locale, type Translate } from "@/lib/i18n";
 
 /* Analyses de l'établissement — tout est dérivé des réservations réelles
    (table qr_reservations, RLS déjà limitée à l'établissement connecté).
@@ -24,14 +26,14 @@ import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
 
 /* ---------- Périodes ---------- */
 
-const PERIODS = [
-  { key: "7j", label: "7 jours" },
-  { key: "30j", label: "30 jours" },
-  { key: "12m", label: "12 mois" },
-  { key: "tout", label: "Tout" },
-] as const;
+type PeriodKey = "7j" | "30j" | "12m" | "tout";
 
-type PeriodKey = (typeof PERIODS)[number]["key"];
+const getPeriods = (t: Translate): { key: PeriodKey; label: string }[] => [
+  { key: "7j", label: t("7 jours", "7 days") },
+  { key: "30j", label: t("30 jours", "30 days") },
+  { key: "12m", label: t("12 mois", "12 months") },
+  { key: "tout", label: t("Tout", "All time") },
+];
 
 const startOfDay = (d: Date) =>
   new Date(d.getFullYear(), d.getMonth(), d.getDate());
@@ -77,39 +79,55 @@ const isNoShow = (r: VenueQrReservation) =>
 /* Réservation qui compte dans le CA et les couverts. */
 const isCounted = (r: VenueQrReservation) => !isCancelled(r) && !isNoShow(r);
 
-const channelLabel = (source: string) =>
+const channelLabel = (source: string, t: Translate) =>
   source === "qr"
-    ? "Réseau QR"
+    ? t("Réseau QR", "QR network")
     : source === "portal"
-      ? "Portail direct"
-      : "Établissement";
+      ? t("Portail direct", "Direct portal")
+      : t("Établissement", "Venue");
+
+/* Libellé affiché d'un statut (la valeur en base reste en français). */
+const statusLabel = (status: string, t: Translate) =>
+  status === "confirmée"
+    ? t("confirmée", "confirmed")
+    : status === "en attente"
+      ? t("en attente", "pending")
+      : status === "annulée"
+        ? t("annulée", "cancelled")
+        : status;
 
 /* ---------- Formats ---------- */
 
-const fmtMAD = (v: number) => `${Math.round(v).toLocaleString("fr-FR")} MAD`;
-const fmtMADShort = (v: number) =>
+const fmtMAD = (v: number, locale: Locale = "fr") =>
+  `${Math.round(v).toLocaleString(intlLocale(locale))} MAD`;
+const fmtMADShort = (v: number, locale: Locale = "fr") =>
   v >= 1000
-    ? `${(v / 1000).toLocaleString("fr-FR", { maximumFractionDigits: 1 })}k`
+    ? `${(v / 1000).toLocaleString(intlLocale(locale), { maximumFractionDigits: 1 })}k`
     : String(Math.round(v));
-const fmtCouverts = (v: number) =>
-  `${Math.round(v)} couvert${Math.round(v) > 1 ? "s" : ""}`;
+const fmtCouverts = (v: number, locale: Locale = "fr") =>
+  pick(
+    locale,
+    `${Math.round(v)} couvert${Math.round(v) > 1 ? "s" : ""}`,
+    `${Math.round(v)} cover${Math.round(v) === 1 ? "" : "s"}`
+  );
 
 /* ---------- Export CSV (même approche que la page Commissions :
    séparateur ";", BOM UTF-8, guillemets échappés) ---------- */
 
-function exportCsv(rows: VenueQrReservation[], periodKey: PeriodKey) {
+function exportCsv(rows: VenueQrReservation[], periodKey: PeriodKey, locale: Locale = "fr") {
+  const t = makeT(locale);
   const header = [
-    "Date",
-    "Heure",
-    "Client",
-    "Téléphone",
-    "Couverts",
-    "Statut",
-    "Canal",
-    "Montant (MAD)",
-    "Origine montant",
-    "Commission (MAD)",
-    "Note",
+    t("Date", "Date"),
+    t("Heure", "Time"),
+    t("Client", "Guest"),
+    t("Téléphone", "Phone"),
+    t("Couverts", "Covers"),
+    t("Statut", "Status"),
+    t("Canal", "Channel"),
+    t("Montant (MAD)", "Amount (MAD)"),
+    t("Origine montant", "Amount source"),
+    t("Commission (MAD)", "Commission (MAD)"),
+    t("Note", "Rating"),
   ];
   const lines = rows.map((r) =>
     [
@@ -118,14 +136,14 @@ function exportCsv(rows: VenueQrReservation[], periodKey: PeriodKey) {
       r.guest_name,
       r.guest_phone,
       r.party_size,
-      r.status,
-      channelLabel(r.source),
+      statusLabel(r.status, t),
+      channelLabel(r.source, t),
       r.amount_spent ?? "",
       r.amount_spent === null
         ? ""
         : r.amount_source === "pos"
-          ? "caisse"
-          : "saisie manuelle",
+          ? t("caisse", "POS")
+          : t("saisie manuelle", "manual entry"),
       r.commission,
       r.rating ?? "",
     ]
@@ -159,6 +177,7 @@ function Bars({
   format: (v: number) => string;
   short?: (v: number) => string;
 }) {
+  const t = useT();
   const max = Math.max(...data.map((d) => d.value), 1);
   const showValues = data.length <= 14;
   const labelEvery = data.length <= 14 ? 1 : Math.ceil(data.length / 10);
@@ -167,7 +186,7 @@ function Bars({
       {data.map((d, i) => (
         <div
           key={`${d.label}-${i}`}
-          title={`${d.full} : ${format(d.value)}`}
+          title={t(`${d.full} : ${format(d.value)}`, `${d.full}: ${format(d.value)}`)}
           className="group flex-1 flex flex-col items-center gap-1 min-w-0"
         >
           {showValues && (
@@ -214,6 +233,7 @@ function ChannelDonut({
   segments: ChannelSegment[];
   total: number;
 }) {
+  const t = useT();
   /* Arcs et décalages précalculés : chaque segment démarre là où le
      précédent s'arrête, sur la circonférence réelle de l'anneau. */
   const arcs: { segment: ChannelSegment; arc: number; offset: number }[] = [];
@@ -257,7 +277,7 @@ function ChannelDonut({
             {total}
           </span>
           <span className="font-ui text-[9px] text-white/40">
-            réservation{total > 1 ? "s" : ""}
+            {t(`réservation${total > 1 ? "s" : ""}`, `reservation${total === 1 ? "" : "s"}`)}
           </span>
         </div>
       </div>
@@ -316,18 +336,19 @@ function Kpi({
 
 /* ---------- Page ---------- */
 
-const WEEKDAYS = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
-const WEEKDAYS_FULL = [
-  "lundi",
-  "mardi",
-  "mercredi",
-  "jeudi",
-  "vendredi",
-  "samedi",
-  "dimanche",
-];
+const WEEKDAYS = {
+  fr: ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"],
+  en: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+};
+const WEEKDAYS_FULL = {
+  fr: ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"],
+  en: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+};
 
 export default function AnalyticsPage() {
+  const t = useT();
+  const locale = useLocale();
+  const intl = intlLocale(locale);
   const { isLoading: authLoading } = useAuthUser();
   const { reservations, isLoading: loadingData } = useVenueQrReservations();
   const [period, setPeriod] = useState<PeriodKey>("30j");
@@ -407,12 +428,12 @@ export default function AnalyticsPage() {
         push(
           dayKey(d),
           period === "7j"
-            ? d.toLocaleDateString("fr-FR", { weekday: "short" })
-            : d.toLocaleDateString("fr-FR", {
+            ? d.toLocaleDateString(intl, { weekday: "short" })
+            : d.toLocaleDateString(intl, {
                 day: "numeric",
                 month: "numeric",
               }),
-          d.toLocaleDateString("fr-FR", {
+          d.toLocaleDateString(intl, {
             weekday: "long",
             day: "numeric",
             month: "long",
@@ -444,8 +465,8 @@ export default function AnalyticsPage() {
       ) {
         push(
           monthKey(d),
-          d.toLocaleDateString("fr-FR", { month: "short" }),
-          d.toLocaleDateString("fr-FR", { month: "long", year: "numeric" })
+          d.toLocaleDateString(intl, { month: "short" }),
+          d.toLocaleDateString(intl, { month: "long", year: "numeric" })
         );
       }
     }
@@ -458,7 +479,7 @@ export default function AnalyticsPage() {
       b.ca += r.amount_spent ?? 0;
     }
     return { list: out, daily };
-  }, [counted, period]);
+  }, [counted, period, intl]);
 
   /* Répartition par canal — « venue » (saisie sur place) à venir : tout
      canal inconnu y est rattaché. */
@@ -470,21 +491,21 @@ export default function AnalyticsPage() {
     const venue = filtered.length - qr - portal;
     const segments: ChannelSegment[] = [
       {
-        label: "Réseau QR",
+        label: t("Réseau QR", "QR network"),
         value: qr,
         stroke: "#60a5fa",
         dot: "bg-blue-400",
         icon: QrCode,
       },
       {
-        label: "Portail direct",
+        label: t("Portail direct", "Direct portal"),
         value: portal,
         stroke: "#34d399",
         dot: "bg-emerald-400",
         icon: Globe,
       },
       {
-        label: "Établissement",
+        label: t("Établissement", "Venue"),
         value: venue,
         stroke: "rgba(255,255,255,0.35)",
         dot: "bg-white/35",
@@ -492,7 +513,7 @@ export default function AnalyticsPage() {
       },
     ];
     return { segments, total: filtered.length };
-  }, [filtered]);
+  }, [filtered, t]);
 
   /* Meilleurs jours de la semaine : couverts moyens par jour ACTIF (une
      date sans réservation ne dilue pas la moyenne). */
@@ -504,9 +525,9 @@ export default function AnalyticsPage() {
       totals[idx] += r.party_size;
       dates[idx].add(r.reservation_date);
     }
-    const data = WEEKDAYS.map((label, i) => ({
+    const data = pick(locale, WEEKDAYS.fr, WEEKDAYS.en).map((label, i) => ({
       label,
-      full: WEEKDAYS_FULL[i],
+      full: pick(locale, WEEKDAYS_FULL.fr, WEEKDAYS_FULL.en)[i],
       value: dates[i].size > 0 ? totals[i] / dates[i].size : 0,
     }));
     let best = -1;
@@ -515,20 +536,21 @@ export default function AnalyticsPage() {
         best = i;
     }
     return { data, best };
-  }, [counted]);
+  }, [counted, locale]);
 
   const handleExport = useCallback(() => {
     const rows = [...filtered].sort((a, b) =>
       a.reservation_date < b.reservation_date ? 1 : -1
     );
-    exportCsv(rows, period);
-  }, [filtered, period]);
+    exportCsv(rows, period, locale);
+  }, [filtered, period, locale]);
 
   if (authLoading || loadingData || reservations === null)
     return <DashboardSkeleton />;
 
+  const periods = getPeriods(t);
   const periodLabel =
-    PERIODS.find((p) => p.key === period)?.label ?? period;
+    periods.find((p) => p.key === period)?.label ?? period;
 
   return (
     <div className="space-y-6">
@@ -537,17 +559,19 @@ export default function AnalyticsPage() {
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
           <div>
             <h1 className="font-display text-3xl font-light text-white">
-              Analyses
+              {t("Analyses", "Analytics")}
             </h1>
             <p className="font-ui text-sm text-white/60 mt-1.5">
-              Les performances réelles de votre établissement, calculées sur
-              vos réservations, mises à jour en temps réel.
+              {t(
+                "Les performances réelles de votre établissement, calculées sur vos réservations, mises à jour en temps réel.",
+                "Your venue's real performance, calculated from your reservations and updated in real time."
+              )}
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex gap-1 bg-white/[0.07] border border-white/[0.12] rounded-2xl p-1">
-              {PERIODS.map((p) => (
+              {periods.map((p) => (
                 <button
                   key={p.key}
                   onClick={() => setPeriod(p.key)}
@@ -567,7 +591,7 @@ export default function AnalyticsPage() {
                 className="font-ui flex items-center gap-2 bg-white/10 hover:bg-white/15 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors"
               >
                 <Download size={16} strokeWidth={1.5} />
-                Exporter en CSV
+                {t("Exporter en CSV", "Export as CSV")}
               </button>
             )}
           </div>
@@ -582,13 +606,13 @@ export default function AnalyticsPage() {
             <BarChart3 size={26} strokeWidth={1.5} className="text-blue-400" />
           </div>
           <h2 className="font-display text-xl font-normal text-white mb-2">
-            Pas encore de données à analyser
+            {t("Pas encore de données à analyser", "No data to analyse yet")}
           </h2>
           <p className="font-ui text-sm text-white/50 max-w-md mx-auto">
-            Dès vos premières réservations, via le réseau QR des hôtels ou
-            votre portail direct, cette page calculera automatiquement votre
-            chiffre d&apos;affaires, vos couverts, votre note moyenne et vos
-            meilleurs jours. Rien à configurer.
+            {t(
+              "Dès vos premières réservations, via le réseau QR des hôtels ou votre portail direct, cette page calculera automatiquement votre chiffre d'affaires, vos couverts, votre note moyenne et vos meilleurs jours. Rien à configurer.",
+              "From your very first reservations, via the hotels' QR network or your direct portal, this page will automatically calculate your revenue, covers, average rating and best days. Nothing to set up."
+            )}
           </p>
         </div>
       ) : filtered.length === 0 ? (
@@ -602,13 +626,13 @@ export default function AnalyticsPage() {
             />
           </div>
           <h2 className="font-display text-xl font-normal text-white mb-2">
-            Aucune réservation sur « {periodLabel} »
+            {t(`Aucune réservation sur « ${periodLabel} »`, `No reservations in “${periodLabel}”`)}
           </h2>
           <p className="font-ui text-sm text-white/50 max-w-md mx-auto">
-            Votre historique contient {reservations.length} réservation
-            {reservations.length > 1 ? "s" : ""}, mais aucune sur cette
-            période. Élargissez la période : « Tout » affiche l&apos;ensemble
-            de votre historique.
+            {t(
+              `Votre historique contient ${reservations.length} réservation${reservations.length > 1 ? "s" : ""}, mais aucune sur cette période. Élargissez la période : « Tout » affiche l'ensemble de votre historique.`,
+              `Your history has ${reservations.length} reservation${reservations.length === 1 ? "" : "s"}, but none in this period. Widen the period: “All time” shows your full history.`
+            )}
           </p>
         </div>
       ) : (
@@ -616,65 +640,77 @@ export default function AnalyticsPage() {
           {/* KPI */}
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             <Kpi
-              label="Chiffre d'affaires"
-              value={fmtMAD(stats.ca)}
+              label={t("Chiffre d'affaires", "Revenue")}
+              value={fmtMAD(stats.ca, locale)}
               hint={
                 stats.awaiting > 0
-                  ? `${stats.awaiting} sortie${stats.awaiting > 1 ? "s" : ""} sans montant saisi`
+                  ? t(
+                      `${stats.awaiting} sortie${stats.awaiting > 1 ? "s" : ""} sans montant saisi`,
+                      `${stats.awaiting} outing${stats.awaiting === 1 ? "" : "s"} with no amount entered`
+                    )
                   : undefined
               }
             />
             <Kpi
-              label="Couverts"
-              value={stats.couverts.toLocaleString("fr-FR")}
-              hint="hors annulations et no-shows"
+              label={t("Couverts", "Covers")}
+              value={stats.couverts.toLocaleString(intl)}
+              hint={t("hors annulations et no-shows", "excluding cancellations and no-shows")}
             />
             <Kpi
-              label="Panier moyen / couvert"
-              value={stats.panier !== null ? fmtMAD(stats.panier) : "—"}
+              label={t("Panier moyen / couvert", "Average spend / cover")}
+              value={stats.panier !== null ? fmtMAD(stats.panier, locale) : "—"}
               hint={
                 stats.panier === null
-                  ? "aucun montant saisi sur la période"
-                  : "sur les sorties au montant connu"
+                  ? t("aucun montant saisi sur la période", "no amounts entered in this period")
+                  : t("sur les sorties au montant connu", "based on outings with a known amount")
               }
             />
             <Kpi
-              label="Réservations"
-              value={filtered.length.toLocaleString("fr-FR")}
+              label={t("Réservations", "Reservations")}
+              value={filtered.length.toLocaleString(intl)}
               hint={
                 stats.cancelled > 0
-                  ? `dont ${stats.cancelled} annulée${stats.cancelled > 1 ? "s" : ""}`
+                  ? t(
+                      `dont ${stats.cancelled} annulée${stats.cancelled > 1 ? "s" : ""}`,
+                      `incl. ${stats.cancelled} cancelled`
+                    )
                   : undefined
               }
             />
             <Kpi
-              label="Note moyenne"
+              label={t("Note moyenne", "Average rating")}
               value={
                 stats.avgRating !== null
-                  ? `${stats.avgRating.toLocaleString("fr-FR", {
+                  ? `${stats.avgRating.toLocaleString(intl, {
                       maximumFractionDigits: 1,
                     })} / 5`
                   : "—"
               }
               hint={
                 stats.avgRating !== null
-                  ? `${stats.ratedCount} avis client${stats.ratedCount > 1 ? "s" : ""}`
-                  : "aucun avis sur la période"
+                  ? t(
+                      `${stats.ratedCount} avis client${stats.ratedCount > 1 ? "s" : ""}`,
+                      `${stats.ratedCount} guest review${stats.ratedCount === 1 ? "" : "s"}`
+                    )
+                  : t("aucun avis sur la période", "no reviews in this period")
               }
             />
             {stats.noShows > 0 ? (
               <Kpi
-                label="Taux de no-show"
-                value={`${stats.noShowRate.toLocaleString("fr-FR", {
+                label={t("Taux de no-show", "No-show rate")}
+                value={`${stats.noShowRate.toLocaleString(intl, {
                   maximumFractionDigits: 1,
-                })} %`}
-                hint={`${stats.noShows} no-show${stats.noShows > 1 ? "s" : ""} sur la période`}
+                })}${t(" %", "%")}`}
+                hint={t(
+                  `${stats.noShows} no-show${stats.noShows > 1 ? "s" : ""} sur la période`,
+                  `${stats.noShows} no-show${stats.noShows === 1 ? "" : "s"} in this period`
+                )}
               />
             ) : (
               <Kpi
-                label="No-shows"
+                label={t("No-shows", "No-shows")}
                 value="0"
-                hint="aucun no-show sur la période"
+                hint={t("aucun no-show sur la période", "no no-shows in this period")}
               />
             )}
           </div>
@@ -683,10 +719,12 @@ export default function AnalyticsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
               <h3 className="font-ui text-white font-bold text-sm mb-1">
-                Couverts par {buckets.daily ? "jour" : "mois"}
+                {buckets.daily
+                  ? t("Couverts par jour", "Covers per day")
+                  : t("Couverts par mois", "Covers per month")}
               </h3>
               <p className="font-ui text-[11px] text-white/40 mb-5">
-                hors annulations et no-shows
+                {t("hors annulations et no-shows", "excluding cancellations and no-shows")}
               </p>
               <Bars
                 data={buckets.list.map((b) => ({
@@ -694,17 +732,19 @@ export default function AnalyticsPage() {
                   full: b.full,
                   value: b.couverts,
                 }))}
-                format={fmtCouverts}
+                format={(v) => fmtCouverts(v, locale)}
                 short={(v) => String(Math.round(v))}
               />
             </div>
 
             <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
               <h3 className="font-ui text-white font-bold text-sm mb-1">
-                Chiffre d&apos;affaires par {buckets.daily ? "jour" : "mois"}
+                {buckets.daily
+                  ? t("Chiffre d'affaires par jour", "Revenue per day")
+                  : t("Chiffre d'affaires par mois", "Revenue per month")}
               </h3>
               <p className="font-ui text-[11px] text-white/40 mb-5">
-                montants saisis ou remontés par la caisse
+                {t("montants saisis ou remontés par la caisse", "amounts entered manually or synced from the POS")}
               </p>
               <Bars
                 data={buckets.list.map((b) => ({
@@ -712,8 +752,8 @@ export default function AnalyticsPage() {
                   full: b.full,
                   value: b.ca,
                 }))}
-                format={fmtMAD}
-                short={fmtMADShort}
+                format={(v) => fmtMAD(v, locale)}
+                short={(v) => fmtMADShort(v, locale)}
               />
             </div>
           </div>
@@ -722,7 +762,7 @@ export default function AnalyticsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
               <h3 className="font-ui text-white font-bold text-sm mb-5">
-                Répartition par canal
+                {t("Répartition par canal", "Breakdown by channel")}
               </h3>
               <ChannelDonut
                 segments={channels.segments}
@@ -732,20 +772,21 @@ export default function AnalyticsPage() {
 
             <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
               <h3 className="font-ui text-white font-bold text-sm mb-1">
-                Meilleurs jours de la semaine
+                {t("Meilleurs jours de la semaine", "Best days of the week")}
               </h3>
               <p className="font-ui text-[11px] text-white/40 mb-5">
-                couverts moyens par jour d&apos;activité
+                {t("couverts moyens par jour d'activité", "average covers per trading day")}
               </p>
               <Bars
                 data={weekdays.data}
                 format={(v) =>
-                  `${v.toLocaleString("fr-FR", {
-                    maximumFractionDigits: 1,
-                  })} couverts en moyenne`
+                  t(
+                    `${v.toLocaleString(intl, { maximumFractionDigits: 1 })} couverts en moyenne`,
+                    `${v.toLocaleString(intl, { maximumFractionDigits: 1 })} covers on average`
+                  )
                 }
                 short={(v) =>
-                  v.toLocaleString("fr-FR", { maximumFractionDigits: 1 })
+                  v.toLocaleString(intl, { maximumFractionDigits: 1 })
                 }
               />
               {weekdays.best >= 0 && (
@@ -755,11 +796,10 @@ export default function AnalyticsPage() {
                     strokeWidth={1.5}
                     className="text-amber-400"
                   />
-                  Votre meilleur jour : {WEEKDAYS_FULL[weekdays.best]} (
-                  {weekdays.data[weekdays.best].value.toLocaleString("fr-FR", {
-                    maximumFractionDigits: 1,
-                  })}{" "}
-                  couverts en moyenne)
+                  {t(
+                    `Votre meilleur jour : ${weekdays.data[weekdays.best].full} (${weekdays.data[weekdays.best].value.toLocaleString(intl, { maximumFractionDigits: 1 })} couverts en moyenne)`,
+                    `Your best day: ${weekdays.data[weekdays.best].full} (${weekdays.data[weekdays.best].value.toLocaleString(intl, { maximumFractionDigits: 1 })} covers on average)`
+                  )}
                 </p>
               )}
             </div>

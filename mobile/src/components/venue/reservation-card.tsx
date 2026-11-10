@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native'
 
 import { Light } from '@/constants/theme'
 import { haptic } from '@/lib/haptics'
+import { intlLocale, makeT, useLocale, type Locale } from '@/lib/i18n'
 import { isOut, todayIso, type Reservation } from '@/lib/venue-data'
 
 import { Button, Icon, StatusPill } from './ui'
@@ -29,13 +30,19 @@ export function ReservationCard({
   showDate?: boolean
 }) {
   const router = useRouter()
+  const locale = useLocale()
+  const t = makeT(locale)
   const today = todayIso()
   const past = r.reservation_date < today
   const out = isOut(r)
   const time = r.reservation_time ? r.reservation_time.slice(0, 5) : '—'
-  const people = `${r.party_size} pers.`
+  const people = t(`${r.party_size} pers.`, `${r.party_size} ${r.party_size === 1 ? 'guest' : 'guests'}`)
   const origin =
-    r.source === 'qr' ? r.referrer_name ?? 'Hôtel partenaire' : r.source === 'portal' ? 'Portail direct' : 'Maison'
+    r.source === 'qr'
+      ? r.referrer_name ?? t('Hôtel partenaire', 'Partner hotel')
+      : r.source === 'portal'
+        ? t('Portail direct', 'Direct portal')
+        : t('Maison', 'In-house')
   const originIcon = r.source === 'qr' ? 'briefcase' : r.source === 'portal' ? 'globe' : 'user'
 
   return (
@@ -46,11 +53,11 @@ export function ReservationCard({
       }}
       style={({ pressed }) => [styles.card, out && styles.cardOut, pressed && styles.pressed]}
       accessibilityRole="button"
-      accessibilityLabel={`Réservation de ${r.guest_name} à ${time}`}>
+      accessibilityLabel={t(`Réservation de ${r.guest_name} à ${time}`, `Reservation for ${r.guest_name} at ${time}`)}>
       <View style={styles.row}>
         <View style={styles.time}>
           <Text style={[styles.timeText, out && styles.timeOut]}>{time}</Text>
-          {showDate && <Text style={styles.dateText}>{shortDay(r.reservation_date)}</Text>}
+          {showDate && <Text style={styles.dateText}>{shortDay(r.reservation_date, locale)}</Text>}
         </View>
         <View style={styles.body}>
           <View style={styles.titleRow}>
@@ -62,8 +69,8 @@ export function ReservationCard({
           <Text style={styles.details} numberOfLines={1}>
             {people}
             {r.service_name ? ` · ${r.service_name}` : ''}
-            {r.arrived_at ? ' · arrivé' : ''}
-            {r.amount_spent !== null ? ` · ${r.amount_spent.toLocaleString('fr-FR')} MAD` : ''}
+            {r.arrived_at ? t(' · arrivé', ' · arrived') : ''}
+            {r.amount_spent !== null ? ` · ${r.amount_spent.toLocaleString(intlLocale(locale))} MAD` : ''}
           </Text>
           <View style={styles.originRow}>
             <Icon name={originIcon} size={12} color={r.source === 'qr' ? Light.accent : Light.faint} />
@@ -85,16 +92,16 @@ export function ReservationCard({
 
       {r.status === 'en attente' ? (
         <View style={styles.actions}>
-          <Button label="Confirmer" tone="success" small icon="check" onPress={onConfirm} style={styles.grow} />
-          <Button label="Refuser" tone="danger" small icon="x" onPress={onRefuse} style={styles.grow} />
+          <Button label={t('Confirmer', 'Confirm')} tone="success" small icon="check" onPress={onConfirm} style={styles.grow} />
+          <Button label={t('Refuser', 'Decline')} tone="danger" small icon="x" onPress={onRefuse} style={styles.grow} />
         </View>
       ) : !out && !compact ? (
         <View style={styles.actions}>
           {!r.arrived_at && !past && (
-            <Button label="Client arrivé" tone="accent" small icon="user-check" onPress={onCheckIn} style={styles.grow} />
+            <Button label={t('Client arrivé', 'Guest arrived')} tone="accent" small icon="user-check" onPress={onCheckIn} style={styles.grow} />
           )}
           {(past || r.arrived_at) && r.amount_spent === null && (
-            <Button label="Saisir l'addition" tone={r.arrived_at ? 'accent' : 'ghost'} small icon="edit-3" onPress={onAmount} style={styles.grow} />
+            <Button label={t("Saisir l'addition", 'Enter the bill')} tone={r.arrived_at ? 'accent' : 'ghost'} small icon="edit-3" onPress={onAmount} style={styles.grow} />
           )}
         </View>
       ) : null}
@@ -103,9 +110,10 @@ export function ReservationCard({
 }
 
 const DAYS = ['dim.', 'lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.']
-function shortDay(iso: string) {
+const DAYS_EN = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+function shortDay(iso: string, locale: Locale) {
   const d = new Date(`${iso}T00:00:00`)
-  return `${DAYS[d.getDay()]} ${d.getDate()}`
+  return `${(locale === 'en' ? DAYS_EN : DAYS)[d.getDay()]} ${d.getDate()}`
 }
 
 const styles = StyleSheet.create({

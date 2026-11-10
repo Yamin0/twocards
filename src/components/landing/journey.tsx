@@ -1,51 +1,71 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useT } from "@/lib/i18n/client";
+import type { Translate } from "@/lib/i18n";
 
-const steps = [
+const getSteps = (t: Translate) => [
   {
-    title: "Demande",
-    description:
+    title: t("Demande", "Request"),
+    description: t(
       "Le concierge envoie une demande structurée : date, couverts, budget, niveau de service.",
+      "The concierge sends a structured request: date, covers, budget, level of service."
+    ),
   },
   {
-    title: "Disponibilité",
-    description:
+    title: t("Disponibilité", "Availability"),
+    description: t(
       "L'établissement accepte ou contre-propose : autre heure, autre zone, autre minimum spend.",
+      "The venue accepts or counter-offers: another time, another area, another minimum spend."
+    ),
   },
   {
-    title: "Acompte",
-    description:
+    title: t("Acompte", "Deposit"),
+    description: t(
       "Le client confirme et paie l'acompte via un lien sécurisé, aux conditions préacceptées.",
+      "The guest confirms and pays the deposit through a secure link, on pre-agreed terms."
+    ),
   },
   {
-    title: "Confirmation",
-    description:
+    title: t("Confirmation", "Confirmation"),
+    description: t(
       "La réservation est verrouillée, horodatée et attribuée à son apporteur.",
+      "The reservation is locked in, timestamped and attributed to its referrer."
+    ),
   },
   {
-    title: "Arrivée",
-    description:
+    title: t("Arrivée", "Arrival"),
+    description: t(
       "Check-in QR à la porte : la preuve que l'apport a produit une visite réelle.",
+      "QR check-in at the door: proof that the referral turned into a real visit."
+    ),
   },
   {
-    title: "Facture vérifiée",
-    description:
+    title: t("Facture vérifiée", "Verified bill"),
+    description: t(
       "Le montant final est validé par API, OCR ou accord mutuel entre les deux parties.",
+      "The final amount is validated by API, OCR or mutual agreement between both parties."
+    ),
   },
   {
-    title: "Commission",
-    description:
+    title: t("Commission", "Commission"),
+    description: t(
       "Calculée automatiquement sur la base convenue dès l'origine. Zéro ambiguïté.",
+      "Calculated automatically on the basis agreed from the outset. Zero ambiguity."
+    ),
   },
   {
-    title: "Paiement",
-    description:
+    title: t("Paiement", "Payout"),
+    description: t(
       "Versée selon un calendrier fixe, avec un historique auditable de bout en bout.",
+      "Paid on a fixed schedule, with an end-to-end auditable history."
+    ),
   },
 ];
 
 export function Journey() {
+  const t = useT();
+  const steps = getSteps(t);
   return (
     <section className="border-t border-black/[0.06] bg-[var(--landing-ivory)] px-6 py-24 md:px-16 md:py-32 font-body">
       <div className="mx-auto max-w-6xl">
@@ -57,15 +77,25 @@ export function Journey() {
           className="mb-20 text-center"
         >
           <p className="mb-3 text-[11px] font-medium uppercase tracking-[0.28em] text-[var(--landing-mute)]">
-            Le parcours
+            {t("Le parcours", "The journey")}
           </p>
           <h2 className="font-title text-3xl font-normal leading-tight text-[var(--landing-ink)] md:text-5xl">
-            De WhatsApp à une transaction{" "}
-            <em className="italic">certaine</em>.
+            {t(
+              <>
+                De WhatsApp à une transaction{" "}
+                <em className="italic">certaine</em>.
+              </>,
+              <>
+                From WhatsApp to a transaction{" "}
+                <em className="italic">you can trust</em>.
+              </>
+            )}
           </h2>
           <p className="mx-auto mt-5 max-w-2xl text-[15px] font-normal leading-relaxed text-[var(--landing-ink)]/70">
-            Chaque étape est horodatée et attribuée à un utilisateur. Sans
-            doublon, sans litige, avec un paiement certain.
+            {t(
+              "Chaque étape est horodatée et attribuée à un utilisateur. Sans doublon, sans litige, avec un paiement certain.",
+              "Every step is timestamped and attributed to a user. No duplicates, no disputes, guaranteed payment."
+            )}
           </p>
         </motion.div>
 

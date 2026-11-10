@@ -31,44 +31,48 @@ import { useAuthUser } from "@/hooks/use-auth-user";
 import { useUnreadMessages } from "@/hooks/use-unread-messages";
 import { useVenueNotifications } from "@/hooks/use-venue-notifications";
 import { Avatar } from "@/components/shared/avatar";
+import { LanguageSwitcher } from "@/components/shared/language-switcher";
+import { useT } from "@/lib/i18n/client";
+import type { Translate } from "@/lib/i18n";
 
-const mainNav = [
-  { icon: LayoutDashboard, label: "Tableau de bord", href: "/dashboard" },
-  { icon: CalendarDays, label: "Réservations", href: "/dashboard/reservations" },
+const getMainNav = (t: Translate) => [
+  { icon: LayoutDashboard, label: t("Tableau de bord", "Dashboard"), href: "/dashboard" },
+  { icon: CalendarDays, label: t("Réservations", "Reservations"), href: "/dashboard/reservations" },
 ];
+type NavItem = ReturnType<typeof getMainNav>[number];
 
 /* Un loueur de quads ou un chauffeur privé vend des prestations, pas des
    tables : elles prennent la place du plan de salle. */
-const activityNav = [
-  ...mainNav,
-  { icon: Tags, label: "Prestations", href: "/dashboard/prestations" },
+const getActivityNav = (t: Translate) => [
+  ...getMainNav(t),
+  { icon: Tags, label: t("Prestations", "Services"), href: "/dashboard/prestations" },
 ];
 
 /* Peu ou pas utilisées au lancement : rangées sous « Plus », dépliable, pour
    que l'essentiel — réservations, messages — reste seul en vue. */
-const moreNav = [
-  { icon: Ticket, label: "Événements", href: "/dashboard/events" },
-  { icon: Grid3X3, label: "Plan de salle", href: "/dashboard/floor-plan" },
-  { icon: Plug, label: "Caisse (POS)", href: "/dashboard/integrations" },
-  { icon: Globe, label: "Portail de résa", href: "/dashboard/portal" },
-  { icon: Users, label: "Clients", href: "/dashboard/guests" },
+const getMoreNav = (t: Translate) => [
+  { icon: Ticket, label: t("Événements", "Events"), href: "/dashboard/events" },
+  { icon: Grid3X3, label: t("Plan de salle", "Floor plan"), href: "/dashboard/floor-plan" },
+  { icon: Plug, label: t("Caisse (POS)", "Till (POS)"), href: "/dashboard/integrations" },
+  { icon: Globe, label: t("Portail de résa", "Booking portal"), href: "/dashboard/portal" },
+  { icon: Users, label: t("Clients", "Guests"), href: "/dashboard/guests" },
 ];
 
-const moreNavActivity = [
-  { icon: Globe, label: "Portail de résa", href: "/dashboard/portal" },
-  { icon: Users, label: "Clients", href: "/dashboard/guests" },
+const getMoreNavActivity = (t: Translate) => [
+  { icon: Globe, label: t("Portail de résa", "Booking portal"), href: "/dashboard/portal" },
+  { icon: Users, label: t("Clients", "Guests"), href: "/dashboard/guests" },
 ];
 
-const toolsNav = [
-  { icon: Network, label: "Réseau apporteurs", href: "/dashboard/network" },
-  { icon: CreditCard, label: "Commissions", href: "/dashboard/commissions" },
-  { icon: MessageSquare, label: "Messages", href: "/dashboard/messages" },
-  { icon: BarChart3, label: "Analyses", href: "/dashboard/analytics" },
+const getToolsNav = (t: Translate) => [
+  { icon: Network, label: t("Réseau apporteurs", "Referral network"), href: "/dashboard/network" },
+  { icon: CreditCard, label: t("Commissions", "Commissions"), href: "/dashboard/commissions" },
+  { icon: MessageSquare, label: t("Messages", "Messages"), href: "/dashboard/messages" },
+  { icon: BarChart3, label: t("Analyses", "Analytics"), href: "/dashboard/analytics" },
 ];
 
-const adminNav = [
-  { icon: Settings, label: "Paramètres", href: "/dashboard/settings" },
-  { icon: Bell, label: "Notifications", href: "/dashboard/notifications" },
+const getAdminNav = (t: Translate) => [
+  { icon: Settings, label: t("Paramètres", "Settings"), href: "/dashboard/settings" },
+  { icon: Bell, label: t("Notifications", "Notifications"), href: "/dashboard/notifications" },
 ];
 
 /* Au niveau module et non dans le layout : un composant recréé à chaque
@@ -79,7 +83,7 @@ function NavSection({
   onNavigate,
   badges,
 }: {
-  items: typeof mainNav;
+  items: NavItem[];
   pathname: string;
   onNavigate: () => void;
   /* Pastilles par lien (ex. messages non lus), masquees a zero. */
@@ -127,12 +131,13 @@ function MoreSection({
   open,
   onToggle,
 }: {
-  items: typeof mainNav;
+  items: NavItem[];
   pathname: string;
   onNavigate: () => void;
   open: boolean;
   onToggle: () => void;
 }) {
+  const t = useT();
   return (
     <div>
       <button
@@ -142,7 +147,7 @@ function MoreSection({
         className="font-ui flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-white/60 transition-all hover:bg-white/10 hover:text-white"
       >
         <MoreHorizontal size={18} strokeWidth={1.5} />
-        Plus
+        {t("Plus", "More")}
         <ChevronDown
           size={16}
           strokeWidth={1.5}
@@ -165,12 +170,15 @@ export default function DashboardLayout({
 }) {
   const { fullName, initials, avatarUrl, isLoading, isAdmin, isActivityVenue } =
     useAuthUser();
+  const t = useT();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const pathname = usePathname();
   const closeSidebar = () => setSidebarOpen(false);
-  const primaryNav = isActivityVenue ? activityNav : mainNav;
-  const moreItems = isActivityVenue ? moreNavActivity : moreNav;
+  const primaryNav = isActivityVenue ? getActivityNav(t) : getMainNav(t);
+  const moreItems = isActivityVenue ? getMoreNavActivity(t) : getMoreNav(t);
+  const toolsNav = getToolsNav(t);
+  const adminNav = getAdminNav(t);
   const moreActive = moreItems.some((i) => pathname.startsWith(i.href));
   const moreExpanded = moreActive || moreOpen;
   const unreadMessages = useUnreadMessages();
@@ -183,7 +191,7 @@ export default function DashboardLayout({
   /* L'entrée Administration n'existe que pour le compte porteur du drapeau
      admin ; la garde réelle est en base, ceci n'est que de l'affichage. */
   const adminItems = isAdmin
-    ? [...adminNav, { icon: Shield, label: "Administration", href: "/admin" }]
+    ? [...adminNav, { icon: Shield, label: t("Administration", "Admin"), href: "/admin" }]
     : adminNav;
 
   useEffect(() => {
@@ -258,7 +266,7 @@ export default function DashboardLayout({
                     className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-white/40 hover:text-white/70 hover:bg-white/10 transition-all font-ui"
                   >
                     <HelpCircle size={18} strokeWidth={1.5} />
-                    Aide
+                    {t("Aide", "Help")}
                   </Link>
                   <form action="/auth/signout" method="post">
                     <button
@@ -266,9 +274,12 @@ export default function DashboardLayout({
                       className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-red-400/80 hover:text-red-400 hover:bg-white/10 transition-all w-full font-ui"
                     >
                       <LogOut size={18} strokeWidth={1.5} />
-                      Déconnexion
+                      {t("Déconnexion", "Log out")}
                     </button>
                   </form>
+                  <div className="px-3 pt-2">
+                    <LanguageSwitcher tone="dark" />
+                  </div>
                 </div>
               </div>
             </>
@@ -285,7 +296,7 @@ export default function DashboardLayout({
                 </span>
               </div>
               <p className="text-white/40 text-xs font-ui">
-                {isActivityVenue ? "Activités & services" : "Venue Manager"}
+                {isActivityVenue ? t("Activités & services", "Activities & services") : "Venue Manager"}
               </p>
             </div>
 
@@ -316,7 +327,7 @@ export default function DashboardLayout({
                     <div className="h-3 w-20 bg-white/10 rounded animate-pulse" />
                   ) : (
                     <p className="text-sm font-medium text-white truncate font-ui">
-                      {fullName || "Utilisateur"}
+                      {fullName || t("Utilisateur", "User")}
                     </p>
                   )}
                 </div>
@@ -327,7 +338,7 @@ export default function DashboardLayout({
                 className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-white/40 hover:text-white/70 hover:bg-white/10 transition-all font-ui"
               >
                 <HelpCircle size={18} strokeWidth={1.5} />
-                Aide
+                {t("Aide", "Help")}
               </Link>
               <form action="/auth/signout" method="post">
                 <button
@@ -335,9 +346,12 @@ export default function DashboardLayout({
                   className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-red-400/70 hover:text-red-400 hover:bg-white/10 transition-all w-full font-ui"
                 >
                   <LogOut size={18} strokeWidth={1.5} />
-                  Déconnexion
+                  {t("Déconnexion", "Log out")}
                 </button>
               </form>
+              <div className="px-3 pt-1">
+                <LanguageSwitcher tone="dark" />
+              </div>
             </div>
           </aside>
 

@@ -9,6 +9,8 @@ import {
   STAGE,
   SectionHeader,
 } from "@/components/landing/section-header";
+import { useT } from "@/lib/i18n/client";
+import type { Translate } from "@/lib/i18n";
 
 /* Les quatre outils propres au réseau. Même écriture que le parcours QR :
    le texte, puis une scène sable qui porte un mini-écran simulé. */
@@ -17,28 +19,32 @@ const panel =
   "w-full rounded-2xl border border-black/[0.08] bg-white shadow-[0_24px_60px_-30px_rgba(60,40,10,0.35)]";
 
 function DropVisual() {
+  const t = useT();
   return (
     <div className={`${panel} p-5 text-left`}>
       <div className="mb-3 flex items-center justify-between">
         <span className="rounded-md bg-amber-400/20 px-2 py-1 text-[11px] font-medium text-amber-700">
-          Dernière minute
+          {t("Dernière minute", "Last minute")}
         </span>
         <span className="text-[12px] text-[var(--landing-ink)]/40">
-          ce soir
+          {t("ce soir", "tonight")}
         </span>
       </div>
       <p className="text-[15px] font-medium text-[var(--landing-ink)]">
-        Table de 6 · 23:00 · Rooftop
+        {t("Table de 6 · 23:00 · Rooftop", "Table for 6 · 23:00 · Rooftop")}
       </p>
       <p className="mt-1 text-[12px] text-[var(--landing-ink)]/55">
-        Min. 8 000 MAD · acompte 20 % · commission 8 %
+        {t(
+          "Min. 8 000 MAD · acompte 20 % · commission 8 %",
+          "Min. 8,000 MAD · 20% deposit · 8% commission"
+        )}
       </p>
       <div className="mt-4 flex gap-2">
         <span className="flex-1 rounded-lg bg-[var(--landing-ink)] py-2 text-center text-[12px] font-semibold text-[var(--landing-ivory)]">
-          Proposer à un client
+          {t("Proposer à un client", "Offer to a guest")}
         </span>
         <span className="rounded-lg bg-black/[0.06] px-3.5 py-2 text-[12px] text-[var(--landing-ink)]/60">
-          Passer
+          {t("Passer", "Skip")}
         </span>
       </div>
     </div>
@@ -46,22 +52,23 @@ function DropVisual() {
 }
 
 function ReverseVisual() {
+  const t = useT();
   return (
     <div className="flex flex-col gap-2.5 text-left">
       <div className="max-w-[85%] self-start rounded-2xl rounded-bl-md bg-[#111] p-3.5 shadow-[0_16px_40px_-16px_rgba(0,0,0,0.4)]">
         <p className="text-[13px] font-medium text-white">
-          8 personnes · restaurant festif · 23:00
+          {t("8 personnes · restaurant festif · 23:00", "8 people · party restaurant · 23:00")}
         </p>
         <p className="mt-0.5 text-[12px] text-white/50">
-          Budget 12 000 MAD · client Priority
+          {t("Budget 12 000 MAD · client Priority", "Budget 12,000 MAD · Priority guest")}
         </p>
       </div>
       <div className="max-w-[85%] self-end rounded-2xl rounded-br-md border border-black/10 bg-white p-3.5">
         <p className="text-[13px] font-medium text-[var(--landing-ink)]">
-          Disponible · terrasse, 23:15
+          {t("Disponible · terrasse, 23:15", "Available · terrace, 23:15")}
         </p>
         <p className="mt-0.5 text-[12px] text-[var(--landing-ink)]/50">
-          2 offres reçues en 9 min
+          {t("2 offres reçues en 9 min", "2 offers received in 9 min")}
         </p>
       </div>
     </div>
@@ -69,12 +76,13 @@ function ReverseVisual() {
 }
 
 function PrivacyVisual() {
+  const t = useT();
   return (
     <div className={`${panel} p-5 text-left`}>
       {[
-        ["Client", "M. B•••••", true],
-        ["Téléphone", "+212 6•• ••• •12", true],
-        ["Couverts · heure", "6 · 23:00", false],
+        [t("Client", "Guest"), t("M. B•••••", "Mr B•••••"), true],
+        [t("Téléphone", "Phone"), "+212 6•• ••• •12", true],
+        [t("Couverts · heure", "Covers · time"), "6 · 23:00", false],
       ].map(([label, value, masked]) => (
         <div
           key={label as string}
@@ -92,17 +100,21 @@ function PrivacyVisual() {
         </div>
       ))}
       <p className="mt-3 text-[12px] text-[var(--landing-ink)]/45">
-        Coordonnées révélées après confirmation uniquement
+        {t(
+          "Coordonnées révélées après confirmation uniquement",
+          "Contact details revealed only after confirmation"
+        )}
       </p>
     </div>
   );
 }
 
 function PassportVisual() {
+  const t = useT();
   return (
     <div className="text-left">
       <div className="mb-3 flex flex-wrap gap-1.5">
-        {["Marrakech", "Paris", "Saint-Tropez", "Dubaï", "Ibiza"].map(
+        {["Marrakech", "Paris", "Saint-Tropez", t("Dubaï", "Dubai"), "Ibiza"].map(
           (city, i) => (
             <span
               key={city}
@@ -119,9 +131,9 @@ function PassportVisual() {
       </div>
       <div className={`${panel} p-4`}>
         {[
-          ["Taux de présence", "96 %"],
-          ["Litiges", "0 sur 124 réservations"],
-          ["Membre vérifié depuis", "2026"],
+          [t("Taux de présence", "Show-up rate"), t("96 %", "96%")],
+          [t("Litiges", "Disputes"), t("0 sur 124 réservations", "0 in 124 reservations")],
+          [t("Membre vérifié depuis", "Verified member since"), "2026"],
         ].map(([label, value]) => (
           <div
             key={label}
@@ -139,50 +151,68 @@ function PassportVisual() {
   );
 }
 
-const FEATURES: {
+const getFeatures = (t: Translate): {
   title: string;
   description: string;
   visual: () => ReactElement;
-}[] = [
+}[] => [
   {
-    title: "Dernière minute",
-    description:
+    title: t("Dernière minute", "Last minute"),
+    description: t(
       "L'établissement propose la table libérée en un geste aux apporteurs les plus adaptés, avec une commission bonifiée si besoin.",
+      "In one tap, the venue offers a freed-up table to the best-placed referrers, with a commission boost if needed."
+    ),
     visual: DropVisual,
   },
   {
-    title: "Appel d'offres",
-    description:
+    title: t("Appel d'offres", "Open requests"),
+    description: t(
       "Le premier choix est complet ? Le concierge publie une demande anonymisée, et les établissements disponibles répondent avec une offre.",
+      "First choice fully booked? The concierge posts an anonymised request, and venues with availability reply with an offer."
+    ),
     visual: ReverseVisual,
   },
   {
-    title: "Confidentialité client",
-    description:
+    title: t("Confidentialité client", "Guest privacy"),
+    description: t(
       "Le portefeuille client d'un concierge est son fonds de commerce. Coordonnées masquées, numéro relais, divulgation après confirmation seulement.",
+      "A concierge's client book is their livelihood. Masked contact details, a relay number, and disclosure only after confirmation."
+    ),
     visual: PrivacyVisual,
   },
   {
-    title: "Passeport de performance",
-    description:
+    title: t("Passeport de performance", "Performance passport"),
+    description: t(
       "Présence, fiabilité, litiges : une réputation transactionnelle qui suit chaque membre de ville en ville, et remplace les notes à l'emporte-pièce.",
+      "Show-ups, reliability, disputes: a reputation built on real transactions that follows every member from city to city, in place of throwaway star ratings."
+    ),
     visual: PassportVisual,
   },
 ];
 
 export function Differentiators() {
+  const t = useT();
+  const FEATURES = getFeatures(t);
   return (
     <section className={SECTION}>
       <div className={CONTAINER}>
         <SectionHeader
-          title={
+          title={t(
             <>
               Pensé pour
               <br />
               <em className="font-light italic">le terrain</em>.
+            </>,
+            <>
+              Built for
+              <br />
+              <em className="font-light italic">the real world</em>.
             </>
-          }
-          intro="Les outils qui manquaient entre établissements et apporteurs : la table libérée au dernier moment, l'appel d'offres, la confidentialité du client, la réputation."
+          )}
+          intro={t(
+            "Les outils qui manquaient entre établissements et apporteurs : la table libérée au dernier moment, l'appel d'offres, la confidentialité du client, la réputation.",
+            "The tools venues and referrers were missing: last-minute tables, open requests, guest privacy and reputation."
+          )}
         />
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">

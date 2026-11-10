@@ -3,10 +3,12 @@
 import { useRef, useState } from "react";
 import Image from "next/image";
 import { ImagePlus, Star, Trash2, X } from "lucide-react";
-import { CATEGORY_KEYS, CATEGORY_LABELS, fallbackImage, type GuestCategoryKey } from "@/lib/guest-catalog";
+import { CATEGORY_KEYS, categoryLabel, fallbackImage, type GuestCategoryKey } from "@/lib/guest-catalog";
 import { uploadImage } from "@/lib/hotel/upload-image";
 import { Button, Field, Modal, Segmented, Switch, inputClass } from "@/components/hotel/ui";
 import { cn } from "@/lib/utils";
+import type { Translate } from "@/lib/i18n";
+import { useLocale, useT } from "@/lib/i18n/client";
 
 /* Fiche d'une adresse, partagée par l'administrateur (catalogue réseau) et
    par l'hôtel (adresses maison) : mêmes champs, mêmes limites que la base.
@@ -52,12 +54,12 @@ export const slugify = (s: string) =>
 /* Huit photos par adresse, comme la contrainte de la base. */
 const MAX_PHOTOS = 8;
 
-const TAG_HINTS: Record<GuestCategoryKey, string> = {
-  restaurants: "Restaurant, Rooftop, Gastronomique…",
-  activites: "Aventure, Bien-être, Culture, Excursion…",
-  clubs: "Club, Bar, Lounge…",
-  services: "Transport, Famille, Lifestyle, Conciergerie…",
-};
+const getTagHints = (t: Translate): Record<GuestCategoryKey, string> => ({
+  restaurants: t("Restaurant, Rooftop, Gastronomique…", "Restaurant, Rooftop, Fine dining…"),
+  activites: t("Aventure, Bien-être, Culture, Excursion…", "Adventure, Wellness, Culture, Day trip…"),
+  clubs: t("Club, Bar, Lounge…", "Club, Bar, Lounge…"),
+  services: t("Transport, Famille, Lifestyle, Conciergerie…", "Transport, Family, Lifestyle, Concierge…"),
+});
 
 export const CITIES = ["Marrakech", "Casablanca", "Tanger", "Rabat", "Agadir", "Fès", "Essaouira"];
 
@@ -82,6 +84,9 @@ export function OfferEditor({
   title: string;
   saving?: boolean;
 }) {
+  const t = useT();
+  const locale = useLocale();
+  const tagHints = getTagHints(t);
   const [draft, setDraft] = useState<OfferDraft>(initial);
   const [slugTouched, setSlugTouched] = useState(!!initial.slug);
   const [uploading, setUploading] = useState(false);
@@ -98,11 +103,16 @@ export function OfferEditor({
   const submit = async () => {
     setError(null);
     if (draft.name.trim().length === 0) {
-      setError("Le nom est obligatoire.");
+      setError(t("Le nom est obligatoire.", "Name is required."));
       return;
     }
     if (admin && !/^[a-z0-9][a-z0-9-]{1,39}$/.test(draft.slug)) {
-      setError("Identifiant invalide : lettres minuscules, chiffres et tirets, 2 à 40 caractères.");
+      setError(
+        t(
+          "Identifiant invalide : lettres minuscules, chiffres et tirets, 2 à 40 caractères.",
+          "Invalid ID: lowercase letters, numbers and hyphens, 2 to 40 characters."
+        )
+      );
       return;
     }
     const msg = await onSave({ ...draft, name: draft.name.trim(), tag: draft.tag.trim(), description: draft.description.trim(), price: draft.price.trim(), city: draft.city.trim() });
@@ -121,12 +131,12 @@ export function OfferEditor({
       const room = MAX_PHOTOS - photos.length;
       const added: string[] = [];
       for (const file of Array.from(files).slice(0, Math.max(room, 0))) {
-        added.push(await uploadImage(file, userId, uploadPrefix, 1600));
+        added.push(await uploadImage(file, userId, uploadPrefix, 1600, locale));
       }
       if (added.length > 0) setPhotos([...photos, ...added]);
-      if (Array.from(files).length > room) setError(`${MAX_PHOTOS} photos au maximum par adresse.`);
+      if (Array.from(files).length > room) setError(t(`${MAX_PHOTOS} photos au maximum par adresse.`, `${MAX_PHOTOS} photos maximum per place.`));
     } catch (e) {
-      setError(e instanceof Error ? e.message : "L'envoi de l'image a échoué");
+      setError(e instanceof Error ? e.message : t("L'envoi de l'image a échoué", "Image upload failed"));
     }
     setUploading(false);
   };
@@ -142,10 +152,10 @@ export function OfferEditor({
       footer={
         <>
           <Button variant="ghost" onClick={onClose}>
-            Annuler
+            {t("Annuler", "Cancel")}
           </Button>
           <Button variant="primary" onClick={submit} loading={saving} disabled={uploading}>
-            Enregistrer
+            {t("Enregistrer", "Save")}
           </Button>
         </>
       }
@@ -167,7 +177,7 @@ export function OfferEditor({
           <div className="relative aspect-[4/3] overflow-hidden rounded-xl border border-white/10 bg-white/[0.04]">
             <Image src={preview} alt="" fill unoptimized={preview.startsWith("http")} sizes="240px" className="object-cover" />
             <span className="absolute inset-x-0 bottom-0 bg-black/60 px-2 py-1 text-center text-[10px] font-bold uppercase tracking-wider text-white/70">
-              {photos.length === 0 ? "Photo par défaut" : "Couverture"}
+              {photos.length === 0 ? t("Photo par défaut", "Default photo") : t("Couverture", "Cover")}
             </span>
           </div>
 
@@ -181,8 +191,8 @@ export function OfferEditor({
                     <button
                       type="button"
                       onClick={() => setPhotos([url, ...photos.filter((u) => u !== url)])}
-                      aria-label="Définir comme couverture"
-                      title="Définir comme couverture"
+                      aria-label={t("Définir comme couverture", "Set as cover")}
+                      title={t("Définir comme couverture", "Set as cover")}
                       className="rounded-md p-1 text-white/80 hover:text-amber-300"
                     >
                       <Star size={13} strokeWidth={2} />
@@ -190,8 +200,8 @@ export function OfferEditor({
                     <button
                       type="button"
                       onClick={() => setPhotos(photos.filter((u) => u !== url))}
-                      aria-label="Retirer cette photo"
-                      title="Retirer"
+                      aria-label={t("Retirer cette photo", "Remove this photo")}
+                      title={t("Retirer", "Remove")}
                       className="rounded-md p-1 text-white/80 hover:text-red-300"
                     >
                       <X size={13} strokeWidth={2.5} />
@@ -214,41 +224,49 @@ export function OfferEditor({
               onClick={() => fileInput.current?.click()}
               className="flex-1"
             >
-              {photos.length === 0 ? "Ajouter des photos" : "Ajouter"}
+              {photos.length === 0 ? t("Ajouter des photos", "Add photos") : t("Ajouter", "Add")}
             </Button>
             {photos.length > 0 && (
-              <Button size="sm" variant="ghost" icon={Trash2} onClick={() => setPhotos(photos.slice(1))} aria-label="Retirer la couverture" title="Retirer la couverture" />
+              <Button size="sm" variant="ghost" icon={Trash2} onClick={() => setPhotos(photos.slice(1))} aria-label={t("Retirer la couverture", "Remove cover")} title={t("Retirer la couverture", "Remove cover")} />
             )}
           </div>
           <p className="mt-2 text-[11px] leading-relaxed text-white/40">
-            La première photo est la couverture, seule visible sur la carte. Les suivantes s&apos;affichent dans la
-            fiche, au clic du client. Jusqu&apos;à {MAX_PHOTOS}, format paysage conseillé.
+            {t(
+              <>
+                La première photo est la couverture, seule visible sur la carte. Les suivantes s&apos;affichent dans la
+                fiche, au clic du client. Jusqu&apos;à {MAX_PHOTOS}, format paysage conseillé.
+              </>,
+              <>
+                The first photo is the cover, the only one shown on the card. The others appear in the detail view
+                when a guest taps it. Up to {MAX_PHOTOS}, landscape format recommended.
+              </>
+            )}
           </p>
         </div>
 
         {/* Champs */}
         <div className="space-y-4">
-          <Field label="Catégorie">
+          <Field label={t("Catégorie", "Category")}>
             <Segmented<GuestCategoryKey>
               size="sm"
               value={draft.category}
               onChange={(v) => set("category", v)}
-              options={CATEGORY_KEYS.map((k) => ({ value: k, label: CATEGORY_LABELS[k] }))}
+              options={CATEGORY_KEYS.map((k) => ({ value: k, label: categoryLabel(k, locale) }))}
             />
           </Field>
-          <Field label="Nom" htmlFor="offer-name">
-            <input id="offer-name" value={draft.name} onChange={(e) => set("name", e.target.value)} maxLength={120} className={inputClass} placeholder="Nom de l'adresse" autoFocus />
+          <Field label={t("Nom", "Name")} htmlFor="offer-name">
+            <input id="offer-name" value={draft.name} onChange={(e) => set("name", e.target.value)} maxLength={120} className={inputClass} placeholder={t("Nom de l'adresse", "Name of the place")} autoFocus />
           </Field>
           <div className={cn("grid gap-4", admin ? "sm:grid-cols-3" : "sm:grid-cols-2")}>
-            <Field label="Étiquette" htmlFor="offer-tag" hint={TAG_HINTS[draft.category]}>
+            <Field label={t("Étiquette", "Tag")} htmlFor="offer-tag" hint={tagHints[draft.category]}>
               <input id="offer-tag" value={draft.tag} onChange={(e) => set("tag", e.target.value)} maxLength={40} className={inputClass} placeholder="Restaurant" />
             </Field>
-            <Field label="Prix indicatif" htmlFor="offer-price" hint="Facultatif, texte libre.">
-              <input id="offer-price" value={draft.price} onChange={(e) => set("price", e.target.value)} maxLength={40} className={cn(inputClass, "num")} placeholder="dès 450 MAD" />
+            <Field label={t("Prix indicatif", "Guide price")} htmlFor="offer-price" hint={t("Facultatif, texte libre.", "Optional, free text.")}>
+              <input id="offer-price" value={draft.price} onChange={(e) => set("price", e.target.value)} maxLength={40} className={cn(inputClass, "num")} placeholder={t("dès 450 MAD", "from 450 MAD")} />
             </Field>
             {admin && (
-              <Field label="Ville" htmlFor="offer-city" hint="Vide = proposée dans toutes les villes.">
-                <input id="offer-city" list="offer-cities" value={draft.city} onChange={(e) => set("city", e.target.value)} maxLength={80} className={inputClass} placeholder="Toutes" />
+              <Field label={t("Ville", "City")} htmlFor="offer-city" hint={t("Vide = proposée dans toutes les villes.", "Empty = offered in every city.")}>
+                <input id="offer-city" list="offer-cities" value={draft.city} onChange={(e) => set("city", e.target.value)} maxLength={80} className={inputClass} placeholder={t("Toutes", "All")} />
                 <datalist id="offer-cities">
                   {CITIES.map((c) => (
                     <option key={c} value={c} />
@@ -258,11 +276,19 @@ export function OfferEditor({
             )}
           </div>
           <Field label="Description" htmlFor="offer-desc" hint={`${draft.description.length}/300`}>
-            <textarea id="offer-desc" value={draft.description} onChange={(e) => set("description", e.target.value.slice(0, 300))} rows={3} className={cn(inputClass, "resize-none")} placeholder="En une ou deux phrases : ce qui rend l'adresse désirable." />
+            <textarea id="offer-desc" value={draft.description} onChange={(e) => set("description", e.target.value.slice(0, 300))} rows={3} className={cn(inputClass, "resize-none")} placeholder={t("En une ou deux phrases : ce qui rend l'adresse désirable.", "In one or two sentences: what makes this place worth a visit.")} />
           </Field>
           <div className={cn("grid gap-4 items-end", admin ? "sm:grid-cols-2" : "")}>
             {admin && (
-              <Field label="Identifiant" htmlFor="offer-slug" hint={initial.slug ? "Ne change pas : les réservations passées y sont rattachées." : "Généré depuis le nom, modifiable avant création."}>
+              <Field
+                label={t("Identifiant", "ID")}
+                htmlFor="offer-slug"
+                hint={
+                  initial.slug
+                    ? t("Ne change pas : les réservations passées y sont rattachées.", "Cannot be changed: past reservations are linked to it.")
+                    : t("Généré depuis le nom, modifiable avant création.", "Generated from the name, editable before creation.")
+                }
+              >
                 <input
                   id="offer-slug"
                   value={draft.slug}
@@ -276,8 +302,8 @@ export function OfferEditor({
               </Field>
             )}
             <div className="flex h-11 items-center gap-3 rounded-xl border border-white/10 bg-white/[0.04] px-4">
-              <Switch checked={draft.active} onChange={(v) => set("active", v)} label="Adresse proposée" />
-              <span className="text-sm text-white/70">{draft.active ? "Proposée aux clients" : "Masquée pour l'instant"}</span>
+              <Switch checked={draft.active} onChange={(v) => set("active", v)} label={t("Adresse proposée", "Place offered")} />
+              <span className="text-sm text-white/70">{draft.active ? t("Proposée aux clients", "Offered to guests") : t("Masquée pour l'instant", "Hidden for now")}</span>
             </div>
           </div>
           {error && <p className="rounded-xl border border-red-400/20 bg-red-500/10 px-3 py-2 text-xs text-red-200">{error}</p>}

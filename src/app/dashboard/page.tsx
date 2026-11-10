@@ -9,6 +9,8 @@ import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
 import { StatStrip } from "@/components/shared/stat-strip";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { MiniBars, weeklySeries } from "@/components/shared/mini-charts";
+import { useIntlLocale, useT } from "@/lib/i18n/client";
+import type { Translate } from "@/lib/i18n";
 import {
   ArrowRight,
   CalendarDays,
@@ -43,62 +45,62 @@ type QuickLink = {
   href: string;
 };
 
-const QUICK_RESTAURANT: QuickLink[] = [
+const getQuickRestaurant = (t: Translate): QuickLink[] => [
   {
     icon: QrCode,
-    label: "Réservations",
-    description: "Clients envoyés par les hôtels, montants et avis",
+    label: t("Réservations", "Reservations"),
+    description: t("Clients envoyés par les hôtels, montants et avis", "Guests sent by hotels, amounts and reviews"),
     href: "/dashboard/reservations",
   },
   {
     icon: MessageSquare,
-    label: "Messages",
-    description: "Échanges avec les concierges et hôtels",
+    label: t("Messages", "Messages"),
+    description: t("Échanges avec les concierges et hôtels", "Conversations with concierges and hotels"),
     href: "/dashboard/messages",
   },
   {
     icon: CreditCard,
-    label: "Commissions",
-    description: "Ce que vous reversez, réservation par réservation",
+    label: t("Commissions", "Commissions"),
+    description: t("Ce que vous reversez, réservation par réservation", "What you pay out, reservation by reservation"),
     href: "/dashboard/commissions",
   },
   {
     icon: MoreHorizontal,
-    label: "Plus",
-    description: "Événements, plan de salle, caisse, portail, clients",
+    label: t("Plus", "More"),
+    description: t("Événements, plan de salle, caisse, portail, clients", "Events, floor plan, till, portal, guests"),
     href: "/dashboard/plus",
   },
 ];
 
-const QUICK_ACTIVITY: QuickLink[] = [
+const getQuickActivity = (t: Translate): QuickLink[] => [
   {
     icon: QrCode,
-    label: "Réservations",
-    description: "Demandes des clients d'hôtels, montants et avis",
+    label: t("Réservations", "Reservations"),
+    description: t("Demandes des clients d'hôtels, montants et avis", "Requests from hotel guests, amounts and reviews"),
     href: "/dashboard/reservations",
   },
   {
     icon: Tags,
-    label: "Prestations",
-    description: "Ce que vos clients peuvent réserver, visible sur le menu",
+    label: t("Prestations", "Services"),
+    description: t("Ce que vos clients peuvent réserver, visible sur le menu", "What your guests can book, shown on the menu"),
     href: "/dashboard/prestations",
   },
   {
     icon: MessageSquare,
-    label: "Messages",
-    description: "Échanges avec les concierges et hôtels",
+    label: t("Messages", "Messages"),
+    description: t("Échanges avec les concierges et hôtels", "Conversations with concierges and hotels"),
     href: "/dashboard/messages",
   },
   {
     icon: MoreHorizontal,
-    label: "Plus",
-    description: "Réseau, commissions, analyses, portail, clients",
+    label: t("Plus", "More"),
+    description: t("Réseau, commissions, analyses, portail, clients", "Network, commissions, analytics, portal, guests"),
     href: "/dashboard/plus",
   },
 ];
 
-const formatDay = (iso: string) =>
-  new Date(`${iso}T00:00:00`).toLocaleDateString("fr-FR", {
+const formatDay = (iso: string, intl = "fr-FR") =>
+  new Date(`${iso}T00:00:00`).toLocaleDateString(intl, {
     weekday: "short",
     day: "numeric",
     month: "short",
@@ -106,6 +108,8 @@ const formatDay = (iso: string) =>
 
 export default function VenueDashboardPage() {
   const { isLoading, fullName, venueName, isActivityVenue } = useAuthUser();
+  const t = useT();
+  const intl = useIntlLocale();
   const { reservations } = useVenueQrReservations();
   const [services, setServices] = useState<ServiceRow[] | null>(null);
 
@@ -166,27 +170,29 @@ export default function VenueDashboardPage() {
     })
     .sort()[0];
 
-  const people = isActivityVenue ? "participant" : "couvert";
+  const people = isActivityVenue
+    ? t(`participant${todayPeople > 1 ? "s" : ""} attendus`, `participant${todayPeople === 1 ? "" : "s"} expected`)
+    : t(`couvert${todayPeople > 1 ? "s" : ""} attendus`, `cover${todayPeople === 1 ? "" : "s"} expected`);
   const stats = [
-    { label: "CA apporté par twocards", value: `${revenue.toLocaleString()} MAD` },
-    { label: "Commissions reversées", value: `${commissions.toLocaleString()} MAD` },
+    { label: t("CA apporté par twocards", "Revenue brought by twocards"), value: `${revenue.toLocaleString(intl)} MAD` },
+    { label: t("Commissions reversées", "Commissions paid out"), value: `${commissions.toLocaleString(intl)} MAD` },
     {
-      label: isActivityVenue ? "Réservations reçues" : "Sorties reçues",
+      label: isActivityVenue ? t("Réservations reçues", "Reservations received") : t("Sorties reçues", "Outings received"),
       value: reservations.length,
-      hint: pending > 0 ? `dont ${pending} en attente` : undefined,
+      hint: pending > 0 ? t(`dont ${pending} en attente`, `${pending} pending`) : undefined,
     },
     {
-      label: "Satisfaction",
+      label: t("Satisfaction", "Satisfaction"),
       value:
-        avgRating !== null ? `${avgRating.toFixed(1).replace(".", ",")}/5` : "—",
+        avgRating !== null ? t(`${avgRating.toFixed(1).replace(".", ",")}/5`, `${avgRating.toFixed(1)}/5`) : "—",
       hint:
         rated.length > 0
-          ? `${rated.length} avis client${rated.length > 1 ? "s" : ""}`
-          : "aucun avis pour le moment",
+          ? t(`${rated.length} avis client${rated.length > 1 ? "s" : ""}`, `${rated.length} guest review${rated.length === 1 ? "" : "s"}`)
+          : t("aucun avis pour le moment", "no reviews yet"),
     },
   ];
 
-  const quickLinks = isActivityVenue ? QUICK_ACTIVITY : QUICK_RESTAURANT;
+  const quickLinks = isActivityVenue ? getQuickActivity(t) : getQuickRestaurant(t);
   const activeServices = (services ?? []).filter((s) => s.active);
 
   return (
@@ -194,30 +200,41 @@ export default function VenueDashboardPage() {
       {/* En-tête */}
       <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
         <h1 className="font-display text-3xl font-light text-white">
-          Bienvenue{fullName ? `, ${fullName.split(" ")[0]}` : ""}
+          {t("Bienvenue", "Welcome")}{fullName ? `, ${fullName.split(" ")[0]}` : ""}
         </h1>
         <p className="font-ui text-sm text-white/60 mt-2">
-          {venueName ? `${venueName} · ` : ""}vos chiffres réels :{" "}
-          {isActivityVenue ? "réservations" : "sorties"} reçues, montants
-          saisis, commissions et satisfaction.
+          {venueName ? `${venueName} · ` : ""}
+          {t(
+            <>
+              vos chiffres réels :{" "}
+              {isActivityVenue ? "réservations" : "sorties"} reçues, montants
+              saisis, commissions et satisfaction.
+            </>,
+            <>
+              your real numbers: {isActivityVenue ? "reservations" : "outings"}{" "}
+              received, amounts entered, commissions and satisfaction.
+            </>,
+          )}
         </p>
         <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-white/[0.08] pt-4">
           <span className="font-ui inline-flex items-center gap-1.5 text-sm text-white/70">
             <CalendarDays size={14} strokeWidth={1.5} className="text-blue-400" />
-            {isActivityVenue ? "Aujourd'hui" : "Ce soir"} :{" "}
+            {isActivityVenue ? t("Aujourd'hui :", "Today:") : t("Ce soir :", "Tonight:")}{" "}
             <span className="font-semibold text-white">
-              {today.length} réservation{today.length > 1 ? "s" : ""}
+              {t(
+                `${today.length} réservation${today.length > 1 ? "s" : ""}`,
+                `${today.length} reservation${today.length === 1 ? "" : "s"}`,
+              )}
             </span>
           </span>
           <span className="font-ui inline-flex items-center gap-1.5 text-sm text-white/70">
             <Users size={14} strokeWidth={1.5} className="text-blue-400" />
             <span className="font-semibold text-white">{todayPeople}</span>
             {people}
-            {todayPeople > 1 ? "s" : ""} attendus
           </span>
           {nextArrival && (
             <span className="font-ui text-sm text-white/70">
-              Prochaine arrivée :{" "}
+              {t("Prochaine arrivée :", "Next arrival:")}{" "}
               <span className="font-semibold text-white">
                 {nextArrival.slice(0, 5)}
               </span>
@@ -227,7 +244,7 @@ export default function VenueDashboardPage() {
             href="/dashboard/reservations"
             className="font-ui ml-auto inline-flex items-center gap-1 text-xs font-medium text-blue-400 hover:text-blue-300 transition-colors"
           >
-            Voir les réservations
+            {t("Voir les réservations", "View reservations")}
             <ArrowRight size={12} strokeWidth={1.5} />
           </Link>
         </div>
@@ -241,7 +258,7 @@ export default function VenueDashboardPage() {
         <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6 flex flex-col">
           <div className="flex items-center justify-between mb-1">
             <h2 className="font-display text-lg font-normal text-white">
-              En attente de réponse
+              {t("En attente de réponse", "Awaiting reply")}
             </h2>
             {pending > 0 && (
               <span className="font-ui flex h-6 min-w-6 items-center justify-center rounded-full bg-amber-400 px-2 text-[11px] font-bold text-black">
@@ -250,12 +267,17 @@ export default function VenueDashboardPage() {
             )}
           </div>
           <p className="font-ui text-xs text-white/40 mb-4">
-            Le client attend votre confirmation par téléphone ou WhatsApp.
+            {t(
+              "Le client attend votre confirmation par téléphone ou WhatsApp.",
+              "The guest is waiting for your confirmation by phone or WhatsApp.",
+            )}
           </p>
           {pendingList.length === 0 ? (
             <p className="font-ui text-sm text-white/40 leading-relaxed">
-              Rien en attente. Chaque nouvelle demande apparaît ici et vous
-              est notifiée sur votre téléphone.
+              {t(
+                "Rien en attente. Chaque nouvelle demande apparaît ici et vous est notifiée sur votre téléphone.",
+                "Nothing pending. Every new request shows up here and is sent to your phone as a notification.",
+              )}
             </p>
           ) : (
             <ul className="divide-y divide-white/[0.06]">
@@ -270,7 +292,7 @@ export default function VenueDashboardPage() {
                     </p>
                     <p className="font-ui text-xs text-white/40 mt-0.5 flex items-center gap-1.5">
                       <Clock size={11} strokeWidth={1.5} />
-                      {formatDay(r.reservation_date)}
+                      {formatDay(r.reservation_date, intl)}
                       {r.reservation_time ? ` · ${r.reservation_time}` : ""}
                       <Users size={11} strokeWidth={1.5} className="ml-1" />
                       {r.party_size}
@@ -280,7 +302,7 @@ export default function VenueDashboardPage() {
                     href={`tel:${r.guest_phone.replace(/\s/g, "")}`}
                     className="font-ui shrink-0 rounded-full border border-white/15 px-3 py-1.5 text-xs font-medium text-white/80 hover:bg-white/10 transition-colors"
                   >
-                    Appeler
+                    {t("Appeler", "Call")}
                   </a>
                 </li>
               ))}
@@ -290,17 +312,19 @@ export default function VenueDashboardPage() {
             href="/dashboard/reservations"
             className="font-ui mt-auto pt-4 inline-flex items-center gap-1.5 text-xs font-medium text-blue-400 hover:text-blue-300 transition-colors"
           >
-            Confirmer ou refuser
+            {t("Confirmer ou refuser", "Confirm or decline")}
             <ArrowRight size={13} strokeWidth={1.5} />
           </Link>
         </div>
 
         <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
           <h2 className="font-display text-lg font-normal text-white mb-1">
-            {isActivityVenue ? "Réservations par semaine" : "Sorties par semaine"}
+            {isActivityVenue
+              ? t("Réservations par semaine", "Reservations per week")
+              : t("Sorties par semaine", "Outings per week")}
           </h2>
           <p className="font-ui text-xs text-white/40 mb-5">
-            8 dernières semaines
+            {t("8 dernières semaines", "Last 8 weeks")}
           </p>
           <MiniBars data={weekly} color="bg-purple-400/70" />
         </div>
@@ -311,20 +335,26 @@ export default function VenueDashboardPage() {
         <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
           <div className="flex items-center justify-between mb-1">
             <h2 className="font-display text-lg font-normal text-white">
-              Vos prestations
+              {t("Vos prestations", "Your services")}
             </h2>
             <Link
               href="/dashboard/prestations"
               className="font-ui flex items-center gap-1 text-xs font-medium text-blue-400 hover:text-blue-300 transition-colors"
             >
-              Gérer
+              {t("Gérer", "Manage")}
               <ArrowRight size={13} strokeWidth={1.5} />
             </Link>
           </div>
           <p className="font-ui text-xs text-white/40 mb-4">
             {activeServices.length === 0
-              ? "Aucune prestation visible : votre fiche n'affiche que son nom."
-              : `${activeServices.length} visible${activeServices.length > 1 ? "s" : ""} sur le menu des hôtels partenaires, mise à jour immédiate.`}
+              ? t(
+                  "Aucune prestation visible : votre fiche n'affiche que son nom.",
+                  "No visible services: your listing only shows its name.",
+                )
+              : t(
+                  `${activeServices.length} visible${activeServices.length > 1 ? "s" : ""} sur le menu des hôtels partenaires, mise à jour immédiate.`,
+                  `${activeServices.length} visible on partner hotels' menus, updated instantly.`,
+                )}
           </p>
           {activeServices.length === 0 ? (
             <Link
@@ -332,7 +362,7 @@ export default function VenueDashboardPage() {
               className="font-ui inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-semibold text-black hover:bg-white/90 transition-colors"
             >
               <Tags size={14} strokeWidth={1.75} />
-              Ajouter une prestation
+              {t("Ajouter une prestation", "Add a service")}
             </Link>
           ) : (
             <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -362,13 +392,13 @@ export default function VenueDashboardPage() {
         <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-display text-lg font-normal text-white">
-              Dernières réservations
+              {t("Dernières réservations", "Latest reservations")}
             </h2>
             <Link
               href="/dashboard/reservations"
               className="font-ui flex items-center gap-1 text-xs font-medium text-blue-400 hover:text-blue-300 transition-colors"
             >
-              Tout voir
+              {t("Tout voir", "View all")}
               <ArrowRight size={13} strokeWidth={1.5} />
             </Link>
           </div>
@@ -389,7 +419,7 @@ export default function VenueDashboardPage() {
                     <CalendarDays size={11} strokeWidth={1.5} />
                     {new Date(
                       r.reservation_date + "T00:00:00"
-                    ).toLocaleDateString("fr-FR")}
+                    ).toLocaleDateString(intl)}
                     {r.reservation_time ? ` · ${r.reservation_time}` : ""}
                     <Users size={11} strokeWidth={1.5} className="ml-1" />
                     {r.party_size}
@@ -398,7 +428,7 @@ export default function VenueDashboardPage() {
                 <div className="flex items-center gap-3 shrink-0">
                   {r.amount_spent !== null && (
                     <span className="font-display text-sm text-white tabular-nums">
-                      {r.amount_spent.toLocaleString()} MAD
+                      {r.amount_spent.toLocaleString(intl)} MAD
                     </span>
                   )}
                   <StatusBadge status={r.status} />

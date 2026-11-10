@@ -5,6 +5,7 @@ import { Download, TrendingUp, Wallet, Clock, Percent, Check, Search } from "luc
 import { useAuthUser } from "@/hooks/use-auth-user";
 import { TableSkeleton } from "@/components/shared/loading-skeleton";
 import { useToast } from "@/hooks/use-toast";
+import { useT, useIntlLocale } from "@/lib/i18n/client";
 
 const DEMO_COMMISSIONS = [
   { id: 1, venue: "Le Comptoir Darna", client: "Mehdi Alaoui", event: "OPENING NIGHT", date: "6 Avr.", montant: "6 400 MAD", status: "versé" },
@@ -19,6 +20,12 @@ const DEMO_COMMISSIONS = [
 
 export default function ConciergeCommissionsPage() {
   const { isDemoConcierge, isLoading } = useAuthUser();
+  const t = useT();
+  const intl = useIntlLocale();
+  /* Le statut reste stocké en français ; seul le libellé est traduit. */
+  const statusLabel = (s: string) =>
+    s === "versé" ? t("Versé", "Paid") : s === "en attente" ? t("En attente", "Pending") : s;
+  const dateLabel = (d: string) => t(d, d.replace("Avr.", "Apr").replace("Mar.", "Mar"));
   const [filter, setFilter] = useState("tous");
   const [search, setSearch] = useState("");
   const { toast, showToast } = useToast();
@@ -42,11 +49,18 @@ export default function ConciergeCommissionsPage() {
 
   const handleExport = () => {
     const today = new Date().toISOString().split("T")[0];
-    const headers = ["Établissement", "Événement", "Client", "Date", "Montant", "Statut"];
+    const headers = [
+      t("Établissement", "Venue"),
+      t("Événement", "Event"),
+      t("Client", "Guest"),
+      t("Date", "Date"),
+      t("Montant", "Amount"),
+      t("Statut", "Status"),
+    ];
     const csv = [
       headers.join(","),
       ...commissions.map((c) =>
-        [c.venue, c.event, c.client, c.date, c.montant, c.status].map((v) => `"${v}"`).join(",")
+        [c.venue, c.event, c.client, dateLabel(c.date), c.montant, statusLabel(c.status)].map((v) => `"${v}"`).join(",")
       ),
     ].join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
@@ -56,7 +70,7 @@ export default function ConciergeCommissionsPage() {
     a.download = `commissions-concierge-${today}.csv`;
     a.click();
     URL.revokeObjectURL(url);
-    showToast("CSV téléchargé");
+    showToast(t("CSV téléchargé", "CSV downloaded"));
   };
 
   return (
@@ -65,10 +79,10 @@ export default function ConciergeCommissionsPage() {
       <div className="px-4 sm:px-6 pt-6 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-xl font-bold text-white">
-            Commissions
+            {t("Commissions", "Commissions")}
           </h1>
           <p className="text-sm text-white/60 font-ui mt-0.5">
-            Suivez vos gains et versements
+            {t("Suivez vos gains et versements", "Track your earnings and payouts")}
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -76,7 +90,7 @@ export default function ConciergeCommissionsPage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60/40" size={16} strokeWidth={1.5} />
             <input
               type="text"
-              placeholder="Rechercher..."
+              placeholder={t("Rechercher...", "Search...")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-10 pr-4 py-2 bg-white/[0.05] rounded-full text-sm text-white font-ui focus:ring-1 focus:ring-white/30/30 focus:outline-none w-48"
@@ -87,7 +101,7 @@ export default function ConciergeCommissionsPage() {
             className="flex items-center gap-2 bg-white/[0.07] border border-white/10/20 text-white/60 text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-white/[0.05] transition-colors font-ui"
           >
             <Download size={16} strokeWidth={1.5} />
-            Exporter CSV
+            {t("Exporter CSV", "Export CSV")}
           </button>
         </div>
       </div>
@@ -100,11 +114,11 @@ export default function ConciergeCommissionsPage() {
               <Wallet size={16} strokeWidth={1.5} className="text-white" />
             </div>
             <span className="text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-ui">
-              Total ce mois
+              {t("Total ce mois", "Total this month")}
             </span>
           </div>
           <p className="text-xl font-extrabold text-white font-ui">
-            {totalMonth.toLocaleString()} MAD
+            {totalMonth.toLocaleString(intl)} MAD
           </p>
         </div>
         <div className="bg-white/[0.07] rounded-xl border border-white/10/10 p-4">
@@ -113,11 +127,11 @@ export default function ConciergeCommissionsPage() {
               <Clock size={16} strokeWidth={1.5} className="text-amber-600" />
             </div>
             <span className="text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-ui">
-              En attente
+              {t("En attente", "Pending")}
             </span>
           </div>
           <p className="text-xl font-extrabold text-white font-ui">
-            {pending.toLocaleString()} MAD
+            {pending.toLocaleString(intl)} MAD
           </p>
         </div>
         <div className="bg-white/[0.07] rounded-xl border border-white/10/10 p-4">
@@ -126,11 +140,11 @@ export default function ConciergeCommissionsPage() {
               <TrendingUp size={16} strokeWidth={1.5} className="text-emerald-600" />
             </div>
             <span className="text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-ui">
-              Versé
+              {t("Versé", "Paid")}
             </span>
           </div>
           <p className="text-xl font-extrabold text-white font-ui">
-            {paid.toLocaleString()} MAD
+            {paid.toLocaleString(intl)} MAD
           </p>
         </div>
         <div className="bg-white/[0.07] rounded-xl border border-white/10/10 p-4">
@@ -139,7 +153,7 @@ export default function ConciergeCommissionsPage() {
               <Percent size={16} strokeWidth={1.5} className="text-blue-600" />
             </div>
             <span className="text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-ui">
-              Taux moyen
+              {t("Taux moyen", "Average rate")}
             </span>
           </div>
           <p className="text-xl font-extrabold text-white font-ui">
@@ -151,9 +165,9 @@ export default function ConciergeCommissionsPage() {
       {/* Filters */}
       <div className="px-4 sm:px-6 pb-4 flex items-center gap-2">
         {[
-          { key: "tous", label: "Tous" },
-          { key: "versé", label: "Versé" },
-          { key: "en attente", label: "En attente" },
+          { key: "tous", label: t("Tous", "All") },
+          { key: "versé", label: t("Versé", "Paid") },
+          { key: "en attente", label: t("En attente", "Pending") },
         ].map((f) => (
           <button
             key={f.key}
@@ -177,22 +191,22 @@ export default function ConciergeCommissionsPage() {
               <thead>
                 <tr className="border-b border-white/10/10">
                   <th className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-ui">
-                    Établissement
+                    {t("Établissement", "Venue")}
                   </th>
                   <th className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-ui">
-                    Événement
+                    {t("Événement", "Event")}
                   </th>
                   <th className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-ui">
-                    Client
+                    {t("Client", "Guest")}
                   </th>
                   <th className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-ui">
-                    Date
+                    {t("Date", "Date")}
                   </th>
                   <th className="text-right px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-ui">
-                    Montant
+                    {t("Montant", "Amount")}
                   </th>
                   <th className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-ui">
-                    Statut
+                    {t("Statut", "Status")}
                   </th>
                 </tr>
               </thead>
@@ -207,21 +221,21 @@ export default function ConciergeCommissionsPage() {
                     <td data-head className="px-4 py-3.5 text-white font-medium font-ui">
                       {c.venue}
                     </td>
-                    <td data-label="Événement" className="px-4 py-3.5">
+                    <td data-label={t("Événement", "Event")} className="px-4 py-3.5">
                       <span className="text-xs font-bold text-white/60/80 font-ui">
                         {c.event}
                       </span>
                     </td>
-                    <td data-label="Client" className="px-4 py-3.5 text-white font-ui">
+                    <td data-label={t("Client", "Guest")} className="px-4 py-3.5 text-white font-ui">
                       {c.client}
                     </td>
-                    <td data-label="Date" className="px-4 py-3.5 text-white/60 font-ui">
-                      {c.date}
+                    <td data-label={t("Date", "Date")} className="px-4 py-3.5 text-white/60 font-ui">
+                      {dateLabel(c.date)}
                     </td>
-                    <td data-label="Montant" className="px-4 py-3.5 text-right text-white font-bold font-ui">
+                    <td data-label={t("Montant", "Amount")} className="px-4 py-3.5 text-right text-white font-bold font-ui">
                       {c.montant}
                     </td>
-                    <td data-label="Statut" className="px-4 py-3.5">
+                    <td data-label={t("Statut", "Status")} className="px-4 py-3.5">
                       <span
                         className={`text-[10px] font-semibold px-2.5 py-1 rounded-full ${
                           c.status === "versé"
@@ -229,7 +243,7 @@ export default function ConciergeCommissionsPage() {
                             : "bg-amber-100 text-amber-800"
                         }`}
                       >
-                        {c.status}
+                        {statusLabel(c.status)}
                       </span>
                     </td>
                   </tr>
@@ -242,10 +256,10 @@ export default function ConciergeCommissionsPage() {
                           <Wallet size={24} strokeWidth={1.5} className="text-white/60/40" />
                         </div>
                         <p className="text-sm font-medium text-white/60 font-ui">
-                          Aucune commission pour le moment
+                          {t("Aucune commission pour le moment", "No commissions yet")}
                         </p>
                         <p className="text-xs text-white/60/60 font-ui mt-1">
-                          Vos commissions apparaîtront ici
+                          {t("Vos commissions apparaîtront ici", "Your commissions will appear here")}
                         </p>
                       </div>
                     </td>

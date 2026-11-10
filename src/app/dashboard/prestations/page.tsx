@@ -28,6 +28,7 @@ import {
   inputClass,
 } from "@/components/hotel/ui";
 import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
+import { useLocale, useT } from "@/lib/i18n/client";
 
 /* Prestations d'une activité ou d'un service : une balade en quad d'une
    heure, un transfert aéroport, un massage de 50 minutes. Chaque
@@ -60,6 +61,7 @@ const SELECT = "id, name, description, duration, price, image_url, active, sort_
 
 export default function PrestationsPage() {
   const { isLoading, userId, isActivityVenue } = useAuthUser();
+  const t = useT();
   const [services, setServices] = useState<Service[] | null>(null);
   const [editor, setEditor] = useState<{ id: string | null; draft: Draft } | null>(null);
   const [deleting, setDeleting] = useState<Service | null>(null);
@@ -104,7 +106,7 @@ export default function PrestationsPage() {
     if (!editor || !userId) return;
     const d = editor.draft;
     if (!d.name.trim()) {
-      notify("Donnez un nom à la prestation.", "error");
+      notify(t("Donnez un nom à la prestation.", "Give the service a name."), "error");
       return;
     }
     setBusy(true);
@@ -126,11 +128,15 @@ export default function PrestationsPage() {
         });
     setBusy(false);
     if (error) {
-      notify("Enregistrement impossible. Réessayez.", "error");
+      notify(t("Enregistrement impossible. Réessayez.", "Could not save. Please try again."), "error");
       return;
     }
     setEditor(null);
-    notify(editor.id ? "Prestation mise à jour." : "Prestation ajoutée, visible sur le menu.");
+    notify(
+      editor.id
+        ? t("Prestation mise à jour.", "Service updated.")
+        : t("Prestation ajoutée, visible sur le menu.", "Service added and visible on the menu.")
+    );
     load();
   };
 
@@ -143,9 +149,9 @@ export default function PrestationsPage() {
       .eq("id", s.id);
     if (error) {
       setServices((prev) => prev!.map((x) => (x.id === s.id ? { ...x, active: s.active } : x)));
-      notify("Changement impossible. Réessayez.", "error");
+      notify(t("Changement impossible. Réessayez.", "Could not update. Please try again."), "error");
     } else {
-      notify(next ? "Visible sur le menu." : "Retirée du menu.");
+      notify(next ? t("Visible sur le menu.", "Visible on the menu.") : t("Retirée du menu.", "Removed from the menu."));
     }
   };
 
@@ -170,7 +176,7 @@ export default function PrestationsPage() {
       supabase.from("venue_services").update({ sort_order: rb }).eq("id", b.id),
     ]);
     if (r1.error || r2.error) {
-      notify("Réordonnancement impossible.", "error");
+      notify(t("Réordonnancement impossible.", "Could not reorder."), "error");
       load();
     }
   };
@@ -185,10 +191,10 @@ export default function PrestationsPage() {
     setBusy(false);
     setDeleting(null);
     if (error) {
-      notify("Suppression impossible.", "error");
+      notify(t("Suppression impossible.", "Could not delete."), "error");
       return;
     }
-    notify("Prestation supprimée.");
+    notify(t("Prestation supprimée.", "Service deleted."));
     load();
   };
 
@@ -199,18 +205,27 @@ export default function PrestationsPage() {
       <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <h1 className="font-display text-3xl font-light text-white">Prestations</h1>
+            <h1 className="font-display text-3xl font-light text-white">{t("Prestations", "Services")}</h1>
             <p className="font-ui text-sm text-white/60 mt-2 max-w-xl">
-              Ce que vos clients peuvent réserver : durée, prix, une photo.
-              Chaque prestation visible apparaît aussitôt sous votre fiche dans
-              le menu des hôtels partenaires, et le client la choisit avec sa
-              date.
+              {t(
+                "Ce que vos clients peuvent réserver : durée, prix, une photo. Chaque prestation visible apparaît aussitôt sous votre fiche dans le menu des hôtels partenaires, et le client la choisit avec sa date.",
+                "What your guests can book: duration, price, a photo. Every visible service appears straight away under your listing on partner hotels' menus, and guests pick it along with their date."
+              )}
             </p>
             {!isActivityVenue && (
               <p className="font-ui mt-2 text-xs text-amber-300/80">
-                Votre compte est enregistré comme restaurant ou club : les
-                prestations servent surtout aux activités et services, mais
-                rien ne vous empêche d&apos;y mettre vos formules.
+                {t(
+                  <>
+                    Votre compte est enregistré comme restaurant ou club : les
+                    prestations servent surtout aux activités et services, mais
+                    rien ne vous empêche d&apos;y mettre vos formules.
+                  </>,
+                  <>
+                    Your account is registered as a restaurant or club. Services
+                    are mainly for activities, but you can still list your set
+                    menus and packages here.
+                  </>
+                )}
               </p>
             )}
           </div>
@@ -220,14 +235,23 @@ export default function PrestationsPage() {
             onClick={() => setEditor({ id: null, draft: EMPTY })}
             className="shrink-0"
           >
-            Nouvelle prestation
+            {t("Nouvelle prestation", "New service")}
           </Button>
         </div>
         {services.length > 0 && (
           <p className="font-ui mt-4 border-t border-white/[0.08] pt-4 text-xs text-white/50">
-            {services.length} prestation{services.length > 1 ? "s" : ""} ·{" "}
-            <span className="text-white/80">{visible} visible{visible > 1 ? "s" : ""}</span> sur le
-            menu · l&apos;ordre ci-dessous est celui du menu.
+            {t(
+              <>
+                {services.length} prestation{services.length > 1 ? "s" : ""} ·{" "}
+                <span className="text-white/80">{visible} visible{visible > 1 ? "s" : ""}</span> sur le
+                menu · l&apos;ordre ci-dessous est celui du menu.
+              </>,
+              <>
+                {services.length} service{services.length === 1 ? "" : "s"} ·{" "}
+                <span className="text-white/80">{visible} visible</span> on the
+                menu · the order below is the menu order.
+              </>
+            )}
           </p>
         )}
       </div>
@@ -236,11 +260,14 @@ export default function PrestationsPage() {
         <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl">
           <EmptyState
             icon={Tags}
-            title="Aucune prestation pour le moment"
-            description="Par exemple « Balade en quad, 1 h, 450 MAD ». Dès qu'elle est enregistrée, les clients des hôtels partenaires peuvent la réserver."
+            title={t("Aucune prestation pour le moment", "No services yet")}
+            description={t(
+              "Par exemple « Balade en quad, 1 h, 450 MAD ». Dès qu'elle est enregistrée, les clients des hôtels partenaires peuvent la réserver.",
+              "For example “Quad bike ride, 1 hr, 450 MAD”. Once saved, guests at partner hotels can book it."
+            )}
             action={
               <Button variant="primary" icon={Plus} onClick={() => setEditor({ id: null, draft: EMPTY })}>
-                Ajouter ma première prestation
+                {t("Ajouter ma première prestation", "Add my first service")}
               </Button>
             }
           />
@@ -279,12 +306,12 @@ export default function PrestationsPage() {
                       {s.name}
                     </p>
                     <p className="font-ui text-xs text-white/50 mt-0.5">
-                      {[s.duration, s.price].filter(Boolean).join(" · ") || "Durée et prix à préciser"}
+                      {[s.duration, s.price].filter(Boolean).join(" · ") || t("Durée et prix à préciser", "Duration and price to be added")}
                     </p>
                   </div>
                   {!s.active && (
                     <span className="font-ui shrink-0 rounded-full border border-white/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white/50">
-                      masquée
+                      {t("masquée", "hidden")}
                     </span>
                   )}
                 </div>
@@ -300,7 +327,7 @@ export default function PrestationsPage() {
                     className="font-ui inline-flex h-9 items-center gap-1.5 rounded-lg border border-white/15 px-3 text-xs font-medium text-white hover:bg-white/10 transition-colors"
                   >
                     <Pencil size={13} strokeWidth={1.75} />
-                    Modifier
+                    {t("Modifier", "Edit")}
                   </button>
                   <button
                     type="button"
@@ -308,14 +335,14 @@ export default function PrestationsPage() {
                     className="font-ui inline-flex h-9 items-center gap-1.5 rounded-lg border border-white/15 px-3 text-xs font-medium text-white/80 hover:bg-white/10 transition-colors"
                   >
                     {s.active ? <EyeOff size={13} strokeWidth={1.75} /> : <Eye size={13} strokeWidth={1.75} />}
-                    {s.active ? "Masquer" : "Afficher"}
+                    {s.active ? t("Masquer", "Hide") : t("Afficher", "Show")}
                   </button>
                   <span className="ml-auto flex items-center gap-1">
                     <button
                       type="button"
                       onClick={() => move(s, -1)}
                       disabled={i === 0}
-                      aria-label="Monter"
+                      aria-label={t("Monter", "Move up")}
                       className="flex h-9 w-9 items-center justify-center rounded-lg text-white/50 hover:bg-white/10 hover:text-white disabled:opacity-25 transition-colors"
                     >
                       <ArrowUp size={15} strokeWidth={1.75} />
@@ -324,7 +351,7 @@ export default function PrestationsPage() {
                       type="button"
                       onClick={() => move(s, 1)}
                       disabled={i === services.length - 1}
-                      aria-label="Descendre"
+                      aria-label={t("Descendre", "Move down")}
                       className="flex h-9 w-9 items-center justify-center rounded-lg text-white/50 hover:bg-white/10 hover:text-white disabled:opacity-25 transition-colors"
                     >
                       <ArrowDown size={15} strokeWidth={1.75} />
@@ -332,7 +359,7 @@ export default function PrestationsPage() {
                     <button
                       type="button"
                       onClick={() => setDeleting(s)}
-                      aria-label="Supprimer"
+                      aria-label={t("Supprimer", "Delete")}
                       className="flex h-9 w-9 items-center justify-center rounded-lg text-red-400/60 hover:bg-red-500/10 hover:text-red-400 transition-colors"
                     >
                       <Trash2 size={15} strokeWidth={1.75} />
@@ -362,13 +389,16 @@ export default function PrestationsPage() {
         open={deleting !== null}
         onCancel={() => setDeleting(null)}
         onConfirm={remove}
-        title="Supprimer cette prestation ?"
+        title={t("Supprimer cette prestation ?", "Delete this service?")}
         description={
           deleting
-            ? `« ${deleting.name} » disparaît du menu immédiatement. Les réservations déjà reçues sont conservées.`
+            ? t(
+                `« ${deleting.name} » disparaît du menu immédiatement. Les réservations déjà reçues sont conservées.`,
+                `“${deleting.name}” is removed from the menu immediately. Reservations already received are kept.`
+              )
             : undefined
         }
-        confirmLabel="Supprimer"
+        confirmLabel={t("Supprimer", "Delete")}
         danger
         loading={busy}
       />
@@ -399,15 +429,17 @@ function ServiceEditor({
 }) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const t = useT();
+  const locale = useLocale();
 
   const pick = async (file: File | undefined) => {
     if (!file) return;
     setUploading(true);
     try {
-      const url = await uploadImage(file, userId, "service", 1200);
+      const url = await uploadImage(file, userId, "service", 1200, locale);
       onChange({ ...draft, image_url: url });
     } catch (e) {
-      onError(e instanceof Error ? e.message : "Envoi de la photo impossible.");
+      onError(e instanceof Error ? e.message : t("Envoi de la photo impossible.", "Could not upload the photo."));
     } finally {
       setUploading(false);
       if (fileRef.current) fileRef.current.value = "";
@@ -418,15 +450,15 @@ function ServiceEditor({
     <Modal
       open
       onClose={onClose}
-      title={isNew ? "Nouvelle prestation" : "Modifier la prestation"}
-      description="Ce que le client lit avant de choisir sa date."
+      title={isNew ? t("Nouvelle prestation", "New service") : t("Modifier la prestation", "Edit service")}
+      description={t("Ce que le client lit avant de choisir sa date.", "What guests read before choosing their date.")}
       footer={
         <>
           <Button variant="ghost" onClick={onClose} disabled={busy}>
-            Annuler
+            {t("Annuler", "Cancel")}
           </Button>
           <Button variant="primary" onClick={onSave} loading={busy}>
-            {isNew ? "Ajouter au menu" : "Enregistrer"}
+            {isNew ? t("Ajouter au menu", "Add to menu") : t("Enregistrer", "Save")}
           </Button>
         </>
       }
@@ -438,30 +470,30 @@ function ServiceEditor({
           onSave();
         }}
       >
-        <Field label="Nom" htmlFor="svc-name" hint="Ce que le client voit en premier.">
+        <Field label={t("Nom", "Name")} htmlFor="svc-name" hint={t("Ce que le client voit en premier.", "What guests see first.")}>
           <input
             id="svc-name"
             className={inputClass}
             value={draft.name}
             onChange={(e) => onChange({ ...draft, name: e.target.value })}
-            placeholder="Balade en quad"
+            placeholder={t("Balade en quad", "Quad bike ride")}
             maxLength={80}
             autoFocus
             required
           />
         </Field>
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Durée" htmlFor="svc-duration">
+          <Field label={t("Durée", "Duration")} htmlFor="svc-duration">
             <input
               id="svc-duration"
               className={inputClass}
               value={draft.duration}
               onChange={(e) => onChange({ ...draft, duration: e.target.value })}
-              placeholder="1 h"
+              placeholder={t("1 h", "1 hr")}
               maxLength={40}
             />
           </Field>
-          <Field label="Prix" htmlFor="svc-price">
+          <Field label={t("Prix", "Price")} htmlFor="svc-price">
             <input
               id="svc-price"
               className={inputClass}
@@ -473,17 +505,26 @@ function ServiceEditor({
             />
           </Field>
         </div>
-        <Field label="Description" htmlFor="svc-desc" hint="Facultatif, 300 caractères.">
+        <Field label={t("Description", "Description")} htmlFor="svc-desc" hint={t("Facultatif, 300 caractères.", "Optional, 300 characters.")}>
           <textarea
             id="svc-desc"
             className={`${inputClass} min-h-24 resize-none`}
             value={draft.description}
             onChange={(e) => onChange({ ...draft, description: e.target.value })}
-            placeholder="Départ de la Palmeraie, casque et lunettes fournis, guide francophone."
+            placeholder={t(
+              "Départ de la Palmeraie, casque et lunettes fournis, guide francophone.",
+              "Departs from the Palmeraie, helmet and goggles provided, English-speaking guide."
+            )}
             maxLength={300}
           />
         </Field>
-        <Field label="Photo" hint="Facultative. Sans photo, celle de votre fiche est utilisée.">
+        <Field
+          label={t("Photo", "Photo")}
+          hint={t(
+            "Facultative. Sans photo, celle de votre fiche est utilisée.",
+            "Optional. Without one, your listing photo is used."
+          )}
+        >
           <div className="flex items-center gap-3">
             <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-white/[0.06]">
               {draft.image_url ? (
@@ -509,13 +550,13 @@ function ServiceEditor({
               onClick={() => fileRef.current?.click()}
               type="button"
             >
-              {draft.image_url ? "Changer" : "Ajouter une photo"}
+              {draft.image_url ? t("Changer", "Change") : t("Ajouter une photo", "Add a photo")}
             </Button>
             {draft.image_url && (
               <button
                 type="button"
                 onClick={() => onChange({ ...draft, image_url: null })}
-                aria-label="Retirer la photo"
+                aria-label={t("Retirer la photo", "Remove photo")}
                 className="flex h-9 w-9 items-center justify-center rounded-lg text-white/50 hover:bg-white/10 hover:text-white transition-colors"
               >
                 <X size={16} strokeWidth={1.75} />
@@ -526,7 +567,7 @@ function ServiceEditor({
         <Switch
           checked={draft.active}
           onChange={(active) => onChange({ ...draft, active })}
-          label="Visible sur le menu des hôtels"
+          label={t("Visible sur le menu des hôtels", "Visible on hotel menus")}
         />
       </form>
     </Modal>

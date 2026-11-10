@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { AlertCircle, Check, Loader2 } from "lucide-react";
 import { unsubscribe, type OptoutState } from "./actions";
+import { useT } from "@/lib/i18n/client";
 
 const inputClass =
   "w-full rounded-xl border border-black/15 bg-white px-4 py-3.5 text-sm text-[var(--landing-ink)] outline-none transition-all placeholder:text-black/30 focus:border-black/40 focus:ring-1 focus:ring-black/10";
@@ -13,6 +14,7 @@ const labelClass =
 
 function SubmitButton() {
   const { pending } = useFormStatus();
+  const t = useT();
   return (
     <button
       type="submit"
@@ -20,12 +22,13 @@ function SubmitButton() {
       className="flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--landing-ink)] px-4 py-3.5 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-60"
     >
       {pending && <Loader2 size={16} className="animate-spin" />}
-      Confirmer ma désinscription
+      {t("Confirmer ma désinscription", "Confirm unsubscribe")}
     </button>
   );
 }
 
 export function OptoutForm({ initialEmail }: { initialEmail: string }) {
+  const t = useT();
   const [state, formAction] = useActionState<OptoutState, FormData>(
     unsubscribe,
     { status: "idle", message: "", email: initialEmail }
@@ -37,17 +40,27 @@ export function OptoutForm({ initialEmail }: { initialEmail: string }) {
         <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-[var(--landing-ink)] text-white">
           <Check size={18} />
         </div>
-        <h2 className="font-title text-xl font-normal">C&apos;est fait.</h2>
+        <h2 className="font-title text-xl font-normal">{t(<>C&apos;est fait.</>, <>All done.</>)}</h2>
         <p className="mt-3 text-[14px] leading-relaxed text-[var(--landing-ink)]/70">
           <span className="font-medium text-[var(--landing-ink)]">
             {state.email}
           </span>{" "}
-          ne recevra plus de message de prospection de notre part. Vous
-          n&apos;avez rien d&apos;autre à faire.
+          {t(
+            <>
+              ne recevra plus de message de prospection de notre part. Vous
+              n&apos;avez rien d&apos;autre à faire.
+            </>,
+            <>
+              will no longer receive outreach messages from us. There&apos;s
+              nothing else you need to do.
+            </>,
+          )}
         </p>
         <p className="mt-3 text-[13px] leading-relaxed text-[var(--landing-mute)]">
-          Cette désinscription ne concerne pas les messages liés à une
-          réservation en cours si vous êtes déjà client.
+          {t(
+            "Cette désinscription ne concerne pas les messages liés à une réservation en cours si vous êtes déjà client.",
+            "This doesn’t apply to messages about an ongoing reservation if you’re already a customer.",
+          )}
         </p>
       </div>
     );
@@ -68,7 +81,7 @@ export function OptoutForm({ initialEmail }: { initialEmail: string }) {
       <div className="space-y-5">
         <div className="space-y-2">
           <label htmlFor="email" className={labelClass}>
-            Adresse e-mail
+            {t("Adresse e-mail", "Email address")}
           </label>
           <input
             id="email"
@@ -77,21 +90,25 @@ export function OptoutForm({ initialEmail }: { initialEmail: string }) {
             required
             autoComplete="email"
             defaultValue={state.email || initialEmail}
-            placeholder="vous@votre-restaurant.com"
+            placeholder={t("vous@votre-restaurant.com", "you@your-restaurant.com")}
             className={inputClass}
           />
         </div>
 
         <div className="space-y-2">
           <label htmlFor="reason" className={labelClass}>
-            Raison <span className="normal-case tracking-normal">(facultatif)</span>
+            {t("Raison", "Reason")}{" "}
+            <span className="normal-case tracking-normal">{t("(facultatif)", "(optional)")}</span>
           </label>
           <textarea
             id="reason"
             name="reason"
             rows={3}
             maxLength={500}
-            placeholder="Ce qui nous aiderait à ne plus déranger les bonnes personnes."
+            placeholder={t(
+              "Ce qui nous aiderait à ne plus déranger les bonnes personnes.",
+              "Anything that would help us stop bothering the right people.",
+            )}
             className={`${inputClass} resize-none`}
           />
         </div>

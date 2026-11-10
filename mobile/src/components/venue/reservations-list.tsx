@@ -16,6 +16,7 @@ import { ReservationCard } from '@/components/venue/reservation-card'
 import { Chip, Empty, Icon, IconButton, LargeTitle, Screen, ScreenSkeleton } from '@/components/venue/ui'
 import { BottomTabInset, Light } from '@/constants/theme'
 import { haptic } from '@/lib/haptics'
+import { useLocale, useT } from '@/lib/i18n'
 import { useToast } from '@/lib/toast'
 import {
   dayLabel,
@@ -43,6 +44,8 @@ export function ReservationsList({
 }) {
   const router = useRouter()
   const toast = useToast()
+  const t = useT()
+  const locale = useLocale()
   const { rows, loading, refreshing, refresh, setStatus, checkIn, setAmount } =
     useVenueReservations()
   const [filter, setFilter] = useState<Filter>(requested ?? 'pending')
@@ -98,40 +101,50 @@ export function ReservationsList({
       const live = data.filter((r) => !isOut(r))
       const people = live.reduce((s, r) => s + r.party_size, 0)
       const spent = live.reduce((s, r) => s + (r.amount_spent ?? 0), 0)
-      return { title: dayLabel(date), date, data, people, live: live.length, spent }
+      return { title: dayLabel(date, locale), date, data, people, live: live.length, spent }
     })
-  }, [rows, filter, query, today])
+  }, [rows, filter, query, today, locale])
 
   const decide = async (r: Reservation, status: 'confirmée' | 'annulée') => {
     haptic.tap()
     const ok = await setStatus(r, status)
     if (!ok) {
       haptic.error()
-      toast.show({ message: 'Modification impossible. Vérifiez votre connexion.', tone: 'danger' })
+      toast.show({ message: t('Modification impossible. Vérifiez votre connexion.', "Couldn't update. Check your connection."), tone: 'danger' })
       return
     }
     haptic.success()
     toast.show({
-      message: status === 'confirmée' ? `${r.guest_name} confirmé` : `${r.guest_name} refusé`,
+      message:
+        status === 'confirmée'
+          ? t(`${r.guest_name} confirmé`, `${r.guest_name} confirmed`)
+          : t(`${r.guest_name} refusé`, `${r.guest_name} declined`),
       tone: status === 'confirmée' ? 'success' : 'default',
-      action: { label: 'Annuler', onPress: () => void setStatus({ ...r, status }, 'en attente') },
+      action: { label: t('Annuler', 'Undo'), onPress: () => void setStatus({ ...r, status }, 'en attente') },
     })
   }
 
   const refuse = (r: Reservation) =>
-    Alert.alert('Refuser cette réservation ?', `${r.guest_name}, ${r.party_size} pers.${r.source === 'qr' ? " L'hôtel le verra aussi." : ''}`, [
-      { text: 'Garder', style: 'cancel' },
-      { text: 'Refuser', style: 'destructive', onPress: () => void decide(r, 'annulée') },
-    ])
+    Alert.alert(
+      t('Refuser cette réservation ?', 'Decline this reservation?'),
+      t(
+        `${r.guest_name}, ${r.party_size} pers.${r.source === 'qr' ? " L'hôtel le verra aussi." : ''}`,
+        `${r.guest_name}, party of ${r.party_size}.${r.source === 'qr' ? ' The hotel will see it too.' : ''}`
+      ),
+      [
+      { text: t('Garder', 'Keep'), style: 'cancel' },
+      { text: t('Refuser', 'Decline'), style: 'destructive', onPress: () => void decide(r, 'annulée') },
+      ]
+    )
 
   const arrive = async (r: Reservation) => {
     haptic.tap()
     const ok = await checkIn(r)
     if (ok) {
       haptic.success()
-      toast.show({ message: `${r.guest_name} est arrivé`, tone: 'success' })
+      toast.show({ message: t(`${r.guest_name} est arrivé`, `${r.guest_name} has arrived`), tone: 'success' })
     } else {
-      toast.show({ message: "Impossible d'enregistrer l'arrivée.", tone: 'danger' })
+      toast.show({ message: t("Impossible d'enregistrer l'arrivée.", "Couldn't record the arrival."), tone: 'danger' })
     }
   }
 
@@ -144,11 +157,11 @@ export function ReservationsList({
   }
 
   const emptyCopy: Record<Filter, [string, string]> = {
-    pending: ['Rien en attente', 'Chaque nouvelle demande apparaît ici et vous est notifiée.'],
-    today: ["Rien aujourd'hui", "Aucune réservation confirmée pour aujourd'hui."],
-    upcoming: ['Rien à venir', 'Les prochaines réservations confirmées apparaîtront ici.'],
-    past: ['Aucun historique', 'Les réservations passées apparaîtront ici.'],
-    all: ['Aucune réservation', "Dès qu'un client réserve chez vous, il apparaît ici."],
+    pending: [t('Rien en attente', 'Nothing pending'), t('Chaque nouvelle demande apparaît ici et vous est notifiée.', "Every new request shows up here and you're notified.")],
+    today: [t("Rien aujourd'hui", 'Nothing today'), t("Aucune réservation confirmée pour aujourd'hui.", 'No confirmed reservations for today.')],
+    upcoming: [t('Rien à venir', 'Nothing upcoming'), t('Les prochaines réservations confirmées apparaîtront ici.', 'Upcoming confirmed reservations will appear here.')],
+    past: [t('Aucun historique', 'No history'), t('Les réservations passées apparaîtront ici.', 'Past reservations will appear here.')],
+    all: [t('Aucune réservation', 'No reservations'), t("Dès qu'un client réserve chez vous, il apparaît ici.", 'As soon as a guest books with you, they appear here.')],
   }
   const searching = query.trim().length > 0
 
@@ -165,20 +178,23 @@ export function ReservationsList({
         ListHeaderComponent={
           <View style={styles.header}>
             <LargeTitle
-              title="Réservations"
+              title={t('Réservations', 'Reservations')}
               subtitle={
                 counts.pending > 0
-                  ? `${counts.pending} demande${counts.pending > 1 ? 's' : ''} à confirmer`
-                  : `${counts.today} aujourd'hui · ${counts.upcoming} à venir`
+                  ? t(
+                      `${counts.pending} demande${counts.pending > 1 ? 's' : ''} à confirmer`,
+                      `${counts.pending} request${counts.pending === 1 ? '' : 's'} to confirm`
+                    )
+                  : t(`${counts.today} aujourd'hui · ${counts.upcoming} à venir`, `${counts.today} today · ${counts.upcoming} upcoming`)
               }
-              right={<IconButton icon="plus" label="Nouvelle réservation" onPress={() => router.push('/venue/new-reservation')} />}
+              right={<IconButton icon="plus" label={t('Nouvelle réservation', 'New reservation')} onPress={() => router.push('/venue/new-reservation')} />}
             />
             <View style={styles.search}>
               <Icon name="search" size={16} color={Light.faint} />
               <TextInput
                 value={query}
                 onChangeText={setQuery}
-                placeholder="Nom ou numéro"
+                placeholder={t('Nom ou numéro', 'Name or number')}
                 placeholderTextColor={Light.faint}
                 autoCorrect={false}
                 clearButtonMode="while-editing"
@@ -186,11 +202,11 @@ export function ReservationsList({
               />
             </View>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
-              <Chip label="En attente" count={counts.pending} active={filter === 'pending'} onPress={() => setFilter('pending')} />
-              <Chip label="Aujourd'hui" count={counts.today} active={filter === 'today'} onPress={() => setFilter('today')} />
-              <Chip label="À venir" count={counts.upcoming} active={filter === 'upcoming'} onPress={() => setFilter('upcoming')} />
-              <Chip label="Passées" active={filter === 'past'} onPress={() => setFilter('past')} />
-              <Chip label="Toutes" active={filter === 'all'} onPress={() => setFilter('all')} />
+              <Chip label={t('En attente', 'Pending')} count={counts.pending} active={filter === 'pending'} onPress={() => setFilter('pending')} />
+              <Chip label={t("Aujourd'hui", 'Today')} count={counts.today} active={filter === 'today'} onPress={() => setFilter('today')} />
+              <Chip label={t('À venir', 'Upcoming')} count={counts.upcoming} active={filter === 'upcoming'} onPress={() => setFilter('upcoming')} />
+              <Chip label={t('Passées', 'Past')} active={filter === 'past'} onPress={() => setFilter('past')} />
+              <Chip label={t('Toutes', 'All')} active={filter === 'all'} onPress={() => setFilter('all')} />
             </ScrollView>
           </View>
         }
@@ -198,8 +214,8 @@ export function ReservationsList({
           <View style={styles.dayRow}>
             <Text style={[styles.day, section.date === today && styles.dayToday]}>{section.title}</Text>
             <Text style={styles.dayMeta}>
-              {section.live > 0 ? `${section.live} · ${section.people} pers.` : `${section.data.length}`}
-              {section.spent > 0 ? ` · ${mad(section.spent)}` : ''}
+              {section.live > 0 ? `${section.live} · ${section.people} ${t('pers.', section.people === 1 ? 'guest' : 'guests')}` : `${section.data.length}`}
+              {section.spent > 0 ? ` · ${mad(section.spent, locale)}` : ''}
             </Text>
           </View>
         )}
@@ -216,7 +232,14 @@ export function ReservationsList({
         )}
         ListEmptyComponent={
           searching ? (
-            <Empty icon="search" title="Aucun résultat" body={`Aucune réservation ne correspond à « ${query.trim()} » dans ce filtre.`} />
+            <Empty
+              icon="search"
+              title={t('Aucun résultat', 'No results')}
+              body={t(
+                `Aucune réservation ne correspond à « ${query.trim()} » dans ce filtre.`,
+                `No reservation matches “${query.trim()}” in this filter.`
+              )}
+            />
           ) : (
             <Empty icon={filter === 'pending' ? 'inbox' : 'calendar'} title={emptyCopy[filter][0]} body={emptyCopy[filter][1]} />
           )
@@ -231,7 +254,7 @@ export function ReservationsList({
           const ok = await setAmount(amountFor, n)
           if (ok) {
             haptic.success()
-            toast.show({ message: `Addition enregistrée : ${mad(n)}`, tone: 'success' })
+            toast.show({ message: t(`Addition enregistrée : ${mad(n, locale)}`, `Bill saved: ${mad(n, locale)}`), tone: 'success' })
           }
           return ok
         }}

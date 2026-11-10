@@ -2,6 +2,7 @@ import { ImageManipulator, SaveFormat } from 'expo-image-manipulator'
 import * as ImagePicker from 'expo-image-picker'
 import { useCallback, useEffect, useState } from 'react'
 
+import { intlLocale, makeT, type Locale, type Translate } from '@/lib/i18n'
 import { subscribe } from '@/lib/realtime'
 import { supabase } from '@/lib/supabase'
 
@@ -585,12 +586,12 @@ export function useReferrers() {
 
 /* Nouveau mot de passe : la session courante suffit, Supabase n'exige pas
    l'ancien. Renvoie un message d'erreur lisible, ou null. */
-export async function updatePassword(password: string): Promise<string | null> {
+export async function updatePassword(password: string, t: Translate): Promise<string | null> {
   const { error } = await supabase.auth.updateUser({ password })
   if (!error) return null
-  if (/same password/i.test(error.message)) return "C'est déjà votre mot de passe actuel."
-  if (/at least/i.test(error.message)) return 'Huit caractères minimum.'
-  return 'Changement impossible pour le moment. Réessayez.'
+  if (/same password/i.test(error.message)) return t("C'est déjà votre mot de passe actuel.", "That's already your current password.")
+  if (/at least/i.test(error.message)) return t('Huit caractères minimum.', 'At least eight characters.')
+  return t('Changement impossible pour le moment. Réessayez.', "Couldn't change it right now. Please try again.")
 }
 
 /* Photo ou logo de l'établissement, gardé dans les métadonnées du compte :
@@ -635,19 +636,20 @@ export function addDaysIso(days: number) {
 
 export const currentPeriod = () => todayIso().slice(0, 7)
 
-export const mad = (n: number) => `${Math.round(n).toLocaleString('fr-FR')} MAD`
+export const mad = (n: number, locale: Locale) => `${Math.round(n).toLocaleString(intlLocale(locale))} MAD`
 
-export function monthLabel(period: string) {
-  const label = new Date(`${period}-01T00:00:00`).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
+export function monthLabel(period: string, locale: Locale) {
+  const label = new Date(`${period}-01T00:00:00`).toLocaleDateString(intlLocale(locale), { month: 'long', year: 'numeric' })
   return label.charAt(0).toUpperCase() + label.slice(1)
 }
 
-export function dayLabel(iso: string) {
+export function dayLabel(iso: string, locale: Locale) {
+  const t = makeT(locale)
   const today = todayIso()
-  if (iso === today) return "Aujourd'hui"
-  if (iso === addDaysIso(1)) return 'Demain'
-  if (iso === addDaysIso(-1)) return 'Hier'
-  const label = new Date(`${iso}T00:00:00`).toLocaleDateString('fr-FR', {
+  if (iso === today) return t("Aujourd'hui", 'Today')
+  if (iso === addDaysIso(1)) return t('Demain', 'Tomorrow')
+  if (iso === addDaysIso(-1)) return t('Hier', 'Yesterday')
+  const label = new Date(`${iso}T00:00:00`).toLocaleDateString(intlLocale(locale), {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
@@ -655,22 +657,23 @@ export function dayLabel(iso: string) {
   return label.charAt(0).toUpperCase() + label.slice(1)
 }
 
-export function shortDate(iso: string) {
-  return new Date(`${iso}T00:00:00`).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
+export function shortDate(iso: string, locale: Locale) {
+  return new Date(`${iso}T00:00:00`).toLocaleDateString(intlLocale(locale), { day: 'numeric', month: 'short' })
 }
 
-export function hourOf(ts: string) {
-  return new Date(ts).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+export function hourOf(ts: string, locale: Locale) {
+  return new Date(ts).toLocaleTimeString(intlLocale(locale), { hour: '2-digit', minute: '2-digit' })
 }
 
 /* « il y a 5 min », « hier », « 12 août ». */
-export function timeAgo(ts: string) {
+export function timeAgo(ts: string, locale: Locale) {
+  const t = makeT(locale)
   const diff = (Date.now() - new Date(ts).getTime()) / 1000
-  if (diff < 60) return "à l'instant"
-  if (diff < 3600) return `il y a ${Math.floor(diff / 60)} min`
-  if (diff < 86400) return `il y a ${Math.floor(diff / 3600)} h`
-  if (diff < 172800) return 'hier'
-  return new Date(ts).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
+  if (diff < 60) return t("à l'instant", 'just now')
+  if (diff < 3600) return t(`il y a ${Math.floor(diff / 60)} min`, `${Math.floor(diff / 60)} min ago`)
+  if (diff < 86400) return t(`il y a ${Math.floor(diff / 3600)} h`, `${Math.floor(diff / 3600)} h ago`)
+  if (diff < 172800) return t('hier', 'yesterday')
+  return new Date(ts).toLocaleDateString(intlLocale(locale), { day: 'numeric', month: 'short' })
 }
 
 export function initials(name: string) {
@@ -684,14 +687,14 @@ export function initials(name: string) {
 
 /* Sept derniers jours, du plus ancien à aujourd'hui, avec le nombre de
    réservations reçues chaque jour (par date de création). */
-export function lastDays(rows: Reservation[], days: number) {
+export function lastDays(rows: Reservation[], days: number, locale: Locale) {
   const out: { key: string; label: string; value: number }[] = []
   for (let i = days - 1; i >= 0; i--) {
     const key = addDaysIso(-i)
     const d = new Date(`${key}T00:00:00`)
     out.push({
       key,
-      label: d.toLocaleDateString('fr-FR', { weekday: 'narrow' }).toUpperCase(),
+      label: d.toLocaleDateString(intlLocale(locale), { weekday: 'narrow' }).toUpperCase(),
       value: rows.filter((r) => r.created_at.slice(0, 10) === key).length,
     })
   }
@@ -699,7 +702,7 @@ export function lastDays(rows: Reservation[], days: number) {
 }
 
 /* Six derniers mois. */
-export function lastMonths(rows: Reservation[], months: number) {
+export function lastMonths(rows: Reservation[], months: number, locale: Locale) {
   const out: { key: string; label: string; value: number }[] = []
   const now = new Date()
   for (let i = months - 1; i >= 0; i--) {
@@ -707,7 +710,7 @@ export function lastMonths(rows: Reservation[], months: number) {
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
     out.push({
       key,
-      label: d.toLocaleDateString('fr-FR', { month: 'short' }).replace('.', ''),
+      label: d.toLocaleDateString(intlLocale(locale), { month: 'short' }).replace('.', ''),
       value: rows.filter((r) => r.reservation_date.slice(0, 7) === key && !isOut(r)).length,
     })
   }

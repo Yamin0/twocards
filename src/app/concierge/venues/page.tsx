@@ -4,6 +4,7 @@ import { useState } from "react";
 import { MapPin, Star, ArrowRight, Phone, Mail, Globe, Building2 } from "lucide-react";
 import { useAuthUser } from "@/hooks/use-auth-user";
 import { ConciergeSkeleton } from "@/components/shared/loading-skeleton";
+import { useT } from "@/lib/i18n/client";
 
 const DEMO_VENUES = [
   { id: 1, name: "Le Comptoir Darna", city: "Marrakech", type: "Restaurant-Club", commission: "10%", covers: 68, rating: 4.8, active: true, phone: "+212 5 24 43 77 02", email: "contact@comptoirdarna.com", address: "Avenue Echouhada, Hivernage, Marrakech", hours: "20h – 3h" },
@@ -16,6 +17,7 @@ const DEMO_VENUES = [
 
 export default function ConciergeVenuesPage() {
   const { isDemoConcierge, isLoading } = useAuthUser();
+  const t = useT();
   const [expandedId, setExpandedId] = useState<number | null>(null);
 
   const venues = isDemoConcierge ? DEMO_VENUES : [];
@@ -26,10 +28,10 @@ export default function ConciergeVenuesPage() {
     <div className="bg-transparent min-h-screen">
       <div className="px-8 pt-8 pb-6">
         <h1 className="text-white text-2xl font-extrabold">
-          Mes établissements
+          {t("Mes établissements", "My venues")}
         </h1>
         <p className="text-white/60 mt-1 text-sm">
-          Les établissements avec lesquels vous travaillez.
+          {t("Les établissements avec lesquels vous travaillez.", "The venues you work with.")}
         </p>
       </div>
 
@@ -45,7 +47,7 @@ export default function ConciergeVenuesPage() {
                     </h3>
                     {!venue.active && (
                       <span className="text-[0.625rem] font-semibold px-2 py-0.5 rounded-full bg-white/[0.05] text-white/60">
-                        inactif
+                        {t("inactif", "inactive")}
                       </span>
                     )}
                   </div>
@@ -65,11 +67,11 @@ export default function ConciergeVenuesPage() {
 
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <p className="text-[0.625rem] uppercase tracking-wider text-white/60 font-semibold">Commission</p>
+                  <p className="text-[0.625rem] uppercase tracking-wider text-white/60 font-semibold">{t("Commission", "Commission")}</p>
                   <p className="text-white font-bold text-lg font-ui">{venue.commission}</p>
                 </div>
                 <div>
-                  <p className="text-[0.625rem] uppercase tracking-wider text-white/60 font-semibold">Couverts ce mois</p>
+                  <p className="text-[0.625rem] uppercase tracking-wider text-white/60 font-semibold">{t("Couverts ce mois", "Covers this month")}</p>
                   <p className="text-white font-bold text-lg font-ui">{venue.covers}</p>
                 </div>
                 <div className="flex items-end justify-end">
@@ -77,7 +79,7 @@ export default function ConciergeVenuesPage() {
                     onClick={() => setExpandedId(expandedId === venue.id ? null : venue.id)}
                     className="text-white text-sm font-medium flex items-center gap-1 hover:opacity-80 transition-opacity"
                   >
-                    {expandedId === venue.id ? "Fermer" : "Voir"}
+                    {expandedId === venue.id ? t("Fermer", "Close") : t("Voir", "View")}
                     <ArrowRight size={14} strokeWidth={1.5} className={`transition-transform ${expandedId === venue.id ? "rotate-90" : ""}`} />
                   </button>
                 </div>
@@ -102,14 +104,14 @@ export default function ConciergeVenuesPage() {
                   </div>
                   <div className="flex items-center gap-2 text-sm text-white/60">
                     <Globe size={14} strokeWidth={1.5} className="text-white" />
-                    <span>Horaires : {venue.hours}</span>
+                    <span>{t("Horaires :", "Hours:")} {venue.hours}</span>
                   </div>
                 </div>
                 <a
                   href={`mailto:${venue.email}`}
                   className="block w-full bg-white/15 text-white text-sm font-medium py-2 rounded-lg hover:opacity-90 transition-opacity mt-2 text-center"
                 >
-                  Contacter l&apos;établissement
+                  {t("Contacter l'établissement", "Contact venue")}
                 </a>
               </div>
             )}
@@ -118,7 +120,7 @@ export default function ConciergeVenuesPage() {
         {venues.length === 0 && (
           <div className="col-span-full text-center py-16">
             <Building2 size={48} strokeWidth={1} className="mx-auto text-white/60/30 mb-4" />
-            <p className="text-sm text-white/60">Aucun établissement partenaire</p>
+            <p className="text-sm text-white/60">{t("Aucun établissement partenaire", "No partner venues")}</p>
           </div>
         )}
       </div>

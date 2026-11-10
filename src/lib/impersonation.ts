@@ -72,9 +72,12 @@ export async function startImpersonation(target: {
   if (error || !data?.token_hash) {
     window.localStorage.removeItem(BACKUP_KEY);
     /* 404 de la fonction : elle n'est pas encore déployée. */
+    const en = document.documentElement.lang === "en";
     return (
       (data?.error as string) ??
-      "Connexion « en tant que » indisponible : la fonction serveur « impersonate » n'est pas déployée."
+      (en
+        ? "“Log in as” is unavailable: the “impersonate” server function is not deployed."
+        : "Connexion « en tant que » indisponible : la fonction serveur « impersonate » n'est pas déployée.")
     );
   }
 

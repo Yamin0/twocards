@@ -5,6 +5,8 @@ import { createPortal } from "react-dom";
 import Link from "next/link";
 import { Check, ChevronDown, Loader2, Search, X, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { Locale } from "@/lib/i18n";
+import { useLocale, useT } from "@/lib/i18n/client";
 
 /* Kit d'interface de l'espace hôtel. Verre sombre sur fond zellige, Satoshi
    partout : Bold pour les titres, Medium pour l'interface, Regular pour les
@@ -260,6 +262,7 @@ const TONE_TEXT: Record<NonNullable<Kpi["tone"]>, string> = {
 };
 
 export function KpiGrid({ items, columns = 4 }: { items: Kpi[]; columns?: 3 | 4 }) {
+  const locale = useLocale();
   return (
     <div
       className={cn(
@@ -291,7 +294,8 @@ export function KpiGrid({ items, columns = 4 }: { items: Kpi[]; columns?: 3 | 4 
                 )}
               >
                 {k.delta >= 0 ? "+" : ""}
-                {Math.round(k.delta * 100)} %
+                {Math.round(k.delta * 100)}
+                {locale === "en" ? "%" : " %"}
               </span>
             )}
             {k.hint && <span>{k.hint}</span>}
@@ -314,7 +318,24 @@ const STATUS_STYLES: Record<string, string> = {
   inactif: "bg-white/10 text-white/50 ring-white/10",
 };
 
+/* Libellé affiché d'un statut : la valeur reste celle de la base (français),
+   seul le texte du badge suit la langue. */
+const STATUS_LABELS_EN: Record<string, string> = {
+  confirmée: "Confirmed",
+  "en attente": "Pending",
+  annulée: "Cancelled",
+  "no-show": "No-show",
+  actif: "Active",
+  inactif: "Inactive",
+};
+
+export function statusLabel(status: string, locale: Locale = "fr") {
+  if (locale === "en" && STATUS_LABELS_EN[status]) return STATUS_LABELS_EN[status];
+  return status.charAt(0).toUpperCase() + status.slice(1);
+}
+
 export function StatusPill({ status, className }: { status: string; className?: string }) {
+  const locale = useLocale();
   return (
     <span
       className={cn(
@@ -335,7 +356,7 @@ export function StatusPill({ status, className }: { status: string; className?: 
                 : "bg-white/40"
         )}
       />
-      {status.charAt(0).toUpperCase() + status.slice(1)}
+      {statusLabel(status, locale)}
     </span>
   );
 }
@@ -488,6 +509,7 @@ export function SearchInput({
   placeholder: string;
   className?: string;
 }) {
+  const t = useT();
   return (
     <div className={cn("relative", className)}>
       <Search
@@ -506,7 +528,7 @@ export function SearchInput({
         <button
           type="button"
           onClick={() => onChange("")}
-          aria-label="Effacer"
+          aria-label={t("Effacer", "Clear")}
           className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-md p-1 text-white/40 hover:text-white"
         >
           <X size={14} strokeWidth={2} />
@@ -647,6 +669,7 @@ export function Modal({
   footer?: ReactNode;
   size?: "sm" | "md" | "lg";
 }) {
+  const t = useT();
   useEscape(open, onClose);
   const id = useId();
   if (!open) return null;
@@ -673,7 +696,7 @@ export function Modal({
                 <p className="mt-1 text-sm leading-relaxed text-white/55">{description}</p>
               )}
             </div>
-            <IconButton icon={X} label="Fermer" onClick={onClose} className="-mr-2 -mt-1" />
+            <IconButton icon={X} label={t("Fermer", "Close")} onClick={onClose} className="-mr-2 -mt-1" />
           </div>
           {children && (
             <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-2 pt-1 scrollbar-thin">{children}</div>
@@ -697,7 +720,7 @@ export function ConfirmDialog({
   onConfirm,
   title,
   description,
-  confirmLabel = "Confirmer",
+  confirmLabel,
   danger = false,
   loading = false,
 }: {
@@ -710,6 +733,7 @@ export function ConfirmDialog({
   danger?: boolean;
   loading?: boolean;
 }) {
+  const t = useT();
   return (
     <Modal
       open={open}
@@ -720,10 +744,10 @@ export function ConfirmDialog({
       footer={
         <>
           <Button variant="ghost" onClick={onCancel}>
-            Annuler
+            {t("Annuler", "Cancel")}
           </Button>
           <Button variant={danger ? "danger" : "primary"} onClick={onConfirm} loading={loading}>
-            {confirmLabel}
+            {confirmLabel ?? t("Confirmer", "Confirm")}
           </Button>
         </>
       }
@@ -746,6 +770,7 @@ export function Drawer({
   children: ReactNode;
   footer?: ReactNode;
 }) {
+  const t = useT();
   useEscape(open, onClose);
   if (!open) return null;
   return (
@@ -766,7 +791,7 @@ export function Drawer({
             )}
             <h3 className="font-display truncate text-xl font-bold text-white">{title}</h3>
           </div>
-          <IconButton icon={X} label="Fermer" onClick={onClose} className="-mr-2 -mt-1" />
+          <IconButton icon={X} label={t("Fermer", "Close")} onClick={onClose} className="-mr-2 -mt-1" />
         </div>
         <div className="flex-1 overflow-y-auto px-6 py-5 scrollbar-thin">{children}</div>
         {footer && (

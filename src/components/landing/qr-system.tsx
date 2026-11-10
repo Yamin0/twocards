@@ -13,6 +13,8 @@ import {
   SECTION,
   SectionHeader,
 } from "@/components/landing/section-header";
+import { useT } from "@/lib/i18n/client";
+import type { Translate } from "@/lib/i18n";
 
 /* Le parcours du système QR, dans l'ordre où le film le raconte : un seul
    QR, la sélection, la réservation, le suivi. Chaque étape est une tuile :
@@ -28,10 +30,11 @@ const panel =
 const DEMO_QR_URL = "https://twocardspro.com/?qr=demo";
 
 function QrVisual() {
+  const t = useT();
   const chips = [
-    { icon: BedDouble, label: "En chambre" },
-    { icon: Mail, label: "Par e-mail" },
-    { icon: MessageCircle, label: "Par WhatsApp" },
+    { icon: BedDouble, label: t("En chambre", "In the room") },
+    { icon: Mail, label: t("Par e-mail", "By email") },
+    { icon: MessageCircle, label: t("Par WhatsApp", "On WhatsApp") },
   ];
   return (
     <div className="flex flex-col items-center gap-5">
@@ -45,7 +48,7 @@ function QrVisual() {
           fgColor="#0d0d0d"
           level="M"
           style={{ display: "block", width: 96, height: 96 }}
-          aria-label="QR code de démonstration TwoCards"
+          aria-label={t("QR code de démonstration TwoCards", "TwoCards demo QR code")}
         />
       </div>
       <div className="flex flex-wrap justify-center gap-2">
@@ -64,15 +67,16 @@ function QrVisual() {
 }
 
 function SelectionVisual() {
+  const t = useT();
   const venues = [
-    { name: "Rooftop · Hivernage", slot: "ce soir · 21:00", tag: "Recommandé" },
-    { name: "Restaurant festif · Guéliz", slot: "ce soir · 22:30" },
-    { name: "Beach club · Agafay", slot: "demain · 13:00" },
+    { name: "Rooftop · Hivernage", slot: t("ce soir · 21:00", "tonight · 21:00"), tag: t("Recommandé", "Recommended") },
+    { name: t("Restaurant festif · Guéliz", "Party restaurant · Guéliz"), slot: t("ce soir · 22:30", "tonight · 22:30") },
+    { name: "Beach club · Agafay", slot: t("demain · 13:00", "tomorrow · 13:00") },
   ];
   return (
     <div className={`${panel} p-5 text-left`}>
       <p className="mb-2 text-[11px] uppercase tracking-[0.14em] text-[var(--landing-ink)]/45">
-        Sélection · Riad Al Andalus
+        {t("Sélection", "Selection")} · Riad Al Andalus
       </p>
       {venues.map((v) => (
         <div
@@ -91,7 +95,7 @@ function SelectionVisual() {
             </span>
           ) : (
             <span className="shrink-0 text-[12px] text-emerald-600">
-              Disponible
+              {t("Disponible", "Available")}
             </span>
           )}
         </div>
@@ -101,6 +105,7 @@ function SelectionVisual() {
 }
 
 function BookingVisual() {
+  const t = useT();
   return (
     <div className={`${panel} p-5 text-left`}>
       <div className="mb-4 flex items-center gap-3">
@@ -109,17 +114,17 @@ function BookingVisual() {
         </span>
         <div>
           <p className="text-[14px] font-medium text-[var(--landing-ink)]">
-            Réservation confirmée
+            {t("Réservation confirmée", "Reservation confirmed")}
           </p>
           <p className="text-[12px] text-[var(--landing-ink)]/50">
-            en 40 secondes, sans passer par le desk
+            {t("en 40 secondes, sans passer par le desk", "in 40 seconds, no call to the desk")}
           </p>
         </div>
       </div>
       {[
-        ["Table", "4 couverts · sam. 21:00"],
-        ["Acompte", "payé · 800 MAD"],
-        ["Attribuée à", "Chambre 12 · QR chevet"],
+        [t("Table", "Table"), t("4 couverts · sam. 21:00", "4 covers · Sat 21:00")],
+        [t("Acompte", "Deposit"), t("payé · 800 MAD", "paid · 800 MAD")],
+        [t("Attribuée à", "Attributed to"), t("Chambre 12 · QR chevet", "Room 12 · bedside QR")],
       ].map(([label, value]) => (
         <div
           key={label}
@@ -134,20 +139,21 @@ function BookingVisual() {
 }
 
 function TrackingVisual() {
+  const t = useT();
   const rows = [
-    { label: "Scans", value: "128", bar: 100 },
-    { label: "Réservations", value: "41", bar: 32 },
-    { label: "Arrivées confirmées", value: "39", bar: 30 },
+    { label: t("Scans", "Scans"), value: "128", bar: 100 },
+    { label: t("Réservations", "Reservations"), value: "41", bar: 32 },
+    { label: t("Arrivées confirmées", "Arrivals confirmed"), value: "39", bar: 30 },
   ];
   return (
     <div className={`${panel} p-5 text-left`}>
       <div className="mb-3 flex items-center justify-between">
         <p className="text-[11px] uppercase tracking-[0.14em] text-[var(--landing-ink)]/45">
-          Tableau de bord
+          {t("Tableau de bord", "Dashboard")}
         </p>
         <span className="flex items-center gap-1.5 text-[12px] text-emerald-600">
           <span className="size-1.5 rounded-full bg-emerald-500" />
-          en direct
+          {t("en direct", "live")}
         </span>
       </div>
       {rows.map((r) => (
@@ -168,56 +174,74 @@ function TrackingVisual() {
       ))}
       <div className="mt-2 flex items-center justify-between border-t border-black/[0.07] pt-3">
         <span className="text-[13px] text-[var(--landing-ink)]/55">
-          Commission du mois
+          {t("Commission du mois", "Commission this month")}
         </span>
         <span className="text-[15px] font-semibold text-[var(--landing-ink)]">
-          3 640 MAD
+          {t("3 640 MAD", "3,640 MAD")}
         </span>
       </div>
     </div>
   );
 }
 
-const STEPS = [
+const getSteps = (t: Translate) => [
   {
-    title: "Un seul QR",
-    description:
+    title: t("Un seul QR", "One QR code"),
+    description: t(
       "Posé sur le chevet, glissé dans l'e-mail de confirmation ou envoyé par WhatsApp avant l'arrivée. Un code, trois points de contact, la même sélection derrière.",
+      "On the bedside table, in the confirmation email or sent on WhatsApp before arrival. One code, three touchpoints, the same curated selection behind them."
+    ),
     visual: QrVisual,
   },
   {
-    title: "Il découvre votre sélection",
-    description:
+    title: t("Il découvre votre sélection", "Guests discover your selection"),
+    description: t(
       "Les restaurants, rooftops, clubs et expériences que vous recommandez, aux vraies disponibilités. Vos adresses en tête, uniquement des établissements vérifiés.",
+      "The restaurants, rooftops, clubs and experiences you recommend, with live availability. Your favourites first, and only verified venues."
+    ),
     visual: SelectionVisual,
   },
   {
-    title: "Il réserve en quelques secondes",
-    description:
+    title: t("Il réserve en quelques secondes", "They book in seconds"),
+    description: t(
       "Date, couverts, acompte : le client réserve seul, à toute heure. La réservation porte dès l'origine le QR qui l'a générée, chambre, lobby, table ou carte.",
+      "Date, covers, deposit: guests book on their own, at any hour. From the outset, every reservation carries the QR that generated it: room, lobby, table or menu."
+    ),
     visual: BookingVisual,
   },
   {
-    title: "Et vous, vous suivez tout",
-    description:
+    title: t("Et vous, vous suivez tout", "You track every step"),
+    description: t(
       "Scans, réservations, arrivées confirmées et commissions apparaissent dans votre tableau de bord à l'instant où ils se produisent. Chaque ligne est auditable.",
+      "Scans, reservations, confirmed arrivals and commissions appear in your dashboard the moment they happen. Every line is auditable."
+    ),
     visual: TrackingVisual,
   },
 ];
 
 export function QrFlow() {
+  const t = useT();
+  const STEPS = getSteps(t);
   return (
     <section className={SECTION}>
       <div className={CONTAINER}>
         <SectionHeader
-          title={
+          title={t(
             <>
               Un seul QR.
               <br />
               <em className="font-light italic">Tout le parcours.</em>
+            </>,
+            <>
+              One QR code.
+              <br />
+              <em className="font-light italic">The whole journey.</em>
             </>
-          }
-          intro="Le service d'une conciergerie, la traçabilité en plus. Du scan à la commission, chaque étape est horodatée et attribuée à son origine."
+          )}
+          intro={t(
+            "Le service d'une conciergerie, la traçabilité en plus. Du scan à la commission, chaque étape est horodatée et attribuée à son origine.",
+            "The service of a concierge desk, with full traceability on top. From scan to commission, every step is timestamped and traced to its source."
+          )}
         />
 
         <div className="grid gap-x-6 gap-y-16 md:grid-cols-2 md:gap-y-20">

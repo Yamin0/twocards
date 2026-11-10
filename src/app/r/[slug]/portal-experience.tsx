@@ -11,6 +11,8 @@ import {
   Users,
   Clock,
 } from "lucide-react";
+import { useIntlLocale, useT } from "@/lib/i18n/client";
+import { LanguageSwitcher } from "@/components/shared/language-switcher";
 
 /* Style « widget de réservation » à la SevenRooms : carte blanche centrée,
    typographie noire, beaucoup d'air, une couleur d'accent par établissement,
@@ -79,6 +81,11 @@ const MONTH_LABELS = [
   "janv.", "févr.", "mars", "avr.", "mai", "juin",
   "juil.", "août", "sept.", "oct.", "nov.", "déc.",
 ];
+const DAY_LABELS_EN = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const MONTH_LABELS_EN = [
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+];
 const isoDay = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 
@@ -99,6 +106,10 @@ export function PortalExperience({
   slug: string;
   embed: boolean;
 }) {
+  const t = useT();
+  const intl = useIntlLocale();
+  const dayLabels = t(DAY_LABELS, DAY_LABELS_EN);
+  const monthLabels = t(MONTH_LABELS, MONTH_LABELS_EN);
   const [portal, setPortal] = useState<Portal | null>(null);
   const [step, setStep] = useState<Step>("loading");
   const [party, setParty] = useState(2);
@@ -203,7 +214,10 @@ export function PortalExperience({
     setSending(false);
     if (err) {
       setError(
-        "Impossible d'envoyer votre demande pour le moment. Réessayez dans un instant."
+        t(
+          "Impossible d'envoyer votre demande pour le moment. Réessayez dans un instant.",
+          "We couldn't send your request right now. Please try again in a moment."
+        )
       );
       return;
     }
@@ -234,7 +248,7 @@ export function PortalExperience({
         @keyframes portal-pop { from { opacity: 0; transform: scale(0.82); } }
       `}</style>
       <div
-        className={`mx-auto w-full bg-white ${
+        className={`relative mx-auto w-full bg-white ${
           embed
             ? "min-h-screen"
             : `min-h-screen sm:min-h-0 sm:max-w-[480px] sm:rounded-2xl ${
@@ -244,6 +258,10 @@ export function PortalExperience({
               }`
         }`}
       >
+        <LanguageSwitcher
+          tone="light"
+          className="absolute right-3 top-3 z-10 bg-white/90 backdrop-blur"
+        />
         {/* Photo de couverture importée par l'établissement — fondue dans
             l'en-tête pour que la maison ouvre la page, pas le widget. */}
         {portal?.cover_url && step !== "notfound" && (
@@ -270,7 +288,9 @@ export function PortalExperience({
             />
           )}
           <h1 className="font-[family-name:var(--font-portal-display)] text-balance break-words text-[26px] font-normal tracking-wide">
-            {step === "notfound" ? "Portail introuvable" : portal?.display_name ?? "…"}
+            {step === "notfound"
+              ? t("Portail introuvable", "Booking page not found")
+              : portal?.display_name ?? "…"}
           </h1>
           {portal?.tagline && step !== "notfound" && (
             <p className="mt-1 text-[13px] text-neutral-500">
@@ -288,7 +308,10 @@ export function PortalExperience({
 
           {step === "notfound" && (
             <p className="py-10 text-center text-sm text-neutral-500">
-              Ce portail de réservation n&apos;existe pas ou a été désactivé.
+              {t(
+                "Ce portail de réservation n'existe pas ou a été désactivé.",
+                "This booking page doesn't exist or has been deactivated."
+              )}
             </p>
           )}
 
@@ -296,7 +319,7 @@ export function PortalExperience({
           {step === "slots" && portal && (
             <>
               <p className="mb-2 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-neutral-400">
-                <Users size={12} strokeWidth={2} /> Nombre de personnes
+                <Users size={12} strokeWidth={2} /> {t("Nombre de personnes", "Number of guests")}
               </p>
               <div className="flex flex-wrap gap-2">
                 {Array.from({ length: portal.party_max }, (_, i) => i + 1).map(
@@ -304,7 +327,10 @@ export function PortalExperience({
                     <button
                       key={n}
                       onClick={() => setParty(n)}
-                      aria-label={`${n} personne${n > 1 ? "s" : ""}`}
+                      aria-label={t(
+                        `${n} personne${n > 1 ? "s" : ""}`,
+                        `${n} ${n === 1 ? "guest" : "guests"}`
+                      )}
                       aria-pressed={party === n}
                       className="h-11 w-11 rounded-full border text-sm font-medium transition-colors"
                       style={
@@ -348,13 +374,13 @@ export function PortalExperience({
                       }
                     >
                       <span className="text-[10px] uppercase opacity-80">
-                        {DAY_LABELS[d.getDay()]}
+                        {dayLabels[d.getDay()]}
                       </span>
                       <span className="text-lg font-semibold leading-6">
                         {d.getDate()}
                       </span>
                       <span className="text-[10px] opacity-80">
-                        {MONTH_LABELS[d.getMonth()]}
+                        {monthLabels[d.getMonth()]}
                       </span>
                     </button>
                   );
@@ -362,7 +388,7 @@ export function PortalExperience({
               </div>
 
               <p className="mb-2 mt-7 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-neutral-400">
-                <Clock size={12} strokeWidth={2} /> Heure
+                <Clock size={12} strokeWidth={2} /> {t("Heure", "Time")}
               </p>
               <div className="grid grid-cols-4 gap-2">
                 {openSlots.map((s) => {
@@ -391,8 +417,14 @@ export function PortalExperience({
               {noSlotLeft && (
                 <p className="mt-3 text-center text-[13px] text-neutral-500">
                   {openSlots.length === 0
-                    ? "Complet pour cette date, choisissez un autre jour."
-                    : "Plus de créneau disponible pour cette date, choisissez un autre jour."}
+                    ? t(
+                        "Complet pour cette date, choisissez un autre jour.",
+                        "Fully booked on this date, please choose another day."
+                      )
+                    : t(
+                        "Plus de créneau disponible pour cette date, choisissez un autre jour.",
+                        "No more times available on this date, please choose another day."
+                      )}
                 </p>
               )}
 
@@ -403,12 +435,17 @@ export function PortalExperience({
                 style={{ background: accent }}
               >
                 {time
-                  ? `Continuer · ${DAY_LABELS[selectedDate.getDay()]} ${selectedDate.getDate()} ${MONTH_LABELS[selectedDate.getMonth()]} · ${time}`
-                  : "Continuer"}
+                  ? t(
+                      `Continuer · ${dayLabels[selectedDate.getDay()]} ${selectedDate.getDate()} ${monthLabels[selectedDate.getMonth()]} · ${time}`,
+                      `Continue · ${dayLabels[selectedDate.getDay()]} ${selectedDate.getDate()} ${monthLabels[selectedDate.getMonth()]} · ${time}`
+                    )
+                  : t("Continuer", "Continue")}
               </button>
               <p className="mt-3 text-center text-[11px] text-neutral-400">
-                Sans prépaiement, l&apos;établissement confirme par téléphone
-                ou WhatsApp.
+                {t(
+                  "Sans prépaiement, l'établissement confirme par téléphone ou WhatsApp.",
+                  "No prepayment: the venue confirms by phone or WhatsApp."
+                )}
               </p>
             </>
           )}
@@ -421,7 +458,7 @@ export function PortalExperience({
                 onClick={() => setStep("slots")}
                 className="mb-4 flex items-center gap-1 text-[13px] font-medium text-neutral-500 hover:text-neutral-900"
               >
-                <ChevronLeft size={15} strokeWidth={2} /> Retour
+                <ChevronLeft size={15} strokeWidth={2} /> {t("Retour", "Back")}
               </button>
 
               <div className="mb-2 rounded-xl bg-neutral-50 px-4 py-3">
@@ -429,8 +466,8 @@ export function PortalExperience({
                   <span className="font-semibold text-neutral-900">
                     {portal.display_name}
                   </span>{" "}
-                  {party} pers. ·{" "}
-                  {selectedDate.toLocaleDateString("fr-FR", {
+                  {t(`${party} pers.`, `${party} ${party === 1 ? "guest" : "guests"}`)} ·{" "}
+                  {selectedDate.toLocaleDateString(intl, {
                     weekday: "long",
                     day: "numeric",
                     month: "long",
@@ -441,15 +478,17 @@ export function PortalExperience({
               {/* La promesse avant l'effort : on demande un numéro, on dit
                   tout de suite pourquoi et ce qui n'est pas demandé. */}
               <p className="mb-6 px-1 text-[12px] leading-relaxed text-neutral-400">
-                Sans prépaiement, l&apos;établissement vous confirme par
-                téléphone ou WhatsApp.
+                {t(
+                  "Sans prépaiement, l'établissement vous confirme par téléphone ou WhatsApp.",
+                  "No prepayment: the venue will confirm by phone or WhatsApp."
+                )}
               </p>
 
               <div className="grid grid-cols-2 gap-3">
                 <input
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
-                  placeholder="Prénom"
+                  placeholder={t("Prénom", "First name")}
                   required
                   maxLength={60}
                   autoComplete="given-name"
@@ -458,7 +497,7 @@ export function PortalExperience({
                 <input
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
-                  placeholder="Nom"
+                  placeholder={t("Nom", "Last name")}
                   required
                   maxLength={60}
                   autoComplete="family-name"
@@ -468,7 +507,7 @@ export function PortalExperience({
               <input
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                placeholder="Téléphone"
+                placeholder={t("Téléphone", "Phone")}
                 type="tel"
                 required
                 maxLength={40}
@@ -478,7 +517,10 @@ export function PortalExperience({
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Occasion, allergies, demande particulière… (facultatif)"
+                placeholder={t(
+                  "Occasion, allergies, demande particulière… (facultatif)",
+                  "Occasion, allergies, special request… (optional)"
+                )}
                 maxLength={500}
                 className="mt-3 min-h-20 w-full resize-none rounded-xl border border-neutral-300 px-4 py-3 text-sm outline-none transition-colors focus:border-neutral-900"
               />
@@ -498,7 +540,7 @@ export function PortalExperience({
                 {sending ? (
                   <Loader2 size={16} strokeWidth={2} className="animate-spin" />
                 ) : (
-                  "Confirmer la réservation"
+                  t("Confirmer la réservation", "Confirm reservation")
                 )}
               </button>
             </form>
@@ -517,17 +559,31 @@ export function PortalExperience({
                 <Check size={30} strokeWidth={2} style={{ color: accent }} />
               </div>
               <h2 className="font-[family-name:var(--font-portal-display)] text-2xl font-normal">
-                Demande envoyée
+                {t("Demande envoyée", "Request sent")}
               </h2>
               <p className="mx-auto mt-2 max-w-xs text-sm leading-relaxed text-neutral-500">
-                {portal.display_name} vous recontactera au{" "}
-                <span className="font-medium text-neutral-900">{phone}</span>{" "}
-                pour confirmer votre table de {party} le{" "}
-                {selectedDate.toLocaleDateString("fr-FR", {
-                  day: "numeric",
-                  month: "long",
-                })}{" "}
-                à {time}.
+                {t(
+                  <>
+                    {portal.display_name} vous recontactera au{" "}
+                    <span className="font-medium text-neutral-900">{phone}</span>{" "}
+                    pour confirmer votre table de {party} le{" "}
+                    {selectedDate.toLocaleDateString(intl, {
+                      day: "numeric",
+                      month: "long",
+                    })}{" "}
+                    à {time}.
+                  </>,
+                  <>
+                    {portal.display_name} will contact you on{" "}
+                    <span className="font-medium text-neutral-900">{phone}</span>{" "}
+                    to confirm your table for {party} on{" "}
+                    {selectedDate.toLocaleDateString(intl, {
+                      day: "numeric",
+                      month: "long",
+                    })}{" "}
+                    at {time}.
+                  </>
+                )}
               </p>
               <button
                 onClick={() => {
@@ -541,7 +597,7 @@ export function PortalExperience({
                 className="mt-8 text-[13px] font-medium underline-offset-4 hover:underline"
                 style={{ color: accent }}
               >
-                Faire une autre réservation
+                {t("Faire une autre réservation", "Make another reservation")}
               </button>
             </div>
           )}
@@ -549,7 +605,7 @@ export function PortalExperience({
 
         {/* Pied — présent aussi en embed : c'est la marque du réseau */}
         <div className="flex items-center justify-center gap-1.5 border-t border-neutral-100 py-4 text-neutral-400">
-          <span className="text-[11px]">Propulsé par</span>
+          <span className="text-[11px]">{t("Propulsé par", "Powered by")}</span>
           <Image
             src="/logo-header.png"
             alt="twocards."

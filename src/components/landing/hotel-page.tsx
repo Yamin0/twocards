@@ -2,6 +2,8 @@
 
 import QRCode from "react-qr-code";
 import { RotatingTitleWord } from "@/components/landing/rotating-title-word";
+import { useT } from "@/lib/i18n/client";
+import type { Translate } from "@/lib/i18n";
 import {
   ShortAudiencePage,
   panel,
@@ -16,10 +18,11 @@ const SIGNUP = "/signup?role=hotel";
 /* ─── Mini-écrans ──────────────────────────────────────────────────────── */
 
 function RoomQrVisual() {
+  const t = useT();
   return (
     <div className={`${panel} mx-auto flex max-w-[17rem] flex-col items-center gap-3 px-6 py-6`}>
       <p className="font-title text-[15px] font-semibold text-[var(--landing-ink)]">
-        Chambre 204
+        {t("Chambre 204", "Room 204")}
       </p>
       <QRCode
         value="https://twocardspro.com/?qr=demo"
@@ -28,52 +31,65 @@ function RoomQrVisual() {
         fgColor="#0d0d0d"
         level="M"
         style={{ display: "block", width: 96, height: 96 }}
-        aria-label="QR code de démonstration"
+        aria-label={t("QR code de démonstration", "Demo QR code")}
       />
       <p className="text-center text-[12px] leading-snug text-[var(--landing-ink)]/55">
-        Scannez pour réserver
-        <br />
-        nos adresses favorites
+        {t(
+          <>
+            Scannez pour réserver
+            <br />
+            nos adresses favorites
+          </>,
+          <>
+            Scan to book
+            <br />
+            our favourite places
+          </>,
+        )}
       </p>
     </div>
   );
 }
 
 function MessageVisual() {
+  const t = useT();
   return (
     <div className="mx-auto flex max-w-[20rem] flex-col gap-2">
       <p className="text-center text-[11px] text-[var(--landing-ink)]/45">
-        WhatsApp ou e-mail · 3 jours avant l&apos;arrivée
+        {t("WhatsApp ou e-mail · 3 jours avant l'arrivée", "WhatsApp or email · 3 days before arrival")}
       </p>
       <div className="max-w-[90%] self-start rounded-2xl rounded-bl-md border border-black/[0.08] bg-white p-3.5 text-[13px] leading-relaxed text-[var(--landing-ink)] shadow-[0_16px_40px_-20px_rgba(60,40,10,0.35)]">
-        Bonjour Mme Laurent, votre suite vous attend samedi. Réservez dès
-        maintenant vos tables et sorties :
+        {t(
+          "Bonjour Mme Laurent, votre suite vous attend samedi. Réservez dès maintenant vos tables et sorties :",
+          "Hello Ms Laurent, your suite awaits you on Saturday. Book your tables and outings now:",
+        )}
         <span className="mt-1.5 block font-medium text-[#1d5fd1]">
           twocardspro.com/s/riad-andalus
         </span>
       </div>
       <div className="max-w-[70%] self-end rounded-2xl rounded-br-md bg-[#dcf8c6] p-3 text-[13px] text-[var(--landing-ink)]">
-        Parfait, c&apos;est réservé pour samedi soir. Merci !
+        {t("Parfait, c'est réservé pour samedi soir. Merci !", "Perfect, it's booked for Saturday night. Thank you!")}
       </div>
     </div>
   );
 }
 
 function DashboardVisual() {
+  const t = useT();
   const rows = [
-    { place: "Chambre 204", count: 6, amount: "620 MAD" },
-    { place: "Lobby", count: 11, amount: "1 140 MAD" },
+    { place: t("Chambre 204", "Room 204"), count: 6, amount: "620 MAD" },
+    { place: "Lobby", count: 11, amount: t("1 140 MAD", "1,140 MAD") },
     { place: "Spa", count: 4, amount: "380 MAD" },
   ];
   return (
     <div className={`${panel} p-5 text-left`}>
       <div className="mb-2 flex items-center justify-between">
         <p className="text-[11px] uppercase tracking-[0.14em] text-[var(--landing-ink)]/45">
-          Ce mois · par emplacement
+          {t("Ce mois · par emplacement", "This month · by location")}
         </p>
         <span className="flex items-center gap-1.5 text-[12px] text-emerald-600">
           <span className="size-1.5 rounded-full bg-emerald-500" />
-          en direct
+          {t("en direct", "live")}
         </span>
       </div>
       {rows.map((r) => (
@@ -83,7 +99,7 @@ function DashboardVisual() {
         >
           <span className="text-[var(--landing-ink)]">{r.place}</span>
           <span className="text-[var(--landing-ink)]/50">
-            {r.count} réservations
+            {t(`${r.count} réservations`, `${r.count} reservations`)}
           </span>
           <span className="w-20 text-right font-medium text-[var(--landing-ink)]">
             {r.amount}
@@ -91,8 +107,8 @@ function DashboardVisual() {
         </div>
       ))}
       <div className="mt-1 flex items-center justify-between rounded-xl bg-emerald-50 px-3 py-2.5">
-        <span className="text-[13px] text-emerald-800">Commission de l&apos;hôtel</span>
-        <span className="text-[16px] font-semibold text-emerald-700">2 140 MAD</span>
+        <span className="text-[13px] text-emerald-800">{t("Commission de l'hôtel", "Hotel commission")}</span>
+        <span className="text-[16px] font-semibold text-emerald-700">{t("2 140 MAD", "2,140 MAD")}</span>
       </div>
     </div>
   );
@@ -100,118 +116,189 @@ function DashboardVisual() {
 
 /* ─── Contenu ──────────────────────────────────────────────────────────── */
 
-const WAYS = [
+const getWays = (t: Translate) => [
   {
-    title: "Un QR code dans la chambre",
-    text: "Sur le chevet ou le bureau. Le client réserve seul, à toute heure, sans passer par le desk.",
+    title: t("Un QR code dans la chambre", "A QR code in the room"),
+    text: t(
+      "Sur le chevet ou le bureau. Le client réserve seul, à toute heure, sans passer par le desk.",
+      "On the bedside table or the desk. Guests book on their own, at any hour, without going through the front desk.",
+    ),
     visual: RoomQrVisual,
   },
   {
-    title: "Un message avant l'arrivée",
-    text: "Un lien par e-mail ou WhatsApp. Le client arrive avec ses tables déjà réservées.",
+    title: t("Un message avant l'arrivée", "A message before arrival"),
+    text: t(
+      "Un lien par e-mail ou WhatsApp. Le client arrive avec ses tables déjà réservées.",
+      "A link by email or WhatsApp. Guests arrive with their tables already booked.",
+    ),
     visual: MessageVisual,
   },
 ];
 
-const GAINS = [
+const getGains = (t: Translate) => [
   {
-    title: "Les tables introuvables",
-    text: "Les adresses complètes gardent des places pour le réseau.",
+    title: t("Les tables introuvables", "The impossible tables"),
+    text: t(
+      "Les adresses complètes gardent des places pour le réseau.",
+      "Fully booked venues hold seats back for the network.",
+    ),
   },
   {
-    title: "Une part de chaque sortie",
-    text: "Calculée sur le montant réellement dépensé, versée chaque mois.",
+    title: t("Une part de chaque sortie", "A share of every outing"),
+    text: t(
+      "Calculée sur le montant réellement dépensé, versée chaque mois.",
+      "Calculated on the amount actually spent, paid every month.",
+    ),
   },
   {
-    title: "Chaque réservation rattachée",
-    text: "À la chambre, au lobby ou au spa qui l'a générée.",
+    title: t("Chaque réservation rattachée", "Every reservation attributed"),
+    text: t(
+      "À la chambre, au lobby ou au spa qui l'a générée.",
+      "To the room, lobby or spa that generated it.",
+    ),
   },
   {
-    title: "Une équipe soulagée",
-    text: "Les clients réservent seuls, et une part peut revenir à la conciergerie.",
+    title: t("Une équipe soulagée", "A lighter load for your team"),
+    text: t(
+      "Les clients réservent seuls, et une part peut revenir à la conciergerie.",
+      "Guests book on their own, and a share can go to the concierge desk.",
+    ),
   },
 ];
 
-const FAQ = [
+const getFaq = (t: Translate) => [
   {
-    q: "TwoCards remplace-t-il notre PMS ou notre outil de conciergerie ?",
-    a: "Non. TwoCards gère la réservation de bout en bout et restitue l'activité à votre équipe. Vos outils internes restent la source de vérité.",
+    q: t(
+      "TwoCards remplace-t-il notre PMS ou notre outil de conciergerie ?",
+      "Does TwoCards replace our PMS or our concierge software?",
+    ),
+    a: t(
+      "Non. TwoCards gère la réservation de bout en bout et restitue l'activité à votre équipe. Vos outils internes restent la source de vérité.",
+      "No. TwoCards handles the reservation end to end and reports the activity back to your team. Your internal tools remain the source of truth.",
+    ),
   },
   {
-    q: "Et notre équipe de conciergerie, qu'est-ce qu'elle y gagne ?",
-    a: "Du temps, d'abord : les demandes simples se réservent seules depuis la chambre, et votre équipe se concentre sur ce qui demande vraiment son savoir-faire. La rémunération est versée à l'hôtel, qui choisit comment la répartir : une partie peut revenir à l'équipe de conciergerie, en toute transparence. Et chaque réservation reste visible et modifiable depuis son tableau de bord.",
+    q: t(
+      "Et notre équipe de conciergerie, qu'est-ce qu'elle y gagne ?",
+      "And what does our concierge team get out of it?",
+    ),
+    a: t(
+      "Du temps, d'abord : les demandes simples se réservent seules depuis la chambre, et votre équipe se concentre sur ce qui demande vraiment son savoir-faire. La rémunération est versée à l'hôtel, qui choisit comment la répartir : une partie peut revenir à l'équipe de conciergerie, en toute transparence. Et chaque réservation reste visible et modifiable depuis son tableau de bord.",
+      "Time, first of all: simple requests get booked straight from the room, so your team can focus on what truly needs its expertise. Rewards are paid to the hotel, which decides how to share them: part can go to the concierge team, with full transparency. And every reservation stays visible and editable from their dashboard.",
+    ),
   },
   {
-    q: "Notre conciergerie fait déjà ce travail. Pourquoi ajouter un QR ?",
-    a: "Parce que beaucoup de clients n'osent pas appeler la conciergerie pour une table. Par habitude, ils cherchent leurs adresses sur Instagram ou TikTok, et réservent ailleurs, sans vous. Le QR en chambre les ramène vers vos recommandations, au moment où ils se posent la question, et chaque réservation reste attribuée à votre hôtel.",
+    q: t(
+      "Notre conciergerie fait déjà ce travail. Pourquoi ajouter un QR ?",
+      "Our concierge desk already does this. Why add a QR code?",
+    ),
+    a: t(
+      "Parce que beaucoup de clients n'osent pas appeler la conciergerie pour une table. Par habitude, ils cherchent leurs adresses sur Instagram ou TikTok, et réservent ailleurs, sans vous. Le QR en chambre les ramène vers vos recommandations, au moment où ils se posent la question, et chaque réservation reste attribuée à votre hôtel.",
+      "Because many guests hesitate to call the concierge desk just for a table. Out of habit, they look for places on Instagram or TikTok and book elsewhere, without you. The in-room QR code brings them back to your recommendations at the very moment they're wondering, and every reservation stays attributed to your hotel.",
+    ),
   },
   {
-    q: "Combien ça coûte ?",
-    a: "Rien. Rejoindre le réseau est gratuit pour l'hôtel : TwoCards se rémunère côté établissements partenaires.",
+    q: t("Combien ça coûte ?", "How much does it cost?"),
+    a: t(
+      "Rien. Rejoindre le réseau est gratuit pour l'hôtel : TwoCards se rémunère côté établissements partenaires.",
+      "Nothing. Joining the network is free for hotels: TwoCards is paid by its partner venues.",
+    ),
   },
   {
-    q: "Combien de temps pour être opérationnel ?",
-    a: "Moins d'une journée : comptes vérifiés, QR imprimés, premières réservations le soir même.",
+    q: t("Combien de temps pour être opérationnel ?", "How long does it take to get up and running?"),
+    a: t(
+      "Moins d'une journée : comptes vérifiés, QR imprimés, premières réservations le soir même.",
+      "Less than a day: accounts verified, QR codes printed, first reservations that same evening.",
+    ),
   },
 ];
 
 /* ─── Page ─────────────────────────────────────────────────────────────── */
 
 export function HotelPage() {
+  const t = useT();
   return (
     <ShortAudiencePage
       data={{
         hero: {
           video: "/videos/hotels-hero-60.mp4",
           poster: "/videos/hotels-hero-poster.jpg",
-          title: (
+          title: t(
             <>
               Offrez à vos clients{" "}
               <RotatingTitleWord words={["la table", "l'activité", "le service"]} />{" "}
               qu&apos;ils <em className="italic">veulent vraiment</em>.
-            </>
+            </>,
+            <>
+              Give your guests{" "}
+              <RotatingTitleWord words={["the table", "the experience", "the service"]} />{" "}
+              they <em className="italic">really want</em>.
+            </>,
           ),
-          primary: { label: "Équiper mon établissement", href: SIGNUP },
-          secondary: { label: "Parler à notre équipe", href: SIGNUP },
+          primary: { label: t("Équiper mon établissement", "Equip my property"), href: SIGNUP },
+          secondary: { label: t("Parler à notre équipe", "Talk to our team"), href: SIGNUP },
         },
         how: {
-          title: (
+          title: t(
             <>
               Deux chemins.
               <br />
               <em className="font-light italic">Un seul suivi.</em>
-            </>
+            </>,
+            <>
+              Two paths.
+              <br />
+              <em className="font-light italic">One record.</em>
+            </>,
           ),
-          intro:
+          intro: t(
             "Que le client réserve depuis sa chambre ou avant même d'arriver, la réservation est attribuée à votre hôtel.",
-          items: WAYS,
+            "Whether guests book from their room or before they even arrive, the reservation is attributed to your hotel.",
+          ),
+          items: getWays(t),
         },
         statement: {
           image: "/images/hotels-beach.jpg",
-          text: "Le service que vos clients réclament. La traçabilité que votre direction exige.",
+          text: t(
+            "Le service que vos clients réclament. La traçabilité que votre direction exige.",
+            "The service your guests ask for. The traceability your management requires.",
+          ),
         },
         gains: {
-          title: (
+          title: t(
             <>
               Ce que votre hôtel
               <br />
               <em className="font-light italic">y gagne</em>.
-            </>
+            </>,
+            <>
+              What your hotel
+              <br />
+              <em className="font-light italic">gains</em>.
+            </>,
           ),
-          items: GAINS,
+          items: getGains(t),
           visual: DashboardVisual,
         },
-        faq: FAQ,
+        faq: getFaq(t),
         cta: {
-          title: (
+          title: t(
             <>
               Donnez la table à vos clients.
               <br />
               <em className="font-light italic">Gardez la traçabilité.</em>
-            </>
+            </>,
+            <>
+              Give your guests the table.
+              <br />
+              <em className="font-light italic">Keep the traceability.</em>
+            </>,
           ),
-          text: "Un nombre limité d'établissements par quartier pendant le pilote à Marrakech.",
-          primary: { label: "Équiper mon établissement", href: SIGNUP },
+          text: t(
+            "Un nombre limité d'établissements par quartier pendant le pilote à Marrakech.",
+            "A limited number of properties per neighbourhood during the Marrakech pilot.",
+          ),
+          primary: { label: t("Équiper mon établissement", "Equip my property"), href: SIGNUP },
         },
       }}
     />

@@ -4,6 +4,8 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useAuthUser } from "@/hooks/use-auth-user";
 import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
+import { useLocale, useT } from "@/lib/i18n/client";
+import { intlLocale, pick, type Locale, type Translate } from "@/lib/i18n";
 import Image from "next/image";
 import {
   LayoutGrid,
@@ -74,18 +76,39 @@ const HOURS = [
   "06:00", "06:30", "07:00",
 ];
 
-const ICON_LABELS = [
-  "Sparkles", "Musique", "Couronne", "Cocktail", "Micro", "Casque",
-  "Fête", "Étoile", "Flamme", "Coeur", "Éclair", "Soleil", "Lune", "Palmier",
-];
+const ICON_LABELS = {
+  fr: [
+    "Sparkles", "Musique", "Couronne", "Cocktail", "Micro", "Casque",
+    "Fête", "Étoile", "Flamme", "Coeur", "Éclair", "Soleil", "Lune", "Palmier",
+  ],
+  en: [
+    "Sparkles", "Music", "Crown", "Cocktail", "Mic", "Headphones",
+    "Party", "Star", "Flame", "Heart", "Lightning", "Sun", "Moon", "Palm tree",
+  ],
+};
 
-const MONTH_NAMES = [
-  "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
-  "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre",
-];
-const MONTH_SHORT = ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin", "Juil", "Aoû", "Sep", "Oct", "Nov", "Déc"];
-const DAY_NAMES = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
-const DAY_SHORT_FR = ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"];
+const MONTH_NAMES = {
+  fr: [
+    "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
+    "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre",
+  ],
+  en: [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December",
+  ],
+};
+const MONTH_SHORT = {
+  fr: ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin", "Juil", "Aoû", "Sep", "Oct", "Nov", "Déc"],
+  en: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+};
+const DAY_NAMES = {
+  fr: ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"],
+  en: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+};
+const DAY_SHORT = {
+  fr: ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"],
+  en: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+};
 
 interface DemoEvent {
   id: number;
@@ -196,6 +219,17 @@ function statusBadge(status: EventStatus) {
   }
 }
 
+/* Libellé affiché d'un statut (la valeur en base reste en français). */
+function statusLabel(status: EventStatus, t: Translate) {
+  switch (status) {
+    case "Ouvert": return t("Ouvert", "Open");
+    case "Bientôt complet": return t("Bientôt complet", "Almost full");
+    case "Fermé": return t("Fermé", "Closed");
+    case "Brouillon": return t("Brouillon", "Draft");
+    default: return status;
+  }
+}
+
 /* ── Form types ── */
 interface FormState {
   title: string;
@@ -217,29 +251,29 @@ interface FormState {
    autorisé dans next.config.ts. Pas d'appel d'API : la recherche Unsplash
    exigerait une clé d'application, absente du projet. Ajouter une entrée ici
    suffit à enrichir la galerie. */
-const UNSPLASH_PHOTOS: { id: string; alt: string }[] = [
-  { id: "photo-1493225457124-a3eb161ffa5f", alt: "Club, jeux de lumière" },
-  { id: "photo-1516450360452-9312f5e86fc7", alt: "Foule en concert" },
-  { id: "photo-1519671482749-fd09be7ccebf", alt: "Scène et public" },
-  { id: "photo-1424298397478-4bd87a6a0f0c", alt: "DJ aux platines" },
-  { id: "photo-1470224114660-3f6686c562eb", alt: "Set DJ en soirée" },
-  { id: "photo-1555396273-367ea4eb4db5", alt: "Ambiance de club" },
-  { id: "photo-1514933651103-005eec06c04b", alt: "Bar de nuit" },
-  { id: "photo-1566737236500-c8ac43014a67", alt: "Cocktails au bar" },
-  { id: "photo-1533174072545-7a4b6ad7a6c3", alt: "Cocktail signature" },
-  { id: "photo-1492684223066-81342ee5ff30", alt: "Confettis et fête" },
-  { id: "photo-1530103862676-de8c9debad1d", alt: "Soirée dansante" },
-  { id: "photo-1544148103-0773bf10d330", alt: "Célébration" },
-  { id: "photo-1517457373958-b7bdd4587205", alt: "Dîner entre convives" },
-  { id: "photo-1528605248644-14dd04022da1", alt: "Table dressée" },
-  { id: "photo-1414235077428-338989a2e8c0", alt: "Salle gastronomique" },
-  { id: "photo-1517248135467-4c7edcad34c4", alt: "Restaurant chaleureux" },
-  { id: "photo-1552566626-52f8b828add9", alt: "Intérieur de restaurant" },
-  { id: "photo-1559339352-11d035aa65de", alt: "Service en salle" },
-  { id: "photo-1592861956120-e524fc739696", alt: "Terrasse" },
-  { id: "photo-1551632436-cbf8dd35adfa", alt: "Rooftop au crépuscule" },
-  { id: "photo-1574391884720-bbc3740c59d1", alt: "Piscine et transats" },
-  { id: "photo-1470337458703-46ad1756a187", alt: "Verre au comptoir" },
+const UNSPLASH_PHOTOS: { id: string; alt: string; altEn: string }[] = [
+  { id: "photo-1493225457124-a3eb161ffa5f", alt: "Club, jeux de lumière", altEn: "Club light show" },
+  { id: "photo-1516450360452-9312f5e86fc7", alt: "Foule en concert", altEn: "Concert crowd" },
+  { id: "photo-1519671482749-fd09be7ccebf", alt: "Scène et public", altEn: "Stage and audience" },
+  { id: "photo-1424298397478-4bd87a6a0f0c", alt: "DJ aux platines", altEn: "DJ on the decks" },
+  { id: "photo-1470224114660-3f6686c562eb", alt: "Set DJ en soirée", altEn: "Evening DJ set" },
+  { id: "photo-1555396273-367ea4eb4db5", alt: "Ambiance de club", altEn: "Club atmosphere" },
+  { id: "photo-1514933651103-005eec06c04b", alt: "Bar de nuit", altEn: "Late-night bar" },
+  { id: "photo-1566737236500-c8ac43014a67", alt: "Cocktails au bar", altEn: "Cocktails at the bar" },
+  { id: "photo-1533174072545-7a4b6ad7a6c3", alt: "Cocktail signature", altEn: "Signature cocktail" },
+  { id: "photo-1492684223066-81342ee5ff30", alt: "Confettis et fête", altEn: "Confetti and celebration" },
+  { id: "photo-1530103862676-de8c9debad1d", alt: "Soirée dansante", altEn: "Dance night" },
+  { id: "photo-1544148103-0773bf10d330", alt: "Célébration", altEn: "Celebration" },
+  { id: "photo-1517457373958-b7bdd4587205", alt: "Dîner entre convives", altEn: "Dinner with friends" },
+  { id: "photo-1528605248644-14dd04022da1", alt: "Table dressée", altEn: "Table set for dinner" },
+  { id: "photo-1414235077428-338989a2e8c0", alt: "Salle gastronomique", altEn: "Fine-dining room" },
+  { id: "photo-1517248135467-4c7edcad34c4", alt: "Restaurant chaleureux", altEn: "Cosy restaurant" },
+  { id: "photo-1552566626-52f8b828add9", alt: "Intérieur de restaurant", altEn: "Restaurant interior" },
+  { id: "photo-1559339352-11d035aa65de", alt: "Service en salle", altEn: "Table service" },
+  { id: "photo-1592861956120-e524fc739696", alt: "Terrasse", altEn: "Terrace" },
+  { id: "photo-1551632436-cbf8dd35adfa", alt: "Rooftop au crépuscule", altEn: "Rooftop at dusk" },
+  { id: "photo-1574391884720-bbc3740c59d1", alt: "Piscine et transats", altEn: "Pool and loungers" },
+  { id: "photo-1470337458703-46ad1756a187", alt: "Verre au comptoir", altEn: "Drink at the counter" },
 ];
 
 /* Vignette légère pour la grille, rendu large pour la couverture retenue. */
@@ -280,10 +314,13 @@ function eventToForm(ev: DemoEvent): FormState {
   };
 }
 
-function formatDateObj(d: { day: number; month: number; year: number } | null): string {
+function formatDateObj(
+  d: { day: number; month: number; year: number } | null,
+  locale: Locale = "fr"
+): string {
   if (!d) return "";
   const date = new Date(d.year, d.month, d.day);
-  return `${DAY_SHORT_FR[date.getDay()]} ${d.day} ${MONTH_SHORT[d.month]}`;
+  return `${pick(locale, DAY_SHORT.fr, DAY_SHORT.en)[date.getDay()]} ${d.day} ${pick(locale, MONTH_SHORT.fr, MONTH_SHORT.en)[d.month]}`;
 }
 
 /* ── Mini Calendar Component ── */
@@ -291,6 +328,7 @@ function MiniCalendar({ selected, onSelect }: {
   selected: { day: number; month: number; year: number } | null;
   onSelect: (d: { day: number; month: number; year: number }) => void;
 }) {
+  const locale = useLocale();
   const today = new Date();
   const [month, setMonth] = useState(selected?.month ?? today.getMonth());
   const [year, setYear] = useState(selected?.year ?? today.getFullYear());
@@ -316,14 +354,14 @@ function MiniCalendar({ selected, onSelect }: {
         <button onClick={prevMonth} className="p-1 rounded-lg text-white/30 hover:text-white hover:bg-white/[0.08] transition-all">
           <ChevronLeft size={14} strokeWidth={1.5} />
         </button>
-        <span className="text-xs font-medium text-white/70">{MONTH_NAMES[month]} {year}</span>
+        <span className="text-xs font-medium text-white/70">{pick(locale, MONTH_NAMES.fr, MONTH_NAMES.en)[month]} {year}</span>
         <button onClick={nextMonth} className="p-1 rounded-lg text-white/30 hover:text-white hover:bg-white/[0.08] transition-all">
           <ChevronRight size={14} strokeWidth={1.5} />
         </button>
       </div>
       <div className="grid grid-cols-7 gap-0.5 mb-1">
-        {DAY_NAMES.map((d) => (
-          <div key={d} className="text-center text-[0.5rem] text-white/20 font-medium py-0.5">{d.charAt(0)}</div>
+        {pick(locale, DAY_NAMES.fr, DAY_NAMES.en).map((d, i) => (
+          <div key={i} className="text-center text-[0.5rem] text-white/20 font-medium py-0.5">{d.charAt(0)}</div>
         ))}
       </div>
       <div className="grid grid-cols-7 gap-0.5">
@@ -355,6 +393,8 @@ function MiniCalendar({ selected, onSelect }: {
 /* ── Component ── */
 
 export default function EventsPage() {
+  const t = useT();
+  const locale = useLocale();
   const { isLoading } = useAuthUser();
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [filterStatus, setFilterStatus] = useState("");
@@ -433,9 +473,12 @@ export default function EventsPage() {
       ...e,
       reservations: rows.length,
       spots: Math.max(0, e.totalSpots - covers),
-      revenue: `${revenue.toLocaleString()} MAD`,
+      revenue: `${revenue.toLocaleString(intlLocale(locale))} MAD`,
     };
   };
+
+  /* Date affichée dans la langue courante (la chaîne stockée reste un repli). */
+  const dateLabel = (ev: DemoEvent) => (ev.dateObj ? formatDateObj(ev.dateObj, locale) : ev.date);
 
   const displayEvents = events.map(withLiveCounts);
 
@@ -475,23 +518,30 @@ export default function EventsPage() {
     const ev = events.find((e) => e.id === id);
     if (!ev) return;
     setOpenMenu(null);
-    const copy = { ...ev, title: `${ev.title} (copie)`, status: "Brouillon" as EventStatus, reservations: 0, spots: ev.totalSpots, revenue: "0 MAD", rpCount: 0, closed: false };
+    const copy = { ...ev, title: `${ev.title}${t(" (copie)", " (copy)")}`, status: "Brouillon" as EventStatus, reservations: 0, spots: ev.totalSpots, revenue: "0 MAD", rpCount: 0, closed: false };
     const { data, error } = await createClient()
       .from("venue_events")
       .insert(eventToRow(copy))
       .select(EVENT_SELECT)
       .single();
     if (error || !data) {
-      showToast("Impossible de dupliquer");
+      showToast(t("Impossible de dupliquer", "Couldn't duplicate"));
       return;
     }
     setEvents((prev) => [...prev, rowToEvent(data as unknown as EventRow)]);
-    showToast(`"${ev.title}" dupliqué`);
+    showToast(t(`"${ev.title}" dupliqué`, `"${ev.title}" duplicated`));
   };
 
   const deleteEvent = async (id: number) => {
     const ev = events.find((e) => e.id === id);
-    if (!window.confirm(`Supprimer "${ev?.title ?? "cet événement"}" ? Cette action est définitive.`))
+    if (
+      !window.confirm(
+        t(
+          `Supprimer "${ev?.title ?? "cet événement"}" ? Cette action est définitive.`,
+          `Delete "${ev?.title ?? "this event"}"? This can't be undone.`
+        )
+      )
+    )
       return;
     setEvents((prev) => prev.filter((e) => e.id !== id));
     if (panelEventId === id) closePanel();
@@ -500,8 +550,8 @@ export default function EventsPage() {
       .from("venue_events")
       .delete()
       .eq("id", id);
-    if (error) showToast("Échec de la suppression");
-    else showToast(`"${ev?.title}" supprimé`);
+    if (error) showToast(t("Échec de la suppression", "Couldn't delete"));
+    else showToast(t(`"${ev?.title}" supprimé`, `"${ev?.title}" deleted`));
   };
 
   /* Couverture : plus de base64 en base — image redimensionnée en webp côté
@@ -514,7 +564,7 @@ export default function EventsPage() {
     e.target.value = "";
     if (!file) return;
     if (!file.type.startsWith("image/")) {
-      showToast("Choisissez une image");
+      showToast(t("Choisissez une image", "Please choose an image"));
       return;
     }
     setUploadingCover(true);
@@ -544,7 +594,7 @@ export default function EventsPage() {
       } = supabase.storage.from("avatars").getPublicUrl(path);
       setForm((prev) => ({ ...prev, coverImage: publicUrl }));
     } catch {
-      showToast("L'envoi de l'image a échoué");
+      showToast(t("L'envoi de l'image a échoué", "Image upload failed"));
     }
     setUploadingCover(false);
   };
@@ -571,11 +621,11 @@ export default function EventsPage() {
         .select(EVENT_SELECT)
         .single();
       if (error || !data) {
-        showToast("Impossible de créer l'événement");
+        showToast(t("Impossible de créer l'événement", "Couldn't create the event"));
         return;
       }
       setEvents((prev) => [...prev, rowToEvent(data as unknown as EventRow)]);
-      showToast(`"${form.title}" créé`);
+      showToast(t(`"${form.title}" créé`, `"${form.title}" created`));
     } else if (panel === "edit" && panelEventId !== null) {
       const existing = events.find((e) => e.id === panelEventId);
       if (!existing) return;
@@ -596,11 +646,11 @@ export default function EventsPage() {
         .update(eventToRow(updated))
         .eq("id", panelEventId);
       if (error) {
-        showToast("Impossible d'enregistrer les modifications");
+        showToast(t("Impossible d'enregistrer les modifications", "Couldn't save your changes"));
         return;
       }
       setEvents((prev) => prev.map((e) => (e.id === panelEventId ? updated : e)));
-      showToast(`"${form.title}" mis à jour`);
+      showToast(t(`"${form.title}" mis à jour`, `"${form.title}" updated`));
     }
     closePanel();
   };
@@ -619,9 +669,9 @@ export default function EventsPage() {
     });
 
   const viewButtons: { mode: ViewMode; icon: typeof LayoutGrid; label: string }[] = [
-    { mode: "grid", icon: LayoutGrid, label: "Grille" },
-    { mode: "list", icon: List, label: "Liste" },
-    { mode: "calendar", icon: Calendar, label: "Calendrier" },
+    { mode: "grid", icon: LayoutGrid, label: t("Grille", "Grid") },
+    { mode: "list", icon: List, label: t("Liste", "List") },
+    { mode: "calendar", icon: Calendar, label: t("Calendrier", "Calendar") },
   ];
 
   if (isLoading || !eventsLoaded) return <DashboardSkeleton />;
@@ -641,11 +691,11 @@ export default function EventsPage() {
           <div className="relative z-10 w-full max-w-lg h-full overflow-y-auto backdrop-blur-xl bg-[#0e0e1a]/95 border-l border-white/[0.1] p-6 space-y-6">
             <div className="flex items-center justify-between">
               <button onClick={closePanel} className="flex items-center gap-2 text-sm text-white/40 hover:text-white transition-colors">
-                <ArrowLeft size={16} strokeWidth={1.5} /> Retour
+                <ArrowLeft size={16} strokeWidth={1.5} /> {t("Retour", "Back")}
               </button>
               <div className="flex items-center gap-2">
                 <button onClick={() => openEdit(panelEvent.id)} className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-500/15 hover:bg-blue-500/25 border border-blue-400/20 rounded-lg text-xs font-medium text-blue-400 transition-all">
-                  <Pencil size={12} strokeWidth={1.5} /> Modifier
+                  <Pencil size={12} strokeWidth={1.5} /> {t("Modifier", "Edit")}
                 </button>
                 <button onClick={closePanel} className="p-1.5 rounded-lg text-white/30 hover:text-white hover:bg-white/[0.08] transition-all">
                   <X size={18} strokeWidth={1.5} />
@@ -666,7 +716,7 @@ export default function EventsPage() {
                 </div>
               )}
               <div className="absolute top-3 right-3">
-                <span className={`text-[0.625rem] font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm ${statusBadge(panelEvent.status)}`}>{panelEvent.status}</span>
+                <span className={`text-[0.625rem] font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm ${statusBadge(panelEvent.status)}`}>{statusLabel(panelEvent.status, t)}</span>
               </div>
               <div className="absolute bottom-4 left-4 z-10">
                 <h2 className="text-2xl font-bold text-white">{panelEvent.title}</h2>
@@ -678,38 +728,41 @@ export default function EventsPage() {
 
             <div className="grid grid-cols-2 gap-3">
               <div className="bg-white/[0.04] border border-white/[0.06] rounded-xl p-3.5">
-                <div className="flex items-center gap-2 mb-1"><Clock size={13} strokeWidth={1.5} className="text-white/25" /><p className="text-[0.625rem] text-white/30 uppercase tracking-wider">Date & Heure</p></div>
-                <p className="text-sm font-medium text-white">{panelEvent.date}</p>
+                <div className="flex items-center gap-2 mb-1"><Clock size={13} strokeWidth={1.5} className="text-white/25" /><p className="text-[0.625rem] text-white/30 uppercase tracking-wider">{t("Date & Heure", "Date & time")}</p></div>
+                <p className="text-sm font-medium text-white">{dateLabel(panelEvent)}</p>
                 <p className="text-xs text-white/40">{panelEvent.time}</p>
               </div>
               <div className="bg-white/[0.04] border border-white/[0.06] rounded-xl p-3.5">
-                <div className="flex items-center gap-2 mb-1"><Users size={13} strokeWidth={1.5} className="text-white/25" /><p className="text-[0.625rem] text-white/30 uppercase tracking-wider">Capacité</p></div>
-                <p className="text-sm font-medium text-white">{panelEvent.totalSpots} places</p>
-                <p className="text-xs text-white/40">{panelEvent.spots} disponibles</p>
+                <div className="flex items-center gap-2 mb-1"><Users size={13} strokeWidth={1.5} className="text-white/25" /><p className="text-[0.625rem] text-white/30 uppercase tracking-wider">{t("Capacité", "Capacity")}</p></div>
+                <p className="text-sm font-medium text-white">{t(`${panelEvent.totalSpots} places`, `${panelEvent.totalSpots} spots`)}</p>
+                <p className="text-xs text-white/40">{t(`${panelEvent.spots} disponibles`, `${panelEvent.spots} available`)}</p>
               </div>
               <div className="bg-white/[0.04] border border-white/[0.06] rounded-xl p-3.5">
-                <div className="flex items-center gap-2 mb-1"><UserCheck size={13} strokeWidth={1.5} className="text-white/25" /><p className="text-[0.625rem] text-white/30 uppercase tracking-wider">RP Actifs</p></div>
+                <div className="flex items-center gap-2 mb-1"><UserCheck size={13} strokeWidth={1.5} className="text-white/25" /><p className="text-[0.625rem] text-white/30 uppercase tracking-wider">{t("RP Actifs", "Active PRs")}</p></div>
                 <p className="text-sm font-medium text-white">{panelEvent.rpCount}</p>
               </div>
               <div className="bg-white/[0.04] border border-white/[0.06] rounded-xl p-3.5">
-                <div className="flex items-center gap-2 mb-1"><DollarSign size={13} strokeWidth={1.5} className="text-white/25" /><p className="text-[0.625rem] text-white/30 uppercase tracking-wider">CA</p></div>
+                <div className="flex items-center gap-2 mb-1"><DollarSign size={13} strokeWidth={1.5} className="text-white/25" /><p className="text-[0.625rem] text-white/30 uppercase tracking-wider">{t("CA", "Revenue")}</p></div>
                 <p className="text-sm font-medium text-white">{panelEvent.revenue}</p>
               </div>
             </div>
 
             <div className="bg-white/[0.04] border border-white/[0.06] rounded-xl p-4">
               <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2"><BarChart3 size={13} strokeWidth={1.5} className="text-white/25" /><span className="text-[0.625rem] text-white/30 uppercase tracking-wider">Remplissage</span></div>
+                <div className="flex items-center gap-2"><BarChart3 size={13} strokeWidth={1.5} className="text-white/25" /><span className="text-[0.625rem] text-white/30 uppercase tracking-wider">{t("Remplissage", "Fill rate")}</span></div>
                 <span className="text-sm font-semibold text-white">{fillPercent}%</span>
               </div>
               <div className="h-2 bg-white/[0.06] rounded-full overflow-hidden">
                 <div className={`h-full rounded-full transition-all duration-500 ${fillPercent >= 90 ? "bg-amber-400" : fillPercent >= 50 ? "bg-blue-400" : "bg-white/20"}`} style={{ width: `${fillPercent}%` }} />
               </div>
-              <p className="text-xs text-white/25 mt-1.5">{panelEvent.reservations} réservations sur {panelEvent.totalSpots}</p>
+              <p className="text-xs text-white/25 mt-1.5">{t(
+                `${panelEvent.reservations} réservations sur ${panelEvent.totalSpots}`,
+                `${panelEvent.reservations} of ${panelEvent.totalSpots} reserved`
+              )}</p>
             </div>
 
             <div>
-              <p className="text-[0.625rem] text-white/30 uppercase tracking-wider mb-2">Genres</p>
+              <p className="text-[0.625rem] text-white/30 uppercase tracking-wider mb-2">{t("Genres", "Genres")}</p>
               <div className="flex flex-wrap gap-2">
                 {panelEvent.genre.map((g) => (
                   <span key={g} className="text-xs font-medium bg-white/[0.06] border border-white/[0.08] text-white/60 px-3 py-1 rounded-full">{g}</span>
@@ -732,9 +785,11 @@ export default function EventsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-xl font-bold text-white">
-                  {isEdit ? "Modifier l'événement" : "Nouvel événement"}
+                  {isEdit ? t("Modifier l'événement", "Edit event") : t("Nouvel événement", "New event")}
                 </h2>
-                <p className="text-xs text-white/30 mt-0.5">{isEdit ? "Modifiez les détails" : "Remplissez les informations"}</p>
+                <p className="text-xs text-white/30 mt-0.5">
+                  {isEdit ? t("Modifiez les détails", "Update the details") : t("Remplissez les informations", "Fill in the details")}
+                </p>
               </div>
               <button onClick={closePanel} className="p-1.5 rounded-lg text-white/30 hover:text-white hover:bg-white/[0.08] transition-all">
                 <X size={18} strokeWidth={1.5} />
@@ -745,7 +800,7 @@ export default function EventsPage() {
             <div className="relative h-36 rounded-2xl overflow-hidden group">
               {form.coverImage ? (
                 <>
-                  <Image src={form.coverImage} alt="Cover" fill className="object-cover" unoptimized />
+                  <Image src={form.coverImage} alt={t("Couverture", "Cover")} fill className="object-cover" unoptimized />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                 </>
               ) : (
@@ -768,7 +823,9 @@ export default function EventsPage() {
                 <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
                   {form.coverImage ? <Pencil size={18} strokeWidth={1.5} className="text-white" /> : <Upload size={18} strokeWidth={1.5} className="text-white" />}
                 </div>
-                <span className="text-xs font-medium text-white/80">{form.coverImage ? "Changer l'image" : "Importer une image"}</span>
+                <span className="text-xs font-medium text-white/80">
+                  {form.coverImage ? t("Changer l'image", "Change image") : t("Importer une image", "Upload an image")}
+                </span>
               </div>
               {form.coverImage && (
                 <button
@@ -794,7 +851,7 @@ export default function EventsPage() {
                 ) : (
                   <Upload size={14} strokeWidth={1.5} />
                 )}
-                {uploadingCover ? "Import en cours…" : "Importer une image"}
+                {uploadingCover ? t("Import en cours…", "Uploading…") : t("Importer une image", "Upload an image")}
               </button>
               <button
                 onClick={() => setGalleryOpen((v) => !v)}
@@ -806,7 +863,7 @@ export default function EventsPage() {
                 }`}
               >
                 <ImageIcon size={14} strokeWidth={1.5} />
-                Photo Unsplash
+                {t("Photo Unsplash", "Unsplash photo")}
               </button>
             </div>
 
@@ -815,13 +872,14 @@ export default function EventsPage() {
                 <div className="grid max-h-56 grid-cols-4 gap-2 overflow-y-auto scrollbar-thin">
                   {UNSPLASH_PHOTOS.map((photo) => {
                     const full = unsplashFull(photo.id);
+                    const alt = pick(locale, photo.alt, photo.altEn);
                     const active = form.coverImage === full;
                     return (
                       <button
                         key={photo.id}
                         onClick={() => setForm({ ...form, coverImage: full })}
-                        title={photo.alt}
-                        aria-label={photo.alt}
+                        title={alt}
+                        aria-label={alt}
                         aria-pressed={active}
                         className={`relative aspect-[3/2] overflow-hidden rounded-lg border transition-all ${
                           active
@@ -831,7 +889,7 @@ export default function EventsPage() {
                       >
                         <Image
                           src={unsplashThumb(photo.id)}
-                          alt={photo.alt}
+                          alt={alt}
                           fill
                           sizes="120px"
                           className="object-cover"
@@ -848,7 +906,7 @@ export default function EventsPage() {
                 </div>
                 {/* Crédit : Unsplash demande d'attribuer la source. */}
                 <p className="mt-2.5 text-[10px] text-white/30">
-                  Photos{" "}
+                  {t("Photos", "Photos")}{" "}
                   <a
                     href="https://unsplash.com"
                     target="_blank"
@@ -857,7 +915,7 @@ export default function EventsPage() {
                   >
                     Unsplash
                   </a>
-                  , libres d&apos;utilisation.
+                  {t(", libres d'utilisation.", ", free to use.")}
                 </p>
               </div>
             )}
@@ -865,7 +923,7 @@ export default function EventsPage() {
             {/* Gradient picker (hidden if cover image) */}
             {!form.coverImage && (
               <div>
-                <label className="text-[0.625rem] text-white/30 uppercase tracking-wider block mb-2">Couleur de fond</label>
+                <label className="text-[0.625rem] text-white/30 uppercase tracking-wider block mb-2">{t("Couleur de fond", "Background colour")}</label>
                 <div className="flex flex-wrap gap-2">
                   {GRADIENTS.map((g) => (
                     <button key={g} onClick={() => setForm({ ...form, gradient: g })} className={`w-7 h-7 rounded-lg bg-gradient-to-br ${g} border-2 transition-all ${form.gradient === g ? "border-blue-400 scale-110" : "border-transparent hover:scale-105"}`} />
@@ -876,7 +934,7 @@ export default function EventsPage() {
 
             {/* Icon dropdown */}
             <div>
-              <label className="text-[0.625rem] text-white/30 uppercase tracking-wider block mb-2">Icône</label>
+              <label className="text-[0.625rem] text-white/30 uppercase tracking-wider block mb-2">{t("Icône", "Icon")}</label>
               <div className="relative">
                 <button
                   onClick={() => setIconDropdownOpen(!iconDropdownOpen)}
@@ -884,7 +942,7 @@ export default function EventsPage() {
                 >
                   <div className="flex items-center gap-2.5">
                     {(() => { const Ic = ICONS[form.iconIdx] ?? Sparkles; return <Ic size={16} strokeWidth={1.5} className="text-blue-400" />; })()}
-                    <span className="text-white/70">{ICON_LABELS[form.iconIdx] ?? "Icône"}</span>
+                    <span className="text-white/70">{pick(locale, ICON_LABELS.fr, ICON_LABELS.en)[form.iconIdx] ?? t("Icône", "Icon")}</span>
                   </div>
                   <ChevronDown size={14} strokeWidth={1.5} className="text-white/30" />
                 </button>
@@ -899,7 +957,7 @@ export default function EventsPage() {
                           className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all hover:bg-white/10 ${form.iconIdx === idx ? "bg-white/[0.08] text-blue-400" : "text-white/60"}`}
                         >
                           <Ic size={16} strokeWidth={1.5} className={form.iconIdx === idx ? "text-blue-400" : "text-white/30"} />
-                          {ICON_LABELS[idx]}
+                          {pick(locale, ICON_LABELS.fr, ICON_LABELS.en)[idx]}
                         </button>
                       ))}
                     </div>
@@ -911,23 +969,23 @@ export default function EventsPage() {
             {/* Form fields */}
             <div className="space-y-4">
               <div>
-                <label className="text-[0.625rem] text-white/30 uppercase tracking-wider block mb-1.5">Nom *</label>
-                <input type="text" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Ex: Gala de Minuit"
+                <label className="text-[0.625rem] text-white/30 uppercase tracking-wider block mb-1.5">{t("Nom *", "Name *")}</label>
+                <input type="text" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder={t("Ex: Gala de Minuit", "e.g. Midnight Gala")}
                   className="w-full px-4 py-2.5 bg-white/[0.05] border border-white/[0.1] rounded-xl text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-blue-400/40 transition-colors" />
               </div>
 
               <div>
-                <label className="text-[0.625rem] text-white/30 uppercase tracking-wider block mb-1.5">Lieu</label>
-                <input type="text" value={form.venue} onChange={(e) => setForm({ ...form, venue: e.target.value })} placeholder="Ex: Maison Dorée"
+                <label className="text-[0.625rem] text-white/30 uppercase tracking-wider block mb-1.5">{t("Lieu", "Location")}</label>
+                <input type="text" value={form.venue} onChange={(e) => setForm({ ...form, venue: e.target.value })} placeholder={t("Ex: Maison Dorée", "e.g. Maison Dorée")}
                   className="w-full px-4 py-2.5 bg-white/[0.05] border border-white/[0.1] rounded-xl text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-blue-400/40 transition-colors" />
               </div>
 
               {/* Date - mini calendar */}
               <div>
-                <label className="text-[0.625rem] text-white/30 uppercase tracking-wider block mb-1.5">Date</label>
+                <label className="text-[0.625rem] text-white/30 uppercase tracking-wider block mb-1.5">{t("Date", "Date")}</label>
                 {form.dateObj && (
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="text-sm font-medium text-white bg-white/[0.06] px-3 py-1 rounded-lg">{formatDateObj(form.dateObj)}</span>
+                    <span className="text-sm font-medium text-white bg-white/[0.06] px-3 py-1 rounded-lg">{formatDateObj(form.dateObj, locale)}</span>
                     <button onClick={() => setForm({ ...form, dateObj: null })} className="text-white/30 hover:text-red-400 transition-colors"><X size={14} strokeWidth={1.5} /></button>
                   </div>
                 )}
@@ -937,7 +995,7 @@ export default function EventsPage() {
               {/* Time dropdowns - Ouverture / Fermeture */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[0.625rem] text-white/30 uppercase tracking-wider block mb-1.5">Ouverture</label>
+                  <label className="text-[0.625rem] text-white/30 uppercase tracking-wider block mb-1.5">{t("Ouverture", "Opens")}</label>
                   <div className="relative">
                     <button
                       onClick={() => { setOpenDropdownOpen(!openDropdownOpen); setCloseDropdownOpen(false); }}
@@ -962,7 +1020,7 @@ export default function EventsPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="text-[0.625rem] text-white/30 uppercase tracking-wider block mb-1.5">Fermeture</label>
+                  <label className="text-[0.625rem] text-white/30 uppercase tracking-wider block mb-1.5">{t("Fermeture", "Closes")}</label>
                   <div className="relative">
                     <button
                       onClick={() => { setCloseDropdownOpen(!closeDropdownOpen); setOpenDropdownOpen(false); }}
@@ -990,7 +1048,7 @@ export default function EventsPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[0.625rem] text-white/30 uppercase tracking-wider block mb-1.5">Statut</label>
+                  <label className="text-[0.625rem] text-white/30 uppercase tracking-wider block mb-1.5">{t("Statut", "Status")}</label>
                   {/* Les quatre statuts du cycle de vie, plus seulement deux */}
                   <div className="grid grid-cols-2 gap-2">
                     {(
@@ -1010,27 +1068,27 @@ export default function EventsPage() {
                             : "bg-white/[0.04] border-white/[0.08] text-white/30 hover:text-white/50"
                         }`}
                       >
-                        {st}
+                        {statusLabel(st, t)}
                       </button>
                     ))}
                   </div>
                 </div>
                 <div>
-                  <label className="text-[0.625rem] text-white/30 uppercase tracking-wider block mb-1.5">Capacité</label>
+                  <label className="text-[0.625rem] text-white/30 uppercase tracking-wider block mb-1.5">{t("Capacité", "Capacity")}</label>
                   <input type="number" value={form.totalSpots} onChange={(e) => setForm({ ...form, totalSpots: parseInt(e.target.value) || 0 })}
                     className="w-full px-4 py-2.5 bg-white/[0.05] border border-white/[0.1] rounded-xl text-sm text-white focus:outline-none focus:border-blue-400/40 transition-colors" />
                 </div>
               </div>
 
               <div>
-                <label className="text-[0.625rem] text-white/30 uppercase tracking-wider block mb-1.5">Genres (virgule)</label>
-                <input type="text" value={form.genre} onChange={(e) => setForm({ ...form, genre: e.target.value })} placeholder="Ex: Electro, House"
+                <label className="text-[0.625rem] text-white/30 uppercase tracking-wider block mb-1.5">{t("Genres (virgule)", "Genres (comma-separated)")}</label>
+                <input type="text" value={form.genre} onChange={(e) => setForm({ ...form, genre: e.target.value })} placeholder={t("Ex: Electro, House", "e.g. Electro, House")}
                   className="w-full px-4 py-2.5 bg-white/[0.05] border border-white/[0.1] rounded-xl text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-blue-400/40 transition-colors" />
               </div>
 
               <div>
-                <label className="text-[0.625rem] text-white/30 uppercase tracking-wider block mb-1.5">Description</label>
-                <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Décrivez votre événement..." rows={3}
+                <label className="text-[0.625rem] text-white/30 uppercase tracking-wider block mb-1.5">{t("Description", "Description")}</label>
+                <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder={t("Décrivez votre événement...", "Describe your event...")} rows={3}
                   className="w-full px-4 py-2.5 bg-white/[0.05] border border-white/[0.1] rounded-xl text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-blue-400/40 transition-colors resize-none" />
               </div>
             </div>
@@ -1038,11 +1096,11 @@ export default function EventsPage() {
             {/* Actions */}
             <div className="flex items-center gap-3 pt-2 pb-6">
               <button onClick={closePanel} className="flex-1 px-4 py-2.5 bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.1] rounded-xl text-sm font-medium text-white/50 hover:text-white transition-all">
-                Annuler
+                {t("Annuler", "Cancel")}
               </button>
               <button onClick={saveForm} disabled={!form.title.trim()} className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-500 hover:bg-blue-400 disabled:opacity-30 disabled:hover:bg-blue-500 text-white rounded-xl text-sm font-medium transition-all shadow-[0_0_20px_rgba(96,165,250,0.2)]">
                 <Save size={15} strokeWidth={1.5} />
-                {isEdit ? "Enregistrer" : "Créer"}
+                {isEdit ? t("Enregistrer", "Save") : t("Créer", "Create")}
               </button>
             </div>
           </div>
@@ -1059,8 +1117,8 @@ export default function EventsPage() {
       <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-white">Événements</h1>
-            <p className="text-white/50 text-sm mt-1">Gérez et planifiez vos événements</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-white">{t("Événements", "Events")}</h1>
+            <p className="text-white/50 text-sm mt-1">{t("Gérez et planifiez vos événements", "Manage and plan your events")}</p>
           </div>
           <div className="flex items-center gap-3">
             <div className="flex rounded-xl overflow-hidden border border-white/[0.12]">
@@ -1071,7 +1129,7 @@ export default function EventsPage() {
               ))}
             </div>
             <button onClick={openCreate} className="flex items-center gap-2 px-4 py-2.5 bg-blue-500 hover:bg-blue-400 text-white rounded-xl text-sm font-medium transition-all shadow-[0_0_20px_rgba(96,165,250,0.2)] hover:shadow-[0_0_30px_rgba(96,165,250,0.3)]">
-              <Plus size={16} strokeWidth={2} /> Créer
+              <Plus size={16} strokeWidth={2} /> {t("Créer", "Create")}
             </button>
           </div>
         </div>
@@ -1081,19 +1139,19 @@ export default function EventsPage() {
       {displayEvents.length > 0 && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl p-4">
-            <p className="text-white/40 text-xs">Événements actifs</p>
+            <p className="text-white/40 text-xs">{t("Événements actifs", "Active events")}</p>
             <p className="text-xl font-bold text-white mt-1 font-ui">{activeEvents}</p>
           </div>
           <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl p-4">
-            <p className="text-white/40 text-xs">Réservations totales</p>
+            <p className="text-white/40 text-xs">{t("Réservations totales", "Total reservations")}</p>
             <p className="text-xl font-bold text-blue-400 mt-1 font-ui">{totalReservations}</p>
           </div>
           <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl p-4">
-            <p className="text-white/40 text-xs">RP mobilisés</p>
+            <p className="text-white/40 text-xs">{t("RP mobilisés", "PRs involved")}</p>
             <p className="text-xl font-bold text-white mt-1 font-ui">{totalRp}</p>
           </div>
           <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl p-4">
-            <p className="text-white/40 text-xs">Taux de remplissage moy.</p>
+            <p className="text-white/40 text-xs">{t("Taux de remplissage moy.", "Avg. fill rate")}</p>
             <p className="text-xl font-bold text-green-400 mt-1 font-ui">{avgFill}%</p>
           </div>
         </div>
@@ -1103,15 +1161,15 @@ export default function EventsPage() {
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative flex-1 min-w-[200px] max-w-sm">
           <Search size={15} strokeWidth={1.5} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
-          <input type="text" placeholder="Rechercher un événement..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+          <input type="text" placeholder={t("Rechercher un événement...", "Search events...")} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-9 pr-4 py-2.5 backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-xl text-sm text-white placeholder:text-white/25 focus:outline-none focus:border-blue-400/40 transition-colors" />
         </div>
         <div className="relative">
           <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="appearance-none pl-4 pr-9 py-2.5 backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-xl text-sm text-white/70 focus:outline-none focus:border-blue-400/40 transition-colors cursor-pointer">
-            <option value="" className="bg-[#1a1a2e]">Tous les statuts</option>
-            <option value="Ouvert" className="bg-[#1a1a2e]">Ouvert</option>
-            <option value="Fermé" className="bg-[#1a1a2e]">Fermé</option>
-            <option value="Brouillon" className="bg-[#1a1a2e]">Brouillon</option>
+            <option value="" className="bg-[#1a1a2e]">{t("Tous les statuts", "All statuses")}</option>
+            <option value="Ouvert" className="bg-[#1a1a2e]">{t("Ouvert", "Open")}</option>
+            <option value="Fermé" className="bg-[#1a1a2e]">{t("Fermé", "Closed")}</option>
+            <option value="Brouillon" className="bg-[#1a1a2e]">{t("Brouillon", "Draft")}</option>
           </select>
           <ChevronDown size={13} strokeWidth={1.5} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none" />
         </div>
@@ -1121,7 +1179,7 @@ export default function EventsPage() {
       {filteredEvents.length === 0 && viewMode !== "calendar" ? (
         <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-12 text-center">
           <Ticket size={36} strokeWidth={1} className="mx-auto text-white/15 mb-3" />
-          <p className="text-sm text-white/30">Aucun événement trouvé</p>
+          <p className="text-sm text-white/30">{t("Aucun événement trouvé", "No events found")}</p>
         </div>
       ) : viewMode === "calendar" ? (
         /* ── Calendar view ── */
@@ -1130,14 +1188,14 @@ export default function EventsPage() {
             <button onClick={() => { if (calMonth === 0) { setCalMonth(11); setCalYear(calYear - 1); } else setCalMonth(calMonth - 1); }} className="p-2 rounded-xl text-white/40 hover:text-white hover:bg-white/[0.08] transition-all">
               <ChevronLeft size={18} strokeWidth={1.5} />
             </button>
-            <h2 className="text-lg font-semibold text-white">{MONTH_NAMES[calMonth]} {calYear}</h2>
+            <h2 className="text-lg font-semibold text-white">{pick(locale, MONTH_NAMES.fr, MONTH_NAMES.en)[calMonth]} {calYear}</h2>
             <button onClick={() => { if (calMonth === 11) { setCalMonth(0); setCalYear(calYear + 1); } else setCalMonth(calMonth + 1); }} className="p-2 rounded-xl text-white/40 hover:text-white hover:bg-white/[0.08] transition-all">
               <ChevronRight size={18} strokeWidth={1.5} />
             </button>
           </div>
           <div className="grid grid-cols-7 border-b border-white/[0.06]">
-            {DAY_NAMES.map((d) => (
-              <div key={d} className="px-2 py-2.5 text-center text-[0.6875rem] text-white/25 uppercase tracking-wider font-semibold">{d}</div>
+            {pick(locale, DAY_NAMES.fr, DAY_NAMES.en).map((d, i) => (
+              <div key={i} className="px-2 py-2.5 text-center text-[0.6875rem] text-white/25 uppercase tracking-wider font-semibold">{d}</div>
             ))}
           </div>
           <div className="grid grid-cols-7">
@@ -1166,13 +1224,13 @@ export default function EventsPage() {
         /* ── List view ── */
         <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl overflow-hidden">
           <div className="grid grid-cols-12 gap-4 px-5 py-3 border-b border-white/[0.08] text-[0.6875rem] text-white/30 uppercase tracking-wider font-semibold">
-            <div className="col-span-4">Événement</div>
-            <div className="col-span-2 hidden md:block">Date & Heure</div>
-            <div className="col-span-1 hidden lg:block text-center">RP</div>
-            <div className="col-span-2 hidden md:block">Remplissage</div>
-            <div className="col-span-1 hidden lg:block text-right">CA</div>
-            <div className="col-span-1 text-center">Statut</div>
-            <div className="col-span-1 text-right">Actions</div>
+            <div className="col-span-4">{t("Événement", "Event")}</div>
+            <div className="col-span-2 hidden md:block">{t("Date & Heure", "Date & time")}</div>
+            <div className="col-span-1 hidden lg:block text-center">{t("RP", "PR")}</div>
+            <div className="col-span-2 hidden md:block">{t("Remplissage", "Fill rate")}</div>
+            <div className="col-span-1 hidden lg:block text-right">{t("CA", "Revenue")}</div>
+            <div className="col-span-1 text-center">{t("Statut", "Status")}</div>
+            <div className="col-span-1 text-right">{t("Actions", "Actions")}</div>
           </div>
           {filteredEvents.map((event) => {
             const fillPercent = event.totalSpots > 0 ? Math.round(((event.totalSpots - event.spots) / event.totalSpots) * 100) : 0;
@@ -1190,7 +1248,7 @@ export default function EventsPage() {
                 </div>
                 <div className="col-span-2 hidden md:flex items-center gap-1.5 text-xs text-white/50">
                   <Clock size={12} strokeWidth={1.5} className="text-white/25" />
-                  <div><p>{event.date}</p><p className="text-white/25">{event.time}</p></div>
+                  <div><p>{dateLabel(event)}</p><p className="text-white/25">{event.time}</p></div>
                 </div>
                 <div className="col-span-1 hidden lg:flex items-center justify-center"><span className="text-sm text-white/60 font-medium">{event.rpCount}</span></div>
                 <div className="col-span-2 hidden md:block">
@@ -1204,7 +1262,7 @@ export default function EventsPage() {
                 </div>
                 <div className="col-span-1 hidden lg:block text-right"><p className="text-sm font-medium text-white/60">{event.revenue}</p></div>
                 <div className="col-span-1 flex justify-center">
-                  <span className={`text-[0.625rem] font-semibold px-2 py-0.5 rounded-full ${statusBadge(event.status)}`}>{event.status}</span>
+                  <span className={`text-[0.625rem] font-semibold px-2 py-0.5 rounded-full ${statusBadge(event.status)}`}>{statusLabel(event.status, t)}</span>
                 </div>
                 <div className="col-span-1 flex justify-end relative">
                   <button onClick={() => setOpenMenu(openMenu === event.id ? null : event.id)} className="p-1.5 rounded-lg text-white/30 hover:text-white hover:bg-white/[0.08] transition-all">
@@ -1214,10 +1272,10 @@ export default function EventsPage() {
                     <>
                       <div className="fixed inset-0 z-30" onClick={() => setOpenMenu(null)} />
                       <div className="absolute right-0 top-full mt-1 z-40 backdrop-blur-xl bg-[#1a1a2e] border border-white/15 rounded-xl p-1 shadow-xl min-w-[160px]">
-                        <button onClick={() => openView(event.id)} className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-white/70 hover:bg-white/10 hover:text-white transition-all"><Eye size={13} strokeWidth={1.5} />Voir détails</button>
-                        <button onClick={() => openEdit(event.id)} className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-white/70 hover:bg-white/10 hover:text-white transition-all"><Pencil size={13} strokeWidth={1.5} />Modifier</button>
-                        <button onClick={() => duplicateEvent(event.id)} className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-white/70 hover:bg-white/10 hover:text-white transition-all"><Copy size={13} strokeWidth={1.5} />Dupliquer</button>
-                        <button onClick={() => deleteEvent(event.id)} className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-red-400/70 hover:bg-red-400/10 hover:text-red-400 transition-all"><Trash2 size={13} strokeWidth={1.5} />Supprimer</button>
+                        <button onClick={() => openView(event.id)} className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-white/70 hover:bg-white/10 hover:text-white transition-all"><Eye size={13} strokeWidth={1.5} />{t("Voir détails", "View details")}</button>
+                        <button onClick={() => openEdit(event.id)} className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-white/70 hover:bg-white/10 hover:text-white transition-all"><Pencil size={13} strokeWidth={1.5} />{t("Modifier", "Edit")}</button>
+                        <button onClick={() => duplicateEvent(event.id)} className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-white/70 hover:bg-white/10 hover:text-white transition-all"><Copy size={13} strokeWidth={1.5} />{t("Dupliquer", "Duplicate")}</button>
+                        <button onClick={() => deleteEvent(event.id)} className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-red-400/70 hover:bg-red-400/10 hover:text-red-400 transition-all"><Trash2 size={13} strokeWidth={1.5} />{t("Supprimer", "Delete")}</button>
                       </div>
                     </>
                   )}
@@ -1246,7 +1304,7 @@ export default function EventsPage() {
                       <Icon size={80} strokeWidth={0.5} className="absolute bottom-2 right-4 text-white/[0.08]" />
                     </div>
                   )}
-                  <div className="absolute top-3 right-3"><span className={`text-[0.625rem] font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm ${statusBadge(event.status)}`}>{event.status}</span></div>
+                  <div className="absolute top-3 right-3"><span className={`text-[0.625rem] font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm ${statusBadge(event.status)}`}>{statusLabel(event.status, t)}</span></div>
                   <div className="absolute bottom-3 left-3 flex gap-1.5">
                     {event.genre.map((g) => (<span key={g} className="text-[0.5625rem] font-medium bg-black/30 backdrop-blur-sm text-white/80 px-2 py-0.5 rounded-full">{g}</span>))}
                   </div>
@@ -1257,27 +1315,30 @@ export default function EventsPage() {
                     <p className="text-[0.6875rem] text-white/40 flex items-center gap-1 mt-1"><MapPin size={11} strokeWidth={1.5} />{event.venue}</p>
                   </div>
                   <div className="flex items-center gap-3 text-xs text-white/50">
-                    <span className="flex items-center gap-1"><Clock size={12} strokeWidth={1.5} className="text-white/25" />{event.date}</span>
+                    <span className="flex items-center gap-1"><Clock size={12} strokeWidth={1.5} className="text-white/25" />{dateLabel(event)}</span>
                     <span className="text-white/15">·</span><span>{event.time}</span>
                   </div>
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-[0.625rem] text-white/30 uppercase tracking-wider">Remplissage</span>
+                      <span className="text-[0.625rem] text-white/30 uppercase tracking-wider">{t("Remplissage", "Fill rate")}</span>
                       <span className="text-xs text-white/50 font-medium">{fillPercent}%</span>
                     </div>
                     <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
                       <div className={`h-full rounded-full transition-all duration-500 ${fillPercent >= 90 ? "bg-amber-400" : fillPercent >= 50 ? "bg-blue-400" : "bg-white/20"}`} style={{ width: `${fillPercent}%` }} />
                     </div>
-                    <p className="text-[0.625rem] text-white/20 mt-1">{event.reservations}/{event.totalSpots} places réservées</p>
+                    <p className="text-[0.625rem] text-white/20 mt-1">{t(
+                      `${event.reservations}/${event.totalSpots} places réservées`,
+                      `${event.reservations}/${event.totalSpots} spots booked`
+                    )}</p>
                   </div>
                   <div className="grid grid-cols-3 gap-3">
-                    <div className="bg-white/[0.04] rounded-xl p-2.5 text-center"><p className="text-[0.5625rem] text-white/25 uppercase tracking-wider">Résa</p><p className="text-sm font-semibold text-white mt-0.5">{event.reservations}</p></div>
-                    <div className="bg-white/[0.04] rounded-xl p-2.5 text-center"><p className="text-[0.5625rem] text-white/25 uppercase tracking-wider">RP</p><p className="text-sm font-semibold text-white mt-0.5">{event.rpCount}</p></div>
-                    <div className="bg-white/[0.04] rounded-xl p-2.5 text-center"><p className="text-[0.5625rem] text-white/25 uppercase tracking-wider">CA</p><p className="text-[0.6875rem] font-semibold text-white mt-0.5 truncate">{event.revenue}</p></div>
+                    <div className="bg-white/[0.04] rounded-xl p-2.5 text-center"><p className="text-[0.5625rem] text-white/25 uppercase tracking-wider">{t("Résa", "Bookings")}</p><p className="text-sm font-semibold text-white mt-0.5">{event.reservations}</p></div>
+                    <div className="bg-white/[0.04] rounded-xl p-2.5 text-center"><p className="text-[0.5625rem] text-white/25 uppercase tracking-wider">{t("RP", "PR")}</p><p className="text-sm font-semibold text-white mt-0.5">{event.rpCount}</p></div>
+                    <div className="bg-white/[0.04] rounded-xl p-2.5 text-center"><p className="text-[0.5625rem] text-white/25 uppercase tracking-wider">{t("CA", "Revenue")}</p><p className="text-[0.6875rem] font-semibold text-white mt-0.5 truncate">{event.revenue}</p></div>
                   </div>
                   <div className="flex items-center gap-2 pt-1">
-                    <button onClick={() => openView(event.id)} className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.08] rounded-xl text-xs font-medium text-white/60 hover:text-white transition-all"><Eye size={13} strokeWidth={1.5} />Voir</button>
-                    <button onClick={() => openEdit(event.id)} className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-blue-500/15 hover:bg-blue-500/25 border border-blue-400/20 rounded-xl text-xs font-medium text-blue-400 transition-all"><Pencil size={13} strokeWidth={1.5} />Modifier</button>
+                    <button onClick={() => openView(event.id)} className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.08] rounded-xl text-xs font-medium text-white/60 hover:text-white transition-all"><Eye size={13} strokeWidth={1.5} />{t("Voir", "View")}</button>
+                    <button onClick={() => openEdit(event.id)} className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-blue-500/15 hover:bg-blue-500/25 border border-blue-400/20 rounded-xl text-xs font-medium text-blue-400 transition-all"><Pencil size={13} strokeWidth={1.5} />{t("Modifier", "Edit")}</button>
                     <div className="relative">
                       <button onClick={() => setOpenMenu(openMenu === event.id ? null : event.id)} className="p-2 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] rounded-xl text-white/30 hover:text-white transition-all">
                         <MoreVertical size={14} strokeWidth={1.5} />
@@ -1286,8 +1347,8 @@ export default function EventsPage() {
                         <>
                           <div className="fixed inset-0 z-30" onClick={() => setOpenMenu(null)} />
                           <div className="absolute right-0 bottom-full mb-1 z-40 backdrop-blur-xl bg-[#1a1a2e] border border-white/15 rounded-xl p-1 shadow-xl min-w-[160px]">
-                            <button onClick={() => duplicateEvent(event.id)} className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-white/70 hover:bg-white/10 hover:text-white transition-all"><Copy size={13} strokeWidth={1.5} />Dupliquer</button>
-                            <button onClick={() => deleteEvent(event.id)} className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-red-400/70 hover:bg-red-400/10 hover:text-red-400 transition-all"><Trash2 size={13} strokeWidth={1.5} />Supprimer</button>
+                            <button onClick={() => duplicateEvent(event.id)} className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-white/70 hover:bg-white/10 hover:text-white transition-all"><Copy size={13} strokeWidth={1.5} />{t("Dupliquer", "Duplicate")}</button>
+                            <button onClick={() => deleteEvent(event.id)} className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-red-400/70 hover:bg-red-400/10 hover:text-red-400 transition-all"><Trash2 size={13} strokeWidth={1.5} />{t("Supprimer", "Delete")}</button>
                           </div>
                         </>
                       )}
@@ -1302,7 +1363,12 @@ export default function EventsPage() {
 
       {filteredEvents.length > 0 && viewMode !== "calendar" && (
         <div className="flex items-center justify-between px-1">
-          <p className="text-xs text-white/25">{filteredEvents.length} sur {displayEvents.length} événements</p>
+          <p className="text-xs text-white/25">
+            {t(
+              `${filteredEvents.length} sur ${displayEvents.length} événements`,
+              `${filteredEvents.length} of ${displayEvents.length} event${displayEvents.length === 1 ? "" : "s"}`
+            )}
+          </p>
         </div>
       )}
 

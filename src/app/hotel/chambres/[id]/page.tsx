@@ -37,8 +37,8 @@ import {
 import { useAuthUser } from "@/hooks/use-auth-user";
 import { useToast } from "@/hooks/use-toast";
 import { useHotelSpace } from "@/lib/hotel/store";
-import { CATEGORY_KEYS, CATEGORY_LABELS, cityCatalog, type GuestCategoryKey } from "@/lib/guest-catalog";
-import { averageRating, conversionRate, isLive } from "@/lib/hotel/analytics";
+import { CATEGORY_KEYS, categoryLabel, cityCatalog, type GuestCategoryKey } from "@/lib/guest-catalog";
+import { averageRating, conversionRate, isLive, reservationCategoryLabel } from "@/lib/hotel/analytics";
 import { formatDate, formatMad, formatNumber, formatPercent, plural, timeAgo, todayIso, whatsappLink } from "@/lib/hotel/format";
 import { downloadPng, downloadSvg, guestUrl, shareByEmail, shareByWhatsapp } from "@/lib/qr";
 import {
@@ -63,6 +63,8 @@ import {
 import { RatingStars } from "@/components/hotel/charts";
 import { PageSkeleton } from "@/components/hotel/skeleton";
 import { cn } from "@/lib/utils";
+import type { Locale } from "@/lib/i18n";
+import { useLocale, useT } from "@/lib/i18n/client";
 
 const CATEGORY_ICONS = {
   restaurants: UtensilsCrossed,
@@ -71,9 +73,15 @@ const CATEGORY_ICONS = {
   services: Sparkles,
 } as const;
 
+/* Libellé d'une catégorie enregistrée (clé inconnue : affichée telle quelle). */
+const catName = (k: string, locale: Locale) =>
+  (CATEGORY_KEYS as string[]).includes(k) ? categoryLabel(k as GuestCategoryKey, locale) : k;
+
 export default function HotelQrDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
+  const t = useT();
+  const locale = useLocale();
   const { isLoading: authLoading, venueName, city } = useAuthUser();
   const { qrCodes, reservations, profile, catalog, hotelOffers, isLoading, update, remove } = useHotelSpace();
   const { toast, showToast } = useToast();
@@ -107,8 +115,8 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
   const hotelName = profile.hotel_name || venueName;
   const hotelCity = profile.city || city;
   const menuCatalog = useMemo(
-    () => cityCatalog(hotelCity ?? null, catalog, hotelOffers),
-    [hotelCity, catalog, hotelOffers]
+    () => cityCatalog(hotelCity ?? null, catalog, hotelOffers, locale),
+    [hotelCity, catalog, hotelOffers, locale]
   );
 
   if (authLoading || isLoading || (qr && (hidden === null || cats === null))) return <PageSkeleton kpis={4} table />;
@@ -118,11 +126,11 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
       <Panel solid>
         <EmptyState
           icon={QrCode}
-          title="QR code introuvable"
-          description="Ce QR code n'existe pas ou ne vous appartient pas."
+          title={t("QR code introuvable", "QR code not found")}
+          description={t("Ce QR code n'existe pas ou ne vous appartient pas.", "This QR code doesn't exist or doesn't belong to you.")}
           action={
             <LinkButton href="/hotel/chambres" icon={ArrowLeft}>
-              Retour aux chambres
+              {t("Retour aux chambres", "Back to rooms")}
             </LinkButton>
           }
         />
@@ -163,7 +171,11 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
     setSavingRules(true);
     const ok = await update(qr.id, { hidden_categories: [...catSet], hidden_until: until || null });
     setSavingRules(false);
-    showToast(ok ? "Filtres enregistrés, visibles dès le prochain scan" : "Impossible d'enregistrer les filtres");
+    showToast(
+      ok
+        ? t("Filtres enregistrés, visibles dès le prochain scan", "Filters saved, live from the next scan")
+        : t("Impossible d'enregistrer les filtres", "Couldn't save the filters")
+    );
   };
 
   const toggleOffer = (offerId: string) =>
@@ -188,7 +200,11 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
     setSavingMenu(true);
     const ok = await update(qr.id, { hidden_offers: [...hiddenSet] });
     setSavingMenu(false);
-    showToast(ok ? "Menu enregistré, visible dès le prochain scan" : "Impossible d'enregistrer le menu");
+    showToast(
+      ok
+        ? t("Menu enregistré, visible dès le prochain scan", "Menu saved, live from the next scan")
+        : t("Impossible d'enregistrer le menu", "Couldn't save the menu")
+    );
   };
 
   const rename = async () => {
@@ -199,12 +215,18 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
     }
     const ok = await update(qr.id, { label: trimmed });
     setRenaming(false);
-    showToast(ok ? "Emplacement renommé" : "Échec du renommage");
+    showToast(ok ? t("Emplacement renommé", "Location renamed") : t("Échec du renommage", "Rename failed"));
   };
 
   const toggleActive = async () => {
     const ok = await update(qr.id, { active: !qr.active });
-    showToast(ok ? (qr.active ? "QR désactivé, le lien affiche un message d'indisponibilité" : "QR réactivé") : "Échec de la mise à jour");
+    showToast(
+      ok
+        ? qr.active
+          ? t("QR désactivé, le lien affiche un message d'indisponibilité", "QR deactivated, the link now shows an unavailable message")
+          : t("QR réactivé", "QR reactivated")
+        : t("Échec de la mise à jour", "Update failed")
+    );
   };
 
   const confirmDelete = async () => {
@@ -214,15 +236,15 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
     if (ok) router.push("/hotel/chambres");
     else {
       setDeleteOpen(false);
-      showToast("Échec de la suppression");
+      showToast(t("Échec de la suppression", "Delete failed"));
     }
   };
 
   return (
     <>
       <PageHeader
-        back={{ href: "/hotel/chambres", label: "Chambres & QR codes" }}
-        eyebrow={`Code ${qr.code}`}
+        back={{ href: "/hotel/chambres", label: t("Chambres & QR codes", "Rooms & QR codes") }}
+        eyebrow={`${t("Code", "Code")} ${qr.code}`}
         title={
           renaming ? (
             <span className="flex items-center gap-2">
@@ -241,7 +263,7 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
                 OK
               </Button>
               <Button size="sm" variant="ghost" onClick={() => setRenaming(false)}>
-                Annuler
+                {t("Annuler", "Cancel")}
               </Button>
             </span>
           ) : (
@@ -250,7 +272,7 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
               <StatusPill status={qr.active ? "actif" : "inactif"} />
               <IconButton
                 icon={Pencil}
-                label="Renommer"
+                label={t("Renommer", "Rename")}
                 size={15}
                 onClick={() => {
                   setLabel(qr.label);
@@ -260,17 +282,20 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
             </span>
           )
         }
-        description={`Créé ${timeAgo(qr.created_at)} · ${formatNumber(qr.scans)} ${plural(qr.scans, "scan")} · ${live.length} ${plural(live.length, "réservation")} · ${formatMad(commission)} de commissions.`}
+        description={t(
+          `Créé ${timeAgo(qr.created_at)} · ${formatNumber(qr.scans)} ${plural(qr.scans, "scan")} · ${live.length} ${plural(live.length, "réservation")} · ${formatMad(commission)} de commissions.`,
+          `Created ${timeAgo(qr.created_at, undefined, "en")} · ${formatNumber(qr.scans, "en")} ${plural(qr.scans, "scan", undefined, "en")} · ${live.length} ${plural(live.length, "reservation", undefined, "en")} · ${formatMad(commission, false, "en")} in commissions.`
+        )}
         actions={
           <>
             <Button icon={Power} onClick={toggleActive}>
-              {qr.active ? "Désactiver" : "Activer"}
+              {qr.active ? t("Désactiver", "Deactivate") : t("Activer", "Activate")}
             </Button>
             <LinkButton href={`/hotel/chambres/imprimer?ids=${qr.id}`} icon={Printer}>
-              Imprimer
+              {t("Imprimer", "Print")}
             </LinkButton>
             <Button variant="danger" icon={Trash2} onClick={() => setDeleteOpen(true)}>
-              Supprimer
+              {t("Supprimer", "Delete")}
             </Button>
           </>
         }
@@ -278,16 +303,56 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
 
       <KpiGrid
         items={[
-          { label: "Scans", value: formatNumber(qr.scans), icon: ScanLine, tone: "emerald", hint: "temps réel" },
-          { label: "Réservations", value: formatNumber(live.length), icon: CalendarDays, tone: "sky", hint: `${mine.length - live.length} annulée${mine.length - live.length > 1 ? "s" : ""} ou no-show` },
-          { label: "Conversion", value: qr.scans > 0 ? formatPercent(conversion, 1) : "—", icon: TrendingUp, tone: "violet", hint: "réservations / scans" },
-          { label: "Commissions", value: formatMad(commission, true), icon: Coins, tone: "amber", hint: rating.average !== null ? `${rating.average.toFixed(1).replace(".", ",")}/5 · ${rating.count} ${plural(rating.count, "avis")}` : "aucun avis" },
+          {
+            label: t("Scans", "Scans"),
+            value: formatNumber(qr.scans, locale),
+            icon: ScanLine,
+            tone: "emerald",
+            hint: t("temps réel", "real time"),
+          },
+          {
+            label: t("Réservations", "Reservations"),
+            value: formatNumber(live.length, locale),
+            icon: CalendarDays,
+            tone: "sky",
+            hint: t(
+              `${mine.length - live.length} annulée${mine.length - live.length > 1 ? "s" : ""} ou no-show`,
+              `${mine.length - live.length} cancelled or no-show`
+            ),
+          },
+          {
+            label: t("Conversion", "Conversion"),
+            value: qr.scans > 0 ? formatPercent(conversion, 1, locale) : "—",
+            icon: TrendingUp,
+            tone: "violet",
+            hint: t("réservations / scans", "reservations / scans"),
+          },
+          {
+            label: t("Commissions", "Commissions"),
+            value: formatMad(commission, true, locale),
+            icon: Coins,
+            tone: "amber",
+            hint:
+              rating.average !== null
+                ? t(
+                    `${rating.average.toFixed(1).replace(".", ",")}/5 · ${rating.count} ${plural(rating.count, "avis")}`,
+                    `${rating.average.toFixed(1)}/5 · ${rating.count} ${plural(rating.count, "review", undefined, "en")}`
+                  )
+                : t("aucun avis", "no reviews"),
+          },
         ]}
       />
 
       <div className="grid gap-4 xl:grid-cols-5">
         {/* QR et lien */}
-        <Panel title="QR code & lien unique" description="Tout scan et toute réservation via ce lien sont rattachés à cet emplacement." className="xl:col-span-2">
+        <Panel
+          title={t("QR code & lien unique", "QR code & unique link")}
+          description={t(
+            "Tout scan et toute réservation via ce lien sont rattachés à cet emplacement.",
+            "Every scan and reservation through this link is attributed to this location."
+          )}
+          className="xl:col-span-2"
+        >
           <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-start">
             <div id={`qr-${qr.id}`} className="shrink-0 rounded-2xl bg-white p-4">
               <QRCode value={link} size={148} />
@@ -297,30 +362,30 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
                 {link}
               </p>
               <div className="flex flex-wrap gap-2">
-                <Button size="sm" icon={copied ? Check : Copy} onClick={() => copy(link).then((ok) => !ok && showToast("Impossible de copier"))}>
-                  {copied ? "Copié" : "Copier"}
+                <Button size="sm" icon={copied ? Check : Copy} onClick={() => copy(link).then((ok) => !ok && showToast(t("Impossible de copier", "Couldn't copy")))}>
+                  {copied ? t("Copié", "Copied") : t("Copier", "Copy")}
                 </Button>
                 <LinkButton size="sm" href={link} external icon={ExternalLink}>
-                  Ouvrir
+                  {t("Ouvrir", "Open")}
                 </LinkButton>
-                <Button size="sm" icon={Download} onClick={() => downloadSvg(`qr-${qr.id}`, qr.label) && showToast("SVG téléchargé")}>
+                <Button size="sm" icon={Download} onClick={() => downloadSvg(`qr-${qr.id}`, qr.label) && showToast(t("SVG téléchargé", "SVG downloaded"))}>
                   SVG
                 </Button>
-                <Button size="sm" icon={ImageIcon} onClick={() => downloadPng(`qr-${qr.id}`, qr.label).then((ok) => showToast(ok ? "PNG téléchargé" : "Échec de l'export"))}>
+                <Button size="sm" icon={ImageIcon} onClick={() => downloadPng(`qr-${qr.id}`, qr.label).then((ok) => showToast(ok ? t("PNG téléchargé", "PNG downloaded") : t("Échec de l'export", "Export failed")))}>
                   PNG
                 </Button>
               </div>
               <div className="border-t border-white/[0.08] pt-3">
-                <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.14em] text-white/40">Partager sans QR</p>
+                <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.14em] text-white/40">{t("Partager sans QR", "Share without QR")}</p>
                 <div className="flex flex-wrap gap-2">
-                  <LinkButton size="sm" variant="ghost" href={shareByWhatsapp(link, hotelName)} external icon={MessageCircle}>
+                  <LinkButton size="sm" variant="ghost" href={shareByWhatsapp(link, hotelName, locale)} external icon={MessageCircle}>
                     WhatsApp
                   </LinkButton>
-                  <LinkButton size="sm" variant="ghost" href={shareByEmail(link, hotelName)} external icon={Mail}>
-                    E-mail
+                  <LinkButton size="sm" variant="ghost" href={shareByEmail(link, hotelName, locale)} external icon={Mail}>
+                    {t("E-mail", "Email")}
                   </LinkButton>
                   <Button size="sm" variant="ghost" icon={preview ? EyeOff : Eye} onClick={() => setPreview((p) => !p)}>
-                    {preview ? "Masquer l'aperçu" : "Aperçu client"}
+                    {preview ? t("Masquer l'aperçu", "Hide preview") : t("Aperçu client", "Guest preview")}
                   </Button>
                 </div>
               </div>
@@ -330,7 +395,7 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
             <div className="mt-5 flex justify-center border-t border-white/[0.08] pt-5">
               <div className="w-[300px] overflow-hidden rounded-[2rem] border-[6px] border-black bg-black shadow-2xl">
                 <iframe
-                  title="Aperçu du menu client"
+                  title={t("Aperçu du menu client", "Guest menu preview")}
                   src={`${link}${link.includes("?") ? "&" : "?"}apercu=1`}
                   className="h-[560px] w-full bg-white"
                 />
@@ -341,8 +406,11 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
 
         {/* Filtres : une catégorie entière, le temps d'un séjour */}
         <Panel
-          title="Filtres du menu"
-          description="Retirez une catégorie entière de ce QR, le temps d'un séjour ou pour de bon. Pour une famille, un geste : plus de clubs."
+          title={t("Filtres du menu", "Menu filters")}
+          description={t(
+            "Retirez une catégorie entière de ce QR, le temps d'un séjour ou pour de bon. Pour une famille, un geste : plus de clubs.",
+            "Remove a whole category from this QR, for one stay or for good. For a family, one tap: no more clubs."
+          )}
           actions={
             <>
               {rulesDirty && (
@@ -355,11 +423,11 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
                     setUntil(qr.hidden_until);
                   }}
                 >
-                  Annuler
+                  {t("Annuler", "Cancel")}
                 </Button>
               )}
               <Button size="sm" variant={rulesDirty ? "primary" : "secondary"} icon={Check} onClick={saveRules} loading={savingRules} disabled={!rulesDirty}>
-                Enregistrer
+                {t("Enregistrer", "Save")}
               </Button>
             </>
           }
@@ -383,8 +451,10 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
                   )}
                 >
                   <Icon size={15} strokeWidth={1.75} />
-                  <span className={cn(off && "line-through decoration-red-300/70")}>{CATEGORY_LABELS[key]}</span>
-                  <span className="text-[10px] font-medium uppercase tracking-wider opacity-60">{off ? "retirée" : "proposée"}</span>
+                  <span className={cn(off && "line-through decoration-red-300/70")}>{categoryLabel(key, locale)}</span>
+                  <span className="text-[10px] font-medium uppercase tracking-wider opacity-60">
+                    {off ? t("retirée", "removed") : t("proposée", "offered")}
+                  </span>
                 </button>
               );
             })}
@@ -398,16 +468,16 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
                 disabled={catSet.has("clubs")}
                 onClick={() => setCats((prev) => new Set([...(prev ?? []), "clubs"]))}
               >
-                Famille : retirer les clubs
+                {t("Famille : retirer les clubs", "Family: remove clubs")}
               </Button>
               {catSet.size > 0 && (
                 <Button size="sm" variant="ghost" onClick={() => setCats(new Set())}>
-                  Tout proposer
+                  {t("Tout proposer", "Offer all")}
                 </Button>
               )}
             </div>
             <label className="flex flex-wrap items-center gap-2 text-xs text-white/60">
-              Jusqu&apos;au
+              {t(<>Jusqu&apos;au</>, <>Until</>)}
               <input
                 type="date"
                 value={until ?? ""}
@@ -417,41 +487,51 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
               />
               {until ? (
                 <button type="button" onClick={() => setUntil(null)} className="text-[11px] font-bold text-sky-300 hover:text-sky-200">
-                  sans limite
+                  {t("sans limite", "no limit")}
                 </button>
               ) : (
-                <span className="text-[11px] text-white/35">sans limite</span>
+                <span className="text-[11px] text-white/35">{t("sans limite", "no limit")}</span>
               )}
             </label>
           </div>
           {qr.hidden_categories.length > 0 && (
             <p className="mt-3 text-xs text-white/45">
               {rulesExpired
-                ? "L'échéance est passée : le menu de ce QR est de nouveau complet."
-                : `Actuellement retiré : ${qr.hidden_categories.map((k) => CATEGORY_LABELS[k as GuestCategoryKey] ?? k).join(", ")}${qr.hidden_until ? ` · jusqu'au ${formatDate(qr.hidden_until, "long")}` : " · sans limite"}.`}
+                ? t(
+                    "L'échéance est passée : le menu de ce QR est de nouveau complet.",
+                    "The end date has passed: this QR's menu is complete again."
+                  )
+                : t(
+                    `Actuellement retiré : ${qr.hidden_categories.map((k) => catName(k, "fr")).join(", ")}${qr.hidden_until ? ` · jusqu'au ${formatDate(qr.hidden_until, "long")}` : " · sans limite"}.`,
+                    `Currently removed: ${qr.hidden_categories.map((k) => catName(k, "en")).join(", ")}${qr.hidden_until ? ` · until ${formatDate(qr.hidden_until, "long", "en")}` : " · no limit"}.`
+                  )}
             </p>
           )}
         </Panel>
 
         {/* Menu */}
         <Panel
-          title="Menu proposé sur ce QR"
+          title={t("Menu proposé sur ce QR", "Menu offered on this QR")}
           description={
-            hotelCity ? (
-              <>Catalogue twocards de {hotelCity} et vos <Link href="/hotel/adresses" className="font-bold text-sky-300">adresses maison</Link> · {shownOffers}/{totalOffers} proposées. Retirez ce que vous ne souhaitez pas suggérer à ce client.</>
-            ) : (
-              <>Indiquez la ville de l&apos;hôtel dans les <Link href="/hotel/settings" className="font-bold text-sky-300">paramètres</Link> pour limiter le catalogue à votre ville, en attendant, tout est proposé.</>
-            )
+            hotelCity
+              ? t(
+                  <>Catalogue twocards de {hotelCity} et vos <Link href="/hotel/adresses" className="font-bold text-sky-300">adresses maison</Link> · {shownOffers}/{totalOffers} proposées. Retirez ce que vous ne souhaitez pas suggérer à ce client.</>,
+                  <>The twocards catalogue for {hotelCity} and your <Link href="/hotel/adresses" className="font-bold text-sky-300">own places</Link> · {shownOffers}/{totalOffers} offered. Remove anything you don&apos;t want to suggest to this guest.</>
+                )
+              : t(
+                  <>Indiquez la ville de l&apos;hôtel dans les <Link href="/hotel/settings" className="font-bold text-sky-300">paramètres</Link> pour limiter le catalogue à votre ville, en attendant, tout est proposé.</>,
+                  <>Add the hotel&apos;s city in <Link href="/hotel/settings" className="font-bold text-sky-300">settings</Link> to limit the catalogue to your city; until then, everything is offered.</>
+                )
           }
           actions={
             <>
               {menuDirty && (
                 <Button size="sm" variant="ghost" icon={RotateCcw} onClick={() => setHidden(new Set(qr.hidden_offers))}>
-                  Annuler
+                  {t("Annuler", "Cancel")}
                 </Button>
               )}
               <Button size="sm" variant={menuDirty ? "primary" : "secondary"} icon={Check} onClick={saveMenu} loading={savingMenu} disabled={!menuDirty}>
-                Enregistrer le menu
+                {t("Enregistrer le menu", "Save menu")}
               </Button>
             </>
           }
@@ -462,7 +542,7 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
             <input
               value={menuSearch}
               onChange={(e) => setMenuSearch(e.target.value)}
-              placeholder="Rechercher une adresse…"
+              placeholder={t("Rechercher une adresse…", "Search for a place…")}
               className={cn(inputClass, "h-9 py-0 pl-9 text-[13px]")}
             />
           </div>
@@ -483,7 +563,7 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
                       <div>
                         <p className="text-sm font-bold text-white">{cat.label}</p>
                         <p className="num text-[11px] text-white/45">
-                          {shown}/{ids.length} proposée{shown > 1 ? "s" : ""}
+                          {shown}/{ids.length} {t(`proposée${shown > 1 ? "s" : ""}`, "offered")}
                         </p>
                       </div>
                     </div>
@@ -492,7 +572,7 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
                       onClick={() => setCategory(ids, shown !== ids.length)}
                       className="text-[11px] font-bold text-sky-300 hover:text-sky-200"
                     >
-                      {shown === ids.length ? "Tout retirer" : "Tout proposer"}
+                      {shown === ids.length ? t("Tout retirer", "Remove all") : t("Tout proposer", "Offer all")}
                     </button>
                   </div>
                   <ul className="divide-y divide-white/[0.05] px-1.5 py-1">
@@ -505,10 +585,10 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
                             <span className="flex items-center gap-1.5 truncate text-[13px] font-medium text-white">
                               <span className="truncate">{o.name}</span>
                               {o.source === "hotel" && (
-                                <span className="shrink-0 rounded-md bg-sky-500/20 px-1.5 py-0.5 text-[10px] font-bold text-sky-200">Maison</span>
+                                <span className="shrink-0 rounded-md bg-sky-500/20 px-1.5 py-0.5 text-[10px] font-bold text-sky-200">{t("Maison", "Own")}</span>
                               )}
                               {global && (
-                                <span className="shrink-0 rounded-md bg-white/10 px-1.5 py-0.5 text-[10px] font-bold text-white/60" title="Retirée pour tout l'hôtel dans Mes adresses">Tout l&apos;hôtel</span>
+                                <span className="shrink-0 rounded-md bg-white/10 px-1.5 py-0.5 text-[10px] font-bold text-white/60" title={t("Retirée pour tout l'hôtel dans Mes adresses", "Removed for the whole hotel in My places")}>{t(<>Tout l&apos;hôtel</>, <>Whole hotel</>)}</span>
                               )}
                             </span>
                             <span className="flex items-center gap-1 text-[11px] text-white/45">
@@ -521,7 +601,7 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
                               {o.price ? ` · ${o.price}` : ""}
                             </span>
                           </button>
-                          <Switch size="sm" checked={on} disabled={global} onChange={() => toggleOffer(o.id)} label={`Proposer ${o.name}`} />
+                          <Switch size="sm" checked={on} disabled={global} onChange={() => toggleOffer(o.id)} label={t(`Proposer ${o.name}`, `Offer ${o.name}`)} />
                         </li>
                       );
                     })}
@@ -535,29 +615,39 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
 
       {/* Réservations */}
       <Panel
-        title="Réservations de cet emplacement"
-        description={mine.length > 0 ? `${mine.length} ${plural(mine.length, "demande")} depuis la création` : undefined}
+        title={t("Réservations de cet emplacement", "Reservations for this location")}
+        description={
+          mine.length > 0
+            ? t(
+                `${mine.length} ${plural(mine.length, "demande")} depuis la création`,
+                `${mine.length} ${plural(mine.length, "request", undefined, "en")} since it was created`
+              )
+            : undefined
+        }
         padded={false}
       >
         {mine.length === 0 ? (
           <EmptyState
             icon={CalendarDays}
-            title="Aucune réservation via ce QR"
-            description={`Dès qu'un client scanne « ${qr.label} » et demande une réservation, elle apparaît ici avec sa commission.`}
+            title={t("Aucune réservation via ce QR", "No reservations via this QR")}
+            description={t(
+              `Dès qu'un client scanne « ${qr.label} » et demande une réservation, elle apparaît ici avec sa commission.`,
+              `As soon as a guest scans “${qr.label}” and requests a reservation, it appears here with its commission.`
+            )}
             compact
           />
         ) : (
           <Table>
             <thead>
               <tr>
-                <Th>Client</Th>
-                <Th>Sortie</Th>
-                <Th>Date</Th>
-                <Th align="center">Pers.</Th>
-                <Th>Statut</Th>
-                <Th>Avis</Th>
-                <Th align="right">Montant</Th>
-                <Th align="right">Commission</Th>
+                <Th>{t("Client", "Guest")}</Th>
+                <Th>{t("Sortie", "Outing")}</Th>
+                <Th>{t("Date", "Date")}</Th>
+                <Th align="center">{t("Pers.", "Guests")}</Th>
+                <Th>{t("Statut", "Status")}</Th>
+                <Th>{t("Avis", "Review")}</Th>
+                <Th align="right">{t("Montant", "Amount")}</Th>
+                <Th align="right">{t("Commission", "Commission")}</Th>
               </tr>
             </thead>
             <tbody>
@@ -571,10 +661,10 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
                   </Td>
                   <Td>
                     <p className="font-medium">{r.venue_name}</p>
-                    <p className="text-xs text-white/45">{r.category}</p>
+                    <p className="text-xs text-white/45">{reservationCategoryLabel(r.category, locale)}</p>
                   </Td>
                   <Td muted className="whitespace-nowrap">
-                    {formatDate(r.reservation_date)}
+                    {formatDate(r.reservation_date, undefined, locale)}
                     {r.reservation_time ? ` · ${r.reservation_time}` : ""}
                   </Td>
                   <Td align="center" muted>
@@ -592,8 +682,8 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
                       <Star size={12} strokeWidth={1.5} className="text-white/20" />
                     )}
                   </Td>
-                  <Td align="right" muted className="num whitespace-nowrap">{r.amount_spent !== null ? formatMad(r.amount_spent) : "—"}</Td>
-                  <Td align="right" className="num whitespace-nowrap font-bold text-amber-300">{r.commission > 0 ? formatMad(r.commission) : "—"}</Td>
+                  <Td align="right" muted className="num whitespace-nowrap">{r.amount_spent !== null ? formatMad(r.amount_spent, false, locale) : "—"}</Td>
+                  <Td align="right" className="num whitespace-nowrap font-bold text-amber-300">{r.commission > 0 ? formatMad(r.commission, false, locale) : "—"}</Td>
                 </Tr>
               ))}
             </tbody>
@@ -607,9 +697,12 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
         onConfirm={confirmDelete}
         loading={busy}
         danger
-        confirmLabel="Supprimer définitivement"
-        title={`Supprimer « ${qr.label} » ?`}
-        description="Le QR imprimé ne fonctionnera plus et ses réservations seront supprimées de votre historique. Pour une pause temporaire, désactivez-le plutôt."
+        confirmLabel={t("Supprimer définitivement", "Delete permanently")}
+        title={t(`Supprimer « ${qr.label} » ?`, `Delete “${qr.label}”?`)}
+        description={t(
+          "Le QR imprimé ne fonctionnera plus et ses réservations seront supprimées de votre historique. Pour une pause temporaire, désactivez-le plutôt.",
+          "The printed QR will stop working and its reservations will be removed from your history. For a temporary pause, deactivate it instead."
+        )}
       />
 
       <Toast message={toast} />

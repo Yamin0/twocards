@@ -10,6 +10,7 @@ import { PushBridge } from '@/components/push-bridge'
 import { Icon } from '@/components/venue/ui'
 import { Light } from '@/constants/theme'
 import { AuthProvider, useAuth } from '@/lib/auth-context'
+import { LocaleProvider, useT } from '@/lib/i18n'
 import { installGlobalErrorReporter, reportError } from '@/lib/report-error'
 import { ToastProvider } from '@/lib/toast'
 import { WebSessionProvider } from '@/lib/web-session'
@@ -78,16 +79,18 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <ThemeProvider value={AppTheme}>
-        <AuthProvider>
-          <WebSessionProvider>
-            <ToastProvider>
-              <AnimatedSplashOverlay />
-              <PushBridge />
-              <RootNavigator />
-              <OfflineBanner />
-            </ToastProvider>
-          </WebSessionProvider>
-        </AuthProvider>
+        <LocaleProvider>
+          <AuthProvider>
+            <WebSessionProvider>
+              <ToastProvider>
+                <AnimatedSplashOverlay />
+                <PushBridge />
+                <RootNavigator />
+                <OfflineBanner />
+              </ToastProvider>
+            </WebSessionProvider>
+          </AuthProvider>
+        </LocaleProvider>
       </ThemeProvider>
     </SafeAreaProvider>
   )
@@ -96,6 +99,7 @@ export default function RootLayout() {
 /* Écran de secours si un écran plante : un mot, un bouton, pas de trace
    rouge. */
 export function ErrorBoundary({ error, retry }: { error: Error; retry: () => Promise<void> }) {
+  const t = useT()
   useEffect(() => {
     reportError('crash', error.message, 'error-boundary', error.stack)
   }, [error])
@@ -104,12 +108,15 @@ export function ErrorBoundary({ error, retry }: { error: Error; retry: () => Pro
       <View style={styles.errorIcon}>
         <Icon name="alert-triangle" size={24} color={Light.warning} />
       </View>
-      <Text style={styles.errorTitle}>Un imprévu est survenu</Text>
+      <Text style={styles.errorTitle}>{t('Un imprévu est survenu', 'Something went wrong')}</Text>
       <Text style={styles.errorBody}>
-        L&apos;écran n&apos;a pas pu s&apos;afficher. Vos données sont intactes, réessayez.
+        {t(
+          "L'écran n'a pas pu s'afficher. Vos données sont intactes, réessayez.",
+          "This screen couldn't be displayed. Your data is safe, please try again."
+        )}
       </Text>
       <Pressable onPress={retry} style={({ pressed }) => [styles.errorButton, pressed && styles.pressed]}>
-        <Text style={styles.errorButtonText}>Réessayer</Text>
+        <Text style={styles.errorButtonText}>{t('Réessayer', 'Try again')}</Text>
       </Pressable>
     </View>
   )

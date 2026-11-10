@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react"
 import { createClient } from "@/lib/supabase/client";
 import {
   buildGuestMenu,
+  CATEGORY_LABELS,
   type GuestCategory,
   type GuestCategoryKey,
   type GuestOffer,
@@ -18,7 +19,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Clock,
-  LayoutGrid,
   Loader2,
   MessageCircle,
   Minus,
@@ -34,16 +34,21 @@ import {
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useIntlLocale, useLocale, useT } from "@/lib/i18n/client";
+import { LanguageSwitcher } from "@/components/shared/language-switcher";
 
 /* Menu client après scan — style « widget de réservation » à la SevenRooms :
    fond clair, blanc, typographie noire en Satoshi, une seule couleur
    d'accent (celle de l'hôtel), beaucoup d'air.
 
+   Pas de photo de couverture : la page s'ouvre sur un titre, comme un
+   guide, et les bandeaux de catégories qui suivent portent les images.
+
    Deux mises en page pour un même contenu. Sur téléphone (le QR est scanné
-   avec), une colonne : couverture, onglets collants, liste. Sur grand
-   écran (lien reçu par e-mail ou WhatsApp, ouvert sur un ordinateur), une
-   vraie page web : couverture panoramique, colonne de navigation fixe à
-   gauche avec catégories, recherche et contact, grille d'adresses à droite.
+   avec), une colonne : titre, onglets collants, liste. Sur grand écran
+   (lien reçu par e-mail ou WhatsApp, ouvert sur un ordinateur), une vraie
+   page web : titre sur deux colonnes, navigation par catégories, recherche
+   et contact, grille d'adresses.
 
    Parcours en trois temps — choisir une adresse, régler couverts / date /
    heure, laisser ses coordonnées — puis confirmation. Sans compte, sans
@@ -62,7 +67,6 @@ type HotelInfo = {
   city: string | null;
   accent: string;
   background: string;
-  cover: string | null;
   welcome: string | null;
   reception: string | null;
   showPrices: boolean;
@@ -111,6 +115,8 @@ export function GuestExperience({
   fallbackCity: string | null;
   preview?: boolean;
 }) {
+  const t = useT();
+  const locale = useLocale();
   const [state, setState] = useState<MenuState>("loading");
   const [info, setInfo] = useState<HotelInfo>({
     label: null,
@@ -118,7 +124,6 @@ export function GuestExperience({
     city: fallbackCity,
     accent: "#13305c",
     background: "#f4f3ef",
-    cover: null,
     welcome: null,
     reception: null,
     showPrices: true,
@@ -164,7 +169,6 @@ export function GuestExperience({
             city: row.city || fallbackCity,
             accent: HEX.test(row.accent_color ?? "") ? row.accent_color : "#13305c",
             background: HEX.test(row.background_color ?? "") ? row.background_color : "#f4f3ef",
-            cover: row.cover_url || null,
             welcome: row.welcome_message ?? null,
             reception: row.reception_phone ?? null,
             showPrices: row.show_prices ?? true,
@@ -181,8 +185,8 @@ export function GuestExperience({
   }, [code, fallbackHotelName, fallbackCity, preview]);
 
   const menu = useMemo(
-    () => buildGuestMenu({ city: info.city, hidden, catalog, hotelOffers, categoryImages, hiddenCategories }),
-    [info.city, hidden, catalog, hotelOffers, categoryImages, hiddenCategories]
+    () => buildGuestMenu({ city: info.city, hidden, catalog, hotelOffers, categoryImages, hiddenCategories, locale }),
+    [info.city, hidden, catalog, hotelOffers, categoryImages, hiddenCategories, locale]
   );
   const total = menu.reduce((s, c) => s + c.offers.length, 0);
   const q = search.trim().toLowerCase();
@@ -209,14 +213,39 @@ export function GuestExperience({
     "--page": info.background,
     "--on-page": darkPage ? "#ffffff" : "#171717",
     "--on-page-muted": darkPage ? "rgba(255,255,255,0.6)" : "rgba(23,23,23,0.55)",
+    /* Filets du titre. */
+    "--rule": darkPage ? "rgba(255,255,255,0.16)" : "rgba(23,23,23,0.16)",
+    /* L'accent ne sert d'encre que s'il tranche sur le fond : un accent
+       clair sur un fond clair (ou l'inverse) serait illisible. */
+    "--accent-ink": darkAccent !== darkPage ? info.accent : "var(--on-page)",
   } as CSSProperties;
 
-  const hotelName = info.hotelName ?? "Votre hôtel";
+  const hotelName = info.hotelName ?? t("Votre hôtel", "Your hotel");
   const welcome =
     info.welcome ??
     (info.city
-      ? `Les meilleures adresses de ${info.city}, réservées en quelques secondes, nous nous occupons du reste.`
-      : "Réservez vos plus belles sorties en quelques secondes, nous nous occupons du reste.");
+      ? t(
+          `Les meilleures adresses de ${info.city}, réservées en quelques secondes, nous nous occupons du reste.`,
+          `The best places in ${info.city}, booked in seconds. We take care of the rest.`
+        )
+      : t(
+          "Réservez vos plus belles sorties en quelques secondes, nous nous occupons du reste.",
+          "Book your finest outings in seconds. We take care of the rest."
+        ));
+
+  /* Ourlet du titre : le décompte n'apparaît qu'une fois le menu chargé,
+     la provenance est toujours là — le bloc n'est donc jamais vide. */
+  const counted = state === "ready" && total > 0;
+  const metaItems = (
+    state === "inactive"
+      ? /* QR désactivé : annoncer une sélection qu'on ne montre pas serait absurde. */
+        []
+      : [
+          counted ? t(`${total} adresse${total > 1 ? "s" : ""}`, `${total} place${total === 1 ? "" : "s"}`) : null,
+          info.city,
+          t("Sélection de l'hôtel", "Curated by the hotel"),
+        ]
+  ).filter((v): v is string => Boolean(v));
 
   const pick = (key: GuestCategoryKey | "tous") => {
     setCategory(key);
@@ -234,75 +263,56 @@ export function GuestExperience({
       className="satoshi min-h-screen bg-[var(--page)] text-neutral-900 selection:bg-[var(--accent)] selection:text-[var(--on-accent)]"
       style={themeStyle}
     >
-      {/* ─── Couverture ─────────────────────────────────────────────────────── */}
-      <header className="relative overflow-hidden text-white">
-        <div className="absolute inset-0" style={{ background: info.accent }}>
-          {info.cover && (
-            <Image
-              src={info.cover}
-              alt=""
-              fill
-              unoptimized
-              priority
-              sizes="100vw"
-              className="object-cover"
-            />
-          )}
-          <div
-            className={cn(
-              "absolute inset-0",
-              info.cover
-                ? "bg-gradient-to-t from-black/80 via-black/45 to-black/15"
-                : "bg-gradient-to-br from-white/10 via-transparent to-black/25"
-            )}
-          />
-          {!info.cover && (
-            <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
-          )}
-        </div>
+      {/* ─── Page de titre ───────────────────────────────────────────────────
+          Pas de bannière : les photos des catégories, juste en dessous et
+          presque bord à bord, font déjà tout le travail d'image. Ici on
+          annonce : où l'on se trouve, chez qui, et ce que contient la
+          sélection. */}
+      <header className="relative mx-auto w-full max-w-[1800px] px-3 pt-9 pb-2 sm:px-4 sm:pt-12 lg:px-5 lg:pt-16">
+        <LanguageSwitcher
+          tone={darkPage ? "dark" : "light"}
+          className="absolute right-3 top-2 sm:right-4 sm:top-4 lg:right-5"
+        />
+        {/* Le libellé du QR, tel que l'hôtel l'a saisi : « Chambre 129 », « Lobby »,
+            « Suite 4 ». Le client sait tout de suite que la page est la sienne. */}
+        {info.label && (
+          <p className="text-sm font-bold text-[color:var(--accent-ink)] duration-700 animate-in fade-in sm:text-base">
+            {info.label}
+          </p>
+        )}
+
+        {/* Le nom pèse, le chapô respire : deux colonnes posées sur la même
+            ligne de pied en grand écran, empilées sur téléphone. */}
         <div
           className={cn(
-            "relative mx-auto flex w-full max-w-6xl flex-col justify-end px-5 sm:px-8 lg:px-10",
-            info.cover ? "min-h-[260px] pb-7 pt-20 sm:min-h-[320px] lg:min-h-[400px] lg:pb-12" : "pb-7 pt-8 sm:pt-10 lg:pb-10 lg:pt-14",
-            !info.cover && !darkAccent && "text-neutral-900"
+            "grid gap-x-12 gap-y-5 duration-700 animate-in fade-in slide-in-from-bottom-2 lg:grid-cols-12 lg:items-end lg:gap-y-0",
+            info.label && "mt-2 sm:mt-3"
           )}
         >
-          <p
-            className={cn(
-              "text-[11px] font-bold uppercase tracking-[0.24em] sm:text-xs",
-              info.cover || darkAccent ? "text-white/75" : "text-neutral-900/60"
-            )}
-          >
-            {state === "loading" ? "Conciergerie" : info.label ? `Conciergerie · ${info.label}` : "Conciergerie"}
-          </p>
-          <h1 className="font-display mt-2 max-w-3xl text-[2rem] font-black leading-[1.02] tracking-tight sm:text-5xl lg:text-6xl">
+          <h1 className="font-display text-[clamp(2.4rem,8.5vw,5.25rem)] font-black leading-[0.88] tracking-[-0.045em] text-[color:var(--on-page)] lg:col-span-7">
             {state === "loading" && !fallbackHotelName ? (
-              <span className="inline-block h-10 w-56 animate-pulse rounded-lg bg-white/25" />
+              <span className="inline-block h-[0.75em] w-[7ch] animate-pulse rounded-md bg-[color:var(--on-page)]/15 align-middle" />
             ) : (
               hotelName
             )}
           </h1>
-          <p
-            className={cn(
-              "mt-3 max-w-xl text-[15px] leading-relaxed sm:text-base lg:text-lg",
-              info.cover || darkAccent ? "text-white/85" : "text-neutral-900/70"
-            )}
-          >
+          <p className="max-w-lg text-[15px] font-light leading-[1.6] text-[color:var(--on-page)]/80 sm:text-lg lg:col-span-5 lg:pb-[0.4em]">
             {welcome}
           </p>
-          {state === "ready" && total > 0 && (
-            <p
-              className={cn(
-                "num mt-4 hidden items-center gap-2 text-xs font-bold lg:inline-flex",
-                info.cover || darkAccent ? "text-white/70" : "text-neutral-900/55"
-              )}
-            >
-              <LayoutGrid size={13} strokeWidth={2} />
-              {total} adresses sélectionnées par l&apos;hôtel
-              {info.city ? ` à ${info.city}` : ""}
-            </p>
-          )}
         </div>
+
+        {metaItems.length > 0 && (
+          <div className="mt-7 flex flex-wrap items-center gap-x-3 gap-y-1.5 border-t border-[color:var(--rule)] pt-3.5 text-[10px] font-bold uppercase tracking-[0.2em] text-[color:var(--on-page-muted)] duration-700 animate-in fade-in sm:mt-9 sm:text-[11px]">
+            {metaItems.map((item, i) => (
+              /* Au-delà de deux mentions ça passe à la ligne sur téléphone et
+                 le losange se retrouve en tête de ligne : on garde l'essentiel. */
+              <span key={item} className={cn("items-center gap-3", i > 1 ? "hidden sm:flex" : "flex")}>
+                {i > 0 && <span aria-hidden className="h-[3px] w-[3px] rotate-45 bg-current opacity-45" />}
+                <span className={cn(i === 0 && counted && "num text-[color:var(--accent-ink)]")}>{item}</span>
+              </span>
+            ))}
+          </div>
+        )}
       </header>
 
       {state === "inactive" ? (
@@ -312,10 +322,11 @@ export function GuestExperience({
           ref={listRef}
           className={cn(
             "mx-auto w-full pb-2 pt-3 sm:pt-6 lg:pt-8",
-            /* Les bandeaux de catégories s'étirent presque bord à bord ;
+            /* Les bandeaux de catégories s'étirent presque bord à bord, sur
+               la même gouttière que le titre pour tenir la ligne verticale ;
                les listes d'adresses gardent la largeur de lecture. */
             category === "tous"
-              ? "max-w-[1800px] px-2 sm:px-3 lg:px-4"
+              ? "max-w-[1800px] px-3 sm:px-4 lg:px-5"
               : "max-w-6xl px-3 sm:px-8 lg:px-10"
           )}
         >
@@ -352,15 +363,18 @@ export function GuestExperience({
                       {c.label}
                     </span>
                     <span className="num mt-2 text-[11px] font-medium uppercase tracking-[0.22em] text-white/85 [text-shadow:0_1px_8px_rgba(0,0,0,0.6)] sm:text-xs">
-                      {c.offers.length} adresse{c.offers.length > 1 ? "s" : ""}
+                      {t(
+                        `${c.offers.length} adresse${c.offers.length > 1 ? "s" : ""}`,
+                        `${c.offers.length} place${c.offers.length === 1 ? "" : "s"}`
+                      )}
                     </span>
                   </div>
                 </button>
               ))}
               {menu.length === 0 && (
                 <div className="rounded-2xl border border-dashed border-black/10 bg-white px-6 py-12 text-center">
-                  <p className="text-sm font-bold">Aucune adresse proposée pour le moment</p>
-                  <p className="mt-1 text-sm text-neutral-500">Adressez-vous à la réception.</p>
+                  <p className="text-sm font-bold">{t("Aucune adresse proposée pour le moment", "No places available yet")}</p>
+                  <p className="mt-1 text-sm text-neutral-500">{t("Adressez-vous à la réception.", "Please ask at reception.")}</p>
                 </div>
               )}
             </div>
@@ -379,7 +393,7 @@ export function GuestExperience({
                     <button
                       type="button"
                       onClick={() => pick("tous")}
-                      aria-label="Retour aux catégories"
+                      aria-label={t("Retour aux catégories", "Back to categories")}
                       className="absolute left-3 top-3 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-neutral-900 shadow transition-colors hover:bg-white sm:left-4 sm:top-4"
                     >
                       <ArrowLeft size={18} strokeWidth={2.25} />
@@ -397,7 +411,7 @@ export function GuestExperience({
                   </div>
 
                   <div className="no-scrollbar mt-3 flex gap-1.5 overflow-x-auto py-1 sm:mt-4">
-                    <CategoryChip active={false} onClick={() => pick("tous")} label="Tout" count={total} />
+                    <CategoryChip active={false} onClick={() => pick("tous")} label={t("Tout", "All")} count={total} />
                     {menu.map((c) => (
                       <CategoryChip
                         key={c.key}
@@ -417,7 +431,7 @@ export function GuestExperience({
                         type="search"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        placeholder={`Rechercher dans ${current.label.toLowerCase()}…`}
+                        placeholder={t(`Rechercher dans ${current.label.toLowerCase()}…`, `Search ${current.label.toLowerCase()}…`)}
                         className="h-11 w-full rounded-xl border border-black/[0.08] bg-white pl-10 pr-4 text-[15px] text-neutral-900 placeholder:text-neutral-400 focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/20"
                       />
                     </div>
@@ -425,8 +439,8 @@ export function GuestExperience({
 
                   {!shown || shown.offers.length === 0 ? (
                     <div className="mt-4 rounded-2xl border border-dashed border-black/10 bg-white px-6 py-12 text-center">
-                      <p className="text-sm font-bold">Aucune adresse ne correspond</p>
-                      <p className="mt-1 text-sm text-neutral-500">Essayez un autre mot.</p>
+                      <p className="text-sm font-bold">{t("Aucune adresse ne correspond", "No matching places")}</p>
+                      <p className="mt-1 text-sm text-neutral-500">{t("Essayez un autre mot.", "Try another word.")}</p>
                     </div>
                   ) : (
                     <ul className="mt-4 grid gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 lg:gap-6">
@@ -447,20 +461,23 @@ export function GuestExperience({
       <footer className="mx-auto w-full max-w-6xl px-6 py-8 text-center lg:py-12">
         {info.reception && state !== "loading" && (
           <a
-            href={waLink(info.reception, `Bonjour ${hotelName}, `)}
+            href={waLink(info.reception, t(`Bonjour ${hotelName}, `, `Hello ${hotelName}, `))}
             target="_blank"
             rel="noopener noreferrer"
             className="mb-4 inline-flex items-center gap-2 rounded-full border border-black/[0.08] bg-white px-4 py-2 text-sm font-bold text-neutral-800 transition-colors hover:bg-neutral-50"
           >
             <MessageCircle size={15} strokeWidth={2} className="text-emerald-600" />
-            Écrire à la réception
+            {t("Écrire à la réception", "Message reception")}
           </a>
         )}
         <p className="text-xs leading-relaxed text-[var(--on-page-muted)]">
-          Sans engagement, l&apos;établissement confirme par téléphone ou WhatsApp.
+          {t(
+            "Sans engagement, l'établissement confirme par téléphone ou WhatsApp.",
+            "No commitment: the venue confirms by phone or WhatsApp."
+          )}
         </p>
         <div className="mt-3 flex items-center justify-center gap-1.5 text-[var(--on-page-muted)]">
-          <span className="text-[11px]">Propulsé par</span>
+          <span className="text-[11px]">{t("Propulsé par", "Powered by")}</span>
           <Image src="/logo-header.png" alt="" width={16} height={16} className={cn("h-4 w-auto opacity-70", darkPage && "brightness-0 invert")} />
           <span className="text-xs font-black text-[var(--on-page)]">twocards.</span>
         </div>
@@ -512,6 +529,7 @@ function CategoryChip({
 }
 
 function OfferCard({ offer: o, showPrice, onPick }: { offer: GuestOffer; showPrice: boolean; onPick: () => void }) {
+  const t = useT();
   return (
     <button
       type="button"
@@ -529,7 +547,7 @@ function OfferCard({ offer: o, showPrice, onPick }: { offer: GuestOffer; showPri
         />
         {o.source === "hotel" && (
           <span className="absolute left-3 top-3 rounded-full bg-[var(--accent)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--on-accent)]">
-            Par l&apos;hôtel
+            {t("Par l'hôtel", "Hotel pick")}
           </span>
         )}
       </div>
@@ -540,7 +558,7 @@ function OfferCard({ offer: o, showPrice, onPick }: { offer: GuestOffer; showPri
         <div className="mt-auto flex items-end justify-between gap-3 pt-2.5">
           <span className="num text-sm font-light italic text-neutral-500">{showPrice && o.price ? o.price : ""}</span>
           <span className="inline-flex h-9 items-center gap-1.5 rounded-full bg-[var(--accent)] px-4 text-xs font-bold text-[var(--on-accent)] transition-transform group-hover:translate-x-0.5">
-            Réserver
+            {t("Réserver", "Book")}
             <ChevronRight size={13} strokeWidth={2.5} />
           </span>
         </div>
@@ -553,6 +571,7 @@ function OfferCard({ offer: o, showPrice, onPick }: { offer: GuestOffer; showPri
    Une seule est visible à la fois, les autres restent montées pour que le
    navigateur les ait déjà en cache au changement. */
 function Gallery({ images }: { images: string[] }) {
+  const t = useT();
   const [index, setIndex] = useState(0);
   if (images.length === 0) return null;
   const go = (step: number) => setIndex((n) => (n + step + images.length) % images.length);
@@ -575,7 +594,7 @@ function Gallery({ images }: { images: string[] }) {
           <button
             type="button"
             onClick={() => go(-1)}
-            aria-label="Photo précédente"
+            aria-label={t("Photo précédente", "Previous photo")}
             className="absolute left-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-neutral-900 shadow transition-colors hover:bg-white"
           >
             <ChevronLeft size={17} strokeWidth={2.25} />
@@ -583,7 +602,7 @@ function Gallery({ images }: { images: string[] }) {
           <button
             type="button"
             onClick={() => go(1)}
-            aria-label="Photo suivante"
+            aria-label={t("Photo suivante", "Next photo")}
             className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-neutral-900 shadow transition-colors hover:bg-white"
           >
             <ChevronRight size={17} strokeWidth={2.25} />
@@ -594,7 +613,7 @@ function Gallery({ images }: { images: string[] }) {
                 key={src}
                 type="button"
                 onClick={() => setIndex(n)}
-                aria-label={`Photo ${n + 1} sur ${images.length}`}
+                aria-label={t(`Photo ${n + 1} sur ${images.length}`, `Photo ${n + 1} of ${images.length}`)}
                 aria-current={n === index}
                 className={cn(
                   "h-1.5 rounded-full transition-all",
@@ -610,24 +629,30 @@ function Gallery({ images }: { images: string[] }) {
 }
 
 function Inactive({ hotelName, reception }: { hotelName: string; reception: string | null }) {
+  const t = useT();
   return (
     <main className="mx-auto flex w-full max-w-md flex-col items-center px-8 py-16 text-center">
       <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-black/[0.06]">
         <X size={20} strokeWidth={2} className="text-[var(--on-page-muted)]" />
       </div>
-      <h2 className="font-display text-xl font-bold tracking-tight text-[var(--on-page)]">Ce menu n&apos;est plus disponible</h2>
+      <h2 className="font-display text-xl font-bold tracking-tight text-[var(--on-page)]">
+        {t("Ce menu n'est plus disponible", "This menu is no longer available")}
+      </h2>
       <p className="mt-2 max-w-xs text-sm leading-relaxed text-[var(--on-page-muted)]">
-        Ce QR code a été désactivé par l&apos;hôtel. Adressez-vous à la réception pour réserver vos sorties.
+        {t(
+          "Ce QR code a été désactivé par l'hôtel. Adressez-vous à la réception pour réserver vos sorties.",
+          "This QR code has been deactivated by the hotel. Please ask at reception to book your outings."
+        )}
       </p>
       {reception && (
         <a
-          href={waLink(reception, `Bonjour ${hotelName}, `)}
+          href={waLink(reception, t(`Bonjour ${hotelName}, `, `Hello ${hotelName}, `))}
           target="_blank"
           rel="noopener noreferrer"
           className="mt-6 inline-flex h-11 items-center gap-2 rounded-full bg-[var(--accent)] px-5 text-sm font-bold text-[var(--on-accent)]"
         >
           <MessageCircle size={15} strokeWidth={2} />
-          Écrire à la réception
+          {t("Écrire à la réception", "Message reception")}
         </a>
       )}
     </main>
@@ -640,6 +665,8 @@ type Step = "details" | "contact" | "done";
 
 const DAY_LABELS = ["dim.", "lun.", "mar.", "mer.", "jeu.", "ven.", "sam."];
 const MONTH_LABELS = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."];
+const DAY_LABELS_EN = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const MONTH_LABELS_EN = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const isoDay = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 
@@ -669,12 +696,16 @@ function ReservationSheet({
   preview: boolean;
   onClose: () => void;
 }) {
+  const t = useT();
+  const intl = useIntlLocale();
+  const dayLabels = t(DAY_LABELS, DAY_LABELS_EN);
+  const monthLabels = t(MONTH_LABELS, MONTH_LABELS_EN);
   const days = useMemo(() => {
     const out: Date[] = [];
-    const t = new Date();
+    const today = new Date();
     for (let i = 0; i < 14; i++) {
-      const d = new Date(t);
-      d.setDate(t.getDate() + i);
+      const d = new Date(today);
+      d.setDate(today.getDate() + i);
       out.push(d);
     }
     return out;
@@ -730,7 +761,8 @@ function ReservationSheet({
     setErrorMsg("");
     const { error } = await createClient().rpc("qr_create_reservation", {
       p_code: code,
-      p_category: category.label,
+      /* Libellé français enregistré en base, quelle que soit la langue affichée. */
+      p_category: CATEGORY_LABELS[category.key],
       p_venue: offer.name,
       p_guest_name: name,
       p_guest_phone: phone,
@@ -748,8 +780,14 @@ function ReservationSheet({
     if (error) {
       setErrorMsg(
         error.message.includes("introuvable")
-          ? "Ce QR code n'est plus actif. Adressez-vous à la réception."
-          : "Impossible d'envoyer votre demande pour le moment. Réessayez ou contactez la réception."
+          ? t(
+              "Ce QR code n'est plus actif. Adressez-vous à la réception.",
+              "This QR code is no longer active. Please ask at reception."
+            )
+          : t(
+              "Impossible d'envoyer votre demande pour le moment. Réessayez ou contactez la réception.",
+              "We couldn't send your request right now. Please try again or contact reception."
+            )
       );
       return;
     }
@@ -760,7 +798,7 @@ function ReservationSheet({
   const themeStyle = { "--accent": accent, "--on-accent": dark ? "#ffffff" : "#0a0a0a" } as CSSProperties;
   const field =
     "h-12 w-full rounded-xl border border-black/[0.08] bg-[#f7f6f3] px-4 text-[15px] text-neutral-900 placeholder:text-neutral-400 focus:border-[var(--accent)] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/20";
-  const dateLabel = new Date(`${date}T00:00:00`).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
+  const dateLabel = new Date(`${date}T00:00:00`).toLocaleDateString(intl, { weekday: "long", day: "numeric", month: "long" });
 
   return (
     <div className="satoshi fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-4" style={themeStyle}>
@@ -776,23 +814,34 @@ function ReservationSheet({
             <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
               <Check size={30} strokeWidth={2.5} />
             </div>
-            <h3 className="font-display text-2xl font-black tracking-tight">Demande envoyée</h3>
+            <h3 className="font-display text-2xl font-black tracking-tight">{t("Demande envoyée", "Request sent")}</h3>
             <p className="mx-auto mt-3 max-w-xs text-[15px] leading-relaxed text-neutral-600">
               <span className="font-bold text-neutral-900">{offer.name}</span>
               {service ? ` — ${service.name}` : ""}, {dateLabel}
-              {chosenTime ? ` à ${chosenTime}` : ""}, pour {partySize} personne{partySize > 1 ? "s" : ""}.
+              {t(
+                `${chosenTime ? ` à ${chosenTime}` : ""}, pour ${partySize} personne${partySize > 1 ? "s" : ""}.`,
+                `${chosenTime ? ` at ${chosenTime}` : ""}, for ${partySize} guest${partySize === 1 ? "" : "s"}.`
+              )}
             </p>
             <p className="mx-auto mt-3 max-w-xs text-sm leading-relaxed text-neutral-500">
-              L&apos;établissement vous confirme au <span className="num font-bold text-neutral-800">{phone}</span> par
-              téléphone ou WhatsApp. {hotelName} est prévenu.
+              {t(
+                <>
+                  L&apos;établissement vous confirme au <span className="num font-bold text-neutral-800">{phone}</span> par
+                  téléphone ou WhatsApp. {hotelName} est prévenu.
+                </>,
+                <>
+                  The venue will confirm on <span className="num font-bold text-neutral-800">{phone}</span> by phone or
+                  WhatsApp. {hotelName} has been notified.
+                </>
+              )}
             </p>
-            {preview && <p className="mt-3 text-xs font-bold text-amber-600">Aperçu : aucune demande n&apos;a été envoyée.</p>}
+            {preview && <p className="mt-3 text-xs font-bold text-amber-600">{t("Aperçu : aucune demande n'a été envoyée.", "Preview: no request was sent.")}</p>}
             <button
               type="button"
               onClick={onClose}
               className="mt-8 h-12 w-full rounded-xl bg-[var(--accent)] text-[15px] font-bold text-[var(--on-accent)] transition-opacity hover:opacity-90"
             >
-              Parfait
+              {t("Parfait", "Perfect")}
             </button>
           </div>
         ) : (
@@ -800,7 +849,7 @@ function ReservationSheet({
             {/* En-tête de la feuille */}
             <div className="sticky top-0 z-10 flex items-center gap-3 border-b border-black/[0.06] bg-white/95 px-5 py-4 backdrop-blur">
               {step === "contact" ? (
-                <button type="button" onClick={() => setStep("details")} aria-label="Retour" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-neutral-100 text-neutral-700">
+                <button type="button" onClick={() => setStep("details")} aria-label={t("Retour", "Back")} className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-neutral-100 text-neutral-700">
                   <ArrowLeft size={16} strokeWidth={2.25} />
                 </button>
               ) : (
@@ -813,7 +862,7 @@ function ReservationSheet({
                 <h3 className="font-display truncate text-[17px] font-bold leading-tight tracking-tight">{offer.name}</h3>
               </div>
               <span className="num shrink-0 text-[11px] font-bold text-neutral-400">{step === "details" ? "1/2" : "2/2"}</span>
-              <button type="button" onClick={onClose} aria-label="Fermer" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-neutral-400 hover:bg-neutral-100 hover:text-neutral-800">
+              <button type="button" onClick={onClose} aria-label={t("Fermer", "Close")} className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-neutral-400 hover:bg-neutral-100 hover:text-neutral-800">
                 <X size={18} strokeWidth={2} />
               </button>
             </div>
@@ -838,7 +887,7 @@ function ReservationSheet({
                 {offer.services.length > 0 && (
                   <section>
                     <p className="mb-2.5 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-neutral-500">
-                      <Sparkles size={12} strokeWidth={2.25} /> Prestation
+                      <Sparkles size={12} strokeWidth={2.25} /> {t("Prestation", "Service")}
                     </p>
                     <div className="space-y-2">
                       {offer.services.map((s) => {
@@ -875,14 +924,14 @@ function ReservationSheet({
                 {/* Couverts */}
                 <section>
                   <p className="mb-2.5 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-neutral-500">
-                    <Users size={12} strokeWidth={2.25} /> Personnes
+                    <Users size={12} strokeWidth={2.25} /> {t("Personnes", "Guests")}
                   </p>
                   <div className="flex items-center justify-between rounded-xl border border-black/[0.08] bg-[#f7f6f3] px-3 py-2">
-                    <button type="button" aria-label="Moins de personnes" onClick={() => setPartySize((n) => Math.max(1, n - 1))} className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-neutral-700 shadow-sm">
+                    <button type="button" aria-label={t("Moins de personnes", "Fewer guests")} onClick={() => setPartySize((n) => Math.max(1, n - 1))} className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-neutral-700 shadow-sm">
                       <Minus size={16} strokeWidth={2.25} />
                     </button>
-                    <span className="num text-xl font-black">{partySize} <span className="text-sm font-medium text-neutral-500">personne{partySize > 1 ? "s" : ""}</span></span>
-                    <button type="button" aria-label="Plus de personnes" onClick={() => setPartySize((n) => Math.min(50, n + 1))} className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-neutral-700 shadow-sm">
+                    <span className="num text-xl font-black">{partySize} <span className="text-sm font-medium text-neutral-500">{t(`personne${partySize > 1 ? "s" : ""}`, `guest${partySize === 1 ? "" : "s"}`)}</span></span>
+                    <button type="button" aria-label={t("Plus de personnes", "More guests")} onClick={() => setPartySize((n) => Math.min(50, n + 1))} className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-neutral-700 shadow-sm">
                       <Plus size={16} strokeWidth={2.25} />
                     </button>
                   </div>
@@ -912,10 +961,10 @@ function ReservationSheet({
                           )}
                         >
                           <span className={cn("text-[10px] font-bold uppercase", active ? "opacity-80" : "text-neutral-400")}>
-                            {i === 0 ? "auj." : i === 1 ? "dem." : DAY_LABELS[d.getDay()]}
+                            {i === 0 ? t("auj.", "Today") : i === 1 ? t("dem.", "Tmrw") : dayLabels[d.getDay()]}
                           </span>
                           <span className="num text-lg font-black leading-tight">{d.getDate()}</span>
-                          <span className={cn("text-[10px] font-medium", active ? "opacity-80" : "text-neutral-400")}>{MONTH_LABELS[d.getMonth()]}</span>
+                          <span className={cn("text-[10px] font-medium", active ? "opacity-80" : "text-neutral-400")}>{monthLabels[d.getMonth()]}</span>
                         </button>
                       );
                     })}
@@ -925,7 +974,8 @@ function ReservationSheet({
                 {/* Heure */}
                 <section>
                   <p className="mb-2.5 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-neutral-500">
-                    <Clock size={12} strokeWidth={2.25} /> Heure <span className="normal-case tracking-normal text-neutral-400">(facultatif)</span>
+                    <Clock size={12} strokeWidth={2.25} /> {t("Heure", "Time")}{" "}
+                    <span className="normal-case tracking-normal text-neutral-400">{t("(facultatif)", "(optional)")}</span>
                   </p>
                   <div className="grid grid-cols-4 gap-2 sm:grid-cols-5">
                     {slots.map((s) => {
@@ -960,7 +1010,7 @@ function ReservationSheet({
                         time === "autre" ? "border-[var(--accent)] bg-[var(--accent)] text-[var(--on-accent)]" : "border-black/[0.08] bg-white text-neutral-800 hover:bg-neutral-50"
                       )}
                     >
-                      Autre
+                      {t("Autre", "Other")}
                     </button>
                   </div>
                   {time === "autre" && (
@@ -973,7 +1023,7 @@ function ReservationSheet({
                   onClick={() => setStep("contact")}
                   className="flex h-13 w-full items-center justify-center gap-2 rounded-xl bg-[var(--accent)] py-3.5 text-[15px] font-bold text-[var(--on-accent)] transition-opacity hover:opacity-90"
                 >
-                  Continuer
+                  {t("Continuer", "Continue")}
                   <ChevronRight size={16} strokeWidth={2.5} />
                 </button>
               </div>
@@ -984,24 +1034,28 @@ function ReservationSheet({
                 <div className="flex items-center justify-between rounded-xl bg-[#f7f6f3] px-4 py-3 text-sm">
                   <span className="text-neutral-600">
                     {service ? `${service.name} · ` : ""}
-                    <span className="num font-bold text-neutral-900">{partySize}</span> pers. · {dateLabel}
+                    <span className="num font-bold text-neutral-900">{partySize}</span>{" "}
+                    {t("pers.", partySize === 1 ? "guest" : "guests")} · {dateLabel}
                     {chosenTime ? ` · ${chosenTime}` : ""}
                   </span>
                   <button type="button" onClick={() => setStep("details")} className="text-xs font-bold text-[var(--accent)]">
-                    Modifier
+                    {t("Modifier", "Edit")}
                   </button>
                 </div>
                 <div className="relative">
                   <User size={16} strokeWidth={2} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400" />
-                  <input className={cn(field, "pl-11")} placeholder="Votre nom" value={name} onChange={(e) => setName(e.target.value)} required maxLength={120} autoComplete="name" autoFocus />
+                  <input className={cn(field, "pl-11")} placeholder={t("Votre nom", "Your name")} value={name} onChange={(e) => setName(e.target.value)} required maxLength={120} autoComplete="name" autoFocus />
                 </div>
                 <div className="relative">
                   <Phone size={16} strokeWidth={2} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400" />
-                  <input className={cn(field, "num pl-11")} type="tel" placeholder="Téléphone (WhatsApp)" value={phone} onChange={(e) => setPhone(e.target.value)} required maxLength={40} autoComplete="tel" inputMode="tel" />
+                  <input className={cn(field, "num pl-11")} type="tel" placeholder={t("Téléphone (WhatsApp)", "Phone (WhatsApp)")} value={phone} onChange={(e) => setPhone(e.target.value)} required maxLength={40} autoComplete="tel" inputMode="tel" />
                 </div>
                 <textarea
                   className="min-h-24 w-full resize-none rounded-xl border border-black/[0.08] bg-[#f7f6f3] px-4 py-3 text-[15px] text-neutral-900 placeholder:text-neutral-400 focus:border-[var(--accent)] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/20"
-                  placeholder="Une précision ? Occasion, allergies, table souhaitée… (facultatif)"
+                  placeholder={t(
+                    "Une précision ? Occasion, allergies, table souhaitée… (facultatif)",
+                    "Anything to add? Occasion, allergies, preferred table… (optional)"
+                  )}
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   maxLength={500}
@@ -1016,14 +1070,21 @@ function ReservationSheet({
                 >
                   {sending ? (
                     <>
-                      <Loader2 size={16} strokeWidth={2.5} className="animate-spin" /> Envoi…
+                      <Loader2 size={16} strokeWidth={2.5} className="animate-spin" /> {t("Envoi…", "Sending…")}
                     </>
                   ) : (
-                    "Envoyer ma demande"
+                    t("Envoyer ma demande", "Send my request")
                   )}
                 </button>
                 <p className="text-center text-xs leading-relaxed text-neutral-500">
-                  Sans engagement ni paiement : {hotelName} et l&apos;établissement sont prévenus, la confirmation arrive par téléphone ou WhatsApp.
+                  {t(
+                    <>
+                      Sans engagement ni paiement : {hotelName} et l&apos;établissement sont prévenus, la confirmation arrive par téléphone ou WhatsApp.
+                    </>,
+                    <>
+                      No commitment, no payment: {hotelName} and the venue are notified, and confirmation comes by phone or WhatsApp.
+                    </>
+                  )}
                 </p>
               </div>
             )}

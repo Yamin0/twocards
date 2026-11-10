@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { useAuthUser } from "@/hooks/use-auth-user";
 import { useHotelSpace, type HotelReservation, type ReservationStatus } from "@/lib/hotel/store";
-import { CATEGORIES, isLive } from "@/lib/hotel/analytics";
+import { CATEGORIES, isLive, reservationCategoryLabel } from "@/lib/hotel/analytics";
 import {
   addDays,
   formatDate,
@@ -50,13 +50,33 @@ import {
 import { RatingStars } from "@/components/hotel/charts";
 import { PageSkeleton } from "@/components/hotel/skeleton";
 import { cn } from "@/lib/utils";
+import { intlLocale, type Locale, type Translate } from "@/lib/i18n";
+import { useLocale, useT } from "@/lib/i18n/client";
 
 type StatusFilter = "toutes" | ReservationStatus;
 type Period = "aujourdhui" | "avenir" | "7j" | "30j" | "tout";
 type Category = "toutes" | (typeof CATEGORIES)[number];
 
-function exportCsv(rows: HotelReservation[]) {
-  const header = ["Date", "Heure", "Client", "Téléphone", "Sortie", "Catégorie", "Chambre", "Personnes", "Statut", "Montant (MAD)", "Commission (MAD)", "Note", "Reçue le"];
+/* Libellé affiché d'un statut (la valeur en base reste en français). */
+const statusLabel = (s: ReservationStatus, t: Translate) =>
+  s === "en attente" ? t("En attente", "Pending") : s === "confirmée" ? t("Confirmée", "Confirmed") : s === "annulée" ? t("Annulée", "Cancelled") : "No-show";
+
+function exportCsv(rows: HotelReservation[], t: Translate, locale: Locale) {
+  const header = [
+    t("Date", "Date"),
+    t("Heure", "Time"),
+    t("Client", "Guest"),
+    t("Téléphone", "Phone"),
+    t("Sortie", "Outing"),
+    t("Catégorie", "Category"),
+    t("Chambre", "Room"),
+    t("Personnes", "Guests"),
+    t("Statut", "Status"),
+    t("Montant (MAD)", "Amount (MAD)"),
+    t("Commission (MAD)", "Commission (MAD)"),
+    t("Note", "Rating"),
+    t("Reçue le", "Received on"),
+  ];
   const lines = rows.map((r) =>
     [
       r.reservation_date,
@@ -64,10 +84,10 @@ function exportCsv(rows: HotelReservation[]) {
       r.guest_name,
       r.guest_phone,
       r.venue_name,
-      r.category,
+      reservationCategoryLabel(r.category, locale),
       r.qr_label ?? "",
       r.party_size,
-      r.status,
+      statusLabel(r.status, t),
       r.amount_spent ?? "",
       r.commission,
       r.rating ?? "",
@@ -80,7 +100,7 @@ function exportCsv(rows: HotelReservation[]) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `reservations-${todayIso()}.csv`;
+  a.download = `${t("reservations", "reservations")}-${todayIso()}.csv`;
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -104,6 +124,8 @@ function ReservationsContent() {
   const [category, setCategory] = useState<Category>("toutes");
   const [search, setSearch] = useState("");
   const [openId, setOpenId] = useState<string | null>(null);
+  const t = useT();
+  const locale = useLocale();
 
   /* Lien profond ?id=… (depuis l'accueil ou une chambre) : on ouvre la fiche
      — ajustement d'état pendant le rendu — puis on nettoie l'URL pour que
@@ -184,25 +206,28 @@ function ReservationsContent() {
   return (
     <>
       <PageHeader
-        eyebrow="Réservations"
-        title="Les sorties de vos clients"
-        description="Chaque demande passée depuis un QR code, en temps réel. L'établissement confirme directement avec le client ; vous suivez ici l'état, le montant dépensé et votre commission."
+        eyebrow={t("Réservations", "Reservations")}
+        title={t("Les sorties de vos clients", "Your guests' outings")}
+        description={t(
+          "Chaque demande passée depuis un QR code, en temps réel. L'établissement confirme directement avec le client ; vous suivez ici l'état, le montant dépensé et votre commission.",
+          "Every request made from a QR code, in real time. The venue confirms directly with the guest; here you track the status, the amount spent and your commission."
+        )}
         actions={
-          <Button icon={Download} onClick={() => exportCsv(filtered)} disabled={filtered.length === 0}>
-            Exporter ({filtered.length})
+          <Button icon={Download} onClick={() => exportCsv(filtered, t, locale)} disabled={filtered.length === 0}>
+            {t("Exporter", "Export")} ({filtered.length})
           </Button>
         }
       />
 
       <KpiGrid
         items={[
-          { label: "Aujourd'hui", value: formatNumber(todays), hint: `${upcoming} à venir`, icon: Clock, tone: "sky" },
-          { label: "En attente", value: formatNumber(pending), hint: "de confirmation", icon: CalendarDays, tone: "amber" },
-          { label: "Confirmées", value: formatNumber(confirmed), hint: `${reservations.length} au total`, icon: Users, tone: "emerald" },
+          { label: t("Aujourd'hui", "Today"), value: formatNumber(todays, locale), hint: t(`${upcoming} à venir`, `${upcoming} upcoming`), icon: Clock, tone: "sky" },
+          { label: t("En attente", "Pending"), value: formatNumber(pending, locale), hint: t("de confirmation", "confirmation"), icon: CalendarDays, tone: "amber" },
+          { label: t("Confirmées", "Confirmed"), value: formatNumber(confirmed, locale), hint: t(`${reservations.length} au total`, `${reservations.length} in total`), icon: Users, tone: "emerald" },
           {
-            label: "Commissions",
-            value: formatMad(reservations.filter(isLive).reduce((s, r) => s + r.commission, 0), true),
-            hint: "cumulées",
+            label: t("Commissions", "Commissions"),
+            value: formatMad(reservations.filter(isLive).reduce((s, r) => s + r.commission, 0), true, locale),
+            hint: t("cumulées", "all-time"),
             icon: Coins,
             tone: "violet",
           },
@@ -215,21 +240,21 @@ function ReservationsContent() {
             value={status}
             onChange={setStatus}
             options={[
-              { value: "toutes", label: "Toutes", count: counts("toutes") },
-              { value: "en attente", label: "En attente", count: counts("en attente") },
-              { value: "confirmée", label: "Confirmées", count: counts("confirmée") },
-              { value: "annulée", label: "Annulées", count: counts("annulée") },
+              { value: "toutes", label: t("Toutes", "All"), count: counts("toutes") },
+              { value: "en attente", label: t("En attente", "Pending"), count: counts("en attente") },
+              { value: "confirmée", label: t("Confirmées", "Confirmed"), count: counts("confirmée") },
+              { value: "annulée", label: t("Annulées", "Cancelled"), count: counts("annulée") },
               { value: "no-show", label: "No-show", count: counts("no-show") },
             ]}
           />
           <div className="flex flex-wrap items-center gap-2">
-            <SearchInput value={search} onChange={setSearch} placeholder="Client, téléphone, sortie, chambre…" className="w-full sm:w-64" />
+            <SearchInput value={search} onChange={setSearch} placeholder={t("Client, téléphone, sortie, chambre…", "Guest, phone, outing, room…")} className="w-full sm:w-64" />
             <Select<Category>
-              label="Catégorie"
+              label={t("Catégorie", "Category")}
               value={category}
               onChange={setCategory}
               className="w-40"
-              options={[{ value: "toutes", label: "Toutes catégories" }, ...CATEGORIES.map((c) => ({ value: c, label: c }))]}
+              options={[{ value: "toutes", label: t("Toutes catégories", "All categories") }, ...CATEGORIES.map((c) => ({ value: c, label: reservationCategoryLabel(c, locale) }))]}
             />
           </div>
         </div>
@@ -238,11 +263,11 @@ function ReservationsContent() {
           value={period}
           onChange={setPeriod}
           options={[
-            { value: "aujourdhui", label: "Aujourd'hui" },
-            { value: "avenir", label: "À venir" },
-            { value: "7j", label: "± 7 jours" },
-            { value: "30j", label: "± 30 jours" },
-            { value: "tout", label: "Tout l'historique" },
+            { value: "aujourdhui", label: t("Aujourd'hui", "Today") },
+            { value: "avenir", label: t("À venir", "Upcoming") },
+            { value: "7j", label: t("± 7 jours", "± 7 days") },
+            { value: "30j", label: t("± 30 jours", "± 30 days") },
+            { value: "tout", label: t("Tout l'historique", "Full history") },
           ]}
         />
       </div>
@@ -251,20 +276,23 @@ function ReservationsContent() {
         <Panel solid>
           <EmptyState
             icon={QrCode}
-            title={reservations.length === 0 ? "Aucune réservation pour le moment" : "Aucune réservation ne correspond"}
+            title={reservations.length === 0 ? t("Aucune réservation pour le moment", "No reservations yet") : t("Aucune réservation ne correspond", "No reservations match")}
             description={
               reservations.length === 0
-                ? "Dès qu'un client scanne l'un de vos QR codes et réserve une sortie, elle apparaît ici instantanément avec la chambre d'origine."
-                : "Essayez un autre filtre, une autre période ou une autre recherche."
+                ? t(
+                    "Dès qu'un client scanne l'un de vos QR codes et réserve une sortie, elle apparaît ici instantanément avec la chambre d'origine.",
+                    "As soon as a guest scans one of your QR codes and books an outing, it appears here instantly with the room it came from."
+                  )
+                : t("Essayez un autre filtre, une autre période ou une autre recherche.", "Try another filter, period or search.")
             }
             action={
               reservations.length === 0 ? (
                 <LinkButton href="/hotel/chambres" variant="primary" icon={QrCode}>
-                  Mes QR codes
+                  {t("Mes QR codes", "My QR codes")}
                 </LinkButton>
               ) : (
                 <Button variant="ghost" onClick={() => { setStatus("toutes"); setPeriod("tout"); setCategory("toutes"); setSearch(""); }}>
-                  Réinitialiser les filtres
+                  {t("Réinitialiser les filtres", "Reset filters")}
                 </Button>
               )
             }
@@ -276,10 +304,11 @@ function ReservationsContent() {
             <section key={g.date}>
               <div className="mb-2 flex items-baseline gap-3 px-1">
                 <h2 className={cn("font-display text-sm font-bold", g.date === today ? "text-sky-300" : "text-white")}>
-                  {relativeDay(g.date)}
+                  {relativeDay(g.date, undefined, locale)}
                 </h2>
                 <span className="text-xs text-white/40">
-                  {g.date !== today && formatDate(g.date, "long")} · {g.rows.length} {plural(g.rows.length, "réservation")}
+                  {g.date !== today && formatDate(g.date, "long", locale)} · {g.rows.length}{" "}
+                  {t(plural(g.rows.length, "réservation"), plural(g.rows.length, "reservation", undefined, "en"))}
                 </span>
               </div>
               <Panel padded={false}>
@@ -301,18 +330,18 @@ function ReservationsContent() {
                             <span className="font-medium text-white/45"> · {r.venue_name}</span>
                           </span>
                           <span className="block truncate text-xs text-white/50">
-                            {r.category} · {r.party_size} pers.
+                            {reservationCategoryLabel(r.category, locale)} · {r.party_size} {t("pers.", r.party_size === 1 ? "guest" : "guests")}
                             {r.qr_label ? ` · ${r.qr_label}` : ""}
                             {r.notes ? " · note" : ""}
                           </span>
                         </span>
                         {r.rating !== null && <RatingStars value={r.rating} size={11} className="hidden md:inline-flex" />}
                         {r.commission > 0 && (
-                          <span className="num hidden shrink-0 text-xs font-bold text-amber-300 sm:inline">+{formatMad(r.commission)}</span>
+                          <span className="num hidden shrink-0 text-xs font-bold text-amber-300 sm:inline">+{formatMad(r.commission, false, locale)}</span>
                         )}
                         {r.arrived_at && (
                           <span className="num hidden shrink-0 items-center gap-1 rounded-md bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-bold text-emerald-300 sm:inline-flex">
-                            Arrivé {new Date(r.arrived_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+                            {t("Arrivé", "Arrived")} {new Date(r.arrived_at).toLocaleTimeString(intlLocale(locale), { hour: "2-digit", minute: "2-digit" })}
                           </span>
                         )}
                         <StatusPill status={r.status} />
@@ -327,9 +356,18 @@ function ReservationsContent() {
       )}
 
       <InfoNote icon={Info}>
-        La confirmation se fait directement entre le client et l&apos;établissement. Le statut et le montant dépensé sont
-        renseignés par l&apos;établissement (ou sa caisse) ; votre commission (10 % du montant dépensé par défaut) se calcule
-        automatiquement dès que le montant est connu.
+        {t(
+          <>
+            La confirmation se fait directement entre le client et l&apos;établissement. Le statut et le montant dépensé sont
+            renseignés par l&apos;établissement (ou sa caisse) ; votre commission (10 % du montant dépensé par défaut) se calcule
+            automatiquement dès que le montant est connu.
+          </>,
+          <>
+            Confirmation happens directly between the guest and the venue. The status and amount spent are entered by the
+            venue (or its till); your commission (10% of the amount spent by default) is calculated automatically as soon
+            as the amount is known.
+          </>
+        )}
       </InfoNote>
 
       <ReservationDrawer reservation={open} onClose={() => setOpenId(null)} />
@@ -346,14 +384,16 @@ export function ReservationDrawer({
   reservation: HotelReservation | null;
   onClose: () => void;
 }) {
+  const t = useT();
+  const locale = useLocale();
   if (!r) return null;
   const rows: { label: string; value: React.ReactNode }[] = [
-    { label: "Date", value: `${relativeDay(r.reservation_date)}${r.reservation_time ? ` à ${r.reservation_time}` : ""}` },
-    { label: "Personnes", value: `${r.party_size}` },
-    { label: "Catégorie", value: r.category },
-    { label: "Emplacement", value: r.qr_label ?? "QR supprimé" },
-    { label: "Reçue le", value: formatTimestamp(r.created_at) },
-    ...(r.arrived_at ? [{ label: "Arrivée", value: formatTimestamp(r.arrived_at) }] : []),
+    { label: t("Date", "Date"), value: `${relativeDay(r.reservation_date, undefined, locale)}${r.reservation_time ? t(` à ${r.reservation_time}`, ` at ${r.reservation_time}`) : ""}` },
+    { label: t("Personnes", "Guests"), value: `${r.party_size}` },
+    { label: t("Catégorie", "Category"), value: reservationCategoryLabel(r.category, locale) },
+    { label: t("Emplacement", "Location"), value: r.qr_label ?? t("QR supprimé", "Deleted QR") },
+    { label: t("Reçue le", "Received"), value: formatTimestamp(r.created_at, locale) },
+    ...(r.arrived_at ? [{ label: t("Arrivée", "Arrival"), value: formatTimestamp(r.arrived_at, locale) }] : []),
   ];
   return (
     <Drawer
@@ -367,11 +407,11 @@ export function ReservationDrawer({
             WhatsApp
           </LinkButton>
           <LinkButton href={`tel:${r.guest_phone.replace(/\s/g, "")}`} external icon={Phone} size="sm">
-            Appeler
+            {t("Appeler", "Call")}
           </LinkButton>
           {r.qr_code_id && (
             <Link href={`/hotel/chambres/${r.qr_code_id}`} className="ml-auto self-center text-xs font-bold text-sky-300 hover:text-sky-200">
-              Voir l&apos;emplacement
+              {t("Voir l'emplacement", "View location")}
             </Link>
           )}
         </>
@@ -393,41 +433,47 @@ export function ReservationDrawer({
 
       {r.notes && (
         <div className="mt-4">
-          <p className="mb-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-white/40">Précisions du client</p>
+          <p className="mb-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-white/40">{t("Précisions du client", "Guest's notes")}</p>
           <p className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm leading-relaxed text-white/80">“{r.notes}”</p>
         </div>
       )}
 
       <div className="mt-4 rounded-xl border border-amber-400/15 bg-amber-500/[0.06] px-4 py-3">
-        <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.14em] text-amber-300">Commission</p>
+        <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.14em] text-amber-300">{t("Commission", "Commission")}</p>
         {r.amount_spent !== null ? (
           <div className="flex items-end justify-between gap-3">
             <div>
-              <p className="num text-2xl font-black text-white">{formatMad(r.commission)}</p>
+              <p className="num text-2xl font-black text-white">{formatMad(r.commission, false, locale)}</p>
               <p className="num text-xs text-white/50">
-                {Math.round(r.commission_rate * 100)} % de {formatMad(r.amount_spent)} dépensés
-                {r.amount_source === "pos" ? " · montant remonté par la caisse" : ""}
+                {t(
+                  `${Math.round(r.commission_rate * 100)} % de ${formatMad(r.amount_spent)} dépensés`,
+                  `${Math.round(r.commission_rate * 100)}% of ${formatMad(r.amount_spent, false, "en")} spent`
+                )}
+                {r.amount_source === "pos" ? t(" · montant remonté par la caisse", " · amount reported by the till") : ""}
               </p>
             </div>
-            <Tag>{isLive(r) ? "acquise" : "annulée"}</Tag>
+            <Tag>{isLive(r) ? t("acquise", "earned") : t("annulée", "cancelled")}</Tag>
           </div>
         ) : (
           <p className="text-xs leading-relaxed text-white/55">
             {isLive(r)
-              ? "Le montant dépensé n'est pas encore renseigné : la commission se calculera automatiquement après la sortie."
-              : "Aucune commission : réservation annulée ou client absent."}
+              ? t(
+                  "Le montant dépensé n'est pas encore renseigné : la commission se calculera automatiquement après la sortie.",
+                  "The amount spent hasn't been entered yet: the commission will be calculated automatically after the outing."
+                )
+              : t("Aucune commission : réservation annulée ou client absent.", "No commission: reservation cancelled or guest didn't show.")}
           </p>
         )}
       </div>
 
       {r.rating !== null && (
         <div className="mt-4">
-          <p className="mb-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-white/40">Avis du client</p>
+          <p className="mb-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-white/40">{t("Avis du client", "Guest review")}</p>
           <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
             <div className="flex items-center gap-2">
               <RatingStars value={r.rating} size={14} />
               <span className="num text-sm font-bold text-white">{r.rating}/5</span>
-              {r.rated_at && <span className="text-xs text-white/40">· {formatDate(r.rated_at.slice(0, 10))}</span>}
+              {r.rated_at && <span className="text-xs text-white/40">· {formatDate(r.rated_at.slice(0, 10), "medium", locale)}</span>}
             </div>
             {r.rating_comment && <p className="mt-2 text-sm leading-relaxed text-white/75">“{r.rating_comment}”</p>}
           </div>
@@ -435,7 +481,7 @@ export function ReservationDrawer({
       )}
       {r.rating === null && isLive(r) && r.reservation_date < todayIso() && (
         <p className="mt-4 flex items-center gap-2 text-xs text-white/40">
-          <Star size={12} strokeWidth={1.5} /> Pas encore d&apos;avis pour cette sortie.
+          <Star size={12} strokeWidth={1.5} /> {t("Pas encore d'avis pour cette sortie.", "No review for this outing yet.")}
         </p>
       )}
     </Drawer>

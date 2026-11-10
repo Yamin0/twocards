@@ -54,19 +54,30 @@ import {
 } from "@/components/hotel/ui";
 import { PageSkeleton } from "@/components/hotel/skeleton";
 import { cn } from "@/lib/utils";
+import type { Locale, Translate } from "@/lib/i18n";
+import { useLocale, useT } from "@/lib/i18n/client";
 
 type Filter = "tous" | "chambres" | "espaces" | "actifs" | "inactifs";
 type Sort = "recent" | "label" | "scans" | "resas" | "conversion";
 type View = "grille" | "liste";
 type CreateMode = "un" | "plusieurs" | "serie";
 
-const SUGGESTED = ["Lobby", "Réception", "Spa", "Piscine", "Rooftop", "Restaurant", "Bar", "Conciergerie"];
+const getSuggested = (t: Translate) => [
+  "Lobby",
+  t("Réception", "Reception"),
+  "Spa",
+  t("Piscine", "Pool"),
+  "Rooftop",
+  "Restaurant",
+  "Bar",
+  t("Conciergerie", "Concierge"),
+];
 
-const sortRows = (rows: QrPerformance[], sort: Sort) =>
+const sortRows = (rows: QrPerformance[], sort: Sort, locale: Locale = "fr") =>
   [...rows].sort((a, b) => {
     switch (sort) {
       case "label":
-        return a.label.localeCompare(b.label, "fr", { numeric: true });
+        return a.label.localeCompare(b.label, locale, { numeric: true });
       case "scans":
         return b.scans - a.scans;
       case "resas":
@@ -103,6 +114,8 @@ export default function HotelChambresPage() {
 function ChambresContent() {
   const router = useRouter();
   const params = useSearchParams();
+  const t = useT();
+  const locale = useLocale();
   const { isLoading: authLoading, venueName, city } = useAuthUser();
   const { qrCodes, reservations, profile, isLoading, create, createMany, update, updateMany, remove } =
     useHotelSpace();
@@ -161,9 +174,10 @@ function ChambresContent() {
             return true;
         }
       }),
-      sort
+      sort,
+      locale
     );
-  }, [rows, search, filter, sort]);
+  }, [rows, search, filter, sort, locale]);
 
   if (authLoading || isLoading) return <PageSkeleton kpis={4} table />;
 
@@ -201,14 +215,22 @@ function ChambresContent() {
 
   const toggleActive = async (q: HotelQrCode) => {
     const ok = await update(q.id, { active: !q.active });
-    showToast(ok ? `« ${q.label} » ${q.active ? "désactivé" : "activé"}` : "Échec de la mise à jour");
+    showToast(
+      ok
+        ? t(`« ${q.label} » ${q.active ? "désactivé" : "activé"}`, `“${q.label}” ${q.active ? "deactivated" : "activated"}`)
+        : t("Échec de la mise à jour", "Update failed")
+    );
   };
 
   const bulkActive = async (active: boolean) => {
     setBusy(true);
     const ok = await updateMany([...selected], { active });
     setBusy(false);
-    showToast(ok ? `${selected.size} QR ${active ? "activés" : "désactivés"}` : "Échec de la mise à jour");
+    showToast(
+      ok
+        ? t(`${selected.size} QR ${active ? "activés" : "désactivés"}`, `${selected.size} QR ${active ? "activated" : "deactivated"}`)
+        : t("Échec de la mise à jour", "Update failed")
+    );
     if (ok) setSelected(new Set());
   };
 
@@ -220,18 +242,22 @@ function ChambresContent() {
     setToDelete(null);
     if (ok) {
       setSelected(new Set());
-      showToast(toDelete.length > 1 ? `${toDelete.length} QR supprimés` : "QR code supprimé");
+      showToast(
+        toDelete.length > 1
+          ? t(`${toDelete.length} QR supprimés`, `${toDelete.length} QR codes deleted`)
+          : t("QR code supprimé", "QR code deleted")
+      );
     } else {
-      showToast("Échec de la suppression");
+      showToast(t("Échec de la suppression", "Delete failed"));
     }
   };
 
   const copyLink = async (q: HotelQrCode) => {
     try {
       await navigator.clipboard.writeText(guestUrl(q.code, hotelName, hotelCity));
-      showToast("Lien copié");
+      showToast(t("Lien copié", "Link copied"));
     } catch {
-      showToast("Impossible de copier le lien");
+      showToast(t("Impossible de copier le lien", "Couldn't copy the link"));
     }
   };
 
@@ -241,16 +267,20 @@ function ChambresContent() {
   return (
     <>
       <PageHeader
-        eyebrow="Chambres & QR codes"
-        title="Vos emplacements"
-        description="Un QR code par chambre, suite ou espace commun. Chaque scan ouvre le menu de sorties que vous avez choisi, et chaque réservation est rattachée à son emplacement."
+        eyebrow={t("Chambres & QR codes", "Rooms & QR codes")}
+        title={t("Vos emplacements", "Your locations")}
+        description={t(
+          "Un QR code par chambre, suite ou espace commun. Chaque scan ouvre le menu de sorties que vous avez choisi, et chaque réservation est rattachée à son emplacement.",
+          "One QR code per room, suite or common area. Each scan opens the outings menu you've chosen, and every reservation is linked to its location."
+        )}
         actions={
           <>
             <LinkButton href={printHref} icon={Printer} variant="secondary">
-              Imprimer{selected.size > 0 ? ` (${selected.size})` : ""}
+              {t("Imprimer", "Print")}
+              {selected.size > 0 ? ` (${selected.size})` : ""}
             </LinkButton>
             <Button variant="primary" icon={Plus} onClick={() => setCreateOpen(true)}>
-              Nouveau QR code
+              {t("Nouveau QR code", "New QR code")}
             </Button>
           </>
         }
@@ -258,10 +288,43 @@ function ChambresContent() {
 
       <KpiGrid
         items={[
-          { label: "QR codes", value: formatNumber(qrCodes.length), hint: `${activeCount} ${plural(activeCount, "actif")}`, icon: QrCode, tone: "sky" },
-          { label: "Chambres", value: formatNumber(rooms), hint: `${qrCodes.length - rooms} ${plural(qrCodes.length - rooms, "espace commun", "espaces communs")}`, icon: BedDouble, tone: "violet" },
-          { label: "Scans", value: formatNumber(totalScans), hint: "cumulés, tous emplacements", icon: ScanLine, tone: "emerald" },
-          { label: "Réservations", value: formatNumber(totalResas), hint: totalScans > 0 ? `${formatPercent(totalResas / totalScans, 1)} de conversion` : "en attente de scans", icon: Check, tone: "amber" },
+          {
+            label: t("QR codes", "QR codes"),
+            value: formatNumber(qrCodes.length, locale),
+            hint: t(`${activeCount} ${plural(activeCount, "actif")}`, `${activeCount} active`),
+            icon: QrCode,
+            tone: "sky",
+          },
+          {
+            label: t("Chambres", "Rooms"),
+            value: formatNumber(rooms, locale),
+            hint: t(
+              `${qrCodes.length - rooms} ${plural(qrCodes.length - rooms, "espace commun", "espaces communs")}`,
+              `${qrCodes.length - rooms} common ${plural(qrCodes.length - rooms, "area", undefined, "en")}`
+            ),
+            icon: BedDouble,
+            tone: "violet",
+          },
+          {
+            label: t("Scans", "Scans"),
+            value: formatNumber(totalScans, locale),
+            hint: t("cumulés, tous emplacements", "total, all locations"),
+            icon: ScanLine,
+            tone: "emerald",
+          },
+          {
+            label: t("Réservations", "Reservations"),
+            value: formatNumber(totalResas, locale),
+            hint:
+              totalScans > 0
+                ? t(
+                    `${formatPercent(totalResas / totalScans, 1, locale)} de conversion`,
+                    `${formatPercent(totalResas / totalScans, 1, locale)} conversion`
+                  )
+                : t("en attente de scans", "awaiting scans"),
+            icon: Check,
+            tone: "amber",
+          },
         ]}
       />
 
@@ -269,11 +332,14 @@ function ChambresContent() {
         <Panel solid>
           <EmptyState
             icon={QrCode}
-            title="Aucun QR code pour le moment"
-            description="Créez un QR code par chambre ou par zone de l'hôtel. Une fois imprimé, chaque scan ouvre le menu de sorties que vous avez choisi, et chaque réservation vous rapporte une commission."
+            title={t("Aucun QR code pour le moment", "No QR codes yet")}
+            description={t(
+              "Créez un QR code par chambre ou par zone de l'hôtel. Une fois imprimé, chaque scan ouvre le menu de sorties que vous avez choisi, et chaque réservation vous rapporte une commission.",
+              "Create one QR code per room or area of the hotel. Once printed, each scan opens the outings menu you've chosen, and every reservation earns you a commission."
+            )}
             action={
               <Button variant="primary" icon={Plus} onClick={() => setCreateOpen(true)}>
-                Créer mon premier QR code
+                {t("Créer mon premier QR code", "Create my first QR code")}
               </Button>
             }
           />
@@ -286,38 +352,38 @@ function ChambresContent() {
               value={filter}
               onChange={setFilter}
               options={[
-                { value: "tous", label: "Tous", count: counts.tous },
-                { value: "chambres", label: "Chambres", count: counts.chambres },
-                { value: "espaces", label: "Espaces communs", count: counts.espaces },
-                { value: "actifs", label: "Actifs", count: counts.actifs },
-                { value: "inactifs", label: "Inactifs", count: counts.inactifs },
+                { value: "tous", label: t("Tous", "All"), count: counts.tous },
+                { value: "chambres", label: t("Chambres", "Rooms"), count: counts.chambres },
+                { value: "espaces", label: t("Espaces communs", "Common areas"), count: counts.espaces },
+                { value: "actifs", label: t("Actifs", "Active"), count: counts.actifs },
+                { value: "inactifs", label: t("Inactifs", "Inactive"), count: counts.inactifs },
               ]}
             />
             <div className="flex flex-wrap items-center gap-2">
-              <SearchInput value={search} onChange={setSearch} placeholder="Chambre, code…" className="w-full sm:w-56" />
+              <SearchInput value={search} onChange={setSearch} placeholder={t("Chambre, code…", "Room, code…")} className="w-full sm:w-56" />
               <Select<Sort>
-                label="Trier"
+                label={t("Trier", "Sort")}
                 value={sort}
                 onChange={setSort}
                 className="w-44"
                 options={[
-                  { value: "recent", label: "Plus récents" },
-                  { value: "label", label: "Nom (A → Z)" },
-                  { value: "scans", label: "Plus scannés" },
-                  { value: "resas", label: "Plus de réservations" },
-                  { value: "conversion", label: "Meilleure conversion" },
+                  { value: "recent", label: t("Plus récents", "Newest") },
+                  { value: "label", label: t("Nom (A → Z)", "Name (A → Z)") },
+                  { value: "scans", label: t("Plus scannés", "Most scanned") },
+                  { value: "resas", label: t("Plus de réservations", "Most reservations") },
+                  { value: "conversion", label: t("Meilleure conversion", "Best conversion") },
                 ]}
               />
               <div className="inline-flex rounded-xl border border-white/10 bg-black/30 p-1">
                 <IconButton
                   icon={LayoutGrid}
-                  label="Vue grille"
+                  label={t("Vue grille", "Grid view")}
                   onClick={() => setView2("grille")}
                   className={cn("h-8 w-8", view === "grille" && "bg-white text-black hover:bg-white hover:text-black")}
                 />
                 <IconButton
                   icon={List}
-                  label="Vue liste"
+                  label={t("Vue liste", "List view")}
                   onClick={() => setView2("liste")}
                   className={cn("h-8 w-8", view === "liste" && "bg-white text-black hover:bg-white hover:text-black")}
                 />
@@ -337,24 +403,26 @@ function ChambresContent() {
               ) : (
                 <Square size={15} strokeWidth={1.75} />
               )}
-              {selected.size > 0 ? `${selected.size} sélectionné${selected.size > 1 ? "s" : ""}` : "Tout sélectionner"}
+              {selected.size > 0
+                ? t(`${selected.size} sélectionné${selected.size > 1 ? "s" : ""}`, `${selected.size} selected`)
+                : t("Tout sélectionner", "Select all")}
             </button>
             {selected.size > 0 && (
               <>
                 <Button size="sm" icon={Power} onClick={() => bulkActive(true)} loading={busy}>
-                  Activer
+                  {t("Activer", "Activate")}
                 </Button>
                 <Button size="sm" icon={Power} onClick={() => bulkActive(false)} loading={busy}>
-                  Désactiver
+                  {t("Désactiver", "Deactivate")}
                 </Button>
                 <LinkButton size="sm" icon={Printer} href={printHref}>
-                  Imprimer
+                  {t("Imprimer", "Print")}
                 </LinkButton>
                 <Button size="sm" variant="danger" icon={Trash2} onClick={() => setToDelete([...selected])}>
-                  Supprimer
+                  {t("Supprimer", "Delete")}
                 </Button>
                 <Button size="sm" variant="ghost" icon={X} onClick={() => setSelected(new Set())}>
-                  Annuler
+                  {t("Annuler", "Cancel")}
                 </Button>
               </>
             )}
@@ -364,12 +432,12 @@ function ChambresContent() {
             <Panel>
               <EmptyState
                 icon={QrCode}
-                title="Aucun emplacement ne correspond"
-                description="Essayez un autre filtre ou une autre recherche."
+                title={t("Aucun emplacement ne correspond", "No matching locations")}
+                description={t("Essayez un autre filtre ou une autre recherche.", "Try another filter or search.")}
                 compact
                 action={
                   <Button variant="ghost" onClick={() => { setSearch(""); setFilter("tous"); }}>
-                    Réinitialiser
+                    {t("Réinitialiser", "Reset")}
                   </Button>
                 }
               />
@@ -387,7 +455,7 @@ function ChambresContent() {
                   onDelete={() => setToDelete([q.id])}
                   onCopy={() => copyLink(q)}
                   onDownload={() => {
-                    if (downloadSvg(`qr-${q.id}`, q.label)) showToast("QR code téléchargé");
+                    if (downloadSvg(`qr-${q.id}`, q.label)) showToast(t("QR code téléchargé", "QR code downloaded"));
                   }}
                 />
               ))}
@@ -398,13 +466,13 @@ function ChambresContent() {
                 <thead>
                   <tr>
                     <Th className="w-10" />
-                    <Th>Emplacement</Th>
-                    <Th>Statut</Th>
-                    <Th align="right">Scans</Th>
-                    <Th align="right">Réservations</Th>
-                    <Th align="right">Conversion</Th>
-                    <Th align="right">Commissions</Th>
-                    <Th>Dernière</Th>
+                    <Th>{t("Emplacement", "Location")}</Th>
+                    <Th>{t("Statut", "Status")}</Th>
+                    <Th align="right">{t("Scans", "Scans")}</Th>
+                    <Th align="right">{t("Réservations", "Reservations")}</Th>
+                    <Th align="right">{t("Conversion", "Conversion")}</Th>
+                    <Th align="right">{t("Commissions", "Commissions")}</Th>
+                    <Th>{t("Dernière", "Latest")}</Th>
                     <Th align="right" />
                   </tr>
                 </thead>
@@ -412,7 +480,7 @@ function ChambresContent() {
                   {filtered.map((q) => (
                     <Tr key={q.id}>
                       <Td>
-                        <button type="button" onClick={() => toggleSelect(q.id)} aria-label="Sélectionner" className="text-white/50 hover:text-white">
+                        <button type="button" onClick={() => toggleSelect(q.id)} aria-label={t("Sélectionner", "Select")} className="text-white/50 hover:text-white">
                           {selected.has(q.id) ? <CheckSquare size={16} strokeWidth={1.75} /> : <Square size={16} strokeWidth={1.75} />}
                         </button>
                       </Td>
@@ -423,16 +491,16 @@ function ChambresContent() {
                         <p className="font-mono-satoshi text-[11px] text-white/40">{q.code}</p>
                       </Td>
                       <Td><StatusPill status={q.active ? "actif" : "inactif"} /></Td>
-                      <Td align="right" className="num">{formatNumber(q.scans)}</Td>
-                      <Td align="right" className="num">{formatNumber(q.liveReservations)}</Td>
-                      <Td align="right" className="num" muted>{q.scans > 0 ? formatPercent(q.conversion, 1) : "—"}</Td>
-                      <Td align="right" className="num font-bold text-amber-300">{q.commission > 0 ? formatMad(q.commission) : "—"}</Td>
-                      <Td muted className="whitespace-nowrap text-xs">{q.lastReservation ? timeAgo(q.lastReservation) : "—"}</Td>
+                      <Td align="right" className="num">{formatNumber(q.scans, locale)}</Td>
+                      <Td align="right" className="num">{formatNumber(q.liveReservations, locale)}</Td>
+                      <Td align="right" className="num" muted>{q.scans > 0 ? formatPercent(q.conversion, 1, locale) : "—"}</Td>
+                      <Td align="right" className="num font-bold text-amber-300">{q.commission > 0 ? formatMad(q.commission, false, locale) : "—"}</Td>
+                      <Td muted className="whitespace-nowrap text-xs">{q.lastReservation ? timeAgo(q.lastReservation, undefined, locale) : "—"}</Td>
                       <Td align="right">
                         <div className="inline-flex items-center gap-0.5">
-                          <IconButton icon={Copy} label="Copier le lien" onClick={() => copyLink(q)} className="h-8 w-8" size={14} />
-                          <IconButton icon={Power} label={q.active ? "Désactiver" : "Activer"} onClick={() => toggleActive(q)} className="h-8 w-8" size={14} />
-                          <Link href={`/hotel/chambres/${q.id}`} className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-white/55 hover:bg-white/10 hover:text-white" aria-label="Ouvrir">
+                          <IconButton icon={Copy} label={t("Copier le lien", "Copy link")} onClick={() => copyLink(q)} className="h-8 w-8" size={14} />
+                          <IconButton icon={Power} label={q.active ? t("Désactiver", "Deactivate") : t("Activer", "Activate")} onClick={() => toggleActive(q)} className="h-8 w-8" size={14} />
+                          <Link href={`/hotel/chambres/${q.id}`} className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-white/55 hover:bg-white/10 hover:text-white" aria-label={t("Ouvrir", "Open")}>
                             <MoreHorizontal size={14} strokeWidth={1.75} />
                           </Link>
                         </div>
@@ -461,10 +529,14 @@ function ChambresContent() {
         onCreate={async (labels) => {
           const created = labels.length === 1 ? await create(labels[0]).then((r) => (r ? [r] : null)) : await createMany(labels);
           if (!created) {
-            showToast("Échec de la création");
+            showToast(t("Échec de la création", "Creation failed"));
             return false;
           }
-          showToast(created.length === 1 ? `« ${created[0].label} » créé` : `${created.length} QR codes créés`);
+          showToast(
+            created.length === 1
+              ? t(`« ${created[0].label} » créé`, `“${created[0].label}” created`)
+              : t(`${created.length} QR codes créés`, `${created.length} QR codes created`)
+          );
           return true;
         }}
       />
@@ -475,9 +547,16 @@ function ChambresContent() {
         onConfirm={confirmDelete}
         loading={busy}
         danger
-        confirmLabel="Supprimer définitivement"
-        title={toDelete && toDelete.length > 1 ? `Supprimer ${toDelete.length} QR codes ?` : "Supprimer ce QR code ?"}
-        description="Le QR imprimé ne fonctionnera plus et l'historique de ses réservations sera supprimé. Pour une pause temporaire, préférez la désactivation."
+        confirmLabel={t("Supprimer définitivement", "Delete permanently")}
+        title={
+          toDelete && toDelete.length > 1
+            ? t(`Supprimer ${toDelete.length} QR codes ?`, `Delete ${toDelete.length} QR codes?`)
+            : t("Supprimer ce QR code ?", "Delete this QR code?")
+        }
+        description={t(
+          "Le QR imprimé ne fonctionnera plus et l'historique de ses réservations sera supprimé. Pour une pause temporaire, préférez la désactivation.",
+          "The printed QR will stop working and its reservation history will be deleted. For a temporary pause, deactivate it instead."
+        )}
       />
 
       <Toast message={toast} />
@@ -506,6 +585,8 @@ function QrCard({
   onCopy: () => void;
   onDownload: () => void;
 }) {
+  const t = useT();
+  const locale = useLocale();
   const room = isRoomLabel(q.label);
   return (
     <div
@@ -519,7 +600,7 @@ function QrCard({
         <button
           type="button"
           onClick={onSelect}
-          aria-label={selected ? "Désélectionner" : "Sélectionner"}
+          aria-label={selected ? t("Désélectionner", "Deselect") : t("Sélectionner", "Select")}
           className={cn(
             "mt-0.5 shrink-0 text-white/40 transition-opacity hover:text-white",
             selected ? "opacity-100 text-sky-300" : "opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
@@ -536,7 +617,7 @@ function QrCard({
             )}
             <span className="truncate text-sm font-bold text-white group-hover:underline">{q.label}</span>
           </Link>
-          <p className="font-mono-satoshi mt-0.5 text-[11px] text-white/40">Code {q.code}</p>
+          <p className="font-mono-satoshi mt-0.5 text-[11px] text-white/40">{t("Code", "Code")} {q.code}</p>
         </div>
         <StatusPill status={q.active ? "actif" : "inactif"} />
       </div>
@@ -545,16 +626,16 @@ function QrCard({
         href={`/hotel/chambres/${q.id}`}
         id={`qr-${q.id}`}
         className="flex items-center justify-center rounded-xl bg-white p-4"
-        aria-label={`Ouvrir ${q.label}`}
+        aria-label={t(`Ouvrir ${q.label}`, `Open ${q.label}`)}
       >
         <QRCode value={link} size={132} />
       </Link>
 
       <dl className="num mt-3 grid grid-cols-3 gap-2 text-center">
         {[
-          { l: "Scans", v: formatNumber(q.scans) },
-          { l: "Résas", v: formatNumber(q.liveReservations) },
-          { l: "Conv.", v: q.scans > 0 ? formatPercent(q.conversion, 0) : "—" },
+          { l: t("Scans", "Scans"), v: formatNumber(q.scans, locale) },
+          { l: t("Résas", "Bookings"), v: formatNumber(q.liveReservations, locale) },
+          { l: t("Conv.", "Conv."), v: q.scans > 0 ? formatPercent(q.conversion, 0, locale) : "—" },
         ].map((s) => (
           <div key={s.l} className="rounded-lg bg-white/[0.05] py-1.5">
             <dt className="text-[10px] font-medium uppercase tracking-wider text-white/40">{s.l}</dt>
@@ -565,22 +646,22 @@ function QrCard({
 
       <div className="mt-3 flex items-center gap-1">
         <LinkButton href={`/hotel/chambres/${q.id}`} size="sm" variant="secondary" className="flex-1">
-          Menu &amp; suivi
+          {t(<>Menu &amp; suivi</>, <>Menu &amp; tracking</>)}
         </LinkButton>
-        <IconButton icon={Copy} label="Copier le lien" onClick={onCopy} className="h-8 w-8" size={14} />
-        <IconButton icon={Download} label="Télécharger le SVG" onClick={onDownload} className="h-8 w-8" size={14} />
+        <IconButton icon={Copy} label={t("Copier le lien", "Copy link")} onClick={onCopy} className="h-8 w-8" size={14} />
+        <IconButton icon={Download} label={t("Télécharger le SVG", "Download SVG")} onClick={onDownload} className="h-8 w-8" size={14} />
         <a
           href={link}
           target="_blank"
           rel="noopener noreferrer"
-          aria-label="Ouvrir le menu client"
-          title="Ouvrir le menu client"
+          aria-label={t("Ouvrir le menu client", "Open the guest menu")}
+          title={t("Ouvrir le menu client", "Open the guest menu")}
           className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-white/55 hover:bg-white/10 hover:text-white"
         >
           <ExternalLink size={14} strokeWidth={1.75} />
         </a>
-        <IconButton icon={Power} label={q.active ? "Désactiver" : "Activer"} onClick={onToggle} className="h-8 w-8" size={14} />
-        <IconButton icon={Trash2} label="Supprimer" onClick={onDelete} tone="danger" className="h-8 w-8" size={14} />
+        <IconButton icon={Power} label={q.active ? t("Désactiver", "Deactivate") : t("Activer", "Activate")} onClick={onToggle} className="h-8 w-8" size={14} />
+        <IconButton icon={Trash2} label={t("Supprimer", "Delete")} onClick={onDelete} tone="danger" className="h-8 w-8" size={14} />
       </div>
     </div>
   );
@@ -599,10 +680,11 @@ function CreateDialog({
   existing: string[];
   onCreate: (labels: string[]) => Promise<boolean>;
 }) {
+  const t = useT();
   const [mode, setMode] = useState<CreateMode>("un");
   const [label, setLabel] = useState("");
   const [bulk, setBulk] = useState("");
-  const [prefix, setPrefix] = useState("Chambre");
+  const [prefix, setPrefix] = useState(() => t("Chambre", "Room"));
   const [from, setFrom] = useState("101");
   const [to, setTo] = useState("110");
   const [saving, setSaving] = useState(false);
@@ -637,15 +719,20 @@ function CreateDialog({
     <Modal
       open={open}
       onClose={onClose}
-      title="Nouveau QR code"
-      description="Un QR par chambre ou par espace. Le menu proposé se règle ensuite, emplacement par emplacement."
+      title={t("Nouveau QR code", "New QR code")}
+      description={t(
+        "Un QR par chambre ou par espace. Le menu proposé se règle ensuite, emplacement par emplacement.",
+        "One QR per room or area. You can then set the menu offered, location by location."
+      )}
       footer={
         <>
           <Button variant="ghost" onClick={onClose}>
-            Annuler
+            {t("Annuler", "Cancel")}
           </Button>
           <Button variant="primary" icon={Plus} onClick={submit} loading={saving} disabled={fresh.length === 0}>
-            {fresh.length > 1 ? `Créer ${fresh.length} QR codes` : "Créer le QR code"}
+            {fresh.length > 1
+              ? t(`Créer ${fresh.length} QR codes`, `Create ${fresh.length} QR codes`)
+              : t("Créer le QR code", "Create QR code")}
           </Button>
         </>
       }
@@ -655,30 +742,30 @@ function CreateDialog({
         onChange={setMode}
         className="mb-5"
         options={[
-          { value: "un", label: "Un seul" },
-          { value: "plusieurs", label: "Plusieurs" },
-          { value: "serie", label: "Série numérotée" },
+          { value: "un", label: t("Un seul", "Single") },
+          { value: "plusieurs", label: t("Plusieurs", "Several") },
+          { value: "serie", label: t("Série numérotée", "Numbered series") },
         ]}
       />
 
       {mode === "un" && (
         <div className="space-y-4">
-          <Field label="Nom de l'emplacement" htmlFor="qr-label">
+          <Field label={t("Nom de l'emplacement", "Location name")} htmlFor="qr-label">
             <input
               id="qr-label"
               value={label}
               onChange={(e) => setLabel(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && submit()}
-              placeholder="Chambre 204, Suite Atlas, Lobby…"
+              placeholder={t("Chambre 204, Suite Atlas, Lobby…", "Room 204, Atlas Suite, Lobby…")}
               autoFocus
               maxLength={60}
               className={inputClass}
             />
           </Field>
           <div>
-            <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.14em] text-white/40">Suggestions</p>
+            <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.14em] text-white/40">{t("Suggestions", "Suggestions")}</p>
             <div className="flex flex-wrap gap-2">
-              {SUGGESTED.filter((s) => !existingSet.has(s.toLowerCase())).map((s) => (
+              {getSuggested(t).filter((s) => !existingSet.has(s.toLowerCase())).map((s) => (
                 <button
                   key={s}
                   type="button"
@@ -694,12 +781,19 @@ function CreateDialog({
       )}
 
       {mode === "plusieurs" && (
-        <Field label="Un emplacement par ligne" hint="Vous pouvez aussi séparer par des virgules. Les doublons sont ignorés." htmlFor="qr-bulk">
+        <Field
+          label={t("Un emplacement par ligne", "One location per line")}
+          hint={t(
+            "Vous pouvez aussi séparer par des virgules. Les doublons sont ignorés.",
+            "You can also separate them with commas. Duplicates are ignored."
+          )}
+          htmlFor="qr-bulk"
+        >
           <textarea
             id="qr-bulk"
             value={bulk}
             onChange={(e) => setBulk(e.target.value)}
-            placeholder={"Lobby\nSpa\nPiscine\nChambre 101"}
+            placeholder={t("Lobby\nSpa\nPiscine\nChambre 101", "Lobby\nSpa\nPool\nRoom 101")}
             rows={6}
             autoFocus
             className={cn(inputClass, "resize-none font-medium")}
@@ -709,26 +803,36 @@ function CreateDialog({
 
       {mode === "serie" && (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <Field label="Préfixe" className="col-span-2" htmlFor="qr-prefix">
+          <Field label={t("Préfixe", "Prefix")} className="col-span-2" htmlFor="qr-prefix">
             <input id="qr-prefix" value={prefix} onChange={(e) => setPrefix(e.target.value)} className={inputClass} maxLength={40} />
           </Field>
-          <Field label="De" htmlFor="qr-from">
+          <Field label={t("De", "From")} htmlFor="qr-from">
             <input id="qr-from" value={from} onChange={(e) => setFrom(e.target.value.replace(/\D/g, ""))} inputMode="numeric" className={cn(inputClass, "num")} />
           </Field>
-          <Field label="À" htmlFor="qr-to">
+          <Field label={t("À", "To")} htmlFor="qr-to">
             <input id="qr-to" value={to} onChange={(e) => setTo(e.target.value.replace(/\D/g, ""))} inputMode="numeric" className={cn(inputClass, "num")} />
           </Field>
           <p className="col-span-full text-xs text-white/50">
             {labels.length > 0
-              ? `${labels.length} emplacements : ${labels[0]}${labels.length > 1 ? ` → ${labels[labels.length - 1]}` : ""}`
-              : "Indiquez un intervalle valide (200 chambres maximum par série)."}
+              ? t(
+                  `${labels.length} emplacements : ${labels[0]}${labels.length > 1 ? ` → ${labels[labels.length - 1]}` : ""}`,
+                  `${labels.length} ${labels.length === 1 ? "location" : "locations"}: ${labels[0]}${labels.length > 1 ? ` → ${labels[labels.length - 1]}` : ""}`
+                )
+              : t(
+                  "Indiquez un intervalle valide (200 chambres maximum par série).",
+                  "Enter a valid range (200 rooms maximum per series)."
+                )}
           </p>
         </div>
       )}
 
       {duplicates.length > 0 && (
         <p className="mt-4 rounded-xl border border-amber-400/15 bg-amber-500/[0.07] px-3 py-2 text-xs text-white/65">
-          Déjà existant{duplicates.length > 1 ? "s" : ""}, ignoré{duplicates.length > 1 ? "s" : ""} : {duplicates.slice(0, 5).join(", ")}
+          {t(
+            `Déjà existant${duplicates.length > 1 ? "s" : ""}, ignoré${duplicates.length > 1 ? "s" : ""} : `,
+            "Already exist, skipped: "
+          )}
+          {duplicates.slice(0, 5).join(", ")}
           {duplicates.length > 5 ? "…" : ""}
         </p>
       )}

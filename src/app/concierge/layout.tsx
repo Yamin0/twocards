@@ -23,26 +23,29 @@ import {
 import { useAuthUser } from "@/hooks/use-auth-user";
 import { Avatar } from "@/components/shared/avatar";
 import { useUnreadMessages } from "@/hooks/use-unread-messages";
+import { useT } from "@/lib/i18n/client";
+import type { Translate } from "@/lib/i18n";
+import { LanguageSwitcher } from "@/components/shared/language-switcher";
 
-const mainNav = [
-  { icon: Home, label: "Accueil", href: "/concierge" },
-  { icon: CalendarDays, label: "Calendrier", href: "/concierge/reservations" },
-  { icon: Users, label: "CRM Clients", href: "/concierge/clients" },
-  { icon: CreditCard, label: "Commissions", href: "/concierge/commissions" },
-  { icon: BarChart3, label: "Statistiques", href: "/concierge/stats" },
+const getMainNav = (t: Translate) => [
+  { icon: Home, label: t("Accueil", "Home"), href: "/concierge" },
+  { icon: CalendarDays, label: t("Calendrier", "Calendar"), href: "/concierge/reservations" },
+  { icon: Users, label: t("CRM Clients", "Guest CRM"), href: "/concierge/clients" },
+  { icon: CreditCard, label: t("Commissions", "Commissions"), href: "/concierge/commissions" },
+  { icon: BarChart3, label: t("Statistiques", "Stats"), href: "/concierge/stats" },
 ];
 
-const toolsNav = [
-  { icon: MessageSquare, label: "Messages", href: "/concierge/messages" },
-  { icon: Building2, label: "Établissements", href: "/concierge/venues" },
-  { icon: Sparkles, label: "Assistant IA", href: "/concierge/ai" },
+const getToolsNav = (t: Translate) => [
+  { icon: MessageSquare, label: t("Messages", "Messages"), href: "/concierge/messages" },
+  { icon: Building2, label: t("Établissements", "Venues"), href: "/concierge/venues" },
+  { icon: Sparkles, label: t("Assistant IA", "AI assistant"), href: "/concierge/ai" },
 ];
 
 /* Une seule entrée : « Profil » pointait aussi vers /concierge/settings, ce
    qui dupliquait la clé React (les liens sont indexés par href) et mettait
    deux entrées du menu en surbrillance à la fois. */
-const adminNav = [
-  { icon: Settings, label: "Paramètres", href: "/concierge/settings" },
+const getAdminNav = (t: Translate) => [
+  { icon: Settings, label: t("Paramètres", "Settings"), href: "/concierge/settings" },
 ];
 
 /* Au niveau module et non dans le layout : un composant recréé à chaque
@@ -55,7 +58,7 @@ function NavSection({
   badges,
 }: {
   title: string;
-  items: typeof mainNav;
+  items: ReturnType<typeof getMainNav>;
   pathname: string;
   onNavigate: () => void;
   /* Pastilles par lien (ex. messages non lus), masquees a zero. */
@@ -114,6 +117,13 @@ export default function ConciergeLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const t = useT();
+  const mainNav = getMainNav(t);
+  const toolsNav = getToolsNav(t);
+  const adminNav = getAdminNav(t);
+  /* Libellé affiché ; la valeur interne reste en français. */
+  const venueLabel = (v: string) =>
+    v === "Tous les établissements" ? t("Tous les établissements", "All venues") : v;
   const { isDemoConcierge, fullName, initials, avatarUrl, isLoading } =
     useAuthUser();
   const venues = isDemoConcierge ? demoVenues : defaultVenues;
@@ -156,7 +166,7 @@ export default function ConciergeLayout({
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
             className="p-1.5 rounded-lg text-white/70 hover:text-white transition-colors"
-            aria-label="Menu"
+            aria-label={t("Menu", "Menu")}
           >
             {sidebarOpen ? <X size={22} strokeWidth={1.5} /> : <Menu size={22} strokeWidth={1.5} />}
           </button>
@@ -184,9 +194,9 @@ export default function ConciergeLayout({
               onClick={() => setSidebarOpen(false)}
             />
             <div className="fixed top-20 left-4 right-4 z-50 lg:hidden backdrop-blur-xl bg-white/10 border border-white/15 rounded-3xl p-5 space-y-5 max-h-[70vh] overflow-y-auto">
-              <NavSection title="Navigation" items={mainNav} pathname={pathname} onNavigate={closeSidebar} badges={badges} />
-              <NavSection title="Outils" items={toolsNav} pathname={pathname} onNavigate={closeSidebar} badges={badges} />
-              <NavSection title="Compte" items={adminNav} pathname={pathname} onNavigate={closeSidebar} badges={badges} />
+              <NavSection title={t("Navigation", "Navigation")} items={mainNav} pathname={pathname} onNavigate={closeSidebar} badges={badges} />
+              <NavSection title={t("Outils", "Tools")} items={toolsNav} pathname={pathname} onNavigate={closeSidebar} badges={badges} />
+              <NavSection title={t("Compte", "Account")} items={adminNav} pathname={pathname} onNavigate={closeSidebar} badges={badges} />
               <div className="pt-3 border-t border-white/10">
                 <form action="/auth/signout" method="post">
                   <button
@@ -194,9 +204,12 @@ export default function ConciergeLayout({
                     className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-red-400/80 hover:text-red-400 hover:bg-white/10 transition-all w-full font-ui"
                   >
                     <LogOut size={18} strokeWidth={1.5} />
-                    Déconnexion
+                    {t("Déconnexion", "Log out")}
                   </button>
                 </form>
+                <div className="px-3 pt-3">
+                  <LanguageSwitcher tone="dark" />
+                </div>
               </div>
             </div>
           </>
@@ -212,7 +225,7 @@ export default function ConciergeLayout({
                 twocards<span className="text-blue-400">.</span>
               </span>
             </div>
-            <p className="text-white/40 text-xs font-ui">Espace Concierge</p>
+            <p className="text-white/40 text-xs font-ui">{t("Espace Concierge", "Concierge workspace")}</p>
           </div>
 
           {/* Venue selector */}
@@ -223,10 +236,10 @@ export default function ConciergeLayout({
             >
               <div className="flex items-center gap-2 min-w-0">
                 <div className="w-6 h-6 rounded-full bg-white/15 flex items-center justify-center shrink-0">
-                  <span className="text-[0.5rem] font-bold text-white">{selectedVenue[0]}</span>
+                  <span className="text-[0.5rem] font-bold text-white">{venueLabel(selectedVenue)[0]}</span>
                 </div>
                 <span className="text-sm font-medium text-white truncate font-ui">
-                  {selectedVenue}
+                  {venueLabel(selectedVenue)}
                 </span>
               </div>
               <ChevronDown
@@ -252,7 +265,7 @@ export default function ConciergeLayout({
                           : "text-white/60 hover:bg-white/5 hover:text-white"
                       }`}
                     >
-                      {v}
+                      {venueLabel(v)}
                     </button>
                   ))}
                 </div>
@@ -262,9 +275,9 @@ export default function ConciergeLayout({
 
           {/* Navigation */}
           <div className="flex-1 overflow-y-auto space-y-5 scrollbar-thin">
-            <NavSection title="Navigation" items={mainNav} pathname={pathname} onNavigate={closeSidebar} badges={badges} />
-            <NavSection title="Outils" items={toolsNav} pathname={pathname} onNavigate={closeSidebar} badges={badges} />
-            <NavSection title="Compte" items={adminNav} pathname={pathname} onNavigate={closeSidebar} badges={badges} />
+            <NavSection title={t("Navigation", "Navigation")} items={mainNav} pathname={pathname} onNavigate={closeSidebar} badges={badges} />
+            <NavSection title={t("Outils", "Tools")} items={toolsNav} pathname={pathname} onNavigate={closeSidebar} badges={badges} />
+            <NavSection title={t("Compte", "Account")} items={adminNav} pathname={pathname} onNavigate={closeSidebar} badges={badges} />
           </div>
 
           {/* Bottom */}
@@ -296,7 +309,7 @@ export default function ConciergeLayout({
               className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-white/40 hover:text-white/70 hover:bg-white/10 transition-all font-ui"
             >
               <HelpCircle size={18} strokeWidth={1.5} />
-              Aide
+              {t("Aide", "Help")}
             </Link>
             <form action="/auth/signout" method="post">
               <button
@@ -304,9 +317,12 @@ export default function ConciergeLayout({
                 className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-red-400/70 hover:text-red-400 hover:bg-white/10 transition-all w-full font-ui"
               >
                 <LogOut size={18} strokeWidth={1.5} />
-                Déconnexion
+                {t("Déconnexion", "Log out")}
               </button>
             </form>
+            <div className="px-3 pt-1">
+              <LanguageSwitcher tone="dark" />
+            </div>
           </div>
         </aside>
 

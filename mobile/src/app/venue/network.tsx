@@ -2,26 +2,39 @@ import { StyleSheet, Text, View } from 'react-native'
 
 import { Avatar, Card, Empty, Icon, ScreenSkeleton, StackScreen } from '@/components/venue/ui'
 import { Light } from '@/constants/theme'
+import { useLocale, useT } from '@/lib/i18n'
 import { mad, shortDate, useReferrers } from '@/lib/venue-data'
 
 /* Le cœur de twocards vu de l'établissement : quel hôtel lui envoie qui,
    pour combien, et ce que ça lui coûte. */
 export default function NetworkScreen() {
   const rows = useReferrers()
+  const t = useT()
+  const locale = useLocale()
   const total = (rows ?? []).reduce((s, r) => s + Number(r.reservations), 0)
 
   return (
     <StackScreen
-      title="Réseau apporteurs"
-      subtitle={rows ? `${rows.length} hôtel${rows.length > 1 ? 's' : ''} · ${total} sortie${total > 1 ? 's' : ''}` : undefined}>
+      title={t('Réseau apporteurs', 'Referral network')}
+      subtitle={
+        rows
+          ? t(
+              `${rows.length} hôtel${rows.length > 1 ? 's' : ''} · ${total} sortie${total > 1 ? 's' : ''}`,
+              `${rows.length} hotel${rows.length === 1 ? '' : 's'} · ${total} outing${total === 1 ? '' : 's'}`
+            )
+          : undefined
+      }>
       {rows === null ? (
         <ScreenSkeleton title={false} bare />
       ) : rows.length === 0 ? (
         <Card>
           <Empty
             icon="share-2"
-            title="Aucun apporteur pour le moment"
-            body="Dès qu'un hôtel partenaire vous envoie un client par son QR code, il apparaît ici avec ses chiffres."
+            title={t('Aucun apporteur pour le moment', 'No referrers yet')}
+            body={t(
+              "Dès qu'un hôtel partenaire vous envoie un client par son QR code, il apparaît ici avec ses chiffres.",
+              'As soon as a partner hotel sends you a guest through its QR code, it appears here with its figures.'
+            )}
           />
         </Card>
       ) : (
@@ -34,30 +47,35 @@ export default function NetworkScreen() {
                   {r.referrer_name}
                 </Text>
                 <Text style={styles.hint}>
-                  {r.reservations} sortie{Number(r.reservations) > 1 ? 's' : ''} · {r.covers} couverts
-                  {r.last_reservation ? ` · dernière le ${shortDate(r.last_reservation)}` : ''}
+                  {t(
+                    `${r.reservations} sortie${Number(r.reservations) > 1 ? 's' : ''} · ${r.covers} couverts`,
+                    `${r.reservations} outing${Number(r.reservations) === 1 ? '' : 's'} · ${r.covers} cover${Number(r.covers) === 1 ? '' : 's'}`
+                  )}
+                  {r.last_reservation
+                    ? t(` · dernière le ${shortDate(r.last_reservation, locale)}`, ` · last on ${shortDate(r.last_reservation, locale)}`)
+                    : ''}
                 </Text>
               </View>
               {r.avg_rating !== null && (
                 <View style={styles.rating}>
                   <Icon name="star" size={12} color={Light.warning} />
-                  <Text style={styles.ratingText}>{Number(r.avg_rating).toFixed(1).replace('.', ',')}</Text>
+                  <Text style={styles.ratingText}>{t(Number(r.avg_rating).toFixed(1).replace('.', ','), Number(r.avg_rating).toFixed(1))}</Text>
                 </View>
               )}
             </View>
             <View style={styles.stats}>
               <View style={styles.stat}>
-                <Text style={styles.statLabel}>CA apporté</Text>
-                <Text style={styles.statValue}>{mad(Number(r.revenue))}</Text>
+                <Text style={styles.statLabel}>{t('CA apporté', 'Revenue brought')}</Text>
+                <Text style={styles.statValue}>{mad(Number(r.revenue), locale)}</Text>
               </View>
               <View style={styles.stat}>
                 <Text style={styles.statLabel}>Commissions</Text>
-                <Text style={[styles.statValue, styles.amber]}>{mad(Number(r.commissions))}</Text>
+                <Text style={[styles.statValue, styles.amber]}>{mad(Number(r.commissions), locale)}</Text>
               </View>
               <View style={styles.stat}>
-                <Text style={styles.statLabel}>Panier moyen</Text>
+                <Text style={styles.statLabel}>{t('Panier moyen', 'Average spend')}</Text>
                 <Text style={styles.statValue}>
-                  {Number(r.reservations) > 0 ? mad(Number(r.revenue) / Number(r.reservations)) : '—'}
+                  {Number(r.reservations) > 0 ? mad(Number(r.revenue) / Number(r.reservations), locale) : '—'}
                 </Text>
               </View>
             </View>

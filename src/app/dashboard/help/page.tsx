@@ -16,91 +16,110 @@ import {
 } from "lucide-react";
 import { useAuthUser } from "@/hooks/use-auth-user";
 import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
+import { useT } from "@/lib/i18n/client";
+import type { Translate } from "@/lib/i18n";
 
 const glassCard =
   "backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl";
 
 /* La FAQ décrit le produit tel qu'il est — chaque réponse correspond à une
    fonctionnalité réellement présente dans le dashboard. */
-const faqItems = [
+const getFaqItems = (t: Translate) => [
   {
-    question: "D'où viennent mes réservations ?",
-    answer:
+    question: t("D'où viennent mes réservations ?", "Where do my reservations come from?"),
+    answer: t(
       "De trois canaux : les QR codes des hôtels partenaires (badge « QR hôtel », commissionnés), votre portail de réservation directe (badge « direct », 0 % de commission) et les réservations que vous saisissez vous-même, téléphone ou walk-in (badge « maison », 0 % également). Le bouton « Nouvelle réservation » en haut de la page Réservations sert à saisir un appel.",
+      "From three channels: partner hotels' QR codes (“hotel QR” badge, commissionable), your direct booking portal (“direct” badge, 0% commission) and reservations you enter yourself, by phone or walk-in (“in-house” badge, also 0%). Use the “New reservation” button at the top of the Reservations page to log a call."
+    ),
   },
   {
-    question: "Comment fonctionnent les commissions ?",
-    answer:
+    question: t("Comment fonctionnent les commissions ?", "How do commissions work?"),
+    answer: t(
       "Quand vous saisissez le montant dépensé en fin de sortie, la commission de l'apporteur est calculée automatiquement (10 % du montant pour les apports hôtel ; les canaux direct et maison sont à 0 %). Le détail par sortie et par hôtel apporteur se trouve dans les sections Commissions et Réseau.",
+      "When you enter the amount spent at the end of an outing, the referrer's commission is calculated automatically (10% of the amount for hotel referrals; direct and in-house channels are at 0%). The breakdown by outing and by referring hotel is in the Commissions and Network sections."
+    ),
   },
   {
-    question: "Comment suivre mes réservations en temps réel ?",
-    answer:
+    question: t("Comment suivre mes réservations en temps réel ?", "How do I track my reservations in real time?"),
+    answer: t(
       "La page Réservations se met à jour en direct et se filtre par période (aujourd'hui, à venir, passées), par statut et par nom ou téléphone. Chaque ligne propose ses actions : confirmer, check-in à l'arrivée du client, no-show, annuler. Le plan de salle affiche les occupations du jour choisi, table par table.",
+      "The Reservations page updates live and can be filtered by period (today, upcoming, past), by status and by name or phone. Each row has its own actions: confirm, check in when the guest arrives, no-show, cancel. The floor plan shows the chosen day's bookings, table by table."
+    ),
   },
   {
-    question: "Comment marquer l'arrivée d'un client ou un no-show ?",
-    answer:
+    question: t("Comment marquer l'arrivée d'un client ou un no-show ?", "How do I mark a guest's arrival or a no-show?"),
+    answer: t(
       "Depuis la page Réservations (icônes d'action en bout de ligne) ou depuis le plan de salle en cliquant sur la table. Le check-in enregistre l'heure d'arrivée, visible de tous les postes ; le no-show libère le créneau sur votre portail de réservation.",
+      "From the Reservations page (action icons at the end of each row) or from the floor plan by clicking the table. Check-in records the arrival time, visible on every device; a no-show frees up the slot on your booking portal."
+    ),
   },
   {
-    question: "Comment interpréter les données analytiques ?",
-    answer:
+    question: t("Comment interpréter les données analytiques ?", "How should I read the analytics?"),
+    answer: t(
       "La page Analytics calcule vos indicateurs réels : chiffre d'affaires, couverts, panier moyen, taux de no-show, répartition par canal et meilleurs jours de la semaine. Le sélecteur de période (7 jours, 30 jours, 12 mois, tout) recalcule l'ensemble, et l'export CSV s'ouvre directement dans Excel.",
+      "The Analytics page calculates your actual figures: revenue, covers, average spend, no-show rate, split by channel and best days of the week. The period selector (7 days, 30 days, 12 months, all) recalculates everything, and the CSV export opens straight in Excel."
+    ),
   },
   {
-    question: "Comment modifier les informations de mon établissement ?",
-    answer:
+    question: t("Comment modifier les informations de mon établissement ?", "How do I update my venue details?"),
+    answer: t(
       "Dans Paramètres : téléphone, ville, adresse, description, capacité, horaires et préférences de notifications s'enregistrent réellement. Le nom d'établissement et son type sont gérés par twocards, contactez le support pour les modifier.",
+      "In Settings: phone, city, address, description, capacity, opening hours and notification preferences are all saved. The venue name and type are managed by twocards; contact support to change them."
+    ),
   },
   {
-    question: "Comment contacter un hôtel apporteur ?",
-    answer:
+    question: t("Comment contacter un hôtel apporteur ?", "How do I contact a referring hotel?"),
+    answer: t(
       "Depuis la page Réseau, chaque carte d'apporteur propose un bouton « Message » qui ouvre la conversation directement dans la messagerie. Vous y voyez aussi combien de sorties, de couverts et de chiffre d'affaires chaque hôtel vous a apportés.",
+      "On the Network page, each referrer card has a “Message” button that opens the conversation straight in your inbox. You can also see how many outings, covers and how much revenue each hotel has brought you."
+    ),
   },
 ];
 
-const quickLinks = [
+const getQuickLinks = (t: Translate) => [
   {
-    label: "Tableau de bord",
+    label: t("Tableau de bord", "Dashboard"),
     href: "/dashboard",
     icon: LayoutDashboard,
-    desc: "Vue d'ensemble",
+    desc: t("Vue d'ensemble", "Overview"),
   },
   {
-    label: "Réseau apporteurs",
+    label: t("Réseau apporteurs", "Referral network"),
     href: "/dashboard/network",
     icon: Users,
-    desc: "Vos hôtels partenaires",
+    desc: t("Vos hôtels partenaires", "Your partner hotels"),
   },
   {
-    label: "Réservations",
+    label: t("Réservations", "Reservations"),
     href: "/dashboard/reservations",
     icon: CalendarCheck,
-    desc: "Suivi en temps réel",
+    desc: t("Suivi en temps réel", "Real-time tracking"),
   },
   {
-    label: "Commissions",
+    label: t("Commissions", "Commissions"),
     href: "/dashboard/commissions",
     icon: Banknote,
-    desc: "Reversements et historique",
+    desc: t("Reversements et historique", "Payouts and history"),
   },
   {
-    label: "Analytics",
+    label: t("Analytics", "Analytics"),
     href: "/dashboard/analytics",
     icon: BarChart3,
-    desc: "Performances",
+    desc: t("Performances", "Performance"),
   },
   {
-    label: "Paramètres",
+    label: t("Paramètres", "Settings"),
     href: "/dashboard/settings",
     icon: Settings,
-    desc: "Configuration",
+    desc: t("Configuration", "Setup"),
   },
 ];
 
 export default function HelpPage() {
   const { isLoading } = useAuthUser();
+  const t = useT();
+  const faqItems = getFaqItems(t);
+  const quickLinks = getQuickLinks(t);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   if (isLoading) return <DashboardSkeleton />;
@@ -114,19 +133,21 @@ export default function HelpPage() {
         <div className="flex items-center gap-3 mb-1">
           <HelpCircle size={28} strokeWidth={1.5} className="text-blue-400" />
           <h1 className="text-2xl font-extrabold text-white">
-            Centre d&apos;aide
+            {t(<>Centre d&apos;aide</>, <>Help centre</>)}
           </h1>
         </div>
         <p className="text-sm text-white/40 font-ui">
-          Trouvez des réponses à vos questions et contactez notre équipe de
-          support.
+          {t(
+            "Trouvez des réponses à vos questions et contactez notre équipe de support.",
+            "Find answers to your questions and get in touch with our support team."
+          )}
         </p>
       </div>
 
       {/* FAQ */}
       <section className="space-y-3">
         <h2 className="text-lg font-bold text-white">
-          Questions fréquentes
+          {t("Questions fréquentes", "Frequently asked questions")}
         </h2>
         <div className={`${glassCard} divide-y divide-white/[0.06]`}>
           {faqItems.map((item, i) => (
@@ -160,7 +181,7 @@ export default function HelpPage() {
       {/* Contact support */}
       <section className="space-y-3">
         <h2 className="text-lg font-bold text-white">
-          Contacter le support
+          {t("Contacter le support", "Contact support")}
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className={`${glassCard} p-6`}>
@@ -170,9 +191,9 @@ export default function HelpPage() {
               </div>
               <div>
                 <p className="text-sm font-medium text-white font-ui">
-                  E-mail
+                  {t("E-mail", "Email")}
                 </p>
-                <p className="text-xs text-white/30">Réponse sous 24 h</p>
+                <p className="text-xs text-white/30">{t("Réponse sous 24 h", "Reply within 24 hrs")}</p>
               </div>
             </div>
             <a
@@ -190,15 +211,15 @@ export default function HelpPage() {
               </div>
               <div>
                 <p className="text-sm font-medium text-white font-ui">
-                  Chat en direct
+                  {t("Chat en direct", "Live chat")}
                 </p>
                 <p className="text-xs text-white/30">
-                  Assistance instantanée
+                  {t("Assistance instantanée", "Instant support")}
                 </p>
               </div>
             </div>
             <span className="inline-block text-xs text-white/20 bg-white/[0.05] border border-white/[0.08] px-3 py-1 rounded-full font-ui">
-              Bientôt disponible
+              {t("Bientôt disponible", "Coming soon")}
             </span>
           </div>
         </div>
@@ -207,7 +228,7 @@ export default function HelpPage() {
       {/* Quick links */}
       <section className="space-y-3">
         <h2 className="text-lg font-bold text-white">
-          Accès rapide
+          {t("Accès rapide", "Quick links")}
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {quickLinks.map((link) => {

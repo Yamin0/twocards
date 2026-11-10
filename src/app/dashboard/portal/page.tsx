@@ -7,6 +7,7 @@ import { useAuthUser } from "@/hooks/use-auth-user";
 import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { downloadSvg } from "@/lib/qr";
+import { useT } from "@/lib/i18n/client";
 import {
   Check,
   Copy,
@@ -57,6 +58,7 @@ const slugify = (s: string) =>
 export default function PortalAdminPage() {
   const { isLoading, venueName, userId } = useAuthUser();
   const { toast, showToast } = useToast();
+  const t = useT();
   const [loaded, setLoaded] = useState(false);
   const [exists, setExists] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -118,7 +120,7 @@ export default function PortalAdminPage() {
         : `${window.location.origin}/r/${form.slug}`,
     [form.slug]
   );
-  const embedCode = `<iframe src="${portalUrl}?embed=1" width="100%" height="760" style="border:0;border-radius:16px" title="Réserver · ${form.display_name}"></iframe>`;
+  const embedCode = `<iframe src="${portalUrl}?embed=1" width="100%" height="760" style="border:0;border-radius:16px" title="${t("Réserver", "Book")} · ${form.display_name}"></iframe>`;
 
   if (isLoading || !loaded) return <DashboardSkeleton />;
 
@@ -131,7 +133,7 @@ export default function PortalAdminPage() {
       setCopied(which);
       setTimeout(() => setCopied(null), 2000);
     } catch {
-      showToast("Impossible de copier");
+      showToast(t("Impossible de copier", "Could not copy"));
     }
   };
 
@@ -141,7 +143,7 @@ export default function PortalAdminPage() {
   const uploadCover = async (file: File) => {
     if (!userId) return;
     if (!file.type.startsWith("image/")) {
-      showToast("Choisissez une image");
+      showToast(t("Choisissez une image", "Please choose an image"));
       return;
     }
     setUploading(true);
@@ -165,20 +167,20 @@ export default function PortalAdminPage() {
         data: { publicUrl },
       } = supabase.storage.from("avatars").getPublicUrl(path);
       set("cover_url", publicUrl);
-      showToast("Couverture importée, pensez à enregistrer");
+      showToast(t("Couverture importée, pensez à enregistrer", "Cover uploaded. Remember to save"));
     } catch {
-      showToast("L'envoi de l'image a échoué");
+      showToast(t("L'envoi de l'image a échoué", "Image upload failed"));
     }
     setUploading(false);
   };
 
   const save = async () => {
     if (!form.slug || form.slug.length < 3) {
-      showToast("Adresse invalide : 3 caractères minimum");
+      showToast(t("Adresse invalide : 3 caractères minimum", "Invalid address: at least 3 characters"));
       return;
     }
     if (!form.display_name.trim()) {
-      showToast("Le nom affiché est requis");
+      showToast(t("Le nom affiché est requis", "Display name is required"));
       return;
     }
     setSaving(true);
@@ -192,13 +194,16 @@ export default function PortalAdminPage() {
     if (error) {
       showToast(
         error.code === "23505"
-          ? "Cette adresse est déjà prise par un autre établissement"
-          : "Impossible d'enregistrer"
+          ? t(
+              "Cette adresse est déjà prise par un autre établissement",
+              "This address is already taken by another venue"
+            )
+          : t("Impossible d'enregistrer", "Could not save")
       );
       return;
     }
     setExists(true);
-    showToast("Portail enregistré, la page publique est à jour");
+    showToast(t("Portail enregistré, la page publique est à jour", "Portal saved. The public page is up to date"));
   };
 
   const input =
@@ -210,12 +215,13 @@ export default function PortalAdminPage() {
     <div className="bg-transparent min-h-screen">
       <div className="px-4 sm:px-6 pt-6 pb-4">
         <h1 className="font-display text-3xl font-light text-white">
-          Portail de réservation
+          {t("Portail de réservation", "Booking portal")}
         </h1>
         <p className="font-ui text-sm text-white/60 mt-1.5 max-w-2xl">
-          Votre page de réservation directe, hébergée par twocards, à mettre
-          en bio Instagram, sur Google et sur votre site (intégration iframe).
-          Réservations sans commission : le canal direct est gratuit.
+          {t(
+            "Votre page de réservation directe, hébergée par twocards, à mettre en bio Instagram, sur Google et sur votre site (intégration iframe). Réservations sans commission : le canal direct est gratuit.",
+            "Your direct booking page, hosted by twocards, for your Instagram bio, Google and your website (iframe embed). Commission-free reservations: the direct channel is free."
+          )}
         </p>
       </div>
 
@@ -223,11 +229,11 @@ export default function PortalAdminPage() {
         {/* ── Configuration ── */}
         <div className="backdrop-blur-xl bg-black/35 border border-white/[0.12] rounded-2xl p-6 space-y-5">
           <h2 className="font-display text-lg font-normal text-white">
-            Configuration
+            {t("Configuration", "Setup")}
           </h2>
 
           <div>
-            <label className={label}>Nom affiché</label>
+            <label className={label}>{t("Nom affiché", "Display name")}</label>
             <input
               className={input}
               value={form.display_name}
@@ -238,7 +244,7 @@ export default function PortalAdminPage() {
           </div>
 
           <div>
-            <label className={label}>Adresse de la page</label>
+            <label className={label}>{t("Adresse de la page", "Page address")}</label>
             <div className="flex items-center gap-2">
               <span className="font-mono text-xs text-white/40">/r/</span>
               <input
@@ -252,24 +258,24 @@ export default function PortalAdminPage() {
           </div>
 
           <div>
-            <label className={label}>Phrase d&apos;accueil (facultatif)</label>
+            <label className={label}>{t(<>Phrase d&apos;accueil (facultatif)</>, <>Welcome line (optional)</>)}</label>
             <input
               className={input}
               value={form.tagline}
               onChange={(e) => set("tagline", e.target.value)}
               maxLength={160}
-              placeholder="La nuit légendaire de l'Hivernage"
+              placeholder={t("La nuit légendaire de l'Hivernage", "Hivernage's legendary nights")}
             />
           </div>
 
           <div>
-            <label className={label}>Couleur d&apos;accent</label>
+            <label className={label}>{t(<>Couleur d&apos;accent</>, <>Accent colour</>)}</label>
             <div className="flex items-center gap-2">
               {ACCENTS.map((c) => (
                 <button
                   key={c}
                   onClick={() => set("accent_color", c)}
-                  aria-label={`Couleur ${c}`}
+                  aria-label={`${t("Couleur", "Colour")} ${c}`}
                   className={`h-8 w-8 rounded-full border-2 transition-transform hover:scale-110 ${
                     form.accent_color === c ? "border-white" : "border-transparent"
                   }`}
@@ -280,20 +286,20 @@ export default function PortalAdminPage() {
                 type="color"
                 value={form.accent_color}
                 onChange={(e) => set("accent_color", e.target.value)}
-                aria-label="Couleur personnalisée"
+                aria-label={t("Couleur personnalisée", "Custom colour")}
                 className="h-8 w-8 cursor-pointer rounded-full border border-white/20 bg-transparent"
               />
             </div>
           </div>
 
           <div>
-            <label className={label}>Fond de la page</label>
+            <label className={label}>{t("Fond de la page", "Page background")}</label>
             <div className="flex items-center gap-2">
               {BACKGROUNDS.map((c) => (
                 <button
                   key={c}
                   onClick={() => set("background_color", c)}
-                  aria-label={`Fond ${c}`}
+                  aria-label={`${t("Fond", "Background")} ${c}`}
                   className={`h-8 w-8 rounded-full border-2 transition-transform hover:scale-110 ${
                     form.background_color === c ? "border-white" : "border-white/20"
                   }`}
@@ -304,25 +310,25 @@ export default function PortalAdminPage() {
                 type="color"
                 value={form.background_color}
                 onChange={(e) => set("background_color", e.target.value)}
-                aria-label="Fond personnalisé"
+                aria-label={t("Fond personnalisé", "Custom background")}
                 className="h-8 w-8 cursor-pointer rounded-full border border-white/20 bg-transparent"
               />
             </div>
           </div>
 
           <div>
-            <label className={label}>Photo de couverture (facultatif)</label>
+            <label className={label}>{t("Photo de couverture (facultatif)", "Cover photo (optional)")}</label>
             {form.cover_url ? (
               <div className="flex items-center gap-3">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={form.cover_url}
-                  alt="Couverture du portail"
+                  alt={t("Couverture du portail", "Portal cover")}
                   className="h-16 w-28 rounded-lg object-cover border border-white/15"
                 />
                 <div className="flex flex-col gap-1.5">
                   <label className="font-ui cursor-pointer text-xs font-medium text-blue-400 hover:text-blue-300">
-                    Remplacer
+                    {t("Remplacer", "Replace")}
                     <input
                       type="file"
                       accept="image/*"
@@ -338,7 +344,7 @@ export default function PortalAdminPage() {
                     onClick={() => set("cover_url", null)}
                     className="font-ui text-left text-xs text-white/40 hover:text-red-400"
                   >
-                    Retirer
+                    {t("Retirer", "Remove")}
                   </button>
                 </div>
               </div>
@@ -350,8 +356,8 @@ export default function PortalAdminPage() {
                   <ImagePlus size={14} strokeWidth={1.5} />
                 )}
                 {uploading
-                  ? "Envoi en cours…"
-                  : "Importer une image (bandeau en haut de la page)"}
+                  ? t("Envoi en cours…", "Uploading…")
+                  : t("Importer une image (bandeau en haut de la page)", "Upload an image (banner at the top of the page)")}
                 <input
                   type="file"
                   accept="image/*"
@@ -369,7 +375,7 @@ export default function PortalAdminPage() {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className={label}>Couverts max.</label>
+              <label className={label}>{t("Couverts max.", "Max. covers")}</label>
               <select
                 className={input}
                 value={form.party_max}
@@ -377,13 +383,13 @@ export default function PortalAdminPage() {
               >
                 {[4, 6, 8, 10, 12, 15, 20].map((n) => (
                   <option key={n} value={n} className="bg-[#10131f]">
-                    {n} personnes
+                    {t(`${n} personnes`, `${n} guests`)}
                   </option>
                 ))}
               </select>
             </div>
             <div>
-              <label className={label}>Créneaux toutes les</label>
+              <label className={label}>{t("Créneaux toutes les", "Time slots every")}</label>
               <select
                 className={input}
                 value={form.interval_minutes}
@@ -397,7 +403,7 @@ export default function PortalAdminPage() {
               </select>
             </div>
             <div>
-              <label className={label}>Premier créneau</label>
+              <label className={label}>{t("Premier créneau", "First slot")}</label>
               <select
                 className={input}
                 value={form.start_time}
@@ -411,7 +417,7 @@ export default function PortalAdminPage() {
               </select>
             </div>
             <div>
-              <label className={label}>Dernier créneau</label>
+              <label className={label}>{t("Dernier créneau", "Last slot")}</label>
               <select
                 className={input}
                 value={form.end_time}
@@ -445,7 +451,7 @@ export default function PortalAdminPage() {
                 />
               </span>
               <span className="font-ui text-xs text-white/60">
-                {form.active ? "Portail en ligne" : "Portail désactivé"}
+                {form.active ? t("Portail en ligne", "Portal live") : t("Portail désactivé", "Portal disabled")}
               </span>
             </button>
             <button
@@ -458,7 +464,7 @@ export default function PortalAdminPage() {
               ) : (
                 <Save size={15} strokeWidth={1.5} />
               )}
-              Enregistrer
+              {t("Enregistrer", "Save")}
             </button>
           </div>
         </div>
@@ -467,18 +473,23 @@ export default function PortalAdminPage() {
         <div className="space-y-4">
           <div className="backdrop-blur-xl bg-black/35 border border-white/[0.12] rounded-2xl p-6">
             <h2 className="font-display text-lg font-normal text-white mb-4">
-              Partager
+              {t("Partager", "Share")}
             </h2>
             {!exists ? (
               <p className="font-ui text-xs text-white/40 leading-relaxed">
-                Enregistrez votre portail : son adresse publique, le code
-                d&apos;intégration et le QR code apparaîtront ici.
+                {t(
+                  <>
+                    Enregistrez votre portail : son adresse publique, le code
+                    d&apos;intégration et le QR code apparaîtront ici.
+                  </>,
+                  <>Save your portal: its public address, embed code and QR code will appear here.</>
+                )}
               </p>
             ) : (
               <div className="space-y-5">
                 <div>
                   <label className={label}>
-                    Page publique, réseaux sociaux, bio, Google
+                    {t("Page publique, réseaux sociaux, bio, Google", "Public page, social media, bio, Google")}
                   </label>
                   <div className="flex items-center gap-2">
                     <p className="font-mono flex-1 truncate rounded-xl bg-black/30 border border-white/10 px-3 py-2.5 text-xs text-white/70">
@@ -486,7 +497,7 @@ export default function PortalAdminPage() {
                     </p>
                     <button
                       onClick={() => copy(portalUrl, "url")}
-                      aria-label="Copier l'adresse"
+                      aria-label={t("Copier l'adresse", "Copy address")}
                       className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/10 text-white/70 hover:bg-white/15"
                     >
                       {copied === "url" ? (
@@ -499,7 +510,7 @@ export default function PortalAdminPage() {
                       href={portalUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      aria-label="Ouvrir la page"
+                      aria-label={t("Ouvrir la page", "Open page")}
                       className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/10 text-white/70 hover:bg-white/15"
                     >
                       <ExternalLink size={14} strokeWidth={1.5} />
@@ -509,7 +520,7 @@ export default function PortalAdminPage() {
 
                 <div>
                   <label className={label}>
-                    Intégration sur votre site (iframe)
+                    {t("Intégration sur votre site (iframe)", "Embed on your website (iframe)")}
                   </label>
                   <div className="flex items-start gap-2">
                     <p className="font-mono flex-1 break-all rounded-xl bg-black/30 border border-white/10 px-3 py-2.5 text-[10px] leading-relaxed text-white/50">
@@ -517,7 +528,7 @@ export default function PortalAdminPage() {
                     </p>
                     <button
                       onClick={() => copy(embedCode, "embed")}
-                      aria-label="Copier le code d'intégration"
+                      aria-label={t("Copier le code d'intégration", "Copy embed code")}
                       className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/10 text-white/70 hover:bg-white/15"
                     >
                       {copied === "embed" ? (
@@ -538,17 +549,20 @@ export default function PortalAdminPage() {
                   </div>
                   <div>
                     <p className="font-ui text-xs text-white/60 leading-relaxed mb-2">
-                      QR code de votre portail, cartes, vitrine, flyers.
+                      {t(
+                        "QR code de votre portail, cartes, vitrine, flyers.",
+                        "Your portal QR code, for cards, windows and flyers."
+                      )}
                     </p>
                     <button
                       onClick={() => {
                         if (downloadSvg("portal-qr", `portail-${form.slug}`))
-                          showToast("QR code téléchargé");
+                          showToast(t("QR code téléchargé", "QR code downloaded"));
                       }}
                       className="font-ui flex items-center gap-2 bg-white/10 hover:bg-white/15 text-white text-xs font-medium px-3 py-2 rounded-lg transition-colors"
                     >
                       <Download size={13} strokeWidth={1.5} />
-                      Télécharger (SVG)
+                      {t("Télécharger (SVG)", "Download (SVG)")}
                     </button>
                   </div>
                 </div>
@@ -558,19 +572,22 @@ export default function PortalAdminPage() {
 
           <div className="backdrop-blur-xl bg-black/35 border border-white/[0.12] rounded-2xl p-6">
             <h2 className="font-display text-lg font-normal text-white mb-2">
-              Comment ça marche
+              {t("Comment ça marche", "How it works")}
             </h2>
             <ul className="font-ui space-y-2 text-xs text-white/50 leading-relaxed">
               <li className="flex gap-2">
                 <Globe size={13} strokeWidth={1.5} className="mt-0.5 shrink-0" />
-                Les réservations du portail arrivent dans votre onglet
-                Réservations, marquées « direct », sans commission, ce canal
-                vous appartient.
+                {t(
+                  "Les réservations du portail arrivent dans votre onglet Réservations, marquées « direct », sans commission, ce canal vous appartient.",
+                  "Portal reservations land in your Reservations tab, tagged “direct”, commission-free. This channel is yours."
+                )}
               </li>
               <li className="flex gap-2">
                 <Check size={13} strokeWidth={2} className="mt-0.5 shrink-0" />
-                Assignez-les à une table : elles occupent votre plan de salle
-                comme les réservations twocards.
+                {t(
+                  "Assignez-les à une table : elles occupent votre plan de salle comme les réservations twocards.",
+                  "Assign them to a table: they fill your floor plan just like twocards reservations."
+                )}
               </li>
             </ul>
           </div>

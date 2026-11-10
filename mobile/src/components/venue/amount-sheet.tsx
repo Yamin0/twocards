@@ -11,6 +11,7 @@ import {
 } from 'react-native'
 
 import { Light } from '@/constants/theme'
+import { intlLocale, useLocale, useT } from '@/lib/i18n'
 import type { Reservation } from '@/lib/venue-data'
 
 import { Button } from './ui'
@@ -33,20 +34,22 @@ export function AmountSheet({
   )
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const t = useT()
+  const locale = useLocale()
 
   if (!reservation) return null
 
   const submit = async () => {
     const n = Number(value.replace(',', '.').replace(/\s/g, ''))
     if (!Number.isFinite(n) || n < 0) {
-      setError('Indiquez un montant en dirhams, par exemple 1450.')
+      setError(t('Indiquez un montant en dirhams, par exemple 1450.', 'Enter an amount in dirhams, e.g. 1450.'))
       return
     }
     setSaving(true)
     const ok = await onSave(n)
     setSaving(false)
     if (!ok) {
-      setError("Enregistrement impossible. Vérifiez votre connexion.")
+      setError(t('Enregistrement impossible. Vérifiez votre connexion.', "Couldn't save. Check your connection."))
       return
     }
     onClose()
@@ -63,10 +66,10 @@ export function AmountSheet({
         style={styles.wrap}
         pointerEvents="box-none">
         <View style={styles.sheet}>
-          <Text style={styles.eyebrow}>Addition</Text>
+          <Text style={styles.eyebrow}>{t('Addition', 'Bill')}</Text>
           <Text style={styles.title}>{reservation.guest_name}</Text>
           <Text style={styles.sub}>
-            {reservation.party_size} pers.
+            {t(`${reservation.party_size} pers.`, `Party of ${reservation.party_size}`)}
             {reservation.service_name ? ` · ${reservation.service_name}` : ''}
           </Text>
           <View style={styles.inputRow}>
@@ -86,18 +89,18 @@ export function AmountSheet({
           </View>
           {reservation.source === 'qr' ? (
             <Text style={styles.hint}>
-              Commission reversée à {rate} % :{' '}
+              {t(`Commission reversée à ${rate} % : `, `Commission paid at ${rate}%: `)}
               <Text style={styles.hintStrong}>
-                {Math.round((preview * rate) / 100).toLocaleString('fr-FR')} MAD
+                {Math.round((preview * rate) / 100).toLocaleString(intlLocale(locale))} MAD
               </Text>
             </Text>
           ) : (
-            <Text style={styles.hint}>Canal direct ou maison : sans commission.</Text>
+            <Text style={styles.hint}>{t('Canal direct ou maison : sans commission.', 'Direct or in-house booking: no commission.')}</Text>
           )}
           {error ? <Text style={styles.error}>{error}</Text> : null}
           <View style={styles.actions}>
-            <Button label="Annuler" tone="ghost" onPress={onClose} style={styles.grow} />
-            <Button label={saving ? 'Enregistrement…' : 'Enregistrer'} onPress={submit} style={styles.grow} />
+            <Button label={t('Annuler', 'Cancel')} tone="ghost" onPress={onClose} style={styles.grow} />
+            <Button label={saving ? t('Enregistrement…', 'Saving…') : t('Enregistrer', 'Save')} onPress={submit} style={styles.grow} />
           </View>
         </View>
       </KeyboardAvoidingView>

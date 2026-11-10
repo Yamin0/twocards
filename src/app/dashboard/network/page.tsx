@@ -7,6 +7,7 @@ import { useAuthUser } from "@/hooks/use-auth-user";
 import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
 import { StatStrip } from "@/components/shared/stat-strip";
 import { RatingStars } from "@/components/shared/mini-charts";
+import { useT, useIntlLocale } from "@/lib/i18n/client";
 import {
   Building2,
   CalendarDays,
@@ -44,6 +45,8 @@ const initialsOf = (name: string) =>
 export default function NetworkPage() {
   const { isLoading } = useAuthUser();
   const router = useRouter();
+  const t = useT();
+  const intl = useIntlLocale();
   const [referrers, setReferrers] = useState<Referrer[] | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -86,12 +89,12 @@ export default function NetworkPage() {
   );
 
   const stats = [
-    { label: "Apporteurs actifs", value: referrers.length },
-    { label: "Sorties apportées", value: totalReservations },
-    { label: "CA apporté", value: `${totalRevenue.toLocaleString()} MAD` },
+    { label: t("Apporteurs actifs", "Active referrers"), value: referrers.length },
+    { label: t("Sorties apportées", "Outings referred"), value: totalReservations },
+    { label: t("CA apporté", "Revenue generated"), value: `${totalRevenue.toLocaleString(intl)} MAD` },
     {
-      label: "Commissions reversées",
-      value: `${totalCommissions.toLocaleString()} MAD`,
+      label: t("Commissions reversées", "Commissions paid"),
+      value: `${totalCommissions.toLocaleString(intl)} MAD`,
     },
   ];
 
@@ -100,11 +103,13 @@ export default function NetworkPage() {
       {/* Header */}
       <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
         <h1 className="font-display text-3xl font-light text-white">
-          Réseau apporteurs
+          {t("Réseau apporteurs", "Referral network")}
         </h1>
         <p className="font-ui text-sm text-white/60 mt-1.5">
-          Les hôtels partenaires qui vous envoient des clients, ce que chacun
-          apporte, ce que vous lui reversez
+          {t(
+            "Les hôtels partenaires qui vous envoient des clients, ce que chacun apporte, ce que vous lui reversez",
+            "The partner hotels sending you guests, what each one brings in, and what you pay them"
+          )}
         </p>
       </div>
 
@@ -121,7 +126,7 @@ export default function NetworkPage() {
           />
           <input
             type="text"
-            placeholder="Rechercher un hôtel..."
+            placeholder={t("Rechercher un hôtel...", "Search for a hotel...")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="font-ui w-full pl-9 pr-4 py-2.5 backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-xl text-sm text-white placeholder:text-white/25 focus:outline-none focus:border-blue-400/40 transition-colors"
@@ -136,20 +141,35 @@ export default function NetworkPage() {
             <Building2 size={26} strokeWidth={1.5} className="text-blue-400" />
           </div>
           <h2 className="font-display text-xl font-normal text-white mb-2">
-            Aucun hôtel ne vous a encore envoyé de client
+            {t(
+              "Aucun hôtel ne vous a encore envoyé de client",
+              "No hotel has sent you a guest yet"
+            )}
           </h2>
           <p className="font-ui text-sm text-white/50 max-w-md mx-auto">
-            Dès qu&apos;un client réserve chez vous en scannant le QR code
-            d&apos;un hôtel partenaire, l&apos;apporteur apparaît ici avec ses
-            sorties, le chiffre d&apos;affaires apporté et les commissions
-            reversées.
+            {t(
+              <>
+                Dès qu&apos;un client réserve chez vous en scannant le QR code
+                d&apos;un hôtel partenaire, l&apos;apporteur apparaît ici avec ses
+                sorties, le chiffre d&apos;affaires apporté et les commissions
+                reversées.
+              </>,
+              <>
+                As soon as a guest books with you by scanning a partner
+                hotel&apos;s QR code, the referrer appears here with their
+                outings, the revenue generated and the commissions paid.
+              </>
+            )}
           </p>
         </div>
       ) : filtered.length === 0 ? (
         <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-12 text-center">
           <Users size={36} strokeWidth={1} className="mx-auto text-white/15 mb-3" />
           <p className="font-ui text-sm text-white/30">
-            Aucun apporteur ne correspond à « {searchQuery} »
+            {t(
+              <>Aucun apporteur ne correspond à « {searchQuery} »</>,
+              <>No referrer matches “{searchQuery}”</>
+            )}
           </p>
         </div>
       ) : (
@@ -172,14 +192,14 @@ export default function NetworkPage() {
                       {r.referrer_name}
                     </p>
                     <p className="font-ui text-[0.6875rem] text-white/35">
-                      Hôtel partenaire
+                      {t("Hôtel partenaire", "Partner hotel")}
                     </p>
                   </div>
                 </div>
                 {r.avg_rating !== null && (
                   <div
                     className="flex items-center gap-1.5 shrink-0"
-                    title="Note moyenne laissée par les clients envoyés"
+                    title={t("Note moyenne laissée par les clients envoyés", "Average rating from referred guests")}
                   >
                     <RatingStars value={Number(r.avg_rating)} size={12} />
                     <span className="font-ui text-xs text-white/50 tabular-nums">
@@ -193,34 +213,34 @@ export default function NetworkPage() {
               <div className="grid grid-cols-2 gap-3 mb-4">
                 <div className="bg-white/[0.04] rounded-xl p-3">
                   <p className="font-ui text-[0.5625rem] text-white/25 uppercase tracking-wider">
-                    Sorties
+                    {t("Sorties", "Outings")}
                   </p>
                   <p className="font-display text-lg font-light text-white mt-0.5 tabular-nums">
-                    {Number(r.reservations).toLocaleString()}
+                    {Number(r.reservations).toLocaleString(intl)}
                   </p>
                 </div>
                 <div className="bg-white/[0.04] rounded-xl p-3">
                   <p className="font-ui text-[0.5625rem] text-white/25 uppercase tracking-wider">
-                    Couverts
+                    {t("Couverts", "Covers")}
                   </p>
                   <p className="font-display text-lg font-light text-white mt-0.5 tabular-nums">
-                    {Number(r.covers).toLocaleString()}
+                    {Number(r.covers).toLocaleString(intl)}
                   </p>
                 </div>
                 <div className="bg-white/[0.04] rounded-xl p-3">
                   <p className="font-ui text-[0.5625rem] text-white/25 uppercase tracking-wider">
-                    CA apporté
+                    {t("CA apporté", "Revenue generated")}
                   </p>
                   <p className="font-display text-sm font-light text-white mt-1 tabular-nums whitespace-nowrap">
-                    {Number(r.revenue).toLocaleString()} MAD
+                    {Number(r.revenue).toLocaleString(intl)} MAD
                   </p>
                 </div>
                 <div className="bg-white/[0.04] rounded-xl p-3">
                   <p className="font-ui text-[0.5625rem] text-white/25 uppercase tracking-wider">
-                    Commission reversée
+                    {t("Commission reversée", "Commission paid")}
                   </p>
                   <p className="font-display text-sm font-light text-amber-400 mt-1 tabular-nums whitespace-nowrap">
-                    {Number(r.commissions).toLocaleString()} MAD
+                    {Number(r.commissions).toLocaleString(intl)} MAD
                   </p>
                 </div>
               </div>
@@ -233,10 +253,10 @@ export default function NetworkPage() {
                     strokeWidth={1.5}
                     className="text-white/25"
                   />
-                  Dernière sortie le{" "}
+                  {t("Dernière sortie le", "Last outing on")}{" "}
                   {new Date(
                     r.last_reservation + "T00:00:00"
-                  ).toLocaleDateString("fr-FR")}
+                  ).toLocaleDateString(intl)}
                 </div>
                 <button
                   onClick={() =>
@@ -245,7 +265,7 @@ export default function NetworkPage() {
                   className="font-ui flex items-center gap-1.5 px-3 py-2 bg-blue-500/15 hover:bg-blue-500/25 border border-blue-400/20 rounded-xl text-xs font-medium text-blue-400 transition-colors shrink-0"
                 >
                   <Send size={13} strokeWidth={1.5} />
-                  Message
+                  {t("Message", "Message")}
                 </button>
               </div>
             </div>
@@ -256,9 +276,18 @@ export default function NetworkPage() {
       {/* Note de périmètre */}
       <p className="font-ui flex items-start gap-2 text-xs text-white/40 max-w-2xl">
         <Globe size={13} strokeWidth={1.5} className="shrink-0 mt-0.5" />
-        Seules les sorties apportées par le réseau (QR hôtel) figurent ici,
-        annulations et no-show exclus. Les canaux direct (portail) et maison,
-        sans commission, n&apos;y apparaissent pas.
+        {t(
+          <>
+            Seules les sorties apportées par le réseau (QR hôtel) figurent ici,
+            annulations et no-show exclus. Les canaux direct (portail) et maison,
+            sans commission, n&apos;y apparaissent pas.
+          </>,
+          <>
+            Only outings referred by the network (hotel QR) are shown here,
+            excluding cancellations and no-shows. Commission-free direct
+            (portal) and in-house channels are not included.
+          </>
+        )}
       </p>
     </div>
   );

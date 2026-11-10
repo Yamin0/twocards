@@ -1,5 +1,6 @@
 import type { HotelQrCode, HotelReservation } from "@/lib/hotel/store";
 import { addDays, isoDay, isWithinDays, monthKey, parseIsoDate } from "@/lib/hotel/format";
+import { intlLocale, type Locale } from "@/lib/i18n";
 
 /* Agrégats de l'espace hôtel, calculés côté navigateur à partir des
    réservations et des QR codes déjà en cache : aucune requête
@@ -13,6 +14,19 @@ export const CATEGORY_COLORS: Record<string, string> = {
   Clubs: "bg-violet-400",
   Services: "bg-amber-400",
 };
+
+/* Libellé affiché d'une catégorie (la clé reste en français : elle est
+   stockée en base et sert aux comparaisons). */
+const CATEGORY_LABELS_EN: Record<string, string> = {
+  Restaurants: "Restaurants",
+  Activités: "Activities",
+  Clubs: "Clubs",
+  Services: "Services",
+};
+
+export function reservationCategoryLabel(category: string, locale: Locale = "fr") {
+  return locale === "en" ? (CATEGORY_LABELS_EN[category] ?? category) : category;
+}
 
 export const isLive = (r: HotelReservation) =>
   r.status !== "annulée" && r.status !== "no-show";
@@ -66,7 +80,8 @@ export function monthlySeries(
   rows: HotelReservation[],
   months = 6,
   value: (r: HotelReservation) => number = () => 1,
-  now = new Date()
+  now = new Date(),
+  locale: Locale = "fr"
 ): Series {
   const buckets: { key: string; label: string; value: number }[] = [];
   for (let i = months - 1; i >= 0; i--) {
@@ -74,7 +89,7 @@ export function monthlySeries(
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
     buckets.push({
       key,
-      label: d.toLocaleDateString("fr-FR", { month: "short" }).replace(".", ""),
+      label: d.toLocaleDateString(intlLocale(locale), { month: "short" }).replace(".", ""),
       value: 0,
     });
   }
@@ -241,8 +256,11 @@ export function qrPerformance(
 }
 
 /* Répartition par jour de semaine (lundi en premier) et par tranche horaire. */
-export function weekdayDistribution(rows: HotelReservation[]): Series {
-  const labels = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
+export function weekdayDistribution(rows: HotelReservation[], locale: Locale = "fr"): Series {
+  const labels =
+    locale === "en"
+      ? ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+      : ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
   const out = labels.map((label, i) => ({ key: String(i), label, value: 0 }));
   for (const r of rows) {
     const d = parseIsoDate(r.reservation_date).getDay();
@@ -251,13 +269,14 @@ export function weekdayDistribution(rows: HotelReservation[]): Series {
   return out;
 }
 
-export function hourDistribution(rows: HotelReservation[]): Series {
+export function hourDistribution(rows: HotelReservation[], locale: Locale = "fr"): Series {
+  const en = locale === "en";
   const slots = [
-    { key: "midi", label: "Midi", from: 11, to: 15 },
-    { key: "aprem", label: "Après-midi", from: 15, to: 19 },
-    { key: "soir", label: "Soirée", from: 19, to: 23 },
-    { key: "nuit", label: "Nuit", from: 23, to: 30 },
-    { key: "matin", label: "Matin", from: 5, to: 11 },
+    { key: "midi", label: en ? "Lunch" : "Midi", from: 11, to: 15 },
+    { key: "aprem", label: en ? "Afternoon" : "Après-midi", from: 15, to: 19 },
+    { key: "soir", label: en ? "Evening" : "Soirée", from: 19, to: 23 },
+    { key: "nuit", label: en ? "Night" : "Nuit", from: 23, to: 30 },
+    { key: "matin", label: en ? "Morning" : "Matin", from: 5, to: 11 },
   ];
   const out = slots.map((s) => ({ key: s.key, label: s.label, value: 0 }));
   for (const r of rows) {

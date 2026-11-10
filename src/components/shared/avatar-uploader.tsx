@@ -5,6 +5,7 @@ import { Camera, Loader2, Trash2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useAuthUser } from "@/hooks/use-auth-user";
 import { Avatar } from "@/components/shared/avatar";
+import { useT } from "@/lib/i18n/client";
 
 const MAX_BYTES = 10 * 1024 * 1024;
 const MAX_DIMENSION = 512;
@@ -57,11 +58,12 @@ async function toSquareThumbnail(file: File): Promise<Blob> {
    ce qui met à jour l'avatar dans toute l'application sans rechargement. */
 export function AvatarUploader({
   onMessage,
-  label = "Photo de profil",
+  label,
 }: {
   onMessage?: (message: string) => void;
   label?: string;
 }) {
+  const t = useT();
   const { avatarUrl, initials, userId } = useAuthUser();
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
@@ -71,15 +73,15 @@ export function AvatarUploader({
     setError(null);
 
     if (!ACCEPTED.includes(file.type)) {
-      setError("Format non pris en charge. Utilisez JPG, PNG, WebP ou GIF.");
+      setError(t("Format non pris en charge. Utilisez JPG, PNG, WebP ou GIF.", "Unsupported format. Use JPG, PNG, WebP or GIF."));
       return;
     }
     if (file.size > MAX_BYTES) {
-      setError("Image trop lourde : 10 Mo maximum.");
+      setError(t("Image trop lourde : 10 Mo maximum.", "Image too large: 10 MB maximum."));
       return;
     }
     if (!userId) {
-      setError("Session expirée. Reconnectez-vous puis réessayez.");
+      setError(t("Session expirée. Reconnectez-vous puis réessayez.", "Session expired. Log in again and retry."));
       return;
     }
 
@@ -89,7 +91,7 @@ export function AvatarUploader({
     try {
       thumbnail = await toSquareThumbnail(file);
     } catch {
-      setError("Image illisible. Essayez un autre fichier.");
+      setError(t("Image illisible. Essayez un autre fichier.", "We couldn’t read this image. Try another file."));
       setBusy(false);
       return;
     }
@@ -105,7 +107,7 @@ export function AvatarUploader({
       .upload(path, thumbnail, { contentType: "image/webp" });
 
     if (uploadError) {
-      setError("L'envoi a échoué. Réessayez.");
+      setError(t("L'envoi a échoué. Réessayez.", "Upload failed. Please try again."));
       setBusy(false);
       return;
     }
@@ -120,7 +122,7 @@ export function AvatarUploader({
 
     if (metaError) {
       await supabase.storage.from("avatars").remove([path]);
-      setError("La photo n'a pas pu être enregistrée. Réessayez.");
+      setError(t("La photo n'a pas pu être enregistrée. Réessayez.", "The photo couldn’t be saved. Please try again."));
       setBusy(false);
       return;
     }
@@ -138,7 +140,7 @@ export function AvatarUploader({
     }
 
     setBusy(false);
-    onMessage?.("Photo de profil mise à jour");
+    onMessage?.(t("Photo de profil mise à jour", "Profile photo updated"));
   };
 
   const handleRemove = async () => {
@@ -151,7 +153,7 @@ export function AvatarUploader({
       data: { avatar_url: null },
     });
     if (metaError) {
-      setError("La photo n'a pas pu être retirée. Réessayez.");
+      setError(t("La photo n'a pas pu être retirée. Réessayez.", "The photo couldn’t be removed. Please try again."));
       setBusy(false);
       return;
     }
@@ -165,7 +167,7 @@ export function AvatarUploader({
     }
 
     setBusy(false);
-    onMessage?.("Photo de profil retirée");
+    onMessage?.(t("Photo de profil retirée", "Profile photo removed"));
   };
 
   return (
@@ -183,7 +185,7 @@ export function AvatarUploader({
             type="button"
             onClick={() => inputRef.current?.click()}
             disabled={busy}
-            aria-label="Changer la photo de profil"
+            aria-label={t("Changer la photo de profil", "Change profile photo")}
             className="absolute bottom-0 right-0 flex h-7 w-7 items-center justify-center rounded-full bg-blue-500 text-white shadow-lg transition-colors hover:bg-blue-600 disabled:opacity-50"
           >
             {busy ? (
@@ -195,10 +197,15 @@ export function AvatarUploader({
         </div>
 
         <div>
-          <p className="text-sm font-medium text-white">{label}</p>
+          <p className="text-sm font-medium text-white">{label ?? t("Photo de profil", "Profile photo")}</p>
           <p className="mt-0.5 text-xs text-white/40">
-            JPG, PNG, WebP ou GIF · 10 Mo maximum. L&apos;image est recadrée en
-            carré automatiquement.
+            {t(
+              <>
+                JPG, PNG, WebP ou GIF · 10 Mo maximum. L&apos;image est recadrée en
+                carré automatiquement.
+              </>,
+              <>JPG, PNG, WebP or GIF · 10 MB maximum. The image is cropped to a square automatically.</>,
+            )}
           </p>
           <div className="mt-2 flex items-center gap-3">
             <button
@@ -207,7 +214,7 @@ export function AvatarUploader({
               disabled={busy}
               className="text-xs font-medium text-blue-400 transition-opacity hover:underline disabled:opacity-50"
             >
-              {avatarUrl ? "Changer la photo" : "Ajouter une photo"}
+              {avatarUrl ? t("Changer la photo", "Change photo") : t("Ajouter une photo", "Add a photo")}
             </button>
             {avatarUrl && (
               <button
@@ -217,7 +224,7 @@ export function AvatarUploader({
                 className="flex items-center gap-1 text-xs font-medium text-red-400/80 transition-colors hover:text-red-400 disabled:opacity-50"
               >
                 <Trash2 size={12} strokeWidth={1.5} />
-                Retirer
+                {t("Retirer", "Remove")}
               </button>
             )}
           </div>

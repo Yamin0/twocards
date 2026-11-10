@@ -1,25 +1,34 @@
-import Link from "next/link";
+"use client";
 
-const footerLinks = {
-  Produit: [
-    { label: "Établissements", href: "/restaurants" },
-    { label: "Concierges / PR", href: "/concierges" },
-    { label: "Hôtels", href: "/hotels" },
-    { label: "Influenceurs", href: "/influenceurs" },
+import Link from "next/link";
+import { useT } from "@/lib/i18n/client";
+import type { Translate } from "@/lib/i18n";
+import { LanguageSwitcher } from "@/components/shared/language-switcher";
+
+/* Composant client : le pied de page est aussi rendu depuis des pages
+   clientes (influenceurs, pages audience courtes). */
+const getFooterLinks = (t: Translate) => ({
+  [t("Produit", "Product")]: [
+    { label: t("Établissements", "Venues"), href: "/restaurants" },
+    { label: t("Concierges / PR", "Concierges / PR"), href: "/concierges" },
+    { label: t("Hôtels", "Hotels"), href: "/hotels" },
+    { label: t("Influenceurs", "Influencers"), href: "/influenceurs" },
   ],
-  Entreprise: [
+  [t("Entreprise", "Company")]: [
     { label: "Founding Circle", href: "/signup" },
-    { label: "Connexion", href: "/login" },
-    { label: "Demander un accès", href: "/signup" },
+    { label: t("Connexion", "Log in"), href: "/login" },
+    { label: t("Demander un accès", "Request access"), href: "/signup" },
   ],
-  Juridique: [
-    { label: "Mentions légales", href: "/legal/mentions-legales" },
-    { label: "Politique de confidentialité", href: "/legal/confidentialite" },
-    { label: "CGU", href: "/legal/cgu" },
+  [t("Juridique", "Legal")]: [
+    { label: t("Mentions légales", "Legal notice"), href: "/legal/mentions-legales" },
+    { label: t("Politique de confidentialité", "Privacy policy"), href: "/legal/confidentialite" },
+    { label: t("CGU", "Terms of use"), href: "/legal/cgu" },
   ],
-};
+});
 
 export function Footer() {
+  const t = useT();
+  const footerLinks = getFooterLinks(t);
   return (
     <footer className="border-t border-black/[0.06] bg-[var(--landing-ivory)] text-[var(--landing-ink)] font-body">
       <div className="mx-auto max-w-6xl px-6 py-16 md:px-16 md:py-20">
@@ -33,9 +42,10 @@ export function Footer() {
               twocards<span className="text-[var(--landing-mute)]">.</span>
             </Link>
             <p className="mt-4 max-w-xs text-[13px] font-normal leading-relaxed text-[var(--landing-ink)]/60">
-              Le channel manager B2B des concierges et RP. TwoCards distribue
-              l&apos;inventaire des établissements, attribue chaque client et
-              automatise les commissions.
+              {t(
+                "Le channel manager B2B des concierges et RP. TwoCards distribue l'inventaire des établissements, attribue chaque client et automatise les commissions.",
+                "The B2B channel manager for concierges and PRs. TwoCards distributes venue inventory, attributes every guest and automates commissions."
+              )}
             </p>
           </div>
 
@@ -66,14 +76,16 @@ export function Footer() {
       <div className="border-t border-black/[0.06]">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 py-6 sm:flex-row md:px-16">
           <p className="text-xs font-normal text-[var(--landing-mute)]">
-            &copy; {new Date().getFullYear()} twocards. Tous droits réservés.
+            &copy; {new Date().getFullYear()} twocards.{" "}
+            {t("Tous droits réservés.", "All rights reserved.")}
           </p>
           <div className="flex items-center gap-6 text-xs font-normal text-[var(--landing-mute)]">
+            <LanguageSwitcher />
             <Link
               href="/legal/mentions-legales"
               className="transition-colors hover:text-[var(--landing-ink)]"
             >
-              Mentions légales
+              {t("Mentions légales", "Legal notice")}
             </Link>
             <a
               href="mailto:contact@twocardspro.com"

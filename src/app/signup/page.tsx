@@ -7,6 +7,9 @@ import { useSearchParams } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import type { Translate } from "@/lib/i18n";
+import { useT } from "@/lib/i18n/client";
+import { LanguageSwitcher } from "@/components/shared/language-switcher";
 
 /* Demande d'accès en trois écrans : le métier d'abord (« Vous êtes… »),
    puis ce qui le concerne, puis les coordonnées du compte. Sur grand écran,
@@ -23,90 +26,104 @@ type Step = 1 | 2 | 3;
 const UNSPLASH = (id: string) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=1400&q=80`;
 
-const KINDS: {
+const getKinds = (
+  t: Translate,
+): {
   value: Kind;
   label: string;
   line: string;
   image: string;
   caption: string;
-}[] = [
+}[] => [
   {
     value: "hotel",
-    label: "Hôtel ou riad",
-    line: "Un QR en chambre, vos clients réservent seuls.",
+    label: t("Hôtel ou riad", "Hotel or riad"),
+    line: t("Un QR en chambre, vos clients réservent seuls.", "A QR code in every room, guests book on their own."),
     image: UNSPLASH("photo-1759472659432-3232e42d04d2"),
-    caption: "Chaque sortie de vos clients est rattachée à votre maison.",
+    caption: t(
+      "Chaque sortie de vos clients est rattachée à votre maison.",
+      "Every outing your guests book is credited to your property.",
+    ),
   },
   {
     value: "etablissement",
-    label: "Établissement",
-    line: "Restaurant, rooftop, club, activité.",
+    label: t("Établissement", "Venue"),
+    line: t("Restaurant, rooftop, club, activité.", "Restaurant, rooftop, club, activity."),
     image: UNSPLASH("photo-1672832593966-fe1795b8d287"),
-    caption: "Des clients d'hôtels à votre porte, vous payez au résultat.",
+    caption: t(
+      "Des clients d'hôtels à votre porte, vous payez au résultat.",
+      "Hotel guests at your door, and you only pay for results.",
+    ),
   },
   {
     value: "concierge",
-    label: "Concierge ou RP",
-    line: "Vos recommandations, suivies et rémunérées.",
+    label: t("Concierge ou RP", "Concierge or PR"),
+    line: t("Vos recommandations, suivies et rémunérées.", "Your recommendations, tracked and rewarded."),
     image: UNSPLASH("photo-1660557989695-14fac79c086d"),
-    caption: "Vous savez quand votre client arrive, la commission suit.",
+    caption: t(
+      "Vous savez quand votre client arrive, la commission suit.",
+      "You know when your guest arrives, and the commission follows.",
+    ),
   },
   {
     value: "influenceur",
-    label: "Créateur de contenu",
-    line: "Un lien unique pour toute votre sélection.",
+    label: t("Créateur de contenu", "Content creator"),
+    line: t("Un lien unique pour toute votre sélection.", "One link for your whole selection."),
     image: UNSPLASH("photo-1672831744471-fb82fd8fa2e0"),
-    caption: "Chaque réservation issue de vos contenus vous est attribuée.",
+    caption: t(
+      "Chaque réservation issue de vos contenus vous est attribuée.",
+      "Every reservation that comes from your content is credited to you.",
+    ),
   },
 ];
 
 const DEFAULT_IMAGE = UNSPLASH("photo-1647878501041-1609141a7fb1");
 
-const VENUE_TYPES = [
+const getVenueTypes = (t: Translate) => [
   { value: "restaurant", label: "Restaurant" },
   { value: "rooftop", label: "Rooftop" },
   { value: "club", label: "Club" },
   { value: "lounge", label: "Lounge" },
   { value: "bar", label: "Bar" },
   { value: "beach-club", label: "Beach club" },
-  { value: "hotel-riad", label: "Hôtel / Riad" },
+  { value: "hotel-riad", label: t("Hôtel / Riad", "Hotel / Riad") },
   /* Activité (quad, hammam, excursion…) ou service (chauffeur,
      photographe…) : l'espace montre des prestations, pas des tables. */
-  { value: "activite", label: "Activité" },
+  { value: "activite", label: t("Activité", "Activity") },
   { value: "service", label: "Service" },
 ] as const;
 
-const CONCIERGE_TYPES = [
-  { value: "hotel", label: "Concierge d'hôtel" },
-  { value: "private", label: "Conciergerie privée" },
-  { value: "rp", label: "RP / promoteur" },
+const getConciergeTypes = (t: Translate) => [
+  { value: "hotel", label: t("Concierge d'hôtel", "Hotel concierge") },
+  { value: "private", label: t("Conciergerie privée", "Private concierge") },
+  { value: "rp", label: t("RP / promoteur", "PR / promoter") },
 ] as const;
 
-const AUDIENCE_SIZES = [
-  { value: "lt10k", label: "Moins de 10 k" },
-  { value: "10-50k", label: "10 à 50 k" },
-  { value: "50-200k", label: "50 à 200 k" },
-  { value: "gt200k", label: "Plus de 200 k" },
+const getAudienceSizes = (t: Translate) => [
+  { value: "lt10k", label: t("Moins de 10 k", "Under 10k") },
+  { value: "10-50k", label: t("10 à 50 k", "10k–50k") },
+  { value: "50-200k", label: t("50 à 200 k", "50k–200k") },
+  { value: "gt200k", label: t("Plus de 200 k", "Over 200k") },
 ] as const;
 
-const STEP2: Record<Kind, { title: string; intro: string }> = {
+const getStep2 = (t: Translate): Record<Kind, { title: string; intro: string }> => ({
   hotel: {
-    title: "Votre hôtel",
-    intro: "Pour préparer vos QR codes et votre espace.",
+    title: t("Votre hôtel", "Your hotel"),
+    intro: t("Pour préparer vos QR codes et votre espace.", "So we can prepare your QR codes and your workspace."),
   },
   etablissement: {
-    title: "Votre établissement",
-    intro: "Ce que les clients verront dans le menu des hôtels.",
+    title: t("Votre établissement", "Your venue"),
+    intro: t("Ce que les clients verront dans le menu des hôtels.", "What guests will see in the hotels’ menu."),
   },
   concierge: {
-    title: "Votre activité",
-    intro: "Pour vous présenter aux établissements du réseau.",
+    title: t("Votre activité", "Your work"),
+    intro: t("Pour vous présenter aux établissements du réseau.", "So we can introduce you to venues in the network."),
   },
   influenceur: {
-    title: "Votre audience",
-    intro: "Pour vous proposer les adresses qui lui ressemblent.",
+    title: t("Votre audience", "Your audience"),
+    intro: t("Pour vous proposer les adresses qui lui ressemblent.", "So we can suggest places that suit your audience."),
   },
-};
+});
 
 /* Ramène toute saisie à l'identifiant seul : « @Karim », « Karim » ou une URL
    de profil collée donnent tous « karim ». Normaliser à l'envoi plutôt qu'à
@@ -224,6 +241,12 @@ function Wordmark({ light = false }: { light?: boolean }) {
 }
 
 function SignupFlow() {
+  const t = useT();
+  const KINDS = getKinds(t);
+  const VENUE_TYPES = getVenueTypes(t);
+  const CONCIERGE_TYPES = getConciergeTypes(t);
+  const AUDIENCE_SIZES = getAudienceSizes(t);
+  const STEP2 = getStep2(t);
   const searchParams = useSearchParams();
   const reduceMotion = useReducedMotion();
 
@@ -240,9 +263,9 @@ function SignupFlow() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const [venueType, setVenueType] = useState<(typeof VENUE_TYPES)[number]["value"]>("restaurant");
-  const [conciergeType, setConciergeType] = useState<(typeof CONCIERGE_TYPES)[number]["value"] | null>(null);
-  const [audienceSize, setAudienceSize] = useState<(typeof AUDIENCE_SIZES)[number]["value"] | null>(null);
+  const [venueType, setVenueType] = useState<ReturnType<typeof getVenueTypes>[number]["value"]>("restaurant");
+  const [conciergeType, setConciergeType] = useState<ReturnType<typeof getConciergeTypes>[number]["value"] | null>(null);
+  const [audienceSize, setAudienceSize] = useState<ReturnType<typeof getAudienceSizes>[number]["value"] | null>(null);
   const [form, setForm] = useState({
     venueName: "",
     city: "",
@@ -291,7 +314,7 @@ function SignupFlow() {
     if (!kind) return;
     setError("");
     if (form.password.length < 8) {
-      setError("Le mot de passe doit contenir au moins 8 caractères.");
+      setError(t("Le mot de passe doit contenir au moins 8 caractères.", "Your password must be at least 8 characters long."));
       return;
     }
     setLoading(true);
@@ -323,8 +346,17 @@ function SignupFlow() {
     if (error) {
       setError(
         error.message === "User already registered"
-          ? "Un compte existe déjà avec cet e-mail."
-          : error.message
+          ? t("Un compte existe déjà avec cet e-mail.", "An account already exists with this email.")
+          : /rate limit|security purposes/i.test(error.message)
+            ? t(
+                "Trop de tentatives. Patientez un instant avant de réessayer.",
+                "Too many attempts. Please wait a moment before trying again.",
+              )
+            : /password should be|weak password/i.test(error.message)
+              ? t("Ce mot de passe est trop faible. Choisissez-en un plus robuste.", "This password is too weak. Please choose a stronger one.")
+              : /invalid.*email|email.*invalid/i.test(error.message)
+                ? t("Adresse e-mail invalide.", "Invalid email address.")
+                : error.message
       );
       return;
     }
@@ -341,7 +373,7 @@ function SignupFlow() {
         transition: { duration: 0.35, ease: [0.22, 1, 0.36, 1] as const },
       };
 
-  const heading = "text-[34px] font-bold leading-[1.05] tracking-[-0.03em] outline-none md:text-[44px]";
+  const heading = "text-[36px] font-bold leading-[1.05] tracking-[-0.03em] outline-none md:text-[48px]";
 
   return (
     <div className="landing-satoshi min-h-screen bg-[var(--landing-ivory)] font-body text-[var(--landing-ink)] lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
@@ -349,29 +381,35 @@ function SignupFlow() {
           posées et se relaient en fondu, sans rechargement au survol. */}
       <aside className="relative hidden lg:block">
         <div className="sticky top-0 h-screen overflow-hidden bg-[#1a1612]">
-          {[DEFAULT_IMAGE, ...KINDS.map((k) => k.image)].map((src) => (
-            <Image
-              key={src}
-              src={src}
-              alt=""
-              fill
-              priority={src === DEFAULT_IMAGE}
-              sizes="45vw"
-              className={`object-cover transition-opacity duration-700 ${
-                (shown?.image ?? DEFAULT_IMAGE) === src ? "opacity-100" : "opacity-0"
-              }`}
-            />
-          ))}
+          {/* Conteneur absolu : next/image « fill » refuse un parent sticky. */}
+          <div className="absolute inset-0">
+            {[DEFAULT_IMAGE, ...KINDS.map((k) => k.image)].map((src) => (
+              <Image
+                key={src}
+                src={src}
+                alt=""
+                fill
+                priority={src === DEFAULT_IMAGE}
+                sizes="45vw"
+                className={`object-cover transition-opacity duration-700 ${
+                  (shown?.image ?? DEFAULT_IMAGE) === src ? "opacity-100" : "opacity-0"
+                }`}
+              />
+            ))}
+          </div>
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/30" />
           <div className="absolute left-10 top-8">
             <Wordmark light />
           </div>
           <div className="absolute inset-x-10 bottom-12 max-w-md text-white">
-            <p className="text-[14px] text-white/60">{shown ? shown.label : "Rejoindre le réseau"}</p>
+            <p className="text-[14px] text-white/60">{shown ? shown.label : t("Rejoindre le réseau", "Join the network")}</p>
             <p className="mt-3 text-[28px] font-semibold leading-[1.15] tracking-[-0.02em]">
               {shown
                 ? shown.caption
-                : "Hôtels, établissements, concierges et créateurs : un même réseau, chaque réservation suivie."}
+                : t(
+                    "Hôtels, établissements, concierges et créateurs : un même réseau, chaque réservation suivie.",
+                    "Hotels, venues, concierges and creators: one network, every reservation tracked.",
+                  )}
             </p>
           </div>
         </div>
@@ -383,15 +421,16 @@ function SignupFlow() {
             <Wordmark />
           </div>
           <p className="ml-auto shrink-0 text-[14px] text-[var(--landing-mute)]">
-            <span className="hidden sm:inline">Déjà un compte ? </span>
+            <span className="hidden sm:inline">{t("Déjà un compte ? ", "Already have an account? ")}</span>
             <Link href="/login" className="font-medium text-[var(--landing-ink)] underline decoration-black/20 underline-offset-4 hover:decoration-black/60">
-              Se connecter
+              {t("Se connecter", "Log in")}
             </Link>
           </p>
+          <LanguageSwitcher className="shrink-0" />
         </header>
 
         <div className="flex flex-1 items-center">
-          <div className="mx-auto w-full max-w-[460px] py-12 lg:py-16">
+          <div className="mx-auto w-full max-w-[520px] py-12 lg:py-16">
             {!done && (
               <div className="mb-10">
                 <div className="flex gap-1.5" aria-hidden>
@@ -412,12 +451,12 @@ function SignupFlow() {
                       className="-ml-1 inline-flex items-center gap-1.5 rounded px-1 text-[var(--landing-ink)]/70 transition-colors hover:text-[var(--landing-ink)]"
                     >
                       <ArrowLeft size={15} strokeWidth={1.75} />
-                      Retour
+                      {t("Retour", "Back")}
                     </button>
                   ) : (
-                    <span>Demander un accès</span>
+                    <span>{t("Demander un accès", "Request access")}</span>
                   )}
-                  <span>Étape {step} sur 3</span>
+                  <span>{t(`Étape ${step} sur 3`, `Step ${step} of 3`)}</span>
                 </div>
               </div>
             )}
@@ -426,28 +465,47 @@ function SignupFlow() {
               {done ? (
                 <motion.div key="done" {...motionProps}>
                   <h1 ref={headingRef} tabIndex={-1} className={heading}>
-                    Vérifiez votre boîte mail.
+                    {t("Vérifiez votre boîte mail.", "Check your inbox.")}
                   </h1>
                   <p className="mt-4 text-[16px] leading-relaxed text-[var(--landing-ink)]/65">
-                    Un lien de confirmation vient d&apos;être envoyé à{" "}
-                    <span className="font-medium text-[var(--landing-ink)]">{form.email}</span>. Cliquez dessus pour
-                    activer votre compte.
+                    {t(
+                      <>
+                        Un lien de confirmation vient d&apos;être envoyé à{" "}
+                        <span className="font-medium text-[var(--landing-ink)]">{form.email}</span>. Cliquez dessus pour
+                        activer votre compte.
+                      </>,
+                      <>
+                        We&apos;ve just sent a confirmation link to{" "}
+                        <span className="font-medium text-[var(--landing-ink)]">{form.email}</span>. Click it to
+                        activate your account.
+                      </>,
+                    )}
                   </p>
                   <Link
                     href="/login"
                     className="mt-8 inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[var(--landing-ink)] px-7 text-[15px] font-medium text-white transition-opacity hover:opacity-90"
                   >
-                    Aller à la connexion
+                    {t("Aller à la connexion", "Go to log in")}
                     <ArrowRight size={16} strokeWidth={1.75} />
                   </Link>
                 </motion.div>
               ) : step === 1 ? (
                 <motion.div key="step-1" {...motionProps}>
                   <h1 ref={headingRef} tabIndex={-1} className={heading}>
-                    Vous <em className="font-light italic">êtes</em>…
+                    {t(
+                      <>
+                        Vous <em className="font-light italic">êtes</em>…
+                      </>,
+                      <>
+                        You <em className="font-light italic">are</em>…
+                      </>,
+                    )}
                   </h1>
                   <p className="mt-4 text-[16px] leading-relaxed text-[var(--landing-ink)]/65">
-                    La suite de l&apos;inscription s&apos;adapte à votre métier.
+                    {t(
+                      <>La suite de l&apos;inscription s&apos;adapte à votre métier.</>,
+                      <>The rest of sign-up adapts to what you do.</>,
+                    )}
                   </p>
 
                   <ul className="mt-9 border-t border-black/[0.08]" onMouseLeave={() => setHovered(null)}>
@@ -458,21 +516,21 @@ function SignupFlow() {
                           onClick={() => chooseKind(k.value)}
                           onMouseEnter={() => setHovered(k.value)}
                           onFocus={() => setHovered(k.value)}
-                          className="group flex w-full items-center gap-4 py-4 text-left outline-none focus-visible:bg-black/[0.03] sm:gap-5"
+                          className="group flex w-full items-center gap-4 py-5 text-left outline-none focus-visible:bg-black/[0.03] sm:gap-6"
                         >
-                          <span className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-[#1a1612]">
-                            <Image src={k.image} alt="" fill sizes="56px" className="object-cover" />
+                          <span className="relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl bg-[#1a1612] sm:h-[76px] sm:w-[76px]">
+                            <Image src={k.image} alt="" fill sizes="76px" className="object-cover" />
                           </span>
                           <span className="min-w-0 flex-1">
-                            <span className="block text-[18px] font-semibold tracking-[-0.01em] sm:text-[19px]">
+                            <span className="block text-[19px] font-semibold tracking-[-0.015em] sm:text-[22px]">
                               {k.label}
                             </span>
-                            <span className="mt-0.5 block text-[14px] leading-snug text-[var(--landing-mute)]">
+                            <span className="mt-1 block text-[14px] leading-snug text-[var(--landing-mute)] sm:text-[15px]">
                               {k.line}
                             </span>
                           </span>
                           <ArrowRight
-                            size={18}
+                            size={20}
                             strokeWidth={1.5}
                             className="shrink-0 text-black/25 transition-all group-hover:translate-x-1 group-hover:text-[var(--landing-ink)]"
                           />
@@ -491,7 +549,7 @@ function SignupFlow() {
                   <form onSubmit={submitDetails} className="mt-9 space-y-6">
                     {(kind === "hotel" || kind === "etablissement") && (
                       <>
-                        <Field id="venue-name" label={kind === "hotel" ? "Nom de l'hôtel" : "Nom de l'établissement"}>
+                        <Field id="venue-name" label={kind === "hotel" ? t("Nom de l'hôtel", "Hotel name") : t("Nom de l'établissement", "Venue name")}>
                           <input
                             id="venue-name"
                             required
@@ -503,7 +561,7 @@ function SignupFlow() {
                           />
                         </Field>
                         <div className="grid gap-6 sm:grid-cols-2">
-                          <Field id="city" label="Ville">
+                          <Field id="city" label={t("Ville", "City")}>
                             <input
                               id="city"
                               required
@@ -515,7 +573,7 @@ function SignupFlow() {
                             />
                           </Field>
                           {kind === "hotel" ? (
-                            <Field id="rooms" label="Chambres" hint="facultatif">
+                            <Field id="rooms" label={t("Chambres", "Rooms")} hint={t("facultatif", "optional")}>
                               <input
                                 id="rooms"
                                 type="number"
@@ -533,7 +591,7 @@ function SignupFlow() {
                         </div>
                         {kind === "etablissement" && (
                           <Choices
-                            label="Type de lieu"
+                            label={t("Type de lieu", "Type of venue")}
                             name="venueType"
                             options={VENUE_TYPES}
                             value={venueType}
@@ -547,13 +605,17 @@ function SignupFlow() {
                     {kind === "concierge" && (
                       <>
                         <Choices
-                          label="Vous travaillez comme"
+                          label={t("Vous travaillez comme", "You work as")}
                           name="conciergeType"
                           options={CONCIERGE_TYPES}
                           value={conciergeType}
                           onChange={setConciergeType}
                         />
-                        <Field id="organization" label="Hôtel, conciergerie ou agence" hint="facultatif">
+                        <Field
+                          id="organization"
+                          label={t("Hôtel, conciergerie ou agence", "Hotel, concierge company or agency")}
+                          hint={t("facultatif", "optional")}
+                        >
                           <input
                             id="organization"
                             autoComplete="organization"
@@ -571,9 +633,9 @@ function SignupFlow() {
                       <>
                         <InstagramField value={form.instagram} onChange={set("instagram")} required />
                         <Choices
-                          label="Abonnés"
+                          label={t("Abonnés", "Followers")}
                           name="audienceSize"
-                          hint="facultatif"
+                          hint={t("facultatif", "optional")}
                           options={AUDIENCE_SIZES}
                           value={audienceSize}
                           onChange={setAudienceSize}
@@ -581,20 +643,20 @@ function SignupFlow() {
                       </>
                     )}
 
-                    <PrimaryButton>Continuer</PrimaryButton>
+                    <PrimaryButton>{t("Continuer", "Continue")}</PrimaryButton>
                   </form>
                 </motion.div>
               ) : (
                 <motion.div key="step-3" {...motionProps}>
                   <h1 ref={headingRef} tabIndex={-1} className={heading}>
-                    Votre compte
+                    {t("Votre compte", "Your account")}
                   </h1>
                   <p className="mt-4 text-[16px] leading-relaxed text-[var(--landing-ink)]/65">
-                    Les coordonnées avec lesquelles vous vous connecterez.
+                    {t("Les coordonnées avec lesquelles vous vous connecterez.", "The details you’ll log in with.")}
                   </p>
 
                   <form onSubmit={submitAccount} className="mt-9 space-y-6">
-                    <Field id="fullname" label="Nom complet">
+                    <Field id="fullname" label={t("Nom complet", "Full name")}>
                       <input
                         id="fullname"
                         required
@@ -605,19 +667,19 @@ function SignupFlow() {
                         className={inputClass}
                       />
                     </Field>
-                    <Field id="email" label="E-mail professionnel">
+                    <Field id="email" label={t("E-mail professionnel", "Work email")}>
                       <input
                         id="email"
                         type="email"
                         required
                         autoComplete="email"
-                        placeholder="nom@entreprise.com"
+                        placeholder={t("nom@entreprise.com", "name@company.com")}
                         value={form.email}
                         onChange={set("email")}
                         className={inputClass}
                       />
                     </Field>
-                    <Field id="phone" label="Téléphone" hint="facultatif">
+                    <Field id="phone" label={t("Téléphone", "Phone")} hint={t("facultatif", "optional")}>
                       <input
                         id="phone"
                         type="tel"
@@ -628,7 +690,7 @@ function SignupFlow() {
                         className={inputClass}
                       />
                     </Field>
-                    <Field id="password" label="Mot de passe" hint="8 caractères minimum">
+                    <Field id="password" label={t("Mot de passe", "Password")} hint={t("8 caractères minimum", "At least 8 characters")}>
                       <div className="relative">
                         <input
                           id="password"
@@ -645,7 +707,7 @@ function SignupFlow() {
                           onClick={() => setShowPassword((v) => !v)}
                           className="absolute right-3 top-1/2 -translate-y-1/2 rounded px-2 py-1 text-[13px] font-medium text-[var(--landing-ink)]/55 transition-colors hover:text-[var(--landing-ink)]"
                         >
-                          {showPassword ? "Masquer" : "Afficher"}
+                          {showPassword ? t("Masquer", "Hide") : t("Afficher", "Show")}
                         </button>
                       </div>
                     </Field>
@@ -656,7 +718,7 @@ function SignupFlow() {
                       </p>
                     )}
 
-                    <PrimaryButton loading={loading}>Créer mon compte</PrimaryButton>
+                    <PrimaryButton loading={loading}>{t("Créer mon compte", "Create my account")}</PrimaryButton>
                   </form>
                 </motion.div>
               )}
@@ -681,15 +743,16 @@ function InstagramField({
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   required?: boolean;
 }) {
+  const t = useT();
   return (
-    <Field id="instagram" label="Instagram" hint={required ? undefined : "facultatif"}>
+    <Field id="instagram" label="Instagram" hint={required ? undefined : t("facultatif", "optional")}>
       <input
         id="instagram"
         required={required}
         autoCapitalize="none"
         autoCorrect="off"
         spellCheck={false}
-        placeholder="@nom_du_compte"
+        placeholder={t("@nom_du_compte", "@account_name")}
         value={value}
         onChange={onChange}
         className={inputClass}

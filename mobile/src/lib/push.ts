@@ -3,6 +3,7 @@ import * as Device from 'expo-device'
 import * as Notifications from 'expo-notifications'
 import { Platform } from 'react-native'
 
+import { getT } from '@/lib/i18n'
 import { supabase } from '@/lib/supabase'
 
 /* Bannière et son même quand l'application est ouverte : un manager en
@@ -22,7 +23,7 @@ export type PushStatus = 'granted' | 'denied' | 'undetermined' | 'unsupported'
 async function ensureChannel() {
   if (Platform.OS !== 'android') return
   await Notifications.setNotificationChannelAsync('default', {
-    name: 'Réservations et messages',
+    name: getT()('Réservations et messages', 'Reservations and messages'),
     importance: Notifications.AndroidImportance.MAX,
     lightColor: '#ffffff',
   })

@@ -17,6 +17,7 @@ import {
   type ConversationSummary,
   type Profile,
 } from "@/hooks/use-messaging";
+import { useLocale, useT } from "@/lib/i18n/client";
 
 /* Messagerie réelle (Supabase + temps réel), partagée par les deux
    dashboards : le camp (établissement ou concierge) est déduit du rôle du
@@ -40,6 +41,8 @@ export function Messenger({
   /* Profil dont la conversation s'ouvre d'office (lien « Message »). */
   initialCounterpartId?: string | null;
 }) {
+  const t = useT();
+  const locale = useLocale();
   const {
     isLoading,
     userId,
@@ -77,7 +80,7 @@ export function Messenger({
   const q = search.trim().toLowerCase();
   const visible = q
     ? conversations.filter((c) =>
-        displayName(c.counterpart).toLowerCase().includes(q)
+        displayName(c.counterpart, locale).toLowerCase().includes(q)
       )
     : conversations;
 
@@ -105,7 +108,7 @@ export function Messenger({
               className="flex items-center gap-1.5 rounded-lg bg-blue-500 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-blue-600"
             >
               <Plus size={14} strokeWidth={2} />
-              Nouvelle
+              {t("Nouvelle", "New")}
             </button>
           </div>
           <div className="relative">
@@ -130,8 +133,8 @@ export function Messenger({
               </div>
               <p className="text-sm font-medium text-white/60">
                 {conversations.length === 0
-                  ? "Aucune conversation pour le moment"
-                  : "Aucun résultat"}
+                  ? t("Aucune conversation pour le moment", "No conversations yet")
+                  : t("Aucun résultat", "No results")}
               </p>
               {conversations.length === 0 && (
                 <p className="text-xs leading-relaxed text-white/35">
@@ -152,22 +155,22 @@ export function Messenger({
               }`}
             >
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-500/20 text-xs font-bold text-blue-300">
-                {initialsOf(c.counterpart)}
+                {initialsOf(c.counterpart, locale)}
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between gap-2">
                   <p className="truncate text-sm font-semibold text-white">
-                    {displayName(c.counterpart)}
+                    {displayName(c.counterpart, locale)}
                   </p>
                   {c.lastMessage && (
                     <span className="shrink-0 text-[10px] text-white/30">
-                      {formatTimestamp(c.lastMessage.created_at)}
+                      {formatTimestamp(c.lastMessage.created_at, locale)}
                     </span>
                   )}
                 </div>
                 <div className="flex items-center justify-between gap-2">
                   <p className="truncate text-xs text-white/40">
-                    {c.lastMessage?.body ?? "Conversation ouverte"}
+                    {c.lastMessage?.body ?? t("Conversation ouverte", "Conversation started")}
                   </p>
                   {c.unread > 0 && (
                     <span className="flex h-4 min-w-4 shrink-0 items-center justify-center rounded-full bg-blue-500 px-1 text-[10px] font-bold text-white">
@@ -193,16 +196,16 @@ export function Messenger({
               <button
                 onClick={() => setMobileThread(false)}
                 className="rounded-lg p-1 text-white/50 hover:text-white lg:hidden"
-                aria-label="Retour aux conversations"
+                aria-label={t("Retour aux conversations", "Back to conversations")}
               >
                 <ArrowLeft size={18} />
               </button>
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-500/20 text-xs font-bold text-blue-300">
-                {initialsOf(active.counterpart)}
+                {initialsOf(active.counterpart, locale)}
               </div>
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold text-white">
-                  {displayName(active.counterpart)}
+                  {displayName(active.counterpart, locale)}
                 </p>
                 <p className="text-[11px] text-white/35">
                   {active.counterpart.city || labels.counterpartHint}
@@ -213,12 +216,12 @@ export function Messenger({
             <div className="flex-1 space-y-3 overflow-y-auto p-5 scrollbar-thin">
               {messagesLoading && (
                 <p className="py-8 text-center text-xs text-white/30">
-                  Chargement…
+                  {t("Chargement…", "Loading…")}
                 </p>
               )}
               {!messagesLoading && messages.length === 0 && (
                 <p className="py-8 text-center text-xs text-white/30">
-                  Aucun message. Écrivez le premier.
+                  {t("Aucun message. Écrivez le premier.", "No messages yet. Write the first one.")}
                 </p>
               )}
               {messages.map((m) => {
@@ -243,7 +246,7 @@ export function Messenger({
                           mine ? "text-white/60" : "text-white/30"
                         }`}
                       >
-                        {formatTimestamp(m.created_at)}
+                        {formatTimestamp(m.created_at, locale)}
                       </p>
                     </div>
                   </div>
@@ -263,14 +266,14 @@ export function Messenger({
                       void handleSend();
                     }
                   }}
-                  placeholder="Votre message..."
+                  placeholder={t("Votre message...", "Your message...")}
                   rows={1}
                   className="max-h-32 flex-1 resize-none rounded-xl border border-white/[0.1] bg-white/[0.05] px-4 py-2.5 text-sm text-white placeholder:text-white/25 focus:border-blue-400/40 focus:outline-none"
                 />
                 <button
                   onClick={() => void handleSend()}
                   disabled={!input.trim()}
-                  aria-label="Envoyer"
+                  aria-label={t("Envoyer", "Send")}
                   className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-500 text-white transition-colors hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   <Send size={16} strokeWidth={2} />
@@ -284,7 +287,7 @@ export function Messenger({
               <MessageSquare size={24} className="text-white/30" />
             </div>
             <p className="text-sm font-semibold text-white/60">
-              Sélectionnez une conversation
+              {t("Sélectionnez une conversation", "Select a conversation")}
             </p>
             <p className="max-w-xs text-xs leading-relaxed text-white/35">
               {labels.emptyHint}
@@ -299,12 +302,12 @@ export function Messenger({
           <div className={`${panel} w-full max-w-sm p-5`}>
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-sm font-bold text-white">
-                Nouvelle conversation
+                {t("Nouvelle conversation", "New conversation")}
               </h2>
               <button
                 onClick={() => setPickerOpen(false)}
                 className="rounded-lg p-1 text-white/40 hover:text-white"
-                aria-label="Fermer"
+                aria-label={t("Fermer", "Close")}
               >
                 <X size={16} />
               </button>
@@ -312,7 +315,7 @@ export function Messenger({
             <div className="max-h-72 space-y-1 overflow-y-auto scrollbar-thin">
               {directory === null && (
                 <p className="py-6 text-center text-xs text-white/30">
-                  Chargement de l&apos;annuaire…
+                  {t(<>Chargement de l&apos;annuaire…</>, <>Loading directory…</>)}
                 </p>
               )}
               {directory?.length === 0 && (
@@ -331,11 +334,11 @@ export function Messenger({
                   className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors hover:bg-white/[0.06]"
                 >
                   <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-500/20 text-xs font-bold text-blue-300">
-                    {initialsOf(p)}
+                    {initialsOf(p, locale)}
                   </div>
                   <div className="min-w-0">
                     <p className="truncate text-sm font-medium text-white">
-                      {displayName(p)}
+                      {displayName(p, locale)}
                     </p>
                     <p className="text-[11px] text-white/35">
                       {p.city || labels.counterpartHint}
@@ -355,7 +358,7 @@ export function Messenger({
           <button
             onClick={dismissError}
             className="text-red-200/60 hover:text-red-200"
-            aria-label="Fermer l'erreur"
+            aria-label={t("Fermer l'erreur", "Dismiss error")}
           >
             <X size={14} />
           </button>

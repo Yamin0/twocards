@@ -13,6 +13,8 @@ import {
 import { useAuthUser } from "@/hooks/use-auth-user";
 import { TableSkeleton } from "@/components/shared/loading-skeleton";
 import { useToast } from "@/hooks/use-toast";
+import { useT } from "@/lib/i18n/client";
+import type { Translate } from "@/lib/i18n";
 
 const DEMO_RESERVATIONS = [
   { id: 1, venue: "Le Comptoir Darna", city: "Marrakech", client: "Mehdi Alaoui", guests: 8, table: "VIP 3", date: "6 Avr. 2026", time: "22:00", status: "confirmée", commission: "6 400 MAD" },
@@ -28,6 +30,23 @@ const statusIcon = (s: string) => {
   if (s === "confirmée") return <CheckCircle size={14} strokeWidth={1.5} className="text-emerald-600" />;
   if (s === "en attente") return <Clock size={14} strokeWidth={1.5} className="text-amber-600" />;
   return <XCircle size={14} strokeWidth={1.5} className="text-red-500" />;
+};
+
+/* Les valeurs restent en français (statuts, « À définir »…) ; seul
+   l'affichage suit la langue. */
+const statusLabel = (s: string, t: Translate) =>
+  ({
+    toutes: t("Toutes", "All"),
+    "confirmée": t("Confirmée", "Confirmed"),
+    "en attente": t("En attente", "Pending"),
+    "refusée": t("Refusée", "Declined"),
+  } as Record<string, string>)[s] ?? s;
+
+const valueLabel = (v: string, t: Translate) => {
+  if (v === "À définir") return t("À définir", "TBC");
+  if (v === "À calculer") return t("À calculer", "To be calculated");
+  if (v === "Carré VIP") return t("Carré VIP", "VIP area");
+  return t(v, v.replace("Avr.", "Apr"));
 };
 
 const statusBadge = (s: string) => {
@@ -48,6 +67,7 @@ function ConciergeReservations() {
       : venues;
 
   const { isDemoConcierge, isLoading } = useAuthUser();
+  const t = useT();
   const [reservations, setReservations] = useState<typeof DEMO_RESERVATIONS>([]);
   const [filter, setFilter] = useState("toutes");
 
@@ -92,10 +112,10 @@ function ConciergeReservations() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const newErrors: Record<string, string> = {};
-    if (!newClient.trim()) newErrors.client = "Le nom du client est requis";
-    if (!newVenue) newErrors.venue = "L'établissement est requis";
-    if (newGuests && parseInt(newGuests) < 1) newErrors.guests = "Minimum 1 personne";
-    if (!newDate.trim()) newErrors.date = "La date est requise";
+    if (!newClient.trim()) newErrors.client = t("Le nom du client est requis", "Guest name is required");
+    if (!newVenue) newErrors.venue = t("L'établissement est requis", "Venue is required");
+    if (newGuests && parseInt(newGuests) < 1) newErrors.guests = t("Minimum 1 personne", "Minimum 1 guest");
+    if (!newDate.trim()) newErrors.date = t("La date est requise", "Date is required");
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) return;
 
@@ -125,7 +145,7 @@ function ConciergeReservations() {
     setNewGuests("");
     setNewDate("");
     setNewTime("");
-    showToast(`Réservation créée pour ${newRes.client}`);
+    showToast(t(`Réservation créée pour ${newRes.client}`, `Reservation created for ${newRes.client}`));
   };
 
   if (isLoading) return <TableSkeleton />;
@@ -135,10 +155,10 @@ function ConciergeReservations() {
       <div className="px-8 pt-8 pb-4 flex items-center justify-between">
         <div>
           <h1 className="text-white text-2xl font-extrabold">
-            Mes réservations
+            {t("Mes réservations", "My reservations")}
           </h1>
           <p className="text-white/60 mt-1 text-sm">
-            Suivez et gérez toutes vos réservations.
+            {t("Suivez et gérez toutes vos réservations.", "Track and manage all your reservations.")}
           </p>
         </div>
         <button
@@ -146,7 +166,7 @@ function ConciergeReservations() {
           className="flex items-center gap-2 bg-white/15 text-white text-sm font-medium px-5 py-2.5 rounded-sm hover:opacity-90 transition-opacity"
         >
           <Plus size={16} strokeWidth={1.5} />
-          Nouvelle réservation
+          {t("Nouvelle réservation", "New reservation")}
         </button>
       </div>
 
@@ -160,7 +180,7 @@ function ConciergeReservations() {
               filter === f ? "bg-white/15 text-white" : "bg-white/[0.05] text-white/60 hover:bg-white/[0.05]"
             }`}
           >
-            {f}
+            {statusLabel(f, t)}
           </button>
         ))}
       </div>
@@ -172,13 +192,13 @@ function ConciergeReservations() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-white/[0.05]">
-                  <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60">Établissement</th>
-                  <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60">Client</th>
-                  <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60">Couverts</th>
-                  <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60">Table</th>
-                  <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60">Date</th>
-                  <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60">Statut</th>
-                  <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60">Commission</th>
+                  <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60">{t("Établissement", "Venue")}</th>
+                  <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60">{t("Client", "Guest")}</th>
+                  <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60">{t("Couverts", "Covers")}</th>
+                  <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60">{t("Table", "Table")}</th>
+                  <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60">{t("Date", "Date")}</th>
+                  <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60">{t("Statut", "Status")}</th>
+                  <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60">{t("Commission", "Commission")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -188,23 +208,23 @@ function ConciergeReservations() {
                       <p className="text-white font-medium">{res.venue}</p>
                       <p className="text-xs text-white/60">{res.city}</p>
                     </td>
-                    <td data-label="Client" className="px-6 py-3.5 text-white">{res.client}</td>
-                    <td data-label="Couverts" className="px-6 py-3.5 text-white">{res.guests}</td>
-                    <td data-label="Table" className="px-6 py-3.5 text-white">{res.table}</td>
-                    <td data-label="Date" className="px-6 py-3.5 text-white/60">{res.date} - {res.time}</td>
-                    <td data-label="Statut" className="px-6 py-3.5">
+                    <td data-label={t("Client", "Guest")} className="px-6 py-3.5 text-white">{res.client}</td>
+                    <td data-label={t("Couverts", "Covers")} className="px-6 py-3.5 text-white">{res.guests}</td>
+                    <td data-label={t("Table", "Table")} className="px-6 py-3.5 text-white">{valueLabel(res.table, t)}</td>
+                    <td data-label={t("Date", "Date")} className="px-6 py-3.5 text-white/60">{valueLabel(res.date, t)} - {valueLabel(res.time, t)}</td>
+                    <td data-label={t("Statut", "Status")} className="px-6 py-3.5">
                       <span className={`inline-flex items-center gap-1 text-[0.625rem] font-semibold px-2 py-0.5 rounded-full ${statusBadge(res.status)}`}>
                         {statusIcon(res.status)}
-                        {res.status}
+                        {statusLabel(res.status, t)}
                       </span>
                     </td>
-                    <td data-label="Commission" className="px-6 py-3.5 text-white font-medium">{res.commission}</td>
+                    <td data-label={t("Commission", "Commission")} className="px-6 py-3.5 text-white font-medium">{valueLabel(res.commission, t)}</td>
                   </tr>
                 ))}
                 {filtered.length === 0 && (
                   <tr>
                     <td colSpan={7} className="px-6 py-12 text-center text-sm text-white/60">
-                      Aucune réservation trouvée
+                      {t("Aucune réservation trouvée", "No reservations found")}
                     </td>
                   </tr>
                 )}
@@ -220,10 +240,11 @@ function ConciergeReservations() {
           <div className="bg-white/[0.07] rounded-xl shadow-xl w-full max-w-md mx-4 p-6">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-lg font-bold text-white">
-                Nouvelle réservation
+                {t("Nouvelle réservation", "New reservation")}
               </h2>
               <button
                 onClick={() => { setShowModal(false); setErrors({}); }}
+                aria-label={t("Fermer", "Close")}
                 className="p-1 rounded-lg text-white/60 hover:text-white hover:bg-white/[0.05] transition-colors"
               >
                 <X size={18} strokeWidth={1.5} />
@@ -232,7 +253,7 @@ function ConciergeReservations() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-xs font-medium text-white/60 mb-1">
-                  Établissement *
+                  {t("Établissement *", "Venue *")}
                 </label>
                 <select
                   value={newVenue}
@@ -250,7 +271,7 @@ function ConciergeReservations() {
               </div>
               <div>
                 <label className="block text-xs font-medium text-white/60 mb-1">
-                  Nom du client *
+                  {t("Nom du client *", "Guest name *")}
                 </label>
                 <input
                   type="text"
@@ -259,7 +280,7 @@ function ConciergeReservations() {
                     setNewClient(e.target.value);
                     clearError("client");
                   }}
-                  placeholder="Ex: Mohamed Tazi"
+                  placeholder={t("Ex: Mohamed Tazi", "e.g. Mohamed Tazi")}
                   className="w-full px-3 py-2 text-sm bg-white/[0.05] border-none rounded-lg text-white placeholder:text-white/60/50 font-ui focus:ring-1 focus:ring-white/30 focus:outline-none"
                 />
                 {errors.client && <p className="text-xs text-red-500 mt-1">{errors.client}</p>}
@@ -267,7 +288,7 @@ function ConciergeReservations() {
               <div className="grid grid-cols-3 gap-3">
                 <div>
                   <label className="block text-xs font-medium text-white/60 mb-1">
-                    Couverts
+                    {t("Couverts", "Covers")}
                   </label>
                   <input
                     type="number"
@@ -284,7 +305,7 @@ function ConciergeReservations() {
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-white/60 mb-1">
-                    Date
+                    {t("Date", "Date")}
                   </label>
                   <input
                     type="text"
@@ -293,14 +314,14 @@ function ConciergeReservations() {
                       setNewDate(e.target.value);
                       clearError("date");
                     }}
-                    placeholder="12 Avr."
+                    placeholder={t("12 Avr.", "12 Apr")}
                     className="w-full px-3 py-2 text-sm bg-white/[0.05] border-none rounded-lg text-white placeholder:text-white/60/50 font-ui focus:ring-1 focus:ring-white/30 focus:outline-none"
                   />
                   {errors.date && <p className="text-xs text-red-500 mt-1">{errors.date}</p>}
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-white/60 mb-1">
-                    Heure
+                    {t("Heure", "Time")}
                   </label>
                   <input
                     type="text"
@@ -315,7 +336,7 @@ function ConciergeReservations() {
                 type="submit"
                 className="w-full bg-white/15 text-white text-sm font-medium py-2.5 rounded-lg hover:opacity-90 transition-opacity"
               >
-                Créer la réservation
+                {t("Créer la réservation", "Create reservation")}
               </button>
             </form>
           </div>

@@ -2,6 +2,7 @@
 
 import { useRef, useState, useCallback, ReactNode } from "react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
+import { useT } from "@/lib/i18n/client";
 
 /**
  * Carrousel éditorial à scroll-snap natif : fluide au doigt sur mobile,
@@ -17,6 +18,7 @@ export function SnapCarousel({
   className?: string;
   ariaLabel?: string;
 }) {
+  const t = useT();
   const trackRef = useRef<HTMLDivElement>(null);
   const [progress, setProgress] = useState(0);
   const [canPrev, setCanPrev] = useState(false);
@@ -79,7 +81,7 @@ export function SnapCarousel({
           <button
             onClick={() => scrollBy(-1)}
             disabled={!canPrev}
-            aria-label="Précédent"
+            aria-label={t("Précédent", "Previous")}
             className="flex h-10 w-10 items-center justify-center rounded-full border border-black/15 text-[var(--landing-ink)] transition-all hover:bg-[var(--landing-ink)] hover:text-[var(--landing-ivory)] disabled:opacity-25 disabled:hover:bg-transparent disabled:hover:text-[var(--landing-ink)]"
           >
             <ArrowLeft size={15} strokeWidth={1.5} />
@@ -87,7 +89,7 @@ export function SnapCarousel({
           <button
             onClick={() => scrollBy(1)}
             disabled={!canNext}
-            aria-label="Suivant"
+            aria-label={t("Suivant", "Next")}
             className="flex h-10 w-10 items-center justify-center rounded-full border border-black/15 text-[var(--landing-ink)] transition-all hover:bg-[var(--landing-ink)] hover:text-[var(--landing-ivory)] disabled:opacity-25 disabled:hover:bg-transparent disabled:hover:text-[var(--landing-ink)]"
           >
             <ArrowRight size={15} strokeWidth={1.5} />

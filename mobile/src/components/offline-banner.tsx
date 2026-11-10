@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Icon } from '@/components/venue/ui'
 import { Light } from '@/constants/theme'
+import { useT } from '@/lib/i18n'
 import { reportError } from '@/lib/report-error'
 
 /* Bandeau discret quand le téléphone n'a vraiment plus de réseau.
@@ -38,6 +39,7 @@ async function serverReachable(): Promise<boolean> {
 export function OfflineBanner() {
   const net = useNetworkState()
   const insets = useSafeAreaInsets()
+  const t = useT()
   const [confirmedOffline, setConfirmedOffline] = useState(false)
 
   const systemSaysOffline = net.isConnected === false || net.isInternetReachable === false
@@ -71,7 +73,7 @@ export function OfflineBanner() {
     <View pointerEvents="none" style={[styles.host, { top: insets.top + 6 }]}>
       <Animated.View entering={FadeInUp.duration(200)} exiting={FadeOutUp.duration(160)} style={styles.pill}>
         <Icon name="wifi-off" size={13} color="#FFFFFF" />
-        <Text style={styles.text}>Hors ligne</Text>
+        <Text style={styles.text}>{t('Hors ligne', 'Offline')}</Text>
       </Animated.View>
     </View>
   )

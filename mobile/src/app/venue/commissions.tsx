@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native'
 
 import { Avatar, Card, Empty, Icon, Kpi, ScreenSkeleton, StackScreen } from '@/components/venue/ui'
 import { Light } from '@/constants/theme'
+import { intlLocale, useLocale, useT, type Translate } from '@/lib/i18n'
 import {
   currentPeriod,
   isDue,
@@ -23,11 +24,11 @@ import {
 type HotelGroup = { key: string; hotelId: string | null; name: string; rows: Reservation[]; spent: number; commission: number }
 type MonthGroup = { period: string; rows: Reservation[]; commission: number; hotels: HotelGroup[] }
 
-function groupByHotel(rows: Reservation[]): HotelGroup[] {
+function groupByHotel(rows: Reservation[], t: Translate): HotelGroup[] {
   const map = new Map<string, HotelGroup>()
   for (const r of rows) {
     const key = r.referrer_id ?? 'inconnu'
-    const g = map.get(key) ?? { key, hotelId: r.referrer_id, name: r.referrer_name ?? 'Hôtel partenaire', rows: [], spent: 0, commission: 0 }
+    const g = map.get(key) ?? { key, hotelId: r.referrer_id, name: r.referrer_name ?? t('Hôtel partenaire', 'Partner hotel'), rows: [], spent: 0, commission: 0 }
     g.rows.push(r)
     g.spent += r.amount_spent ?? 0
     g.commission += r.commission
@@ -48,6 +49,8 @@ function HotelList({
   toggle: (key: string) => void
   settled: (period: string, hotelId: string | null) => Settlement | null
 }) {
+  const t = useT()
+  const locale = useLocale()
   return (
     <View style={styles.hotels}>
       {month.hotels.map((h) => {
@@ -63,13 +66,21 @@ function HotelList({
                   {h.name}
                 </Text>
                 <Text style={styles.hotelHint}>
-                  {h.rows.length} sortie{h.rows.length > 1 ? 's' : ''} · {mad(h.spent)} dépensés
+                  {t(
+                    `${h.rows.length} sortie${h.rows.length > 1 ? 's' : ''} · ${mad(h.spent, locale)} dépensés`,
+                    `${h.rows.length} outing${h.rows.length === 1 ? '' : 's'} · ${mad(h.spent, locale)} spent`
+                  )}
                 </Text>
               </View>
               <View style={styles.hotelRight}>
-                <Text style={styles.hotelAmount}>{mad(h.commission)}</Text>
+                <Text style={styles.hotelAmount}>{mad(h.commission, locale)}</Text>
                 <Text style={[styles.hotelStatus, s ? styles.settled : styles.pending]}>
-                  {s ? `réglé le ${new Date(s.settled_at).toLocaleDateString('fr-FR')}` : 'à régler'}
+                  {s
+                    ? t(
+                        `réglé le ${new Date(s.settled_at).toLocaleDateString(intlLocale(locale))}`,
+                        `settled on ${new Date(s.settled_at).toLocaleDateString(intlLocale(locale))}`
+                      )
+                    : t('à régler', 'due')}
                 </Text>
               </View>
               <Icon name={isOpen ? 'chevron-up' : 'chevron-down'} size={16} color={Light.faint} />
@@ -83,11 +94,12 @@ function HotelList({
                       {r.service_name ? ` · ${r.service_name}` : ''}
                     </Text>
                     <Text style={styles.lineHint}>
-                      {shortDate(r.reservation_date)} · {mad(r.amount_spent ?? 0)} · {Math.round(r.commission_rate * 100)} %
-                      {r.amount_source === 'pos' ? ' · caisse' : ''}
+                      {shortDate(r.reservation_date, locale)} · {mad(r.amount_spent ?? 0, locale)} ·{' '}
+                      {t(`${Math.round(r.commission_rate * 100)} %`, `${Math.round(r.commission_rate * 100)}%`)}
+                      {r.amount_source === 'pos' ? t(' · caisse', ' · till') : ''}
                     </Text>
                   </View>
-                  <Text style={styles.lineAmount}>{mad(r.commission)}</Text>
+                  <Text style={styles.lineAmount}>{mad(r.commission, locale)}</Text>
                 </View>
               ))}
           </View>
@@ -101,6 +113,8 @@ export default function CommissionsScreen() {
   const { rows } = useVenueReservations()
   const settlements = useSettlements()
   const [open, setOpen] = useState<Set<string>>(() => new Set())
+  const t = useT()
+  const locale = useLocale()
 
   if (rows === null || settlements === null) {
     return (
@@ -120,7 +134,7 @@ export default function CommissionsScreen() {
     .reverse()
     .map((period) => {
       const list = due.filter((r) => periodOf(r) === period)
-      return { period, rows: list, commission: list.reduce((s, r) => s + r.commission, 0), hotels: groupByHotel(list) }
+      return { period, rows: list, commission: list.reduce((s, r) => s + r.commission, 0), hotels: groupByHotel(list, t) }
     })
 
   const now = currentPeriod()
@@ -144,33 +158,73 @@ export default function CommissionsScreen() {
   )
 
   return (
-    <StackScreen title="Commissions" subtitle="Ce que vous reversez aux hôtels">
+    <StackScreen title="Commissions" subtitle={t('Ce que vous reversez aux hôtels', 'What you pay out to hotels')}>
       <View style={styles.kpiRow}>
-        <Kpi label="À régler ce mois" value={mad(thisMonth ? remainingOf(thisMonth) : 0)} hint={thisMonth ? `${thisMonth.rows.length} sortie${thisMonth.rows.length > 1 ? 's' : ''}` : 'aucune sortie'} tone="warning" />
-        <Kpi label="Restant dû" value={mad(toSettle)} hint={toSettle > 0 ? 'tous mois confondus' : 'vous êtes à jour'} />
+        <Kpi
+          label={t('À régler ce mois', 'Due this month')}
+          value={mad(thisMonth ? remainingOf(thisMonth) : 0, locale)}
+          hint={
+            thisMonth
+              ? t(
+                  `${thisMonth.rows.length} sortie${thisMonth.rows.length > 1 ? 's' : ''}`,
+                  `${thisMonth.rows.length} outing${thisMonth.rows.length === 1 ? '' : 's'}`
+                )
+              : t('aucune sortie', 'no outings')
+          }
+          tone="warning"
+        />
+        <Kpi
+          label={t('Restant dû', 'Outstanding')}
+          value={mad(toSettle, locale)}
+          hint={toSettle > 0 ? t('tous mois confondus', 'across all months') : t('vous êtes à jour', "you're up to date")}
+        />
       </View>
       <View style={styles.kpiRow}>
-        <Kpi label="Reversé au total" value={mad(total)} hint={`${due.length} sortie${due.length > 1 ? 's' : ''} commissionnée${due.length > 1 ? 's' : ''}`} tone="accent" />
-        <Kpi label="En attente de montant" value={String(awaiting)} hint={awaiting > 0 ? "saisissez l'addition" : 'tout est saisi'} />
+        <Kpi
+          label={t('Reversé au total', 'Paid out in total')}
+          value={mad(total, locale)}
+          hint={t(
+            `${due.length} sortie${due.length > 1 ? 's' : ''} commissionnée${due.length > 1 ? 's' : ''}`,
+            `${due.length} commissioned outing${due.length === 1 ? '' : 's'}`
+          )}
+          tone="accent"
+        />
+        <Kpi
+          label={t('En attente de montant', 'Awaiting amount')}
+          value={String(awaiting)}
+          hint={awaiting > 0 ? t("saisissez l'addition", 'enter the bill') : t('tout est saisi', 'all entered')}
+        />
       </View>
 
       <Card>
         <View style={styles.monthHead}>
-          <Text style={styles.monthTitle}>{monthLabel(now)}</Text>
-          <Text style={styles.monthAmount}>{mad(thisMonth?.commission ?? 0)}</Text>
+          <Text style={styles.monthTitle}>{monthLabel(now, locale)}</Text>
+          <Text style={styles.monthAmount}>{mad(thisMonth?.commission ?? 0, locale)}</Text>
         </View>
-        <Text style={styles.monthHint}>Par hôtel d&apos;origine. Le règlement se fait au mois clôturé, consolidé par twocards.</Text>
+        <Text style={styles.monthHint}>
+          {t(
+            "Par hôtel d'origine. Le règlement se fait au mois clôturé, consolidé par twocards.",
+            'By referring hotel. Settlement happens once the month is closed, consolidated by twocards.'
+          )}
+        </Text>
         {thisMonth ? (
           hotelList(thisMonth)
         ) : (
-          <Text style={styles.empty}>Aucune sortie commissionnée ce mois-ci pour le moment.</Text>
+          <Text style={styles.empty}>{t('Aucune sortie commissionnée ce mois-ci pour le moment.', 'No commissioned outings this month yet.')}</Text>
         )}
       </Card>
 
-      <Text style={styles.heading}>Historique</Text>
+      <Text style={styles.heading}>{t('Historique', 'History')}</Text>
       {history.length === 0 ? (
         <Card>
-          <Empty icon="dollar-sign" title="Pas encore d'historique" body="Les mois passés apparaîtront ici avec, pour chacun, ce qui a été reversé à chaque hôtel." />
+          <Empty
+            icon="dollar-sign"
+            title={t("Pas encore d'historique", 'No history yet')}
+            body={t(
+              'Les mois passés apparaîtront ici avec, pour chacun, ce qui a été reversé à chaque hôtel.',
+              'Past months will appear here, each showing what was paid out to each hotel.'
+            )}
+          />
         </Card>
       ) : (
         history.map((m) => {
@@ -180,15 +234,18 @@ export default function CommissionsScreen() {
             <Card key={m.period} style={styles.monthCard}>
               <Pressable onPress={() => toggle(m.period)} style={styles.monthRow}>
                 <View style={styles.monthText}>
-                  <Text style={styles.monthTitle}>{monthLabel(m.period)}</Text>
+                  <Text style={styles.monthTitle}>{monthLabel(m.period, locale)}</Text>
                   <Text style={styles.monthHint}>
-                    {m.rows.length} sortie{m.rows.length > 1 ? 's' : ''} · {m.hotels.length} hôtel{m.hotels.length > 1 ? 's' : ''}
+                    {t(
+                      `${m.rows.length} sortie${m.rows.length > 1 ? 's' : ''} · ${m.hotels.length} hôtel${m.hotels.length > 1 ? 's' : ''}`,
+                      `${m.rows.length} outing${m.rows.length === 1 ? '' : 's'} · ${m.hotels.length} hotel${m.hotels.length === 1 ? '' : 's'}`
+                    )}
                   </Text>
                 </View>
                 <View style={styles.hotelRight}>
-                  <Text style={styles.monthAmount}>{mad(m.commission)}</Text>
+                  <Text style={styles.monthAmount}>{mad(m.commission, locale)}</Text>
                   <Text style={[styles.hotelStatus, remaining > 0 ? styles.pending : styles.settled]}>
-                    {remaining > 0 ? `${mad(remaining)} à régler` : 'réglé'}
+                    {remaining > 0 ? t(`${mad(remaining, locale)} à régler`, `${mad(remaining, locale)} due`) : t('réglé', 'settled')}
                   </Text>
                 </View>
                 <Icon name={isOpen ? 'chevron-up' : 'chevron-down'} size={16} color={Light.faint} />
@@ -200,8 +257,10 @@ export default function CommissionsScreen() {
       )}
 
       <Text style={styles.note}>
-        Vous reversez un pourcentage du montant réellement dépensé, 10 % par défaut, uniquement sur les clients
-        apportés par un hôtel du réseau. Le même détail, ligne par ligne, est celui que voit l&apos;hôtel.
+        {t(
+          "Vous reversez un pourcentage du montant réellement dépensé, 10 % par défaut, uniquement sur les clients apportés par un hôtel du réseau. Le même détail, ligne par ligne, est celui que voit l'hôtel.",
+          'You pay out a percentage of the amount actually spent, 10% by default, only on guests referred by a hotel in the network. The hotel sees the same line-by-line detail.'
+        )}
       </Text>
     </StackScreen>
   )

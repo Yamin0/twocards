@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowUpRight, Sparkle } from "lucide-react";
+import { useT } from "@/lib/i18n/client";
+import type { Translate } from "@/lib/i18n";
 
 /* Adaptation TwoCards de la section bento portfolio : mêmes gabarits,
    contenu crédible — feuille de route, promesse, objectif pilote,
@@ -30,10 +32,10 @@ function SectionLabel({
   );
 }
 
-const ROADMAP = [
-  { year: "Été 2026", step: "Founding Circle", place: "Marrakech" },
-  { year: "T4 2026", step: "Pilote en conditions réelles", place: "Hivernage · Guéliz" },
-  { year: "2027", step: "Connecteurs & multi-villes", place: "Casablanca →" },
+const getRoadmap = (t: Translate) => [
+  { year: t("Été 2026", "Summer 2026"), step: "Founding Circle", place: "Marrakech" },
+  { year: t("T4 2026", "Q4 2026"), step: t("Pilote en conditions réelles", "Live pilot"), place: "Hivernage · Guéliz" },
+  { year: "2027", step: t("Connecteurs & multi-villes", "Connectors & multi-city"), place: "Casablanca →" },
 ];
 
 const TOOLS_ROW_1 = [
@@ -83,6 +85,8 @@ function MarqueeRow({
 }
 
 export function NetworkBento() {
+  const t = useT();
+  const ROADMAP = getRoadmap(t);
   return (
     <section className="border-t border-black/[0.06] bg-[#0a0a0a] px-4 py-16 text-white antialiased sm:px-6 md:px-10 md:py-20 lg:px-14 font-body">
       {/* En-tête */}
@@ -95,20 +99,23 @@ export function NetworkBento() {
       >
         <div className="max-w-3xl">
           <h2 className="font-title text-[28px] font-normal leading-[1.15] tracking-tight sm:text-3xl md:text-4xl lg:text-[44px]">
-            Le réseau, <em className="italic">en actes</em>.
+            {t(
+              <>Le réseau, <em className="italic">en actes</em>.</>,
+              <>The network, <em className="italic">in action</em>.</>
+            )}
           </h2>
           <p className="mt-4 max-w-3xl text-sm leading-[1.6] text-white/60 md:text-[15px]">
-            TwoCards démarre là où les recommandations circulent déjà :
-            Marrakech. Feuille de route, promesse contractuelle, outils
-            compatibles et objectifs du pilote, tout est posé, noir sur
-            blanc, avant la première réservation.
+            {t(
+              "TwoCards démarre là où les recommandations circulent déjà : Marrakech. Feuille de route, promesse contractuelle, outils compatibles et objectifs du pilote, tout est posé, noir sur blanc, avant la première réservation.",
+              "TwoCards starts where recommendations already flow: Marrakech. Roadmap, contractual promise, compatible tools and pilot targets, all set down in black and white before the first reservation."
+            )}
           </p>
         </div>
         <Link
           href="/signup"
           className="landing-glass shrink-0 rounded-full px-5 py-2.5 text-sm font-medium text-white transition-transform hover:scale-[1.03] sm:px-6 sm:py-3"
         >
-          Rejoindre le Founding Circle
+          {t("Rejoindre le Founding Circle", "Join the Founding Circle")}
         </Link>
       </motion.div>
 
@@ -132,7 +139,7 @@ export function NetworkBento() {
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/75" />
           <div className="relative">
-            <SectionLabel>La feuille de route</SectionLabel>
+            <SectionLabel>{t("La feuille de route", "The roadmap")}</SectionLabel>
           </div>
           <div className="relative grid grid-cols-[auto_auto_1fr_auto] items-center gap-x-3 gap-y-3 text-[12.5px]">
             {ROADMAP.map((r) => (
@@ -149,18 +156,18 @@ export function NetworkBento() {
         {/* Colonne 2 — promesse + objectif pilote */}
         <div className="grid gap-4 md:grid-rows-[auto_1fr] md:gap-5">
           <div className="noise-overlay relative overflow-hidden rounded-2xl bg-[#2e2b25] p-5 md:p-6">
-            <SectionLabel align="start">La promesse</SectionLabel>
+            <SectionLabel align="start">{t("La promesse", "The promise")}</SectionLabel>
             <p className="mt-4 text-[13px] leading-[1.6] text-white/85 sm:text-[13.5px]">
-              « Une recommandation qui part sur WhatsApp doit revenir en
-              transaction traçable, sans doublon, sans litige, avec un
-              paiement certain. C&apos;est le contrat que chaque membre du
-              réseau signe, des deux côtés. »
+              {t(
+                "« Une recommandation qui part sur WhatsApp doit revenir en transaction traçable, sans doublon, sans litige, avec un paiement certain. C'est le contrat que chaque membre du réseau signe, des deux côtés. »",
+                "“A recommendation that goes out on WhatsApp should come back as a traceable transaction: no duplicates, no disputes, guaranteed payment. That's the contract every network member signs, on both sides.”"
+              )}
             </p>
             <p className="mt-4 text-[12.5px] text-white/60">
               <strong className="font-semibold text-white">
-                L&apos;engagement TwoCards
+                {t("L'engagement TwoCards", "The TwoCards commitment")}
               </strong>{" "}
-              Pilote Marrakech 2026
+              {t("Pilote Marrakech 2026", "Marrakech pilot 2026")}
             </p>
           </div>
 
@@ -178,7 +185,10 @@ export function NetworkBento() {
               60+
             </p>
             <p className="relative mt-2 text-center text-[13px] text-white/85">
-              concierges &amp; RP vérifiés, objectif du pilote Marrakech
+              {t(
+                "concierges & RP vérifiés, objectif du pilote Marrakech",
+                "verified concierges & PRs, our Marrakech pilot target"
+              )}
             </p>
           </div>
         </div>
@@ -196,23 +206,23 @@ export function NetworkBento() {
             />
             <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/20 to-black/70" />
             <div className="relative">
-              <SectionLabel>Compatible avec vos outils</SectionLabel>
+              <SectionLabel>{t("Compatible avec vos outils", "Works with your tools")}</SectionLabel>
             </div>
             <div className="relative flex flex-col gap-3">
               <MarqueeRow items={TOOLS_ROW_1} direction="left" />
               <MarqueeRow items={TOOLS_ROW_2} direction="right" />
               <p className="px-5 text-center text-[10px] uppercase tracking-[0.18em] text-white/40">
-                Programme connecteurs · V1
+                {t("Programme connecteurs · V1", "Connector programme · V1")}
               </p>
             </div>
           </div>
 
           <div className="noise-overlay relative overflow-hidden rounded-2xl bg-[#2e2b25] p-5 md:p-6">
             <div className="flex items-start justify-between">
-              <SectionLabel align="start">Nous joindre</SectionLabel>
+              <SectionLabel align="start">{t("Nous joindre", "Get in touch")}</SectionLabel>
               <Link
                 href="/#contact"
-                aria-label="Nous contacter"
+                aria-label={t("Nous contacter", "Contact us")}
                 className="landing-glass flex h-9 w-9 items-center justify-center rounded-full text-white transition-transform hover:scale-110"
               >
                 <ArrowUpRight size={16} strokeWidth={1.5} />

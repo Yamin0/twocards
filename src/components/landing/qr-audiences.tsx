@@ -9,6 +9,8 @@ import {
   SECTION,
   SectionHeader,
 } from "@/components/landing/section-header";
+import { useT } from "@/lib/i18n/client";
+import type { Translate } from "@/lib/i18n";
 
 /* Le même QR, lu différemment selon le métier — en accordéon d'images,
    sur le modèle « Interactive Image Accordion » de 21st.dev (reconstruit
@@ -22,56 +24,70 @@ import {
    Photos Unsplash (licence Unsplash : usage commercial libre, sans
    attribution obligatoire), servies par images.unsplash.com, déjà autorisé
    dans next.config. Même ambiance pour les quatre : intérieur chaud, soir. */
-const AUDIENCES = [
+const getAudiences = (t: Translate) => [
   {
     href: "/hotels",
-    label: "Hôtels & riads",
-    where: "En chambre, avant l'arrivée",
-    description:
+    label: t("Hôtels & riads", "Hotels & riads"),
+    description: t(
       "Le client réserve seul, à toute heure. Chaque réservation est attribuée à votre établissement, conforme à votre politique interne.",
+      "Guests book on their own, at any hour. Every reservation is attributed to your property and in line with your internal policy."
+    ),
     image: "https://images.unsplash.com/photo-1759472659432-3232e42d04d2?auto=format&fit=crop&w=1400&q=80",
   },
   {
     href: "/restaurants",
-    label: "Établissements",
-    where: "À la porte, au check-in",
-    description:
+    label: t("Établissements", "Venues"),
+    description: t(
       "Le scan à l'arrivée prouve la visite. La commission se calcule sur la facture vérifiée, aux conditions fixées dès l'origine.",
+      "A scan on arrival proves the visit. Commission is calculated on the verified bill, on terms agreed from the start."
+    ),
     image: "https://images.unsplash.com/photo-1672832593966-fe1795b8d287?auto=format&fit=crop&w=1400&q=80",
   },
   {
     href: "/concierges",
-    label: "Concierges / RP",
-    where: "Sur une carte, dans un message",
-    description:
+    label: t("Concierges / RP", "Concierges / PR"),
+    description: t(
       "Votre QR suit votre client. Vous savez quand il est arrivé, et la commission apparaît validée sans relancer personne.",
+      "Your QR follows your guest. You know the moment they arrive, and your commission shows up validated without chasing anyone."
+    ),
     image: "https://images.unsplash.com/photo-1660557989695-14fac79c086d?auto=format&fit=crop&w=1400&q=80",
   },
   {
     href: "/influenceurs",
-    label: "Influenceurs",
-    where: "En bio, en story",
-    description:
+    label: t("Influenceurs", "Influencers"),
+    description: t(
       "Un lien unique couvre toute votre sélection. Chaque réservation issue de vos recommandations vous est attribuée et rémunérée.",
+      "One link covers your entire selection. Every reservation that comes from your recommendations is credited and paid to you."
+    ),
     image: "https://images.unsplash.com/photo-1672831744471-fb82fd8fa2e0?auto=format&fit=crop&w=1400&q=80",
   },
 ];
 
 export function QrAudiences() {
+  const t = useT();
+  const AUDIENCES = getAudiences(t);
   const [active, setActive] = useState(0);
 
   return (
     <section className={SECTION}>
       <div className={CONTAINER}>
         <SectionHeader
-          title={
+          title={t(
             <>
               Le même QR,
               <br />
               <em className="font-light italic">pour chaque métier</em>.
+            </>,
+            <>
+              One QR,
+              <br />
+              <em className="font-light italic">for every trade</em>.
             </>
-          }
-          intro="Où qu'il soit posé, le QR sait d'où vient le client. Le réseau, lui, est commun : établissements vérifiés, disponibilités réelles, commissions calculées sur du revenu vérifié."
+          )}
+          intro={t(
+            "Où qu'il soit posé, le QR sait d'où vient le client. Le réseau, lui, est commun : établissements vérifiés, disponibilités réelles, commissions calculées sur du revenu vérifié.",
+            "Wherever it's placed, the QR knows where the guest came from. The network is shared by all: verified venues, real availability, commissions calculated on verified revenue."
+          )}
         />
 
         <div className="flex flex-col gap-3 lg:h-[560px] lg:flex-row">
@@ -122,17 +138,14 @@ export function QrAudiences() {
                     open ? "lg:opacity-100 lg:delay-200" : "lg:pointer-events-none lg:opacity-0"
                   }`}
                 >
-                  <p className="text-[12px] font-medium uppercase tracking-[0.18em] text-white/65">
-                    {a.where}
-                  </p>
-                  <h3 className="mt-3 text-[26px] font-semibold leading-tight tracking-[-0.02em] md:text-[30px]">
+                  <h3 className="text-[26px] font-semibold leading-tight tracking-[-0.02em] md:text-[30px]">
                     {a.label}
                   </h3>
                   <p className="mt-3 max-w-sm text-[15px] leading-relaxed text-white/80">
                     {a.description}
                   </p>
                   <span className="mt-6 inline-flex items-center gap-2 text-[14px] font-medium">
-                    En savoir plus
+                    {t("En savoir plus", "Learn more")}
                     <ArrowRight
                       size={15}
                       strokeWidth={1.5}

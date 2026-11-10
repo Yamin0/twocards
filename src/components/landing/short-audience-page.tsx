@@ -15,6 +15,7 @@ import {
 } from "@/components/landing/section-header";
 import { WarpOverlay } from "@/components/ui/wrap-shader";
 import { Footer } from "@/components/layout/footer";
+import { useT } from "@/lib/i18n/client";
 
 /* Gabarit court des pages métiers (hôtels, établissements, concierges),
    dans l'écriture de la page d'accueil :
@@ -71,6 +72,7 @@ const HERO_VIDEO_RATE = 0.8;
 
 export function ShortAudiencePage({ data }: { data: ShortAudienceData }) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const t = useT();
 
   /* playbackRate n'existe pas en attribut HTML et se réinitialise à chaque
      chargement de source : on le repose sur loadedmetadata. */
@@ -288,9 +290,18 @@ export function ShortAudiencePage({ data }: { data: ShortAudienceData }) {
         <section className={SECTION}>
           <div className={`${CONTAINER} grid gap-12 md:grid-cols-[1fr_1.5fr] md:gap-20`}>
             <h2 className={`${TITLE} md:sticky md:top-28 md:self-start`}>
-              Vos questions,
-              <br />
-              <em className="font-light italic">nos réponses</em>.
+              {t(
+                <>
+                  Vos questions,
+                  <br />
+                  <em className="font-light italic">nos réponses</em>.
+                </>,
+                <>
+                  Your questions,
+                  <br />
+                  <em className="font-light italic">answered</em>.
+                </>,
+              )}
             </h2>
             <div className="flex flex-col">
               {faq.map((item) => (

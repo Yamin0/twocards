@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Marcellus, Figtree } from "next/font/google";
+import { getT } from "@/lib/i18n/server";
 import { PortalExperience } from "./portal-experience";
 
 /* Identité typographique propre au portail — l'écriture d'une maison,
@@ -18,11 +19,14 @@ const portalUi = Figtree({
 
 /* Portail de réservation directe d'un établissement, hébergé par twocards.
    S'intègre aussi en iframe sur le site de l'établissement (?embed=1). */
-export const metadata: Metadata = {
-  title: "Réserver | twocards.",
-  description: "Réservez votre table en quelques secondes.",
-  robots: { index: true, follow: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT();
+  return {
+    title: t("Réserver | twocards.", "Book | twocards."),
+    description: t("Réservez votre table en quelques secondes.", "Book your table in seconds."),
+    robots: { index: true, follow: false },
+  };
+}
 
 export default async function PortalPage({
   params,

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useScroll } from "framer-motion";
 import { LandingNavbar } from "@/components/landing/navbar";
+import { useT } from "@/lib/i18n/client";
 
 /* Séquence cinématique : la vidéo des portes est épinglée en fond et sert de
    décor à deux écrans qui défilent par-dessus — l'accroche, puis la section
@@ -44,6 +45,7 @@ export function ScrollVideoHero({
   hero?: React.ReactNode;
 }) {
   const sectionRef = useRef<HTMLElement>(null);
+  const t = useT();
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
@@ -204,7 +206,7 @@ export function ScrollVideoHero({
             phase === "fading" ? "pointer-events-none opacity-0" : "opacity-100"
           }`}
           role="status"
-          aria-label="Chargement du site"
+          aria-label={t("Chargement du site", "Loading the site")}
         >
           <span className="font-title text-[30px] font-medium tracking-tight text-white">
             twocards<span className="text-white/50">.</span>
@@ -217,7 +219,7 @@ export function ScrollVideoHero({
               />
             </div>
             <span className="text-[10px] font-medium uppercase tracking-[0.24em] text-white/50">
-              {pct} %
+              {t(`${pct} %`, `${pct}%`)}
             </span>
           </div>
         </div>
@@ -251,20 +253,30 @@ export function ScrollVideoHero({
           {hero ?? (
             <div className="flex flex-1 flex-col items-center justify-center px-6 text-center">
               <h1 className="mb-8 max-w-4xl font-title text-[38px] font-normal leading-[1.12] tracking-[-0.02em] text-white md:text-[64px]">
-                Ils vous amènent des clients.
-                <br />
-                Vous les payez au <em className="italic">résultat</em>.
+                {t(
+                  <>
+                    Ils vous amènent des clients.
+                    <br />
+                    Vous les payez au <em className="italic">résultat</em>.
+                  </>,
+                  <>
+                    They bring you guests.
+                    <br />
+                    You pay them on <em className="italic">results</em>.
+                  </>,
+                )}
               </h1>
               <p className="mb-10 max-w-xl text-[15px] font-normal leading-relaxed text-white/75">
-                TwoCards connecte les établissements aux concierges et RP
-                vérifiés, synchronise les disponibilités et automatise
-                l&apos;attribution, les acomptes et les commissions.
+                {t(
+                  "TwoCards connecte les établissements aux concierges et RP vérifiés, synchronise les disponibilités et automatise l'attribution, les acomptes et les commissions.",
+                  "TwoCards connects venues with verified concierges and PRs, syncs availability and automates attribution, deposits and commissions.",
+                )}
               </p>
               <Link
                 href="/signup"
                 className="rounded-full bg-white px-8 py-3.5 text-[14px] font-medium text-black transition-opacity hover:opacity-85"
               >
-                Commencer gratuitement
+                {t("Commencer gratuitement", "Get started for free")}
               </Link>
             </div>
           )}

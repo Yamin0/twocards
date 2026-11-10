@@ -3,6 +3,7 @@
 import { TrendingUp, ArrowUpRight, Users, Wallet, CalendarDays, CheckCircle, BarChart3 } from "lucide-react";
 import { useAuthUser } from "@/hooks/use-auth-user";
 import { ConciergeSkeleton } from "@/components/shared/loading-skeleton";
+import { useT } from "@/lib/i18n/client";
 
 const DEMO_MONTHLY_DATA = [
   { month: "Jan.", covers: 98, commission: "28 400", growth: 0 },
@@ -25,12 +26,17 @@ const DEMO_VENUE_BREAKDOWN = [
   { venue: "Pacha Marrakech", covers: 25, commission: "7 600 MAD", percentage: 16, color: "bg-amber-400" },
 ];
 
+/* Mois de démonstration écrits à la main : libellé anglais à côté. */
+const MONTH_EN: Record<string, string> = { "Jan.": "Jan", "Fév.": "Feb", "Mar.": "Mar", "Avr.": "Apr" };
+
 const EMPTY_MONTHLY: typeof DEMO_MONTHLY_DATA = [];
 const EMPTY_BAR_CHART: typeof DEMO_BAR_CHART = [];
 const EMPTY_VENUE_BREAKDOWN: typeof DEMO_VENUE_BREAKDOWN = [];
 
 export default function ConciergeStatsPage() {
   const { isDemoConcierge, isLoading } = useAuthUser();
+  const t = useT();
+  const monthLabel = (m: string) => t(m, MONTH_EN[m] ?? m);
 
   if (isLoading) return <ConciergeSkeleton />;
 
@@ -43,20 +49,20 @@ export default function ConciergeStatsPage() {
       {/* Header */}
       <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
         <h1 className="text-2xl font-bold text-white">
-          Statistiques
+          {t("Statistiques", "Stats")}
         </h1>
         <p className="text-sm text-white/50 font-ui mt-1">
-          Analysez votre performance et croissance
+          {t("Analysez votre performance et croissance", "Analyse your performance and growth")}
         </p>
       </div>
 
       {/* Stats cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Couverts ce mois", value: isDemoConcierge ? "156" : "0", trend: "+16%", icon: Users, iconColor: "text-blue-400", iconBg: "bg-blue-400/10" },
-          { label: "CA généré (MAD)", value: isDemoConcierge ? "486K" : "0", trend: "+22%", icon: Wallet, iconColor: "text-emerald-400", iconBg: "bg-emerald-400/10" },
-          { label: "Commissions (MAD)", value: isDemoConcierge ? "48.6K" : "0", trend: "+16%", icon: CalendarDays, iconColor: "text-amber-400", iconBg: "bg-amber-400/10" },
-          { label: "Taux confirmation", value: isDemoConcierge ? "87%" : "\u2014", trend: "+3%", icon: CheckCircle, iconColor: "text-purple-400", iconBg: "bg-purple-400/10" },
+          { label: t("Couverts ce mois", "Covers this month"), value: isDemoConcierge ? "156" : "0", trend: "+16%", icon: Users, iconColor: "text-blue-400", iconBg: "bg-blue-400/10" },
+          { label: t("CA généré (MAD)", "Revenue generated (MAD)"), value: isDemoConcierge ? "486K" : "0", trend: "+22%", icon: Wallet, iconColor: "text-emerald-400", iconBg: "bg-emerald-400/10" },
+          { label: t("Commissions (MAD)", "Commissions (MAD)"), value: isDemoConcierge ? "48.6K" : "0", trend: "+16%", icon: CalendarDays, iconColor: "text-amber-400", iconBg: "bg-amber-400/10" },
+          { label: t("Taux confirmation", "Confirmation rate"), value: isDemoConcierge ? "87%" : "\u2014", trend: "+3%", icon: CheckCircle, iconColor: "text-purple-400", iconBg: "bg-purple-400/10" },
         ].map((stat) => (
           <div
             key={stat.label}
@@ -87,7 +93,7 @@ export default function ConciergeStatsPage() {
         {/* Chart */}
         <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
           <h3 className="text-lg font-bold text-white mb-6">
-            Évolution des couverts
+            {t("Évolution des couverts", "Covers over time")}
           </h3>
           {barChart.length > 0 ? (
             <div className="flex items-end justify-between gap-4 h-52 px-2">
@@ -109,21 +115,21 @@ export default function ConciergeStatsPage() {
                       />
                     </div>
                     <span className={`text-xs font-medium ${isMax ? "text-white" : "text-white/40"} font-ui`}>
-                      {bar.label}
+                      {monthLabel(bar.label)}
                     </span>
                   </div>
                 );
               })}
             </div>
           ) : (
-            <EmptyState icon={TrendingUp} text="Aucune donnée disponible" sub="Les statistiques apparaîtront ici" />
+            <EmptyState icon={TrendingUp} text={t("Aucune donnée disponible", "No data yet")} sub={t("Les statistiques apparaîtront ici", "Your stats will appear here")} />
           )}
         </div>
 
         {/* Venue breakdown */}
         <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
           <h3 className="text-lg font-bold text-white mb-6">
-            Répartition par établissement
+            {t("Répartition par établissement", "Breakdown by venue")}
           </h3>
           {venueBreakdown.length > 0 ? (
             <div className="space-y-5">
@@ -152,30 +158,30 @@ export default function ConciergeStatsPage() {
               ))}
             </div>
           ) : (
-            <EmptyState icon={Users} text="Aucune donnée disponible" sub="La répartition apparaîtra ici" />
+            <EmptyState icon={Users} text={t("Aucune donnée disponible", "No data yet")} sub={t("La répartition apparaîtra ici", "The breakdown will appear here")} />
           )}
         </div>
 
         {/* Monthly detail table */}
         <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6 lg:col-span-2">
           <h3 className="text-lg font-bold text-white mb-4">
-            Détail mensuel
+            {t("Détail mensuel", "Monthly breakdown")}
           </h3>
           <div className="tc-stack overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-white/[0.1]">
                   <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-white/40 font-ui">
-                    Mois
+                    {t("Mois", "Month")}
                   </th>
                   <th className="text-center px-4 py-3 text-xs font-semibold uppercase tracking-wider text-white/40 font-ui">
-                    Couverts
+                    {t("Couverts", "Covers")}
                   </th>
                   <th className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wider text-white/40 font-ui">
-                    Commission
+                    {t("Commission", "Commission")}
                   </th>
                   <th className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wider text-white/40 font-ui">
-                    Croissance
+                    {t("Croissance", "Growth")}
                   </th>
                 </tr>
               </thead>
@@ -184,15 +190,15 @@ export default function ConciergeStatsPage() {
                   monthlyData.map((m) => (
                     <tr key={m.month} className="border-b border-white/[0.06] hover:bg-white/[0.03] transition-colors">
                       <td data-head className="px-4 py-3.5 font-semibold text-white font-ui">
-                        {m.month}
+                        {monthLabel(m.month)}
                       </td>
-                      <td data-label="Couverts" className="px-4 py-3.5 text-center text-white/70 font-ui">
+                      <td data-label={t("Couverts", "Covers")} className="px-4 py-3.5 text-center text-white/70 font-ui">
                         {m.covers}
                       </td>
-                      <td data-label="Commission" className="px-4 py-3.5 text-right font-bold text-white font-ui">
+                      <td data-label={t("Commission", "Commission")} className="px-4 py-3.5 text-right font-bold text-white font-ui">
                         {m.commission} MAD
                       </td>
-                      <td data-label="Croissance" className="px-4 py-3.5 text-right">
+                      <td data-label={t("Croissance", "Growth")} className="px-4 py-3.5 text-right">
                         {m.growth > 0 ? (
                           <span className="inline-flex items-center gap-1 text-emerald-400 font-semibold text-xs">
                             <ArrowUpRight size={12} strokeWidth={2} />
@@ -207,7 +213,7 @@ export default function ConciergeStatsPage() {
                 ) : (
                   <tr>
                     <td colSpan={4}>
-                      <EmptyState icon={CalendarDays} text="Aucune donnée disponible" sub="Le détail mensuel apparaîtra ici" />
+                      <EmptyState icon={CalendarDays} text={t("Aucune donnée disponible", "No data yet")} sub={t("Le détail mensuel apparaîtra ici", "The monthly breakdown will appear here")} />
                     </td>
                   </tr>
                 )}

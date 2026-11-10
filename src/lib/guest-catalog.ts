@@ -6,6 +6,8 @@
    filtrer par ville et appliquer les choix de l'hôtel : aucune adresse n'est
    écrite ici. */
 
+import type { Locale } from "@/lib/i18n";
+
 export type GuestCategoryKey = "restaurants" | "activites" | "clubs" | "services";
 
 export const CATEGORY_KEYS: GuestCategoryKey[] = ["restaurants", "activites", "clubs", "services"];
@@ -36,9 +38,28 @@ export const CATEGORY_META: Record<
   },
 };
 
+/* Libellés français : ce sont aussi ceux enregistrés en base avec chaque
+   réservation (p_category). Ne pas les traduire ici. */
 export const CATEGORY_LABELS = Object.fromEntries(
   CATEGORY_KEYS.map((k) => [k, CATEGORY_META[k].label])
 ) as Record<GuestCategoryKey, string>;
+
+/* Version anglaise des textes affichés ; l'image reste celle du français. */
+const CATEGORY_META_EN: Record<GuestCategoryKey, { label: string; tagline: string }> = {
+  restaurants: { label: "Restaurants", tagline: "Refined tables and exceptional dinners" },
+  activites: { label: "Activities", tagline: "Experience the best of the destination" },
+  clubs: { label: "Clubs", tagline: "The most sought-after nights in the country" },
+  services: { label: "Services", tagline: "A concierge desk at your service" },
+};
+
+/* Libellé et accroche d'une catégorie dans la langue demandée. */
+export function categoryMeta(key: GuestCategoryKey, locale: Locale = "fr") {
+  return locale === "en" ? { ...CATEGORY_META[key], ...CATEGORY_META_EN[key] } : CATEGORY_META[key];
+}
+
+export function categoryLabel(key: GuestCategoryKey, locale: Locale = "fr") {
+  return categoryMeta(key, locale).label;
+}
 
 /* Prestation tenue par l'établissement lui-même (venue_services) : une
    balade en quad d'une heure, un transfert aéroport… Le client la choisit
@@ -116,7 +137,7 @@ export function fallbackImage(slug: string) {
   return CAROUSEL[h % CAROUSEL.length];
 }
 
-export function toOffer(row: OfferRow, source: GuestOffer["source"]): GuestOffer {
+export function toOffer(row: OfferRow, source: GuestOffer["source"], locale: Locale = "fr"): GuestOffer {
   const cover = row.image_url || fallbackImage(row.slug);
   const services: GuestService[] = (row.services ?? []).map((s) => ({
     id: s.id,
@@ -134,8 +155,8 @@ export function toOffer(row: OfferRow, source: GuestOffer["source"]): GuestOffer
     name: row.name,
     city: row.city ?? undefined,
     description: row.description ?? "",
-    tag: row.tag || (source === "hotel" ? "Adresse de l'hôtel" : ""),
-    price: row.price ?? (firstPrice ? `dès ${firstPrice}` : undefined),
+    tag: row.tag || (source === "hotel" ? (locale === "en" ? "Hotel pick" : "Adresse de l'hôtel") : ""),
+    price: row.price ?? (firstPrice ? (locale === "en" ? `from ${firstPrice}` : `dès ${firstPrice}`) : undefined),
     image: cover,
     images: [cover, ...(row.images ?? []).filter(Boolean)],
     source,
@@ -167,6 +188,7 @@ export function buildGuestMenu({
   hotelOffers = [],
   categoryImages = {},
   hiddenCategories = [],
+  locale = "fr",
 }: {
   city: string | null;
   hidden: string[];
@@ -176,6 +198,8 @@ export function buildGuestMenu({
   categoryImages?: Partial<Record<GuestCategoryKey, string>>;
   /* Catégories entières retirées de ce QR (une famille sans clubs…). */
   hiddenCategories?: string[];
+  /* Langue des libellés affichés (catégories, étiquettes par défaut). */
+  locale?: Locale;
 }): GuestCategory[] {
   const hiddenSet = new Set(hidden);
   const hiddenCats = new Set(hiddenCategories);
@@ -184,22 +208,22 @@ export function buildGuestMenu({
 
   const sorted = (rows: OfferRow[]) =>
     [...rows].sort(
-      (a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0) || a.name.localeCompare(b.name, "fr")
+      (a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0) || a.name.localeCompare(b.name, locale)
     );
 
   for (const row of sorted(hotelOffers)) {
     if (!isKey(row.category) || row.active === false) continue;
-    byCategory.get(row.category)!.push(toOffer(row, "hotel"));
+    byCategory.get(row.category)!.push(toOffer(row, "hotel", locale));
   }
   for (const row of sorted(catalog)) {
     if (!isKey(row.category) || row.active === false) continue;
     if (row.city && hotelCity && normalizeCity(row.city) !== hotelCity) continue;
-    byCategory.get(row.category)!.push(toOffer(row, "reseau"));
+    byCategory.get(row.category)!.push(toOffer(row, "reseau", locale));
   }
 
   return CATEGORY_KEYS.map((key) => ({
     key,
-    ...CATEGORY_META[key],
+    ...categoryMeta(key, locale),
     image: categoryImages[key] || CATEGORY_META[key].image,
     offers: byCategory.get(key)!.filter((o) => !hiddenSet.has(o.id)),
   })).filter((cat) => cat.offers.length > 0 && !hiddenCats.has(cat.key));
@@ -211,7 +235,8 @@ export function buildGuestMenu({
 export function cityCatalog(
   city: string | null,
   catalog: OfferRow[],
-  hotelOffers: OfferRow[] = []
+  hotelOffers: OfferRow[] = [],
+  locale: Locale = "fr"
 ): GuestCategory[] {
-  return buildGuestMenu({ city, hidden: [], catalog, hotelOffers });
+  return buildGuestMenu({ city, hidden: [], catalog, hotelOffers, locale });
 }

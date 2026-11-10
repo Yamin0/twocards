@@ -6,6 +6,7 @@ import { Button, Field, Icon, StackScreen, Stepper, inputStyle } from '@/compone
 import { Light } from '@/constants/theme'
 import { useAuth } from '@/lib/auth-context'
 import { haptic } from '@/lib/haptics'
+import { useLocale, useT, type Locale } from '@/lib/i18n'
 import { useToast } from '@/lib/toast'
 import { addDaysIso, createReservation, todayIso } from '@/lib/venue-data'
 
@@ -18,22 +19,28 @@ const ACTIVITY_HOURS = ['08:00', '09:00', '10:00', '11:00', '14:00', '15:00', '1
 
 const DAYS = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi']
 const MONTHS = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.']
+const DAYS_EN = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+const MONTHS_EN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
-function dayChip(iso: string, today: string) {
-  if (iso === today) return { top: "Auj.", bottom: String(new Date(`${iso}T00:00:00`).getDate()) }
-  if (iso === addDaysIso(1)) return { top: 'Dem.', bottom: String(new Date(`${iso}T00:00:00`).getDate()) }
+function dayChip(iso: string, today: string, locale: Locale) {
+  const en = locale === 'en'
+  if (iso === today) return { top: en ? 'Today' : 'Auj.', bottom: String(new Date(`${iso}T00:00:00`).getDate()) }
+  if (iso === addDaysIso(1)) return { top: en ? 'Tmrw' : 'Dem.', bottom: String(new Date(`${iso}T00:00:00`).getDate()) }
   const d = new Date(`${iso}T00:00:00`)
-  return { top: DAYS[d.getDay()].slice(0, 3), bottom: String(d.getDate()) }
+  return { top: (en ? DAYS_EN : DAYS)[d.getDay()].slice(0, 3), bottom: String(d.getDate()) }
 }
 
-function longDate(iso: string) {
+function longDate(iso: string, locale: Locale) {
   const d = new Date(`${iso}T00:00:00`)
+  if (locale === 'en') return `${DAYS_EN[d.getDay()]} ${d.getDate()} ${MONTHS_EN[d.getMonth()]}`
   return `${DAYS[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]}`
 }
 
 export default function NewReservationScreen() {
   const router = useRouter()
   const toast = useToast()
+  const t = useT()
+  const locale = useLocale()
   const { tabRole } = useAuth()
   const activity = tabRole === 'activite'
   const today = todayIso()
@@ -69,37 +76,43 @@ export default function NewReservationScreen() {
     setSaving(false)
     if (err) {
       haptic.error()
-      setError(/Nom/.test(err) ? 'Le nom est requis.' : /Téléphone/.test(err) ? 'Numéro trop long.' : 'Enregistrement impossible. Vérifiez votre connexion.')
+      setError(
+        /Nom/.test(err)
+          ? t('Le nom est requis.', 'The name is required.')
+          : /Téléphone/.test(err)
+            ? t('Numéro trop long.', 'Number too long.')
+            : t('Enregistrement impossible. Vérifiez votre connexion.', "Couldn't save. Check your connection.")
+      )
       return
     }
     haptic.success()
-    toast.show({ message: `Réservation ajoutée pour ${name.trim()}`, tone: 'success' })
+    toast.show({ message: t(`Réservation ajoutée pour ${name.trim()}`, `Reservation added for ${name.trim()}`), tone: 'success' })
     router.back()
   }
 
   return (
     <StackScreen
-      title="Nouvelle réservation"
-      subtitle="Prise par téléphone ou au comptoir"
+      title={t('Nouvelle réservation', 'New reservation')}
+      subtitle={t('Prise par téléphone ou au comptoir', 'Taken by phone or at the desk')}
       right={
-        <Pressable onPress={() => router.back()} hitSlop={8} accessibilityLabel="Fermer">
+        <Pressable onPress={() => router.back()} hitSlop={8} accessibilityLabel={t('Fermer', 'Close')}>
           <Icon name="x" size={22} color={Light.muted} />
         </Pressable>
       }>
       <View style={styles.form}>
-        <Field label="Client">
+        <Field label={t('Client', 'Guest')}>
           <TextInput
             value={name}
             onChangeText={setName}
             style={inputStyle}
-            placeholder="Nom du client"
+            placeholder={t('Nom du client', 'Guest name')}
             placeholderTextColor={Light.faint}
             autoCapitalize="words"
             autoFocus
             returnKeyType="next"
           />
         </Field>
-        <Field label="Téléphone" hint="Facultatif, pour le joindre ou lui écrire depuis la fiche.">
+        <Field label={t('Téléphone', 'Phone')} hint={t('Facultatif, pour le joindre ou lui écrire depuis la fiche.', 'Optional, to call or message them from the reservation.')}>
           <TextInput
             value={phone}
             onChangeText={setPhone}
@@ -111,10 +124,10 @@ export default function NewReservationScreen() {
           />
         </Field>
 
-        <Field label="Jour" hint={longDate(date)}>
+        <Field label={t('Jour', 'Day')} hint={longDate(date, locale)}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.days}>
             {days.map((d) => {
-              const c = dayChip(d, today)
+              const c = dayChip(d, today, locale)
               const active = d === date
               return (
                 <Pressable
@@ -132,7 +145,7 @@ export default function NewReservationScreen() {
           </ScrollView>
         </Field>
 
-        <Field label="Heure">
+        <Field label={t('Heure', 'Time')}>
           <View style={styles.hours}>
             {hours.map((h) => {
               const active = time === h && !customTime
@@ -154,23 +167,33 @@ export default function NewReservationScreen() {
             value={customTime}
             onChangeText={setCustomTime}
             style={[inputStyle, styles.customTime]}
-            placeholder="Autre heure, par exemple 20:15"
+            placeholder={t('Autre heure, par exemple 20:15', 'Other time, e.g. 20:15')}
             placeholderTextColor={Light.faint}
             keyboardType="numbers-and-punctuation"
             maxLength={5}
           />
         </Field>
 
-        <Field label={activity ? 'Participants' : 'Couverts'}>
-          <Stepper value={party} onChange={setParty} min={1} max={60} unit={(n) => (activity ? (n > 1 ? 'participants' : 'participant') : n > 1 ? 'personnes' : 'personne')} />
+        <Field label={activity ? t('Participants', 'Participants') : t('Couverts', 'Covers')}>
+          <Stepper
+            value={party}
+            onChange={setParty}
+            min={1}
+            max={60}
+            unit={(n) =>
+              activity
+                ? t(n > 1 ? 'participants' : 'participant', n === 1 ? 'participant' : 'participants')
+                : t(n > 1 ? 'personnes' : 'personne', n === 1 ? 'person' : 'people')
+            }
+          />
         </Field>
 
-        <Field label="Note" hint="Allergie, anniversaire, table préférée…">
+        <Field label="Note" hint={t('Allergie, anniversaire, table préférée…', 'Allergy, birthday, favourite table…')}>
           <TextInput
             value={notes}
             onChangeText={setNotes}
             style={[inputStyle, styles.textarea]}
-            placeholder="Facultatif"
+            placeholder={t('Facultatif', 'Optional')}
             placeholderTextColor={Light.faint}
             multiline
             maxLength={500}
@@ -178,8 +201,13 @@ export default function NewReservationScreen() {
         </Field>
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
-        <Button label={saving ? 'Enregistrement…' : 'Ajouter la réservation'} icon="check" onPress={submit} disabled={!canSave} />
-        <Text style={styles.note}>Réservation maison : sans commission, visible sur le plan de salle du site.</Text>
+        <Button label={saving ? t('Enregistrement…', 'Saving…') : t('Ajouter la réservation', 'Add the reservation')} icon="check" onPress={submit} disabled={!canSave} />
+        <Text style={styles.note}>
+          {t(
+            'Réservation maison : sans commission, visible sur le plan de salle du site.',
+            'In-house reservation: no commission, shown on the floor plan on the website.'
+          )}
+        </Text>
       </View>
     </StackScreen>
   )

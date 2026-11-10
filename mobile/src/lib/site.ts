@@ -1,6 +1,8 @@
 import type Feather from '@expo/vector-icons/Feather'
 import type { ComponentProps } from 'react'
 
+import type { Translate } from '@/lib/i18n'
+
 /* Le site twocards, dont l'app affiche encore certaines pages. Adresse
    canonique : twocardspro.com redirige vers www, autant partir directement
    dessus pour éviter une redirection à chaque chargement. */
@@ -35,12 +37,12 @@ export type Role = 'etablissement' | 'hotel' | 'concierge' | 'admin'
    ses prestations à la place du plan de salle. */
 export type TabRole = Role | 'activite'
 
-export const roleLabels: Record<Role, string> = {
-  etablissement: 'Établissement',
-  hotel: 'Hôtel',
+export const getRoleLabels = (t: Translate): Record<Role, string> => ({
+  etablissement: t('Établissement', 'Venue'),
+  hotel: t('Hôtel', 'Hotel'),
   concierge: 'Concierge',
-  admin: 'Administrateur',
-}
+  admin: t('Administrateur', 'Administrator'),
+})
 
 /* Espace privé de chaque rôle — même table que le middleware du site. */
 export const roleHome: Record<Role, string> = {
@@ -69,42 +71,42 @@ export const roleTabs: Record<TabRole, { home: string; reservations: string | nu
 }
 
 /* Titres des pages du site ouvertes dans l'app. */
-export const WEB_PAGES: Record<string, string> = {
-  '/dashboard': 'Accueil',
-  '/dashboard/reservations': 'Réservations',
+export const getWebPages = (t: Translate): Record<string, string> => ({
+  '/dashboard': t('Accueil', 'Home'),
+  '/dashboard/reservations': t('Réservations', 'Reservations'),
   '/dashboard/messages': 'Messages',
   '/dashboard/commissions': 'Commissions',
-  '/dashboard/network': 'Réseau apporteurs',
-  '/dashboard/analytics': 'Analyses',
-  '/dashboard/guests': 'Clients',
-  '/dashboard/prestations': 'Prestations',
-  '/dashboard/portal': 'Portail de réservation',
-  '/dashboard/events': 'Événements',
-  '/dashboard/floor-plan': 'Plan de salle',
-  '/dashboard/integrations': 'Caisse (POS)',
-  '/dashboard/settings': 'Paramètres',
+  '/dashboard/network': t('Réseau apporteurs', 'Referral network'),
+  '/dashboard/analytics': t('Analyses', 'Analytics'),
+  '/dashboard/guests': t('Clients', 'Guests'),
+  '/dashboard/prestations': t('Prestations', 'Services'),
+  '/dashboard/portal': t('Portail de réservation', 'Booking portal'),
+  '/dashboard/events': t('Événements', 'Events'),
+  '/dashboard/floor-plan': t('Plan de salle', 'Floor plan'),
+  '/dashboard/integrations': t('Caisse (POS)', 'Till (POS)'),
+  '/dashboard/settings': t('Paramètres', 'Settings'),
   '/dashboard/notifications': 'Notifications',
-  '/dashboard/help': 'Aide',
-  '/hotel': 'Accueil',
-  '/hotel/reservations': 'Réservations',
-  '/hotel/chambres': 'Chambres & QR codes',
-  '/hotel/adresses': 'Mes adresses',
-  '/hotel/clients': 'Clients',
+  '/dashboard/help': t('Aide', 'Help'),
+  '/hotel': t('Accueil', 'Home'),
+  '/hotel/reservations': t('Réservations', 'Reservations'),
+  '/hotel/chambres': t('Chambres & QR codes', 'Rooms & QR codes'),
+  '/hotel/adresses': t('Mes adresses', 'My places'),
+  '/hotel/clients': t('Clients', 'Guests'),
   '/hotel/commissions': 'Commissions',
-  '/hotel/analyses': 'Analyses',
-  '/hotel/settings': 'Paramètres',
-  '/hotel/aide': 'Aide',
-  '/concierge': 'Accueil',
-  '/concierge/reservations': 'Calendrier',
-  '/concierge/clients': 'CRM Clients',
+  '/hotel/analyses': t('Analyses', 'Analytics'),
+  '/hotel/settings': t('Paramètres', 'Settings'),
+  '/hotel/aide': t('Aide', 'Help'),
+  '/concierge': t('Accueil', 'Home'),
+  '/concierge/reservations': t('Calendrier', 'Calendar'),
+  '/concierge/clients': t('CRM Clients', 'Guest CRM'),
   '/concierge/commissions': 'Commissions',
-  '/concierge/stats': 'Statistiques',
+  '/concierge/stats': t('Statistiques', 'Stats'),
   '/concierge/messages': 'Messages',
-  '/concierge/venues': 'Établissements',
-  '/concierge/ai': 'Assistant IA',
-  '/concierge/settings': 'Paramètres',
-  '/admin': 'Administration',
-}
+  '/concierge/venues': t('Établissements', 'Venues'),
+  '/concierge/ai': t('Assistant IA', 'AI assistant'),
+  '/concierge/settings': t('Paramètres', 'Settings'),
+  '/admin': t('Administration', 'Admin'),
+})
 
 /* Le menu (troisième onglet) : chaque section avec son icône en traits.
    `route` ouvre un écran natif, `path` une page du site. */
@@ -112,104 +114,104 @@ export type IconName = ComponentProps<typeof Feather>['name']
 export type HubItem = { icon: IconName; label: string; hint: string; route?: string; path?: string }
 export type HubGroup = { title: string; items: HubItem[] }
 
-const VENUE_ACTIVITY: HubItem[] = [
-  { icon: 'message-circle', label: 'Messages', hint: 'Hôtels et concierges', route: '/venue/messages' },
-  { icon: 'dollar-sign', label: 'Commissions', hint: 'À régler ce mois, historique par hôtel', route: '/venue/commissions' },
-  { icon: 'share-2', label: 'Réseau apporteurs', hint: 'Quels hôtels vous envoient des clients', route: '/venue/network' },
-  { icon: 'bar-chart-2', label: 'Analyses', hint: 'Volumes, panier moyen, tendances', route: '/venue/analytics' },
-  { icon: 'users', label: 'Clients', hint: 'Historique et fidélité', route: '/venue/guests' },
+const venueActivity = (t: Translate): HubItem[] => [
+  { icon: 'message-circle', label: 'Messages', hint: t('Hôtels et concierges', 'Hotels and concierges'), route: '/venue/messages' },
+  { icon: 'dollar-sign', label: 'Commissions', hint: t('À régler ce mois, historique par hôtel', 'Due this month, history by hotel'), route: '/venue/commissions' },
+  { icon: 'share-2', label: t('Réseau apporteurs', 'Referral network'), hint: t('Quels hôtels vous envoient des clients', 'Which hotels send you guests'), route: '/venue/network' },
+  { icon: 'bar-chart-2', label: t('Analyses', 'Analytics'), hint: t('Volumes, panier moyen, tendances', 'Volumes, average spend, trends'), route: '/venue/analytics' },
+  { icon: 'users', label: t('Clients', 'Guests'), hint: t('Historique et fidélité', 'History and loyalty'), route: '/venue/guests' },
 ]
 
-const VENUE_TOOLS_GROUP: HubGroup = {
-  title: 'Outils',
+const venueToolsGroup = (t: Translate): HubGroup => ({
+  title: t('Outils', 'Tools'),
   items: [
-    { icon: 'grid', label: 'Plus', hint: 'Portail, événements, plan de salle, caisse', route: '/venue/tools' },
+    { icon: 'grid', label: t('Plus', 'More'), hint: t('Portail, événements, plan de salle, caisse', 'Portal, events, floor plan, till'), route: '/venue/tools' },
   ],
-}
+})
 
-const VENUE_ACCOUNT: HubGroup = {
-  title: 'Compte',
+const venueAccount = (t: Translate): HubGroup => ({
+  title: t('Compte', 'Account'),
   items: [
-    { icon: 'settings', label: 'Paramètres', hint: 'Profil, établissement, sécurité', route: '/venue/settings' },
-    { icon: 'bell', label: 'Notifications', hint: "Tout ce qui s'est passé, dans l'ordre", route: '/venue/notifications' },
-    { icon: 'help-circle', label: 'Aide', hint: 'Guides et contact', route: '/venue/help' },
+    { icon: 'settings', label: t('Paramètres', 'Settings'), hint: t('Profil, établissement, sécurité', 'Profile, venue, security'), route: '/venue/settings' },
+    { icon: 'bell', label: 'Notifications', hint: t("Tout ce qui s'est passé, dans l'ordre", 'Everything that happened, in order'), route: '/venue/notifications' },
+    { icon: 'help-circle', label: t('Aide', 'Help'), hint: t('Guides et contact', 'Guides and contact'), route: '/venue/help' },
   ],
-}
+})
 
-export const HUB: Record<TabRole, HubGroup[]> = {
-  etablissement: [{ title: 'Activité', items: VENUE_ACTIVITY }, VENUE_TOOLS_GROUP, VENUE_ACCOUNT],
+export const getHub = (t: Translate): Record<TabRole, HubGroup[]> => ({
+  etablissement: [{ title: t('Activité', 'Activity'), items: venueActivity(t) }, venueToolsGroup(t), venueAccount(t)],
   activite: [
     {
-      title: 'Activité',
+      title: t('Activité', 'Activity'),
       items: [
-        { icon: 'tag', label: 'Prestations', hint: 'Ce que vos clients réservent, visible sur le menu', route: '/venue/prestations' },
-        ...VENUE_ACTIVITY,
+        { icon: 'tag', label: t('Prestations', 'Services'), hint: t('Ce que vos clients réservent, visible sur le menu', 'What your guests book, shown on the menu'), route: '/venue/prestations' },
+        ...venueActivity(t),
       ],
     },
-    { title: 'Outils', items: [{ icon: 'grid', label: 'Plus', hint: 'Portail de réservation', route: '/venue/tools' }] },
-    VENUE_ACCOUNT,
+    { title: t('Outils', 'Tools'), items: [{ icon: 'grid', label: t('Plus', 'More'), hint: t('Portail de réservation', 'Booking portal'), route: '/venue/tools' }] },
+    venueAccount(t),
   ],
   hotel: [
     {
-      title: 'Activité',
+      title: t('Activité', 'Activity'),
       items: [
-        { icon: 'key', label: 'Chambres & QR codes', hint: 'Un QR par chambre, le menu de chacun', path: '/hotel/chambres' },
-        { icon: 'map-pin', label: 'Mes adresses', hint: 'Vos adresses maison sur le menu', path: '/hotel/adresses' },
-        { icon: 'users', label: 'Clients', hint: 'Qui a réservé quoi', path: '/hotel/clients' },
-        { icon: 'dollar-sign', label: 'Commissions', hint: 'Ce que vous recevez, mois par mois', path: '/hotel/commissions' },
-        { icon: 'bar-chart-2', label: 'Analyses', hint: 'Scans, conversions, tendances', path: '/hotel/analyses' },
+        { icon: 'key', label: t('Chambres & QR codes', 'Rooms & QR codes'), hint: t('Un QR par chambre, le menu de chacun', 'One QR per room, each with its menu'), path: '/hotel/chambres' },
+        { icon: 'map-pin', label: t('Mes adresses', 'My places'), hint: t('Vos adresses maison sur le menu', 'Your own recommendations on the menu'), path: '/hotel/adresses' },
+        { icon: 'users', label: t('Clients', 'Guests'), hint: t('Qui a réservé quoi', 'Who booked what'), path: '/hotel/clients' },
+        { icon: 'dollar-sign', label: 'Commissions', hint: t('Ce que vous recevez, mois par mois', 'What you earn, month by month'), path: '/hotel/commissions' },
+        { icon: 'bar-chart-2', label: t('Analyses', 'Analytics'), hint: t('Scans, conversions, tendances', 'Scans, conversions, trends'), path: '/hotel/analyses' },
       ],
     },
     {
-      title: 'Compte',
+      title: t('Compte', 'Account'),
       items: [
-        { icon: 'settings', label: 'Paramètres', hint: "Profil de l'hôtel, couleurs, menu client", path: '/hotel/settings' },
-        { icon: 'help-circle', label: 'Aide', hint: 'Guides et contact', path: '/hotel/aide' },
+        { icon: 'settings', label: t('Paramètres', 'Settings'), hint: t("Profil de l'hôtel, couleurs, menu client", 'Hotel profile, colours, guest menu'), path: '/hotel/settings' },
+        { icon: 'help-circle', label: t('Aide', 'Help'), hint: t('Guides et contact', 'Guides and contact'), path: '/hotel/aide' },
       ],
     },
   ],
   concierge: [
     {
-      title: 'Activité',
+      title: t('Activité', 'Activity'),
       items: [
-        { icon: 'users', label: 'CRM Clients', hint: 'Vos clients et leurs habitudes', path: '/concierge/clients' },
-        { icon: 'dollar-sign', label: 'Commissions', hint: 'Ce que vous recevez', path: '/concierge/commissions' },
-        { icon: 'trending-up', label: 'Statistiques', hint: 'Couverts, commissions, croissance', path: '/concierge/stats' },
-        { icon: 'message-circle', label: 'Messages', hint: 'Échanges avec les établissements', path: '/concierge/messages' },
-        { icon: 'home', label: 'Établissements', hint: 'Le réseau et ses tables', path: '/concierge/venues' },
-        { icon: 'zap', label: 'Assistant IA', hint: 'Une recommandation en quelques mots', path: '/concierge/ai' },
+        { icon: 'users', label: t('CRM Clients', 'Guest CRM'), hint: t('Vos clients et leurs habitudes', 'Your guests and their habits'), path: '/concierge/clients' },
+        { icon: 'dollar-sign', label: 'Commissions', hint: t('Ce que vous recevez', 'What you earn'), path: '/concierge/commissions' },
+        { icon: 'trending-up', label: t('Statistiques', 'Stats'), hint: t('Couverts, commissions, croissance', 'Covers, commissions, growth'), path: '/concierge/stats' },
+        { icon: 'message-circle', label: 'Messages', hint: t('Échanges avec les établissements', 'Conversations with venues'), path: '/concierge/messages' },
+        { icon: 'home', label: t('Établissements', 'Venues'), hint: t('Le réseau et ses tables', 'The network and its tables'), path: '/concierge/venues' },
+        { icon: 'zap', label: t('Assistant IA', 'AI assistant'), hint: t('Une recommandation en quelques mots', 'A recommendation in a few words'), path: '/concierge/ai' },
       ],
     },
     {
-      title: 'Compte',
-      items: [{ icon: 'settings', label: 'Paramètres', hint: 'Profil et sécurité', path: '/concierge/settings' }],
+      title: t('Compte', 'Account'),
+      items: [{ icon: 'settings', label: t('Paramètres', 'Settings'), hint: t('Profil et sécurité', 'Profile and security'), path: '/concierge/settings' }],
     },
   ],
   admin: [
     {
-      title: 'Réseau',
+      title: t('Réseau', 'Network'),
       items: [
-        { icon: 'shield', label: 'Console admin', hint: 'Comptes, catalogue, commissions', path: '/admin' },
-        { icon: 'coffee', label: 'Espace établissement', hint: 'Tel que le voit un restaurant', path: '/dashboard' },
-        { icon: 'briefcase', label: 'Espace hôtel', hint: 'Tel que le voit un hôtel', path: '/hotel' },
-        { icon: 'user-check', label: 'Espace concierge', hint: 'Tel que le voit une conciergerie', path: '/concierge' },
+        { icon: 'shield', label: t('Console admin', 'Admin console'), hint: t('Comptes, catalogue, commissions', 'Accounts, catalogue, commissions'), path: '/admin' },
+        { icon: 'coffee', label: t('Espace établissement', 'Venue workspace'), hint: t('Tel que le voit un restaurant', 'As a restaurant sees it'), path: '/dashboard' },
+        { icon: 'briefcase', label: t('Espace hôtel', 'Hotel workspace'), hint: t('Tel que le voit un hôtel', 'As a hotel sees it'), path: '/hotel' },
+        { icon: 'user-check', label: t('Espace concierge', 'Concierge workspace'), hint: t('Tel que le voit une conciergerie', 'As a concierge desk sees it'), path: '/concierge' },
       ],
     },
   ],
-}
+})
 
 /* Les outils rares, derrière « Plus » : encore des pages du site. */
-export const VENUE_TOOLS: Record<'etablissement' | 'activite', HubItem[]> = {
+export const getVenueTools = (t: Translate): Record<'etablissement' | 'activite', HubItem[]> => ({
   etablissement: [
-    { icon: 'globe', label: 'Portail de réservation', hint: 'Votre page de réservation directe, sans commission', path: '/dashboard/portal' },
-    { icon: 'calendar', label: 'Événements', hint: 'Soirées et programmation', path: '/dashboard/events' },
-    { icon: 'layout', label: 'Plan de salle', hint: 'Vos tables et leur occupation', path: '/dashboard/floor-plan' },
-    { icon: 'credit-card', label: 'Caisse (POS)', hint: 'Rapprochement automatique des tickets', path: '/dashboard/integrations' },
+    { icon: 'globe', label: t('Portail de réservation', 'Booking portal'), hint: t('Votre page de réservation directe, sans commission', 'Your direct booking page, commission-free'), path: '/dashboard/portal' },
+    { icon: 'calendar', label: t('Événements', 'Events'), hint: t('Soirées et programmation', 'Nights and line-up'), path: '/dashboard/events' },
+    { icon: 'layout', label: t('Plan de salle', 'Floor plan'), hint: t('Vos tables et leur occupation', 'Your tables and who is seated'), path: '/dashboard/floor-plan' },
+    { icon: 'credit-card', label: t('Caisse (POS)', 'Till (POS)'), hint: t('Rapprochement automatique des tickets', 'Automatic receipt matching'), path: '/dashboard/integrations' },
   ],
   activite: [
-    { icon: 'globe', label: 'Portail de réservation', hint: 'Votre page de réservation directe, sans commission', path: '/dashboard/portal' },
+    { icon: 'globe', label: t('Portail de réservation', 'Booking portal'), hint: t('Votre page de réservation directe, sans commission', 'Your direct booking page, commission-free'), path: '/dashboard/portal' },
   ],
-}
+})
 
 /* Fond de la coque sombre du site, pour les pages ouvertes par-dessus. */
 export const SHELL_BG = '#0d0f12'

@@ -1,16 +1,22 @@
 import type { Metadata } from "next";
+import { getT } from "@/lib/i18n/server";
 import { GuestExperience } from "./guest-experience";
 
 /* Page publique ouverte par le scan d'un QR code hôtel : aucun compte,
    aucune indexation — le lien n'a de sens qu'imprimé dans l'hôtel.
    Le nom et la ville de l'hôtel sont lus en base (profil de l'hôtel) ;
    les paramètres ?h= et ?c= des anciens QR servent de secours. */
-export const metadata: Metadata = {
-  title: "Votre conciergerie | twocards.",
-  description:
-    "Restaurants, activités, clubs et services : réservez vos plus belles sorties.",
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT();
+  return {
+    title: t("Votre conciergerie | twocards.", "Your concierge | twocards."),
+    description: t(
+      "Restaurants, activités, clubs et services : réservez vos plus belles sorties.",
+      "Restaurants, activities, clubs and services: book your finest outings."
+    ),
+    robots: { index: false, follow: false },
+  };
+}
 
 export default async function GuestScanPage({
   params,

@@ -18,6 +18,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { CardShadow, Light } from '@/constants/theme'
 import { haptic } from '@/lib/haptics'
+import { useT, type Translate } from '@/lib/i18n'
 import { initials, type ReservationStatus } from '@/lib/venue-data'
 
 /* Briques des écrans clairs. Icônes en traits (Feather), jamais d'emoji :
@@ -63,6 +64,7 @@ export function StackScreen({
   contentStyle?: StyleProp<ViewStyle>
 }) {
   const router = useRouter()
+  const t = useT()
   return (
     <SafeAreaView style={styles.screen} edges={['top']}>
       <StatusBar style="dark" />
@@ -71,7 +73,7 @@ export function StackScreen({
           onPress={() => (router.canGoBack() ? router.back() : router.navigate('/hub'))}
           hitSlop={10}
           style={styles.barSide}
-          accessibilityLabel="Retour">
+          accessibilityLabel={t('Retour', 'Back')}>
           <Icon name="chevron-left" size={26} color={Light.ink} />
         </Pressable>
         <View style={styles.barCenter}>
@@ -182,6 +184,7 @@ export function Kpi({
   /* Chaque chiffre mène quelque part : la liste qu'il résume. */
   onPress?: () => void
 }) {
+  const t = useT()
   const color =
     tone === 'accent'
       ? Light.accent
@@ -199,20 +202,21 @@ export function Kpi({
       <Text style={[styles.kpiValue, { color }]} numberOfLines={1} adjustsFontSizeToFit>
         {value}
       </Text>
-      <Text style={styles.kpiHint}>{hint ?? (onPress ? 'Voir' : ' ')}</Text>
+      <Text style={styles.kpiHint}>{hint ?? (onPress ? t('Voir', 'View') : ' ')}</Text>
     </Pressable>
   )
 }
 
-const STATUS: Record<ReservationStatus, { label: string; fg: string; bg: string }> = {
-  'en attente': { label: 'En attente', fg: Light.warning, bg: Light.warningSoft },
-  confirmée: { label: 'Confirmée', fg: Light.success, bg: Light.successSoft },
-  annulée: { label: 'Refusée', fg: Light.danger, bg: Light.dangerSoft },
+const getStatus = (t: Translate): Record<ReservationStatus, { label: string; fg: string; bg: string }> => ({
+  'en attente': { label: t('En attente', 'Pending'), fg: Light.warning, bg: Light.warningSoft },
+  confirmée: { label: t('Confirmée', 'Confirmed'), fg: Light.success, bg: Light.successSoft },
+  annulée: { label: t('Refusée', 'Declined'), fg: Light.danger, bg: Light.dangerSoft },
   'no-show': { label: 'No-show', fg: Light.muted, bg: Light.line },
-}
+})
 
 export function StatusPill({ status }: { status: ReservationStatus }) {
-  const s = STATUS[status]
+  const t = useT()
+  const s = getStatus(t)[status]
   return (
     <View style={[styles.pill, { backgroundColor: s.bg }]}>
       <Text style={[styles.pillText, { color: s.fg }]}>{s.label}</Text>
@@ -375,16 +379,17 @@ export function Stepper({
       onChange(next)
     }
   }
+  const t = useT()
   return (
     <View style={styles.stepper}>
-      <Pressable onPress={() => step(-1)} disabled={value <= min} hitSlop={6} style={[styles.stepperButton, value <= min && styles.stepperOff]} accessibilityLabel="Moins">
+      <Pressable onPress={() => step(-1)} disabled={value <= min} hitSlop={6} style={[styles.stepperButton, value <= min && styles.stepperOff]} accessibilityLabel={t('Moins', 'Less')}>
         <Icon name="minus" size={18} color={Light.ink} />
       </Pressable>
       <Text style={styles.stepperValue}>
         {value}
         {unit ? <Text style={styles.stepperUnit}> {unit(value)}</Text> : null}
       </Text>
-      <Pressable onPress={() => step(1)} disabled={value >= max} hitSlop={6} style={[styles.stepperButton, value >= max && styles.stepperOff]} accessibilityLabel="Plus">
+      <Pressable onPress={() => step(1)} disabled={value >= max} hitSlop={6} style={[styles.stepperButton, value >= max && styles.stepperOff]} accessibilityLabel={t('Plus', 'More')}>
         <Icon name="plus" size={18} color={Light.ink} />
       </Pressable>
     </View>

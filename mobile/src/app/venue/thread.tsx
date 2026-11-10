@@ -16,6 +16,7 @@ import { Icon, StackScreen } from '@/components/venue/ui'
 import { Light } from '@/constants/theme'
 import { useAuth } from '@/lib/auth-context'
 import { haptic } from '@/lib/haptics'
+import { intlLocale, useLocale, useT } from '@/lib/i18n'
 import { hourOf, useThread } from '@/lib/venue-data'
 
 /* Un fil : les bulles, les vôtres à droite en bleu, la saisie en bas. */
@@ -28,11 +29,13 @@ export default function ThreadScreen() {
   const [draft, setDraft] = useState('')
   const [sending, setSending] = useState(false)
   const scrollRef = useRef<ScrollView>(null)
+  const t = useT()
+  const locale = useLocale()
 
   useEffect(() => {
     if (rows && rows.length > 0) {
-      const t = setTimeout(() => scrollRef.current?.scrollToEnd({ animated: false }), 50)
-      return () => clearTimeout(t)
+      const timer = setTimeout(() => scrollRef.current?.scrollToEnd({ animated: false }), 50)
+      return () => clearTimeout(timer)
     }
   }, [rows])
 
@@ -51,10 +54,10 @@ export default function ThreadScreen() {
     }
   }
 
-  const dayOf = (iso: string) => new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })
+  const dayOf = (iso: string) => new Date(iso).toLocaleDateString(intlLocale(locale), { day: 'numeric', month: 'long' })
 
   return (
-    <StackScreen title={typeof name === 'string' && name ? name : 'Conversation'} scroll={false}>
+    <StackScreen title={typeof name === 'string' && name ? name : t('Conversation', 'Conversation')} scroll={false}>
       <KeyboardAvoidingView
         style={styles.fill}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -65,7 +68,7 @@ export default function ThreadScreen() {
           </View>
         ) : (
           <ScrollView ref={scrollRef} contentContainerStyle={styles.list} keyboardShouldPersistTaps="handled">
-            {rows.length === 0 && <Text style={styles.empty}>Dites bonjour : votre message part en notification.</Text>}
+            {rows.length === 0 && <Text style={styles.empty}>{t('Dites bonjour : votre message part en notification.', 'Say hello: your message is sent as a notification.')}</Text>}
             {rows.map((m, i) => {
               const day = dayOf(m.created_at)
               const showDay = i === 0 || day !== dayOf(rows[i - 1].created_at)
@@ -76,7 +79,7 @@ export default function ThreadScreen() {
                   <View style={[styles.bubbleRow, mine && styles.bubbleRowMine]}>
                     <View style={[styles.bubble, mine ? styles.bubbleMine : styles.bubbleTheirs]}>
                       <Text style={[styles.bubbleText, mine && styles.bubbleTextMine]}>{m.body}</Text>
-                      <Text style={[styles.bubbleTime, mine && styles.bubbleTimeMine]}>{hourOf(m.created_at)}</Text>
+                      <Text style={[styles.bubbleTime, mine && styles.bubbleTimeMine]}>{hourOf(m.created_at, locale)}</Text>
                     </View>
                   </View>
                 </View>
@@ -88,7 +91,7 @@ export default function ThreadScreen() {
           <TextInput
             value={draft}
             onChangeText={setDraft}
-            placeholder="Votre message"
+            placeholder={t('Votre message', 'Your message')}
             placeholderTextColor={Light.faint}
             style={styles.input}
             multiline
@@ -98,7 +101,7 @@ export default function ThreadScreen() {
             onPress={submit}
             disabled={!draft.trim() || sending}
             style={({ pressed }) => [styles.send, (!draft.trim() || sending) && styles.sendOff, pressed && styles.pressed]}
-            accessibilityLabel="Envoyer">
+            accessibilityLabel={t('Envoyer', 'Send')}>
             <Icon name="send" size={18} color="#FFFFFF" />
           </Pressable>
         </View>

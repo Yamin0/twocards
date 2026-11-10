@@ -17,15 +17,18 @@ import { useAuthUser } from "@/hooks/use-auth-user";
 import { createClient } from "@/lib/supabase/client";
 import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
 import { AvatarUploader } from "@/components/shared/avatar-uploader";
+import { LanguageSwitcher } from "@/components/shared/language-switcher";
+import { useT } from "@/lib/i18n/client";
+import type { Translate } from "@/lib/i18n";
 
 /* ------------------------------------------------------------------ */
 /*  Nav items                                                          */
 /* ------------------------------------------------------------------ */
-const settingsNav = [
-  { label: "Profil", icon: User, id: "profil" },
-  { label: "Établissement", icon: Building2, id: "etablissement" },
-  { label: "Notifications", icon: Bell, id: "notifications" },
-  { label: "Sécurité", icon: Lock, id: "securite" },
+const getSettingsNav = (t: Translate) => [
+  { label: t("Profil", "Profile"), icon: User, id: "profil" },
+  { label: t("Établissement", "Venue"), icon: Building2, id: "etablissement" },
+  { label: t("Notifications", "Notifications"), icon: Bell, id: "notifications" },
+  { label: t("Sécurité", "Security"), icon: Lock, id: "securite" },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -38,26 +41,33 @@ const inputCls =
 const labelCls =
   "block text-[0.625rem] text-white/30 uppercase tracking-wider mb-1.5";
 const managedNoteCls = "text-[0.6875rem] text-white/25 mt-1.5";
-const MANAGED_NOTE =
-  "Géré par twocards, contactez le support pour le modifier.";
-const VENUE_TYPE_LABELS: Record<string, string> = {
+const getManagedNote = (t: Translate) =>
+  t(
+    "Géré par twocards, contactez le support pour le modifier.",
+    "Managed by twocards. Contact support to change it."
+  );
+const getVenueTypeLabels = (t: Translate): Record<string, string> => ({
   restaurant: "Restaurant",
   bar: "Bar",
   club: "Club",
-  "restaurant-bar": "Restaurant-Bar",
+  "restaurant-bar": t("Restaurant-Bar", "Restaurant & bar"),
   lounge: "Lounge",
   rooftop: "Rooftop",
   "beach-club": "Beach club",
-  "hotel-riad": "Hôtel / Riad",
-  activite: "Activité",
+  "hotel-riad": t("Hôtel / Riad", "Hotel / Riad"),
+  activite: t("Activité", "Activity"),
   service: "Service",
-};
+});
 
-const DELETE_MAILTO = `mailto:support@twocards.io?subject=${encodeURIComponent(
-  "Suppression de compte"
-)}&body=${encodeURIComponent(
-  "Bonjour,\n\nJe souhaite supprimer mon compte twocards ainsi que les données associées.\n\nMerci."
-)}`;
+const getDeleteMailto = (t: Translate) =>
+  `mailto:support@twocards.io?subject=${encodeURIComponent(
+    t("Suppression de compte", "Account deletion")
+  )}&body=${encodeURIComponent(
+    t(
+      "Bonjour,\n\nJe souhaite supprimer mon compte twocards ainsi que les données associées.\n\nMerci.",
+      "Hello,\n\nI would like to delete my twocards account and the associated data.\n\nThank you."
+    )
+  )}`;
 
 /* ------------------------------------------------------------------ */
 /*  Toggle component                                                   */
@@ -96,6 +106,11 @@ type ToastState = { message: string; type: "success" | "error" };
 
 export default function SettingsPage() {
   const { isLoading } = useAuthUser();
+  const t = useT();
+  const settingsNav = getSettingsNav(t);
+  const MANAGED_NOTE = getManagedNote(t);
+  const VENUE_TYPE_LABELS = getVenueTypeLabels(t);
+  const DELETE_MAILTO = getDeleteMailto(t);
 
   const [activeTab, setActiveTab] = useState("profil");
   const [saving, setSaving] = useState(false);
@@ -112,11 +127,11 @@ export default function SettingsPage() {
   );
   useEffect(() => {
     if (!toast) return;
-    const t = setTimeout(
+    const timer = setTimeout(
       () => setToast(null),
       toast.type === "error" ? 5000 : 3000
     );
-    return () => clearTimeout(t);
+    return () => clearTimeout(timer);
   }, [toast]);
 
   /* ---- Profile form ---- */
@@ -198,7 +213,13 @@ export default function SettingsPage() {
        n'accepte qu'une adresse https, jamais javascript: ou autre schéma. */
     const googleReviewUrl = form.googleReviewUrl.trim();
     if (googleReviewUrl && !/^https:\/\/\S+$/i.test(googleReviewUrl)) {
-      showToast("Le lien d'avis Google doit commencer par https://", "error");
+      showToast(
+        t(
+          "Le lien d'avis Google doit commencer par https://",
+          "The Google review link must start with https://"
+        ),
+        "error"
+      );
       return;
     }
     setSaving(true);
@@ -218,9 +239,12 @@ export default function SettingsPage() {
     });
     setSaving(false);
     if (error) {
-      showToast(`Échec de l'enregistrement : ${error.message}`, "error");
+      showToast(
+        t(`Échec de l'enregistrement : ${error.message}`, `Could not save: ${error.message}`),
+        "error"
+      );
     } else {
-      showToast("Modifications enregistrées avec succès");
+      showToast(t("Modifications enregistrées avec succès", "Changes saved"));
     }
   };
 
@@ -233,9 +257,12 @@ export default function SettingsPage() {
     });
     setSaving(false);
     if (error) {
-      showToast(`Échec de l'enregistrement : ${error.message}`, "error");
+      showToast(
+        t(`Échec de l'enregistrement : ${error.message}`, `Could not save: ${error.message}`),
+        "error"
+      );
     } else {
-      showToast("Préférences de notifications enregistrées");
+      showToast(t("Préférences de notifications enregistrées", "Notification preferences saved"));
     }
   };
 
@@ -243,13 +270,16 @@ export default function SettingsPage() {
   const handlePasswordSave = async () => {
     if (security.newPw.length < 8) {
       showToast(
-        "Le mot de passe doit contenir au moins 8 caractères",
+        t(
+          "Le mot de passe doit contenir au moins 8 caractères",
+          "Your password must be at least 8 characters"
+        ),
         "error"
       );
       return;
     }
     if (security.newPw !== security.confirmPw) {
-      showToast("Les mots de passe ne correspondent pas", "error");
+      showToast(t("Les mots de passe ne correspondent pas", "Passwords do not match"), "error");
       return;
     }
     setSaving(true);
@@ -260,12 +290,15 @@ export default function SettingsPage() {
     setSaving(false);
     if (error) {
       showToast(
-        `Échec du changement de mot de passe : ${error.message}`,
+        t(
+          `Échec du changement de mot de passe : ${error.message}`,
+          `Could not change password: ${error.message}`
+        ),
         "error"
       );
     } else {
       setSecurity({ newPw: "", confirmPw: "" });
-      showToast("Mot de passe modifié avec succès");
+      showToast(t("Mot de passe modifié avec succès", "Password updated"));
     }
   };
 
@@ -276,20 +309,20 @@ export default function SettingsPage() {
   /* ---------------------------------------------------------------- */
   const tabHeaders: Record<string, { title: string; subtitle: string }> = {
     profil: {
-      title: "Profil",
-      subtitle: "Gérez vos informations personnelles.",
+      title: t("Profil", "Profile"),
+      subtitle: t("Gérez vos informations personnelles.", "Manage your personal details."),
     },
     etablissement: {
-      title: "Établissement",
-      subtitle: "Configurez les détails de votre établissement.",
+      title: t("Établissement", "Venue"),
+      subtitle: t("Configurez les détails de votre établissement.", "Set up your venue details."),
     },
     notifications: {
-      title: "Notifications",
-      subtitle: "Choisissez les alertes que vous souhaitez recevoir.",
+      title: t("Notifications", "Notifications"),
+      subtitle: t("Choisissez les alertes que vous souhaitez recevoir.", "Choose which alerts you receive."),
     },
     securite: {
-      title: "Sécurité",
-      subtitle: "Protégez votre compte avec un mot de passe fort.",
+      title: t("Sécurité", "Security"),
+      subtitle: t("Protégez votre compte avec un mot de passe fort.", "Protect your account with a strong password."),
     },
   };
 
@@ -305,7 +338,7 @@ export default function SettingsPage() {
       className="px-6 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-xl text-sm font-medium transition-colors disabled:opacity-50 flex items-center gap-2"
     >
       {saving && <Loader2 size={16} className="animate-spin" />}
-      {saving ? "Enregistrement..." : "Enregistrer"}
+      {saving ? t("Enregistrement...", "Saving...") : t("Enregistrer", "Save")}
     </button>
   );
 
@@ -320,17 +353,17 @@ export default function SettingsPage() {
       {/* Fields */}
       <div className={`${glassCard} p-6 space-y-5`}>
         <div>
-          <label className={labelCls}>Nom complet</label>
+          <label className={labelCls}>{t("Nom complet", "Full name")}</label>
           <input
             type="text"
             value={form.name}
             onChange={(e) => updateForm("name", e.target.value)}
-            placeholder="Votre nom"
+            placeholder={t("Votre nom", "Your name")}
             className={inputCls}
           />
         </div>
         <div>
-          <label className={labelCls}>E-mail</label>
+          <label className={labelCls}>{t("E-mail", "Email")}</label>
           <input
             type="email"
             value={form.email}
@@ -341,7 +374,7 @@ export default function SettingsPage() {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className={labelCls}>Téléphone</label>
+            <label className={labelCls}>{t("Téléphone", "Phone")}</label>
             <input
               type="tel"
               value={form.phone}
@@ -351,16 +384,30 @@ export default function SettingsPage() {
             />
           </div>
           <div>
-            <label className={labelCls}>Ville</label>
+            <label className={labelCls}>{t("Ville", "City")}</label>
             <input
               type="text"
               value={form.city}
               onChange={(e) => updateForm("city", e.target.value)}
-              placeholder="Votre ville"
+              placeholder={t("Votre ville", "Your city")}
               className={inputCls}
             />
           </div>
         </div>
+      </div>
+
+      {/* Langue de l'interface (visible aussi dans l'app mobile) */}
+      <div className={`${glassCard} p-6 flex items-center justify-between gap-4`}>
+        <div>
+          <p className="text-sm text-white font-medium">Language / Langue</p>
+          <p className="text-xs text-white/40 mt-0.5">
+            {t(
+              "Langue de votre espace twocards.",
+              "The language of your twocards workspace."
+            )}
+          </p>
+        </div>
+        <LanguageSwitcher tone="dark" />
       </div>
 
       <div className="flex items-start justify-between gap-4">
@@ -370,10 +417,13 @@ export default function SettingsPage() {
             href={DELETE_MAILTO}
             className="px-4 py-2.5 inline-block text-sm font-medium text-red-400 hover:text-red-300 transition-colors"
           >
-            Supprimer le compte
+            {t("Supprimer le compte", "Delete account")}
           </a>
           <p className="text-[0.6875rem] text-white/25 max-w-[16rem]">
-            La demande est envoyée à notre support et traitée sous 30 jours.
+            {t(
+              "La demande est envoyée à notre support et traitée sous 30 jours.",
+              "Your request goes to our support team and is handled within 30 days."
+            )}
           </p>
         </div>
       </div>
@@ -385,7 +435,7 @@ export default function SettingsPage() {
     <div className="space-y-6">
       <div className={`${glassCard} p-6 space-y-5`}>
         <div>
-          <label className={labelCls}>Nom de l&apos;établissement</label>
+          <label className={labelCls}>{t(<>Nom de l&apos;établissement</>, <>Venue name</>)}</label>
           <input
             type="text"
             value={form.venueName}
@@ -407,7 +457,7 @@ export default function SettingsPage() {
             <p className={managedNoteCls}>{MANAGED_NOTE}</p>
           </div>
           <div>
-            <label className={labelCls}>Capacité</label>
+            <label className={labelCls}>{t("Capacité", "Capacity")}</label>
             <input
               type="number"
               value={form.capacity}
@@ -419,45 +469,45 @@ export default function SettingsPage() {
         </div>
 
         <div>
-          <label className={labelCls}>Adresse</label>
+          <label className={labelCls}>{t("Adresse", "Address")}</label>
           <input
             type="text"
             value={form.address}
             onChange={(e) => updateForm("address", e.target.value)}
-            placeholder="Adresse complète"
+            placeholder={t("Adresse complète", "Full address")}
             className={inputCls}
           />
         </div>
 
         <div>
-          <label className={labelCls}>Description</label>
+          <label className={labelCls}>{t("Description", "Description")}</label>
           <textarea
             rows={3}
             value={form.description}
             onChange={(e) => updateForm("description", e.target.value)}
-            placeholder="Décrivez votre établissement..."
+            placeholder={t("Décrivez votre établissement...", "Describe your venue...")}
             className={`${inputCls} resize-none`}
           />
         </div>
 
         <div>
-          <label className={labelCls}>Horaires d&apos;ouverture</label>
+          <label className={labelCls}>{t(<>Horaires d&apos;ouverture</>, <>Opening hours</>)}</label>
           <input
             type="text"
             value={form.hours}
             onChange={(e) => updateForm("hours", e.target.value)}
-            placeholder="Ex: Lun-Ven 19h-02h"
+            placeholder={t("Ex: Lun-Ven 19h-02h", "e.g. Mon–Fri 7pm–2am")}
             className={inputCls}
           />
         </div>
 
         <div>
-          <label className={labelCls}>Consommation minimum</label>
+          <label className={labelCls}>{t("Consommation minimum", "Minimum spend")}</label>
           <input
             type="text"
             value={form.minSpend}
             onChange={(e) => updateForm("minSpend", e.target.value)}
-            placeholder="Ex: Table Standard: 500 MAD"
+            placeholder={t("Ex: Table Standard: 500 MAD", "e.g. Standard table: 500 MAD")}
             className={inputCls}
           />
         </div>
@@ -465,7 +515,7 @@ export default function SettingsPage() {
         {/* Lien « Demander des avis » de la fiche Google : proposé à chaque
             client après sa note, sur la page /avis/[id]. */}
         <div>
-          <label className={labelCls}>Lien d&apos;avis Google</label>
+          <label className={labelCls}>{t(<>Lien d&apos;avis Google</>, <>Google review link</>)}</label>
           <input
             type="url"
             inputMode="url"
@@ -475,9 +525,10 @@ export default function SettingsPage() {
             className={inputCls}
           />
           <p className={managedNoteCls}>
-            Dans votre fiche Google Business Profile, « Demander des avis »,
-            puis copiez le lien. Après avoir noté sa soirée, chaque client est
-            invité à laisser un avis Google.
+            {t(
+              "Dans votre fiche Google Business Profile, « Demander des avis », puis copiez le lien. Après avoir noté sa soirée, chaque client est invité à laisser un avis Google.",
+              "In your Google Business Profile, open “Ask for reviews” and copy the link. After rating their evening, each guest is invited to leave a Google review."
+            )}
           </p>
         </div>
       </div>
@@ -491,28 +542,31 @@ export default function SettingsPage() {
     [
       {
         key: "emailNotifs",
-        label: "Notifications par e-mail",
-        desc: "Recevez des résumés et alertes par e-mail.",
+        label: t("Notifications par e-mail", "Email notifications"),
+        desc: t("Recevez des résumés et alertes par e-mail.", "Get summaries and alerts by email."),
       },
       {
         key: "smsAlerts",
-        label: "Alertes SMS",
-        desc: "Recevez des alertes importantes par SMS.",
+        label: t("Alertes SMS", "SMS alerts"),
+        desc: t("Recevez des alertes importantes par SMS.", "Get important alerts by text message."),
       },
       {
         key: "commissionAlerts",
-        label: "Alertes commissions",
-        desc: "Soyez notifié des nouvelles commissions.",
+        label: t("Alertes commissions", "Commission alerts"),
+        desc: t("Soyez notifié des nouvelles commissions.", "Be notified of new commissions."),
       },
       {
         key: "newRpNotifs",
-        label: "Nouveaux RP",
-        desc: "Notification lorsqu'un nouveau RP rejoint votre réseau.",
+        label: t("Nouveaux RP", "New PRs"),
+        desc: t(
+          "Notification lorsqu'un nouveau RP rejoint votre réseau.",
+          "Be notified when a new PR joins your network."
+        ),
       },
       {
         key: "weeklyReport",
-        label: "Rapport hebdomadaire",
-        desc: "Recevez un résumé chaque semaine.",
+        label: t("Rapport hebdomadaire", "Weekly report"),
+        desc: t("Recevez un résumé chaque semaine.", "Get a summary every week."),
       },
     ];
 
@@ -548,11 +602,11 @@ export default function SettingsPage() {
       {/* Password */}
       <div className={`${glassCard} p-6 space-y-5`}>
         <h3 className="text-sm font-semibold text-white">
-          Changer le mot de passe
+          {t("Changer le mot de passe", "Change password")}
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className={labelCls}>Nouveau mot de passe</label>
+            <label className={labelCls}>{t("Nouveau mot de passe", "New password")}</label>
             <div className="relative">
               <input
                 type={showNewPw ? "text" : "password"}
@@ -566,6 +620,11 @@ export default function SettingsPage() {
               <button
                 type="button"
                 onClick={() => setShowNewPw(!showNewPw)}
+                aria-label={
+                  showNewPw
+                    ? t("Masquer le mot de passe", "Hide password")
+                    : t("Afficher le mot de passe", "Show password")
+                }
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/50"
               >
                 {showNewPw ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -573,7 +632,7 @@ export default function SettingsPage() {
             </div>
           </div>
           <div>
-            <label className={labelCls}>Confirmer</label>
+            <label className={labelCls}>{t("Confirmer", "Confirm")}</label>
             <input
               type="password"
               value={security.confirmPw}
@@ -586,8 +645,13 @@ export default function SettingsPage() {
           </div>
         </div>
         <p className="text-xs text-white/40">
-          8 caractères minimum. Le changement s&apos;applique immédiatement à
-          votre compte.
+          {t(
+            <>
+              8 caractères minimum. Le changement s&apos;applique immédiatement à
+              votre compte.
+            </>,
+            <>At least 8 characters. The change applies to your account immediately.</>
+          )}
         </p>
         {saveButton(handlePasswordSave)}
       </div>
@@ -598,24 +662,29 @@ export default function SettingsPage() {
           <div className="flex items-center gap-2.5">
             <Shield size={16} className="text-white/40" />
             <h3 className="text-sm font-semibold text-white">
-              Sécurité avancée
+              {t("Sécurité avancée", "Advanced security")}
             </h3>
           </div>
           <span className="text-[0.625rem] uppercase tracking-wider text-blue-400 bg-blue-500/10 border border-blue-400/20 px-2.5 py-1 rounded-full">
-            Bientôt disponible
+            {t("Bientôt disponible", "Coming soon")}
           </span>
         </div>
         <p className="text-xs text-white/40">
-          L&apos;authentification à deux facteurs et la gestion des sessions
-          actives arrivent prochainement.
+          {t(
+            <>
+              L&apos;authentification à deux facteurs et la gestion des sessions
+              actives arrivent prochainement.
+            </>,
+            <>Two-factor authentication and active session management are coming soon.</>
+          )}
         </p>
         <div className="flex items-center justify-between pt-2 border-t border-white/[0.06] opacity-60">
           <div>
             <p className="text-sm text-white font-medium">
-              Authentification à deux facteurs
+              {t("Authentification à deux facteurs", "Two-factor authentication")}
             </p>
             <p className="text-xs text-white/40 mt-0.5">
-              Ajoutez une couche de sécurité supplémentaire.
+              {t("Ajoutez une couche de sécurité supplémentaire.", "Add an extra layer of security.")}
             </p>
           </div>
           <Toggle enabled={false} disabled />
@@ -625,17 +694,21 @@ export default function SettingsPage() {
       {/* Delete account */}
       <div className={`${glassCard} p-6 flex items-start justify-between gap-4`}>
         <div>
-          <p className="text-sm text-white font-medium">Supprimer le compte</p>
+          <p className="text-sm text-white font-medium">
+            {t("Supprimer le compte", "Delete account")}
+          </p>
           <p className="text-xs text-white/40 mt-0.5 max-w-md">
-            Envoyez votre demande à notre support, la suppression est traitée
-            sous 30 jours.
+            {t(
+              "Envoyez votre demande à notre support, la suppression est traitée sous 30 jours.",
+              "Send your request to our support team. Deletion is handled within 30 days."
+            )}
           </p>
         </div>
         <a
           href={DELETE_MAILTO}
           className="flex-shrink-0 px-4 py-2.5 text-sm font-medium text-red-400 hover:text-red-300 transition-colors"
         >
-          Contacter le support
+          {t("Contacter le support", "Contact support")}
         </a>
       </div>
     </div>

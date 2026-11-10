@@ -3,6 +3,7 @@
 import { Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Series } from "@/lib/hotel/analytics";
+import { useLocale, useT } from "@/lib/i18n/client";
 
 /* Graphes légers de l'espace hôtel : du DOM et du SVG, aucune dépendance.
    Les échelles sont relatives au maximum de la série. */
@@ -20,6 +21,8 @@ export function Bars({
   height?: number;
   highlightLast?: boolean;
 }) {
+  const locale = useLocale();
+  const sep = locale === "en" ? ":" : " :";
   const max = Math.max(...data.map((d) => d.value), 1);
   return (
     <div className="flex items-end gap-1.5 sm:gap-2" style={{ height }}>
@@ -29,7 +32,7 @@ export function Bars({
           <div
             key={d.key}
             className="group flex min-w-0 flex-1 flex-col items-center justify-end gap-1.5"
-            title={`${d.label} : ${format(d.value)}`}
+            title={`${d.label}${sep} ${format(d.value)}`}
           >
             <span className="num text-[10px] font-bold text-white/70 opacity-0 transition-opacity group-hover:opacity-100">
               {d.value > 0 ? format(d.value) : ""}
@@ -62,6 +65,8 @@ export function DualBars({
   labels?: boolean;
   height?: number;
 }) {
+  const locale = useLocale();
+  const sep = locale === "en" ? ":" : " :";
   const max = Math.max(...primary.data.map((d) => d.value), ...secondary.data.map((d) => d.value), 1);
   return (
     <div>
@@ -72,7 +77,7 @@ export function DualBars({
             <div
               key={d.key}
               className="flex min-w-0 flex-1 flex-col items-center justify-end gap-1.5"
-              title={`${d.label} · ${primary.label} : ${d.value} · ${secondary.label} : ${s}`}
+              title={`${d.label} · ${primary.label}${sep} ${d.value} · ${secondary.label}${sep} ${s}`}
             >
               <div className="flex w-full items-end justify-center gap-0.5">
                 <div
@@ -134,6 +139,9 @@ export function SplitBar({
   segments: { label: string; value: number; color: string }[];
   format?: (n: number) => string;
 }) {
+  const locale = useLocale();
+  const sep = locale === "en" ? ":" : " :";
+  const pct = locale === "en" ? "%" : " %";
   const total = segments.reduce((s, x) => s + x.value, 0);
   return (
     <div>
@@ -148,7 +156,7 @@ export function SplitBar({
                 key={s.label}
                 className={cn("rounded-sm first:rounded-l-full last:rounded-r-full", s.color)}
                 style={{ width: `${(s.value / total) * 100}%` }}
-                title={`${s.label} : ${format(s.value)}`}
+                title={`${s.label}${sep} ${format(s.value)}`}
               />
             ))}
         </div>
@@ -159,7 +167,7 @@ export function SplitBar({
             <span className={cn("h-2 w-2 shrink-0 rounded-full", s.color)} />
             <span className="truncate">{s.label}</span>
             <span className="num ml-auto font-bold text-white/80">
-              {total > 0 ? `${Math.round((s.value / total) * 100)} %` : "—"}
+              {total > 0 ? `${Math.round((s.value / total) * 100)}${pct}` : "—"}
             </span>
           </span>
         ))}
@@ -173,7 +181,7 @@ export function RankedBars({
   items,
   format = (n: number) => String(n),
   color = "bg-sky-400/80",
-  empty = "Aucune donnée",
+  empty,
   href,
 }: {
   items: { label: string; value: number; sub?: string; id?: string }[];
@@ -182,8 +190,10 @@ export function RankedBars({
   empty?: string;
   href?: (id: string) => string;
 }) {
+  const t = useT();
   const max = Math.max(...items.map((i) => i.value), 1);
-  if (items.length === 0) return <p className="text-xs text-white/40">{empty}</p>;
+  if (items.length === 0)
+    return <p className="text-xs text-white/40">{empty ?? t("Aucune donnée", "No data yet")}</p>;
   return (
     <ul className="space-y-3">
       {items.map((it, i) => {
@@ -219,8 +229,12 @@ export function RankedBars({
 }
 
 export function RatingStars({ value, size = 14, className }: { value: number; size?: number; className?: string }) {
+  const t = useT();
   return (
-    <span className={cn("inline-flex items-center gap-0.5", className)} aria-label={`${value.toFixed(1)} sur 5`}>
+    <span
+      className={cn("inline-flex items-center gap-0.5", className)}
+      aria-label={t(`${value.toFixed(1)} sur 5`, `${value.toFixed(1)} out of 5`)}
+    >
       {[1, 2, 3, 4, 5].map((n) => (
         <Star
           key={n}

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Play } from "lucide-react";
 import { LandingNavbar } from "@/components/landing/navbar";
+import { useLocale, useT } from "@/lib/i18n/client";
 
 /* Héros : l'accroche centrée sur fond noir, puis le film de marque en grand
    format, à cheval entre le noir et l'ivoire de la page.
@@ -17,16 +18,30 @@ import { LandingNavbar } from "@/components/landing/navbar";
    Deux encodages de la même source (Downloads/twocards-hero-film-60s-
    musique-C.mp4, 1080p 24 i/s) :
    - tc-film-1080.mp4 (~10 Mo) à partir de lg ;
-   - tc-film-720.mp4 (~5 Mo) en dessous. */
-const FILM_1080 = "/videos/tc-film-1080.mp4";
-const FILM_720 = "/videos/tc-film-720.mp4";
-const FILM_POSTER = "/videos/tc-film-poster.jpg";
+   - tc-film-720.mp4 (~5 Mo) en dessous.
+   La version anglaise (voix off, titres et interfaces en anglais) a ses
+   propres fichiers, suffixés -en. */
+const FILMS = {
+  fr: {
+    hd: "/videos/tc-film-1080.mp4",
+    sd: "/videos/tc-film-720.mp4",
+    poster: "/videos/tc-film-poster.jpg",
+  },
+  en: {
+    hd: "/videos/tc-film-en-1080.mp4",
+    sd: "/videos/tc-film-en-720.mp4",
+    poster: "/videos/tc-film-en-poster.jpg",
+  },
+} as const;
 
 const blockContextMenu = (e: React.SyntheticEvent) => e.preventDefault();
 const prefersReducedMotion = () =>
   window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 export function QrHero() {
+  const t = useT();
+  const locale = useLocale();
+  const film = FILMS[locale];
   const videoRef = useRef<HTMLVideoElement>(null);
   const frameRef = useRef<HTMLDivElement>(null);
   const [withSound, setWithSound] = useState(false);
@@ -47,7 +62,8 @@ export function QrHero() {
     });
     io.observe(v);
     return () => io.disconnect();
-  }, []);
+    // La vidéo est remontée à chaque changement de langue (key).
+  }, [locale]);
 
   /* Appelé dans le geste de l'utilisateur : le son n'est autorisé par le
      navigateur que s'il est activé dans le clic lui-même. */
@@ -77,14 +93,23 @@ export function QrHero() {
       <div className="bg-[#0a0a0a] text-white">
         <LandingNavbar variant="dark" />
 
-        <div className="mx-auto max-w-4xl px-6 pb-12 pt-14 text-center md:pb-16 md:pt-20">
+        {/* max-w-5xl : le titre anglais, plus long, tient aussi sur une ligne
+            à partir de lg — sinon le bloc noir descend d'une ligne. */}
+        <div className="mx-auto max-w-5xl px-6 pb-12 pt-14 text-center md:pb-16 md:pt-20">
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.05 }}
             className="font-title text-[44px] font-bold leading-[1.02] tracking-[-0.04em] sm:text-[60px] lg:text-[76px]"
           >
-            Bien plus qu&apos;un <em className="font-light italic">QR code</em>.
+            {t(
+              <>
+                Bien plus qu&apos;un <em className="font-light italic whitespace-nowrap">QR code</em>.
+              </>,
+              <>
+                Much more than a <em className="font-light italic whitespace-nowrap">QR code</em>.
+              </>,
+            )}
           </motion.h1>
 
           <motion.p
@@ -93,9 +118,10 @@ export function QrHero() {
             transition={{ duration: 0.7, delay: 0.14 }}
             className="mx-auto mt-7 max-w-xl text-[16px] leading-relaxed text-white/60 md:text-[18px]"
           >
-            Un QR en chambre, un lien par e-mail ou WhatsApp. Votre client
-            découvre votre sélection, réserve en quelques secondes, et vous
-            suivez tout : arrivée, facture vérifiée, commission.
+            {t(
+              "Un QR en chambre, un lien par e-mail ou WhatsApp. Votre client découvre votre sélection, réserve en quelques secondes, et vous suivez tout : arrivée, facture vérifiée, commission.",
+              "A QR code in the room, a link by email or WhatsApp. Your guest browses your selection, books in seconds, and you track everything: arrival, verified bill, commission.",
+            )}
           </motion.p>
 
           <motion.div
@@ -108,7 +134,7 @@ export function QrHero() {
               href="/signup"
               className="rounded-full bg-white px-8 py-3.5 text-[14px] font-medium text-[var(--landing-ink)] transition-opacity hover:opacity-85"
             >
-              Demander un accès
+              {t("Demander un accès", "Request access")}
             </Link>
             <button
               type="button"
@@ -118,7 +144,7 @@ export function QrHero() {
               <span className="flex size-9 items-center justify-center rounded-full border border-white/25 transition-colors group-hover:border-white/60">
                 <Play size={12} fill="currentColor" className="ml-0.5" />
               </span>
-              Regarder le film · 1 min
+              {t("Regarder le film · 1 min", "Watch the film · 1 min")}
             </button>
           </motion.div>
         </div>
@@ -134,9 +160,11 @@ export function QrHero() {
           transition={{ duration: 0.9, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
           className="relative mx-auto aspect-video max-w-6xl overflow-hidden rounded-xl bg-black shadow-[0_50px_120px_-40px_rgba(0,0,0,0.55)] ring-1 ring-white/10 md:rounded-2xl"
         >
+          {/* key : changer de langue recharge la vidéo sur la bonne source. */}
           <video
+            key={locale}
             ref={videoRef}
-            poster={FILM_POSTER}
+            poster={film.poster}
             autoPlay
             muted
             loop
@@ -148,12 +176,12 @@ export function QrHero() {
             controlsList="nodownload noremoteplayback"
             onContextMenu={blockContextMenu}
             onEnded={backToPreview}
-            aria-label="Film de présentation de TwoCards"
+            aria-label={t("Film de présentation de TwoCards", "TwoCards introduction film")}
             className="absolute inset-0 h-full w-full object-cover"
           >
-            <source src={FILM_1080} type="video/mp4" media="(min-width: 1024px)" />
-            <source src={FILM_720} type="video/mp4" />
-            Votre navigateur ne peut pas lire cette vidéo.
+            <source src={film.hd} type="video/mp4" media="(min-width: 1024px)" />
+            <source src={film.sd} type="video/mp4" />
+            {t("Votre navigateur ne peut pas lire cette vidéo.", "Your browser cannot play this video.")}
           </video>
 
           {!withSound && (
@@ -165,7 +193,7 @@ export function QrHero() {
               <span className="flex size-7 items-center justify-center rounded-full bg-white text-[var(--landing-ink)]">
                 <Play size={10} fill="currentColor" className="ml-0.5" />
               </span>
-              Regarder avec le son
+              {t("Regarder avec le son", "Watch with sound")}
             </button>
           )}
         </motion.div>
