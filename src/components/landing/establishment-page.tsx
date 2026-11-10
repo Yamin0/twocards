@@ -11,7 +11,7 @@ import {
    la salle au zellige fermé, elle se joue une fois et reste sur le mur
    clos. Les adresses des exemples sont celles de la fiction du film. */
 
-const SIGNUP = "/signup";
+const SIGNUP = "/signup?role=etablissement";
 
 /* ─── Mini-écrans ──────────────────────────────────────────────────────── */
 

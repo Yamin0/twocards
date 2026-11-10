@@ -251,7 +251,7 @@ const FAQ = [
   },
 ];
 
-const SIGNUP = "/signup?role=concierge";
+const SIGNUP = "/signup?role=influenceur";
 
 /* ─── Page ─────────────────────────────────────────────────────────────── */
 
