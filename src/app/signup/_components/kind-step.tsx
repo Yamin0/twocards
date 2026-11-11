@@ -48,14 +48,17 @@ export function KindStep({
               onClick={() => onChoose(k.value)}
               onMouseEnter={() => onPreview(k.value)}
               onFocus={() => onPreview(k.value)}
-              className="group flex w-full items-center gap-4 py-5 text-left outline-none focus-visible:bg-black/[0.04] sm:gap-6"
+              /* Survol et focus clavier : la ligne passe en encre, texte
+                 blanc. Le retrait négatif garde photos et textes alignés
+                 sur le titre, le fond déborde de la marge. */
+              className="group -mx-3 flex w-[calc(100%+1.5rem)] items-center gap-4 rounded-xl px-3 py-5 text-left outline-none transition-colors duration-200 hover:bg-[var(--landing-ink)] hover:text-white focus-visible:bg-[var(--landing-ink)] focus-visible:text-white motion-reduce:transition-none sm:gap-6"
             >
               <span className="relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl bg-[#1a1612] sm:h-[76px] sm:w-[76px]">
                 <Image src={k.image} alt="" fill sizes="76px" className="object-cover" />
               </span>
               <span className="min-w-0 flex-1">
                 <span className="block text-[19px] font-semibold tracking-[-0.015em] sm:text-[22px]">{k.label}</span>
-                <span className="mt-1 block text-[14px] leading-snug text-[var(--landing-mute)] sm:text-[15px]">
+                <span className="mt-1 block text-[14px] leading-snug text-[var(--landing-mute)] transition-colors duration-200 group-hover:text-white/75 group-focus-visible:text-white/75 sm:text-[15px]">
                   {k.line}
                 </span>
               </span>
@@ -63,7 +66,7 @@ export function KindStep({
                 size={20}
                 strokeWidth={1.5}
                 aria-hidden
-                className="shrink-0 text-black/40 transition-all group-hover:translate-x-1 group-hover:text-[var(--landing-ink)]"
+                className="shrink-0 text-black/40 transition-all group-hover:translate-x-1 group-hover:text-white group-focus-visible:text-white"
               />
             </button>
           </li>
