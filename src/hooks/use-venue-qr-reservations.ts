@@ -28,6 +28,13 @@ export type VenueQrReservation = {
   rating: number | null;
   rating_comment: string | null;
   created_at: string;
+  /* Acompte payé en ligne par le client (menu QR, Stripe) : c'est la
+     commission, déjà encaissée par twocards. Absents avant la migration
+     20261112090000_acompte_stripe. */
+  deposit_amount?: number | null;
+  deposit_currency?: string | null;
+  deposit_paid_at?: string | null;
+  deposit_refunded_at?: string | null;
 };
 
 /* Pas de jointure hotel_qr_codes ici : la RLS la réserve à l'hôtel.
@@ -37,6 +44,10 @@ const SELECT =
   "reservation_time, party_size, notes, service_name, referrer_id, referrer_name, status, commission, " +
   "commission_rate, amount_spent, amount_source, source, table_id, " +
   "arrived_at, rating, rating_comment, created_at";
+const SELECT_DEPOSIT = `${SELECT}, deposit_amount, deposit_currency, deposit_paid_at, deposit_refunded_at`;
+/* Colonne inconnue (migration de l'acompte pas encore lancée) : on relit
+   sans les colonnes d'acompte plutôt que d'afficher une erreur. */
+let withDeposit = true;
 
 /* Réservations adressées à l'établissement connecté — la RLS ne laisse
    passer que celles dont venue_slug pointe vers sa fiche venues. Tenues à
@@ -54,10 +65,15 @@ export function useVenueQrReservations() {
     const load = () => {
       supabase
         .from("qr_reservations")
-        .select(SELECT)
+        .select(withDeposit ? SELECT_DEPOSIT : SELECT)
         .order("created_at", { ascending: false })
         .then(({ data, error: err }) => {
           if (cancelled) return;
+          if (err?.code === "42703" && withDeposit) {
+            withDeposit = false;
+            load();
+            return;
+          }
           if (err) {
             /* Une relecture temps réel ratée ne vide pas l'écran. */
             setError(true);

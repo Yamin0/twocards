@@ -1,3 +1,4 @@
+import type { OfferDeposit } from "@/lib/booking/deposit";
 /* Catalogue présenté au client de l'hôtel après un scan de QR code.
 
    Les adresses vivent en base : le catalogue du réseau twocards
@@ -75,11 +76,21 @@ export type ServiceRow = {
 
 export type GuestService = {
   id: string;
+  /* Nom affiché, traduit en anglais si l'adresse l'a été. */
   name: string;
+  /* Nom tel qu'en base (français) : c'est lui qui part avec la réservation
+     et qui désigne la prestation au moment du devis d'acompte. */
+  baseName: string;
   description: string;
   duration: string;
   price: string;
   image?: string;
+  /* Prestation à prix partenaire (voir `qr_menu_extras`) : prix affiché,
+     acompte par véhicule et places par véhicule, calculés par la base. */
+  clientPrice?: number;
+  deposit?: number;
+  seats?: number;
+  currency?: OfferDeposit["currency"];
 };
 
 /* Ligne telle que renvoyée par la base (catalog_offers, hotel_offers ou le
@@ -103,7 +114,9 @@ export type OfferRow = {
 
 export type GuestOffer = {
   id: string;
+  /* Nom affiché ; `baseName` est celui en base, enregistré avec la réservation. */
   name: string;
+  baseName: string;
   city?: string;
   description: string;
   tag: string;
@@ -117,6 +130,9 @@ export type GuestOffer = {
   /* Vide pour un restaurant ou un club ; une balade, un transfert… pour
      une activité ou un service. */
   services: GuestService[];
+  /* Acompte en ligne demandé à la réservation (adresses du réseau à prix
+     fixe seulement). Absent : demande sans paiement, comme avant. */
+  deposit?: OfferDeposit;
 };
 
 export type GuestCategory = {
@@ -154,6 +170,7 @@ export function toOffer(
   const services: GuestService[] = (row.services ?? []).map((s) => ({
     id: s.id,
     name: s.name,
+    baseName: s.name,
     description: s.description ?? "",
     duration: s.duration ?? "",
     price: s.price ?? "",
@@ -165,6 +182,7 @@ export function toOffer(
   return {
     id: row.slug,
     name: row.name,
+    baseName: row.name,
     city: row.city ?? undefined,
     description: row.description ?? "",
     tag: row.tag || (source === "hotel" ? defaultHouseTag(locale, ownerKind) : ""),

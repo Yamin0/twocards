@@ -1,64 +1,65 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
+import { useEffect, useState } from "react";
 import { Eye, Loader2, LogOut } from "lucide-react";
-import type { ImpersonationFlag } from "@/lib/impersonation";
 import { useT } from "@/lib/i18n/client";
 
-/* Ce bandeau est monté dans le layout racine, donc livré à toutes les
-   pages, site public compris. Il ne doit pas y entraîner le client
-   Supabase (environ 60 Ko compressés) : `@/lib/impersonation`, qui
-   l'importe, n'est donc chargé qu'au clic sur « Revenir à
-   l'administration ». Seul son type est importé ici (effacé à la
-   compilation), et la lecture du drapeau est refaite sur place.
+/* Bandeau « Vous consultez l'espace de X » : affiché tant que
+   l'administrateur visite un compte.
 
-   La clé doit rester la même que FLAG_KEY dans `@/lib/impersonation`. */
-const FLAG_KEY = "tc_impersonating";
+   Monté dans le layout racine, donc livré à toutes les pages, site public
+   compris : il n'interroge le serveur que si le cookie indice
+   `tc-view-as` est présent (posé à l'ouverture de la visite, sans donnée).
+   L'état affiché vient du serveur, qui le vérifie en base ; l'indice seul
+   ne montre rien. Le module `@/lib/impersonation` n'est chargé qu'au clic
+   sur « Quitter ». */
 
-/* Valeur brute du drapeau : primitive stable, adaptée à
-   useSyncExternalStore (un objet reparsé à chaque appel ferait boucler
-   React). */
-function readFlag(): string | null {
-  try {
-    return window.localStorage.getItem(FLAG_KEY);
-  } catch {
-    /* Stockage refusé par le navigateur : pas d'usurpation possible. */
-    return null;
-  }
-}
+const HINT_COOKIE = "tc-view-as";
 
-function parseFlag(raw: string | null): ImpersonationFlag | null {
-  if (!raw) return null;
-  try {
-    return JSON.parse(raw) as ImpersonationFlag;
-  } catch {
-    return null;
-  }
-}
+type Status = { active: true; name: string; email: string | null };
 
-/* Le drapeau ne change qu'au prix d'un rechargement (bascule ou retour) :
-   un abonnement vide suffit, getServerSnapshot rend null pour l'hydratation. */
-const subscribe = () => () => {};
-
-/* Bandeau permanent affiché tant que l'administrateur navigue sous
-   l'identité d'un autre compte. Monté à la racine de l'application : il
-   couvre tous les espaces (dashboard, concierge, hôtel) sans dépendre de
-   leurs layouts. Invisible hors usurpation, donc sans effet pour les
-   utilisateurs normaux. */
 export function ImpersonationBanner() {
   const t = useT();
-  const raw = useSyncExternalStore(subscribe, readFlag, () => null);
-  const flag = parseFlag(raw);
+  const [status, setStatus] = useState<Status | null>(null);
   const [leaving, setLeaving] = useState(false);
 
-  if (!flag) return null;
+  useEffect(() => {
+    /* Anciennes clés (version localStorage) : la session admin y était
+       recopiée ; on les efface sans attendre. */
+    try {
+      window.localStorage.removeItem("tc_admin_session");
+      window.localStorage.removeItem("tc_impersonating");
+    } catch {
+      /* stockage refusé : rien à effacer. */
+    }
+    if (!document.cookie.split("; ").some((c) => c.startsWith(`${HINT_COOKIE}=`))) return;
+    let cancelled = false;
+    fetch("/api/admin/voir-en-tant-que", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((s: { active: boolean } & Partial<Status>) => {
+        if (!cancelled && s.active && s.name) setStatus({ active: true, name: s.name, email: s.email ?? null });
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (!status) return null;
 
   return (
-    <div className="print-hide fixed inset-x-0 top-0 z-[200] flex items-center justify-center gap-3 bg-amber-500 px-4 py-2 text-[13px] font-semibold text-black shadow-lg">
+    <div
+      role="status"
+      className="print-hide fixed inset-x-0 top-0 z-[200] flex items-center justify-center gap-3 bg-amber-500 px-4 py-2 text-[13px] font-semibold text-black shadow-lg"
+    >
       <Eye size={15} strokeWidth={2} className="shrink-0" />
       <span className="truncate">
-        {t("Vue administrateur, connecté en tant que", "Admin view, logged in as")}{" "}
-        <span className="font-bold">{flag.email}</span>
+        {t("Vous consultez l'espace de", "You are viewing the workspace of")}{" "}
+        <span className="font-bold">{status.name}</span>
+        <span className="hidden font-normal sm:inline">
+          {" "}
+          · {t("lecture seule", "read-only")}
+        </span>
       </span>
       <button
         onClick={() => {
@@ -72,12 +73,8 @@ export function ImpersonationBanner() {
         disabled={leaving}
         className="flex shrink-0 items-center gap-1.5 rounded-full bg-black/85 px-3 py-1 text-[12px] font-bold text-white transition-colors hover:bg-black disabled:opacity-60"
       >
-        {leaving ? (
-          <Loader2 size={12} className="animate-spin" />
-        ) : (
-          <LogOut size={12} strokeWidth={2.5} />
-        )}
-        {t(<>Revenir à l&apos;administration</>, <>Back to admin</>)}
+        {leaving ? <Loader2 size={12} className="animate-spin" /> : <LogOut size={12} strokeWidth={2.5} />}
+        {t("Quitter", "Leave")}
       </button>
     </div>
   );

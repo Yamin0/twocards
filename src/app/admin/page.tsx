@@ -3,7 +3,6 @@
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
-  ArrowUpRight,
   Building2,
   Hotel,
   RefreshCw,
@@ -41,10 +40,10 @@ const VUE_TO_TAB: Record<string, Tab> = { comptes: "accounts", catalogue: "catal
 const TAB_TO_VUE: Record<Tab, string> = { overview: "", accounts: "comptes", catalog: "catalogue", commissions: "commissions" };
 
 const getSections = (t: Translate) => [
-  { role: "etablissement", title: t("Établissements", "Venues"), icon: Building2, home: "/dashboard" },
-  { role: "hotel", title: t("Hôtels", "Hotels"), icon: Hotel, home: "/hotel" },
-  { role: "concierge", title: t("Concierges", "Concierges"), icon: UserCheck, home: "/concierge" },
-  { role: "admin", title: t("Administration", "Admin"), icon: Shield, home: "/admin" },
+  { role: "etablissement", title: t("Établissements", "Venues"), icon: Building2 },
+  { role: "hotel", title: t("Hôtels", "Hotels"), icon: Hotel },
+  { role: "concierge", title: t("Concierges", "Concierges"), icon: UserCheck },
+  { role: "admin", title: t("Administration", "Admin"), icon: Shield },
 ];
 
 const panel = cardClass;
@@ -55,7 +54,10 @@ function AdminConsole() {
   const t = useT();
   const router = useRouter();
   const notify = useNotify();
-  const vue = useSearchParams().get("vue");
+  const params = useSearchParams();
+  const vue = params.get("vue");
+  /* `?type=hotel` (menu « Voir un espace ») : n'affiche que ce type. */
+  const typeFilter = params.get("type");
   const tab: Tab = (vue && VUE_TO_TAB[vue]) || "overview";
   const setTab = useCallback(
     (next: Tab) => router.push(next === "overview" ? "/admin" : `/admin?vue=${TAB_TO_VUE[next]}`),
@@ -228,7 +230,15 @@ function AdminConsole() {
                 />
               </div>
             </div>
-            {getSections(t).map((section) => {
+            <p className="px-1 text-xs text-ink-3">
+              {t(
+                "« Voir son espace » ouvre le dashboard réel d'un compte, en lecture seule. Un bandeau permet de revenir ici.",
+                "“View workspace” opens an account’s real dashboard, read-only. A banner brings you back here."
+              )}
+            </p>
+            {getSections(t)
+              .filter((section) => !typeFilter || section.role === typeFilter)
+              .map((section) => {
               const Icon = section.icon;
               const rows = filteredAccounts.filter((a) => a.role === section.role);
               if (section.role === "admin" && rows.length === 0) return null;
@@ -249,15 +259,6 @@ function AdminConsole() {
                         </p>
                       </div>
                     </div>
-                    {section.role !== "admin" && (
-                      <a
-                        href={section.home}
-                        className="flex items-center gap-1.5 rounded-lg border border-line bg-fill px-3 py-2 text-xs font-semibold text-ink-2 transition-colors hover:bg-fill-2 hover:text-ink"
-                      >
-                        {t("Ouvrir cet espace", "Open this dashboard")}
-                        <ArrowUpRight size={12} />
-                      </a>
-                    )}
                   </div>
                   {accounts !== null && rows.length === 0 && (
                     <p className="py-6 text-center text-sm text-ink-3">{t("Aucun compte de ce type.", "No accounts of this type.")}</p>

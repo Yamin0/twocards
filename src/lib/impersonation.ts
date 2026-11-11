@@ -1,126 +1,56 @@
 "use client";
 
-import { createClient } from "@/lib/supabase/client";
+/* « Voir en tant que » côté navigateur : de simples appels à la route
+   serveur /api/admin/voir-en-tant-que, qui vérifie le droit, bascule les
+   cookies de session et met la session admin de côté (cookie httpOnly).
+   Aucun jeton ne transite par ce code. */
 
-/* Usurpation d'identité, réservée à l'administrateur. La bascule de session
-   passe par un jeton à usage unique fabriqué côté serveur (Edge Function
-   « impersonate ») ; ici, seule la mécanique navigateur : échanger la
-   session admin contre celle de la cible, puis la restaurer au retour.
+const ENDPOINT = "/api/admin/voir-en-tant-que";
 
-   La session admin est mise de côté avant la bascule pour permettre un
-   retour sans nouvelle connexion — son jeton de rafraîchissement vit déjà
-   dans le stockage de Supabase, le recopier ici n'ajoute pas d'exposition. */
-
-const BACKUP_KEY = "tc_admin_session";
-const FLAG_KEY = "tc_impersonating";
-
-export type ImpersonationFlag = { email: string; role: string };
-
-const homeForRole = (role: string) =>
-  role === "concierge"
-    ? "/concierge"
-    : role === "hotel"
-      ? "/hotel"
-      : role === "admin"
-        ? "/admin"
-        : "/dashboard";
-
-/* Valeur brute du drapeau : primitive stable, adaptée à useSyncExternalStore
-   (un objet reparsé à chaque appel ferait boucler React). */
-export function impersonationRaw(): string | null {
-  if (typeof window === "undefined") return null;
-  return window.localStorage.getItem(FLAG_KEY);
-}
-
-export function parseImpersonation(
-  raw: string | null
-): ImpersonationFlag | null {
-  if (!raw) return null;
+/* Anciennes clés de la version « localStorage » : la session admin de
+   secours y était recopiée. On les efface partout où ce module passe. */
+export function clearLegacyImpersonation() {
   try {
-    return JSON.parse(raw) as ImpersonationFlag;
+    window.localStorage.removeItem("tc_admin_session");
+    window.localStorage.removeItem("tc_impersonating");
   } catch {
-    return null;
+    /* stockage refusé : rien à effacer. */
   }
 }
 
-/* Devient la cible. Renvoie un message d'erreur, ou null en cas de succès
-   (la page est alors rechargée sur l'espace de la cible). */
-export async function startImpersonation(target: {
-  id: string;
-  email: string;
-  role: string;
-}): Promise<string | null> {
-  const supabase = createClient();
-
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  if (session) {
-    window.localStorage.setItem(
-      BACKUP_KEY,
-      JSON.stringify({
-        access_token: session.access_token,
-        refresh_token: session.refresh_token,
-      })
-    );
-  }
-
-  const { data, error } = await supabase.functions.invoke("impersonate", {
-    body: { userId: target.id },
-  });
-
-  if (error || !data?.token_hash) {
-    window.localStorage.removeItem(BACKUP_KEY);
-    /* 404 de la fonction : elle n'est pas encore déployée. */
-    const en = document.documentElement.lang === "en";
-    return (
-      (data?.error as string) ??
-      (en
-        ? "“Log in as” is unavailable: the “impersonate” server function is not deployed."
-        : "Connexion « en tant que » indisponible : la fonction serveur « impersonate » n'est pas déployée.")
-    );
-  }
-
-  const { error: verifyError } = await supabase.auth.verifyOtp({
-    token_hash: data.token_hash as string,
-    type: "magiclink",
-  });
-  if (verifyError) {
-    window.localStorage.removeItem(BACKUP_KEY);
-    return verifyError.message;
-  }
-
-  window.localStorage.setItem(
-    FLAG_KEY,
-    JSON.stringify({ email: target.email, role: target.role })
-  );
-  window.location.href = homeForRole(target.role);
-  return null;
-}
-
-/* Restaure la session administrateur mise de côté. À défaut, renvoie à la
-   page de connexion. */
-export async function stopImpersonation(): Promise<void> {
-  const supabase = createClient();
-  const raw = window.localStorage.getItem(BACKUP_KEY);
-  window.localStorage.removeItem(FLAG_KEY);
-  window.localStorage.removeItem(BACKUP_KEY);
-
-  if (raw) {
-    try {
-      const tokens = JSON.parse(raw) as {
-        access_token: string;
-        refresh_token: string;
-      };
-      const { error } = await supabase.auth.setSession(tokens);
-      if (!error) {
-        window.location.href = "/admin";
-        return;
-      }
-    } catch {
-      /* jeton illisible : on retombe sur la reconnexion. */
+/* Ouvre l'espace du compte. Renvoie un message d'erreur, ou null en cas de
+   succès (la page part alors vers l'espace du compte). */
+export async function startImpersonation(target: { id: string }): Promise<string | null> {
+  clearLegacyImpersonation();
+  const en = document.documentElement.lang === "en";
+  try {
+    const res = await fetch(ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId: target.id }),
+    });
+    const body = (await res.json().catch(() => null)) as { home?: string; error?: string } | null;
+    if (!res.ok || !body?.home) {
+      return body?.error ?? (en ? "Couldn’t open this account." : "Impossible d'ouvrir ce compte.");
     }
+    window.location.href = body.home;
+    return null;
+  } catch {
+    return en ? "Network error." : "Erreur réseau.";
   }
-  await supabase.auth.signOut();
-  window.location.href = "/login";
+}
+
+/* Fin de visite : le serveur restaure la session admin et indique où
+   revenir. */
+export async function stopImpersonation(): Promise<void> {
+  clearLegacyImpersonation();
+  let home = "/admin?vue=comptes";
+  try {
+    const res = await fetch(ENDPOINT, { method: "DELETE" });
+    const body = (await res.json().catch(() => null)) as { home?: string } | null;
+    if (body?.home) home = body.home;
+  } catch {
+    /* réseau coupé : on recharge l'administration, le proxy tranchera. */
+  }
+  window.location.href = home;
 }

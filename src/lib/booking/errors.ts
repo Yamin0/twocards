@@ -14,6 +14,8 @@ export type BookingErrorKind =
   | "length"
   | "closed"
   | "network"
+  | "deposit"
+  | "payment"
   | "full"
   | "unknown";
 
@@ -36,6 +38,10 @@ export function bookingErrorKind(error: RpcError): BookingErrorKind {
   if (message.includes("Nom invalide")) return "name";
   if (message.includes("Téléphone invalide")) return "phone";
   if (message.includes("Champ trop long")) return "length";
+  /* L'adresse demande désormais un acompte (page ouverte avant le réglage). */
+  if (message.includes("Acompte requis")) return "deposit";
+  /* Le paiement en ligne n'a pas pu être préparé (Stripe, configuration). */
+  if (message.includes("Paiement indisponible")) return "payment";
   /* Portail : le créneau s'est rempli entre l'affichage et l'envoi
      (20261112120000_portail_creneaux_complets). */
   if (message.includes("Créneau complet")) return "full";
@@ -102,6 +108,21 @@ export function bookingErrorMessage(
             "Ce portail de réservation n'est plus actif. Appelez directement l'établissement.",
             "This booking page is no longer active. Please call the venue directly."
           );
+    case "deposit":
+      return t(
+        "Cette adresse demande maintenant un acompte en ligne. Rechargez la page pour réserver avec paiement.",
+        "This place now requires an online deposit. Reload the page to book with payment."
+      );
+    case "payment":
+      return t(
+        `Le paiement en ligne est momentanément indisponible. Rien n'a été débité : réessayez dans un instant, ou ${fallback}.`,
+        `Online payment is temporarily unavailable. Nothing was charged: try again shortly, or ${fallback}.`
+      );
+    case "full":
+      return t(
+        "Ce créneau vient d'être complet. Choisissez une autre heure.",
+        "This time has just been fully booked. Please choose another time."
+      );
     case "network":
       return t(
         "Pas de connexion. Vérifiez votre réseau puis réessayez : rien n'a été envoyé.",

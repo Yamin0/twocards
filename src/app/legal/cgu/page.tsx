@@ -16,7 +16,7 @@ export default async function CguPage() {
   return (
     <LegalArticle
       title={t("Conditions générales d'utilisation", "Terms of use")}
-      updated={t("31 juillet 2026", "31 July 2026")}
+      updated={t("11 novembre 2026", "11 November 2026")}
       sections={[
         {
           heading: t("Objet", "Purpose"),
@@ -64,9 +64,18 @@ export default async function CguPage() {
               "TwoCards agit comme intermédiaire technique et n'est partie ni au contrat de restauration ou d'accueil conclu entre l'établissement et le client final, ni au contrat commercial entre l'établissement et l'apporteur, dont il assure la traçabilité.",
               "TwoCards acts as a technical intermediary and is not a party either to the dining or hospitality contract concluded between the venue and the end customer, or to the commercial agreement between the venue and the referrer, the traceability of which it provides.",
             ),
+          ],
+        },
+        {
+          heading: t("Acompte de réservation", "Booking deposit"),
+          body: [
             t(
-              "Pendant la phase pilote, l'acompte éventuel est encaissé directement pour le compte de l'établissement via son propre contrat marchand ; TwoCards ne détient pas les fonds et ne conserve aucune donnée de carte bancaire.",
-              "During the pilot phase, any deposit is collected directly on behalf of the venue through its own merchant agreement; TwoCards does not hold the funds and does not store any payment card data.",
+              "Pour certaines adresses à prix fixe (menu fixe, activité), la réservation est confirmée par le paiement en ligne d'un acompte, dont le montant est affiché avant le paiement. Cet acompte correspond aux frais de service de TwoCards : il est encaissé par Twocards, LLC (Delaware, États-Unis) et conservé par elle. Le paiement est traité par Stripe ; TwoCards ne conserve aucune donnée de carte bancaire.",
+              "For some fixed-price places (set menu, activity), the booking is confirmed by paying a deposit online, whose amount is shown before payment. This deposit is TwoCards' service fee: it is collected and kept by Twocards, LLC (Delaware, United States). Payment is processed by Stripe; TwoCards does not store any payment card data.",
+            ),
+            t(
+              "L'acompte est remboursé en totalité si la réservation ne peut pas être enregistrée ou honorée par l'établissement, ou si le client l'annule au moins 24 heures avant l'heure prévue. Il n'est pas remboursé en cas d'annulation tardive ou d'absence. Le remboursement est fait sur la carte utilisée, dans un délai de 5 à 10 jours selon la banque.",
+              "The deposit is refunded in full if the booking cannot be recorded or honoured by the venue, or if the guest cancels at least 24 hours before the booked time. It is not refunded for late cancellation or no-show. Refunds go back to the card used, within 5 to 10 days depending on the bank.",
             ),
           ],
         },

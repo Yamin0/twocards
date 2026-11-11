@@ -56,6 +56,9 @@ type Rows = {
     category: string;
     city: string | null;
     created_at: string;
+    deposit_amount: number | null;
+    deposit_currency: string;
+    deposit_mode: string;
     description: string;
     image_url: string | null;
     images: string[];
@@ -173,6 +176,10 @@ type Rows = {
     commission: number;
     commission_rate: number;
     created_at: string;
+    deposit_amount: number | null;
+    deposit_currency: string | null;
+    deposit_paid_at: string | null;
+    deposit_refunded_at: string | null;
     guest_name: string;
     guest_phone: string;
     id: string;
@@ -373,6 +380,32 @@ export type Database = {
           p_time: string | null;
           p_venue: string;
           p_venue_slug?: string | null;
+        };
+        Returns: string;
+      };
+      qr_deposit_quote: {
+        Args: { p_code: string; p_party_size: number; p_venue_slug: string; p_service?: string | null };
+        Returns: Json;
+      };
+      qr_menu_extras: { Args: { p_slugs: string[] }; Returns: Json };
+      qr_mark_deposit_refunded: { Args: { p_payment_intent: string }; Returns: undefined };
+      qr_record_paid_reservation: {
+        Args: {
+          p_amount: number;
+          p_category: string;
+          p_code: string;
+          p_currency: string;
+          p_date: string;
+          p_guest_name: string;
+          p_guest_phone: string;
+          p_notes: string | null;
+          p_party_size: number;
+          p_payment_intent: string;
+          p_service: string | null;
+          p_session_id: string;
+          p_time: string | null;
+          p_venue: string;
+          p_venue_slug: string;
         };
         Returns: string;
       };
