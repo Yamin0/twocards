@@ -1,6 +1,6 @@
 "use client";
 
-import { Info, Smartphone } from "lucide-react";
+import { Smartphone } from "lucide-react";
 import { useT } from "@/lib/i18n/client";
 import { Button, Card, InfoNote, Switch } from "@/components/app/ui";
 import type { NotifPrefs, VenueSettings } from "./use-venue-settings";
@@ -11,8 +11,7 @@ import type { NotifPrefs, VenueSettings } from "./use-venue-settings";
    SMS n'est envoyé aux établissements : aucun réglage ne le laisse croire.
 
    Le respect de ces réglages par la base vient de la migration
-   20261112140000_preferences_de_notification.sql. Une fois appliquée,
-   supprimer le bloc <PendingNote /> ci-dessous (et la fonction PendingNote). */
+   20261112140000_preferences_de_notification.sql, appliquée en production. */
 export function NotificationsTab({
   settings,
   onSave,
@@ -61,9 +60,6 @@ export function NotificationsTab({
         )}
       </InfoNote>
 
-      {/* À RETIRER une fois la migration 20261112140000 appliquée. */}
-      <PendingNote />
-
       <Card title={t("Notifications sur le téléphone", "Phone notifications")}>
         <ul className="divide-y divide-line">
           {items.map((item) => (
@@ -90,19 +86,5 @@ export function NotificationsTab({
         </div>
       </Card>
     </div>
-  );
-}
-
-/* Tant que la migration n'est pas appliquée, les choix sont enregistrés
-   mais la base envoie encore tous les push. À supprimer ensuite. */
-function PendingNote() {
-  const t = useT();
-  return (
-    <InfoNote icon={Info} tone="amber">
-      {t(
-        "Vos choix sont enregistrés et prendront effet très prochainement : pour l'instant, toutes ces notifications vous sont encore envoyées.",
-        "Your choices are saved and will take effect very soon. For now, all of these notifications are still sent to you."
-      )}
-    </InfoNote>
   );
 }

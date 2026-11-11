@@ -128,6 +128,11 @@ export function bookingErrorMessage(
         "Pas de connexion. Vérifiez votre réseau puis réessayez : rien n'a été envoyé.",
         "No connection. Check your network and try again: nothing was sent."
       );
+    case "full":
+      return t(
+        "Ce créneau vient d'être complet. Choisissez une autre heure.",
+        "This time has just been fully booked. Please choose another time."
+      );
     default:
       return t(
         `Votre demande n'a pas pu être envoyée. Réessayez, ou ${fallback}.`,

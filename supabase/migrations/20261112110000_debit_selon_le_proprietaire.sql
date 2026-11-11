@@ -139,8 +139,8 @@ begin
       where guest_phone = v_phone and created_at > now() - interval '10 minutes') >= 3
      or (select count(*) from qr_reservations
          where qr_code_id = v_qr.id and created_at > now() - interval '1 hour')
-        >= case when (select r.role from profiles r where r.id = v_qr.user_id) = 'concierge'
-                then 300 else 30 end then
+        >= (case when (select r.role from profiles r where r.id = v_qr.user_id) = 'concierge'
+                 then 300 else 30 end) then
     raise exception 'Trop de demandes, réessayez dans quelques minutes';
   end if;
 
