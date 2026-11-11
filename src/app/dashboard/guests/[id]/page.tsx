@@ -1,204 +1,98 @@
 "use client";
 
 import { use, useMemo } from "react";
-import Link from "next/link";
+import { MessageCircle, Phone, UserX } from "lucide-react";
 import { useAuthUser } from "@/hooks/use-auth-user";
+import { useVenueQrReservations } from "@/hooks/use-venue-qr-reservations";
 import {
-  useVenueQrReservations,
-  type VenueQrReservation,
-} from "@/hooks/use-venue-qr-reservations";
-import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
-import { StatStrip } from "@/components/shared/stat-strip";
-import { RatingStars } from "@/components/shared/mini-charts";
-import { StatusBadge } from "@/components/shared/status-badge";
-import { useLocale, useT } from "@/lib/i18n/client";
-import { intlLocale, type Locale, type Translate } from "@/lib/i18n";
+  Card,
+  EmptyState,
+  ErrorState,
+  KpiGrid,
+  LinkButton,
+  NameAvatar,
+  PageHeader,
+  PageSkeleton,
+} from "@/components/app/ui";
+import { useIntlLocale, useT } from "@/lib/i18n/client";
 import {
-  ArrowLeft,
-  Clock,
-  MessageCircle,
-  Phone,
-  StickyNote,
-  UserX,
-  Users,
-} from "lucide-react";
+  computeSegments,
+  isCancelled,
+  isUpcoming,
+  isVisit,
+  localToday,
+  normalizePhone,
+} from "@/lib/venue/guests";
+import { SegmentBadges } from "@/components/venue/guests/segment-badges";
+import {
+  GuestNotes,
+  UpcomingReservations,
+  VisitHistory,
+} from "@/components/venue/guests/guest-history";
 
 /* Fiche client dérivée des réservations : l'identifiant de la route est le
    téléphone normalisé (encodeURIComponent), la fiche agrège toutes les
    réservations de ce numéro — la RLS limite déjà aux réservations de
-   l'établissement connecté. Aucune donnée de démo. */
+   l'établissement connecté. Mêmes règles que la liste (lib/venue/guests). */
 
-/* ---------- Dérivation (mêmes règles que la liste) ---------- */
-
-const normalizePhone = (raw: string) => raw.replace(/[\s.\-]/g, "");
-
-const localToday = () => {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-};
-
-const isCancelled = (r: VenueQrReservation) =>
-  r.status === "annulée" || (r.status as string) === "no-show";
-
-const isVisit = (r: VenueQrReservation, today: string) =>
-  !isCancelled(r) && (r.reservation_date < today || r.amount_spent !== null);
-
-const isUpcoming = (r: VenueQrReservation, today: string) =>
-  !isCancelled(r) && r.reservation_date >= today && r.amount_spent === null;
-
-const DAY_MS = 86_400_000;
-
-/* Segments du client, calculés sur l'ensemble des réservations de
-   l'établissement (le seuil VIP est relatif au reste de la clientèle). */
-function computeSegments(
-  all: VenueQrReservation[],
-  phone: string
-): string[] {
-  const today = localToday();
-  const totals = new Map<string, number>();
-  for (const r of all) {
-    const key = normalizePhone(r.guest_phone ?? "");
-    if (!key || isCancelled(r) || r.amount_spent === null) continue;
-    totals.set(key, (totals.get(key) ?? 0) + r.amount_spent);
-  }
-  const sorted = [...totals.values()].filter((t) => t > 0).sort((a, b) => b - a);
-  const vipThreshold =
-    sorted.length > 0
-      ? sorted[Math.max(0, Math.ceil(sorted.length * 0.1) - 1)]
-      : Infinity;
-
-  const rows = all.filter((r) => normalizePhone(r.guest_phone ?? "") === phone);
-  const visits = rows.filter((r) => isVisit(r, today));
-  const totalSpent = totals.get(phone) ?? 0;
-  const lastVisit =
-    visits.length > 0
-      ? visits.reduce(
-          (m, r) => (r.reservation_date > m ? r.reservation_date : m),
-          visits[0].reservation_date
-        )
-      : null;
-
-  const segments: string[] = [];
-  if (totalSpent > 0 && totalSpent >= vipThreshold) segments.push("VIP");
-  if (visits.length >= 3) {
-    segments.push("Habitué");
-    if (
-      lastVisit &&
-      Date.now() - new Date(lastVisit + "T00:00:00").getTime() >= 60 * DAY_MS
-    )
-      segments.push("À risque");
-  } else if (visits.length === 1) {
-    segments.push("Nouveau");
-  }
-  return segments;
-}
-
-/* ---------- Présentation ---------- */
-
-const SEGMENT_STYLES: Record<string, string> = {
-  VIP: "bg-warn-soft text-warn border-warn/25",
-  Habitué: "bg-ok-soft text-ok border-ok/25",
-  Nouveau: "bg-info-soft text-info border-info/25",
-  "À risque": "bg-danger-soft text-danger border-danger/25",
-};
-
-/* Libellé affiché d'un segment (la clé reste en français). */
-const segmentLabel = (s: string, t: Translate) => {
-  if (s === "Habitué") return t("Habitué", "Regular");
-  if (s === "Nouveau") return t("Nouveau", "New");
-  if (s === "À risque") return t("À risque", "At risk");
-  return s;
-};
-
-const sourceLabel = (source: string, t: Translate) => {
-  if (source === "qr") return t("Réseau QR", "QR network");
-  if (source === "portal") return t("Portail", "Portal");
-  if (source === "venue") return t("Sur place", "In-house");
-  return source;
-};
-
-const fmtDate = (iso: string, locale: Locale = "fr") =>
-  new Date(iso + "T00:00:00").toLocaleDateString(intlLocale(locale), {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-
-const fmtTime = (t: string | null, locale: Locale = "fr") =>
-  t ? (locale === "en" ? t.slice(0, 5) : t.slice(0, 5).replace(":", "h")) : "—";
-
-export default function GuestProfilePage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default function GuestProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const phone = normalizePhone(decodeURIComponent(id));
   const t = useT();
-  const locale = useLocale();
-  const intl = intlLocale(locale);
+  const intl = useIntlLocale();
 
-  const { isLoading } = useAuthUser();
-  const { reservations, isLoading: loadingData } = useVenueQrReservations();
+  const { isLoading: authLoading } = useAuthUser();
+  const { reservations, isLoading, error, reload } = useVenueQrReservations();
 
   const rows = useMemo(
-    () =>
-      (reservations ?? []).filter(
-        (r) => normalizePhone(r.guest_phone ?? "") === phone
-      ),
+    () => (reservations ?? []).filter((r) => normalizePhone(r.guest_phone ?? "") === phone),
     [reservations, phone]
   );
-  const segments = useMemo(
-    () => computeSegments(reservations ?? [], phone),
-    [reservations, phone]
-  );
+  const segments = useMemo(() => computeSegments(reservations ?? [], phone), [reservations, phone]);
 
-  if (isLoading || loadingData || reservations === null)
-    return <DashboardSkeleton />;
+  const back = { href: "/dashboard/guests", label: t("Clients", "Guests") };
+
+  if (error)
+    return (
+      <div className="space-y-6">
+        <PageHeader back={back} title={t("Fiche client", "Guest profile")} />
+        <Card padded={false}>
+          <ErrorState onRetry={reload} />
+        </Card>
+      </div>
+    );
+  if (authLoading || isLoading || reservations === null) return <PageSkeleton />;
 
   /* Client introuvable : aucune réservation ne porte ce numéro. */
   if (rows.length === 0) {
     return (
       <div className="space-y-6">
-        <Link
-          href="/dashboard/guests"
-          className="font-ui inline-flex items-center gap-2 text-sm text-ink-3 hover:text-ink transition-colors"
-        >
-          <ArrowLeft size={16} strokeWidth={1.5} />
-          {t("Retour aux clients", "Back to guests")}
-        </Link>
-        <div className=" bg-panel border border-line rounded-3xl p-12 text-center">
-          <div className="w-14 h-14 rounded-2xl bg-fill-2 border border-line flex items-center justify-center mx-auto mb-5">
-            <UserX size={26} strokeWidth={1.5} className="text-ink-3" />
-          </div>
-          <h1 className="font-display text-xl font-normal text-ink mb-2">
-            {t("Client introuvable", "Guest not found")}
-          </h1>
-          <p className="font-ui text-sm text-ink-3 max-w-md mx-auto">
-            {t(
-              "Aucune réservation ne correspond à ce numéro pour votre établissement. La fiche a peut-être été ouverte depuis un ancien lien.",
-              "No reservation matches this number at your venue. The profile may have been opened from an old link."
+        <PageHeader back={back} title={t("Client introuvable", "Guest not found")} />
+        <Card padded={false}>
+          <EmptyState
+            icon={UserX}
+            title={t("Aucune réservation à ce numéro", "No reservation under this number")}
+            description={t(
+              "La fiche a peut-être été ouverte depuis un ancien lien.",
+              "The profile may have been opened from an old link."
             )}
-          </p>
-        </div>
+            action={
+              <LinkButton href="/dashboard/guests">{t("Voir les clients", "View guests")}</LinkButton>
+            }
+          />
+        </Card>
       </div>
     );
   }
 
   const today = localToday();
-  const name = rows.reduce((a, b) =>
-    a.created_at >= b.created_at ? a : b
-  ).guest_name;
+  const name = rows.reduce((a, b) => (a.created_at >= b.created_at ? a : b)).guest_name;
   const visits = rows.filter((r) => isVisit(r, today));
-  const spentRows = rows.filter(
-    (r) => !isCancelled(r) && r.amount_spent !== null
-  );
+  const spentRows = rows.filter((r) => !isCancelled(r) && r.amount_spent !== null);
   const totalSpent = spentRows.reduce((s, r) => s + (r.amount_spent ?? 0), 0);
   const rated = rows.filter((r) => r.rating !== null);
   const avgRating =
-    rated.length > 0
-      ? rated.reduce((s, r) => s + (r.rating ?? 0), 0) / rated.length
-      : null;
+    rated.length > 0 ? rated.reduce((s, r) => s + (r.rating ?? 0), 0) / rated.length : null;
 
   const upcoming = rows
     .filter((r) => isUpcoming(r, today))
@@ -214,257 +108,77 @@ export default function GuestProfilePage({
           ? 1
           : -1
     );
-  const clientNotes = rows
+  const notes = rows
     .filter((r) => r.notes && r.notes.trim().length > 0)
     .sort((a, b) => (a.reservation_date < b.reservation_date ? 1 : -1));
 
-  const initials = name
-    .split(" ")
-    .filter((n) => n.length > 0)
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
-
-  const stats = [
-    { label: t("Visites", "Visits"), value: visits.length },
-    {
-      label: t("Total dépensé", "Total spent"),
-      value: totalSpent > 0 ? `${totalSpent.toLocaleString(intl)} MAD` : "—",
-    },
-    {
-      label: t("Panier moyen", "Average spend"),
-      value:
-        spentRows.length > 0
-          ? `${Math.round(totalSpent / spentRows.length).toLocaleString(intl)} MAD`
-          : "—",
-    },
-    {
-      label: t("Note moyenne", "Average rating"),
-      value:
-        avgRating !== null
-          ? avgRating.toLocaleString(intl, { minimumFractionDigits: 1, maximumFractionDigits: 1 })
-          : "—",
-      hint:
-        rated.length > 0
-          ? t(`${rated.length} avis`, `${rated.length} review${rated.length === 1 ? "" : "s"}`)
-          : t("aucun avis", "no reviews"),
-    },
-  ];
-
   return (
     <div className="space-y-6">
-      {/* Retour */}
-      <Link
-        href="/dashboard/guests"
-        className="font-ui inline-flex items-center gap-2 text-sm text-ink-3 hover:text-ink transition-colors"
-      >
-        <ArrowLeft size={16} strokeWidth={1.5} />
-        {t("Retour aux clients", "Back to guests")}
-      </Link>
-
-      {/* En-tête */}
-      <div className=" bg-panel border border-line rounded-3xl p-6 flex flex-wrap items-center gap-5">
-        <div className="h-16 w-16 rounded-full bg-fill-2 border border-line flex items-center justify-center shrink-0">
-          <span className="font-ui text-xl font-semibold text-ink">
-            {initials || "?"}
+      <PageHeader
+        back={back}
+        title={
+          <span className="flex flex-wrap items-center gap-3">
+            <NameAvatar name={name} size={44} />
+            {name}
           </span>
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex flex-wrap items-center gap-2.5">
-            <h1 className="font-display text-2xl font-light text-ink">
-              {name}
-            </h1>
-            {segments.map((s) => (
-              <span
-                key={s}
-                className={`font-ui inline-flex rounded-full border px-2 py-0.5 text-xs font-bold ${SEGMENT_STYLES[s] ?? "bg-fill-2 text-ink-3 border-line"}`}
-              >
-                {segmentLabel(s, t)}
-              </span>
-            ))}
-          </div>
-          <p className="font-ui mt-1 inline-flex items-center gap-1.5 text-sm text-ink-3">
-            <Phone size={13} strokeWidth={1.5} />
-            {phone}
-          </p>
-        </div>
-        <a
-          href={`https://wa.me/${phone.replace(/\D/g, "")}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="font-ui inline-flex items-center gap-2 bg-ok-soft hover:bg-ok-soft border border-ok/25 text-ok text-sm font-medium px-4 py-2.5 rounded-xl transition-colors shrink-0"
-        >
-          <MessageCircle size={16} strokeWidth={1.5} />
-          {t("Contacter sur WhatsApp", "Message on WhatsApp")}
-        </a>
-      </div>
+        }
+        description={
+          <span className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+            <span className="num inline-flex items-center gap-1.5">
+              <Phone size={13} strokeWidth={1.75} aria-hidden />
+              {phone}
+            </span>
+            {segments.length > 0 && <SegmentBadges segments={segments} />}
+          </span>
+        }
+        actions={
+          <LinkButton
+            href={`https://wa.me/${phone.replace(/\D/g, "")}`}
+            external
+            variant="success"
+            icon={MessageCircle}
+          >
+            {t("Écrire sur WhatsApp", "Message on WhatsApp")}
+          </LinkButton>
+        }
+      />
 
-      {/* KPI */}
-      <StatStrip stats={stats} />
+      <KpiGrid
+        items={[
+          { label: t("Visites", "Visits"), value: visits.length },
+          {
+            label: t("Total dépensé", "Total spent"),
+            value: totalSpent > 0 ? `${totalSpent.toLocaleString(intl)} MAD` : "—",
+          },
+          {
+            label: t("Panier moyen", "Average spend"),
+            value:
+              spentRows.length > 0
+                ? `${Math.round(totalSpent / spentRows.length).toLocaleString(intl)} MAD`
+                : "—",
+          },
+          {
+            label: t("Note moyenne", "Average rating"),
+            value:
+              avgRating !== null
+                ? avgRating.toLocaleString(intl, {
+                    minimumFractionDigits: 1,
+                    maximumFractionDigits: 1,
+                  })
+                : "—",
+            hint:
+              rated.length > 0
+                ? t(`${rated.length} avis`, `${rated.length} review${rated.length === 1 ? "" : "s"}`)
+                : t("aucun avis", "no reviews"),
+          },
+        ]}
+      />
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        {/* Historique des visites */}
-        <div className="xl:col-span-2 bg-panel border border-line rounded-2xl overflow-hidden">
-          <div className="px-5 pt-5 pb-3">
-            <h2 className="font-ui text-base font-semibold text-ink">
-              {t("Historique des visites", "Visit history")}
-            </h2>
-          </div>
-          {history.length === 0 ? (
-            <p className="font-ui px-5 pb-6 text-sm text-ink-3">
-              {t(
-                "Pas encore de visite passée, la première réservation de ce client est à venir.",
-                "No past visits yet. This guest's first reservation is still to come."
-              )}
-            </p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left">
-                <thead>
-                  <tr className="border-y border-line bg-fill">
-                    {[
-                      t("Date", "Date"),
-                      t("Heure", "Time"),
-                      t("Couverts", "Covers"),
-                      t("Montant", "Amount"),
-                      t("Statut", "Status"),
-                      t("Canal", "Channel"),
-                      t("Avis", "Review"),
-                    ].map(
-                      (h) => (
-                        <th
-                          key={h}
-                          className="font-ui px-4 py-2.5 text-xs font-bold text-ink-3 whitespace-nowrap"
-                        >
-                          {h}
-                        </th>
-                      )
-                    )}
-                  </tr>
-                </thead>
-                <tbody>
-                  {history.map((r) => (
-                    <tr
-                      key={r.id}
-                      className="border-b border-line last:border-0"
-                    >
-                      <td className="font-ui px-4 py-3 text-sm text-ink whitespace-nowrap">
-                        {fmtDate(r.reservation_date, locale)}
-                      </td>
-                      <td className="font-ui px-4 py-3 text-sm text-ink-2 whitespace-nowrap">
-                        {fmtTime(r.reservation_time, locale)}
-                      </td>
-                      <td className="font-ui px-4 py-3 text-sm text-ink-2 tabular-nums">
-                        {r.party_size}
-                      </td>
-                      <td className="font-ui px-4 py-3 text-sm text-ink tabular-nums whitespace-nowrap">
-                        {r.amount_spent !== null
-                          ? `${r.amount_spent.toLocaleString(intl)} MAD`
-                          : "—"}
-                      </td>
-                      <td className="px-4 py-3">
-                        <StatusBadge status={r.status} />
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className="font-ui rounded-md bg-fill-2 px-1.5 py-0.5 text-xs font-bold text-ink-3 whitespace-nowrap">
-                          {sourceLabel(r.source, t)}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 min-w-[9rem]">
-                        {r.rating !== null ? (
-                          <div>
-                            <RatingStars value={r.rating} size={12} />
-                            {r.rating_comment && (
-                              <p className="font-ui mt-1 text-xs text-ink-3 leading-snug max-w-[16rem]">
-                                {t(`« ${r.rating_comment} »`, `“${r.rating_comment}”`)}
-                              </p>
-                            )}
-                          </div>
-                        ) : (
-                          <span className="text-ink-3">—</span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-
-        {/* Colonne droite */}
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+        <VisitHistory history={history} />
         <div className="space-y-6">
-          {/* Réservations à venir */}
-          <div className=" bg-panel border border-line rounded-2xl p-5">
-            <h2 className="font-ui text-base font-semibold text-ink mb-4">
-              {t("Réservations à venir", "Upcoming reservations")}
-            </h2>
-            {upcoming.length === 0 ? (
-              <p className="font-ui text-sm text-ink-3">
-                {t("Aucune réservation à venir pour ce client.", "No upcoming reservations for this guest.")}
-              </p>
-            ) : (
-              <div className="space-y-3">
-                {upcoming.map((r) => (
-                  <div
-                    key={r.id}
-                    className="bg-fill border border-line rounded-xl p-4 flex items-center justify-between gap-3"
-                  >
-                    <div>
-                      <p className="font-ui text-sm font-medium text-ink">
-                        {fmtDate(r.reservation_date, locale)}
-                      </p>
-                      <div className="flex items-center gap-3 mt-1 text-xs text-ink-3 font-ui">
-                        <span className="inline-flex items-center gap-1">
-                          <Clock size={12} strokeWidth={1.5} />
-                          {fmtTime(r.reservation_time, locale)}
-                        </span>
-                        <span className="inline-flex items-center gap-1">
-                          <Users size={12} strokeWidth={1.5} />
-                          {r.party_size} {t("pers.", "guests")}
-                        </span>
-                        <span>{sourceLabel(r.source, t)}</span>
-                      </div>
-                    </div>
-                    <StatusBadge status={r.status} />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Notes laissées par le client */}
-          <div className=" bg-panel border border-line rounded-2xl p-5">
-            <h2 className="font-ui text-base font-semibold text-ink mb-4 inline-flex items-center gap-2">
-              <StickyNote size={15} strokeWidth={1.5} className="text-ink-3" />
-              {t("Notes du client", "Guest notes")}
-            </h2>
-            {clientNotes.length === 0 ? (
-              <p className="font-ui text-sm text-ink-3">
-                {t(
-                  "Ce client n'a laissé aucune note avec ses réservations.",
-                  "This guest hasn't left any notes with their reservations."
-                )}
-              </p>
-            ) : (
-              <div className="space-y-3">
-                {clientNotes.map((r) => (
-                  <div
-                    key={r.id}
-                    className="bg-fill rounded-xl p-3"
-                  >
-                    <p className="font-ui text-xs text-ink-3 mb-1">
-                      {fmtDate(r.reservation_date, locale)}
-                    </p>
-                    <p className="font-ui text-sm text-ink-2 leading-relaxed">
-                      {r.notes}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          <UpcomingReservations upcoming={upcoming} />
+          <GuestNotes notes={notes} />
         </div>
       </div>
     </div>

@@ -7,18 +7,21 @@ import { Button, Card, ErrorState, KpiGrid, PageHeader } from "@/components/app/
 import { useAuthUser } from "@/hooks/use-auth-user";
 import {
   useVenueQrReservations,
-  type VenueQrReservation,
 } from "@/hooks/use-venue-qr-reservations";
 import { TableSkeleton } from "@/components/shared/loading-skeleton";
 import { useLocale, useT } from "@/lib/i18n/client";
-import { intlLocale, makeT, type Locale, type Translate } from "@/lib/i18n";
+import { HotelList } from "@/components/venue/commissions/hotel-list";
 import {
-  Check,
+  exportCsv,
+  groupByHotel,
+  periodOf,
+  type MonthGroup,
+  type Settlement,
+} from "@/components/venue/commissions/commissions-lib";
+import {
   ChevronDown,
-  Clock,
   Coins,
   Download,
-  Hotel,
   Percent,
 } from "lucide-react";
 
@@ -30,97 +33,6 @@ import {
    fait qu'agréger. Le canal direct (portail) et les réservations maison sont
    à 0 % par construction. Un règlement, noté par twocards, vaut pour un
    mois et un hôtel : c'est ce qui sépare « à régler » de « réglé ». */
-
-type Settlement = {
-  period: string;
-  hotel_id: string;
-  amount: number;
-  settled_at: string;
-  note: string;
-};
-
-const periodOf = (r: VenueQrReservation) => r.reservation_date.slice(0, 7);
-
-const fmtDate = (iso: string, locale: Locale = "fr") =>
-  new Date(`${iso}T00:00:00`).toLocaleDateString(intlLocale(locale), {
-    day: "numeric",
-    month: "short",
-  });
-
-type HotelGroup = {
-  key: string;
-  hotelId: string | null;
-  name: string;
-  rows: VenueQrReservation[];
-  spent: number;
-  commission: number;
-};
-
-type MonthGroup = {
-  period: string;
-  rows: VenueQrReservation[];
-  commission: number;
-  hotels: HotelGroup[];
-};
-
-function groupByHotel(rows: VenueQrReservation[], t: Translate): HotelGroup[] {
-  const map = new Map<string, HotelGroup>();
-  for (const r of rows) {
-    const key = r.referrer_id ?? "inconnu";
-    const g = map.get(key) ?? {
-      key,
-      hotelId: r.referrer_id,
-      name: r.referrer_name ?? t("Hôtel partenaire", "Partner hotel"),
-      rows: [],
-      spent: 0,
-      commission: 0,
-    };
-    g.rows.push(r);
-    g.spent += r.amount_spent ?? 0;
-    g.commission += r.commission;
-    map.set(key, g);
-  }
-  return [...map.values()].sort((a, b) => b.commission - a.commission);
-}
-
-function exportCsv(rows: VenueQrReservation[], locale: Locale = "fr") {
-  const t = makeT(locale);
-  const header = [
-    t("Mois", "Month"),
-    t("Date sortie", "Outing date"),
-    t("Client", "Guest"),
-    t("Hôtel d'origine", "Referring hotel"),
-    t("Prestation", "Service"),
-    t("Montant dépensé (MAD)", "Amount spent (MAD)"),
-    t("Taux", "Rate"),
-    t("Commission reversée (MAD)", "Commission paid (MAD)"),
-    t("Origine du montant", "Amount source"),
-  ];
-  const lines = rows.map((r) =>
-    [
-      periodOf(r),
-      r.reservation_date,
-      r.guest_name,
-      r.referrer_name ?? "",
-      r.service_name ?? "",
-      r.amount_spent ?? "",
-      `${Math.round(r.commission_rate * 100)}%`,
-      r.commission,
-      r.amount_source === "pos" ? t("caisse", "POS") : t("saisie manuelle", "manual entry"),
-    ]
-      .map((v) => `"${String(v).replace(/"/g, '""')}"`)
-      .join(";")
-  );
-  const blob = new Blob(["﻿" + [header.join(";"), ...lines].join("\n")], {
-    type: "text/csv;charset=utf-8",
-  });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `commissions-${new Date().toISOString().slice(0, 10)}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
-}
 
 export default function VenueCommissionsPage() {
   const t = useT();
@@ -375,87 +287,3 @@ export default function VenueCommissionsPage() {
   );
 }
 
-function HotelList({
-  month,
-  settled,
-  open,
-  toggle,
-}: {
-  month: MonthGroup;
-  settled: (period: string, hotelId: string | null) => Settlement | null;
-  open: Set<string>;
-  toggle: (key: string) => void;
-}) {
-  const t = useT();
-  const locale = useLocale();
-  return (
-    <ul className="space-y-2">
-      {month.hotels.map((h) => {
-        const key = `${month.period}|${h.key}`;
-        const isOpen = open.has(key);
-        const s = settled(month.period, h.hotelId);
-        return (
-          <li key={key} className="rounded-xl border border-line bg-fill">
-            <button
-              type="button"
-              onClick={() => toggle(key)}
-              aria-expanded={isOpen}
-              className="flex w-full items-center gap-3 px-4 py-3 text-left"
-            >
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-fill-2">
-                <Hotel size={15} strokeWidth={1.75} className="text-ink" />
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="font-ui text-sm font-semibold text-ink truncate">{h.name}</p>
-                <p className="font-ui text-xs text-ink-3">
-                  {t(
-                    `${h.rows.length} sortie${h.rows.length > 1 ? "s" : ""} · ${mad(h.spent, locale)} dépensés`,
-                    `${h.rows.length} outing${h.rows.length === 1 ? "" : "s"} · ${mad(h.spent, locale)} spent`
-                  )}
-                </p>
-              </div>
-              <div className="text-right shrink-0">
-                <p className="font-display text-base text-warn tabular-nums">{mad(h.commission, locale)}</p>
-                {s ? (
-                  <p className="font-ui inline-flex items-center gap-1 text-xs text-ok">
-                    <Check size={11} strokeWidth={2.5} />
-                    {t("réglé le", "settled on")} {new Date(s.settled_at).toLocaleDateString(intlLocale(locale))}
-                  </p>
-                ) : (
-                  <p className="font-ui inline-flex items-center gap-1 text-xs text-warn">
-                    <Clock size={11} strokeWidth={2} />
-                    {t("à régler", "due")}
-                  </p>
-                )}
-              </div>
-              <ChevronDown
-                size={15}
-                strokeWidth={1.75}
-                className={`shrink-0 text-ink-3 transition-transform ${isOpen ? "rotate-180" : ""}`}
-              />
-            </button>
-            {isOpen && (
-              <ul className="divide-y divide-line border-t border-line px-4">
-                {h.rows.map((r) => (
-                  <li key={r.id} className="flex items-center justify-between gap-3 py-2.5">
-                    <div className="min-w-0">
-                      <p className="font-ui text-sm text-ink truncate">
-                        {r.guest_name}
-                        {r.service_name && <span className="text-info"> · {r.service_name}</span>}
-                      </p>
-                      <p className="font-ui text-xs text-ink-3">
-                        {fmtDate(r.reservation_date, locale)} · {mad(r.amount_spent ?? 0, locale)} {t("dépensés", "spent")} · {Math.round(r.commission_rate * 100)}{t(" %", "%")}
-                        {r.amount_source === "pos" ? t(" · caisse", " · POS") : ""}
-                      </p>
-                    </div>
-                    <span className="font-display shrink-0 text-sm text-warn tabular-nums">{mad(r.commission, locale)}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </li>
-        );
-      })}
-    </ul>
-  );
-}
