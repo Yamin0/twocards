@@ -14,6 +14,7 @@ import {
   SectionHeader,
 } from "@/components/landing/section-header";
 import { useT } from "@/lib/i18n/client";
+import { useMoney } from "@/lib/currency/client";
 import type { Translate } from "@/lib/i18n";
 
 /* Le parcours du système QR, dans l'ordre où le film le raconte : un seul
@@ -106,6 +107,7 @@ function SelectionVisual() {
 
 function BookingVisual() {
   const t = useT();
+  const money = useMoney();
   return (
     <div className={`${panel} p-5 text-left`}>
       <div className="mb-4 flex items-center gap-3">
@@ -123,7 +125,7 @@ function BookingVisual() {
       </div>
       {[
         [t("Table", "Table"), t("4 couverts · sam. 21:00", "4 covers · Sat 21:00")],
-        [t("Acompte", "Deposit"), t("payé · 800 MAD", "paid · 800 MAD")],
+        [t("Acompte", "Deposit"), t(`payé · ${money("qrDeposit")}`, `paid · ${money("qrDeposit")}`)],
         [t("Attribuée à", "Attributed to"), t("Chambre 12 · QR chevet", "Room 12 · bedside QR")],
       ].map(([label, value]) => (
         <div
@@ -140,6 +142,7 @@ function BookingVisual() {
 
 function TrackingVisual() {
   const t = useT();
+  const money = useMoney();
   const rows = [
     { label: t("Scans", "Scans"), value: "128", bar: 100 },
     { label: t("Réservations", "Reservations"), value: "41", bar: 32 },
@@ -177,7 +180,7 @@ function TrackingVisual() {
           {t("Commission du mois", "Commission this month")}
         </span>
         <span className="text-[15px] font-semibold text-[var(--landing-ink)]">
-          {t("3 640 MAD", "3,640 MAD")}
+          {money("qrMonthlyCommission")}
         </span>
       </div>
     </div>

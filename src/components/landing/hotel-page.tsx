@@ -3,6 +3,7 @@
 import QRCode from "react-qr-code";
 import { RotatingTitleWord } from "@/components/landing/rotating-title-word";
 import { useT } from "@/lib/i18n/client";
+import { useMoney } from "@/lib/currency/client";
 import type { Translate } from "@/lib/i18n";
 import {
   ShortAudiencePage,
@@ -76,10 +77,11 @@ function MessageVisual() {
 
 function DashboardVisual() {
   const t = useT();
+  const money = useMoney();
   const rows = [
-    { place: t("Chambre 204", "Room 204"), count: 6, amount: "620 MAD" },
-    { place: "Lobby", count: 11, amount: t("1 140 MAD", "1,140 MAD") },
-    { place: "Spa", count: 4, amount: "380 MAD" },
+    { place: t("Chambre 204", "Room 204"), count: 6, amount: money("hotelRoom") },
+    { place: "Lobby", count: 11, amount: money("hotelLobby") },
+    { place: "Spa", count: 4, amount: money("hotelSpa") },
   ];
   return (
     <div className={`${panel} p-5 text-left`}>
@@ -108,7 +110,7 @@ function DashboardVisual() {
       ))}
       <div className="mt-1 flex items-center justify-between rounded-xl bg-emerald-50 px-3 py-2.5">
         <span className="text-[13px] text-emerald-800">{t("Commission de l'hôtel", "Hotel commission")}</span>
-        <span className="text-[16px] font-semibold text-emerald-700">{t("2 140 MAD", "2,140 MAD")}</span>
+        <span className="text-[16px] font-semibold text-emerald-700">{money("hotelTotal")}</span>
       </div>
     </div>
   );

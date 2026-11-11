@@ -9,6 +9,8 @@ import {
   SectionHeader,
 } from "@/components/landing/section-header";
 import { useT } from "@/lib/i18n/client";
+import { useMoney } from "@/lib/currency/client";
+import type { Money } from "@/lib/currency/amounts";
 import type { Translate } from "@/lib/i18n";
 
 /* Les trois cartes empilées du parcours (réservation, check-in,
@@ -22,7 +24,7 @@ const cardBase =
 const washed =
   "md:before:absolute md:before:w-[100%] md:before:outline-1 md:before:rounded-xl md:before:outline-border md:before:h-[100%] md:before:content-[''] md:before:bg-blend-overlay md:before:bg-background/50 md:grayscale-[100%] md:hover:before:opacity-0 md:before:transition-opacity md:before:duration-700 md:hover:grayscale-0 md:before:left-0 md:before:top-0";
 
-const getCards = (t: Translate) => [
+const getCards = (t: Translate, money: Money) => [
   {
     icon: <CalendarCheck className="size-4 text-[var(--landing-ivory)]" />,
     title: t("Réservation confirmée", "Reservation confirmed"),
@@ -44,7 +46,10 @@ const getCards = (t: Translate) => [
   {
     icon: <BadgePercent className="size-4 text-[var(--landing-ivory)]" />,
     title: t("Commission validée", "Commission validated"),
-    description: t("+ 480 MAD · facture vérifiée", "+ 480 MAD · bill verified"),
+    description: t(
+      `+ ${money("activityCommission")} · facture vérifiée`,
+      `+ ${money("activityCommission")} · bill verified`,
+    ),
     date: t("à l'instant", "just now"),
     iconClassName: "bg-[var(--landing-ink)]",
     titleClassName: "text-[var(--landing-ink)]",
@@ -69,7 +74,8 @@ const getPoints = (t: Translate) => [
 
 export function Activity() {
   const t = useT();
-  const CARDS = getCards(t);
+  const money = useMoney();
+  const CARDS = getCards(t, money);
   const POINTS = getPoints(t);
   return (
     <section className={`${SECTION} overflow-x-clip`}>

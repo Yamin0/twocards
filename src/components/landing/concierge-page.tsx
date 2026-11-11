@@ -6,6 +6,7 @@ import {
   panel,
 } from "@/components/landing/short-audience-page";
 import { useT } from "@/lib/i18n/client";
+import { useMoney } from "@/lib/currency/client";
 
 /* Page Concierges & RP, sur le gabarit court des pages métiers. Le héros
    photo (zellige) est repris de l'ancienne page. Les adresses des
@@ -17,9 +18,10 @@ const SIGNUP = "/signup?role=concierge";
 
 function ConditionsVisual() {
   const t = useT();
+  const money = useMoney();
   const rows = [
     [t("Disponible", "Available"), t("sam. 21:00 · 22:30", "Sat. 21:00 · 22:30")],
-    [t("Minimum", "Minimum spend"), t("600 MAD / pers.", "600 MAD / person")],
+    [t("Minimum", "Minimum spend"), t(`${money("conciergeMinimumPerGuest")} / pers.`, `${money("conciergeMinimumPerGuest")} / person`)],
     [t("Acompte", "Deposit"), t("aucun", "none")],
     [t("Tenue", "Dress code"), t("élégante", "smart")],
   ];
@@ -100,6 +102,7 @@ function PaidVisual() {
 
 function EarningsVisual() {
   const t = useT();
+  const money = useMoney();
   const paid = t("Payée", "Paid");
   const rows = [
     ["Le Comptoir du Soir", t("4 pers.", "4 guests"), paid],
@@ -135,7 +138,7 @@ function EarningsVisual() {
       ))}
       <div className="mt-1 flex items-center justify-between rounded-xl bg-emerald-50 px-3 py-2.5">
         <span className="text-[13px] text-emerald-800">{t("Ce mois", "This month")}</span>
-        <span className="text-[16px] font-semibold text-emerald-700">{t("1 860 MAD", "1,860 MAD")}</span>
+        <span className="text-[16px] font-semibold text-emerald-700">{money("conciergeMonthlyEarnings")}</span>
       </div>
     </div>
   );

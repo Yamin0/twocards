@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { useLocale, useT } from "@/lib/i18n/client";
 import { LanguageSwitcher } from "@/components/shared/language-switcher";
+import { CurrencySwitcher } from "@/components/shared/currency-switcher";
 
 /* Les libellés suivent la langue : construits dans le composant. */
 const getNavLinks = (t: ReturnType<typeof useT>) => [
@@ -173,6 +174,7 @@ export function LandingNavbar({
         </nav>
 
         <div className="flex shrink-0 items-center justify-self-end gap-4 xl:gap-6">
+          <CurrencySwitcher tone={onDark ? "dark" : "light"} className="hidden sm:inline-flex" />
           <LanguageSwitcher tone={onDark ? "dark" : "light"} />
           <Link
             href="/login"
@@ -225,6 +227,14 @@ export function LandingNavbar({
               {link.label}
             </Link>
           ))}
+          {/* Sur mobile, la devise n'a pas de place dans la barre : elle est
+              dans le menu. */}
+          <div className="flex items-center justify-between py-3.5 sm:hidden">
+            <span className="text-[12px] font-medium uppercase tracking-[0.18em] text-[var(--landing-ink)]/70">
+              {t("Devise", "Currency")}
+            </span>
+            <CurrencySwitcher />
+          </div>
           <Link
             href="/signup"
             onClick={() => setMobileOpen(false)}
