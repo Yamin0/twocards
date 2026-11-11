@@ -245,17 +245,24 @@
 :root {
   --landing-ivory: #fffdf9;
   --landing-ink: #0d0d0d;
-  --landing-mute: #8d8d8d;
+  /* Gris des textes secondaires : 4,9:1 sur l'ivoire (AA). L'ancien
+     #8d8d8d plafonnait à 3,3:1. */
+  --landing-mute: #6e6e6e;
+  /* Inter n'est plus chargée (elle ne servait que de repli). La variable
+     reste définie pour que les piles « var(--font-x), var(--font-inter) »
+     écrites ailleurs dans ce fichier restent valides : une variable
+     absente invaliderait toute la déclaration font-family. */
+  --font-inter: system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
 /* Piles typographiques landing : Gotham (titres) / Suisse Int'l (textes),
    auto-hébergées via next/font/local. Gotham n'existe qu'en Book (400) :
    les titres restent donc en font-normal. */
 .font-title {
-  font-family: var(--font-gotham), var(--font-inter), sans-serif;
+  font-family: var(--font-gotham), system-ui, sans-serif;
 }
 .font-body {
-  font-family: var(--font-suisse), var(--font-inter), sans-serif;
+  font-family: var(--font-suisse), system-ui, sans-serif;
 }
 
 /* Pile display des dashboards et pages client : Gotham (licence client)
@@ -278,7 +285,7 @@
 .landing-satoshi,
 .landing-satoshi .font-title,
 .landing-satoshi .font-body {
-  font-family: var(--font-satoshi), var(--font-inter), sans-serif;
+  font-family: var(--font-satoshi), system-ui, sans-serif;
 }
 /* La règle globale h1…h6 impose Gotham à tout titre : les titres de la
    landing qui ne portent ni .font-title ni .font-body doivent la lever. */
@@ -287,6 +294,45 @@
 }
 .landing-satoshi .font-title em {
   font-weight: 300;
+}
+
+/* Entrée du héros : un simple glissement, sans opacité. Le titre, l'intro
+   et les boutons sont donc lisibles dès le HTML du serveur, avant (et
+   sans) JavaScript, et comptent tout de suite pour le LCP. */
+@keyframes landing-rise {
+  from {
+    transform: translateY(14px);
+  }
+  to {
+    transform: none;
+  }
+}
+.landing-rise {
+  animation: landing-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+/* Apparition des blocs sous la ligne de flottaison (composant Reveal).
+   L'attribut n'est posé que par le script, et seulement sur un bloc encore
+   hors écran : sans JavaScript, tout reste visible. */
+.landing-satoshi [data-reveal] {
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.landing-satoshi [data-reveal="wait"] {
+  opacity: 0;
+  transform: translateY(20px);
+}
+/* Fondu de la photo du panneau des pages de compte quand elle change. */
+@keyframes landing-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.landing-fade {
+  animation: landing-fade 0.6s ease both;
 }
 
 /* ─── Espace Hôtel & menu client : Satoshi partout ─────────────────────

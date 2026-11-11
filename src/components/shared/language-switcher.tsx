@@ -33,7 +33,8 @@ export function LanguageSwitcher({
             type="button"
             lang={l}
             aria-pressed={active}
-            aria-label={l === "fr" ? "Français" : "English"}
+            /* Le nom accessible commence par le libellé visible (WCAG 2.5.3). */
+            aria-label={l === "fr" ? "FR, Français" : "EN, English"}
             disabled={active || pending}
             onClick={() => setLocale(l)}
             className={`rounded-full px-2 py-1 leading-none transition-colors ${
@@ -42,8 +43,8 @@ export function LanguageSwitcher({
                   ? "bg-white text-black"
                   : "bg-[var(--landing-ink,#111)] text-white"
                 : onDark
-                  ? "text-white/60 hover:text-white"
-                  : "text-black/50 hover:text-black"
+                  ? "text-white/75 hover:text-white"
+                  : "text-black/70 hover:text-black"
             }`}
           >
             {l}

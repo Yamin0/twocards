@@ -4,20 +4,21 @@ import Link from "next/link";
 import { useT } from "@/lib/i18n/client";
 import type { Translate } from "@/lib/i18n";
 import { LanguageSwitcher } from "@/components/shared/language-switcher";
+import { CtaLink } from "@/components/landing/section-header";
 
 /* Composant client : le pied de page est aussi rendu depuis des pages
    clientes (influenceurs, pages audience courtes). */
 const getFooterLinks = (t: Translate) => ({
   [t("Produit", "Product")]: [
     { label: t("Établissements", "Venues"), href: "/restaurants" },
-    { label: t("Concierges / PR", "Concierges / PR"), href: "/concierges" },
+    { label: t("Concierges / RP", "Concierges / PR"), href: "/concierges" },
     { label: t("Hôtels", "Hotels"), href: "/hotels" },
     { label: t("Influenceurs", "Influencers"), href: "/influenceurs" },
   ],
   [t("Entreprise", "Company")]: [
-    { label: "Founding Circle", href: "/signup" },
     { label: t("Connexion", "Log in"), href: "/login" },
     { label: t("Demander un accès", "Request access"), href: "/signup" },
+    { label: t("Nous écrire", "Contact us"), href: "mailto:contact@twocardspro.com" },
   ],
   [t("Juridique", "Legal")]: [
     { label: t("Mentions légales", "Legal notice"), href: "/legal/mentions-legales" },
@@ -30,7 +31,7 @@ export function Footer() {
   const t = useT();
   const footerLinks = getFooterLinks(t);
   return (
-    <footer className="border-t border-black/[0.06] bg-[var(--landing-ivory)] text-[var(--landing-ink)] font-body">
+    <footer className="landing-satoshi border-t border-black/[0.06] bg-[var(--landing-ivory)] font-body text-[var(--landing-ink)]">
       <div className="mx-auto max-w-6xl px-6 py-16 md:px-16 md:py-20">
         <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-4">
           {/* Brand column */}
@@ -41,7 +42,7 @@ export function Footer() {
             >
               twocards<span className="text-[var(--landing-mute)]">.</span>
             </Link>
-            <p className="mt-4 max-w-xs text-[13px] font-normal leading-relaxed text-[var(--landing-ink)]/60">
+            <p className="mt-4 max-w-xs text-[14px] font-normal leading-relaxed text-[var(--landing-ink)]/70">
               {t(
                 "Le channel manager B2B des concierges et RP. TwoCards distribue l'inventaire des établissements, attribue chaque client et automatise les commissions.",
                 "The B2B channel manager for concierges and PRs. TwoCards distributes venue inventory, attributes every guest and automates commissions."
@@ -52,18 +53,16 @@ export function Footer() {
           {/* Link columns */}
           {Object.entries(footerLinks).map(([title, links]) => (
             <div key={title}>
-              <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-[var(--landing-mute)]">
-                {title}
-              </p>
+              <h2 className="text-[14px] font-semibold text-[var(--landing-ink)]">{title}</h2>
               <ul className="mt-5 flex flex-col gap-3">
                 {links.map((link, i) => (
                   <li key={`${title}-${i}`}>
-                    <Link
+                    <CtaLink
                       href={link.href}
-                      className="text-[13px] font-normal text-[var(--landing-ink)]/60 transition-colors hover:text-[var(--landing-ink)]"
+                      className="text-[14px] font-normal text-[var(--landing-ink)]/70 transition-colors hover:text-[var(--landing-ink)]"
                     >
                       {link.label}
-                    </Link>
+                    </CtaLink>
                   </li>
                 ))}
               </ul>
@@ -75,11 +74,11 @@ export function Footer() {
       {/* Copyright bar */}
       <div className="border-t border-black/[0.06]">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 py-6 sm:flex-row md:px-16">
-          <p className="text-xs font-normal text-[var(--landing-mute)]">
+          <p className="text-[13px] font-normal text-[var(--landing-mute)]">
             &copy; {new Date().getFullYear()} twocards.{" "}
             {t("Tous droits réservés.", "All rights reserved.")}
           </p>
-          <div className="flex items-center gap-6 text-xs font-normal text-[var(--landing-mute)]">
+          <div className="flex items-center gap-6 text-[13px] font-normal text-[var(--landing-mute)]">
             <LanguageSwitcher />
             <Link
               href="/legal/mentions-legales"
@@ -91,7 +90,7 @@ export function Footer() {
               href="mailto:contact@twocardspro.com"
               className="transition-colors hover:text-[var(--landing-ink)]"
             >
-              Contact
+              {t("Contact", "Contact")}
             </a>
           </div>
         </div>

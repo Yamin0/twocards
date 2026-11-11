@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
-import { getT } from "@/lib/i18n/server";
+import { pageMetadata } from "@/components/landing/seo";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const t = await getT();
-  return {
-    title: t("Connexion | twocards.", "Log in | twocards."),
-    description: t("Connectez-vous à votre espace twocards.", "Log in to your twocards workspace."),
-  };
+export function generateMetadata(): Promise<Metadata> {
+  return pageMetadata({
+    title: ["Connexion", "Log in"],
+    description: ["Connectez-vous à votre espace twocards.", "Log in to your twocards workspace."],
+    path: "/login",
+    index: false,
+  });
 }
 
 export default function LoginLayout({ children }: { children: React.ReactNode }) {

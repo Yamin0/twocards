@@ -1,20 +1,20 @@
 import type { Metadata } from "next";
 import { LegalArticle } from "@/components/landing/legal-article";
+import { pageMetadata } from "@/components/landing/seo";
 import { getT } from "@/lib/i18n/server";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const t = await getT();
-  return {
-    title: t("twocards. | Politique de confidentialité", "twocards. | Privacy policy"),
-    robots: { index: false },
-  };
+export function generateMetadata(): Promise<Metadata> {
+  return pageMetadata({
+    title: ["Politique de confidentialité", "Privacy policy"],
+    path: "/legal/confidentialite",
+    index: false,
+  });
 }
 
 export default async function ConfidentialitePage() {
   const t = await getT();
   return (
     <LegalArticle
-      label={t("Juridique", "Legal")}
       title={t("Politique de confidentialité", "Privacy policy")}
       updated={t("31 juillet 2026", "31 July 2026")}
       sections={[

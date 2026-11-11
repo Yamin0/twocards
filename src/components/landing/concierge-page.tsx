@@ -1,14 +1,15 @@
 "use client";
 
 import { Check } from "lucide-react";
+import { getCostFaq } from "@/components/landing/faq-home";
 import {
   ShortAudiencePage,
   panel,
 } from "@/components/landing/short-audience-page";
 import { useT } from "@/lib/i18n/client";
 
-/* Page Concierges & RP, sur le gabarit court des pages métiers. Le héros
-   photo (zellige) est repris de l'ancienne page. Les adresses des
+/* Page Concierges & RP, sur le gabarit commun des pages métiers, avec un
+   héros photo (zellige). Les adresses des
    exemples sont celles de la fiction du film. */
 
 const SIGNUP = "/signup?role=concierge";
@@ -27,14 +28,14 @@ function ConditionsVisual() {
     <div className={`${panel} p-5 text-left`}>
       <div className="flex items-baseline justify-between">
         <p className="text-[15px] font-semibold">Le Comptoir du Soir</p>
-        <p className="text-[11px] text-[var(--landing-ink)]/45">{t("Restaurant", "Restaurant")}</p>
+        <p className="text-[11px] text-[var(--landing-ink)]/65">{t("Restaurant", "Restaurant")}</p>
       </div>
       {rows.map(([label, value]) => (
         <div
           key={label}
           className="flex items-center justify-between border-t border-black/[0.07] py-2.5 text-[13px] first-of-type:mt-2"
         >
-          <span className="text-[var(--landing-ink)]/55">{label}</span>
+          <span className="text-[var(--landing-ink)]/65">{label}</span>
           <span className="font-medium">{value}</span>
         </div>
       ))}
@@ -52,7 +53,7 @@ function BookingVisual() {
       </div>
       <div className={`${panel} max-w-[88%] self-start rounded-bl-md p-3.5`}>
         <p className="text-[13px] font-medium">{t("Complet à 21:00, terrasse à 21:30 ?", "Full at 21:00, terrace at 21:30?")}</p>
-        <p className="mt-0.5 text-[12px] text-[var(--landing-ink)]/50">
+        <p className="mt-0.5 text-[12px] text-[var(--landing-ink)]/65">
           {t("Le Comptoir du Soir · en 4 min", "Le Comptoir du Soir · in 4 min")}
         </p>
       </div>
@@ -73,7 +74,7 @@ function PaidVisual() {
   ];
   return (
     <div className={`${panel} p-5 text-left`}>
-      <p className="mb-2 text-[11px] uppercase tracking-[0.14em] text-[var(--landing-ink)]/45">
+      <p className="mb-2 text-[12px] font-medium text-[var(--landing-ink)]/65">
         {t("Réservation de M. B.", "Mr B.'s reservation")}
       </p>
       {rows.map((r) => (
@@ -88,9 +89,9 @@ function PaidVisual() {
           >
             {r.done && <Check size={11} strokeWidth={3} />}
           </span>
-          <span className={r.done ? "" : "text-[var(--landing-ink)]/50"}>{r.step}</span>
+          <span className={r.done ? "" : "text-[var(--landing-ink)]/65"}>{r.step}</span>
           {!r.done && (
-            <span className="ml-auto text-[12px] text-[var(--landing-ink)]/45">{t("le 5 du mois", "on the 5th")}</span>
+            <span className="ml-auto text-[12px] text-[var(--landing-ink)]/65">{t("le 5 du mois", "on the 5th")}</span>
           )}
         </div>
       ))}
@@ -109,13 +110,9 @@ function EarningsVisual() {
   return (
     <div className={`${panel} p-5 text-left`}>
       <div className="mb-2 flex items-center justify-between">
-        <p className="text-[11px] uppercase tracking-[0.14em] text-[var(--landing-ink)]/45">
+        <p className="text-[12px] font-medium text-[var(--landing-ink)]/65">
           {t("Mes commissions", "My commissions")}
         </p>
-        <span className="flex items-center gap-1.5 text-[12px] text-emerald-600">
-          <span className="size-1.5 rounded-full bg-emerald-500" />
-          {t("en direct", "live")}
-        </span>
       </div>
       {rows.map(([place, size, status]) => (
         <div
@@ -123,10 +120,10 @@ function EarningsVisual() {
           className="flex items-center justify-between gap-3 border-t border-black/[0.07] py-2.5 text-[13px]"
         >
           <span className="min-w-0 truncate">{place}</span>
-          <span className="shrink-0 text-[var(--landing-ink)]/50">{size}</span>
+          <span className="shrink-0 text-[var(--landing-ink)]/65">{size}</span>
           <span
             className={`w-16 shrink-0 text-right text-[12px] font-medium ${
-              status === paid ? "text-emerald-600" : "text-[var(--landing-ink)]/60"
+              status === paid ? "text-emerald-700" : "text-[var(--landing-ink)]/60"
             }`}
           >
             {status}
@@ -149,16 +146,20 @@ export function ConciergePage() {
     <ShortAudiencePage
       data={{
         hero: {
-          image: "/images/concierges-hero.jpg",
+          media: { image: "/images/concierges-hero.jpg" },
           title: t(
             <>
               Vos recommandations valent de l&apos;argent.{" "}
-              <em className="italic">Encaissez-les</em>.
+              <em className="font-light italic">Encaissez-les</em>.
             </>,
             <>
               Your recommendations are worth money.{" "}
-              <em className="italic">Cash in on them</em>.
+              <em className="font-light italic">Cash in on them</em>.
             </>,
+          ),
+          intro: t(
+            "Accédez aux disponibilités des meilleurs établissements, confirmez vos clients plus vite et suivez chaque commission jusqu'au paiement.",
+            "Access live availability at the best venues, confirm your guests faster and track every commission through to payout.",
           ),
           primary: { label: t("Rejoindre le réseau", "Join the network"), href: SIGNUP },
           secondary: { label: t("Comment ça marche", "How it works"), href: "#comment" },
@@ -168,12 +169,12 @@ export function ConciergePage() {
             <>
               Comment ça marche.
               <br />
-              <em className="font-light italic">En trois étapes.</em>
+              En trois étapes.
             </>,
             <>
               How it works.
               <br />
-              <em className="font-light italic">In three steps.</em>
+              In three steps.
             </>,
           ),
           intro: t(
@@ -217,16 +218,8 @@ export function ConciergePage() {
         },
         gains: {
           title: t(
-            <>
-              Ce que vous
-              <br />
-              <em className="font-light italic">y gagnez</em>.
-            </>,
-            <>
-              What&apos;s in it
-              <br />
-              <em className="font-light italic">for you</em>.
-            </>,
+"Ce que vous y gagnez.",
+            "What's in it for you.",
           ),
           items: [
             {
@@ -261,13 +254,7 @@ export function ConciergePage() {
           visual: EarningsVisual,
         },
         faq: [
-          {
-            q: t("Combien ça coûte ?", "How much does it cost?"),
-            a: t(
-              "Rien. L'accès est gratuit pour les concierges et RP vérifiés : TwoCards se rémunère côté établissements.",
-              "Nothing. Access is free for verified concierges and PRs: TwoCards is paid by the venues.",
-            ),
-          },
+          getCostFaq(t),
           {
             q: t("Comment mon apport est-il prouvé ?", "How is my referral proven?"),
             a: t(
@@ -298,12 +285,12 @@ export function ConciergePage() {
             <>
               Votre réseau travaille déjà.
               <br />
-              <em className="font-light italic">Faites-le payer.</em>
+              Faites-le payer.
             </>,
             <>
               Your network already works.
               <br />
-              <em className="font-light italic">Make it pay.</em>
+              Make it pay.
             </>,
           ),
           text: t("Inscription gratuite, vérification en 24 h.", "Free sign-up, verified within 24 hours."),
