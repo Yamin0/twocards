@@ -32,8 +32,6 @@ export const PANEL =
 /* Intitulé d'un mini-écran : petit, en casse normale. */
 export const PANEL_LABEL = "text-[12px] font-medium text-[var(--landing-ink)]/65";
 
-/* Le QR des exemples est un vrai QR : il ouvre le menu de démonstration. */
-export const DEMO_QR_URL = "https://twocardspro.com/s/a1f3c07b";
 export const CONTACT_MAILTO = "mailto:contact@twocardspro.com";
 
 export type Cta = { label: string; href: string };

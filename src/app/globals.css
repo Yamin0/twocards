@@ -310,6 +310,29 @@
 .landing-rise {
   animation: landing-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
+/* Mot tournant d'un titre de héros (RotatingTitleWord) : le mot sort vers
+   le haut dans un léger flou, le suivant monte à sa place. 0,4 s chacun,
+   comme SWAP_MS dans le composant. */
+@keyframes landing-word-out {
+  to {
+    transform: translateY(-0.55em);
+    opacity: 0;
+    filter: blur(5px);
+  }
+}
+@keyframes landing-word-in {
+  from {
+    transform: translateY(0.55em);
+    opacity: 0;
+    filter: blur(5px);
+  }
+}
+.landing-word-out {
+  animation: landing-word-out 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.landing-word-in {
+  animation: landing-word-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
 /* Apparition des blocs sous la ligne de flottaison (composant Reveal).
    L'attribut n'est posé que par le script, et seulement sur un bloc encore
    hors écran : sans JavaScript, tout reste visible. */

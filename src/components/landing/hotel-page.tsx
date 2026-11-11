@@ -1,11 +1,11 @@
 "use client";
 
-import QRCode from "react-qr-code";
+import { DemoQr } from "@/components/landing/demo-qr";
 import { RotatingTitleWord } from "@/components/landing/rotating-title-word";
 import { useT } from "@/lib/i18n/client";
 import type { Translate } from "@/lib/i18n";
 import { getCostFaq } from "@/components/landing/faq-home";
-import { CONTACT_MAILTO, DEMO_QR_URL } from "@/components/landing/section-header";
+import { CONTACT_MAILTO } from "@/components/landing/section-header";
 import {
   ShortAudiencePage,
   panel,
@@ -24,15 +24,7 @@ function RoomQrVisual() {
       <p className="font-title text-[15px] font-semibold text-[var(--landing-ink)]">
         {t("Chambre 204", "Room 204")}
       </p>
-      <QRCode
-        value={DEMO_QR_URL}
-        size={96}
-        bgColor="#ffffff"
-        fgColor="#0d0d0d"
-        level="M"
-        style={{ display: "block", width: 96, height: 96 }}
-        aria-label={t("QR code de démonstration", "Demo QR code")}
-      />
+      <DemoQr label={t("QR code de démonstration", "Demo QR code")} />
       <p className="text-center text-[12px] leading-snug text-[var(--landing-ink)]/65">
         {t(
           <>

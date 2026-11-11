@@ -2,12 +2,39 @@
 
 import { useState, useSyncExternalStore } from "react";
 import { Eye, Loader2, LogOut } from "lucide-react";
-import {
-  impersonationRaw,
-  parseImpersonation,
-  stopImpersonation,
-} from "@/lib/impersonation";
+import type { ImpersonationFlag } from "@/lib/impersonation";
 import { useT } from "@/lib/i18n/client";
+
+/* Ce bandeau est monté dans le layout racine, donc livré à toutes les
+   pages, site public compris. Il ne doit pas y entraîner le client
+   Supabase (environ 60 Ko compressés) : `@/lib/impersonation`, qui
+   l'importe, n'est donc chargé qu'au clic sur « Revenir à
+   l'administration ». Seul son type est importé ici (effacé à la
+   compilation), et la lecture du drapeau est refaite sur place.
+
+   La clé doit rester la même que FLAG_KEY dans `@/lib/impersonation`. */
+const FLAG_KEY = "tc_impersonating";
+
+/* Valeur brute du drapeau : primitive stable, adaptée à
+   useSyncExternalStore (un objet reparsé à chaque appel ferait boucler
+   React). */
+function readFlag(): string | null {
+  try {
+    return window.localStorage.getItem(FLAG_KEY);
+  } catch {
+    /* Stockage refusé par le navigateur : pas d'usurpation possible. */
+    return null;
+  }
+}
+
+function parseFlag(raw: string | null): ImpersonationFlag | null {
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw) as ImpersonationFlag;
+  } catch {
+    return null;
+  }
+}
 
 /* Le drapeau ne change qu'au prix d'un rechargement (bascule ou retour) :
    un abonnement vide suffit, getServerSnapshot rend null pour l'hydratation. */
@@ -20,12 +47,8 @@ const subscribe = () => () => {};
    utilisateurs normaux. */
 export function ImpersonationBanner() {
   const t = useT();
-  const raw = useSyncExternalStore(
-    subscribe,
-    impersonationRaw,
-    () => null
-  );
-  const flag = parseImpersonation(raw);
+  const raw = useSyncExternalStore(subscribe, readFlag, () => null);
+  const flag = parseFlag(raw);
   const [leaving, setLeaving] = useState(false);
 
   if (!flag) return null;
@@ -40,7 +63,11 @@ export function ImpersonationBanner() {
       <button
         onClick={() => {
           setLeaving(true);
-          void stopImpersonation();
+          import("@/lib/impersonation")
+            .then((m) => m.stopImpersonation())
+            /* Module non chargé (réseau coupé) : le bouton redevient
+               cliquable, la session en cours n'a pas été touchée. */
+            .catch(() => setLeaving(false));
         }}
         disabled={leaving}
         className="flex shrink-0 items-center gap-1.5 rounded-full bg-black/85 px-3 py-1 text-[12px] font-bold text-white transition-colors hover:bg-black disabled:opacity-60"

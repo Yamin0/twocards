@@ -1,6 +1,6 @@
 "use client";
 
-import QRCode from "react-qr-code";
+import { DemoQr } from "@/components/landing/demo-qr";
 import {
   BedDouble,
   Check,
@@ -9,7 +9,6 @@ import {
 } from "lucide-react";
 import {
   CONTAINER,
-  DEMO_QR_URL,
   PANEL as panel,
   SECTION,
   SectionHeader,
@@ -36,15 +35,7 @@ function QrVisual() {
       {/* Taille fixe en pixels, sans width: 100 % : le QR ne suit jamais la
           largeur de la scène. */}
       <div className="shrink-0 rounded-xl border border-black/[0.08] bg-white p-2.5 shadow-[0_24px_60px_-30px_rgba(60,40,10,0.35)]">
-        <QRCode
-          value={DEMO_QR_URL}
-          size={96}
-          bgColor="#ffffff"
-          fgColor="#0d0d0d"
-          level="M"
-          style={{ display: "block", width: 96, height: 96 }}
-          aria-label={t("QR code de démonstration TwoCards", "TwoCards demo QR code")}
-        />
+        <DemoQr label={t("QR code de démonstration TwoCards", "TwoCards demo QR code")} />
       </div>
       <div className="flex flex-wrap justify-center gap-2">
         {chips.map((chip) => (

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { Play } from "lucide-react";
 import { LandingNavbar } from "@/components/landing/navbar";
 import { HeroCopy } from "@/components/landing/section-header";
@@ -13,6 +14,13 @@ import { useLocale, useT } from "@/lib/i18n/client";
    aperçu. « Regarder le film » le reprend au début, avec le son et les
    contrôles natifs ; à la fin, il redevient l'aperçu muet. Rien n'est posé
    par-dessus l'image : le film porte déjà ses propres titres.
+
+   L'affiche du film est l'image du premier écran sur mobile (LCP). Elle
+   passe donc par next/image, sous la vidéo : préchargée dès le <head>, en
+   priorité haute, à la taille du cadre et en WebP. La vidéo n'a pas
+   d'attribut poster : tant qu'elle n'a pas démarré elle est transparente
+   et laisse voir l'affiche, y compris sans JavaScript, en mouvement réduit
+   et en économie de données.
 
    Deux encodages de la même source (Downloads/twocards-hero-film-60s-
    musique-C.mp4, 1080p 24 i/s) :
@@ -131,11 +139,21 @@ export function QrHero() {
           ref={frameRef}
           className="landing-rise relative mx-auto aspect-video max-w-6xl overflow-hidden rounded-xl bg-black shadow-[0_50px_120px_-40px_rgba(0,0,0,0.55)] ring-1 ring-white/10 md:rounded-2xl"
         >
+          {/* Le cadre fait au plus 1152 px (max-w-6xl) ; en dessous, il
+              occupe l'écran moins ses gouttières. */}
+          <Image
+            src={film.poster}
+            alt=""
+            fill
+            preload
+            fetchPriority="high"
+            sizes="(min-width: 1232px) 1152px, calc(100vw - 32px)"
+            className="object-cover"
+          />
           {/* key : changer de langue recharge la vidéo sur la bonne source. */}
           <video
             key={locale}
             ref={videoRef}
-            poster={film.poster}
             muted
             loop
             playsInline
