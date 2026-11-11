@@ -329,7 +329,7 @@ export function CatalogAdmin({
 
       <div className="space-y-2">
         {shown.map((r) => {
-          const img = r.image_url || fallbackImage(r.slug);
+          const img = r.image_url || fallbackImage(r.slug, r.category);
           return (
             <div
               key={r.slug}

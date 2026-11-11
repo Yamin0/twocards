@@ -30,7 +30,7 @@ import { useTrackScan } from "./_hooks/use-track-scan";
    coordonnées — puis confirmation. Sans compte, sans paiement. */
 
 const DEFAULT_ACCENT = "#13305c";
-const DEFAULT_BACKGROUND = "#f4f3ef";
+const DEFAULT_BACKGROUND = "#fffdf9";
 
 export function GuestExperience({
   code,

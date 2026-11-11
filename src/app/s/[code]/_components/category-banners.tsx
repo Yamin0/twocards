@@ -1,11 +1,13 @@
 "use client";
 
+import { ArrowRight } from "lucide-react";
 import { RemoteImage } from "@/components/booking/remote-image";
 import type { GuestCategory, GuestCategoryKey } from "@/lib/guest-catalog";
 import { useT } from "@/lib/i18n/client";
 
-/* Bandeaux de catégories : la première vue du menu. Presque bord à bord, ils
-   portent les images de la page. */
+/* Bandeaux de catégories : la première vue du menu, une photo par
+   catégorie. Sobres : pas d'ombre, un voile qui ne fonce que le bas de la
+   photo, le nom en bas à gauche, le décompte en italique fin. */
 export function CategoryBanners({
   menu,
   emptyHint,
@@ -20,20 +22,22 @@ export function CategoryBanners({
   const t = useT();
   if (menu.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-black/15 bg-white px-6 py-12 text-center">
-        <p className="text-base font-bold text-neutral-900">{t("Aucune adresse proposée pour le moment", "No places available yet")}</p>
-        <p className="mt-1 text-sm text-neutral-600">{emptyHint}</p>
+      <div className="border-t border-[color:var(--rule)] px-1 py-12 text-center">
+        <p className="text-base font-bold text-[color:var(--on-page)]">
+          {t("Aucune adresse proposée pour le moment", "No places available yet")}
+        </p>
+        <p className="mt-1 text-sm text-[color:var(--on-page-muted)]">{emptyHint}</p>
       </div>
     );
   }
   return (
-    <ul className="space-y-3 sm:space-y-4">
+    <ul className="space-y-2 sm:space-y-3">
       {menu.map((c, i) => (
         <li key={c.key}>
           <button
             type="button"
             onClick={() => onPick(c.key)}
-            className="group relative block h-40 w-full overflow-hidden rounded-2xl text-white shadow-[0_20px_50px_-30px_rgba(0,0,0,0.6)] transition-transform active:scale-[0.99] motion-reduce:transition-none sm:h-52 lg:h-64"
+            className="group relative block h-40 w-full overflow-hidden rounded-md bg-neutral-300 text-left text-white sm:h-56 lg:h-64"
           >
             {/* Les deux premiers bandeaux sont visibles dès l'ouverture :
                 préchargés, les suivants attendent le défilement. */}
@@ -42,19 +46,27 @@ export function CategoryBanners({
               fill
               preload={i < 2}
               sizes="(max-width: 1800px) 100vw, 1800px"
-              className="object-cover transition-transform duration-700 group-hover:scale-[1.04] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+              className="object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.03] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
             />
-            <span className="absolute inset-0 bg-black/35 transition-colors group-hover:bg-black/45" />
-            <span className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center">
-              <span className="font-display text-xl font-bold uppercase tracking-[0.35em] [text-shadow:0_2px_14px_rgba(0,0,0,0.6)] sm:text-2xl lg:text-3xl">
-                {c.label}
+            <span className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/15 to-black/5" />
+            <span className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 px-5 pb-4 sm:px-7 sm:pb-6 lg:px-9 lg:pb-7">
+              <span>
+                <span className="block text-[1.65rem] font-bold leading-none tracking-[-0.03em] sm:text-4xl lg:text-5xl">
+                  {c.label}
+                </span>
+                <span className="mt-2 block text-sm font-light italic text-white/85 sm:text-base">
+                  {t(
+                    `${c.offers.length} adresse${c.offers.length > 1 ? "s" : ""}`,
+                    `${c.offers.length} place${c.offers.length === 1 ? "" : "s"}`
+                  )}
+                </span>
               </span>
-              <span className="num mt-2 text-xs font-medium uppercase tracking-[0.2em] text-white [text-shadow:0_1px_8px_rgba(0,0,0,0.7)]">
-                {t(
-                  `${c.offers.length} adresse${c.offers.length > 1 ? "s" : ""}`,
-                  `${c.offers.length} place${c.offers.length === 1 ? "" : "s"}`
-                )}
-              </span>
+              <ArrowRight
+                size={22}
+                strokeWidth={1.5}
+                aria-hidden
+                className="mb-1 shrink-0 transition-transform duration-300 group-hover:translate-x-1 motion-reduce:transition-none"
+              />
             </span>
           </button>
         </li>

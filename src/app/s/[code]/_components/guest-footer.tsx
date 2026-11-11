@@ -58,15 +58,15 @@ export function GuestFooter({
 }) {
   const t = useT();
   return (
-    <footer className="mx-auto w-full max-w-6xl px-6 pb-[max(2rem,env(safe-area-inset-bottom))] pt-8 text-center lg:pb-12 lg:pt-12">
+    <footer className="mx-auto w-full max-w-6xl px-6 pb-[max(2rem,env(safe-area-inset-bottom))] pt-10 text-center lg:pb-12 lg:pt-16">
       {reception && (
         <ReceptionLink
           reception={reception}
           words={words}
-          className="mb-4 border border-black/[0.1] bg-white text-neutral-900 transition-colors hover:bg-neutral-50 [&>svg]:text-emerald-700"
+          className="mb-4 border border-[color:var(--rule)] font-medium text-[color:var(--on-page)] transition-colors hover:border-[color:var(--on-page)]"
         />
       )}
-      <p className="text-sm leading-relaxed text-[var(--on-page-muted)]">
+      <p className="text-[13px] font-light italic leading-relaxed text-[var(--on-page-muted)]">
         {t(
           "Sans engagement, l'établissement confirme par téléphone ou WhatsApp.",
           "No commitment: the venue confirms by phone or WhatsApp."

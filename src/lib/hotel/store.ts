@@ -80,7 +80,7 @@ export const DEFAULT_PROFILE: HotelProfile = {
   hotel_name: null,
   city: null,
   accent_color: "#13305c",
-  background_color: "#f4f3ef",
+  background_color: "#fffdf9",
   welcome_message: null,
   reception_phone: null,
   show_prices: true,

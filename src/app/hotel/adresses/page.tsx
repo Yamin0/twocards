@@ -321,7 +321,7 @@ export default function HotelAddressesPage() {
             {mine.map((o) => (
               <OfferTile
                 key={o.id}
-                image={o.image_url || fallbackImage(o.slug)}
+                image={o.image_url || fallbackImage(o.slug, o.category)}
                 name={o.name}
                 price={o.price}
                 active={o.active}
