@@ -29,31 +29,49 @@ export function Bars({
   const t = useT();
   const max = Math.max(...data.map((d) => d.value), 1);
   const showValues = data.length <= 14;
-  const labelEvery = data.length <= 14 ? 1 : Math.ceil(data.length / 10);
+  /* Une date sur n quand les barres sont nombreuses : chaque libellé a la
+     place de plusieurs colonnes et n'est jamais tronqué. */
+  const labelEvery = data.length <= 14 ? 1 : Math.ceil(data.length / 7);
+  const gap = data.length > 20 ? "gap-[3px]" : "gap-1.5";
   return (
     <div>
-      <div role="img" aria-label={label} className="flex h-36 items-end gap-1">
+      {/* Barres : toutes partent de la même ligne de base. La valeur, quand
+          il y a la place, est posée au-dessus de la barre. */}
+      <div role="img" aria-label={label} className={cn("flex h-36 items-end border-b border-line", gap)}>
         {data.map((d, i) => (
           <div
             key={`${d.label}-${i}`}
             title={t(`${d.full} : ${format(d.value)}`, `${d.full}: ${format(d.value)}`)}
-            className="group flex min-w-0 flex-1 flex-col items-center gap-1"
+            className="group flex h-full min-w-0 flex-1 flex-col items-center justify-end"
           >
-            {showValues && (
-              <span className="num text-xs text-ink-2">
-                {d.value > 0 ? (short ?? format)(d.value) : ""}
-              </span>
+            {showValues && d.value > 0 && (
+              <span className="num mb-1 whitespace-nowrap text-[11px] text-ink-2">{(short ?? format)(d.value)}</span>
             )}
             <div
               className={cn(
-                "w-full rounded-t-md transition-colors",
+                "w-full max-w-[28px] rounded-t-[3px] transition-colors",
                 d.value > 0 ? "bg-link group-hover:bg-link-strong" : "bg-fill-3"
               )}
-              style={{ height: `${Math.max((d.value / max) * 96, 3)}px` }}
+              style={{ height: d.value > 0 ? `${Math.max((d.value / max) * (showValues ? 80 : 100), 3)}%` : "2px" }}
             />
-            <span className="max-w-full truncate text-xs text-ink-3">
-              {i % labelEvery === 0 ? d.label : ""}
-            </span>
+          </div>
+        ))}
+      </div>
+      {/* Dates : même découpage en colonnes, libellé centré sous sa barre et
+          libre de déborder sur les colonnes voisines, laissées vides. */}
+      <div aria-hidden className={cn("mt-2 flex", gap)}>
+        {data.map((d, i) => (
+          <div key={`${d.label}-${i}`} className="relative h-4 min-w-0 flex-1">
+            {i % labelEvery === 0 && (
+              <span
+                className={cn(
+                  "absolute top-0 whitespace-nowrap text-[11px] text-ink-3",
+                  i === 0 && labelEvery > 1 ? "left-0" : "left-1/2 -translate-x-1/2"
+                )}
+              >
+                {d.label}
+              </span>
+            )}
           </div>
         ))}
       </div>

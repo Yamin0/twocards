@@ -32,6 +32,7 @@ import {
 import { CalendarCard, DonutCard, Script, SectionTitle, ServiceCard, TrendCard } from "@/components/app/glass";
 import { ReservationRow, type RowActions } from "@/components/venue/reservations/reservation-row";
 import type { Reservation } from "@/lib/venue/reservations";
+import { Bars } from "@/components/venue/analytics/charts";
 import { useT } from "@/lib/i18n/client";
 
 const KIT_MONTHS = ["déc", "janv", "févr", "mars", "avr", "mai", "juin", "juil", "août", "sept", "oct", "nov"].map(
@@ -90,6 +91,17 @@ const KIT_ACTIONS: RowActions = {
   copyReviewLink: () => {},
   openReview: () => {},
 };
+/* 30 jours d'exemple pour les graphiques par jour (cas des Analyses). */
+const KIT_DAYS = Array.from({ length: 30 }, (_, i) => {
+  const d = new Date();
+  d.setDate(d.getDate() - 29 + i);
+  const covers = [4, 0, 0, 6, 0, 3, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 5, 3, 4, 5, 6, 12][i];
+  return {
+    label: d.toLocaleDateString("fr-FR", { day: "numeric", month: "short" }).replace(".", ""),
+    full: d.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" }),
+    value: covers,
+  };
+});
 const ROLES: ShellRole[] = ["etablissement", "hotel", "concierge", "admin"];
 const ROWS = [
   { name: "Exemple A", when: "20:30", party: 4, status: "en attente" },
@@ -125,6 +137,19 @@ function Samples() {
           </>
         }
       />
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <Card title="Couverts par jour" description="hors annulations et no-shows">
+          <Bars label="Couverts par jour" data={KIT_DAYS} format={(v) => `${v} couverts`} short={(v) => String(v)} />
+        </Card>
+        <Card title="Meilleurs jours de la semaine" description="couverts moyens par jour d'activité">
+          <Bars
+            label="Meilleurs jours"
+            data={["lun", "mar", "mer", "jeu", "ven", "sam", "dim"].map((l, i) => ({ label: l, full: l, value: [3, 2, 4, 5, 8, 11, 6][i] }))}
+            format={(v) => `${v} couverts`}
+            short={(v) => String(v)}
+          />
+        </Card>
+      </div>
       <section className="space-y-4">
         <SectionTitle hint="Le client attend votre réponse : confirmez ou refusez d'un geste.">
           2 demandes <Script>à confirmer</Script>.
