@@ -5,7 +5,8 @@
    aux espaces connectés et aux pages clients (QR, portail, avis).
 
    Premier passage sans cookie : le proxy choisit d'après la langue du
-   navigateur (Accept-Language), puis pose le cookie. `?lang=en` ou
+   navigateur (Accept-Language) puis le pays du visiteur (voir
+   `detectLocale`), puis pose le cookie. `?lang=en` ou
    `?lang=fr` dans n'importe quelle URL force la langue (lien à partager).
 
    Les textes sont écrits côte à côte dans le code : `t("Bonjour", "Hello")`.
@@ -34,6 +35,54 @@ export type Translate = <T>(fr: T, en: T) => T;
 
 export function makeT(locale: Locale): Translate {
   return (fr, en) => (locale === "en" ? en : fr);
+}
+
+/* Pays où le site s'ouvre en français quand le navigateur n'est réglé ni
+   en français ni en anglais (arabe, espagnol…) : la France et son
+   outre-mer, le Maroc et le Maghreb, et quelques pays francophones. */
+const FRENCH_COUNTRIES = new Set([
+  "FR", "MC", "GP", "MQ", "GF", "RE", "YT", "PM", "BL", "MF", "NC", "PF", "WF",
+  "MA", "DZ", "TN", "SN", "CI",
+]);
+
+/** Langue par défaut d'un pays : français en France / au Maroc, anglais ailleurs. */
+export function localeForCountry(country: string | null): Locale | null {
+  if (!country) return null;
+  return FRENCH_COUNTRIES.has(country) ? "fr" : "en";
+}
+
+/** Langue placée en tête de l'en-tête Accept-Language, si c'est fr ou en. */
+function topBrowserLocale(header: string | null | undefined): Locale | null {
+  if (!header) return null;
+  const top = header
+    .split(",")
+    .map((part) => {
+      const [tag, ...params] = part.trim().split(";");
+      const q = params.find((p) => p.trim().startsWith("q="));
+      return { tag: tag.toLowerCase(), q: q ? Number(q.trim().slice(2)) || 0 : 1 };
+    })
+    .sort((a, b) => b.q - a.q)[0];
+  if (top?.tag.startsWith("fr")) return "fr";
+  if (top?.tag.startsWith("en")) return "en";
+  return null;
+}
+
+/* Langue d'un premier passage (sans cookie) :
+   1. la langue principale du navigateur si c'est le français ou l'anglais
+      (un Français en vacances en Espagne garde le français) ;
+   2. sinon le pays du visiteur (Vercel) : français en France / au Maroc,
+      anglais ailleurs ;
+   3. sinon (en local, sans pays) : le premier fr/en de la liste du
+      navigateur, comme avant. */
+export function detectLocale(
+  acceptLanguage: string | null | undefined,
+  country: string | null,
+): Locale {
+  return (
+    topBrowserLocale(acceptLanguage) ??
+    localeForCountry(country) ??
+    localeFromAcceptLanguage(acceptLanguage)
+  );
 }
 
 /** Langue préférée d'après l'en-tête Accept-Language (premier fr/en trouvé). */

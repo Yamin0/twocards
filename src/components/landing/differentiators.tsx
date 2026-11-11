@@ -10,6 +10,7 @@ import {
   SectionHeader,
 } from "@/components/landing/section-header";
 import { useT } from "@/lib/i18n/client";
+import { useMoney } from "@/lib/currency/client";
 import type { Translate } from "@/lib/i18n";
 
 /* Les quatre outils propres au réseau. Même écriture que le parcours QR :
@@ -20,6 +21,7 @@ const panel =
 
 function DropVisual() {
   const t = useT();
+  const money = useMoney();
   return (
     <div className={`${panel} p-5 text-left`}>
       <div className="mb-3 flex items-center justify-between">
@@ -35,8 +37,8 @@ function DropVisual() {
       </p>
       <p className="mt-1 text-[12px] text-[var(--landing-ink)]/55">
         {t(
-          "Min. 8 000 MAD · acompte 20 % · commission 8 %",
-          "Min. 8,000 MAD · 20% deposit · 8% commission"
+          `Min. ${money("lastMinuteMinimum")} · acompte 20 % · commission 8 %`,
+          `Min. ${money("lastMinuteMinimum")} · 20% deposit · 8% commission`
         )}
       </p>
       <div className="mt-4 flex gap-2">
@@ -53,6 +55,7 @@ function DropVisual() {
 
 function ReverseVisual() {
   const t = useT();
+  const money = useMoney();
   return (
     <div className="flex flex-col gap-2.5 text-left">
       <div className="max-w-[85%] self-start rounded-2xl rounded-bl-md bg-[#111] p-3.5 shadow-[0_16px_40px_-16px_rgba(0,0,0,0.4)]">
@@ -60,7 +63,10 @@ function ReverseVisual() {
           {t("8 personnes · restaurant festif · 23:00", "8 people · party restaurant · 23:00")}
         </p>
         <p className="mt-0.5 text-[12px] text-white/50">
-          {t("Budget 12 000 MAD · client Priority", "Budget 12,000 MAD · Priority guest")}
+          {t(
+            `Budget ${money("priorityBudget")} · client Priority`,
+            `Budget ${money("priorityBudget")} · Priority guest`,
+          )}
         </p>
       </div>
       <div className="max-w-[85%] self-end rounded-2xl rounded-br-md border border-black/10 bg-white p-3.5">

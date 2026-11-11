@@ -5,6 +5,8 @@ import "./globals.css";
 import { ImpersonationBanner } from "@/components/shared/impersonation-banner";
 import { LocaleProvider } from "@/lib/i18n/client";
 import { getLocale } from "@/lib/i18n/server";
+import { CurrencyProvider } from "@/lib/currency/client";
+import { getCurrency } from "@/lib/currency/server";
 
 const manrope = Manrope({
   variable: "--font-manrope",
@@ -112,7 +114,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const locale = await getLocale();
+  const [locale, currency] = await Promise.all([getLocale(), getCurrency()]);
   return (
     <html
       lang={locale}
@@ -130,8 +132,10 @@ export default async function RootLayout({
           }}
         />
         <LocaleProvider locale={locale}>
-          <ImpersonationBanner />
-          {children}
+          <CurrencyProvider currency={currency}>
+            <ImpersonationBanner />
+            {children}
+          </CurrencyProvider>
         </LocaleProvider>
       </body>
     </html>

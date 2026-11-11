@@ -6,6 +6,7 @@ import {
   panel,
 } from "@/components/landing/short-audience-page";
 import { useT } from "@/lib/i18n/client";
+import { useMoney } from "@/lib/currency/client";
 
 /* Page Établissements (restaurants, rooftops, clubs), sur le gabarit court
    des pages métiers. Le héros vidéo est repris tel quel : la séquence va de
@@ -18,10 +19,11 @@ const SIGNUP = "/signup?role=etablissement";
 
 function InventoryVisual() {
   const t = useT();
+  const money = useMoney();
   const rows = [
     [t("Tables confiées", "Tables shared"), t("2 tables de 4", "2 tables for 4")],
     [t("Créneaux", "Time slots"), t("ven. & sam. · 20:00–23:00", "Fri. & Sat. · 20:00–23:00")],
-    [t("Minimum par table", "Minimum per table"), "800 MAD"],
+    [t("Minimum par table", "Minimum per table"), money("venueTableMinimum")],
     [t("Acompte", "Deposit"), t("20 %", "20%")],
   ];
   return (
@@ -72,6 +74,7 @@ function RequestVisual() {
 
 function VerifiedVisual() {
   const t = useT();
+  const money = useMoney();
   return (
     <div className={`${panel} p-5 text-left`}>
       <div className="flex items-center gap-3 border-b border-black/[0.07] pb-3">
@@ -85,7 +88,7 @@ function VerifiedVisual() {
       </div>
       <div className="flex items-center justify-between py-3 text-[13px]">
         <span className="text-[var(--landing-ink)]/55">{t("Addition vérifiée", "Bill verified")}</span>
-        <span className="font-medium">2 300 MAD</span>
+        <span className="font-medium">{money("venueVerifiedBill")}</span>
       </div>
       <div className="flex items-center gap-2 rounded-xl bg-emerald-50 px-3 py-2.5 text-[13px] font-medium text-emerald-800">
         <Check size={14} strokeWidth={2.5} className="shrink-0" />
@@ -139,8 +142,9 @@ function ReviewVisual() {
 
 function DashboardVisual() {
   const t = useT();
+  const money = useMoney();
   const rows = [
-    [t("Chiffre d'affaires apporté", "Revenue referred"), t("48 200 MAD", "48,200 MAD")],
+    [t("Chiffre d'affaires apporté", "Revenue referred"), money("venueReferredRevenue")],
     [t("Sorties ce mois", "Outings this month"), "37"],
     [t("Clients venus", "Guests who came"), t("35 sur 37", "35 of 37")],
   ];

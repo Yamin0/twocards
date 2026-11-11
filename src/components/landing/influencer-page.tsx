@@ -24,6 +24,8 @@ import {
 } from "@/components/landing/section-header";
 import { Footer } from "@/components/layout/footer";
 import { useT } from "@/lib/i18n/client";
+import { useMoney } from "@/lib/currency/client";
+import type { Money } from "@/lib/currency/amounts";
 import type { Translate } from "@/lib/i18n";
 
 /* Page Influenceurs, dans l'écriture de la page d'accueil.
@@ -113,10 +115,11 @@ function ShareVisual() {
 
 function EarnVisual() {
   const t = useT();
+  const money = useMoney();
   const rows = [
     [t("Réservations ce mois", "Reservations this month"), "18"],
     [t("Clients arrivés", "Guests arrived"), "17"],
-    [t("Revenu vérifié", "Verified revenue"), t("21 400 MAD", "21,400 MAD")],
+    [t("Revenu vérifié", "Verified revenue"), money("influencerVerifiedRevenue")],
   ];
   return (
     <div className={`${panel} p-5 text-left`}>
@@ -140,7 +143,7 @@ function EarnVisual() {
       ))}
       <div className="mt-1 flex items-center justify-between rounded-xl bg-emerald-50 px-3 py-2.5">
         <span className="text-[13px] text-emerald-800">{t("Mes commissions", "My commissions")}</span>
-        <span className="text-[16px] font-semibold text-emerald-700">{t("2 140 MAD", "2,140 MAD")}</span>
+        <span className="text-[16px] font-semibold text-emerald-700">{money("influencerCommissions")}</span>
       </div>
     </div>
   );
@@ -175,7 +178,7 @@ const getSteps = (t: Translate) => [
 
 /* ─── Exemple complet ──────────────────────────────────────────────────── */
 
-const getExample = (t: Translate) => [
+const getExample = (t: Translate, money: Money) => [
   {
     icon: Camera,
     when: t("Lundi, 18:00", "Monday, 18:00"),
@@ -203,7 +206,10 @@ const getExample = (t: Translate) => [
   {
     icon: Receipt,
     when: t("Samedi, 23:30", "Saturday, 23:30"),
-    title: t("L'addition de 1 240 MAD est vérifiée", "The 1,240 MAD bill is verified"),
+    title: t(
+      `L'addition de ${money("influencerBill")} est vérifiée`,
+      `The ${money("influencerBill")} bill is verified`,
+    ),
     detail: t(
       "Votre commission est calculée sur ce montant réel.",
       "Your commission is calculated on that actual amount.",
@@ -212,7 +218,10 @@ const getExample = (t: Translate) => [
   {
     icon: Wallet,
     when: t("Aussitôt", "Instantly"),
-    title: t("+124 MAD dans votre tableau de bord", "+124 MAD in your dashboard"),
+    title: t(
+      `+${money("influencerBillCommission")} dans votre tableau de bord`,
+      `+${money("influencerBillCommission")} in your dashboard`,
+    ),
     detail: t(
       "Au taux fixé par l'établissement, payés à la date prévue.",
       "At the rate set by the venue, paid on the scheduled date.",
@@ -321,8 +330,9 @@ const SIGNUP = "/signup?role=influenceur";
 
 export function InfluencerPage() {
   const t = useT();
+  const money = useMoney();
   const steps = getSteps(t);
-  const example = getExample(t);
+  const example = getExample(t, money);
   const gains = getGains(t);
   const faq = getFaq(t);
   /* Écran 1 : l'accroche, posée sur un voile radial qui assombrit le centre
