@@ -15,7 +15,7 @@ export function PageHeader({
   actions,
   back,
 }: {
-  /** Fil d'Ariane court, facultatif. Pas de capitales espacées. */
+  /** Ligne courte au-dessus du titre (fil d'Ariane), facultative. Pas de capitales espacées. */
   eyebrow?: ReactNode;
   title: ReactNode;
   description?: ReactNode;
@@ -34,8 +34,8 @@ export function PageHeader({
             {back.label}
           </Link>
         )}
-        {eyebrow && <p className="mb-1 text-[13px] text-ink-3">{eyebrow}</p>}
-        <h1 className="text-[1.75rem] leading-tight text-ink sm:text-[2.125rem]">{title}</h1>
+        {eyebrow && <p className="mb-1 text-[14px] text-ink-3">{eyebrow}</p>}
+        <h1 className="text-[2rem] leading-[1.05] text-ink sm:text-[2.75rem]">{title}</h1>
         {description && (
           <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-ink-2">{description}</p>
         )}
@@ -45,7 +45,7 @@ export function PageHeader({
   );
 }
 
-export const cardClass = "rounded-2xl border border-line bg-panel shadow-card";
+export const cardClass = "rounded-[18px] border border-line bg-panel";
 
 export function Card({
   title,
@@ -131,7 +131,7 @@ export function InfoNote({
   return (
     <div
       className={cn(
-        "flex items-start gap-3 rounded-xl border px-4 py-3 text-[13px] leading-relaxed",
+        "flex items-start gap-3 rounded-[14px] border px-4 py-3 text-[13px] leading-relaxed",
         tones[tone]
       )}
     >

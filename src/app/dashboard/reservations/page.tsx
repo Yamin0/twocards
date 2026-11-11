@@ -53,7 +53,8 @@ function ReservationsScreen() {
   const { rows, isLoading, error, reload, busy, setStatus, checkIn, saveBill, assignTable, create } =
     useVenueReservations();
   const [tables, setTables] = useState<VenueTable[]>([]);
-  const [showNew, setShowNew] = useState(false);
+  /* ?nouvelle=1 (bouton de l'accueil) : le formulaire s'ouvre d'emblée. */
+  const [showNew, setShowNew] = useState(() => params.get("nouvelle") === "1");
   const [review, setReview] = useState<Reservation | null>(null);
 
   /* Tables du plan de salle (restaurants et clubs seulement). */

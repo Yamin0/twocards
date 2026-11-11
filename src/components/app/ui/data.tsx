@@ -13,15 +13,6 @@ import { useLocale } from "@/lib/i18n/client";
 
 export type Tone = "default" | "amber" | "emerald" | "sky" | "violet" | "danger";
 
-const TONE_TEXT: Record<Tone, string> = {
-  default: "text-ink-3",
-  amber: "text-warn",
-  emerald: "text-ok",
-  sky: "text-info",
-  violet: "text-plum",
-  danger: "text-danger",
-};
-
 export type Kpi = {
   label: string;
   value: ReactNode;
@@ -29,52 +20,52 @@ export type Kpi = {
   /** Variation relative (0,12 = +12 %). null : pas de période de comparaison. */
   delta?: number | null;
   deltaLabel?: string;
+  /** Conservé pour compatibilité : le bandeau n'affiche pas d'icône. */
   icon?: LucideIcon;
   tone?: Tone;
-  /** Rend la carte cliquable. */
+  /** Rend la cellule cliquable. */
   href?: string;
+  /** Conservé pour compatibilité ; non affiché. */
+  trend?: number[];
+  /** Chiffre en marine : l'indicateur qui compte le plus (un seul). */
+  highlight?: boolean;
 };
 
-export function KpiCard({ kpi, className }: { kpi: Kpi; className?: string }) {
+/* Indicateurs : un seul bandeau de papier, colonnes séparées par des
+   filets, libellé en capitales espacées, grand chiffre. Pas d'icône dans
+   une boîte : le chiffre est le sujet. */
+function KpiCell({ kpi }: { kpi: Kpi }) {
   const locale = useLocale();
+  const hasDelta = typeof kpi.delta === "number" && Number.isFinite(kpi.delta);
   const body = (
     <>
-      <div className="flex items-center justify-between gap-2">
-        <p className="text-[13px] text-ink-3">{kpi.label}</p>
-        {kpi.icon && (
-          <kpi.icon size={16} strokeWidth={1.75} className={TONE_TEXT[kpi.tone ?? "default"]} aria-hidden />
+      <p className="truncate text-[13.5px] text-ink-3">{kpi.label}</p>
+      <p
+        className={cn(
+          "num font-display mt-3 truncate text-[2rem] leading-none sm:text-[2.375rem]",
+          kpi.highlight ? "text-[#13305c]" : "text-ink"
         )}
-      </div>
-      <p className="num font-display mt-2 text-[1.75rem] leading-none text-ink sm:text-[2rem]">
+      >
         {kpi.value}
       </p>
-      {(typeof kpi.delta === "number" || kpi.hint || (kpi.delta === null && kpi.deltaLabel)) && (
-        <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-ink-3">
-          {typeof kpi.delta === "number" && Number.isFinite(kpi.delta) && (
-            <span
-              className={cn(
-                "num inline-flex items-center rounded-md px-1.5 py-0.5 font-bold",
-                kpi.delta >= 0 ? "bg-ok-soft text-ok" : "bg-danger-soft text-danger"
-              )}
-            >
-              {kpi.delta >= 0 ? "+" : ""}
-              {Math.round(kpi.delta * 100)}
+      {(hasDelta || kpi.hint || (kpi.delta === null && kpi.deltaLabel)) && (
+        <p className="mt-2.5 truncate text-[12.5px] text-ink-3">
+          {hasDelta && (
+            <span className={cn("num font-bold", kpi.delta! >= 0 ? "text-ok" : "text-danger")}>
+              {kpi.delta! >= 0 ? "+" : "−"}
+              {Math.abs(Math.round(kpi.delta! * 100))}
               {locale === "en" ? "%" : " %"}
             </span>
           )}
-          {kpi.hint && <span>{kpi.hint}</span>}
-          {kpi.delta === null && kpi.deltaLabel && <span>{kpi.deltaLabel}</span>}
-        </div>
+          {hasDelta && (kpi.hint || kpi.deltaLabel) ? " " : ""}
+          {kpi.hint ?? (kpi.delta === null ? kpi.deltaLabel : null)}
+        </p>
       )}
     </>
   );
-  const cls = cn(
-    "rounded-2xl border border-line bg-panel px-5 py-4 shadow-card sm:px-6 sm:py-5",
-    kpi.href && "block transition-colors hover:border-line-2",
-    className
-  );
+  const cls = "block min-w-0 px-5 py-5 sm:px-6";
   return kpi.href ? (
-    <Link href={kpi.href} className={cls}>
+    <Link href={kpi.href} className={cn(cls, "transition-colors hover:bg-fill")}>
       {body}
     </Link>
   ) : (
@@ -82,20 +73,30 @@ export function KpiCard({ kpi, className }: { kpi: Kpi; className?: string }) {
   );
 }
 
+/** Un indicateur seul, dans sa propre carte. */
+export function KpiCard({ kpi, className }: { kpi: Kpi; className?: string }) {
+  return (
+    <div className={cn("overflow-hidden rounded-[18px] border border-line bg-panel", className)}>
+      <KpiCell kpi={kpi} />
+    </div>
+  );
+}
+
 export function KpiGrid({ items, columns = 4 }: { items: Kpi[]; columns?: 2 | 3 | 4 }) {
   return (
     <div
       className={cn(
-        "grid gap-3",
+        "grid overflow-hidden rounded-[18px] border border-line bg-panel",
+        "[&>*]:border-line [&>*:not(:first-child)]:border-t",
         columns === 4
-          ? "grid-cols-2 xl:grid-cols-4"
+          ? "grid-cols-2 xl:grid-cols-4 [&>*:nth-child(2)]:border-t-0 [&>*:nth-child(even)]:border-l xl:[&>*]:!border-t-0 xl:[&>*:not(:first-child)]:border-l"
           : columns === 3
-            ? "grid-cols-1 sm:grid-cols-3"
-            : "grid-cols-2"
+            ? "grid-cols-1 sm:grid-cols-3 sm:[&>*]:!border-t-0 sm:[&>*:not(:first-child)]:border-l"
+            : "grid-cols-2 [&>*:nth-child(2)]:border-t-0 [&>*:nth-child(even)]:border-l"
       )}
     >
       {items.map((k) => (
-        <KpiCard key={k.label} kpi={k} />
+        <KpiCell key={k.label} kpi={k} />
       ))}
     </div>
   );

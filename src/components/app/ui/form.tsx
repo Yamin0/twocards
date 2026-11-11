@@ -9,7 +9,7 @@ import { useT } from "@/lib/i18n/client";
    iOS zoome à chaque saisie. */
 
 export const inputClass =
-  "w-full rounded-xl border border-line-2 bg-panel px-3.5 py-2.5 text-base text-ink placeholder:text-ink-4 transition-colors hover:border-ink-4 focus:border-link focus:outline-none focus:ring-2 focus:ring-link/25 disabled:opacity-50 disabled:bg-fill sm:text-sm";
+  "w-full rounded-[12px] border border-line-2 bg-white px-3.5 py-2.5 text-base text-ink placeholder:text-ink-4 transition-colors hover:border-ink-4 focus:border-link focus:outline-none focus:ring-2 focus:ring-link/25 disabled:opacity-50 disabled:bg-fill sm:text-sm";
 
 export function Field({
   label,
@@ -191,7 +191,7 @@ export function Segmented<T extends string>({
       role="group"
       aria-label={label}
       className={cn(
-        "no-scrollbar inline-flex max-w-full items-center gap-1 overflow-x-auto rounded-xl bg-fill-2 p-1",
+        "no-scrollbar inline-flex max-w-full items-center gap-1 overflow-x-auto rounded-full border border-line-2 bg-white p-1",
         className
       )}
     >
@@ -204,17 +204,17 @@ export function Segmented<T extends string>({
             aria-pressed={active}
             onClick={() => onChange(o.value)}
             className={cn(
-              "inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg font-bold transition-colors",
+              "inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full font-bold transition-colors",
               size === "sm" ? "h-8 px-2.5 text-xs" : "h-9 px-3 text-[13px]",
-              active ? "bg-panel text-ink shadow-sm" : "text-ink-3 hover:text-ink"
+              active ? "bg-brand text-on-brand shadow-sm" : "text-ink-3 hover:text-ink"
             )}
           >
             {o.label}
             {typeof o.count === "number" && (
               <span
                 className={cn(
-                  "num rounded-md px-1.5 text-[11px]",
-                  active ? "bg-brand text-on-brand" : "bg-fill-3 text-ink-2"
+                  "num rounded-full px-1.5 text-[11px]",
+                  active ? "bg-white/20 text-on-brand" : "bg-fill-3 text-ink-2"
                 )}
               >
                 {o.count}
