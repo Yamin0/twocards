@@ -43,6 +43,12 @@ const nextConfig: NextConfig = {
      intégré sur le site de l'établissement (`?embed=1`). Les aperçus internes
      (menu client dans l'espace hôtel, portail dans le dashboard) restent
      possibles : même origine. */
+  /* Anciennes adresses : la page d'accueil de compte a été remplacée par la
+     demande d'accès. */
+  async redirects() {
+    return [{ source: "/onboarding", destination: "/signup", permanent: true }];
+  },
+
   async headers() {
     const sameOriginOnly = [
       { key: "Content-Security-Policy", value: "frame-ancestors 'self'" },

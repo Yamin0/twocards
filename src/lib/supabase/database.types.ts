@@ -7,6 +7,10 @@
    d'être listés un par un : le client n'y perd que le contrôle des champs
    obligatoires à l'insertion, que la base vérifie de toute façon.
 
+   Les paramètres de RPC que la base accepte vides (`p_time`, `p_notes`,
+   `p_service`, `p_table_id`, `p_comment`) sont déclarés `| null` à la main :
+   le générateur ne le sait pas, et le code envoie bien `null`.
+
    Pour régénérer après une migration : relancer l'outil et remplacer les
    blocs `Row` et `Functions`. */
 
@@ -333,7 +337,7 @@ export type Database = {
           p_date: string;
           p_guest_name: string;
           p_guest_phone: string;
-          p_notes?: string;
+          p_notes?: string | null;
           p_party_size: number;
           p_slug: string;
           p_time: string;
@@ -363,12 +367,12 @@ export type Database = {
           p_date: string;
           p_guest_name: string;
           p_guest_phone: string;
-          p_notes: string;
+          p_notes: string | null;
           p_party_size: number;
-          p_service?: string;
-          p_time: string;
+          p_service?: string | null;
+          p_time: string | null;
           p_venue: string;
-          p_venue_slug?: string;
+          p_venue_slug?: string | null;
         };
         Returns: string;
       };
@@ -393,7 +397,7 @@ export type Database = {
         }[];
       };
       qr_rate_reservation: {
-        Args: { p_comment?: string; p_id: string; p_rating: number };
+        Args: { p_comment?: string | null; p_id: string; p_rating: number };
         Returns: undefined;
       };
       qr_rating_context: {
@@ -410,11 +414,11 @@ export type Database = {
         Args: {
           p_date: string;
           p_guest_name: string;
-          p_guest_phone: string;
-          p_notes?: string;
+          p_guest_phone: string | null;
+          p_notes?: string | null;
           p_party_size: number;
-          p_table_id?: number;
-          p_time: string;
+          p_table_id?: number | null;
+          p_time: string | null;
         };
         Returns: string;
       };

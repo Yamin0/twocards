@@ -27,7 +27,6 @@ export default function robots(): MetadataRoute.Robots {
         // Pages de compte
         "/login",
         "/signup",
-        "/onboarding",
         "/forgot-password",
         "/reset-password",
         "/desinscription",
