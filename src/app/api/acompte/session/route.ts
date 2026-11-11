@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
 
   let quote;
   try {
-    quote = await quoteDeposit(req.code, req.slug, req.party);
+    quote = await quoteDeposit(req.code, req.slug, req.party, req.service);
   } catch (error) {
     console.error("[acompte] devis impossible", error);
     return fail("Paiement indisponible", 503);
@@ -45,6 +45,19 @@ export async function POST(request: NextRequest) {
   const code = encodeURIComponent(req.code);
   const when = [req.date, req.time].filter(Boolean).join(" ");
   const guests = locale === "en" ? `${req.party} guest${req.party > 1 ? "s" : ""}` : `${req.party} pers.`;
+  /* Prestation à prix partenaire : nombre de véhicules et reste payé sur place. */
+  const vehicles =
+    quote.mode === "per_vehicle" && quote.units
+      ? locale === "en"
+        ? `${quote.units} vehicle${quote.units > 1 ? "s" : ""}`
+        : `${quote.units} véhicule${quote.units > 1 ? "s" : ""}`
+      : null;
+  const onSite =
+    quote.mode === "per_vehicle" && quote.onSite
+      ? locale === "en"
+        ? `${formatDeposit(quote.onSite, quote.currency, "en-GB")} paid on site`
+        : `${formatDeposit(quote.onSite, quote.currency, "fr-FR")} à régler sur place`
+      : null;
 
   try {
     const session = await getStripe().checkout.sessions.create({
@@ -58,7 +71,7 @@ export async function POST(request: NextRequest) {
             unit_amount: toMinor(quote.amount),
             product_data: {
               name: locale === "en" ? `Booking deposit · ${req.venue}` : `Acompte de réservation · ${req.venue}`,
-              description: [req.service, when, guests].filter(Boolean).join(" · "),
+              description: [req.service, when, guests, vehicles, onSite].filter(Boolean).join(" · "),
             },
           },
         },

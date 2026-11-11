@@ -21,9 +21,15 @@ export type { DepositCurrency };
    SUPABASE_SERVICE_ROLE_KEY (+ NEXT_PUBLIC_SUPABASE_URL). */
 
 export type DepositQuote = {
-  mode: "per_person" | "fixed";
-  /* Montant saisi par l'admin : par personne ou pour la réservation. */
+  /* per_vehicle : prestation à prix partenaire, acompte = marge twocards
+     par véhicule (migration 20261113110000). */
+  mode: "per_person" | "fixed" | "per_vehicle";
+  /* Montant par personne, pour la réservation, ou par véhicule. */
   unit: number;
+  /* Véhicules réservés (per_vehicle seulement). */
+  units?: number;
+  /* Reste à régler sur place au partenaire (per_vehicle seulement). */
+  onSite?: number;
   /* Montant total à payer pour ce nombre de personnes. */
   amount: number;
   currency: DepositCurrency;
@@ -79,6 +85,11 @@ export function parseQuote(value: unknown): DepositQuote | null {
   const mode = String(q.mode ?? "");
   if (!(amount > 0) || !(unit > 0)) return null;
   if (currency !== "mad" && currency !== "eur" && currency !== "usd") return null;
+  if (mode === "per_vehicle") {
+    const units = Math.max(1, Math.round(Number(q.units) || 1));
+    const onSite = Number(q.on_site);
+    return { amount, unit, currency, mode, units, onSite: onSite > 0 ? onSite : undefined };
+  }
   if (mode !== "per_person" && mode !== "fixed") return null;
   return { amount, unit, currency, mode };
 }
@@ -153,12 +164,21 @@ function fromMetadata(m: Stripe.Metadata | null): (DepositRequest & { amount: nu
 
 /* ─── Devis ──────────────────────────────────────────────────────────────── */
 
-export async function quoteDeposit(code: string, slug: string, party: number): Promise<DepositQuote | null> {
-  const { data, error } = await serviceClient().rpc("qr_deposit_quote", {
-    p_code: code,
-    p_venue_slug: slug,
-    p_party_size: party,
-  });
+export async function quoteDeposit(
+  code: string,
+  slug: string,
+  party: number,
+  service: string | null
+): Promise<DepositQuote | null> {
+  const base = { p_code: code, p_venue_slug: slug, p_party_size: party };
+  const client = serviceClient();
+  let { data, error } = await client.rpc("qr_deposit_quote", service ? { ...base, p_service: service } : base);
+  /* Avant la migration 20261113110000, la fonction n'a que trois arguments
+     (PostgREST : PGRST202, fonction introuvable) : on redemande sans la
+     prestation. */
+  if (error?.code === "PGRST202" && service) {
+    ({ data, error } = await client.rpc("qr_deposit_quote", base));
+  }
   if (error) throw new Error(error.message);
   return parseQuote(data);
 }

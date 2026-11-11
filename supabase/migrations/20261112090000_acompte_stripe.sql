@@ -28,6 +28,18 @@
 
 begin;
 
+-- Garde-fou (ajouté le 11 nov. 2026) : la production a reçu depuis
+-- 20261112110000 (plafond 300/h pour un concierge). Cette version-ci
+-- l'effacerait : utiliser 20261113100000_acompte_stripe_apres_debit.sql.
+do $guard$
+begin
+  if position('then 300 else 30 end' in pg_get_functiondef(
+       'public.qr_create_reservation(text, text, text, text, text, date, text, integer, text, text, text)'::regprocedure)) > 0 then
+    raise exception 'Débit concierge déjà en place : lancer 20261113100000_acompte_stripe_apres_debit.sql à la place';
+  end if;
+end
+$guard$;
+
 -- ─── 1. Réglage par adresse ────────────────────────────────────────────────
 
 alter table public.catalog_offers

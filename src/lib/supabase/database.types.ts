@@ -384,9 +384,10 @@ export type Database = {
         Returns: string;
       };
       qr_deposit_quote: {
-        Args: { p_code: string; p_party_size: number; p_venue_slug: string };
+        Args: { p_code: string; p_party_size: number; p_venue_slug: string; p_service?: string | null };
         Returns: Json;
       };
+      qr_menu_extras: { Args: { p_slugs: string[] }; Returns: Json };
       qr_mark_deposit_refunded: { Args: { p_payment_intent: string }; Returns: undefined };
       qr_record_paid_reservation: {
         Args: {

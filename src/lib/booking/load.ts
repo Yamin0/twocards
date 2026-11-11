@@ -6,9 +6,9 @@ import {
   type GuestCategoryKey,
   type OfferRow,
 } from "@/lib/guest-catalog";
-import type { Locale } from "@/lib/i18n";
+import { intlLocale, type Locale } from "@/lib/i18n";
 import { safeHex } from "./color";
-import { isDepositCurrency, type OfferDeposit } from "./deposit";
+import { formatDeposit, isDepositCurrency, type OfferDeposit } from "./deposit";
 import { hostKind, type HostKind } from "./host";
 
 /* Chargement côté serveur des deux pages clients (menu QR, portail direct).
@@ -93,6 +93,7 @@ export const loadGuestMenu = cache(async (code: string, locale: Locale): Promise
       ownerKind: kind,
     });
     await attachDeposits(supabase, menu);
+    await attachExtras(supabase, menu, locale);
     return { status: "ready", hotel, menu };
   } catch {
     return { status: "error" };
@@ -123,6 +124,93 @@ async function attachDeposits(supabase: Awaited<ReturnType<typeof createClient>>
     for (const offer of category.offers) {
       const deposit = offer.source === "reseau" ? bySlug.get(offer.id) : undefined;
       if (deposit) offer.deposit = deposit;
+    }
+  }
+}
+
+/* Compléments du menu (`qr_menu_extras`, migration 20261113110000) :
+   - prestations à prix partenaire : prix affiché et acompte par véhicule,
+     calculés en base par `twocards_prix_client` (la règle n'existe qu'à cet
+     endroit) ;
+   - traductions anglaises du nom, de la description, de l'étiquette.
+   Avant la migration, la RPC n'existe pas : le menu reste tel quel. */
+type Translation = { name?: string; description?: string; tag?: string; duration?: string };
+
+const translationFor = (value: unknown, locale: Locale): Translation => {
+  if (locale === "fr" || !value || typeof value !== "object") return {};
+  const entry = (value as Record<string, unknown>)[locale];
+  if (!entry || typeof entry !== "object") return {};
+  const out: Translation = {};
+  for (const key of ["name", "description", "tag", "duration"] as const) {
+    const text = (entry as Record<string, unknown>)[key];
+    if (typeof text === "string" && text.trim()) out[key] = text.trim();
+  }
+  return out;
+};
+
+type ExtrasService = {
+  id?: string;
+  translations?: unknown;
+  seats?: number | null;
+  currency?: string | null;
+  client_price?: number | string | null;
+  deposit?: number | string | null;
+};
+
+async function attachExtras(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  menu: GuestCategory[],
+  locale: Locale
+) {
+  const slugs = menu.flatMap((c) => c.offers.filter((o) => o.source === "reseau").map((o) => o.id));
+  if (slugs.length === 0) return;
+  const { data, error } = await supabase.rpc("qr_menu_extras", { p_slugs: slugs });
+  if (error || !data || typeof data !== "object") return;
+  const extras = data as { offers?: { slug?: string; translations?: unknown }[]; services?: ExtrasService[] };
+
+  const offerText = new Map<string, Translation>();
+  for (const row of extras.offers ?? []) {
+    if (row.slug) offerText.set(row.slug, translationFor(row.translations, locale));
+  }
+  const services = new Map<string, ExtrasService>();
+  for (const row of extras.services ?? []) if (row.id) services.set(row.id, row);
+
+  const money = (amount: number, currency: string) => formatDeposit(amount, currency, intlLocale(locale));
+
+  for (const category of menu) {
+    for (const offer of category.offers) {
+      if (offer.source !== "reseau") continue;
+      const text = offerText.get(offer.id);
+      if (text?.name) offer.name = text.name;
+      if (text?.description) offer.description = text.description;
+      if (text?.tag) offer.tag = text.tag;
+
+      let lowest: { amount: number; currency: string } | null = null;
+      for (const service of offer.services) {
+        const extra = services.get(service.id);
+        if (!extra) continue;
+        const own = translationFor(extra.translations, locale);
+        if (own.name) service.name = own.name;
+        if (own.description) service.description = own.description;
+        if (own.duration) service.duration = own.duration;
+        const seats = Number(extra.seats);
+        if (seats > 0) service.seats = seats;
+        const price = Number(extra.client_price);
+        const deposit = Number(extra.deposit);
+        const currency = isDepositCurrency(extra.currency) ? extra.currency : "mad";
+        if (price > 0) {
+          service.clientPrice = price;
+          service.currency = currency;
+          service.price = money(price, currency);
+          if (!lowest || price < lowest.amount) lowest = { amount: price, currency };
+        }
+        if (price > 0 && deposit > 0) service.deposit = deposit;
+      }
+      /* La carte annonce le plus petit prix affiché des prestations. */
+      if (lowest) {
+        const from = money(lowest.amount, lowest.currency);
+        offer.price = locale === "en" ? `from ${from}` : `dès ${from}`;
+      }
     }
   }
 }

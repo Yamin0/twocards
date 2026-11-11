@@ -21,6 +21,12 @@ export const isDepositCurrency = (v: unknown): v is DepositCurrency =>
 export const depositTotal = (d: OfferDeposit, party: number) =>
   d.mode === "per_person" ? d.unit * Math.min(Math.max(party, 1), 50) : d.unit;
 
+/** Véhicules nécessaires pour `party` personnes (quad : 1 place, buggy X3
+    MAX : 4…). Sans nombre de places, une réservation = une prestation. Même
+    calcul que `qr_deposit_quote` en base. */
+export const vehiclesFor = (seats: number | undefined, party: number) =>
+  seats && seats > 0 ? Math.ceil(Math.min(Math.max(party, 1), 50) / seats) : 1;
+
 /** « 400 MAD », « 40 € » — dans la langue de la page. */
 export function formatDeposit(amount: number, currency: string, locale: string) {
   const code = currency.toUpperCase();

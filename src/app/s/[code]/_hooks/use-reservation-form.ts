@@ -4,7 +4,7 @@ import { CATEGORY_LABELS, type GuestCategory, type GuestOffer, type GuestService
 import { nextDays } from "@/lib/booking/dates";
 import { bookingErrorKind, bookingErrorMessage } from "@/lib/booking/errors";
 import { defaultGuestDate, isGuestSlotPast, isGuestTimePast } from "@/lib/booking/slots";
-import { depositTotal } from "@/lib/booking/deposit";
+import { depositTotal, vehiclesFor, type DepositCurrency } from "@/lib/booking/deposit";
 import { useT } from "@/lib/i18n/client";
 
 export type SheetStep = "details" | "contact" | "done";
@@ -59,8 +59,31 @@ export function useReservationForm({
     window.addEventListener("pageshow", onShow);
     return () => window.removeEventListener("pageshow", onShow);
   }, []);
-  /* Adresse à acompte : montant affiché avant de payer (la base le recalcule). */
-  const deposit = offer.deposit ? { amount: depositTotal(offer.deposit, partySize), currency: offer.deposit.currency } : null;
+  /* Montant affiché avant de payer (la base le recalcule). Une prestation à
+     prix partenaire porte son propre acompte, par véhicule ; sinon c'est le
+     réglage de l'adresse. */
+  const deposit: {
+    amount: number;
+    currency: DepositCurrency;
+    /* Prestation à prix partenaire seulement. */
+    vehicles?: number;
+    unit?: number;
+    onSite?: number;
+  } | null =
+    service?.deposit && service.clientPrice
+      ? (() => {
+          const vehicles = vehiclesFor(service.seats, partySize);
+          return {
+            amount: service.deposit * vehicles,
+            currency: service.currency ?? "mad",
+            vehicles,
+            unit: service.deposit,
+            onSite: (service.clientPrice - service.deposit) * vehicles,
+          };
+        })()
+      : offer.deposit
+        ? { amount: depositTotal(offer.deposit, partySize), currency: offer.deposit.currency }
+        : null;
 
   /* Dès que le client corrige un champ, le message d'erreur s'efface. */
   const editing =
@@ -136,7 +159,7 @@ export function useReservationForm({
           body: JSON.stringify({
             code,
             category: CATEGORY_LABELS[category.key],
-            venue: offer.name,
+            venue: offer.baseName,
             slug: offer.id,
             name: cleanName,
             phone: cleanPhone,
@@ -144,7 +167,7 @@ export function useReservationForm({
             time: chosenTime || null,
             party: partySize,
             notes: notes || null,
-            service: service?.name ?? null,
+            service: service?.baseName ?? null,
           }),
         });
         const payload = (await res.json().catch(() => ({}))) as { url?: string; message?: string };
@@ -165,7 +188,7 @@ export function useReservationForm({
         p_code: code,
         /* Libellé français enregistré en base, quelle que soit la langue affichée. */
         p_category: CATEGORY_LABELS[category.key],
-        p_venue: offer.name,
+        p_venue: offer.baseName,
         p_guest_name: cleanName,
         p_guest_phone: cleanPhone,
         p_date: date,
@@ -176,7 +199,7 @@ export function useReservationForm({
            l'établissement, qui saisira le montant dépensé. */
         p_venue_slug: offer.id,
         /* La prestation choisie, telle que l'établissement la nomme. */
-        p_service: service?.name ?? null,
+        p_service: service?.baseName ?? null,
       });
       failure = error;
     } catch (e) {
