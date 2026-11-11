@@ -4,7 +4,7 @@ import { Suspense, useEffect, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useSearchParams } from "next/navigation";
-import { LogOut, Menu, X } from "lucide-react";
+import { ChevronDown, Ellipsis, LogOut, Menu, X } from "lucide-react";
 import { useAuthUser } from "@/hooks/use-auth-user";
 import { Avatar } from "@/components/shared/avatar";
 import { LanguageSwitcher } from "@/components/shared/language-switcher";
@@ -110,46 +110,98 @@ function RailLink({
   );
 }
 
+/* Groupes repliables (« Outils ») : fermés par défaut, ouverts d'un clic
+   ou d'office quand l'une de leurs pages est affichée. */
+function useGroupToggle(groups: NavGroup[], pathname: string, search: URLSearchParams | null) {
+  const [opened, setOpened] = useState<Record<string, boolean>>({});
+  const isOpen = (group: NavGroup, key: string) =>
+    !group.collapsible || Boolean(opened[key]) || group.items.some((i) => isActive(i, pathname, search));
+  const toggle = (key: string, now: boolean) => setOpened((o) => ({ ...o, [key]: !now }));
+  return { isOpen, toggle, groups };
+}
+
 function RailGroups({ groups, badges, open }: { groups: NavGroup[]; badges: Badges; open: boolean }) {
   const pathname = usePathname();
   const search = useSearchParams();
+  const { isOpen, toggle } = useGroupToggle(groups, pathname, search);
   return (
     <div className="space-y-3">
-      {groups.map((group, gi) => (
-        <div key={group.title ?? `g${gi}`}>
-          {group.title && (
-            <div className="relative mb-1 flex h-6 items-center px-[19px]">
-              <span
-                className={cn(
-                  "whitespace-nowrap text-[12px] font-medium text-white/50 transition-opacity duration-200",
-                  open ? "opacity-100" : "opacity-0"
-                )}
-              >
-                {group.title}
-              </span>
-              <span
-                aria-hidden
-                className={cn(
-                  "absolute left-[22px] top-1/2 h-px w-3 bg-white/30 transition-opacity duration-200",
-                  open ? "opacity-0" : "opacity-100"
-                )}
-              />
-            </div>
-          )}
-          <ul className="space-y-1">
-            {group.items.map((item) => (
-              <li key={item.href}>
-                <RailLink
-                  item={item}
-                  active={isActive(item, pathname, search)}
-                  badge={badges[item.href] ?? 0}
-                  open={open}
-                />
-              </li>
-            ))}
-          </ul>
-        </div>
-      ))}
+      {groups.map((group, gi) => {
+        const key = group.title ?? `g${gi}`;
+        const expanded = isOpen(group, key);
+        const badgeSum = group.items.reduce((n, i) => n + (badges[i.href] ?? 0), 0);
+        return (
+          <div key={key}>
+            {group.title &&
+              (group.collapsible ? (
+                <button
+                  type="button"
+                  aria-expanded={expanded}
+                  onClick={() => toggle(key, expanded)}
+                  title={open ? undefined : group.title}
+                  className="relative flex h-10 w-full items-center gap-3.5 rounded-[14px] pl-[19px] pr-3 text-[14px] font-medium text-white/70 transition-colors hover:bg-white/[0.07] hover:text-white"
+                >
+                  <span className="relative shrink-0">
+                    <Ellipsis size={18} strokeWidth={1.9} aria-hidden />
+                    {!expanded && badgeSum > 0 && (
+                      <span aria-hidden className="absolute -right-1.5 -top-1.5 h-2.5 w-2.5 rounded-full bg-white ring-2 ring-[#13305c]" />
+                    )}
+                  </span>
+                  <span
+                    className={cn(
+                      "min-w-0 flex-1 truncate whitespace-nowrap text-left transition-opacity duration-200",
+                      open ? "opacity-100" : "opacity-0"
+                    )}
+                  >
+                    {group.title}
+                  </span>
+                  <ChevronDown
+                    size={15}
+                    strokeWidth={2}
+                    aria-hidden
+                    className={cn(
+                      "shrink-0 transition-[transform,opacity] duration-200",
+                      expanded && "rotate-180",
+                      open ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                </button>
+              ) : (
+                <div className="relative mb-1 flex h-6 items-center px-[19px]">
+                  <span
+                    className={cn(
+                      "whitespace-nowrap text-[12px] font-medium text-white/50 transition-opacity duration-200",
+                      open ? "opacity-100" : "opacity-0"
+                    )}
+                  >
+                    {group.title}
+                  </span>
+                  <span
+                    aria-hidden
+                    className={cn(
+                      "absolute left-[22px] top-1/2 h-px w-3 bg-white/30 transition-opacity duration-200",
+                      open ? "opacity-0" : "opacity-100"
+                    )}
+                  />
+                </div>
+              ))}
+            {expanded && (
+              <ul className={cn("space-y-1", group.collapsible && "mt-1")}>
+                {group.items.map((item) => (
+                  <li key={item.href}>
+                    <RailLink
+                      item={item}
+                      active={isActive(item, pathname, search)}
+                      badge={badges[item.href] ?? 0}
+                      open={open}
+                    />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -166,11 +218,29 @@ function SheetGroups({
 }) {
   const pathname = usePathname();
   const search = useSearchParams();
+  const { isOpen, toggle } = useGroupToggle(groups, pathname, search);
   return (
     <div className="space-y-4">
-      {groups.map((group, gi) => (
-        <div key={group.title ?? `g${gi}`}>
-          {group.title && <p className="mb-1.5 px-3 text-[12.5px] font-medium text-ink-3">{group.title}</p>}
+      {groups.map((group, gi) => {
+        const key = group.title ?? `g${gi}`;
+        const expanded = isOpen(group, key);
+        return (
+        <div key={key}>
+          {group.title &&
+            (group.collapsible ? (
+              <button
+                type="button"
+                aria-expanded={expanded}
+                onClick={() => toggle(key, expanded)}
+                className="mb-1.5 flex h-9 w-full items-center justify-between rounded-[10px] px-3 text-[12.5px] font-medium text-ink-3 hover:text-ink"
+              >
+                {group.title}
+                <ChevronDown size={15} strokeWidth={2} aria-hidden className={cn("transition-transform", expanded && "rotate-180")} />
+              </button>
+            ) : (
+              <p className="mb-1.5 px-3 text-[12.5px] font-medium text-ink-3">{group.title}</p>
+            ))}
+          {expanded && (
           <ul className="grid grid-cols-2 gap-1.5">
             {group.items.map((item) => {
               const active = isActive(item, pathname, search);
@@ -194,8 +264,10 @@ function SheetGroups({
               );
             })}
           </ul>
+          )}
         </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
