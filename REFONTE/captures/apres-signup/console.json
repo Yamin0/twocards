@@ -1,0 +1,82 @@
+{
+  "signup-fr-390.png": {
+    "final": "/signup | Demander un accès | twocards.",
+    "errors": []
+  },
+  "signup_role_hotel-fr-390.png": {
+    "final": "/signup | Demander un accès | twocards.",
+    "errors": []
+  },
+  "signup_role_etablissement-fr-390.png": {
+    "final": "/signup | Demander un accès | twocards.",
+    "errors": []
+  },
+  "signup_role_concierge-fr-390.png": {
+    "final": "/signup | Demander un accès | twocards.",
+    "errors": []
+  },
+  "signup_role_influenceur-fr-390.png": {
+    "final": "/signup | Demander un accès | twocards.",
+    "errors": []
+  },
+  "signup-fr-1440.png": {
+    "final": "/signup | Demander un accès | twocards.",
+    "errors": []
+  },
+  "signup_role_hotel-fr-1440.png": {
+    "final": "/signup | Demander un accès | twocards.",
+    "errors": []
+  },
+  "signup_role_etablissement-fr-1440.png": {
+    "final": "/signup | Demander un accès | twocards.",
+    "errors": []
+  },
+  "signup_role_concierge-fr-1440.png": {
+    "final": "/signup | Demander un accès | twocards.",
+    "errors": []
+  },
+  "signup_role_influenceur-fr-1440.png": {
+    "final": "/signup | Demander un accès | twocards.",
+    "errors": []
+  },
+  "signup-en-390.png": {
+    "final": "/signup | Request access | twocards.",
+    "errors": []
+  },
+  "signup_role_hotel-en-390.png": {
+    "final": "/signup | Request access | twocards.",
+    "errors": []
+  },
+  "signup_role_etablissement-en-390.png": {
+    "final": "/signup | Request access | twocards.",
+    "errors": []
+  },
+  "signup_role_concierge-en-390.png": {
+    "final": "/signup | Request access | twocards.",
+    "errors": []
+  },
+  "signup_role_influenceur-en-390.png": {
+    "final": "/signup | Request access | twocards.",
+    "errors": []
+  },
+  "signup-en-1440.png": {
+    "final": "/signup | Request access | twocards.",
+    "errors": []
+  },
+  "signup_role_hotel-en-1440.png": {
+    "final": "/signup | Request access | twocards.",
+    "errors": []
+  },
+  "signup_role_etablissement-en-1440.png": {
+    "final": "/signup | Request access | twocards.",
+    "errors": []
+  },
+  "signup_role_concierge-en-1440.png": {
+    "final": "/signup | Request access | twocards.",
+    "errors": []
+  },
+  "signup_role_influenceur-en-1440.png": {
+    "final": "/signup | Request access | twocards.",
+    "errors": []
+  }
+}
