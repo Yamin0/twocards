@@ -206,6 +206,121 @@
   font-family: var(--font-suisse), var(--font-inter), system-ui, sans-serif;
   color: var(--app-ink);
 }
+/* ─── Espaces connectés : la DA twocards. ────────────────────────────────
+   Ce que dit la marque (carte de visite, site public) et que la coque
+   reprend tel quel :
+   - marine #13305C, le fond de la carte de visite : le rail, la carte du
+     service, les jours sélectionnés ;
+   - papier ivoire #FFFDF9 et encre #0D0D0D, comme le site ; filets à 8 %,
+     pas d'ombres portées ;
+   - Satoshi : titres gras qui finissent par un point, un mot en italique
+     fin ; libellés en capitales espacées ;
+   - action principale en pilule noire, action secondaire en lien souligné ;
+   - les deux as en filigrane, comme au dos de la carte ;
+   - derrière, la vue aérienne sable et océan des dashboards twocards,
+     floutée, la même pour les quatre espaces.
+   Contrastes AA sur le papier : ink 19:1, ink-2 11:1, ink-3 5,3:1,
+   link (marine) 12:1. */
+.tc-shell,
+body:has(.tc-shell) .tc-layer {
+  --app-canvas: transparent;
+  --app-panel: rgba(255, 255, 255, 0.78);
+  --app-fill: rgba(13, 13, 13, 0.035);
+  --app-fill-2: rgba(13, 13, 13, 0.06);
+  --app-fill-3: rgba(13, 13, 13, 0.1);
+  --app-line: rgba(13, 13, 13, 0.08);
+  --app-line-2: rgba(13, 13, 13, 0.16);
+  --app-ink: #0d0d0d;
+  --app-ink-2: #3a3a3a;
+  --app-ink-3: #6a6a6a;
+  --app-ink-4: #a6a6a6;
+  --app-brand: #0d0d0d;
+  --app-brand-strong: #000000;
+  --app-on-brand: #ffffff;
+  --app-link: #13305c;
+  --app-link-strong: #0c2244;
+  --app-link-soft: rgba(19, 48, 92, 0.08);
+  --app-ok: #0a7a52;
+  --app-ok-soft: rgba(10, 122, 82, 0.1);
+  --app-warn: #8a5200;
+  --app-warn-soft: rgba(138, 82, 0, 0.1);
+  --app-danger: #b42318;
+  --app-danger-soft: rgba(180, 35, 24, 0.08);
+  --app-info: #13305c;
+  --app-info-soft: rgba(19, 48, 92, 0.08);
+  --app-plum: #5b3a9c;
+  --app-plum-soft: rgba(91, 58, 156, 0.09);
+  --app-scrim: rgba(13, 13, 13, 0.45);
+  --app-rail: #13305c;
+  --tc-navy: #13305c;
+  --tc-ivory: #fffdf9;
+}
+.tc-shell {
+  background: #0f5c6b url("/images/dashboard-bg.jpg") center / cover fixed no-repeat;
+}
+/* Les cartes du kit : papier blanc, filet, aucune ombre. */
+.tc-shell .shadow-card {
+  box-shadow: none;
+}
+/* Calques : fenêtres et tiroirs sur papier ivoire plein. */
+body:has(.tc-shell) .tc-layer {
+  --app-panel: var(--tc-ivory);
+}
+/* Rail marine, la couleur de la carte de visite. */
+.tc-rail {
+  background: rgba(19, 48, 92, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px);
+}
+/* Le papier qui porte la page. */
+.tc-paper {
+  background: rgba(255, 253, 249, 0.93);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(24px);
+}
+/* Carte marine (le service du jour). */
+.tc-card-navy {
+  background: #13305c;
+  color: #fff;
+}
+/* Les deux as en filigrane. */
+.tc-aces {
+  pointer-events: none;
+  user-select: none;
+  opacity: 0.11;
+}
+/* Satoshi partout, comme le site public. */
+.tc-shell,
+.tc-shell :is(h1, h2, h3, h4, h5, h6, .font-display, button, input, select, textarea),
+body:has(.tc-shell) .tc-layer,
+body:has(.tc-shell) .tc-layer :is(h1, h2, h3, h4, h5, h6, .font-display, button, input, select, textarea) {
+  font-family: var(--font-satoshi), var(--font-inter), system-ui, sans-serif;
+}
+.tc-shell :is(h1, .font-display),
+body:has(.tc-shell) .tc-layer :is(h1, .font-display) {
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+.tc-shell :is(h1, h2, h3) em,
+.tc-shell .font-display em {
+  font-style: italic;
+  font-weight: 300;
+  letter-spacing: -0.02em;
+}
+/* Libellé en capitales espacées, comme la navbar et la carte de visite. */
+.tc-eyebrow {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+/* Lien secondaire du site : souligné à distance. */
+.tc-link {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+
 /* Chiffres alignés dans les tableaux et les indicateurs. */
 .num {
   font-variant-numeric: tabular-nums lining-nums;

@@ -14,17 +14,17 @@ export type ButtonSize = "sm" | "md" | "lg";
 
 const VARIANTS: Record<ButtonVariant, string> = {
   primary: "bg-brand text-on-brand hover:bg-brand-strong",
-  accent: "bg-link text-white hover:bg-link-strong",
+  accent: "bg-[#13305c] text-white hover:bg-[#0c2244]",
   success: "bg-ok text-white hover:brightness-95",
-  secondary: "bg-panel text-ink border border-line-2 hover:bg-fill",
+  secondary: "bg-white text-ink border border-line-2 hover:border-ink",
   ghost: "bg-transparent text-ink-2 hover:bg-fill-2 hover:text-ink",
   danger: "bg-danger-soft text-danger border border-danger/20 hover:bg-danger/15",
 };
 
 const SIZES: Record<ButtonSize, string> = {
-  sm: "h-9 px-3 text-[13px] gap-1.5 rounded-lg",
-  md: "h-11 px-4 text-sm gap-2 rounded-xl",
-  lg: "h-12 px-6 text-[15px] gap-2 rounded-xl",
+  sm: "h-9 px-3.5 text-[13px] gap-1.5 rounded-full",
+  md: "h-11 px-5 text-sm gap-2 rounded-full",
+  lg: "h-12 px-6 text-[15px] gap-2 rounded-full",
 };
 
 export function buttonClass(
@@ -33,7 +33,7 @@ export function buttonClass(
   className = ""
 ) {
   return cn(
-    "inline-flex items-center justify-center font-bold whitespace-nowrap select-none transition-colors duration-150",
+    "inline-flex items-center justify-center font-bold whitespace-nowrap select-none transition-all duration-150 active:scale-[0.98]",
     "disabled:opacity-50 disabled:pointer-events-none",
     VARIANTS[variant],
     SIZES[size],
@@ -133,7 +133,7 @@ export function IconButton({
       aria-label={label}
       title={label}
       className={cn(
-        "inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-colors disabled:opacity-40",
+        "inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors disabled:opacity-40",
         tone === "danger"
           ? "text-ink-3 hover:bg-danger-soft hover:text-danger"
           : "text-ink-3 hover:bg-fill-2 hover:text-ink",

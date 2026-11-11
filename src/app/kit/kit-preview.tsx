@@ -29,8 +29,67 @@ import {
   inputClass,
   useNotify,
 } from "@/components/app/ui";
+import { CalendarCard, DonutCard, Script, SectionTitle, ServiceCard, TrendCard } from "@/components/app/glass";
+import { ReservationRow, type RowActions } from "@/components/venue/reservations/reservation-row";
+import type { Reservation } from "@/lib/venue/reservations";
 import { useT } from "@/lib/i18n/client";
 
+const KIT_MONTHS = ["déc", "janv", "févr", "mars", "avr", "mai", "juin", "juil", "août", "sept", "oct", "nov"].map(
+  (label, i) => ({
+    key: String(i),
+    label,
+    a: [12000, 15000, 14000, 19000, 22000, 21000, 26000, 31000, 28000, 33000, 35000, 33400][i],
+    b: [1200, 1500, 1400, 1900, 2200, 2100, 2600, 3100, 2800, 3300, 3500, 3340][i],
+  })
+);
+const KIT_BUSY = new Set(
+  [0, 1, 3, 5].map((n) => {
+    const d = new Date();
+    d.setDate(d.getDate() + n);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  })
+);
+const kitDay = (n: number) => {
+  const d = new Date();
+  d.setDate(d.getDate() + n);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+};
+const KIT_ROW = {
+  id: "kit-1",
+  category: "restaurant",
+  guest_name: "Exemple A",
+  guest_phone: "+212 600 000 000",
+  reservation_date: kitDay(0),
+  reservation_time: "20:30",
+  party_size: 4,
+  notes: "Table en terrasse si possible.",
+  service_name: null,
+  referrer_id: null,
+  referrer_name: "Hôtel Démo",
+  status: "en attente",
+  commission: 0,
+  commission_rate: 0.1,
+  amount_spent: null,
+  amount_source: "manuel",
+  source: "qr",
+  table_id: null,
+  arrived_at: null,
+  rating: null,
+  rating_comment: null,
+  created_at: new Date().toISOString(),
+} as Reservation;
+const KIT_PENDING: Reservation[] = [
+  KIT_ROW,
+  { ...KIT_ROW, id: "kit-2", guest_name: "Exemple B", reservation_time: "21:15", party_size: 2, notes: null, referrer_name: null, source: "portal", reservation_date: kitDay(1) },
+];
+const KIT_ACTIONS: RowActions = {
+  setStatus: () => {},
+  checkIn: () => {},
+  saveBill: async () => true,
+  assignTable: () => {},
+  copyReviewLink: () => {},
+  openReview: () => {},
+};
 const ROLES: ShellRole[] = ["etablissement", "hotel", "concierge", "admin"];
 const ROWS = [
   { name: "Exemple A", when: "20:30", party: 4, status: "en attente" },
@@ -66,14 +125,70 @@ function Samples() {
           </>
         }
       />
+      <section className="space-y-4">
+        <SectionTitle hint="Le client attend votre réponse : confirmez ou refusez d'un geste.">
+          2 demandes <Script>à confirmer</Script>.
+        </SectionTitle>
+        <ul className="space-y-3">
+          {KIT_PENDING.map((r) => (
+            <ReservationRow key={r.id} r={r} busy={false} tables={[]} actions={KIT_ACTIONS} />
+          ))}
+        </ul>
+      </section>
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
+        <ServiceCard
+          title={
+            <>
+              Aujourd&apos;hui, <Script>22 couverts</Script> attendus.
+            </>
+          }
+          text="Prochaine arrivée à 20:30 : Exemple A, 4 pers. (Hôtel Démo)."
+          stats={[
+            { value: 6, label: "réservations" },
+            { value: 22, label: "couverts" },
+            { value: "2/6", label: "arrivés" },
+          ]}
+          primary={{ href: "/kit", label: "Voir le service" }}
+        />
+        <CalendarCard
+          busyDays={KIT_BUSY}
+          countLabel="6 réservations"
+          href="/kit"
+          emptyLabel="Rien de prévu"
+          events={[
+            { id: "1", time: "20:30", title: "Exemple A", sub: "4 pers. · Hôtel Démo", tag: "Prochaine" },
+            { id: "2", time: "21:00", title: "Exemple B", sub: "2 pers. · Portail", pending: true },
+          ]}
+        />
+      </div>
       <KpiGrid
         items={[
-          { label: t("À confirmer", "To confirm"), value: 3, icon: Inbox, tone: "amber", hint: t("dont 1 ce soir", "1 tonight") },
-          { label: t("Aujourd'hui", "Today"), value: 12, icon: CalendarDays, delta: 0.12 },
-          { label: t("Couverts", "Covers"), value: 46, icon: Users, delta: -0.05 },
-          { label: t("Commissions du mois", "Commissions this month"), value: "4 280 MAD", icon: Coins, tone: "emerald" },
+          { label: t("À confirmer", "To confirm"), value: 3, icon: Inbox, tone: "amber", hint: t("dont 1 ce soir", "1 tonight"), trend: [1, 3, 2, 4, 3, 5, 3] },
+          { label: t("Aujourd'hui", "Today"), value: 12, icon: CalendarDays, delta: 0.12, hint: "22 pers.", trend: [4, 6, 5, 8, 7, 10, 12] },
+          { label: t("Commissions du mois", "Commissions this month"), value: "4 280 MAD", icon: Coins, highlight: true, delta: -0.05, hint: "vs 4 500 MAD", trend: [9, 8, 9, 7, 6, 7, 5] },
+          { label: t("Couverts", "Covers"), value: 46, icon: Users, delta: 0.04, hint: "30 derniers jours", trend: [30, 34, 33, 38, 41, 40, 46] },
         ]}
       />
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
+        <TrendCard
+          title="Chiffre apporté"
+          description="186 400 MAD d'additions sur les 6 derniers mois"
+          months={KIT_MONTHS}
+          series={{ a: "Additions", b: "Commissions" }}
+          format={(n) => `${Math.round(n).toLocaleString("fr-FR")} MAD`}
+        />
+        <DonutCard
+          title="D'où viennent vos clients"
+          description="Toutes les réservations"
+          total={130}
+          totalLabel="réservations"
+          segments={[
+            { label: "Hôtels (QR)", value: 74, display: "74" },
+            { label: "Portail", value: 38, display: "38" },
+            { label: "Sur place", value: 18, display: "18" },
+          ]}
+        />
+      </div>
       <Card title={t("Boutons et badges", "Buttons and badges")}>
         <div className="flex flex-wrap items-center gap-2">
           <Button variant="primary">{t("Principal", "Primary")}</Button>
