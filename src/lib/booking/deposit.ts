@@ -27,6 +27,16 @@ export const depositTotal = (d: OfferDeposit, party: number) =>
 export const vehiclesFor = (seats: number | undefined, party: number) =>
   seats && seats > 0 ? Math.ceil(Math.min(Math.max(party, 1), 50) / seats) : 1;
 
+/* Panier de véhicules : quantité par prestation (identifiant → nombre). */
+export type VehicleCart = Record<string, number>;
+
+/** Lignes du panier, dans l'ordre de l'offre, quantités positives seulement. */
+export function cartLines<T extends { id: string }>(services: T[], cart: VehicleCart) {
+  return services
+    .map((service) => ({ service, qty: Math.max(0, Math.floor(cart[service.id] ?? 0)) }))
+    .filter((line) => line.qty > 0);
+}
+
 /** « 400 MAD », « 40 € » — dans la langue de la page. */
 export function formatDeposit(amount: number, currency: string, locale: string) {
   const code = currency.toUpperCase();

@@ -5,6 +5,8 @@ import {
   getStripe,
   isDepositConfigured,
   quoteDeposit,
+  describeLines,
+  quoteDepositLines,
   readDepositRequest,
   toMetadata,
   toMinor,
@@ -32,13 +34,22 @@ export async function POST(request: NextRequest) {
 
   let quote;
   try {
-    quote = await quoteDeposit(req.code, req.slug, req.party, req.service);
+    quote = req.lines
+      ? await quoteDepositLines(req.code, req.slug, req.lines)
+      : await quoteDeposit(req.code, req.slug, req.party, req.service);
   } catch (error) {
     console.error("[acompte] devis impossible", error);
     return fail("Paiement indisponible", 503);
   }
   /* L'adresse ne demande pas (ou plus) d'acompte, ou le QR est inactif. */
   if (!quote) return fail("Adresse indisponible", 409);
+
+  /* Panier : la prestation enregistrée est le résumé calculé par la base. */
+  if (quote.mode === "lines" && quote.lines) {
+    const described = describeLines(quote.lines, req.notes);
+    req.service = described.service;
+    req.notes = described.notes;
+  }
 
   const locale = await getLocale();
   const origin = request.nextUrl.origin;
@@ -47,13 +58,13 @@ export async function POST(request: NextRequest) {
   const guests = locale === "en" ? `${req.party} guest${req.party > 1 ? "s" : ""}` : `${req.party} pers.`;
   /* Prestation à prix partenaire : nombre de véhicules et reste payé sur place. */
   const vehicles =
-    quote.mode === "per_vehicle" && quote.units
+    (quote.mode === "per_vehicle" || quote.mode === "lines") && quote.units
       ? locale === "en"
         ? `${quote.units} vehicle${quote.units > 1 ? "s" : ""}`
         : `${quote.units} véhicule${quote.units > 1 ? "s" : ""}`
       : null;
   const onSite =
-    quote.mode === "per_vehicle" && quote.onSite
+    (quote.mode === "per_vehicle" || quote.mode === "lines") && quote.onSite
       ? locale === "en"
         ? `${formatDeposit(quote.onSite, quote.currency, "en-GB")} paid on site`
         : `${formatDeposit(quote.onSite, quote.currency, "fr-FR")} à régler sur place`

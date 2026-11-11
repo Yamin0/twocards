@@ -134,14 +134,14 @@ async function attachDeposits(supabase: Awaited<ReturnType<typeof createClient>>
      endroit) ;
    - traductions anglaises du nom, de la description, de l'étiquette.
    Avant la migration, la RPC n'existe pas : le menu reste tel quel. */
-type Translation = { name?: string; description?: string; tag?: string; duration?: string };
+type Translation = { name?: string; description?: string; tag?: string; duration?: string; model?: string };
 
 const translationFor = (value: unknown, locale: Locale): Translation => {
   if (locale === "fr" || !value || typeof value !== "object") return {};
   const entry = (value as Record<string, unknown>)[locale];
   if (!entry || typeof entry !== "object") return {};
   const out: Translation = {};
-  for (const key of ["name", "description", "tag", "duration"] as const) {
+  for (const key of ["name", "description", "tag", "duration", "model"] as const) {
     const text = (entry as Record<string, unknown>)[key];
     if (typeof text === "string" && text.trim()) out[key] = text.trim();
   }
@@ -150,6 +150,7 @@ const translationFor = (value: unknown, locale: Locale): Translation => {
 
 type ExtrasService = {
   id?: string;
+  model?: string | null;
   translations?: unknown;
   seats?: number | null;
   currency?: string | null;
@@ -193,6 +194,8 @@ async function attachExtras(
         if (own.name) service.name = own.name;
         if (own.description) service.description = own.description;
         if (own.duration) service.duration = own.duration;
+        const model = own.model || (typeof extra.model === "string" ? extra.model.trim() : "");
+        if (model) service.model = model;
         const seats = Number(extra.seats);
         if (seats > 0) service.seats = seats;
         const price = Number(extra.client_price);

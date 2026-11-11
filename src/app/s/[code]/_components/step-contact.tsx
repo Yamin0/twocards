@@ -45,7 +45,7 @@ export function StepContact({
       <div className="flex-1 space-y-4 px-5 pb-6 pt-5 sm:px-7">
         <div className="flex items-center justify-between gap-2 rounded-xl bg-[#f7f6f3] py-1 pl-4 pr-1 text-sm">
           <p className="py-2 text-neutral-700">
-            {form.service ? `${form.service.name} · ` : ""}
+            {form.selectionLabel ? `${form.selectionLabel} · ` : ""}
             <span className="num font-bold text-neutral-900">{n}</span>{" "}
             {t(`personne${n > 1 ? "s" : ""}`, n === 1 ? "guest" : "guests")} · {longDate(fromIsoDay(form.date), intl)}
             {form.chosenTime ? ` · ${form.chosenTime}` : ""}

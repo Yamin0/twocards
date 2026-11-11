@@ -388,6 +388,7 @@ export type Database = {
         Returns: Json;
       };
       qr_menu_extras: { Args: { p_slugs: string[] }; Returns: Json };
+      qr_deposit_quote_lines: { Args: { p_code: string; p_venue_slug: string; p_lines: Json }; Returns: Json };
       qr_mark_deposit_refunded: { Args: { p_payment_intent: string }; Returns: undefined };
       qr_record_paid_reservation: {
         Args: {

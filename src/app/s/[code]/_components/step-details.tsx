@@ -10,6 +10,7 @@ import { useIntlLocale, useT } from "@/lib/i18n/client";
 import { cn } from "@/lib/utils";
 import { OTHER_TIME, type ReservationForm } from "../_hooks/use-reservation-form";
 import { Gallery } from "./gallery";
+import { VehiclePicker } from "./vehicle-picker";
 import { FIELD, SheetAction } from "./sheet-parts";
 
 const CHOICE = "border-black/[0.12] bg-white text-neutral-900 hover:bg-neutral-50";
@@ -40,12 +41,14 @@ function Section({
 
 /* Prestation à prix partenaire : l'acompte (la part twocards) se paie en
    ligne, par véhicule ; le reste se règle sur place au partenaire. */
-function VehicleDepositNote({ amount, unit, onSite, vehicles }: { amount: string; unit: string; onSite: string; vehicles: number }) {
+function VehicleDepositNote({ amount, unit, onSite, vehicles }: { amount: string; unit?: string; onSite: string; vehicles: number }) {
   const t = useT();
   const split =
-    vehicles > 1
-      ? t(` (${vehicles} véhicules × ${unit})`, ` (${vehicles} vehicles × ${unit})`)
-      : "";
+    vehicles <= 1
+      ? ""
+      : unit
+        ? t(` (${vehicles} véhicules × ${unit})`, ` (${vehicles} vehicles × ${unit})`)
+        : t(` (${vehicles} véhicules)`, ` (${vehicles} vehicles)`);
   return (
     <p className="num mt-2.5 text-center text-xs leading-relaxed text-neutral-600">
       {t(
@@ -92,7 +95,7 @@ export function StepDetails({ form, offer, category }: { form: ReservationForm; 
         </section>
 
         {/* Prestation : quad ou buggy, une heure ou une demi-journée. */}
-        {offer.services.length > 0 && (
+        {offer.services.length > 0 && !form.cartMode && (
           <Section icon={Sparkles} title={t("Prestation", "Service")}>
             <div className="space-y-2">
               {offer.services.map((s) => {
@@ -149,6 +152,9 @@ export function StepDetails({ form, offer, category }: { form: ReservationForm; 
             </button>
           </div>
         </Section>
+
+        {/* Véhicules : après le nombre de personnes, pour comparer les places. */}
+        {form.cartMode && <VehiclePicker form={form} offer={offer} />}
 
         <Section icon={Calendar} title={t("Date", "Date")}>
           <div className="no-scrollbar -mx-5 flex gap-2 overflow-x-auto px-5 py-0.5 sm:-mx-7 sm:px-7">
@@ -236,6 +242,11 @@ export function StepDetails({ form, offer, category }: { form: ReservationForm; 
       </div>
 
       <SheetAction>
+        {form.errorMsg && form.step === "details" && (
+          <p role="alert" className="mb-2.5 text-center text-sm font-medium text-red-700">
+            {form.errorMsg}
+          </p>
+        )}
         <button
           type="submit"
           className="flex h-13 min-h-[3.25rem] w-full items-center justify-center gap-2 rounded-xl bg-[var(--accent)] text-base font-bold text-[var(--on-accent)] transition-opacity hover:opacity-90"
@@ -243,10 +254,10 @@ export function StepDetails({ form, offer, category }: { form: ReservationForm; 
           {t("Continuer", "Continue")}
           <ChevronRight size={17} strokeWidth={2.5} aria-hidden />
         </button>
-        {form.deposit?.vehicles && form.deposit.unit ? (
+        {form.deposit?.vehicles ? (
           <VehicleDepositNote
             amount={formatDeposit(form.deposit.amount, form.deposit.currency, intl)}
-            unit={formatDeposit(form.deposit.unit, form.deposit.currency, intl)}
+            unit={form.deposit.unit ? formatDeposit(form.deposit.unit, form.deposit.currency, intl) : undefined}
             onSite={formatDeposit(form.deposit.onSite ?? 0, form.deposit.currency, intl)}
             vehicles={form.deposit.vehicles}
           />
