@@ -1,9 +1,8 @@
 "use client";
 
-import { createContext, useCallback, useContext, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { createContext, useCallback, useContext } from "react";
 import { useLocale } from "@/lib/i18n/client";
-import { CURRENCY_COOKIE, DEFAULT_CURRENCY, formatMoney, type Currency } from "./index";
+import { DEFAULT_CURRENCY, formatMoney, type Currency } from "./index";
 import { AMOUNTS, type Amount, type AmountKey, type Money } from "./amounts";
 
 /* La devise descend du layout racine (lue dans le cookie côté serveur,
@@ -35,18 +34,4 @@ export function useMoney(): Money {
     },
     [currency, locale],
   );
-}
-
-/** Change de devise : cookie d'un an, puis nouveau rendu serveur de la page. */
-export function useSetCurrency() {
-  const router = useRouter();
-  const [pending, startTransition] = useTransition();
-  const setCurrency = useCallback(
-    (next: Currency) => {
-      document.cookie = `${CURRENCY_COOKIE}=${next}; path=/; max-age=31536000; samesite=lax`;
-      startTransition(() => router.refresh());
-    },
-    [router],
-  );
-  return { setCurrency, pending };
 }

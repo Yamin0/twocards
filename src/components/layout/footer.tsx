@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useT } from "@/lib/i18n/client";
 import type { Translate } from "@/lib/i18n";
 import { LanguageSwitcher } from "@/components/shared/language-switcher";
-import { CurrencySwitcher } from "@/components/shared/currency-switcher";
 
 /* Composant client : le pied de page est aussi rendu depuis des pages
    clientes (influenceurs, pages audience courtes). */
@@ -80,8 +79,7 @@ export function Footer() {
             &copy; {new Date().getFullYear()} twocards.{" "}
             {t("Tous droits réservés.", "All rights reserved.")}
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-xs font-normal text-[var(--landing-mute)]">
-            <CurrencySwitcher />
+          <div className="flex items-center gap-6 text-xs font-normal text-[var(--landing-mute)]">
             <LanguageSwitcher />
             <Link
               href="/legal/mentions-legales"

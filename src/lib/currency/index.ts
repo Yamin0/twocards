@@ -6,7 +6,7 @@
 
    Ordre de décision, dans le proxy (src/proxy.ts) :
    1. `?currency=eur|mad|usd` dans l'URL : choix manuel, mémorisé un an ;
-   2. le cookie `tc-currency` (choix fait avec le sélecteur) ;
+   2. le cookie `tc-currency` (posé par ce même lien) ;
    3. le pays du visiteur (en-tête Vercel `x-vercel-ip-country`) ;
    4. sans pays connu (en local) : le dirham, comme avant.
 
@@ -17,7 +17,7 @@ export const CURRENCIES = ["MAD", "EUR", "USD"] as const;
 export type Currency = (typeof CURRENCIES)[number];
 export const DEFAULT_CURRENCY: Currency = "MAD";
 
-/** Choix manuel de la devise (sélecteur ou `?currency=`), un an. */
+/** Choix manuel de la devise (`?currency=`), un an. */
 export const CURRENCY_COOKIE = "tc-currency";
 /** Pays simulé (`?country=XX`), le temps de la session du navigateur. */
 export const COUNTRY_COOKIE = "tc-country";
@@ -64,13 +64,6 @@ export function currencyForCountry(country: string | null): Currency {
   if (EUROPE.has(country)) return "EUR";
   return "USD";
 }
-
-/** Libellés du sélecteur. */
-export const CURRENCY_LABELS: Record<Currency, { fr: string; en: string }> = {
-  MAD: { fr: "Maroc · MAD", en: "Morocco · MAD" },
-  EUR: { fr: "Europe · EUR €", en: "Europe · EUR €" },
-  USD: { fr: "International · USD $", en: "International · USD $" },
-};
 
 /* Formatage maison plutôt qu'Intl.NumberFormat : le résultat est
    identique au rendu serveur et dans le navigateur (pas d'écart

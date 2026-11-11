@@ -46,7 +46,7 @@ export async function proxy(request: NextRequest) {
   const localeChanged = locale !== currentLocale;
   if (localeChanged) request.cookies.set(LOCALE_COOKIE, locale);
 
-  /* Devise : `?currency=eur|mad|usd` ou le sélecteur (cookie d'un an),
+  /* Devise : `?currency=eur|mad|usd` (lien à partager, cookie d'un an),
      sinon celle du pays. Seul un choix manuel est mémorisé : un visiteur
      qui voyage voit la devise de là où il est. La devise retenue est
      toujours posée sur la requête pour le rendu serveur. */
