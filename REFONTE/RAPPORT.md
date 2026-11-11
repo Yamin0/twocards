@@ -1,6 +1,6 @@
 # Rapport de refonte twocards
 
-Branche `refonte/structure-design`, 19 commits depuis `master` (57150b8). **Rien n'est poussé ni déployé.** Aucune migration lancée.
+Branche `refonte/structure-design`, 18 commits depuis `master` (57150b8). **Rien n'est poussé ni déployé.** Aucune migration lancée.
 
 ## À lire en premier
 
