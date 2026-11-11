@@ -41,6 +41,7 @@ export function ReservationDrawer({
   const locale = useLocale();
   if (!r) return null;
   const rows: { label: string; value: ReactNode }[] = [
+    ...(r.venue_name ? [{ label: t("Établissement", "Venue"), value: r.venue_name }] : []),
     {
       label: t("Date", "Date"),
       value: `${relativeDay(r.reservation_date, undefined, locale)}${
@@ -62,7 +63,6 @@ export function ReservationDrawer({
     <Drawer
       open
       onClose={onClose}
-      eyebrow={r.venue_name}
       title={r.guest_name}
       footer={
         <>

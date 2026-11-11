@@ -136,7 +136,6 @@ export function AuthSubmit({ loading, children }: { loading?: boolean; children:
 
 export function AuthShell({
   image,
-  eyebrow,
   caption,
   headerLink,
   maxWidth = "max-w-[460px]",
@@ -145,7 +144,6 @@ export function AuthShell({
   /* Photo du panneau (grand écran). Une seule image est montée à la fois :
      quand elle change, la nouvelle arrive en fondu. */
   image: string;
-  eyebrow: string;
   caption: string;
   /* Lien de l'en-tête (« Pas encore de compte ? … »). */
   headerLink?: ReactNode;
@@ -176,8 +174,7 @@ export function AuthShell({
             <Wordmark light />
           </div>
           <div className="absolute inset-x-10 bottom-12 max-w-md text-white">
-            <p className="text-[14px] text-white/75">{eyebrow}</p>
-            <p className="mt-3 text-[28px] font-semibold leading-[1.15] tracking-[-0.02em]">
+            <p className="text-[28px] font-semibold leading-[1.15] tracking-[-0.02em]">
               {caption}
             </p>
           </div>

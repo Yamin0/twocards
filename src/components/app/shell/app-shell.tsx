@@ -121,7 +121,7 @@ function RailGroups({ groups, badges, open }: { groups: NavGroup[]; badges: Badg
             <div className="relative mb-1 flex h-6 items-center px-[19px]">
               <span
                 className={cn(
-                  "tc-eyebrow whitespace-nowrap text-white/50 transition-opacity duration-200",
+                  "whitespace-nowrap text-[12px] font-medium text-white/50 transition-opacity duration-200",
                   open ? "opacity-100" : "opacity-0"
                 )}
               >
@@ -170,7 +170,7 @@ function SheetGroups({
     <div className="space-y-4">
       {groups.map((group, gi) => (
         <div key={group.title ?? `g${gi}`}>
-          {group.title && <p className="tc-eyebrow mb-1.5 px-3 text-ink-3">{group.title}</p>}
+          {group.title && <p className="mb-1.5 px-3 text-[12.5px] font-medium text-ink-3">{group.title}</p>}
           <ul className="grid grid-cols-2 gap-1.5">
             {group.items.map((item) => {
               const active = isActive(item, pathname, search);
@@ -434,7 +434,7 @@ export function AppShell({
                 </span>
                 <span className={cn("min-w-0", fade)}>
                   <span className="block truncate text-[13.5px] font-bold text-white">{spaceName}</span>
-                  <span className="tc-eyebrow block truncate text-[9.5px] text-white/50">{nav.space}</span>
+                  <span className="block truncate text-[11.5px] text-white/55">{nav.space}</span>
                 </span>
               </div>
             </div>
@@ -469,7 +469,7 @@ export function AppShell({
                 </Suspense>
               )}
               <div className={cn("flex h-9 items-center justify-between pl-[19px] pr-1", fade)}>
-                <span className="tc-eyebrow text-white/50">{t("Langue", "Language")}</span>
+                <span className="text-[12.5px] text-white/55">{t("Langue", "Language")}</span>
                 <LanguageSwitcher tone="dark" />
               </div>
               <div className="flex items-center gap-2">

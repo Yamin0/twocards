@@ -172,8 +172,7 @@ export function RatingExperience({ reservationId }: { reservationId: string }) {
               void submit();
             }}
           >
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-neutral-600">{t("Votre avis compte", "Your review matters")}</p>
-            <h1 id={titleId} className="font-display mt-3 text-[1.6rem] font-black leading-tight tracking-tight">
+            <h1 id={titleId} className="font-display text-[1.6rem] font-black leading-tight tracking-tight">
               {t(
                 <>Comment était votre sortie chez {context.venue_name}&nbsp;?</>,
                 <>How was your outing at {context.venue_name}?</>

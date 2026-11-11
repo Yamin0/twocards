@@ -52,7 +52,6 @@ export function SignupFlow({ initialKind }: { initialKind: Kind | null }) {
     <PublicMotion>
       <AuthShell
         image={shown?.image ?? DEFAULT_IMAGE}
-        eyebrow={shown ? shown.label : t("Rejoindre le réseau", "Join the network")}
         caption={
           shown
             ? shown.caption

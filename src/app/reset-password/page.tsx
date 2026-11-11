@@ -73,7 +73,6 @@ export default function ResetPasswordPage() {
   return (
     <AuthShell
       image={PHOTO}
-      eyebrow={t("Votre espace", "Your workspace")}
       caption={t(
         "Un nouveau mot de passe, et vous retrouvez votre espace.",
         "A new password, and you're back in your workspace.",

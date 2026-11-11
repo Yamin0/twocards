@@ -96,7 +96,6 @@ export default function ConciergeTodayPage() {
   return (
     <>
       <PageHeader
-        eyebrow={new Date().toLocaleDateString(intl, { weekday: "long", day: "numeric", month: "long" })}
         title={
           <>
             {greeting(t)}
@@ -104,7 +103,12 @@ export default function ConciergeTodayPage() {
           </>
         }
         description={
-          !hasLink
+          <>
+            <span className="inline-block first-letter:uppercase">
+              {new Date().toLocaleDateString(intl, { weekday: "long", day: "numeric", month: "long" })}
+            </span>
+            {" · "}
+            {!hasLink
             ? t(
                 "Créez votre lien pour commencer à recevoir des réservations.",
                 "Create your link to start receiving reservations."
@@ -119,7 +123,8 @@ export default function ConciergeTodayPage() {
                     `${todays.length} ${plural(todays.length, "sortie")} aujourd'hui. Aucune demande en attente.`,
                     `${todays.length} ${plural(todays.length, "outing", undefined, "en")} today. No pending requests.`
                   )
-                : t("Aucune demande en attente, aucune sortie aujourd'hui.", "No pending requests, no outings today.")
+                : t("Aucune demande en attente, aucune sortie aujourd'hui.", "No pending requests, no outings today.")}
+          </>
         }
         actions={
           <>
