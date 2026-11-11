@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import {
   Check,
   ChevronDown,
+  Eye,
   Loader2,
   LogIn,
   MessageSquare,
@@ -78,15 +79,13 @@ export function AccountRow({
   const [thread, setThread] = useState<ThreadMessage[] | null>(null);
   const [entering, setEntering] = useState(false);
 
-  const canImpersonate = selfId !== null && account.id !== selfId;
+  /* Pas soi-même, ni un autre administrateur : la visite est faite pour
+     voir l'espace d'un établissement, d'un hôtel ou d'un concierge. */
+  const canImpersonate = selfId !== null && account.id !== selfId && account.role !== "admin";
 
   const impersonate = async () => {
     setEntering(true);
-    const message = await startImpersonation({
-      id: account.id,
-      email: account.email,
-      role: account.role,
-    });
+    const message = await startImpersonation({ id: account.id });
     /* Succès : la page est déjà en train de basculer, on ne réactive pas
        le bouton. Échec : on affiche l'erreur et on rend la main. */
     if (message) {
@@ -170,10 +169,11 @@ export function AccountRow({
 
   return (
     <div className="rounded-2xl border border-line bg-fill">
+      <div className="flex items-center">
       <button
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        className="flex w-full items-center gap-3 p-4 text-left"
+        className="flex min-w-0 flex-1 items-center gap-3 p-4 text-left"
       >
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-fill-2 text-xs font-bold text-ink">
           {initialsOfAccount(account)}
@@ -202,6 +202,18 @@ export function AccountRow({
           className={`shrink-0 text-ink-3 transition-transform ${open ? "rotate-180" : ""}`}
         />
       </button>
+      {canImpersonate && (
+        <button
+          onClick={() => void impersonate()}
+          disabled={entering}
+          title={t("Ouvrir son dashboard, en lecture seule", "Open their dashboard, read-only")}
+          className="mr-4 flex shrink-0 items-center gap-1.5 rounded-lg border border-line bg-panel px-3 py-2 text-xs font-semibold text-ink-2 transition-colors hover:bg-fill-2 hover:text-ink disabled:opacity-50"
+        >
+          {entering ? <Loader2 size={13} className="animate-spin" /> : <Eye size={13} strokeWidth={2} />}
+          <span className="hidden sm:inline">{t("Voir son espace", "View workspace")}</span>
+        </button>
+      )}
+      </div>
 
       {open && (
         <div className="space-y-4 border-t border-line p-4">
@@ -276,7 +288,7 @@ export function AccountRow({
                 ) : (
                   <LogIn size={13} strokeWidth={2} />
                 )}
-                {t("Se connecter en tant que ce compte", "Log in as this account")}
+                {t("Voir son espace (lecture seule)", "View workspace (read-only)")}
               </button>
             )}
           </div>

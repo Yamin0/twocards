@@ -61,13 +61,27 @@ export async function updateSession(request: NextRequest) {
       | undefined;
     const home = roleHome[role ?? ""] ?? "/dashboard";
 
-    /* L'administrateur circule dans tous les espaces : c'est le sens même
-       du rôle. Seule la page de connexion le renvoie chez lui. */
+    /* L'administrateur n'a ni établissement, ni hôtel, ni clientèle : ouvrir
+       /dashboard, /hotel ou /concierge avec son propre compte montrait un
+       espace vide. Il est renvoyé vers la liste des comptes de ce type, d'où
+       « Voir son espace » ouvre le vrai dashboard d'un compte (lecture
+       seule). */
     const isAdmin = user.app_metadata?.is_admin === true;
     if (isAdmin) {
+      const url = request.nextUrl.clone();
       if (pathname === "/login" || pathname === "/signup") {
-        const url = request.nextUrl.clone();
         url.pathname = "/admin";
+        return NextResponse.redirect(url);
+      }
+      const spaceType: Record<string, string> = {
+        "/dashboard": "etablissement",
+        "/hotel": "hotel",
+        "/concierge": "concierge",
+      };
+      const section = Object.keys(spaceType).find(inSection);
+      if (section) {
+        url.pathname = "/admin";
+        url.search = `?vue=comptes&type=${spaceType[section]}`;
         return NextResponse.redirect(url);
       }
       return supabaseResponse;

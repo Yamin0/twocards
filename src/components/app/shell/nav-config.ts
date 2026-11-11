@@ -225,10 +225,28 @@ export function getShellNav(
         { items: [overview, accounts, catalog, commissions] },
         {
           title: t("Voir un espace", "Open a workspace"),
+          /* Liste des comptes du type, d'où « Voir son espace » ouvre le
+             dashboard réel d'un compte (lecture seule). Ouvrir /dashboard
+             avec le compte admin ne montrait qu'un espace vide. */
           items: [
-            { icon: Building2, label: t("Établissement", "Venue"), href: "/dashboard" },
-            { icon: Hotel, label: t("Hôtel", "Hotel"), href: "/hotel" },
-            { icon: UserCheck, label: t("Concierge", "Concierge"), href: "/concierge" },
+            {
+              icon: Building2,
+              label: t("Établissement", "Venue"),
+              href: "/admin?vue=comptes&type=etablissement",
+              query: { key: "type", value: "etablissement" },
+            },
+            {
+              icon: Hotel,
+              label: t("Hôtel", "Hotel"),
+              href: "/admin?vue=comptes&type=hotel",
+              query: { key: "type", value: "hotel" },
+            },
+            {
+              icon: UserCheck,
+              label: t("Concierge", "Concierge"),
+              href: "/admin?vue=comptes&type=concierge",
+              query: { key: "type", value: "concierge" },
+            },
           ],
         },
       ],
