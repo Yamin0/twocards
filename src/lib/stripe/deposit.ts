@@ -23,13 +23,15 @@ export type { DepositCurrency };
 export type DepositQuote = {
   /* per_vehicle : prestation à prix partenaire, acompte = marge twocards
      par véhicule (migration 20261113110000). */
-  mode: "per_person" | "fixed" | "per_vehicle";
+  mode: "per_person" | "fixed" | "per_vehicle" | "lines";
   /* Montant par personne, pour la réservation, ou par véhicule. */
   unit: number;
   /* Véhicules réservés (per_vehicle seulement). */
   units?: number;
   /* Reste à régler sur place au partenaire (per_vehicle seulement). */
   onSite?: number;
+  /* Panier (mode lines) : une ligne par prestation, nom tel qu'en base. */
+  lines?: { name: string; qty: number }[];
   /* Montant total à payer pour ce nombre de personnes. */
   amount: number;
   currency: DepositCurrency;
@@ -48,6 +50,8 @@ export type DepositRequest = {
   party: number;
   notes: string | null;
   service: string | null;
+  /* Panier de véhicules : identifiant de prestation et quantité. */
+  lines?: { id: string; qty: number }[];
 };
 
 let stripeClient: Stripe | null = null;
@@ -85,6 +89,16 @@ export function parseQuote(value: unknown): DepositQuote | null {
   const mode = String(q.mode ?? "");
   if (!(amount > 0) || !(unit > 0)) return null;
   if (currency !== "mad" && currency !== "eur" && currency !== "usd") return null;
+  if (mode === "lines") {
+    const raw = Array.isArray(q.lines) ? (q.lines as Record<string, unknown>[]) : [];
+    const lines = raw
+      .map((l) => ({ name: String(l.name ?? ""), qty: Math.round(Number(l.qty) || 0) }))
+      .filter((l) => l.name && l.qty > 0);
+    if (lines.length === 0) return null;
+    const units = Math.max(1, Math.round(Number(q.units) || 1));
+    const onSite = Number(q.on_site);
+    return { amount, unit: amount, currency, mode, units, onSite: onSite > 0 ? onSite : undefined, lines };
+  }
   if (mode === "per_vehicle") {
     const units = Math.max(1, Math.round(Number(q.units) || 1));
     const onSite = Number(q.on_site);
@@ -97,6 +111,19 @@ export function parseQuote(value: unknown): DepositQuote | null {
 /* ─── Lecture de la demande ──────────────────────────────────────────────── */
 
 const str = (v: unknown, max: number) => (typeof v === "string" ? v.trim().slice(0, max) : "");
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Panier reçu du navigateur : 10 lignes au plus, quantités entières de 1 à 20.
+    La base revérifie tout (prestations de l'adresse, total de 20 véhicules). */
+function readLines(value: unknown): DepositRequest["lines"] {
+  if (!Array.isArray(value) || value.length === 0 || value.length > 10) return undefined;
+  const lines = value.map((l) => {
+    const line = (l ?? {}) as Record<string, unknown>;
+    return { id: typeof line.id === "string" ? line.id : "", qty: Number(line.qty) };
+  });
+  return lines.every((l) => UUID.test(l.id) && Number.isInteger(l.qty) && l.qty >= 1 && l.qty <= 20) ? lines : undefined;
+}
 
 /** Valide le corps JSON reçu du navigateur ; null si inutilisable. Les mêmes
     contrôles sont refaits par la base au moment d'enregistrer. */
@@ -115,6 +142,7 @@ export function readDepositRequest(body: unknown): DepositRequest | null {
     party: Math.min(Math.max(Math.round(Number(b.party) || 2), 1), 50),
     notes: str(b.notes, 500) || null,
     service: str(b.service, 80) || null,
+    lines: readLines(b.lines),
   };
   if (!req.code || !req.slug || !req.venue || !req.category || !req.name) return null;
   if (req.phone.replace(/\D/g, "").length < 6) return null;
@@ -181,6 +209,31 @@ export async function quoteDeposit(
   }
   if (error) throw new Error(error.message);
   return parseQuote(data);
+}
+
+/** Devis d'un panier de véhicules (`qr_deposit_quote_lines`). */
+export async function quoteDepositLines(
+  code: string,
+  slug: string,
+  lines: { id: string; qty: number }[]
+): Promise<DepositQuote | null> {
+  const { data, error } = await serviceClient().rpc("qr_deposit_quote_lines", {
+    p_code: code,
+    p_venue_slug: slug,
+    p_lines: lines,
+  });
+  if (error) throw new Error(error.message);
+  return parseQuote(data);
+}
+
+/** Résumé du panier enregistré avec la réservation (80 caractères au plus,
+    noms tels qu'en base) ; le détail complet passe en tête des précisions
+    s'il ne tient pas. */
+export function describeLines(lines: { name: string; qty: number }[], notes: string | null) {
+  const full = lines.map((l) => `${l.qty}× ${l.name}`).join(", ");
+  const service = full.length <= 80 ? full : `${full.slice(0, 79)}…`;
+  const extra = full.length <= 80 ? notes : [`Véhicules : ${full}`, notes].filter(Boolean).join(" — ");
+  return { service, notes: extra ? extra.slice(0, 500) : null };
 }
 
 /* ─── Enregistrement après paiement ──────────────────────────────────────── */

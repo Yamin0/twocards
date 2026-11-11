@@ -46,7 +46,7 @@ export function StepDone({
       </h2>
       <p className="mx-auto mt-3 max-w-xs text-base leading-relaxed text-neutral-700">
         <span className="font-bold text-neutral-900">{offer.name}</span>
-        {form.service ? ` — ${form.service.name}` : ""}, {longDate(fromIsoDay(form.date), intl)}
+        {form.selectionLabel ? ` — ${form.selectionLabel}` : ""}, {longDate(fromIsoDay(form.date), intl)}
         {t(
           `${form.chosenTime ? ` à ${form.chosenTime}` : ""}, pour ${n} personne${n > 1 ? "s" : ""}.`,
           `${form.chosenTime ? ` at ${form.chosenTime}` : ""}, for ${n} guest${n === 1 ? "" : "s"}.`

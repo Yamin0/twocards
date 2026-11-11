@@ -90,6 +90,9 @@ export type GuestService = {
   clientPrice?: number;
   deposit?: number;
   seats?: number;
+  /* Modèle qui regroupe les durées (« Quad 300 cc ») : le client choisit
+     d'abord le modèle, puis la durée. Absent : liste simple. */
+  model?: string;
   currency?: OfferDeposit["currency"];
 };
 

@@ -4,7 +4,7 @@ import { CATEGORY_LABELS, type GuestCategory, type GuestOffer, type GuestService
 import { nextDays } from "@/lib/booking/dates";
 import { bookingErrorKind, bookingErrorMessage } from "@/lib/booking/errors";
 import { defaultGuestDate, isGuestSlotPast, isGuestTimePast } from "@/lib/booking/slots";
-import { depositTotal, vehiclesFor, type DepositCurrency } from "@/lib/booking/deposit";
+import { cartLines, depositTotal, vehiclesFor, type DepositCurrency, type VehicleCart } from "@/lib/booking/deposit";
 import { useT } from "@/lib/i18n/client";
 
 export type SheetStep = "details" | "contact" | "done";
@@ -37,6 +37,12 @@ export function useReservationForm({
   /* La première prestation est proposée d'office : c'est l'établissement
      qui a choisi l'ordre, et le client peut en changer d'un geste. */
   const [service, setService] = useState<GuestService | null>(offer.services[0] ?? null);
+  /* Offre à véhicules (prestations à prix partenaire) : le client compose un
+     panier — un modèle, une durée, une quantité par ligne — au lieu de
+     choisir une seule prestation. Trois personnes peuvent ainsi prendre trois
+     modèles différents. */
+  const cartMode = offer.services.some((s) => s.deposit && s.clientPrice);
+  const [cart, setCart] = useState<VehicleCart>({});
   /* Demain si plus aucun créneau n'est réservable ce soir, comme le portail. */
   const [date, setDateState] = useState(() => defaultGuestDate(category.key));
   const [time, setTime] = useState<string | null>(null);
@@ -62,6 +68,11 @@ export function useReservationForm({
   /* Montant affiché avant de payer (la base le recalcule). Une prestation à
      prix partenaire porte son propre acompte, par véhicule ; sinon c'est le
      réglage de l'adresse. */
+  const lines = cartMode ? cartLines(offer.services, cart) : [];
+  const vehicleCount = lines.reduce((sum, l) => sum + l.qty, 0);
+  /* Places réunies par le panier (1 par véhicule quand le nombre manque). */
+  const seatsChosen = lines.reduce((sum, l) => sum + l.qty * (l.service.seats ?? 1), 0);
+
   const deposit: {
     amount: number;
     currency: DepositCurrency;
@@ -69,8 +80,16 @@ export function useReservationForm({
     vehicles?: number;
     unit?: number;
     onSite?: number;
-  } | null =
-    service?.deposit && service.clientPrice
+  } | null = cartMode
+    ? vehicleCount > 0
+      ? {
+          amount: lines.reduce((sum, l) => sum + l.qty * (l.service.deposit ?? 0), 0),
+          currency: lines[0].service.currency ?? "mad",
+          vehicles: vehicleCount,
+          onSite: lines.reduce((sum, l) => sum + l.qty * ((l.service.clientPrice ?? 0) - (l.service.deposit ?? 0)), 0),
+        }
+      : null
+    : service?.deposit && service.clientPrice
       ? (() => {
           const vehicles = vehiclesFor(service.seats, partySize);
           return {
@@ -84,6 +103,24 @@ export function useReservationForm({
       : offer.deposit
         ? { amount: depositTotal(offer.deposit, partySize), currency: offer.deposit.currency }
         : null;
+
+  /* Quantité d'une ligne du panier : 20 véhicules au plus en tout. */
+  const setQty = (id: string, qty: number) => {
+    setCart((current) => {
+      const others = Object.entries(current).reduce((sum, [key, n]) => (key === id ? sum : sum + n), 0);
+      const next = Math.max(0, Math.min(Math.floor(qty), 20 - others));
+      const copy = { ...current };
+      if (next > 0) copy[id] = next;
+      else delete copy[id];
+      return copy;
+    });
+    setErrorMsg("");
+  };
+
+  /* Résumé affiché (noms traduits) : « 1 × Buggy X3 · 2 h, 2 × Quad 300 cc · 1 h ». */
+  const selectionLabel = cartMode
+    ? lines.map((l) => `${l.qty} × ${l.service.name}`).join(", ")
+    : service?.name ?? "";
 
   /* Dès que le client corrige un champ, le message d'erreur s'efface. */
   const editing =
@@ -115,6 +152,10 @@ export function useReservationForm({
   /* Passage à l'étape contact. Renvoie false si l'heure saisie est passée :
      la feuille reste alors sur l'étape 1, message affiché sous le champ. */
   const toContact = () => {
+    if (cartMode && vehicleCount === 0) {
+      setErrorMsg(t("Choisissez au moins un véhicule.", "Choose at least one vehicle."));
+      return false;
+    }
     if (time === OTHER_TIME && customTime && isGuestTimePast(date, customTime)) {
       setTimeError(
         t(
@@ -167,7 +208,9 @@ export function useReservationForm({
             time: chosenTime || null,
             party: partySize,
             notes: notes || null,
-            service: service?.baseName ?? null,
+            /* Panier : la base recalcule tout, le résumé enregistré vient d'elle. */
+            service: cartMode ? null : service?.baseName ?? null,
+            lines: cartMode ? lines.map((l) => ({ id: l.service.id, qty: l.qty })) : undefined,
           }),
         });
         const payload = (await res.json().catch(() => ({}))) as { url?: string; message?: string };
@@ -217,6 +260,13 @@ export function useReservationForm({
     days,
     step,
     setStep,
+    cartMode,
+    cart,
+    setQty,
+    lines,
+    vehicleCount,
+    seatsChosen,
+    selectionLabel,
     partySize,
     setPartySize,
     service,
