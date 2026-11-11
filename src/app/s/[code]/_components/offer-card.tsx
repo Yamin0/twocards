@@ -5,15 +5,18 @@ import { RemoteImage } from "@/components/booking/remote-image";
 import type { GuestOffer } from "@/lib/guest-catalog";
 import { useT } from "@/lib/i18n/client";
 
-/* Carte d'une adresse : la photo, le nom, le prix si l'hôtel l'affiche. Toute
+/* Carte d'une adresse : la photo, le nom, le prix si l'hôte l'affiche. Toute
    la carte est le bouton ; l'étiquette et la description attendent la fiche. */
 export function OfferCard({
   offer: o,
   showPrice,
+  pickBadge,
   onPick,
 }: {
   offer: GuestOffer;
   showPrice: boolean;
+  /* Pastille d'une adresse maison, selon l'hôte : « Par l'hôtel », « Coup de cœur ». */
+  pickBadge: string;
   /* Reçoit la carte cliquée : la feuille lui rendra le focus en se fermant. */
   onPick: (card: HTMLElement) => void;
 }) {
@@ -34,7 +37,7 @@ export function OfferCard({
         />
         {o.source === "hotel" && (
           <span className="absolute left-3 top-3 rounded-full bg-[var(--accent)] px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--on-accent)]">
-            {t("Par l'hôtel", "Hotel pick")}
+            {pickBadge}
           </span>
         )}
       </div>

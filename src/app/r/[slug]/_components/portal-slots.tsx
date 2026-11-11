@@ -82,6 +82,12 @@ export function PortalSlots({ booking, portal }: { booking: PortalBooking; porta
       </Group>
 
       <Group icon={Clock} title={t("Heure", "Time")} className="mt-7">
+        {/* Retour depuis les coordonnées : le créneau s'est rempli entre-temps. */}
+        {booking.slotNotice && (
+          <p role="alert" className="mb-3 rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm leading-relaxed text-red-800">
+            {booking.slotNotice}
+          </p>
+        )}
         <div className="grid grid-cols-4 gap-2">
           {openSlots.map((s) => {
             const past = slotDateTime(date, s) < now;

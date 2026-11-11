@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Copy, KeyRound, Send, ShieldCheck } from "lucide-react";
+import { Check, Copy, FlaskConical, KeyRound, Send, ShieldCheck } from "lucide-react";
 import { useT } from "@/lib/i18n/client";
 import type { Translate } from "@/lib/i18n";
 import {
@@ -8,6 +8,7 @@ import {
   Card,
   Field,
   IconButton,
+  InfoNote,
   Segmented,
   inputClass,
   useCopy,
@@ -59,7 +60,6 @@ export function PosSetup({
   testKey,
   onTestKey,
   onSendTest,
-  hasTables,
   busy,
 }: {
   provider: string;
@@ -72,7 +72,6 @@ export function PosSetup({
   testKey: string;
   onTestKey: (v: string) => void;
   onSendTest: () => void;
-  hasTables: boolean;
   busy: "key" | "test" | null;
 }) {
   const t = useT();
@@ -136,6 +135,13 @@ export function PosSetup({
         </section>
 
         <section className="space-y-3 border-t border-line pt-5">
+          <h2 className="text-base font-bold text-ink">{t("Ticket de test", "Test ticket")}</h2>
+          <InfoNote icon={FlaskConical} tone="sky">
+            {t(
+              "Le test vérifie votre clé et la liaison avec twocards. Il n'envoie ni table ni montant : il n'écrit sur aucune réservation et ne crée aucune commission. Il apparaît dans le journal avec le badge « Test ».",
+              "The test checks your key and the link with twocards. It sends no table and no amount: it writes to no reservation and creates no commission. It shows in the log with a “Test” badge."
+            )}
+          </InfoNote>
           <Field
             label={t("Clé API", "API key")}
             htmlFor="pos-test-key"
@@ -155,14 +161,6 @@ export function PosSetup({
               className={`${inputClass} font-mono`}
             />
           </Field>
-          {!hasTables && (
-            <p role="status" className="text-[13px] text-warn">
-              {t(
-                "Créez d'abord une table dans le plan de salle pour tester le rapprochement.",
-                "Create a table in the floor plan first to test matching."
-              )}
-            </p>
-          )}
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="flex items-center gap-1.5 text-[13px] text-ink-3">
               <ShieldCheck size={15} strokeWidth={1.75} aria-hidden />
@@ -172,14 +170,8 @@ export function PosSetup({
               size="sm"
               icon={Send}
               loading={busy === "test"}
-              disabled={!testKey.trim() || !hasTables}
-              title={
-                !hasTables
-                  ? t("Créez d'abord une table dans le plan de salle", "Create a table in the floor plan first")
-                  : testKey.trim()
-                    ? undefined
-                    : t("Collez d'abord votre clé API", "Paste your API key first")
-              }
+              disabled={!testKey.trim()}
+              title={testKey.trim() ? undefined : t("Collez d'abord votre clé API", "Paste your API key first")}
               onClick={onSendTest}
             >
               {t("Envoyer un ticket de test", "Send a test ticket")}

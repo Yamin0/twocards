@@ -3,28 +3,29 @@
 import { MessageCircle, X } from "lucide-react";
 import { PoweredBy } from "@/components/booking/powered-by";
 import { waLink } from "@/lib/booking/contact";
+import type { HostWords } from "@/lib/booking/host";
 import { useT } from "@/lib/i18n/client";
 import { cn } from "@/lib/utils";
 
-/* Lien WhatsApp vers la réception de l'hôtel, avec le début du message. */
-function ReceptionLink({ reception, hotelName, className }: { reception: string; hotelName: string; className?: string }) {
-  const t = useT();
+/* Lien WhatsApp vers la réception de l'hôtel (ou vers le concierge), avec le
+   début du message. Les mots viennent de `hostWords`. */
+function ReceptionLink({ reception, words, className }: { reception: string; words: HostWords; className?: string }) {
   return (
     <a
-      href={waLink(reception, t(`Bonjour ${hotelName}, `, `Hello ${hotelName}, `))}
+      href={waLink(reception, words.greeting)}
       target="_blank"
       rel="noopener noreferrer"
       className={cn("inline-flex h-11 items-center gap-2 rounded-full px-5 text-sm font-bold", className)}
     >
       <MessageCircle size={16} strokeWidth={2} aria-hidden />
-      {t("Écrire à la réception", "Message reception")}
+      {words.contactCta}
     </a>
   );
 }
 
-/* QR désactivé par l'hôtel (ou code inconnu) : la base a répondu, il n'y a
-   pas de menu. Ce n'est pas une panne — pas de bouton « Réessayer » ici. */
-export function InactiveMenu({ hotelName, reception }: { hotelName: string; reception: string | null }) {
+/* QR désactivé par son propriétaire (ou code inconnu) : la base a répondu, il
+   n'y a pas de menu. Ce n'est pas une panne — pas de bouton « Réessayer ». */
+export function InactiveMenu({ words, reception }: { words: HostWords; reception: string | null }) {
   const t = useT();
   return (
     <main className="mx-auto flex w-full max-w-md flex-col items-center px-8 py-16 text-center">
@@ -35,13 +36,10 @@ export function InactiveMenu({ hotelName, reception }: { hotelName: string; rece
         {t("Ce menu n'est plus disponible", "This menu is no longer available")}
       </h2>
       <p className="mt-2 max-w-xs text-sm leading-relaxed text-[var(--on-page-muted)]">
-        {t(
-          "Ce QR code a été désactivé par l'hôtel. Adressez-vous à la réception pour réserver vos sorties.",
-          "This QR code has been deactivated by the hotel. Please ask at reception to book your outings."
-        )}
+        {words.inactiveText}
       </p>
       {reception && (
-        <ReceptionLink reception={reception} hotelName={hotelName} className="mt-6 bg-[var(--accent)] text-[var(--on-accent)]" />
+        <ReceptionLink reception={reception} words={words} className="mt-6 bg-[var(--accent)] text-[var(--on-accent)]" />
       )}
     </main>
   );
@@ -50,11 +48,11 @@ export function InactiveMenu({ hotelName, reception }: { hotelName: string; rece
 /* Pied : contact de la réception, rappel « sans engagement », signature du
    réseau. La marge basse tient compte de la barre d'accueil iOS. */
 export function GuestFooter({
-  hotelName,
+  words,
   reception,
   darkPage,
 }: {
-  hotelName: string;
+  words: HostWords;
   reception: string | null;
   darkPage: boolean;
 }) {
@@ -64,7 +62,7 @@ export function GuestFooter({
       {reception && (
         <ReceptionLink
           reception={reception}
-          hotelName={hotelName}
+          words={words}
           className="mb-4 border border-black/[0.1] bg-white text-neutral-900 transition-colors hover:bg-neutral-50 [&>svg]:text-emerald-700"
         />
       )}

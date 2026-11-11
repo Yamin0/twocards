@@ -23,12 +23,21 @@ export type SettingsForm = {
   googleReviewUrl: string;
 };
 
+/* Un interrupteur par envoi push réel (voir la migration
+   20261112140000_preferences_de_notification.sql) :
+   - pushReservations : nouvelle réservation (venue_notifications « reservation ») ;
+   - pushRatings      : nouvel avis client (« rating ») ;
+   - pushPos          : ticket de caisse non rapproché (« pos ») ;
+   - pushMessages     : nouveau message (push_new_message).
+   Absente en base = activée. Les anciennes clés (emailNotifs, smsAlerts,
+   commissionAlerts, newRpNotifs, weeklyReport) ne correspondaient à aucun
+   envoi : elles ne sont plus affichées, mais restent enregistrées telles
+   quelles dans notif_prefs. */
 export type NotifPrefs = {
-  emailNotifs: boolean;
-  smsAlerts: boolean;
-  commissionAlerts: boolean;
-  newRpNotifs: boolean;
-  weeklyReport: boolean;
+  pushReservations: boolean;
+  pushRatings: boolean;
+  pushPos: boolean;
+  pushMessages: boolean;
 };
 
 const EMPTY_FORM: SettingsForm = {
@@ -46,13 +55,26 @@ const EMPTY_FORM: SettingsForm = {
   googleReviewUrl: "",
 };
 
+/* Même valeur par défaut que la base : tout est envoyé tant que
+   l'établissement n'a rien coupé. */
 const DEFAULT_NOTIFS: NotifPrefs = {
-  emailNotifs: true,
-  smsAlerts: false,
-  commissionAlerts: true,
-  newRpNotifs: true,
-  weeklyReport: true,
+  pushReservations: true,
+  pushRatings: true,
+  pushPos: true,
+  pushMessages: true,
 };
+
+const NOTIF_KEYS = Object.keys(DEFAULT_NOTIFS) as (keyof NotifPrefs)[];
+
+/* Ne retient d'un notif_prefs enregistré que les booléens des clés
+   affichées (comme la base, qui ne coupe que sur la valeur false). */
+function readNotifs(raw: Record<string, unknown>): NotifPrefs {
+  const next = { ...DEFAULT_NOTIFS };
+  for (const key of NOTIF_KEYS) {
+    if (typeof raw[key] === "boolean") next[key] = raw[key];
+  }
+  return next;
+}
 
 /** Résultat d'une écriture : `null` si elle a réussi, sinon le message du serveur. */
 export type SaveResult = string | null;
@@ -60,6 +82,9 @@ export type SaveResult = string | null;
 export function useVenueSettings() {
   const [form, setForm] = useState<SettingsForm>(EMPTY_FORM);
   const [notifs, setNotifs] = useState<NotifPrefs>(DEFAULT_NOTIFS);
+  /* notif_prefs tel qu'enregistré, anciennes clés comprises : réécrit en
+     entier à chaque enregistrement pour n'en effacer aucune. */
+  const [storedPrefs, setStoredPrefs] = useState<Record<string, unknown>>({});
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -95,9 +120,12 @@ export function useVenueSettings() {
           googleReviewUrl: str("google_review_url"),
         });
         const prefs = meta.notif_prefs;
-        if (prefs && typeof prefs === "object") {
-          setNotifs((prev) => ({ ...prev, ...(prefs as Partial<NotifPrefs>) }));
-        }
+        const stored =
+          prefs && typeof prefs === "object" && !Array.isArray(prefs)
+            ? (prefs as Record<string, unknown>)
+            : {};
+        setStoredPrefs(stored);
+        setNotifs(readNotifs(stored));
         setError(false);
         setLoaded(true);
       })
@@ -152,7 +180,14 @@ export function useVenueSettings() {
     [form, write]
   );
 
-  const saveNotifs = useCallback(() => write({ data: { notif_prefs: notifs } }), [notifs, write]);
+  /* auth.updateUser remplace notif_prefs d'un bloc : on repart de l'objet
+     enregistré pour conserver les clés qui ne sont plus affichées. */
+  const saveNotifs = useCallback(async (): Promise<SaveResult> => {
+    const next = { ...storedPrefs, ...notifs };
+    const failure = await write({ data: { notif_prefs: next } });
+    if (!failure) setStoredPrefs(next);
+    return failure;
+  }, [notifs, storedPrefs, write]);
 
   const savePassword = useCallback((password: string) => write({ password }), [write]);
 
