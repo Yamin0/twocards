@@ -2,14 +2,17 @@
 
 import { useState } from "react";
 import { Button, Card, Field, PageHeader, PageSkeleton, inputClass, useNotify } from "@/components/app/ui";
+import { MenuSettingsCard } from "@/components/concierge/menu-settings";
 import { AvatarUploader } from "@/components/shared/avatar-uploader";
 import { LanguageSwitcher } from "@/components/shared/language-switcher";
 import { useAuthUser } from "@/hooks/use-auth-user";
+import { useConciergeSpace } from "@/lib/concierge/space";
 import { useT } from "@/lib/i18n/client";
 import { createClient } from "@/lib/supabase/client";
 
-/* Paramètres du concierge. L'enregistrement écrit réellement dans le
-   compte (métadonnées de l'utilisateur), comme dans les autres espaces. */
+/* Paramètres du concierge. Le profil s'enregistre dans le compte
+   (métadonnées de l'utilisateur), comme dans les autres espaces ; le menu
+   client s'enregistre dans hotel_profiles. */
 
 function ProfileForm({
   initial,
@@ -100,14 +103,19 @@ export default function ConciergeSettingsPage() {
   const t = useT();
   const notify = useNotify();
   const { isLoading, fullName, email, phone, city } = useAuthUser();
+  /* Le formulaire du menu se remplit une fois le profil lu en base. */
+  const { isLoading: spaceLoading } = useConciergeSpace();
 
-  if (isLoading) return <PageSkeleton kpis={0} rows={4} />;
+  if (isLoading || spaceLoading) return <PageSkeleton kpis={0} rows={4} />;
 
   return (
     <>
       <PageHeader
         title={t("Paramètres", "Settings")}
-        description={t("Votre profil et la langue de l'espace.", "Your profile and the workspace language.")}
+        description={t(
+          "Votre profil, votre menu client et la langue de l'espace.",
+          "Your profile, your guest menu and the workspace language."
+        )}
       />
       <div className="grid max-w-3xl gap-6">
         <Card title={t("Photo de profil", "Profile photo")}>
@@ -119,6 +127,7 @@ export default function ConciergeSettingsPage() {
             email={email ?? ""}
           />
         </Card>
+        <MenuSettingsCard />
         <Card title={t("Langue", "Language")} description={t("S'applique à tout l'espace.", "Applies to the whole workspace.")}>
           <LanguageSwitcher tone="light" />
         </Card>

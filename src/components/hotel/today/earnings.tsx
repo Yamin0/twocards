@@ -122,7 +122,14 @@ export function TopQrCard({
 
 /* Le mois en cours, en trois lignes, et la règle de calcul avec le taux lu
    dans les réservations. */
-export function MonthCard({ summary }: { summary: TodaySummary }) {
+export function MonthCard({
+  summary,
+  statementHref = "/hotel/commissions",
+}: {
+  summary: TodaySummary;
+  /** Adresse du relevé (espace hôtel par défaut). */
+  statementHref?: string;
+}) {
   const t = useT();
   const locale = useLocale();
   const rows = [
@@ -143,7 +150,7 @@ export function MonthCard({ summary }: { summary: TodaySummary }) {
     <Card
       title={t("Ce mois-ci", "This month")}
       actions={
-        <LinkButton href="/hotel/commissions" size="sm" variant="ghost">
+        <LinkButton href={statementHref} size="sm" variant="ghost">
           {t("Relevé", "Statement")}
         </LinkButton>
       }

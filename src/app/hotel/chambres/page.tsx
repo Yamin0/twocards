@@ -327,8 +327,8 @@ function ChambresContent() {
             : t("Supprimer ce QR code ?", "Delete this QR code?")
         }
         description={t(
-          "Le QR imprimé ne fonctionnera plus et l'historique de ses réservations sera supprimé. Pour une pause temporaire, préférez la désactivation.",
-          "The printed QR will stop working and its reservation history will be deleted. For a temporary pause, deactivate it instead."
+          "Le QR imprimé ne fonctionnera plus. S'il a déjà des réservations, il est désactivé au lieu d'être supprimé : leur historique et leurs commissions sont conservés.",
+          "The printed QR will stop working. If it already has reservations, it is deactivated instead of deleted: their history and commissions are kept."
         )}
       />
     </>

@@ -213,11 +213,11 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
         }}
         loading={d.busy}
         danger
-        confirmLabel={t("Supprimer définitivement", "Delete permanently")}
+        confirmLabel={t("Supprimer", "Delete")}
         title={t(`Supprimer « ${qr.label} » ?`, `Delete “${qr.label}”?`)}
         description={t(
-          "Le QR imprimé ne fonctionnera plus et ses réservations seront supprimées de votre historique. Pour une pause temporaire, désactivez-le plutôt.",
-          "The printed QR will stop working and its reservations will be removed from your history. For a temporary pause, deactivate it instead."
+          "Le QR imprimé ne fonctionnera plus. S'il a déjà des réservations, il est désactivé au lieu d'être supprimé : leur historique et leurs commissions sont conservés.",
+          "The printed QR will stop working. If it already has reservations, it is deactivated instead of deleted: their history and commissions are kept."
         )}
       />
     </>

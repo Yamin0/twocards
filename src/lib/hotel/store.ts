@@ -235,6 +235,9 @@ const qrStore = createStore<HotelQrCode[]>(async () => {
 
 const newCode = () => crypto.randomUUID().replace(/-/g, "").slice(0, 8);
 
+/** Résultat d'une suppression de QR : supprimés, ou gardés et désactivés. */
+export type RemoveResult = { deleted: number; kept: number };
+
 export function useHotelQrCodes() {
   const snapshot = useStore(qrStore);
 
@@ -300,18 +303,39 @@ export function useHotelQrCodes() {
     []
   );
 
-  const remove = useCallback(async (ids: string[]) => {
-    if (ids.length === 0) return true;
-    const { error } = await createClient()
-      .from("hotel_qr_codes")
-      .delete()
-      .in("id", ids);
-    if (error) return false;
-    const set = new Set(ids);
-    qrStore.set((qrStore.get() ?? []).filter((q) => !set.has(q.id)));
-    /* Les réservations rattachées disparaissent en cascade côté base. */
-    void reservationStore.reload();
-    return true;
+  /* Supprimer un QR efface en cascade ses réservations (clé étrangère
+     ON DELETE CASCADE), donc aussi les commissions qu'elles portent, chez
+     l'établissement et dans l'administration. Un QR qui a déjà servi n'est
+     donc jamais supprimé : il est désactivé (le lien n'ouvre plus le menu,
+     l'historique reste). Seuls les QR sans aucune réservation sont
+     réellement supprimés. Renvoie le décompte, ou false en cas d'échec. */
+  const remove = useCallback(async (ids: string[]): Promise<RemoveResult | false> => {
+    if (ids.length === 0) return { deleted: 0, kept: 0 };
+    const supabase = createClient();
+    const { data: used, error: readError } = await supabase
+      .from("qr_reservations")
+      .select("qr_code_id")
+      .in("qr_code_id", ids);
+    if (readError) return false;
+    const keep = new Set((used ?? []).map((r) => r.qr_code_id).filter((id): id is string => Boolean(id)));
+    const toDelete = ids.filter((id) => !keep.has(id));
+    const toKeep = ids.filter((id) => keep.has(id));
+
+    if (toKeep.length > 0) {
+      const { error } = await supabase.from("hotel_qr_codes").update({ active: false }).in("id", toKeep);
+      if (error) return false;
+    }
+    if (toDelete.length > 0) {
+      const { error } = await supabase.from("hotel_qr_codes").delete().in("id", toDelete);
+      if (error) return false;
+    }
+    const gone = new Set(toDelete);
+    qrStore.set(
+      (qrStore.get() ?? [])
+        .filter((q) => !gone.has(q.id))
+        .map((q) => (keep.has(q.id) ? { ...q, active: false } : q))
+    );
+    return { deleted: toDelete.length, kept: toKeep.length };
   }, []);
 
   return {

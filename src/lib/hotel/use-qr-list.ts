@@ -182,9 +182,14 @@ export function useQrList() {
     if (!ok) return notify(t("Échec de la suppression", "Delete failed"), "error");
     clearSelection();
     notify(
-      toDelete.length > 1
-        ? t(`${toDelete.length} QR supprimés`, `${toDelete.length} QR codes deleted`)
-        : t("QR code supprimé", "QR code deleted")
+      ok.kept === 0
+        ? ok.deleted > 1
+          ? t(`${ok.deleted} QR supprimés`, `${ok.deleted} QR codes deleted`)
+          : t("QR code supprimé", "QR code deleted")
+        : t(
+            `${ok.deleted} supprimé${ok.deleted > 1 ? "s" : ""}, ${ok.kept} désactivé${ok.kept > 1 ? "s" : ""} (ils ont des réservations)`,
+            `${ok.deleted} deleted, ${ok.kept} deactivated (they have reservations)`
+          )
     );
   };
 

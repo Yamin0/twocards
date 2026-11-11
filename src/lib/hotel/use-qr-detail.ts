@@ -115,9 +115,21 @@ export function useQrDetail(id: string) {
     setBusy(true);
     const ok = await remove([qr.id]);
     setBusy(false);
-    if (ok) router.push("/hotel/chambres");
-    else notify(t("Échec de la suppression", "Delete failed"), "error");
-    return ok;
+    if (!ok) {
+      notify(t("Échec de la suppression", "Delete failed"), "error");
+      return false;
+    }
+    if (ok.kept > 0) {
+      notify(
+        t(
+          "Ce QR a des réservations : il est désactivé, pas supprimé, pour garder leur historique.",
+          "This QR code has reservations: it was deactivated, not deleted, to keep their history."
+        )
+      );
+      return true;
+    }
+    router.push("/hotel/chambres");
+    return true;
   };
 
   return {

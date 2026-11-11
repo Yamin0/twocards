@@ -9,7 +9,15 @@ import type { Locale, Translate } from "@/lib/i18n";
    commissions. Les colonnes sont celles d'avant la refonte ; seule la
    fabrication du fichier est commune (src/lib/csv.ts). */
 
-export function exportReservationsCsv(rows: HotelReservation[], t: Translate, locale: Locale) {
+/* `locationLabel` : intitulé de la colonne d'origine. Par défaut, celui de
+   l'hôtel (« Chambre » / « Emplacements ») ; l'espace concierge passe
+   « Lien ». */
+export function exportReservationsCsv(
+  rows: HotelReservation[],
+  t: Translate,
+  locale: Locale,
+  locationLabel?: string
+) {
   downloadCsv(
     `${t("reservations", "reservations")}-${todayIso()}`,
     [
@@ -19,7 +27,7 @@ export function exportReservationsCsv(rows: HotelReservation[], t: Translate, lo
       t("Téléphone", "Phone"),
       t("Sortie", "Outing"),
       t("Catégorie", "Category"),
-      t("Chambre", "Room"),
+      locationLabel ?? t("Chambre", "Room"),
       t("Personnes", "Guests"),
       t("Statut", "Status"),
       t("Montant (MAD)", "Amount (MAD)"),
@@ -45,7 +53,7 @@ export function exportReservationsCsv(rows: HotelReservation[], t: Translate, lo
   );
 }
 
-export function exportGuestsCsv(guests: GuestProfile[], t: Translate) {
+export function exportGuestsCsv(guests: GuestProfile[], t: Translate, locationLabel?: string) {
   downloadCsv(
     `${t("clients", "guests")}-${todayIso()}`,
     [
@@ -59,7 +67,7 @@ export function exportGuestsCsv(guests: GuestProfile[], t: Translate) {
       t("Commissions (MAD)", "Commissions (MAD)"),
       t("Note", "Rating"),
       t("Adresse préférée", "Favourite place"),
-      t("Emplacements", "Locations"),
+      locationLabel ?? t("Emplacements", "Locations"),
     ],
     guests.map((g) => [
       g.name,
@@ -79,7 +87,13 @@ export function exportGuestsCsv(guests: GuestProfile[], t: Translate) {
 
 /* Relevé de commissions : une ligne par sortie, avec le taux porté par la
    réservation, puis une ligne de total. */
-export function exportCommissionsCsv(rows: HotelReservation[], suffix: string, t: Translate, locale: Locale) {
+export function exportCommissionsCsv(
+  rows: HotelReservation[],
+  suffix: string,
+  t: Translate,
+  locale: Locale,
+  locationLabel?: string
+) {
   const total = rows.reduce((s, r) => s + r.commission, 0);
   downloadCsv(
     `commissions-${suffix}-${todayIso()}`,
@@ -88,7 +102,7 @@ export function exportCommissionsCsv(rows: HotelReservation[], suffix: string, t
       t("Client", "Guest"),
       t("Sortie", "Outing"),
       t("Catégorie", "Category"),
-      t("Chambre", "Room"),
+      locationLabel ?? t("Chambre", "Room"),
       t("Montant dépensé (MAD)", "Amount spent (MAD)"),
       t("Taux", "Rate"),
       t("Commission (MAD)", "Commission (MAD)"),

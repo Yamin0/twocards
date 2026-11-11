@@ -131,20 +131,32 @@ export function getShellNav(
   }
 
   if (role === "concierge") {
-    /* Seules les sections qui ont de vraies données derrière elles sont au
-       menu. Réservations, clients, commissions, statistiques et assistant
-       gardent leur adresse mais n'y figurent pas tant qu'ils ne sont pas
-       branchés. */
+    /* Le concierge est un apporteur d'affaires : son lien et son QR, les
+       réservations qui en sortent, suivies jusqu'à la commission. Toutes
+       les entrées ont de vraies données derrière elles ; l'assistant
+       (/concierge/ai), pas encore branché, n'est pas au menu. */
     const today: NavItem = {
       icon: LayoutDashboard,
       label: t("Aujourd'hui", "Today"),
       href: "/concierge",
       exact: true,
     };
+    const reservations: NavItem = {
+      icon: CalendarDays,
+      label: t("Réservations", "Reservations"),
+      short: t("Résas", "Bookings"),
+      href: "/concierge/reservations",
+    };
     const messages: NavItem = {
       icon: MessageSquare,
       label: t("Messages", "Messages"),
       href: "/concierge/messages",
+    };
+    const commissions: NavItem = {
+      icon: Coins,
+      label: t("Commissions", "Commissions"),
+      short: t("Gains", "Earnings"),
+      href: "/concierge/commissions",
     };
     const account: NavItem = {
       icon: Settings,
@@ -155,10 +167,26 @@ export function getShellNav(
       home: "/concierge",
       space: t("Espace concierge", "Concierge workspace"),
       groups: [
-        { items: [today, messages] },
+        {
+          items: [
+            today,
+            reservations,
+            { icon: QrCode, label: t("Liens & QR", "Links & QR"), href: "/concierge/liens" },
+            { icon: Users, label: t("Clients", "Guests"), href: "/concierge/clients" },
+            messages,
+            { icon: Building2, label: t("Établissements", "Venues"), href: "/concierge/venues" },
+          ],
+        },
+        {
+          title: t("Résultats", "Results"),
+          items: [
+            commissions,
+            { icon: BarChart3, label: t("Statistiques", "Statistics"), href: "/concierge/stats" },
+          ],
+        },
         { title: t("Compte", "Account"), items: [account, ...adminLink] },
       ],
-      tabs: [today, messages, account],
+      tabs: [today, reservations, messages, commissions],
       account,
     };
   }

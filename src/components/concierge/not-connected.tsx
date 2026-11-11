@@ -28,7 +28,7 @@ export function NotConnected({
           action={
             <>
               <LinkButton href="/concierge" variant="primary">
-                {t("Voir les établissements", "See venues")}
+                {t("Revenir à Aujourd'hui", "Back to Today")}
               </LinkButton>
               <LinkButton href="/concierge/messages">{t("Ouvrir les messages", "Open messages")}</LinkButton>
             </>

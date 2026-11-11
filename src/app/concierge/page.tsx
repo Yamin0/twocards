@@ -1,184 +1,199 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Building2, MessageSquare, SearchX } from "lucide-react";
-import {
-  Card,
-  EmptyState,
-  ErrorState,
-  InfoNote,
-  LinkButton,
-  NameAvatar,
-  PageHeader,
-  PageSkeleton,
-  SearchInput,
-} from "@/components/app/ui";
-import { useAuthUser } from "@/hooks/use-auth-user";
+import { ArrowRight, Building2, CalendarDays, Clock, Coins, Inbox, MessageSquare } from "lucide-react";
+import { InfoNote, KpiGrid, LinkButton, PageHeader, PageSkeleton, type Kpi } from "@/components/app/ui";
+import { CreateFirstLink, LinkHero } from "@/components/concierge/link-hero";
+import { ConciergeLoadError } from "@/components/concierge/states";
+import { OutingsCard, PendingCard } from "@/components/concierge/today-cards";
+import { loadFailed } from "@/components/hotel/states";
+import { MonthCard } from "@/components/hotel/today/earnings";
 import { useUnreadMessages } from "@/hooks/use-unread-messages";
-import { useIntlLocale, useT } from "@/lib/i18n/client";
-import { createClient } from "@/lib/supabase/client";
+import { useConciergeLinks } from "@/lib/concierge/use-links";
+import { formatMad, formatNumber, plural } from "@/lib/hotel/format";
+import { todaySummary } from "@/lib/hotel/today";
+import type { Translate } from "@/lib/i18n";
+import { useIntlLocale, useLocale, useT } from "@/lib/i18n/client";
 
-/* Accueil du concierge. Ce qui existe vraiment aujourd'hui : l'annuaire des
-   établissements du réseau (table profiles, tenu à jour en direct) et la
-   messagerie avec eux. Aucun chiffre d'exemple : le suivi des réservations
-   et des commissions viendra avec le lien et le QR personnels. */
-
-type Venue = {
-  id: string;
-  full_name: string | null;
-  role: string;
-  venue_name: string | null;
-  city: string | null;
+const greeting = (t: Translate) => {
+  const h = new Date().getHours();
+  return h < 5
+    ? t("Bonne nuit", "Good night")
+    : h < 12
+      ? t("Bonjour", "Good morning")
+      : h < 18
+        ? t("Bon après-midi", "Good afternoon")
+        : t("Bonsoir", "Good evening");
 };
 
-const nameOf = (v: Venue) => v.venue_name || v.full_name || "—";
-
+/* Accueil du concierge : « Aujourd'hui ». Son lien et son QR en tête, puis
+   ce qui presse — les demandes en attente, les sorties du jour et à venir,
+   les commissions du mois. Tout est lu en base ; rien n'est créé au
+   chargement (le premier lien se crée au clic). */
 export default function ConciergeTodayPage() {
   const t = useT();
+  const locale = useLocale();
   const intl = useIntlLocale();
-  const { isLoading: authLoading, fullName } = useAuthUser();
   const unread = useUnreadMessages();
-  const [venues, setVenues] = useState<Venue[] | null>(null);
-  const [failed, setFailed] = useState(false);
-  const [tick, setTick] = useState(0);
-  const [query, setQuery] = useState("");
+  const space = useConciergeLinks();
+  const { qrCodes, reservations, profile, isLoading, failed, reload } = space;
 
-  useEffect(() => {
-    const supabase = createClient();
-    let cancelled = false;
-    supabase
-      .from("profiles")
-      .select("id, full_name, role, venue_name, city")
-      .eq("role", "etablissement")
-      .order("venue_name", { ascending: true })
-      .then(({ data, error }) => {
-        if (cancelled) return;
-        setFailed(Boolean(error));
-        if (!error) setVenues((data ?? []) as Venue[]);
-      });
-    /* Un établissement qui s'inscrit apparaît sans recharger. */
-    const channel = supabase
-      .channel(`annuaire-etablissements-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`)
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "profiles" }, (payload) => {
-        const p = payload.new as Venue;
-        if (p.role !== "etablissement") return;
-        setVenues((prev) => (!prev || prev.some((v) => v.id === p.id) ? prev : [...prev, p]));
-      })
-      .subscribe();
-    return () => {
-      cancelled = true;
-      supabase.removeChannel(channel);
-    };
-  }, [tick]);
+  if (isLoading) return <PageSkeleton kpis={4} rows={5} />;
 
-  const list = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return (venues ?? [])
-      .filter((v) => !q || nameOf(v).toLowerCase().includes(q) || (v.city ?? "").toLowerCase().includes(q))
-      .sort((a, b) => nameOf(a).localeCompare(nameOf(b), intl));
-  }, [venues, query, intl]);
+  const summary = todaySummary(qrCodes, reservations);
+  const { pending, todays, upcoming, today } = summary;
+  const firstName = space.fullName?.split(" ")[0];
+  const nextToday = todays.find((r) => r.reservation_time);
+  const hasLink = qrCodes.length > 0;
 
-  if (authLoading || (venues === null && !failed)) return <PageSkeleton kpis={0} rows={6} />;
-
-  const firstName = fullName?.split(" ")[0];
+  const kpis: Kpi[] = [
+    {
+      label: t("En attente", "Pending"),
+      value: formatNumber(pending.length, locale),
+      hint:
+        pending.length > 0
+          ? t("à confirmer par l'établissement", "to be confirmed by the venue")
+          : t("rien à suivre", "nothing to follow up"),
+      icon: Inbox,
+      tone: pending.length > 0 ? "amber" : "default",
+      href: "/concierge/reservations?statut=attente",
+    },
+    {
+      label: t("Sorties aujourd'hui", "Outings today"),
+      value: formatNumber(todays.length, locale),
+      hint: nextToday
+        ? t(`première à ${nextToday.reservation_time}`, `first at ${nextToday.reservation_time}`)
+        : todays.length > 0
+          ? t("heure non précisée", "no time given")
+          : t("aucune prévue", "none planned"),
+      icon: Clock,
+      tone: "sky",
+      href: "/concierge/reservations?periode=aujourdhui",
+    },
+    {
+      label: t("À venir", "Upcoming"),
+      value: formatNumber(upcoming.length, locale),
+      hint: t(`dont ${summary.upcomingWeek} sous 7 jours`, `${summary.upcomingWeek} within 7 days`),
+      icon: CalendarDays,
+      tone: "violet",
+      href: "/concierge/reservations?periode=avenir",
+    },
+    {
+      label: t("Commissions du mois", "Commissions this month"),
+      value: formatMad(summary.commissionMonth, true, locale),
+      delta:
+        summary.commissionPrev > 0
+          ? (summary.commissionMonth - summary.commissionPrev) / summary.commissionPrev
+          : null,
+      deltaLabel: t("pas de mois précédent", "no previous month"),
+      hint: summary.commissionPrev > 0 ? t("vs mois précédent", "vs last month") : undefined,
+      icon: Coins,
+      tone: "emerald",
+      href: "/concierge/commissions",
+    },
+  ];
 
   return (
     <>
       <PageHeader
-        title={firstName ? t(`Bonjour, ${firstName}`, `Hello, ${firstName}`) : t("Aujourd'hui", "Today")}
-        description={t(
-          "Les établissements du réseau, à un message de vous.",
-          "The venues in the network, one message away."
-        )}
+        eyebrow={new Date().toLocaleDateString(intl, { weekday: "long", day: "numeric", month: "long" })}
+        title={
+          <>
+            {greeting(t)}
+            {firstName ? `, ${firstName}` : ""}
+          </>
+        }
+        description={
+          !hasLink
+            ? t(
+                "Créez votre lien pour commencer à recevoir des réservations.",
+                "Create your link to start receiving reservations."
+              )
+            : pending.length > 0
+              ? t(
+                  `${pending.length} ${plural(pending.length, "demande")} en attente, ${todays.length} ${plural(todays.length, "sortie")} aujourd'hui.`,
+                  `${pending.length} ${plural(pending.length, "request", undefined, "en")} pending, ${todays.length} ${plural(todays.length, "outing", undefined, "en")} today.`
+                )
+              : todays.length > 0
+                ? t(
+                    `${todays.length} ${plural(todays.length, "sortie")} aujourd'hui. Aucune demande en attente.`,
+                    `${todays.length} ${plural(todays.length, "outing", undefined, "en")} today. No pending requests.`
+                  )
+                : t("Aucune demande en attente, aucune sortie aujourd'hui.", "No pending requests, no outings today.")
+        }
         actions={
-          <LinkButton href="/concierge/messages" variant="primary" icon={MessageSquare}>
-            {t("Messages", "Messages")}
-          </LinkButton>
+          <>
+            <LinkButton href="/concierge/venues" icon={Building2}>
+              {t("Établissements", "Venues")}
+            </LinkButton>
+            <LinkButton href="/concierge/messages" icon={MessageSquare}>
+              {t("Messages", "Messages")}
+            </LinkButton>
+          </>
         }
       />
 
-      {unread > 0 && (
-        <Link
-          href="/concierge/messages"
-          className="flex items-center gap-3 rounded-2xl border border-info/25 bg-info-soft px-5 py-3.5 text-sm text-ink transition-colors hover:border-info/50"
-        >
-          <MessageSquare size={18} strokeWidth={1.75} className="shrink-0 text-info" aria-hidden />
-          <span className="flex-1 font-bold">
-            {t(
-              `${unread} message${unread > 1 ? "s" : ""} non lu${unread > 1 ? "s" : ""}`,
-              `${unread} unread message${unread === 1 ? "" : "s"}`
-            )}
-          </span>
-          <ArrowRight size={16} strokeWidth={2} className="text-info" aria-hidden />
-        </Link>
-      )}
-
-      <InfoNote tone="sky">
-        {t(
-          "Votre lien et votre QR personnels, avec le suivi de vos réservations jusqu'à la commission, ne sont pas encore disponibles dans cet espace. Pour réserver, écrivez à l'établissement.",
-          "Your personal link and QR code, with booking tracking through to commission, aren't available in this workspace yet. To book, message the venue."
-        )}
-      </InfoNote>
-
-      <Card
-        padded={false}
-        title={t("Établissements", "Venues")}
-        description={
-          venues
-            ? t(
-                `${venues.length} établissement${venues.length > 1 ? "s" : ""} dans le réseau`,
-                `${venues.length} venue${venues.length === 1 ? "" : "s"} in the network`
-              )
-            : undefined
-        }
-        actions={
-          <SearchInput
-            value={query}
-            onChange={setQuery}
-            placeholder={t("Nom ou ville", "Name or city")}
-            className="w-full sm:w-64"
-          />
-        }
-      >
-        {failed ? (
-          <ErrorState compact onRetry={() => setTick((n) => n + 1)} />
-        ) : list.length === 0 ? (
-          query ? (
-            <EmptyState
-              compact
-              icon={SearchX}
-              title={t("Aucun résultat", "No results")}
-              description={t(`Aucun établissement ne correspond à « ${query} ».`, `No venue matches “${query}”.`)}
-            />
+      {loadFailed(failed, qrCodes, reservations) ? (
+        <ConciergeLoadError onRetry={reload} />
+      ) : (
+        <>
+          {hasLink ? (
+            <LinkHero links={qrCodes} linkOf={space.linkOf} displayName={space.displayName} />
           ) : (
-            <EmptyState
-              compact
-              icon={Building2}
-              title={t("Aucun établissement pour le moment", "No venues yet")}
-              description={t(
-                "Les établissements apparaissent ici dès leur inscription.",
-                "Venues appear here as soon as they sign up."
+            <CreateFirstLink onCreate={space.createLink} />
+          )}
+
+          {unread > 0 && (
+            <Link
+              href="/concierge/messages"
+              className="flex items-center gap-3 rounded-2xl border border-info/25 bg-info-soft px-5 py-3.5 text-sm text-ink transition-colors hover:border-info/50"
+            >
+              <MessageSquare size={18} strokeWidth={1.75} className="shrink-0 text-info" aria-hidden />
+              <span className="flex-1 font-bold">
+                {t(
+                  `${unread} ${plural(unread, "message non lu", "messages non lus")}`,
+                  `${unread} unread ${plural(unread, "message", undefined, "en")}`
+                )}
+              </span>
+              <ArrowRight size={16} strokeWidth={2} className="text-info" aria-hidden />
+            </Link>
+          )}
+
+          {hasLink && !profile.hotel_name && (
+            <InfoNote tone="amber">
+              {t(
+                <>
+                  Le nom affiché en tête de votre menu client n&apos;est pas encore réglé.{" "}
+                  <Link href="/concierge/settings" className="font-bold text-link underline">
+                    Régler mon menu
+                  </Link>
+                </>,
+                <>
+                  The name shown at the top of your guest menu isn&apos;t set yet.{" "}
+                  <Link href="/concierge/settings" className="font-bold text-link underline">
+                    Set up my menu
+                  </Link>
+                </>
               )}
-            />
-          )
-        ) : (
-          <ul className="divide-y divide-line border-t border-line">
-            {list.map((v) => (
-              <li key={v.id} className="flex items-center gap-3 px-5 py-3 sm:px-6">
-                <NameAvatar name={nameOf(v)} size={40} />
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-bold text-ink">{nameOf(v)}</p>
-                  <p className="truncate text-[13px] text-ink-3">{v.city || t("Ville non renseignée", "City not set")}</p>
+            </InfoNote>
+          )}
+
+          {/* Sans lien et sans réservation, les compteurs ne diraient que
+              des zéros : on ne les montre qu'à partir du premier lien. */}
+          {(hasLink || reservations.length > 0) && (
+            <>
+              <PendingCard pending={pending} today={today} />
+              <KpiGrid items={kpis} />
+              <div className="grid gap-4 xl:grid-cols-3">
+                <div className="xl:col-span-2">
+                  <OutingsCard todays={todays} upcoming={upcoming} today={today} />
                 </div>
-                <LinkButton href={`/concierge/messages?to=${v.id}`} size="sm" icon={MessageSquare}>
-                  {t("Écrire", "Message")}
-                </LinkButton>
-              </li>
-            ))}
-          </ul>
-        )}
-      </Card>
+                <MonthCard summary={summary} statementHref="/concierge/commissions" />
+              </div>
+            </>
+          )}
+        </>
+      )}
     </>
   );
 }

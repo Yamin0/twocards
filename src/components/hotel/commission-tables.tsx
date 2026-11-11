@@ -82,9 +82,20 @@ export function StatementTable({
 
 /* Détail : une ligne par sortie commissionnée, avec le taux porté par la
    réservation (commission_rate). */
-export function CommissionDetailTable({ rows }: { rows: HotelReservation[] }) {
+export function CommissionDetailTable({
+  rows,
+  reservationHref = (id) => `/hotel/reservations?id=${id}`,
+  locationLabel,
+}: {
+  rows: HotelReservation[];
+  /** Adresse de la fiche d'une réservation (espace hôtel par défaut). */
+  reservationHref?: (id: string) => string;
+  /** Intitulé de la colonne d'origine (« Emplacement » par défaut). */
+  locationLabel?: string;
+}) {
   const t = useT();
   const locale = useLocale();
+  const location = locationLabel ?? t("Emplacement", "Location");
   return (
     <Table stack>
       <thead>
@@ -92,7 +103,7 @@ export function CommissionDetailTable({ rows }: { rows: HotelReservation[] }) {
           <Th>{t("Client", "Guest")}</Th>
           <Th>{t("Date", "Date")}</Th>
           <Th>{t("Sortie", "Outing")}</Th>
-          <Th>{t("Emplacement", "Location")}</Th>
+          <Th>{location}</Th>
           <Th align="right">{t("Montant", "Amount")}</Th>
           <Th align="right">{t("Taux", "Rate")}</Th>
           <Th align="right">{t("Commission", "Commission")}</Th>
@@ -102,7 +113,7 @@ export function CommissionDetailTable({ rows }: { rows: HotelReservation[] }) {
         {rows.map((r) => (
           <Tr key={r.id}>
             <Td head>
-              <Link href={`/hotel/reservations?id=${r.id}`} className="font-bold text-ink hover:underline">
+              <Link href={reservationHref(r.id)} className="font-bold text-ink hover:underline">
                 {r.guest_name}
               </Link>
             </Td>
@@ -115,7 +126,7 @@ export function CommissionDetailTable({ rows }: { rows: HotelReservation[] }) {
                 <p className="text-xs text-ink-3">{reservationCategoryLabel(r.category, locale)}</p>
               </div>
             </Td>
-            <Td label={t("Emplacement", "Location")} muted>
+            <Td label={location} muted>
               {r.qr_label ?? "—"}
             </Td>
             <Td label={t("Montant", "Amount")} align="right" muted className="num whitespace-nowrap">

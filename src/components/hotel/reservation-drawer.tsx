@@ -18,13 +18,24 @@ import type { HotelReservation } from "@/lib/hotel/store";
 import { useLocale, useT } from "@/lib/i18n/client";
 
 /* Fiche d'une réservation, en lecture : l'hôtel suit, l'établissement
-   confirme et saisit le montant. D'ici, on appelle ou on écrit au client. */
+   confirme et saisit le montant. D'ici, on appelle ou on écrit au client.
+   `qrHref`, `labels` et `extra` servent à l'espace concierge (où le QR est
+   un « lien ») ; sans eux, la fiche est celle de l'hôtel, inchangée. */
 export function ReservationDrawer({
   reservation: r,
   onClose,
+  qrHref = (id) => `/hotel/chambres/${id}`,
+  labels,
+  extra,
 }: {
   reservation: HotelReservation | null;
   onClose: () => void;
+  /** Adresse de la page du QR d'origine. */
+  qrHref?: (qrCodeId: string) => string;
+  /** Libellés de l'origine (« Emplacement » par défaut). */
+  labels?: { location?: string; viewLocation?: string; deleted?: string };
+  /** Bloc inséré sous le statut (suivi d'étapes, par exemple). */
+  extra?: ReactNode;
 }) {
   const t = useT();
   const locale = useLocale();
@@ -38,7 +49,10 @@ export function ReservationDrawer({
     },
     { label: t("Personnes", "Guests"), value: `${r.party_size}` },
     { label: t("Catégorie", "Category"), value: reservationCategoryLabel(r.category, locale) },
-    { label: t("Emplacement", "Location"), value: r.qr_label ?? t("QR supprimé", "Deleted QR") },
+    {
+      label: labels?.location ?? t("Emplacement", "Location"),
+      value: r.qr_label ?? labels?.deleted ?? t("QR supprimé", "Deleted QR"),
+    },
     { label: t("Reçue le", "Received"), value: formatTimestamp(r.created_at, locale) },
     ...(r.arrived_at
       ? [{ label: t("Arrivée", "Arrival"), value: formatTimestamp(r.arrived_at, locale) }]
@@ -59,8 +73,8 @@ export function ReservationDrawer({
             {t("Appeler", "Call")}
           </LinkButton>
           {r.qr_code_id && (
-            <LinkButton href={`/hotel/chambres/${r.qr_code_id}`} icon={QrCode} variant="ghost" className="sm:ml-auto">
-              {t("Voir l'emplacement", "View location")}
+            <LinkButton href={qrHref(r.qr_code_id)} icon={QrCode} variant="ghost" className="sm:ml-auto">
+              {labels?.viewLocation ?? t("Voir l'emplacement", "View location")}
             </LinkButton>
           )}
         </>
@@ -70,6 +84,8 @@ export function ReservationDrawer({
         <StatusPill status={r.status} />
         <span className="num text-sm text-ink-2">{r.guest_phone}</span>
       </div>
+
+      {extra}
 
       <dl className="mt-5 divide-y divide-line rounded-xl border border-line bg-fill">
         {rows.map((row) => (
