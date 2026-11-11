@@ -86,3 +86,12 @@
 - **Performance** (`12ffb88`). Vérifié : Lighthouse sur le vrai build, trois passes, 91 / 91 / 91 et 93 / 93 / 93. Non vérifié : le bandeau d'impersonation, dont le chargement est différé.
 - **SQL proposé** (`1fa5b35`) : note refusée avant la sortie. Non lancé.
 - **Final** : `tsc` 0 erreur, `eslint .` 0 erreur 0 avertissement, `next build` 63 pages, 68 captures « après » sans erreur console.
+
+## Lot 9 — Suites après la mise en ligne (branche `suites/apres-refonte`, commit `55368b4`, NON POUSSÉE)
+
+- **Changé** : menu client `/s` au vocabulaire neutre pour un concierge ; portail `/r` qui reconnaît « Créneau complet » et transmet sa hauteur au site hôte ; ticket de test de la caisse qui n'envoie plus ni table ni montant ; préférences de notification ramenées aux quatre envois réels.
+- **SQL écrit, non lancé** : `20261112100000` (rôle du propriétaire dans `qr_get_menu`), `110000` (300 demandes par heure pour un concierge), `120000` (créneaux complets du portail), `130000` (statut « test » des événements de caisse), `140000` (préférences de notification respectées par le push).
+- **Vérifié** : `tsc` 0 erreur, `eslint src` 0 erreur, `next build` 65 pages ; menu hôtel identique au pixel près ; hauteur d'iframe et refus de créneau testés avec des réponses simulées. Aucun ancien ticket de test n'avait touché de réservation (lecture en base).
+- **Non vérifié** : aucun des cinq SQL exécuté ; pages connectées non vues ; fonction Edge `pos-webhook` non déployée.
+- **Lighthouse sur le site en ligne** (3 passes, mobile) : `/` 94 / 96 / 97, `/hotels` 98 / 98 / 98 ; accessibilité, bonnes pratiques et SEO à 100.
+- **Attention** : la branche porte aussi deux commits d'une autre session (« acompte Stripe », `5a6cf68` et `6049881`), sur lesquels ce lot s'appuie dans six fichiers. Elle n'est pas poussée tant que l'acompte n'est pas validé. Le SQL `110000` refuse de s'exécuter si l'acompte est déjà en place, pour ne pas effacer son contrôle de paiement.
