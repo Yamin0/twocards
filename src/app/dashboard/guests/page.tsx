@@ -1,274 +1,55 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { ArrowDown, ArrowUp, CalendarPlus, Download, SearchX, Users } from "lucide-react";
 import { useAuthUser } from "@/hooks/use-auth-user";
+import { useVenueQrReservations } from "@/hooks/use-venue-qr-reservations";
 import {
-  useVenueQrReservations,
-  type VenueQrReservation,
-} from "@/hooks/use-venue-qr-reservations";
-import { TableSkeleton } from "@/components/shared/loading-skeleton";
-import { StatStrip } from "@/components/shared/stat-strip";
-import { RatingStars } from "@/components/shared/mini-charts";
-import { useLocale, useT } from "@/lib/i18n/client";
-import { intlLocale, makeT, type Locale, type Translate } from "@/lib/i18n";
-import {
-  ArrowDown,
-  ArrowUp,
-  CalendarPlus,
-  Download,
-  Search,
-  Users,
-} from "lucide-react";
+  Button,
+  Card,
+  EmptyState,
+  ErrorState,
+  KpiGrid,
+  LinkButton,
+  PageHeader,
+  PageSkeleton,
+  SearchInput,
+  Segmented,
+} from "@/components/app/ui";
+import { useIntlLocale, useLocale, useT } from "@/lib/i18n/client";
+import { SEGMENTS, buildGuests, normalizePhone, segmentLabel } from "@/lib/venue/guests";
+import { GuestsTable } from "@/components/venue/guests/guests-table";
+import { exportGuestsCsv } from "@/components/venue/guests/export-guests";
 
-/* CRM clients dérivé des réservations : pas de table clients à part, un
-   client = un numéro de téléphone vu dans qr_reservations (la RLS limite
-   déjà aux réservations de l'établissement connecté). Tout est recalculé
-   à partir des lignes réelles — aucune donnée de démo. */
+/* Clients de l'établissement, recalculés à partir des réservations
+   réelles (règles dans lib/venue/guests) : aucune donnée de démonstration. */
 
-/* ---------- Dérivation ---------- */
-
-/* Clé d'identité d'un client : téléphone sans espaces/points/tirets,
-   le + initial conservé. */
-function normalizePhone(raw: string) {
-  return raw.replace(/[\s.\-]/g, "");
-}
-
-const localToday = () => {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-};
-
-const isCancelled = (r: VenueQrReservation) =>
-  r.status === "annulée" || (r.status as string) === "no-show";
-
-/* Une visite : réservation non annulée déjà passée, ou dont le montant
-   dépensé est connu (le client est bien venu). */
-const isVisit = (r: VenueQrReservation, today: string) =>
-  !isCancelled(r) && (r.reservation_date < today || r.amount_spent !== null);
-
-const isUpcoming = (r: VenueQrReservation, today: string) =>
-  !isCancelled(r) && r.reservation_date >= today && r.amount_spent === null;
-
-type GuestProfile = {
-  id: string;
-  name: string;
-  phone: string;
-  visits: number;
-  totalSpent: number;
-  avgBasket: number | null;
-  lastVisit: string | null;
-  nextReservation: VenueQrReservation | null;
-  avgRating: number | null;
-  sources: string[];
-  firstSeen: string;
-  segments: string[];
-};
-
-function sourceLabel(source: string, t: Translate) {
-  if (source === "qr") return t("Réseau QR", "QR network");
-  if (source === "portal") return t("Portail", "Portal");
-  if (source === "venue") return t("Sur place", "In-house");
-  return source;
-}
-
-/* Libellé affiché d'un segment (la clé reste en français). */
-function segmentLabel(s: string, t: Translate) {
-  if (s === "Habitué") return t("Habitué", "Regular");
-  if (s === "Nouveau") return t("Nouveau", "New");
-  if (s === "À risque") return t("À risque", "At risk");
-  return s;
-}
-
-const DAY_MS = 86_400_000;
-
-function buildGuests(reservations: VenueQrReservation[]): GuestProfile[] {
-  const today = localToday();
-  const byPhone = new Map<string, VenueQrReservation[]>();
-  for (const r of reservations) {
-    const key = normalizePhone(r.guest_phone ?? "");
-    if (!key) continue;
-    const list = byPhone.get(key);
-    if (list) list.push(r);
-    else byPhone.set(key, [r]);
-  }
-
-  const guests: GuestProfile[] = [];
-  for (const [phone, rows] of byPhone) {
-    const latest = rows.reduce((a, b) => (a.created_at >= b.created_at ? a : b));
-    const visits = rows.filter((r) => isVisit(r, today));
-    const spentRows = rows.filter(
-      (r) => !isCancelled(r) && r.amount_spent !== null
-    );
-    const totalSpent = spentRows.reduce((s, r) => s + (r.amount_spent ?? 0), 0);
-    const rated = rows.filter((r) => r.rating !== null);
-    const upcoming = rows
-      .filter((r) => isUpcoming(r, today))
-      .sort((a, b) => (a.reservation_date < b.reservation_date ? -1 : 1));
-    const lastVisit =
-      visits.length > 0
-        ? visits.reduce((m, r) => (r.reservation_date > m ? r.reservation_date : m), visits[0].reservation_date)
-        : null;
-
-    guests.push({
-      id: phone,
-      name: latest.guest_name,
-      phone,
-      visits: visits.length,
-      totalSpent,
-      avgBasket: spentRows.length > 0 ? totalSpent / spentRows.length : null,
-      lastVisit,
-      nextReservation: upcoming[0] ?? null,
-      avgRating:
-        rated.length > 0
-          ? rated.reduce((s, r) => s + (r.rating ?? 0), 0) / rated.length
-          : null,
-      sources: [...new Set(rows.map((r) => r.source as string))],
-      firstSeen: rows.reduce(
-        (m, r) => (r.created_at < m ? r.created_at : m),
-        rows[0].created_at
-      ),
-      segments: [],
-    });
-  }
-
-  /* Seuil VIP : le top 10 % des totaux dépensés (au moins un client dès
-     qu'un montant existe) — calculé, pas décrété. */
-  const totals = guests
-    .map((g) => g.totalSpent)
-    .filter((t) => t > 0)
-    .sort((a, b) => b - a);
-  const vipThreshold =
-    totals.length > 0
-      ? totals[Math.max(0, Math.ceil(totals.length * 0.1) - 1)]
-      : Infinity;
-
-  const now = Date.now();
-  for (const g of guests) {
-    if (g.totalSpent > 0 && g.totalSpent >= vipThreshold)
-      g.segments.push("VIP");
-    if (g.visits >= 3) {
-      g.segments.push("Habitué");
-      if (
-        g.lastVisit &&
-        now - new Date(g.lastVisit + "T00:00:00").getTime() >= 60 * DAY_MS
-      )
-        g.segments.push("À risque");
-    } else if (g.visits === 1) {
-      g.segments.push("Nouveau");
-    }
-  }
-  return guests;
-}
-
-/* ---------- Présentation ---------- */
-
-const SEGMENT_STYLES: Record<string, string> = {
-  VIP: "bg-amber-400/15 text-amber-400 border-amber-400/20",
-  Habitué: "bg-emerald-500/15 text-emerald-400 border-emerald-400/20",
-  Nouveau: "bg-blue-500/15 text-blue-300 border-blue-400/20",
-  "À risque": "bg-red-500/15 text-red-400 border-red-400/20",
-};
-
-function SegmentBadges({ segments }: { segments: string[] }) {
-  const t = useT();
-  if (segments.length === 0) return <span className="text-white/25">—</span>;
-  return (
-    <span className="flex flex-wrap gap-1">
-      {segments.map((s) => (
-        <span
-          key={s}
-          className={`font-ui inline-flex rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${SEGMENT_STYLES[s] ?? "bg-white/10 text-white/50 border-white/10"}`}
-        >
-          {segmentLabel(s, t)}
-        </span>
-      ))}
-    </span>
-  );
-}
-
-const fmtDate = (iso: string, locale: Locale = "fr") =>
-  new Date(iso + "T00:00:00").toLocaleDateString(intlLocale(locale), {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-
-function exportCsv(guests: GuestProfile[], locale: Locale = "fr") {
-  const t = makeT(locale);
-  const header = [
-    t("Nom", "Name"),
-    t("Téléphone", "Phone"),
-    t("Visites", "Visits"),
-    t("Total dépensé (MAD)", "Total spent (MAD)"),
-    t("Panier moyen (MAD)", "Average spend (MAD)"),
-    t("Dernière visite", "Last visit"),
-    t("Prochaine réservation", "Next reservation"),
-    t("Note moyenne", "Average rating"),
-    t("Segments", "Segments"),
-    t("Canaux", "Channels"),
-  ];
-  const lines = guests.map((g) =>
-    [
-      g.name,
-      g.phone,
-      g.visits,
-      g.totalSpent,
-      g.avgBasket !== null ? Math.round(g.avgBasket) : "",
-      g.lastVisit ?? "",
-      g.nextReservation?.reservation_date ?? "",
-      g.avgRating !== null ? g.avgRating.toFixed(1) : "",
-      g.segments.map((s) => segmentLabel(s, t)).join(", "),
-      g.sources.map((s) => sourceLabel(s, t)).join(", "),
-    ]
-      .map((v) => `"${String(v).replace(/"/g, '""')}"`)
-      .join(";")
-  );
-  const blob = new Blob(["﻿" + [header.join(";"), ...lines].join("\n")], {
-    type: "text/csv;charset=utf-8",
-  });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `clients-${new Date().toISOString().slice(0, 10)}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-type SortField = "visites" | "depense" | "derniereVisite";
-const SEGMENT_FILTERS = ["VIP", "Habitué", "Nouveau", "À risque"] as const;
+type SortField = "derniereVisite" | "visites" | "depense";
+type SegmentFilter = "tous" | (typeof SEGMENTS)[number];
 
 export default function GuestsPage() {
   const t = useT();
   const locale = useLocale();
-  const intl = intlLocale(locale);
-  const router = useRouter();
-  const { isLoading } = useAuthUser();
-  const { reservations, isLoading: loadingData } = useVenueQrReservations();
+  const intl = useIntlLocale();
+  const { isLoading: authLoading } = useAuthUser();
+  const { reservations, isLoading, error, reload } = useVenueQrReservations();
   const [searchQuery, setSearchQuery] = useState("");
-  const [segmentFilter, setSegmentFilter] = useState<string | null>(null);
+  const [segmentFilter, setSegmentFilter] = useState<SegmentFilter>("tous");
   const [sortField, setSortField] = useState<SortField>("derniereVisite");
   const [sortAsc, setSortAsc] = useState(false);
 
-  const guests = useMemo(
-    () => buildGuests(reservations ?? []),
-    [reservations]
-  );
+  const guests = useMemo(() => buildGuests(reservations ?? []), [reservations]);
 
   const filtered = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     const qPhone = normalizePhone(searchQuery.trim());
-    let result = guests.filter((g) => {
-      if (segmentFilter && !g.segments.includes(segmentFilter)) return false;
+    const result = guests.filter((g) => {
+      if (segmentFilter !== "tous" && !g.segments.includes(segmentFilter)) return false;
       if (!q) return true;
-      return (
-        g.name.toLowerCase().includes(q) ||
-        (qPhone.length > 0 && g.phone.includes(qPhone))
-      );
+      return g.name.toLowerCase().includes(q) || (qPhone.length > 0 && g.phone.includes(qPhone));
     });
     const dir = sortAsc ? 1 : -1;
-    result = [...result].sort((a, b) => {
+    return [...result].sort((a, b) => {
       if (sortField === "visites") return (a.visits - b.visits) * dir;
       if (sortField === "depense") return (a.totalSpent - b.totalSpent) * dir;
       /* Dernière visite : les clients sans visite passent toujours en fin. */
@@ -277,19 +58,50 @@ export default function GuestsPage() {
       if (b.lastVisit === null) return -1;
       return a.lastVisit < b.lastVisit ? -dir : a.lastVisit > b.lastVisit ? dir : 0;
     });
-    return result;
   }, [guests, searchQuery, segmentFilter, sortField, sortAsc]);
 
-  if (isLoading || loadingData || reservations === null)
-    return <TableSkeleton cols={7} />;
+  const header = (
+    <PageHeader
+      title={t("Clients", "Guests")}
+      description={t(
+        "Votre fichier clients se construit tout seul : chaque réservation crée ou complète une fiche.",
+        "Your guest list builds itself: every reservation creates or updates a profile."
+      )}
+      actions={
+        <>
+          <LinkButton href="/dashboard/reservations" icon={CalendarPlus}>
+            {t("Réservations", "Reservations")}
+          </LinkButton>
+          {filtered.length > 0 && (
+            <Button
+              variant="primary"
+              icon={Download}
+              onClick={() => exportGuestsCsv(filtered, locale)}
+            >
+              {t("Exporter en CSV", "Export CSV")}
+            </Button>
+          )}
+        </>
+      }
+    />
+  );
 
-  /* KPI réels */
+  if (error)
+    return (
+      <div className="space-y-6">
+        {header}
+        <Card padded={false}>
+          <ErrorState onRetry={reload} />
+        </Card>
+      </div>
+    );
+  if (authLoading || isLoading || reservations === null) return <PageSkeleton />;
+
+  /* Indicateurs calculés sur les réservations réelles. */
   const now = new Date();
   const newThisMonth = guests.filter((g) => {
     const d = new Date(g.firstSeen);
-    return (
-      d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth()
-    );
+    return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
   }).length;
   const allRated = reservations.filter((r) => r.rating !== null);
   const globalRating =
@@ -299,283 +111,154 @@ export default function GuestsPage() {
   const visited = guests.filter((g) => g.visits >= 1);
   const returning = guests.filter((g) => g.visits >= 2);
   const returnRate =
-    visited.length > 0
-      ? Math.round((returning.length / visited.length) * 100)
-      : null;
+    visited.length > 0 ? Math.round((returning.length / visited.length) * 100) : null;
 
-  const stats = [
-    { label: t("Clients uniques", "Unique guests"), value: guests.length },
-    { label: t("Nouveaux ce mois", "New this month"), value: newThisMonth },
-    {
-      label: t("Note moyenne", "Average rating"),
-      value:
-        globalRating !== null
-          ? globalRating.toLocaleString(intl, { minimumFractionDigits: 1, maximumFractionDigits: 1 })
-          : "—",
-      hint:
-        allRated.length > 0
-          ? t(`${allRated.length} avis`, `${allRated.length} review${allRated.length === 1 ? "" : "s"}`)
-          : t("aucun avis pour le moment", "no reviews yet"),
-    },
-    {
-      label: t("Clients qui reviennent", "Returning guests"),
-      value: returnRate !== null ? `${returnRate}%` : "—",
-      hint:
-        visited.length > 0
-          ? t(
-              `${returning.length} sur ${visited.length} clients venus`,
-              `${returning.length} of ${visited.length} guests who visited`
-            )
-          : undefined,
-    },
-  ];
-
-  const sortButton = (field: SortField, label: string) => {
-    const active = sortField === field;
-    return (
-      <button
-        key={field}
-        onClick={() => {
-          if (active) setSortAsc(!sortAsc);
-          else {
-            setSortField(field);
-            setSortAsc(false);
-          }
-        }}
-        className={`font-ui inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm transition-colors ${active ? "bg-blue-500 text-white" : "bg-white/[0.07] text-white/50 border border-white/[0.1] hover:bg-white/[0.1]"}`}
-      >
+  const sortLabel = (field: SortField, label: string) =>
+    sortField === field ? (
+      <>
         {label}
-        {active &&
-          (sortAsc ? (
-            <ArrowUp className="h-3.5 w-3.5" strokeWidth={1.5} />
-          ) : (
-            <ArrowDown className="h-3.5 w-3.5" strokeWidth={1.5} />
-          ))}
-      </button>
+        {sortAsc ? (
+          <ArrowUp size={14} strokeWidth={2} aria-hidden />
+        ) : (
+          <ArrowDown size={14} strokeWidth={2} aria-hidden />
+        )}
+        <span className="sr-only">{sortAsc ? t("croissant", "ascending") : t("décroissant", "descending")}</span>
+      </>
+    ) : (
+      label
     );
-  };
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="font-display text-3xl font-light text-white">
-            {t("Clients", "Guests")}
-          </h1>
-          <p className="font-ui text-sm text-white/60 mt-1.5">
-            {t(
-              "Votre base clients, construite automatiquement à partir des réservations, un client naît d'une réservation.",
-              "Your guest database, built automatically from reservations: every reservation creates a guest."
-            )}
-          </p>
-        </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <Link
-            href="/dashboard/reservations"
-            className="font-ui flex items-center gap-2 bg-white/10 hover:bg-white/15 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors"
-          >
-            <CalendarPlus size={16} strokeWidth={1.5} />
-            {t("Réservations", "Reservations")}
-          </Link>
-          {filtered.length > 0 && (
-            <button
-              onClick={() => exportCsv(filtered, locale)}
-              className="font-ui flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors shadow-lg shadow-blue-500/20"
-            >
-              <Download size={16} strokeWidth={1.5} />
-              {t("Exporter CSV", "Export CSV")}
-            </button>
-          )}
-        </div>
-      </div>
+      {header}
 
-      {/* KPI */}
-      <StatStrip stats={stats} />
+      <KpiGrid
+        items={[
+          { label: t("Clients uniques", "Unique guests"), value: guests.length },
+          { label: t("Nouveaux ce mois", "New this month"), value: newThisMonth },
+          {
+            label: t("Note moyenne", "Average rating"),
+            value:
+              globalRating !== null
+                ? globalRating.toLocaleString(intl, {
+                    minimumFractionDigits: 1,
+                    maximumFractionDigits: 1,
+                  })
+                : "—",
+            hint:
+              allRated.length > 0
+                ? t(
+                    `${allRated.length} avis`,
+                    `${allRated.length} review${allRated.length === 1 ? "" : "s"}`
+                  )
+                : t("aucun avis pour le moment", "no reviews yet"),
+          },
+          {
+            label: t("Clients qui reviennent", "Returning guests"),
+            value: returnRate !== null ? t(`${returnRate} %`, `${returnRate}%`) : "—",
+            hint:
+              visited.length > 0
+                ? t(
+                    `${returning.length} sur ${visited.length} clients venus`,
+                    `${returning.length} of ${visited.length} guests who visited`
+                  )
+                : undefined,
+          },
+        ]}
+      />
 
-      {/* Recherche */}
-      <div className="relative">
-        <Search
-          className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30"
-          strokeWidth={1.5}
-        />
-        <input
-          type="text"
-          placeholder={t("Rechercher un client par nom ou téléphone...", "Search guests by name or phone...")}
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="font-ui w-full bg-white/[0.05] border border-white/[0.1] rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-blue-400/40 transition-colors"
-        />
-      </div>
-
-      {/* Segments + tris */}
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            onClick={() => setSegmentFilter(null)}
-            className={`font-ui rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${segmentFilter === null ? "bg-white text-black" : "bg-white/[0.07] text-white/50 border border-white/[0.1] hover:bg-white/[0.1]"}`}
-          >
-            {t("Tous", "All")} · {guests.length}
-          </button>
-          {SEGMENT_FILTERS.map((s) => {
-            const count = guests.filter((g) => g.segments.includes(s)).length;
-            return (
-              <button
-                key={s}
-                onClick={() =>
-                  setSegmentFilter(segmentFilter === s ? null : s)
-                }
-                className={`font-ui rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${segmentFilter === s ? "bg-white text-black" : "bg-white/[0.07] text-white/50 border border-white/[0.1] hover:bg-white/[0.1]"}`}
-              >
-                {segmentLabel(s, t)} · {count}
-              </button>
-            );
-          })}
-        </div>
-        <div className="ml-auto flex flex-wrap items-center gap-2">
-          <span className="font-ui text-[10px] uppercase tracking-wider text-white/30">
-            {t("Trier", "Sort")}
-          </span>
-          {sortButton("derniereVisite", t("Dernière visite", "Last visit"))}
-          {sortButton("visites", t("Visites", "Visits"))}
-          {sortButton("depense", t("Dépense totale", "Total spend"))}
-        </div>
-      </div>
-
-      {/* Table / état vide */}
       {guests.length === 0 ? (
-        <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-12 text-center">
-          <div className="w-14 h-14 rounded-2xl bg-blue-500/15 border border-blue-400/20 flex items-center justify-center mx-auto mb-5">
-            <Users size={26} strokeWidth={1.5} className="text-blue-400" />
+        <Card padded={false}>
+          <EmptyState
+            icon={Users}
+            title={t("Aucun client pour le moment", "No guests yet")}
+            description={t(
+              "Dès qu'une réservation arrive, par un QR du réseau ou par votre portail, le client apparaît ici avec ses visites, ses dépenses et ses avis.",
+              "As soon as a reservation comes in, through a network QR or your portal, the guest appears here with their visits, spend and reviews."
+            )}
+            action={
+              <LinkButton href="/dashboard/reservations" icon={CalendarPlus}>
+                {t("Voir les réservations", "View reservations")}
+              </LinkButton>
+            }
+          />
+        </Card>
+      ) : (
+        <>
+          <SearchInput
+            value={searchQuery}
+            onChange={setSearchQuery}
+            placeholder={t("Nom ou téléphone", "Name or phone")}
+            label={t("Rechercher un client", "Search guests")}
+          />
+
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <Segmented<SegmentFilter>
+              label={t("Segment", "Segment")}
+              value={segmentFilter}
+              /* Un second clic sur le segment actif revient à « Tous ». */
+              onChange={(v) => setSegmentFilter(v === segmentFilter ? "tous" : v)}
+              options={[
+                { value: "tous", label: t("Tous", "All"), count: guests.length },
+                ...SEGMENTS.map((s) => ({
+                  value: s,
+                  label: segmentLabel(s, t),
+                  count: guests.filter((g) => g.segments.includes(s)).length,
+                })),
+              ]}
+            />
+            <Segmented<SortField>
+              label={t("Trier par", "Sort by")}
+              size="sm"
+              value={sortField}
+              /* Un second clic sur le tri actif inverse le sens. */
+              onChange={(v) => {
+                if (v === sortField) setSortAsc((asc) => !asc);
+                else {
+                  setSortField(v);
+                  setSortAsc(false);
+                }
+              }}
+              options={[
+                {
+                  value: "derniereVisite",
+                  label: sortLabel("derniereVisite", t("Dernière visite", "Last visit")),
+                },
+                { value: "visites", label: sortLabel("visites", t("Visites", "Visits")) },
+                { value: "depense", label: sortLabel("depense", t("Dépense", "Spend")) },
+              ]}
+            />
           </div>
-          <h2 className="font-display text-xl font-normal text-white mb-2">
-            {t("Aucun client pour le moment", "No guests yet")}
-          </h2>
-          <p className="font-ui text-sm text-white/50 max-w-md mx-auto">
+
+          <Card padded={false}>
+            {filtered.length === 0 ? (
+              <EmptyState
+                compact
+                icon={SearchX}
+                title={t("Aucun client ne correspond", "No guests match")}
+                action={
+                  <Button
+                    onClick={() => {
+                      setSearchQuery("");
+                      setSegmentFilter("tous");
+                    }}
+                  >
+                    {t("Effacer les filtres", "Clear filters")}
+                  </Button>
+                }
+              />
+            ) : (
+              <GuestsTable guests={filtered} />
+            )}
+          </Card>
+
+          <p className="max-w-3xl text-xs leading-relaxed text-ink-3">
             {t(
-              "Votre base clients se construit toute seule : dès qu'une réservation arrive, QR du réseau ou portail direct, le client apparaît ici avec ses visites, ses dépenses et ses avis.",
-              "Your guest database builds itself: as soon as a reservation comes in, via the QR network or your direct portal, the guest appears here with their visits, spend and reviews."
+              "Segments calculés sur vos réservations : « Nouveau » = 1 visite, « Habitué » = 3 visites ou plus, « À risque » = habitué sans visite depuis 60 jours, « VIP » = les 10 % qui ont le plus dépensé.",
+              "Segments are based on your reservations: “New” = 1 visit, “Regular” = 3 or more visits, “At risk” = a regular with no visit in 60 days, “VIP” = top 10% by total spend."
             )}
           </p>
-          <Link
-            href="/dashboard/reservations"
-            className="font-ui inline-flex items-center gap-2 mt-6 bg-white/10 hover:bg-white/15 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors"
-          >
-            <CalendarPlus size={16} strokeWidth={1.5} />
-            {t("Voir les réservations", "View reservations")}
-          </Link>
-        </div>
-      ) : filtered.length === 0 ? (
-        <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-10 text-center">
-          <p className="font-ui text-sm text-white/50">
-            {t("Aucun client ne correspond à cette recherche.", "No guests match this search.")}
-          </p>
-        </div>
-      ) : (
-        <div className="tc-stack backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl overflow-x-auto">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="border-b border-white/10">
-                {[
-                  t("Client", "Guest"),
-                  t("Visites", "Visits"),
-                  t("Total dépensé", "Total spent"),
-                  t("Panier moyen", "Average spend"),
-                  t("Dernière visite", "Last visit"),
-                  t("Prochaine résa", "Next booking"),
-                  t("Note", "Rating"),
-                  t("Canaux", "Channels"),
-                  t("Segment", "Segment"),
-                ].map((h) => (
-                  <th
-                    key={h}
-                    className="font-ui px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/50 whitespace-nowrap"
-                  >
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((g) => (
-                <tr
-                  key={g.id}
-                  onClick={() =>
-                    router.push(
-                      `/dashboard/guests/${encodeURIComponent(g.id)}`
-                    )
-                  }
-                  className="border-b border-white/[0.06] last:border-0 cursor-pointer hover:bg-white/[0.06] transition-colors"
-                >
-                  <td data-head className="px-4 py-3">
-                    <p className="font-ui text-sm font-medium text-white">
-                      {g.name}
-                    </p>
-                    <p className="font-ui text-xs text-white/40">{g.phone}</p>
-                  </td>
-                  <td data-label={t("Visites", "Visits")} className="font-ui px-4 py-3 text-sm text-white tabular-nums">
-                    {g.visits}
-                  </td>
-                  <td data-label={t("Total dépensé", "Total spent")} className="font-ui px-4 py-3 text-sm text-white tabular-nums whitespace-nowrap">
-                    {g.totalSpent > 0
-                      ? `${g.totalSpent.toLocaleString(intl)} MAD`
-                      : "—"}
-                  </td>
-                  <td data-label={t("Panier moyen", "Average spend")} className="font-ui px-4 py-3 text-sm text-white/70 tabular-nums whitespace-nowrap">
-                    {g.avgBasket !== null
-                      ? `${Math.round(g.avgBasket).toLocaleString(intl)} MAD`
-                      : "—"}
-                  </td>
-                  <td data-label={t("Dernière visite", "Last visit")} className="font-ui px-4 py-3 text-sm text-white/70 whitespace-nowrap">
-                    {g.lastVisit ? fmtDate(g.lastVisit, locale) : "—"}
-                  </td>
-                  <td data-label={t("Prochaine résa", "Next booking")} className="font-ui px-4 py-3 text-sm text-white/70 whitespace-nowrap">
-                    {g.nextReservation
-                      ? fmtDate(g.nextReservation.reservation_date, locale)
-                      : "—"}
-                  </td>
-                  <td data-label={t("Note", "Rating")} className="px-4 py-3 whitespace-nowrap">
-                    {g.avgRating !== null ? (
-                      <span className="inline-flex items-center gap-1.5">
-                        <RatingStars value={g.avgRating} size={12} />
-                        <span className="font-ui text-xs text-white/60 tabular-nums">
-                          {g.avgRating.toLocaleString(intl, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
-                        </span>
-                      </span>
-                    ) : (
-                      <span className="text-white/25">—</span>
-                    )}
-                  </td>
-                  <td data-label={t("Canaux", "Channels")} className="px-4 py-3">
-                    <span className="flex flex-wrap gap-1">
-                      {g.sources.map((s) => (
-                        <span
-                          key={s}
-                          className="font-ui rounded-md bg-white/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white/50 whitespace-nowrap"
-                        >
-                          {sourceLabel(s, t)}
-                        </span>
-                      ))}
-                    </span>
-                  </td>
-                  <td data-label={t("Segment", "Segment")} className="px-4 py-3">
-                    <SegmentBadges segments={g.segments} />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {/* Lecture des segments */}
-      {guests.length > 0 && (
-        <p className="font-ui text-xs text-white/40 max-w-3xl">
-          {t(
-            "Segments calculés sur vos réservations réelles : « Nouveau » = 1 visite, « Habitué » = 3 visites ou plus, « À risque » = habitué sans visite depuis 60 jours, « VIP » = top 10 % des dépenses totales.",
-            "Segments are based on your actual reservations: “New” = 1 visit, “Regular” = 3 or more visits, “At risk” = a regular with no visit in 60 days, “VIP” = top 10% by total spend."
-          )}
-        </p>
+        </>
       )}
     </div>
   );

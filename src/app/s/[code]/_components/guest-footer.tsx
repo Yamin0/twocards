@@ -1,0 +1,80 @@
+"use client";
+
+import { MessageCircle, X } from "lucide-react";
+import { PoweredBy } from "@/components/booking/powered-by";
+import { waLink } from "@/lib/booking/contact";
+import { useT } from "@/lib/i18n/client";
+import { cn } from "@/lib/utils";
+
+/* Lien WhatsApp vers la réception de l'hôtel, avec le début du message. */
+function ReceptionLink({ reception, hotelName, className }: { reception: string; hotelName: string; className?: string }) {
+  const t = useT();
+  return (
+    <a
+      href={waLink(reception, t(`Bonjour ${hotelName}, `, `Hello ${hotelName}, `))}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={cn("inline-flex h-11 items-center gap-2 rounded-full px-5 text-sm font-bold", className)}
+    >
+      <MessageCircle size={16} strokeWidth={2} aria-hidden />
+      {t("Écrire à la réception", "Message reception")}
+    </a>
+  );
+}
+
+/* QR désactivé par l'hôtel (ou code inconnu) : la base a répondu, il n'y a
+   pas de menu. Ce n'est pas une panne — pas de bouton « Réessayer » ici. */
+export function InactiveMenu({ hotelName, reception }: { hotelName: string; reception: string | null }) {
+  const t = useT();
+  return (
+    <main className="mx-auto flex w-full max-w-md flex-col items-center px-8 py-16 text-center">
+      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[color:var(--on-page)]/10">
+        <X size={20} strokeWidth={2} className="text-[var(--on-page-muted)]" aria-hidden />
+      </div>
+      <h2 className="font-display text-xl font-bold tracking-tight text-[var(--on-page)]">
+        {t("Ce menu n'est plus disponible", "This menu is no longer available")}
+      </h2>
+      <p className="mt-2 max-w-xs text-sm leading-relaxed text-[var(--on-page-muted)]">
+        {t(
+          "Ce QR code a été désactivé par l'hôtel. Adressez-vous à la réception pour réserver vos sorties.",
+          "This QR code has been deactivated by the hotel. Please ask at reception to book your outings."
+        )}
+      </p>
+      {reception && (
+        <ReceptionLink reception={reception} hotelName={hotelName} className="mt-6 bg-[var(--accent)] text-[var(--on-accent)]" />
+      )}
+    </main>
+  );
+}
+
+/* Pied : contact de la réception, rappel « sans engagement », signature du
+   réseau. La marge basse tient compte de la barre d'accueil iOS. */
+export function GuestFooter({
+  hotelName,
+  reception,
+  darkPage,
+}: {
+  hotelName: string;
+  reception: string | null;
+  darkPage: boolean;
+}) {
+  const t = useT();
+  return (
+    <footer className="mx-auto w-full max-w-6xl px-6 pb-[max(2rem,env(safe-area-inset-bottom))] pt-8 text-center lg:pb-12 lg:pt-12">
+      {reception && (
+        <ReceptionLink
+          reception={reception}
+          hotelName={hotelName}
+          className="mb-4 border border-black/[0.1] bg-white text-neutral-900 transition-colors hover:bg-neutral-50 [&>svg]:text-emerald-700"
+        />
+      )}
+      <p className="text-sm leading-relaxed text-[var(--on-page-muted)]">
+        {t(
+          "Sans engagement, l'établissement confirme par téléphone ou WhatsApp.",
+          "No commitment: the venue confirms by phone or WhatsApp."
+        )}
+      </p>
+      <PoweredBy onDark={darkPage} className="mt-3" />
+    </footer>
+  );
+}

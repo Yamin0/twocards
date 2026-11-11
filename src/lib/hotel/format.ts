@@ -131,6 +131,20 @@ export function formatPercent(ratio: number, digits = 0, locale: Locale = "fr") 
   return locale === "en" ? `${v}%` : `${v} %`;
 }
 
+/* Taux de commission tel qu'il est stocké (0,1 → « 10 % », 0,125 → « 12,5 % »). */
+export function formatRate(rate: number, locale: Locale = "fr") {
+  return formatPercent(rate, 1, locale);
+}
+
+/* « 10 % » si toutes les réservations portent le même taux, « 10 à 15 % »
+   sinon. Les bornes viennent des données (commission_rate), jamais d'une
+   valeur supposée. */
+export function formatRateRange(rates: { min: number; max: number }, locale: Locale = "fr") {
+  if (rates.min === rates.max) return formatRate(rates.min, locale);
+  const lo = (rates.min * 100).toLocaleString(intlLocale(locale), { maximumFractionDigits: 1 });
+  return locale === "en" ? `${lo} to ${formatRate(rates.max, locale)}` : `${lo} à ${formatRate(rates.max, locale)}`;
+}
+
 /* Français : 0 et 1 au singulier. Anglais : seul 1 est au singulier. */
 export function plural(n: number, singular: string, pluralForm?: string, locale: Locale = "fr") {
   return (locale === "en" ? n !== 1 : n > 1) ? (pluralForm ?? `${singular}s`) : singular;

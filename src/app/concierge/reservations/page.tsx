@@ -1,364 +1,244 @@
 "use client";
 
-import { Suspense, useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
+import { CalendarDays, Clock, Coins, Download, Info, Link2, Receipt } from "lucide-react";
 import {
-  Plus,
-  CheckCircle,
-  Clock,
-  XCircle,
-  X,
-  Check,
-} from "lucide-react";
-import { useAuthUser } from "@/hooks/use-auth-user";
-import { TableSkeleton } from "@/components/shared/loading-skeleton";
-import { useToast } from "@/hooks/use-toast";
-import { useT } from "@/lib/i18n/client";
-import type { Translate } from "@/lib/i18n";
+  Button,
+  Card,
+  EmptyState,
+  InfoNote,
+  KpiGrid,
+  LinkButton,
+  PageHeader,
+  PageSkeleton,
+  SearchInput,
+  Segmented,
+  Select,
+  statusLabel,
+} from "@/components/app/ui";
+import { ReservationsTable, StageTracker } from "@/components/concierge/reservation-tracking";
+import { ConciergeLoadError } from "@/components/concierge/states";
+import { ReservationDrawer } from "@/components/hotel/reservation-drawer";
+import { commissionRule, loadFailed } from "@/components/hotel/states";
+import { useConciergeSpace } from "@/lib/concierge/space";
+import { useConciergeReservationFilters } from "@/lib/concierge/use-reservation-filters";
+import { commissionRates, hasCommission, isLive } from "@/lib/hotel/analytics";
+import { exportReservationsCsv } from "@/lib/hotel/exports";
+import { formatMad, formatNumber, plural } from "@/lib/hotel/format";
+import type { Period, StatusFilter } from "@/lib/hotel/use-reservation-filters";
+import { useLocale, useT } from "@/lib/i18n/client";
 
-const DEMO_RESERVATIONS = [
-  { id: 1, venue: "Le Comptoir Darna", city: "Marrakech", client: "Mehdi Alaoui", guests: 8, table: "VIP 3", date: "6 Avr. 2026", time: "22:00", status: "confirmée", commission: "6 400 MAD" },
-  { id: 2, venue: "Sky Bar Casa", city: "Casablanca", client: "Sarah Cohen", guests: 4, table: "Standard 7", date: "7 Avr. 2026", time: "21:00", status: "en attente", commission: "2 800 MAD" },
-  { id: 3, venue: "Le Lotus Club", city: "Tanger", client: "Omar Tazi", guests: 12, table: "Carré VIP", date: "12 Avr. 2026", time: "23:00", status: "en attente", commission: "9 600 MAD" },
-  { id: 4, venue: "Le Comptoir Darna", city: "Marrakech", client: "Lina Berrada", guests: 6, table: "VIP 1", date: "5 Avr. 2026", time: "21:30", status: "confirmée", commission: "4 200 MAD" },
-  { id: 5, venue: "Pacha Marrakech", city: "Marrakech", client: "Youssef Fassi", guests: 10, table: "VIP 5", date: "4 Avr. 2026", time: "23:30", status: "refusée", commission: "—" },
-];
-
-const venues = ["Le Comptoir Darna", "Sky Bar Casa", "Le Lotus Club", "Pacha Marrakech", "La Mamounia Lounge"];
-
-const statusIcon = (s: string) => {
-  if (s === "confirmée") return <CheckCircle size={14} strokeWidth={1.5} className="text-emerald-600" />;
-  if (s === "en attente") return <Clock size={14} strokeWidth={1.5} className="text-amber-600" />;
-  return <XCircle size={14} strokeWidth={1.5} className="text-red-500" />;
-};
-
-/* Les valeurs restent en français (statuts, « À définir »…) ; seul
-   l'affichage suit la langue. */
-const statusLabel = (s: string, t: Translate) =>
-  ({
-    toutes: t("Toutes", "All"),
-    "confirmée": t("Confirmée", "Confirmed"),
-    "en attente": t("En attente", "Pending"),
-    "refusée": t("Refusée", "Declined"),
-  } as Record<string, string>)[s] ?? s;
-
-const valueLabel = (v: string, t: Translate) => {
-  if (v === "À définir") return t("À définir", "TBC");
-  if (v === "À calculer") return t("À calculer", "To be calculated");
-  if (v === "Carré VIP") return t("Carré VIP", "VIP area");
-  return t(v, v.replace("Avr.", "Apr"));
-};
-
-const statusBadge = (s: string) => {
-  if (s === "confirmée") return "bg-emerald-100 text-emerald-800";
-  if (s === "en attente") return "bg-amber-100 text-amber-800";
-  return "bg-red-100 text-red-800";
-};
-
-function ConciergeReservations() {
-  /* Arrivee depuis l'annuaire de l'accueil : ?new=1 ouvre le modal,
-     ?venue= preselectionne l'etablissement (ajoute aux choix s'il n'y
-     figure pas — l'annuaire reel deborde de la liste de demonstration). */
-  const params = useSearchParams();
-  const requestedVenue = params.get("venue");
-  const venueOptions =
-    requestedVenue && !venues.includes(requestedVenue)
-      ? [requestedVenue, ...venues]
-      : venues;
-
-  const { isDemoConcierge, isLoading } = useAuthUser();
-  const t = useT();
-  const [reservations, setReservations] = useState<typeof DEMO_RESERVATIONS>([]);
-  const [filter, setFilter] = useState("toutes");
-
-  /* Ajustement d'etat pendant le rendu (patron React documente) plutot
-     qu'un effet : la liste se remplit des que l'authentification est
-     resolue, sans rendu intermediaire vide. */
-  const [initialized, setInitialized] = useState(false);
-  if (!isLoading && !initialized) {
-    setInitialized(true);
-    if (isDemoConcierge) setReservations(DEMO_RESERVATIONS);
-  }
-  const [showModal, setShowModal] = useState(params.get("new") === "1");
-
-  useEffect(() => {
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setShowModal(false);
-    };
-    if (showModal) {
-      document.addEventListener("keydown", handleEsc);
-      return () => document.removeEventListener("keydown", handleEsc);
-    }
-  }, [showModal]);
-
-  const [newClient, setNewClient] = useState("");
-  const [newVenue, setNewVenue] = useState(requestedVenue ?? venues[0]);
-  const [newGuests, setNewGuests] = useState("");
-  const [newDate, setNewDate] = useState("");
-  const [newTime, setNewTime] = useState("");
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const { toast, showToast } = useToast();
-
-  const filtered = filter === "toutes" ? reservations : reservations.filter((r) => r.status === filter);
-
-  const clearError = (field: string) => {
-    setErrors((prev) => {
-      const next = { ...prev };
-      delete next[field];
-      return next;
-    });
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const newErrors: Record<string, string> = {};
-    if (!newClient.trim()) newErrors.client = t("Le nom du client est requis", "Guest name is required");
-    if (!newVenue) newErrors.venue = t("L'établissement est requis", "Venue is required");
-    if (newGuests && parseInt(newGuests) < 1) newErrors.guests = t("Minimum 1 personne", "Minimum 1 guest");
-    if (!newDate.trim()) newErrors.date = t("La date est requise", "Date is required");
-    setErrors(newErrors);
-    if (Object.keys(newErrors).length > 0) return;
-
-    const venueCity: Record<string, string> = {
-      "Le Comptoir Darna": "Marrakech",
-      "Sky Bar Casa": "Casablanca",
-      "Le Lotus Club": "Tanger",
-      "Pacha Marrakech": "Marrakech",
-      "La Mamounia Lounge": "Marrakech",
-    };
-    const newRes = {
-      id: Date.now(),
-      venue: newVenue,
-      city: venueCity[newVenue] || "—",
-      client: newClient.trim(),
-      guests: parseInt(newGuests) || 2,
-      table: "À définir",
-      date: newDate || "À définir",
-      time: newTime || "À définir",
-      status: "en attente",
-      commission: "À calculer",
-    };
-    setReservations((prev) => [newRes, ...prev]);
-    setShowModal(false);
-    setErrors({});
-    setNewClient("");
-    setNewGuests("");
-    setNewDate("");
-    setNewTime("");
-    showToast(t(`Réservation créée pour ${newRes.client}`, `Reservation created for ${newRes.client}`));
-  };
-
-  if (isLoading) return <TableSkeleton />;
-
+export default function ConciergeReservationsPage() {
+  /* useSearchParams exige une frontière Suspense au prérendu. */
   return (
-    <div className="bg-transparent min-h-screen">
-      <div className="px-8 pt-8 pb-4 flex items-center justify-between">
-        <div>
-          <h1 className="text-white text-2xl font-extrabold">
-            {t("Mes réservations", "My reservations")}
-          </h1>
-          <p className="text-white/60 mt-1 text-sm">
-            {t("Suivez et gérez toutes vos réservations.", "Track and manage all your reservations.")}
-          </p>
-        </div>
-        <button
-          onClick={() => setShowModal(true)}
-          className="flex items-center gap-2 bg-white/15 text-white text-sm font-medium px-5 py-2.5 rounded-sm hover:opacity-90 transition-opacity"
-        >
-          <Plus size={16} strokeWidth={1.5} />
-          {t("Nouvelle réservation", "New reservation")}
-        </button>
-      </div>
-
-      {/* Filters */}
-      <div className="px-8 pb-6 flex items-center gap-3">
-        {["toutes", "confirmée", "en attente", "refusée"].map((f) => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors capitalize ${
-              filter === f ? "bg-white/15 text-white" : "bg-white/[0.05] text-white/60 hover:bg-white/[0.05]"
-            }`}
-          >
-            {statusLabel(f, t)}
-          </button>
-        ))}
-      </div>
-
-      {/* Table */}
-      <div className="px-8 pb-8">
-        <div className="bg-white/[0.07] rounded-md editorial-shadow overflow-hidden">
-          <div className="tc-stack overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-white/[0.05]">
-                  <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60">{t("Établissement", "Venue")}</th>
-                  <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60">{t("Client", "Guest")}</th>
-                  <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60">{t("Couverts", "Covers")}</th>
-                  <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60">{t("Table", "Table")}</th>
-                  <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60">{t("Date", "Date")}</th>
-                  <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60">{t("Statut", "Status")}</th>
-                  <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60">{t("Commission", "Commission")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((res, i) => (
-                  <tr key={res.id} className={i % 2 === 0 ? "bg-white/[0.07]" : "bg-white/[0.05]/50"}>
-                    <td data-head className="px-6 py-3.5">
-                      <p className="text-white font-medium">{res.venue}</p>
-                      <p className="text-xs text-white/60">{res.city}</p>
-                    </td>
-                    <td data-label={t("Client", "Guest")} className="px-6 py-3.5 text-white">{res.client}</td>
-                    <td data-label={t("Couverts", "Covers")} className="px-6 py-3.5 text-white">{res.guests}</td>
-                    <td data-label={t("Table", "Table")} className="px-6 py-3.5 text-white">{valueLabel(res.table, t)}</td>
-                    <td data-label={t("Date", "Date")} className="px-6 py-3.5 text-white/60">{valueLabel(res.date, t)} - {valueLabel(res.time, t)}</td>
-                    <td data-label={t("Statut", "Status")} className="px-6 py-3.5">
-                      <span className={`inline-flex items-center gap-1 text-[0.625rem] font-semibold px-2 py-0.5 rounded-full ${statusBadge(res.status)}`}>
-                        {statusIcon(res.status)}
-                        {statusLabel(res.status, t)}
-                      </span>
-                    </td>
-                    <td data-label={t("Commission", "Commission")} className="px-6 py-3.5 text-white font-medium">{valueLabel(res.commission, t)}</td>
-                  </tr>
-                ))}
-                {filtered.length === 0 && (
-                  <tr>
-                    <td colSpan={7} className="px-6 py-12 text-center text-sm text-white/60">
-                      {t("Aucune réservation trouvée", "No reservations found")}
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      {/* New Reservation Modal */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white/[0.07] rounded-xl shadow-xl w-full max-w-md mx-4 p-6">
-            <div className="flex items-center justify-between mb-5">
-              <h2 className="text-lg font-bold text-white">
-                {t("Nouvelle réservation", "New reservation")}
-              </h2>
-              <button
-                onClick={() => { setShowModal(false); setErrors({}); }}
-                aria-label={t("Fermer", "Close")}
-                className="p-1 rounded-lg text-white/60 hover:text-white hover:bg-white/[0.05] transition-colors"
-              >
-                <X size={18} strokeWidth={1.5} />
-              </button>
-            </div>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-xs font-medium text-white/60 mb-1">
-                  {t("Établissement *", "Venue *")}
-                </label>
-                <select
-                  value={newVenue}
-                  onChange={(e) => {
-                    setNewVenue(e.target.value);
-                    clearError("venue");
-                  }}
-                  className="w-full px-3 py-2 text-sm bg-white/[0.05] border-none rounded-lg text-white font-ui focus:ring-1 focus:ring-white/30 focus:outline-none"
-                >
-                  {venueOptions.map((v) => (
-                    <option key={v} value={v}>{v}</option>
-                  ))}
-                </select>
-                {errors.venue && <p className="text-xs text-red-500 mt-1">{errors.venue}</p>}
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-white/60 mb-1">
-                  {t("Nom du client *", "Guest name *")}
-                </label>
-                <input
-                  type="text"
-                  value={newClient}
-                  onChange={(e) => {
-                    setNewClient(e.target.value);
-                    clearError("client");
-                  }}
-                  placeholder={t("Ex: Mohamed Tazi", "e.g. Mohamed Tazi")}
-                  className="w-full px-3 py-2 text-sm bg-white/[0.05] border-none rounded-lg text-white placeholder:text-white/60/50 font-ui focus:ring-1 focus:ring-white/30 focus:outline-none"
-                />
-                {errors.client && <p className="text-xs text-red-500 mt-1">{errors.client}</p>}
-              </div>
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <label className="block text-xs font-medium text-white/60 mb-1">
-                    {t("Couverts", "Covers")}
-                  </label>
-                  <input
-                    type="number"
-                    value={newGuests}
-                    onChange={(e) => {
-                      setNewGuests(e.target.value);
-                      clearError("guests");
-                    }}
-                    placeholder="4"
-                    min="1"
-                    className="w-full px-3 py-2 text-sm bg-white/[0.05] border-none rounded-lg text-white placeholder:text-white/60/50 font-ui focus:ring-1 focus:ring-white/30 focus:outline-none"
-                  />
-                  {errors.guests && <p className="text-xs text-red-500 mt-1">{errors.guests}</p>}
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-white/60 mb-1">
-                    {t("Date", "Date")}
-                  </label>
-                  <input
-                    type="text"
-                    value={newDate}
-                    onChange={(e) => {
-                      setNewDate(e.target.value);
-                      clearError("date");
-                    }}
-                    placeholder={t("12 Avr.", "12 Apr")}
-                    className="w-full px-3 py-2 text-sm bg-white/[0.05] border-none rounded-lg text-white placeholder:text-white/60/50 font-ui focus:ring-1 focus:ring-white/30 focus:outline-none"
-                  />
-                  {errors.date && <p className="text-xs text-red-500 mt-1">{errors.date}</p>}
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-white/60 mb-1">
-                    {t("Heure", "Time")}
-                  </label>
-                  <input
-                    type="text"
-                    value={newTime}
-                    onChange={(e) => setNewTime(e.target.value)}
-                    placeholder="22:00"
-                    className="w-full px-3 py-2 text-sm bg-white/[0.05] border-none rounded-lg text-white placeholder:text-white/60/50 font-ui focus:ring-1 focus:ring-white/30 focus:outline-none"
-                  />
-                </div>
-              </div>
-              <button
-                type="submit"
-                className="w-full bg-white/15 text-white text-sm font-medium py-2.5 rounded-lg hover:opacity-90 transition-opacity"
-              >
-                {t("Créer la réservation", "Create reservation")}
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Toast */}
-      {toast && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-white/15-dark text-white px-4 py-3 rounded-md shadow-lg">
-          <Check size={16} strokeWidth={2} />
-          <span className="text-sm font-medium">{toast}</span>
-        </div>
-      )}
-    </div>
+    <Suspense fallback={<PageSkeleton kpis={4} rows={8} />}>
+      <ReservationsContent />
+    </Suspense>
   );
 }
 
-export default function ConciergeReservationsPage() {
-  /* useSearchParams exige une frontiere Suspense au prerendu. */
+const ALL_LINKS = "tous";
+
+/* Réservations du concierge, suivies de la demande à la commission : le
+   statut et l'addition sont renseignés par l'établissement, la commission
+   en découle. Filtres, recherche et fiche ouverte vivent dans l'URL
+   (?statut=, ?periode=, ?lien=, ?q=, ?id=). */
+function ReservationsContent() {
+  const t = useT();
+  const locale = useLocale();
+  const { reservations, qrCodes, isLoading, failed, reload } = useConciergeSpace();
+  const f = useConciergeReservationFilters(reservations);
+
+  if (isLoading) return <PageSkeleton kpis={4} rows={8} />;
+
+  const linkLabel = t("Lien", "Link");
+  const header = (
+    <PageHeader
+      title={t("Réservations", "Reservations")}
+      description={t(
+        "Chaque demande passée par vos liens, en temps réel. L'établissement confirme avec votre client puis saisit l'addition ; votre commission en découle.",
+        "Every request made through your links, in real time. The venue confirms with your guest, then enters the bill; your commission follows from it."
+      )}
+      actions={
+        <Button
+          icon={Download}
+          onClick={() => exportReservationsCsv(f.filtered, t, locale, linkLabel)}
+          disabled={f.filtered.length === 0}
+        >
+          {t("Exporter", "Export")} ({f.filtered.length})
+        </Button>
+      }
+    />
+  );
+
+  if (loadFailed(failed, reservations, qrCodes))
+    return (
+      <>
+        {header}
+        <ConciergeLoadError onRetry={reload} />
+      </>
+    );
+
+  const count = (s: StatusFilter) =>
+    s === "toutes" ? reservations.length : reservations.filter((r) => r.status === s).length;
+  const live = reservations.filter(isLive);
+  const todays = live.filter((r) => r.reservation_date === f.today).length;
+  const upcoming = live.filter((r) => r.reservation_date > f.today).length;
+  const awaitingBill = live.filter((r) => r.amount_spent === null && r.reservation_date < f.today).length;
+  const earned = reservations.filter(hasCommission);
+
   return (
-    <Suspense fallback={<TableSkeleton />}>
-      <ConciergeReservations />
-    </Suspense>
+    <>
+      {header}
+
+      <KpiGrid
+        items={[
+          {
+            label: t("En attente", "Pending"),
+            value: formatNumber(count("en attente"), locale),
+            hint: t("de confirmation par l'établissement", "confirmation by the venue"),
+            icon: CalendarDays,
+            tone: "amber",
+          },
+          {
+            label: t("Aujourd'hui", "Today"),
+            value: formatNumber(todays, locale),
+            hint: t(`${upcoming} à venir`, `${upcoming} upcoming`),
+            icon: Clock,
+            tone: "sky",
+          },
+          {
+            label: t("Addition attendue", "Bill awaited"),
+            value: formatNumber(awaitingBill, locale),
+            hint: t(
+              `${plural(awaitingBill, "sortie passée", "sorties passées")} sans montant saisi`,
+              `past ${plural(awaitingBill, "outing", undefined, "en")} with no amount entered`
+            ),
+            icon: Receipt,
+            tone: "violet",
+          },
+          {
+            label: t("Commissions", "Commissions"),
+            value: formatMad(
+              earned.reduce((s, r) => s + r.commission, 0),
+              true,
+              locale
+            ),
+            hint: t(
+              `sur ${earned.length} ${plural(earned.length, "addition saisie", "additions saisies")}`,
+              `from ${earned.length} ${plural(earned.length, "bill", undefined, "en")} entered`
+            ),
+            icon: Coins,
+            tone: "emerald",
+          },
+        ]}
+      />
+
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <Segmented<StatusFilter>
+            label={t("Statut", "Status")}
+            value={f.status}
+            onChange={f.setStatus}
+            options={[
+              { value: "toutes", label: t("Toutes", "All"), count: count("toutes") },
+              { value: "en attente", label: t("En attente", "Pending"), count: count("en attente") },
+              { value: "confirmée", label: t("Confirmées", "Confirmed"), count: count("confirmée") },
+              { value: "annulée", label: t("Annulées", "Cancelled"), count: count("annulée") },
+              { value: "no-show", label: statusLabel("no-show", locale), count: count("no-show") },
+            ]}
+          />
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <SearchInput
+              value={f.search}
+              onChange={f.setSearch}
+              placeholder={t("Client, téléphone, établissement…", "Guest, phone, venue…")}
+              className="w-full sm:w-64"
+            />
+            {qrCodes.length > 1 && (
+              <Select
+                label={linkLabel}
+                value={f.linkId && qrCodes.some((q) => q.id === f.linkId) ? f.linkId : ALL_LINKS}
+                onChange={(v) => f.setLinkId(v === ALL_LINKS ? null : v)}
+                className="w-full sm:w-48"
+                options={[
+                  { value: ALL_LINKS, label: t("Tous les liens", "All links") },
+                  ...qrCodes.map((q) => ({ value: q.id, label: q.label })),
+                ]}
+              />
+            )}
+          </div>
+        </div>
+        <Segmented<Period>
+          size="sm"
+          label={t("Période", "Period")}
+          value={f.period}
+          onChange={f.setPeriod}
+          className="self-start"
+          options={[
+            { value: "aujourdhui", label: t("Aujourd'hui", "Today") },
+            { value: "avenir", label: t("À venir", "Upcoming") },
+            { value: "7j", label: t("± 7 jours", "± 7 days") },
+            { value: "30j", label: t("± 30 jours", "± 30 days") },
+            { value: "tout", label: t("Tout l'historique", "Full history") },
+          ]}
+        />
+      </div>
+
+      <Card padded={false} as="div">
+        {f.filtered.length > 0 ? (
+          <ReservationsTable
+            rows={f.filtered}
+            today={f.today}
+            showLink={qrCodes.length > 1}
+            onOpen={f.setOpenId}
+          />
+        ) : reservations.length === 0 ? (
+          <EmptyState
+            icon={Link2}
+            title={t("Aucune réservation pour le moment", "No reservations yet")}
+            description={t(
+              "Dès qu'un client réserve depuis l'un de vos liens ou de vos QR, la demande apparaît ici.",
+              "As soon as a guest books through one of your links or QR codes, the request appears here."
+            )}
+            action={
+              <LinkButton href={qrCodes.length > 0 ? "/concierge/liens" : "/concierge"} variant="primary" icon={Link2}>
+                {qrCodes.length > 0 ? t("Mes liens", "My links") : t("Créer mon lien", "Create my link")}
+              </LinkButton>
+            }
+          />
+        ) : (
+          <EmptyState
+            icon={CalendarDays}
+            title={t("Aucune réservation ne correspond", "No reservations match")}
+            description={t(
+              "Essayez un autre statut, une autre période ou une autre recherche.",
+              "Try another status, period or search."
+            )}
+            action={<Button onClick={f.reset}>{t("Réinitialiser les filtres", "Reset filters")}</Button>}
+          />
+        )}
+      </Card>
+
+      <InfoNote icon={Info}>
+        {t(
+          "La confirmation se fait entre votre client et l'établissement. Le statut et l'addition sont renseignés par l'établissement (ou sa caisse). Votre commission se calcule dès que l'addition est connue : ",
+          "Confirmation happens between your guest and the venue. The status and the bill are entered by the venue (or its till). Your commission is calculated as soon as the bill is known: "
+        )}
+        {commissionRule(commissionRates(reservations), locale)}.
+      </InfoNote>
+
+      <ReservationDrawer
+        reservation={f.open}
+        onClose={() => f.setOpenId(null)}
+        qrHref={() => "/concierge/liens"}
+        labels={{
+          location: linkLabel,
+          viewLocation: t("Voir mes liens", "View my links"),
+          deleted: t("Lien supprimé", "Deleted link"),
+        }}
+        extra={f.open ? <StageTracker r={f.open} /> : null}
+      />
+    </>
   );
 }

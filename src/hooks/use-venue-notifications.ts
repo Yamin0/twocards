@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useAuthUser } from "@/hooks/use-auth-user";
-import { useT } from "@/lib/i18n/client";
 
 export type VenueNotificationKind = "reservation" | "rating" | "pos";
 
@@ -30,7 +29,6 @@ let channelSeq = 0;
    et purge, rien d'autre. Toute erreur laisse unreadCount à 0 : le layout
    qui monte ce hook ne doit jamais casser. */
 export function useVenueNotifications() {
-  const t = useT();
   const { userId, isLoading: authLoading } = useAuthUser();
   const [notifications, setNotifications] = useState<
     VenueNotification[] | null
@@ -105,23 +103,14 @@ export function useVenueNotifications() {
   const clearAll = useCallback(async () => {
     const before = currentRef.current;
     if (!before || before.length === 0) return;
-    if (
-      !window.confirm(
-        t(
-          "Supprimer définitivement toutes les notifications ?",
-          "Permanently delete all notifications?",
-        )
-      )
-    ) {
-      return;
-    }
     setNotifications([]);
     const { error } = await createClient()
       .from("venue_notifications")
       .delete()
       .gte("id", 0);
     if (error) setNotifications(before);
-  }, [t]);
+    return !error;
+  }, []);
 
   return {
     notifications,

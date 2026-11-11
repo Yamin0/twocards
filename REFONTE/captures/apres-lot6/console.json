@@ -1,0 +1,162 @@
+{
+  "accueil-fr-390.png": {
+    "final": "/ | Un seul QR code, de la chambre à la commission | twocards.",
+    "errors": []
+  },
+  "hotels-fr-390.png": {
+    "final": "/hotels | Hôtels et riads : le service que vos clients demandent le plus | twocards.",
+    "errors": []
+  },
+  "restaurants-fr-390.png": {
+    "final": "/restaurants | Restaurants et établissements : remplissez vos tables à vos conditions | twocards.",
+    "errors": []
+  },
+  "concierges-fr-390.png": {
+    "final": "/concierges | Concierges et RP : chaque apport tracé, chaque commission payée | twocards.",
+    "errors": []
+  },
+  "influenceurs-fr-390.png": {
+    "final": "/influenceurs | Influenceurs : votre goût a déjà de la valeur | twocards.",
+    "errors": []
+  },
+  "signup-fr-390.png": {
+    "final": "/signup | Demander un accès | twocards.",
+    "errors": []
+  },
+  "login-fr-390.png": {
+    "final": "/login | Connexion | twocards.",
+    "errors": []
+  },
+  "forgot-password-fr-390.png": {
+    "final": "/forgot-password | Mot de passe oublié | twocards.",
+    "errors": []
+  },
+  "reset-password-fr-390.png": {
+    "final": "/reset-password | Nouveau mot de passe | twocards.",
+    "errors": []
+  },
+  "legal_cgu-fr-390.png": {
+    "final": "/legal/cgu | Conditions générales d'utilisation | twocards.",
+    "errors": []
+  },
+  "accueil-fr-1440.png": {
+    "final": "/ | Un seul QR code, de la chambre à la commission | twocards.",
+    "errors": []
+  },
+  "hotels-fr-1440.png": {
+    "final": "/hotels | Hôtels et riads : le service que vos clients demandent le plus | twocards.",
+    "errors": []
+  },
+  "restaurants-fr-1440.png": {
+    "final": "/restaurants | Restaurants et établissements : remplissez vos tables à vos conditions | twocards.",
+    "errors": []
+  },
+  "concierges-fr-1440.png": {
+    "final": "/concierges | Concierges et RP : chaque apport tracé, chaque commission payée | twocards.",
+    "errors": []
+  },
+  "influenceurs-fr-1440.png": {
+    "final": "/influenceurs | Influenceurs : votre goût a déjà de la valeur | twocards.",
+    "errors": []
+  },
+  "signup-fr-1440.png": {
+    "final": "/signup | Demander un accès | twocards.",
+    "errors": []
+  },
+  "login-fr-1440.png": {
+    "final": "/login | Connexion | twocards.",
+    "errors": []
+  },
+  "forgot-password-fr-1440.png": {
+    "final": "/forgot-password | Mot de passe oublié | twocards.",
+    "errors": []
+  },
+  "reset-password-fr-1440.png": {
+    "final": "/reset-password | Nouveau mot de passe | twocards.",
+    "errors": []
+  },
+  "legal_cgu-fr-1440.png": {
+    "final": "/legal/cgu | Conditions générales d'utilisation | twocards.",
+    "errors": []
+  },
+  "accueil-en-390.png": {
+    "final": "/ | One QR code, from the room to the commission | twocards.",
+    "errors": []
+  },
+  "hotels-en-390.png": {
+    "final": "/hotels | Hotels and riads: the service your guests ask for most | twocards.",
+    "errors": []
+  },
+  "restaurants-en-390.png": {
+    "final": "/restaurants | Restaurants and venues: fill your tables on your terms | twocards.",
+    "errors": []
+  },
+  "concierges-en-390.png": {
+    "final": "/concierges | Concierges and PRs: every referral tracked, every commission paid | twocards.",
+    "errors": []
+  },
+  "influenceurs-en-390.png": {
+    "final": "/influenceurs | Influencers: your taste already has value | twocards.",
+    "errors": []
+  },
+  "signup-en-390.png": {
+    "final": "/signup | Request access | twocards.",
+    "errors": []
+  },
+  "login-en-390.png": {
+    "final": "/login | Log in | twocards.",
+    "errors": []
+  },
+  "forgot-password-en-390.png": {
+    "final": "/forgot-password | Forgot password | twocards.",
+    "errors": []
+  },
+  "reset-password-en-390.png": {
+    "final": "/reset-password | New password | twocards.",
+    "errors": []
+  },
+  "legal_cgu-en-390.png": {
+    "final": "/legal/cgu | Terms of use | twocards.",
+    "errors": []
+  },
+  "accueil-en-1440.png": {
+    "final": "/ | One QR code, from the room to the commission | twocards.",
+    "errors": []
+  },
+  "hotels-en-1440.png": {
+    "final": "/hotels | Hotels and riads: the service your guests ask for most | twocards.",
+    "errors": []
+  },
+  "restaurants-en-1440.png": {
+    "final": "/restaurants | Restaurants and venues: fill your tables on your terms | twocards.",
+    "errors": []
+  },
+  "concierges-en-1440.png": {
+    "final": "/concierges | Concierges and PRs: every referral tracked, every commission paid | twocards.",
+    "errors": []
+  },
+  "influenceurs-en-1440.png": {
+    "final": "/influenceurs | Influencers: your taste already has value | twocards.",
+    "errors": []
+  },
+  "signup-en-1440.png": {
+    "final": "/signup | Request access | twocards.",
+    "errors": []
+  },
+  "login-en-1440.png": {
+    "final": "/login | Log in | twocards.",
+    "errors": []
+  },
+  "forgot-password-en-1440.png": {
+    "final": "/forgot-password | Forgot password | twocards.",
+    "errors": []
+  },
+  "reset-password-en-1440.png": {
+    "final": "/reset-password | New password | twocards.",
+    "errors": []
+  },
+  "legal_cgu-en-1440.png": {
+    "final": "/legal/cgu | Terms of use | twocards.",
+    "errors": []
+  }
+}

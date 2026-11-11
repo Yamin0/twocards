@@ -1,0 +1,816 @@
+[
+  {
+    "name": "Écran 1 → formulaire → envoi à vide → retour (390 px)",
+    "checks": [
+      {
+        "label": "écran 1 : un seul h1",
+        "ok": true,
+        "detail": "[\"Vous êtes…\"]"
+      },
+      {
+        "label": "écran 1 : « Étape 1 sur 2 »",
+        "ok": true
+      },
+      {
+        "label": "écran 1 : cibles ≥ 44 px, pas de défilement horizontal",
+        "ok": true,
+        "detail": "{\"checked\":4,\"small\":[],\"fields\":[],\"unlabeled\":[],\"overflow\":false}"
+      },
+      {
+        "label": "hotel : un clic ouvre le formulaire, un seul h1, focus sur le titre",
+        "ok": true,
+        "detail": "Inscrire votre hôtel"
+      },
+      {
+        "label": "hotel : champs visibles = obligatoires seulement",
+        "ok": true,
+        "detail": "{\"venue-name\":\"text / organization / - / requis\",\"city\":\"text / address-level2 / - / requis\",\"fullname\":\"text / name / - / requis\",\"email\":\"email / email / email / requis\",\"password\":\"password / new-password / - / requis\"}"
+      },
+      {
+        "label": "hotel : un message par champ obligatoire",
+        "ok": true,
+        "detail": "venue-name: Indiquez le nom de votre hôtel. ; city: Indiquez votre ville. ; fullname: Indiquez votre nom complet. ; email: Indiquez votre e-mail. ; password: 8 caractères minimum | Le mot de passe doit contenir au moins 8 caractères."
+      },
+      {
+        "label": "hotel : focus sur la première erreur",
+        "ok": true,
+        "detail": "venue-name"
+      },
+      {
+        "label": "hotel : aucune requête d'authentification",
+        "ok": true
+      },
+      {
+        "label": "hotel : cibles ≥ 44 px, champs à 16 px, étiquettes",
+        "ok": true,
+        "detail": "{\"checked\":9,\"small\":[],\"fields\":[],\"unlabeled\":[],\"overflow\":false}"
+      },
+      {
+        "label": "hotel : l'erreur s'efface à la correction",
+        "ok": true
+      },
+      {
+        "label": "hotel : retour à l'écran 1, focus sur le titre",
+        "ok": true
+      },
+      {
+        "label": "etablissement : un clic ouvre le formulaire, un seul h1, focus sur le titre",
+        "ok": true,
+        "detail": "Inscrire votre établissement"
+      },
+      {
+        "label": "etablissement : champs visibles = obligatoires seulement",
+        "ok": true,
+        "detail": "{\"venue-name\":\"text / organization / - / requis\",\"city\":\"text / address-level2 / - / requis\",\"fullname\":\"text / name / - / requis\",\"email\":\"email / email / email / requis\",\"password\":\"password / new-password / - / requis\"}"
+      },
+      {
+        "label": "etablissement : un message par champ obligatoire",
+        "ok": true,
+        "detail": "venue-name: Indiquez le nom de votre établissement. ; city: Indiquez votre ville. ; fullname: Indiquez votre nom complet. ; email: Indiquez votre e-mail. ; password: 8 caractères minimum | Le mot de passe doit contenir au moins 8 caractères."
+      },
+      {
+        "label": "etablissement : focus sur la première erreur",
+        "ok": true,
+        "detail": "venue-name"
+      },
+      {
+        "label": "etablissement : aucune requête d'authentification",
+        "ok": true
+      },
+      {
+        "label": "etablissement : cibles ≥ 44 px, champs à 16 px, étiquettes",
+        "ok": true,
+        "detail": "{\"checked\":17,\"small\":[],\"fields\":[],\"unlabeled\":[],\"overflow\":false}"
+      },
+      {
+        "label": "etablissement : l'erreur s'efface à la correction",
+        "ok": true
+      },
+      {
+        "label": "etablissement : retour à l'écran 1, focus sur le titre",
+        "ok": true
+      },
+      {
+        "label": "concierge : un clic ouvre le formulaire, un seul h1, focus sur le titre",
+        "ok": true,
+        "detail": "Créer votre compte concierge"
+      },
+      {
+        "label": "concierge : champs visibles = obligatoires seulement",
+        "ok": true,
+        "detail": "{\"fullname\":\"text / name / - / requis\",\"email\":\"email / email / email / requis\",\"password\":\"password / new-password / - / requis\"}"
+      },
+      {
+        "label": "concierge : un message par champ obligatoire",
+        "ok": true,
+        "detail": "fullname: Indiquez votre nom complet. ; email: Indiquez votre e-mail. ; password: 8 caractères minimum | Le mot de passe doit contenir au moins 8 caractères."
+      },
+      {
+        "label": "concierge : focus sur la première erreur",
+        "ok": true,
+        "detail": "fullname"
+      },
+      {
+        "label": "concierge : aucune requête d'authentification",
+        "ok": true
+      },
+      {
+        "label": "concierge : cibles ≥ 44 px, champs à 16 px, étiquettes",
+        "ok": true,
+        "detail": "{\"checked\":7,\"small\":[],\"fields\":[],\"unlabeled\":[],\"overflow\":false}"
+      },
+      {
+        "label": "concierge : l'erreur s'efface à la correction",
+        "ok": true
+      },
+      {
+        "label": "concierge : retour à l'écran 1, focus sur le titre",
+        "ok": true
+      },
+      {
+        "label": "influenceur : un clic ouvre le formulaire, un seul h1, focus sur le titre",
+        "ok": true,
+        "detail": "Créer votre compte créateur"
+      },
+      {
+        "label": "influenceur : champs visibles = obligatoires seulement",
+        "ok": true,
+        "detail": "{\"instagram\":\"text / off / - / requis\",\"fullname\":\"text / name / - / requis\",\"email\":\"email / email / email / requis\",\"password\":\"password / new-password / - / requis\"}"
+      },
+      {
+        "label": "influenceur : un message par champ obligatoire",
+        "ok": true,
+        "detail": "instagram: Indiquez votre compte Instagram. ; fullname: Indiquez votre nom complet. ; email: Indiquez votre e-mail. ; password: 8 caractères minimum | Le mot de passe doit contenir au moins 8 caractères."
+      },
+      {
+        "label": "influenceur : focus sur la première erreur",
+        "ok": true,
+        "detail": "instagram"
+      },
+      {
+        "label": "influenceur : aucune requête d'authentification",
+        "ok": true
+      },
+      {
+        "label": "influenceur : cibles ≥ 44 px, champs à 16 px, étiquettes",
+        "ok": true,
+        "detail": "{\"checked\":8,\"small\":[],\"fields\":[],\"unlabeled\":[],\"overflow\":false}"
+      },
+      {
+        "label": "influenceur : l'erreur s'efface à la correction",
+        "ok": true
+      },
+      {
+        "label": "influenceur : retour à l'écran 1, focus sur le titre",
+        "ok": true
+      },
+      {
+        "label": "aucune erreur console",
+        "ok": true
+      }
+    ]
+  },
+  {
+    "name": "Écran 1 → formulaire → envoi à vide → retour (1440 px)",
+    "checks": [
+      {
+        "label": "écran 1 : un seul h1",
+        "ok": true,
+        "detail": "[\"Vous êtes…\"]"
+      },
+      {
+        "label": "écran 1 : « Étape 1 sur 2 »",
+        "ok": true
+      },
+      {
+        "label": "écran 1 : cibles ≥ 44 px, pas de défilement horizontal",
+        "ok": true,
+        "detail": "{\"checked\":4,\"small\":[],\"fields\":[],\"unlabeled\":[],\"overflow\":false}"
+      },
+      {
+        "label": "hotel : un clic ouvre le formulaire, un seul h1, focus sur le titre",
+        "ok": true,
+        "detail": "Inscrire votre hôtel"
+      },
+      {
+        "label": "hotel : champs visibles = obligatoires seulement",
+        "ok": true,
+        "detail": "{\"venue-name\":\"text / organization / - / requis\",\"city\":\"text / address-level2 / - / requis\",\"fullname\":\"text / name / - / requis\",\"email\":\"email / email / email / requis\",\"password\":\"password / new-password / - / requis\"}"
+      },
+      {
+        "label": "hotel : un message par champ obligatoire",
+        "ok": true,
+        "detail": "venue-name: Indiquez le nom de votre hôtel. ; city: Indiquez votre ville. ; fullname: Indiquez votre nom complet. ; email: Indiquez votre e-mail. ; password: 8 caractères minimum | Le mot de passe doit contenir au moins 8 caractères."
+      },
+      {
+        "label": "hotel : focus sur la première erreur",
+        "ok": true,
+        "detail": "venue-name"
+      },
+      {
+        "label": "hotel : aucune requête d'authentification",
+        "ok": true
+      },
+      {
+        "label": "hotel : cibles ≥ 44 px, champs à 16 px, étiquettes",
+        "ok": true,
+        "detail": "{\"checked\":9,\"small\":[],\"fields\":[],\"unlabeled\":[],\"overflow\":false}"
+      },
+      {
+        "label": "hotel : l'erreur s'efface à la correction",
+        "ok": true
+      },
+      {
+        "label": "hotel : retour à l'écran 1, focus sur le titre",
+        "ok": true
+      },
+      {
+        "label": "etablissement : un clic ouvre le formulaire, un seul h1, focus sur le titre",
+        "ok": true,
+        "detail": "Inscrire votre établissement"
+      },
+      {
+        "label": "etablissement : champs visibles = obligatoires seulement",
+        "ok": true,
+        "detail": "{\"venue-name\":\"text / organization / - / requis\",\"city\":\"text / address-level2 / - / requis\",\"fullname\":\"text / name / - / requis\",\"email\":\"email / email / email / requis\",\"password\":\"password / new-password / - / requis\"}"
+      },
+      {
+        "label": "etablissement : un message par champ obligatoire",
+        "ok": true,
+        "detail": "venue-name: Indiquez le nom de votre établissement. ; city: Indiquez votre ville. ; fullname: Indiquez votre nom complet. ; email: Indiquez votre e-mail. ; password: 8 caractères minimum | Le mot de passe doit contenir au moins 8 caractères."
+      },
+      {
+        "label": "etablissement : focus sur la première erreur",
+        "ok": true,
+        "detail": "venue-name"
+      },
+      {
+        "label": "etablissement : aucune requête d'authentification",
+        "ok": true
+      },
+      {
+        "label": "etablissement : cibles ≥ 44 px, champs à 16 px, étiquettes",
+        "ok": true,
+        "detail": "{\"checked\":17,\"small\":[],\"fields\":[],\"unlabeled\":[],\"overflow\":false}"
+      },
+      {
+        "label": "etablissement : l'erreur s'efface à la correction",
+        "ok": true
+      },
+      {
+        "label": "etablissement : retour à l'écran 1, focus sur le titre",
+        "ok": true
+      },
+      {
+        "label": "concierge : un clic ouvre le formulaire, un seul h1, focus sur le titre",
+        "ok": true,
+        "detail": "Créer votre compte concierge"
+      },
+      {
+        "label": "concierge : champs visibles = obligatoires seulement",
+        "ok": true,
+        "detail": "{\"fullname\":\"text / name / - / requis\",\"email\":\"email / email / email / requis\",\"password\":\"password / new-password / - / requis\"}"
+      },
+      {
+        "label": "concierge : un message par champ obligatoire",
+        "ok": true,
+        "detail": "fullname: Indiquez votre nom complet. ; email: Indiquez votre e-mail. ; password: 8 caractères minimum | Le mot de passe doit contenir au moins 8 caractères."
+      },
+      {
+        "label": "concierge : focus sur la première erreur",
+        "ok": true,
+        "detail": "fullname"
+      },
+      {
+        "label": "concierge : aucune requête d'authentification",
+        "ok": true
+      },
+      {
+        "label": "concierge : cibles ≥ 44 px, champs à 16 px, étiquettes",
+        "ok": true,
+        "detail": "{\"checked\":7,\"small\":[],\"fields\":[],\"unlabeled\":[],\"overflow\":false}"
+      },
+      {
+        "label": "concierge : l'erreur s'efface à la correction",
+        "ok": true
+      },
+      {
+        "label": "concierge : retour à l'écran 1, focus sur le titre",
+        "ok": true
+      },
+      {
+        "label": "influenceur : un clic ouvre le formulaire, un seul h1, focus sur le titre",
+        "ok": true,
+        "detail": "Créer votre compte créateur"
+      },
+      {
+        "label": "influenceur : champs visibles = obligatoires seulement",
+        "ok": true,
+        "detail": "{\"instagram\":\"text / off / - / requis\",\"fullname\":\"text / name / - / requis\",\"email\":\"email / email / email / requis\",\"password\":\"password / new-password / - / requis\"}"
+      },
+      {
+        "label": "influenceur : un message par champ obligatoire",
+        "ok": true,
+        "detail": "instagram: Indiquez votre compte Instagram. ; fullname: Indiquez votre nom complet. ; email: Indiquez votre e-mail. ; password: 8 caractères minimum | Le mot de passe doit contenir au moins 8 caractères."
+      },
+      {
+        "label": "influenceur : focus sur la première erreur",
+        "ok": true,
+        "detail": "instagram"
+      },
+      {
+        "label": "influenceur : aucune requête d'authentification",
+        "ok": true
+      },
+      {
+        "label": "influenceur : cibles ≥ 44 px, champs à 16 px, étiquettes",
+        "ok": true,
+        "detail": "{\"checked\":8,\"small\":[],\"fields\":[],\"unlabeled\":[],\"overflow\":false}"
+      },
+      {
+        "label": "influenceur : l'erreur s'efface à la correction",
+        "ok": true
+      },
+      {
+        "label": "influenceur : retour à l'écran 1, focus sur le titre",
+        "ok": true
+      },
+      {
+        "label": "aucune erreur console",
+        "ok": true
+      }
+    ]
+  },
+  {
+    "name": "Clavier seul : écran 1 → hôtel → champs facultatifs → erreur dans un facultatif",
+    "checks": [
+      {
+        "label": "Tab atteint le premier métier",
+        "ok": true,
+        "detail": "a:twocards. → a:Se connecter → button:EN, English → button:Hôtel ou riadUn QR en chambre, vos clien"
+      },
+      {
+        "label": "Entrée ouvre le formulaire hôtel",
+        "ok": true
+      },
+      {
+        "label": "ordre de tabulation = ordre visuel",
+        "ok": true,
+        "detail": "venue-name → city → fullname → email → password → button:Afficher → button:Ajouter le nombre de chambres, Instagram → button:Créer mon compte"
+      },
+      {
+        "label": "« Afficher » puis « Ajouter… » puis « Créer mon compte » suivent",
+        "ok": true,
+        "detail": "button:Afficher → button:Ajouter le nombre de chambres, Instagram → button:Créer mon compte"
+      },
+      {
+        "label": "Espace déplie les facultatifs, focus sur le premier",
+        "ok": true,
+        "detail": "rooms"
+      },
+      {
+        "label": "facultatifs de l'hôtel : chambres, Instagram, téléphone",
+        "ok": true,
+        "detail": "{\"venue-name\":\"text / organization / - / requis\",\"city\":\"text / address-level2 / - / requis\",\"fullname\":\"text / name / - / requis\",\"email\":\"email / email / email / requis\",\"password\":\"password / new-password / - / requis\",\"rooms\":\"number / off / numeric / facultatif\",\"instagram\":\"text / off / - / facultatif\",\"phone\":\"tel / tel / tel / facultatif\"}"
+      },
+      {
+        "label": "erreurs sur les seuls facultatifs fautifs",
+        "ok": true,
+        "detail": "instagram: Ce nom de compte ne semble pas valide. Exemple : @nom_du_compte ; phone: Ce numéro semble incomplet. Exemple : +212 6 12 34 56 78"
+      },
+      {
+        "label": "focus sur la première (Instagram)",
+        "ok": true,
+        "detail": "instagram"
+      },
+      {
+        "label": "rien n'est parti",
+        "ok": true
+      },
+      {
+        "label": "cibles ≥ 44 px, champs à 16 px, étiquettes (facultatifs dépliés)",
+        "ok": true,
+        "detail": "{\"checked\":11,\"small\":[],\"fields\":[],\"unlabeled\":[],\"overflow\":false}"
+      },
+      {
+        "label": "concierge : facultatifs déjà dépliés car Instagram est rempli",
+        "ok": true
+      },
+      {
+        "label": "aucune erreur console",
+        "ok": true
+      }
+    ]
+  },
+  {
+    "name": "?role=hotel : arrivée directe sur le formulaire (390 px, anglais)",
+    "checks": [
+      {
+        "label": "formulaire affiché d'emblée, un seul h1, « Step 2 of 2 »",
+        "ok": true,
+        "detail": "Register your hotel"
+      },
+      {
+        "label": "obligatoires visibles seulement",
+        "ok": true
+      },
+      {
+        "label": "ouvrir les facultatifs pose le focus sur le premier",
+        "ok": true,
+        "detail": "rooms"
+      },
+      {
+        "label": "cibles ≥ 44 px, champs à 16 px, étiquettes, pas de défilement horizontal",
+        "ok": true,
+        "detail": "{\"checked\":11,\"small\":[],\"fields\":[],\"unlabeled\":[],\"overflow\":false}"
+      },
+      {
+        "label": "retour à l'écran 1",
+        "ok": true
+      },
+      {
+        "label": "aucune erreur console",
+        "ok": true
+      }
+    ],
+    "attrs": {
+      "venue-name": "text / organization / - / requis",
+      "city": "text / address-level2 / - / requis",
+      "fullname": "text / name / - / requis",
+      "email": "email / email / email / requis",
+      "password": "password / new-password / - / requis",
+      "rooms": "number / off / numeric / facultatif",
+      "instagram": "text / off / - / facultatif",
+      "phone": "tel / tel / tel / facultatif"
+    }
+  },
+  {
+    "name": "?role=etablissement : arrivée directe sur le formulaire (390 px, anglais)",
+    "checks": [
+      {
+        "label": "formulaire affiché d'emblée, un seul h1, « Step 2 of 2 »",
+        "ok": true,
+        "detail": "Register your venue"
+      },
+      {
+        "label": "obligatoires visibles seulement",
+        "ok": true
+      },
+      {
+        "label": "ouvrir les facultatifs pose le focus sur le premier",
+        "ok": true,
+        "detail": "instagram"
+      },
+      {
+        "label": "cibles ≥ 44 px, champs à 16 px, étiquettes, pas de défilement horizontal",
+        "ok": true,
+        "detail": "{\"checked\":18,\"small\":[],\"fields\":[],\"unlabeled\":[],\"overflow\":false}"
+      },
+      {
+        "label": "retour à l'écran 1",
+        "ok": true
+      },
+      {
+        "label": "aucune erreur console",
+        "ok": true
+      }
+    ],
+    "attrs": {
+      "venue-name": "text / organization / - / requis",
+      "city": "text / address-level2 / - / requis",
+      "fullname": "text / name / - / requis",
+      "email": "email / email / email / requis",
+      "password": "password / new-password / - / requis",
+      "instagram": "text / off / - / facultatif",
+      "phone": "tel / tel / tel / facultatif"
+    }
+  },
+  {
+    "name": "?role=concierge : arrivée directe sur le formulaire (390 px, anglais)",
+    "checks": [
+      {
+        "label": "formulaire affiché d'emblée, un seul h1, « Step 2 of 2 »",
+        "ok": true,
+        "detail": "Create your concierge account"
+      },
+      {
+        "label": "obligatoires visibles seulement",
+        "ok": true
+      },
+      {
+        "label": "ouvrir les facultatifs pose le focus sur le premier",
+        "ok": true,
+        "detail": "input[radio hotel]:"
+      },
+      {
+        "label": "cibles ≥ 44 px, champs à 16 px, étiquettes, pas de défilement horizontal",
+        "ok": true,
+        "detail": "{\"checked\":12,\"small\":[],\"fields\":[],\"unlabeled\":[],\"overflow\":false}"
+      },
+      {
+        "label": "retour à l'écran 1",
+        "ok": true
+      },
+      {
+        "label": "aucune erreur console",
+        "ok": true
+      }
+    ],
+    "attrs": {
+      "fullname": "text / name / - / requis",
+      "email": "email / email / email / requis",
+      "password": "password / new-password / - / requis",
+      "organization": "text / organization / - / facultatif",
+      "instagram": "text / off / - / facultatif",
+      "phone": "tel / tel / tel / facultatif"
+    }
+  },
+  {
+    "name": "?role=influenceur : arrivée directe sur le formulaire (390 px, anglais)",
+    "checks": [
+      {
+        "label": "formulaire affiché d'emblée, un seul h1, « Step 2 of 2 »",
+        "ok": true,
+        "detail": "Create your creator account"
+      },
+      {
+        "label": "obligatoires visibles seulement",
+        "ok": true
+      },
+      {
+        "label": "ouvrir les facultatifs pose le focus sur le premier",
+        "ok": true,
+        "detail": "input[radio lt10k]:"
+      },
+      {
+        "label": "cibles ≥ 44 px, champs à 16 px, étiquettes, pas de défilement horizontal",
+        "ok": true,
+        "detail": "{\"checked\":12,\"small\":[],\"fields\":[],\"unlabeled\":[],\"overflow\":false}"
+      },
+      {
+        "label": "retour à l'écran 1",
+        "ok": true
+      },
+      {
+        "label": "aucune erreur console",
+        "ok": true
+      }
+    ],
+    "attrs": {
+      "instagram": "text / off / - / requis",
+      "fullname": "text / name / - / requis",
+      "email": "email / email / email / requis",
+      "password": "password / new-password / - / requis",
+      "phone": "tel / tel / tel / facultatif"
+    }
+  },
+  {
+    "name": "hotel : envoi complet, intercepté dans le navigateur",
+    "checks": [
+      {
+        "label": "une seule requête, vers /auth/v1/signup",
+        "ok": true,
+        "detail": "/auth/v1/signup?redirect_to=http%3A%2F%2Flocalhost%3A3000%2Fauth%2Fcallback"
+      },
+      {
+        "label": "options.data : clés, ordre et valeurs attendus",
+        "ok": true,
+        "detail": "{\"full_name\":\"Essai Parcours\",\"phone\":\"+212 6 12 34 56 78\",\"instagram\":\"essai.parcours\",\"role\":\"hotel\",\"signup_profile\":\"hotel\",\"venue_name\":\"Riad Essai\",\"venue_type\":null,\"city\":\"Marrakech\",\"rooms_count\":45,\"organization\":null,\"concierge_type\":null,\"audience_size\":null}"
+      },
+      {
+        "label": "e-mail et redirection",
+        "ok": true,
+        "detail": "essai@example.invalid redirect_to=http://localhost:3000/auth/callback"
+      },
+      {
+        "label": "écran « Vérifiez votre boîte mail », un seul h1, adresse rappelée",
+        "ok": true,
+        "detail": "Vérifiez votre boîte mail."
+      },
+      {
+        "label": "aucune erreur console",
+        "ok": true
+      }
+    ],
+    "sent": {
+      "email": "essai@example.invalid",
+      "password": "(masqué)",
+      "data": {
+        "full_name": "Essai Parcours",
+        "phone": "+212 6 12 34 56 78",
+        "instagram": "essai.parcours",
+        "role": "hotel",
+        "signup_profile": "hotel",
+        "venue_name": "Riad Essai",
+        "venue_type": null,
+        "city": "Marrakech",
+        "rooms_count": 45,
+        "organization": null,
+        "concierge_type": null,
+        "audience_size": null
+      },
+      "gotrue_meta_security": {},
+      "code_challenge": "CgoOl7Jx4ttRiYg-hTI5eX-O0LvOPeX6KBIhvA6W3AU",
+      "code_challenge_method": "s256"
+    }
+  },
+  {
+    "name": "etablissement : envoi complet, intercepté dans le navigateur",
+    "checks": [
+      {
+        "label": "une seule requête, vers /auth/v1/signup",
+        "ok": true,
+        "detail": "/auth/v1/signup?redirect_to=http%3A%2F%2Flocalhost%3A3000%2Fauth%2Fcallback"
+      },
+      {
+        "label": "options.data : clés, ordre et valeurs attendus",
+        "ok": true,
+        "detail": "{\"full_name\":\"Essai Parcours\",\"phone\":\"+212 6 12 34 56 78\",\"instagram\":\"essai.parcours\",\"role\":\"etablissement\",\"signup_profile\":\"etablissement\",\"venue_name\":\"Riad Essai\",\"venue_type\":\"rooftop\",\"city\":\"Marrakech\",\"rooms_count\":null,\"organization\":null,\"concierge_type\":null,\"audience_size\":null}"
+      },
+      {
+        "label": "e-mail et redirection",
+        "ok": true,
+        "detail": "essai@example.invalid redirect_to=http://localhost:3000/auth/callback"
+      },
+      {
+        "label": "écran « Vérifiez votre boîte mail », un seul h1, adresse rappelée",
+        "ok": true,
+        "detail": "Vérifiez votre boîte mail."
+      },
+      {
+        "label": "aucune erreur console",
+        "ok": true
+      }
+    ],
+    "sent": {
+      "email": "essai@example.invalid",
+      "password": "(masqué)",
+      "data": {
+        "full_name": "Essai Parcours",
+        "phone": "+212 6 12 34 56 78",
+        "instagram": "essai.parcours",
+        "role": "etablissement",
+        "signup_profile": "etablissement",
+        "venue_name": "Riad Essai",
+        "venue_type": "rooftop",
+        "city": "Marrakech",
+        "rooms_count": null,
+        "organization": null,
+        "concierge_type": null,
+        "audience_size": null
+      },
+      "gotrue_meta_security": {},
+      "code_challenge": "Xe7f-YvsyX4gs2QeOrGCmS-P7eP_CG1PJr_7JkdU_go",
+      "code_challenge_method": "s256"
+    }
+  },
+  {
+    "name": "concierge : envoi complet, intercepté dans le navigateur",
+    "checks": [
+      {
+        "label": "une seule requête, vers /auth/v1/signup",
+        "ok": true,
+        "detail": "/auth/v1/signup?redirect_to=http%3A%2F%2Flocalhost%3A3000%2Fauth%2Fcallback"
+      },
+      {
+        "label": "options.data : clés, ordre et valeurs attendus",
+        "ok": true,
+        "detail": "{\"full_name\":\"Essai Parcours\",\"phone\":\"+212 6 12 34 56 78\",\"instagram\":\"essai.parcours\",\"role\":\"concierge\",\"signup_profile\":\"concierge\",\"venue_name\":null,\"venue_type\":null,\"city\":null,\"rooms_count\":null,\"organization\":\"Royal Essai\",\"concierge_type\":\"rp\",\"audience_size\":null}"
+      },
+      {
+        "label": "e-mail et redirection",
+        "ok": true,
+        "detail": "essai@example.invalid redirect_to=http://localhost:3000/auth/callback"
+      },
+      {
+        "label": "écran « Vérifiez votre boîte mail », un seul h1, adresse rappelée",
+        "ok": true,
+        "detail": "Vérifiez votre boîte mail."
+      },
+      {
+        "label": "aucune erreur console",
+        "ok": true
+      }
+    ],
+    "sent": {
+      "email": "essai@example.invalid",
+      "password": "(masqué)",
+      "data": {
+        "full_name": "Essai Parcours",
+        "phone": "+212 6 12 34 56 78",
+        "instagram": "essai.parcours",
+        "role": "concierge",
+        "signup_profile": "concierge",
+        "venue_name": null,
+        "venue_type": null,
+        "city": null,
+        "rooms_count": null,
+        "organization": "Royal Essai",
+        "concierge_type": "rp",
+        "audience_size": null
+      },
+      "gotrue_meta_security": {},
+      "code_challenge": "bYw6HFYYLRWKvX1gVDiB4r7xor24sMwST7EYMctYEdc",
+      "code_challenge_method": "s256"
+    }
+  },
+  {
+    "name": "influenceur : envoi complet, intercepté dans le navigateur",
+    "checks": [
+      {
+        "label": "une seule requête, vers /auth/v1/signup",
+        "ok": true,
+        "detail": "/auth/v1/signup?redirect_to=http%3A%2F%2Flocalhost%3A3000%2Fauth%2Fcallback"
+      },
+      {
+        "label": "options.data : clés, ordre et valeurs attendus",
+        "ok": true,
+        "detail": "{\"full_name\":\"Essai Parcours\",\"phone\":\"+212 6 12 34 56 78\",\"instagram\":\"essai.parcours\",\"role\":\"concierge\",\"signup_profile\":\"influenceur\",\"venue_name\":null,\"venue_type\":null,\"city\":null,\"rooms_count\":null,\"organization\":null,\"concierge_type\":null,\"audience_size\":\"10-50k\"}"
+      },
+      {
+        "label": "e-mail et redirection",
+        "ok": true,
+        "detail": "essai@example.invalid redirect_to=http://localhost:3000/auth/callback"
+      },
+      {
+        "label": "écran « Vérifiez votre boîte mail », un seul h1, adresse rappelée",
+        "ok": true,
+        "detail": "Vérifiez votre boîte mail."
+      },
+      {
+        "label": "aucune erreur console",
+        "ok": true
+      }
+    ],
+    "sent": {
+      "email": "essai@example.invalid",
+      "password": "(masqué)",
+      "data": {
+        "full_name": "Essai Parcours",
+        "phone": "+212 6 12 34 56 78",
+        "instagram": "essai.parcours",
+        "role": "concierge",
+        "signup_profile": "influenceur",
+        "venue_name": null,
+        "venue_type": null,
+        "city": null,
+        "rooms_count": null,
+        "organization": null,
+        "concierge_type": null,
+        "audience_size": "10-50k"
+      },
+      "gotrue_meta_security": {},
+      "code_challenge": "DlT6qYf0Z7OTkoPX7QikimWGkGMmOc0YQ5lPhwBlc_M",
+      "code_challenge_method": "s256"
+    }
+  },
+  {
+    "name": "Erreur Supabase « compte déjà existant » (fr)",
+    "checks": [
+      {
+        "label": "message traduit, pas le texte brut du serveur",
+        "ok": true,
+        "detail": "Un compte existe déjà avec cet e-mail. Connectez-vous, ou réinitialisez votre mot de passe."
+      },
+      {
+        "label": "on reste sur le formulaire, saisie conservée",
+        "ok": true
+      },
+      {
+        "label": "aucune autre erreur console",
+        "ok": true
+      }
+    ]
+  },
+  {
+    "name": "Erreur Supabase « compte déjà existant » (en)",
+    "checks": [
+      {
+        "label": "message traduit, pas le texte brut du serveur",
+        "ok": true,
+        "detail": "An account already exists with this email. Log in, or reset your password."
+      },
+      {
+        "label": "on reste sur le formulaire, saisie conservée",
+        "ok": true
+      },
+      {
+        "label": "aucune autre erreur console",
+        "ok": true
+      }
+    ]
+  },
+  {
+    "name": "prefers-reduced-motion : changement d'écran sans déplacement",
+    "checks": [
+      {
+        "label": "aucune translation pendant la transition",
+        "ok": true
+      },
+      {
+        "label": "le formulaire est bien affiché",
+        "ok": true
+      }
+    ]
+  }
+]

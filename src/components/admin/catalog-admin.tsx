@@ -6,7 +6,7 @@ import { ArrowDown, ArrowUp, BookOpen, Eye, EyeOff, MapPin, Pencil, Plus, Search
 import { createClient } from "@/lib/supabase/client";
 import { CATEGORY_KEYS, CATEGORY_LABELS, fallbackImage, type GuestCategoryKey } from "@/lib/guest-catalog";
 import { EMPTY_DRAFT, OfferEditor, type OfferDraft } from "@/components/hotel/offer-editor";
-import { ConfirmDialog, Segmented, Select, Switch } from "@/components/hotel/ui";
+import { ConfirmDialog, Segmented, Select, Switch } from "@/components/app/ui";
 import { cn } from "@/lib/utils";
 import { useLocale, useT } from "@/lib/i18n/client";
 
@@ -204,12 +204,12 @@ export function CatalogAdmin({
     <div className={`${panel} satoshi p-6`}>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10">
-            <BookOpen size={17} className="text-blue-300" />
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-fill-2">
+            <BookOpen size={17} className="text-info" />
           </div>
           <div>
-            <h2 className="text-lg font-semibold text-white">{t("Catalogue réseau", "Network catalogue")}</h2>
-            <p className="text-xs text-white/35">
+            <h2 className="text-lg font-semibold text-ink">{t("Catalogue réseau", "Network catalogue")}</h2>
+            <p className="text-xs text-ink-3">
               {rows === null
                 ? t("Chargement…", "Loading…")
                 : t(
@@ -222,7 +222,7 @@ export function CatalogAdmin({
         <button
           type="button"
           onClick={() => setEditing({ row: null })}
-          className="flex items-center gap-2 rounded-xl bg-blue-500 px-4 py-2.5 text-xs font-semibold text-white transition-colors hover:bg-blue-600"
+          className="flex items-center gap-2 rounded-xl bg-link px-4 py-2.5 text-xs font-semibold text-white transition-colors hover:bg-link-strong"
         >
           <Plus size={14} />
           {t("Nouvelle adresse", "New place")}
@@ -241,12 +241,12 @@ export function CatalogAdmin({
         />
         <div className="flex flex-wrap items-center gap-2">
           <div className="relative">
-            <Search size={13} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-white/35" />
+            <Search size={13} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-3" />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={t("Nom, étiquette, identifiant…", "Name, tag, ID…")}
-              className="h-9 w-56 rounded-lg border border-white/[0.1] bg-white/[0.05] pl-8 pr-3 text-xs text-white placeholder:text-white/25 focus:border-blue-400/40 focus:outline-none"
+              className="h-9 w-56 rounded-lg border border-line bg-fill pl-8 pr-3 text-xs text-ink placeholder:text-ink-4 focus:border-info/25 focus:outline-none"
             />
           </div>
           <Select
@@ -264,7 +264,7 @@ export function CatalogAdmin({
       </div>
 
       {rows !== null && shown.length === 0 && (
-        <p className="py-8 text-center text-sm text-white/35">
+        <p className="py-8 text-center text-sm text-ink-3">
           {rows.length === 0 ? t("Le catalogue est vide.", "The catalogue is empty.") : t("Aucune adresse ne correspond.", "No places match.")}
         </p>
       )}
@@ -276,22 +276,22 @@ export function CatalogAdmin({
             <div
               key={r.slug}
               className={cn(
-                "flex items-center gap-3 rounded-2xl border border-white/[0.08] bg-white/[0.04] p-2.5 pr-3",
+                "flex items-center gap-3 rounded-2xl border border-line bg-fill p-2.5 pr-3",
                 !r.active && "opacity-55"
               )}
             >
-              <div className="relative h-14 w-20 shrink-0 overflow-hidden rounded-lg bg-white/5">
+              <div className="relative h-14 w-20 shrink-0 overflow-hidden rounded-lg bg-fill">
                 <Image src={img} alt="" fill unoptimized={img.startsWith("http")} sizes="80px" className="object-cover" />
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-                  <p className="truncate text-sm font-bold text-white">{r.name}</p>
-                  <span className="rounded-md bg-white/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white/60">
+                  <p className="truncate text-sm font-bold text-ink">{r.name}</p>
+                  <span className="rounded-md bg-fill-2 px-1.5 py-0.5 text-xs font-bold text-ink-2">
                     {categoryLabel(r.category)}
                   </span>
-                  {!r.active && <span className="text-[10px] font-bold uppercase tracking-wider text-amber-300">{t("Masquée", "Hidden")}</span>}
+                  {!r.active && <span className="text-xs font-bold text-warn">{t("Masquée", "Hidden")}</span>}
                 </div>
-                <p className="truncate text-xs text-white/45">
+                <p className="truncate text-xs text-ink-3">
                   {r.tag || t("Sans étiquette", "No tag")}
                   {" · "}
                   <span className="inline-flex items-center gap-0.5">
@@ -299,26 +299,26 @@ export function CatalogAdmin({
                   </span>
                   {r.price ? ` · ${r.price}` : ""}
                   {r.images?.length ? ` · ${r.images.length + 1} photos` : ""}
-                  <span className="font-mono-satoshi text-white/30"> · {r.slug}</span>
+                  <span className="font-mono-satoshi text-ink-3"> · {r.slug}</span>
                 </p>
               </div>
               <div className="flex shrink-0 items-center gap-0.5">
-                <button type="button" onClick={() => move(r, -1)} aria-label={t("Monter", "Move up")} className="rounded-lg p-1.5 text-white/40 hover:bg-white/10 hover:text-white">
+                <button type="button" onClick={() => move(r, -1)} aria-label={t("Monter", "Move up")} className="rounded-lg p-1.5 text-ink-3 hover:bg-fill-2 hover:text-ink">
                   <ArrowUp size={14} />
                 </button>
-                <button type="button" onClick={() => move(r, 1)} aria-label={t("Descendre", "Move down")} className="rounded-lg p-1.5 text-white/40 hover:bg-white/10 hover:text-white">
+                <button type="button" onClick={() => move(r, 1)} aria-label={t("Descendre", "Move down")} className="rounded-lg p-1.5 text-ink-3 hover:bg-fill-2 hover:text-ink">
                   <ArrowDown size={14} />
                 </button>
                 <span className="mx-1 hidden sm:inline-flex">
                   <Switch size="sm" checked={r.active} onChange={() => toggle(r)} label={t(`Proposer ${r.name}`, `Offer ${r.name}`)} />
                 </span>
-                <button type="button" onClick={() => toggle(r)} aria-label={r.active ? t("Masquer", "Hide") : t("Proposer", "Offer")} className="rounded-lg p-1.5 text-white/40 hover:bg-white/10 hover:text-white sm:hidden">
+                <button type="button" onClick={() => toggle(r)} aria-label={r.active ? t("Masquer", "Hide") : t("Proposer", "Offer")} className="rounded-lg p-1.5 text-ink-3 hover:bg-fill-2 hover:text-ink sm:hidden">
                   {r.active ? <EyeOff size={14} /> : <Eye size={14} />}
                 </button>
-                <button type="button" onClick={() => setEditing({ row: r })} aria-label={t("Modifier", "Edit")} className="rounded-lg p-1.5 text-white/60 hover:bg-white/10 hover:text-white">
+                <button type="button" onClick={() => setEditing({ row: r })} aria-label={t("Modifier", "Edit")} className="rounded-lg p-1.5 text-ink-2 hover:bg-fill-2 hover:text-ink">
                   <Pencil size={14} />
                 </button>
-                <button type="button" onClick={() => setToDelete(r)} aria-label={t("Supprimer", "Delete")} className="rounded-lg p-1.5 text-white/40 hover:bg-red-500/15 hover:text-red-300">
+                <button type="button" onClick={() => setToDelete(r)} aria-label={t("Supprimer", "Delete")} className="rounded-lg p-1.5 text-ink-3 hover:bg-danger-soft hover:text-danger">
                   <Trash2 size={14} />
                 </button>
               </div>

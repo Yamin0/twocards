@@ -59,6 +59,45 @@
   --color-input: #eff5f3;
   --color-ring: #13305c;
 
+
+  /* ─── Back-office : jetons sémantiques ──────────────────────────────
+     Chaque utilitaire (text-ink, bg-panel, border-line…) lit une variable
+     --app-* définie plus bas. Une zone sombre (rail, texte sur photo)
+     redéfinit ces variables avec la classe .tc-dark : le même balisage
+     sert aux deux fonds. */
+  --color-canvas: var(--app-canvas);
+  --color-panel: var(--app-panel);
+  --color-fill: var(--app-fill);
+  --color-fill-2: var(--app-fill-2);
+  --color-fill-3: var(--app-fill-3);
+  --color-line: var(--app-line);
+  --color-line-2: var(--app-line-2);
+  --color-ink: var(--app-ink);
+  --color-ink-2: var(--app-ink-2);
+  --color-ink-3: var(--app-ink-3);
+  --color-ink-4: var(--app-ink-4);
+  --color-brand: var(--app-brand);
+  --color-brand-strong: var(--app-brand-strong);
+  --color-on-brand: var(--app-on-brand);
+  --color-link: var(--app-link);
+  --color-link-strong: var(--app-link-strong);
+  --color-link-soft: var(--app-link-soft);
+  --color-ok: var(--app-ok);
+  --color-ok-soft: var(--app-ok-soft);
+  --color-warn: var(--app-warn);
+  --color-warn-soft: var(--app-warn-soft);
+  --color-danger: var(--app-danger);
+  --color-danger-soft: var(--app-danger-soft);
+  --color-info: var(--app-info);
+  --color-info-soft: var(--app-info-soft);
+  --color-plum: var(--app-plum);
+  --color-plum-soft: var(--app-plum-soft);
+  --color-scrim: var(--app-scrim);
+  --color-rail: var(--app-rail);
+
+  --shadow-card: 0 1px 2px rgba(15, 27, 45, 0.04), 0 10px 28px -18px rgba(15, 27, 45, 0.18);
+  --shadow-pop: 0 2px 6px rgba(15, 27, 45, 0.06), 0 24px 60px -24px rgba(15, 27, 45, 0.35);
+
   /* Border Radius */
   --radius-sm: 0.125rem;
   --radius-md: 0.375rem;
@@ -70,6 +109,116 @@
 
 :root {
   --radius: 0.375rem;
+}
+
+
+/* ─── Back-office : valeurs des jetons ──────────────────────────────────
+   Papier clair, encre bleu nuit, rail #13305c. Choisi pour des gens
+   pressés, souvent en plein jour (terrasse, réception) : texte foncé sur
+   fond clair, sans photo ni flou derrière les chiffres. Tous les couples
+   texte / fond ci-dessous tiennent le contraste AA (4,5:1 au moins) :
+   ink 16:1, ink-2 9:1, ink-3 5,6:1 sur blanc. ink-4 est décoratif
+   (filets d'icônes, tirets), jamais du texte à lire. */
+:root {
+  --app-canvas: #f3f5f9;
+  --app-panel: #ffffff;
+  --app-fill: #f1f4f8;
+  --app-fill-2: #e7ecf3;
+  --app-fill-3: #d6dee9;
+  --app-line: #e1e6ee;
+  --app-line-2: #c5cedb;
+  --app-ink: #0f1b2d;
+  --app-ink-2: #3a485c;
+  --app-ink-3: #5c6878;
+  --app-ink-4: #98a2b1;
+  --app-brand: #13305c;
+  --app-brand-strong: #0c2244;
+  --app-on-brand: #ffffff;
+  --app-link: #1f55d6;
+  --app-link-strong: #1846b4;
+  --app-link-soft: #e8effd;
+  --app-ok: #0a7a52;
+  --app-ok-soft: #e1f5ec;
+  --app-warn: #8a5200;
+  --app-warn-soft: #fdf0d5;
+  --app-danger: #b42318;
+  --app-danger-soft: #fde9e7;
+  --app-info: #1f55d6;
+  --app-info-soft: #e8effd;
+  --app-plum: #6d3fc4;
+  --app-plum-soft: #efe8fb;
+  --app-scrim: rgba(15, 27, 45, 0.5);
+  --app-rail: #13305c;
+}
+
+/* Zone sombre : rail de navigation, texte posé sur une photo. */
+.tc-dark {
+  --app-panel: rgba(255, 255, 255, 0.08);
+  --app-fill: rgba(255, 255, 255, 0.08);
+  --app-fill-2: rgba(255, 255, 255, 0.14);
+  --app-fill-3: rgba(255, 255, 255, 0.22);
+  --app-line: rgba(255, 255, 255, 0.14);
+  --app-line-2: rgba(255, 255, 255, 0.28);
+  --app-ink: #ffffff;
+  --app-ink-2: rgba(255, 255, 255, 0.86);
+  --app-ink-3: rgba(255, 255, 255, 0.72);
+  --app-ink-4: rgba(255, 255, 255, 0.45);
+  --app-brand: #ffffff;
+  --app-brand-strong: #e8edf5;
+  --app-on-brand: #13305c;
+  --app-link: #a9c4ff;
+  --app-link-strong: #c6d8ff;
+  --app-link-soft: rgba(169, 196, 255, 0.16);
+  --app-ok: #7be0b3;
+  --app-ok-soft: rgba(123, 224, 179, 0.16);
+  --app-warn: #ffcf70;
+  --app-warn-soft: rgba(255, 207, 112, 0.16);
+  --app-danger: #ffa49b;
+  --app-danger-soft: rgba(255, 164, 155, 0.16);
+  --app-info: #a9c4ff;
+  --app-info-soft: rgba(169, 196, 255, 0.16);
+  --app-plum: #cdb6ff;
+  --app-plum-soft: rgba(205, 182, 255, 0.16);
+  color: var(--app-ink);
+}
+
+/* Coque des espaces connectés. Gotham (Book, seule graisse fournie) pour
+   le titre de page et les grands chiffres ; Suisse Int'l pour tout le
+   reste, titres de section compris. Sans font-synthesis, le navigateur
+   fabriquerait un faux gras de Gotham. */
+.tc-shell {
+  background: var(--app-canvas);
+  color: var(--app-ink);
+  font-family: var(--font-suisse), var(--font-inter), system-ui, sans-serif;
+}
+.tc-shell :is(h2, h3, h4, h5, h6),
+.tc-layer :is(h2, h3, h4, h5, h6) {
+  font-family: var(--font-suisse), var(--font-inter), system-ui, sans-serif;
+}
+.tc-shell :is(h1, .font-display),
+.tc-layer :is(h1, .font-display) {
+  font-family: var(--font-gotham), var(--font-inter), sans-serif;
+  font-weight: 400;
+  font-synthesis: none;
+  letter-spacing: -0.015em;
+}
+.tc-layer {
+  font-family: var(--font-suisse), var(--font-inter), system-ui, sans-serif;
+  color: var(--app-ink);
+}
+/* Chiffres alignés dans les tableaux et les indicateurs. */
+.num {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+/* Anneau de focus unique, visible au clavier seulement. */
+.tc-shell :is(a, button, input, select, textarea, [tabindex]):focus-visible,
+.tc-layer :is(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--app-link);
+  outline-offset: 2px;
+}
+.tc-shell .scrollbar-thin::-webkit-scrollbar-thumb,
+.tc-layer .scrollbar-thin::-webkit-scrollbar-thumb {
+  background: var(--app-line-2);
 }
 
 @layer base {
@@ -92,33 +241,28 @@
   box-shadow: 0 4px 30px rgba(19, 48, 92, 0.04);
 }
 
-/* Hero gradient */
-.hero-gradient {
-  background: linear-gradient(180deg, #13305c 0%, #001b40 100%);
-}
-
-/* Blueprint grid for floor plan */
-.blueprint-grid {
-  background-image: radial-gradient(#eff5f3 1.5px, transparent 1.5px);
-  background-size: 24px 24px;
-}
-
 /* ─── Landing v3 (éditorial Dorsia) ───────────────────────── */
 :root {
-  --hero-subtitle: 210 17% 95%;
   --landing-ivory: #fffdf9;
   --landing-ink: #0d0d0d;
-  --landing-mute: #8d8d8d;
+  /* Gris des textes secondaires : 4,9:1 sur l'ivoire (AA). L'ancien
+     #8d8d8d plafonnait à 3,3:1. */
+  --landing-mute: #6e6e6e;
+  /* Inter n'est plus chargée (elle ne servait que de repli). La variable
+     reste définie pour que les piles « var(--font-x), var(--font-inter) »
+     écrites ailleurs dans ce fichier restent valides : une variable
+     absente invaliderait toute la déclaration font-family. */
+  --font-inter: system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
 /* Piles typographiques landing : Gotham (titres) / Suisse Int'l (textes),
    auto-hébergées via next/font/local. Gotham n'existe qu'en Book (400) :
    les titres restent donc en font-normal. */
 .font-title {
-  font-family: var(--font-gotham), var(--font-inter), sans-serif;
+  font-family: var(--font-gotham), system-ui, sans-serif;
 }
 .font-body {
-  font-family: var(--font-suisse), var(--font-inter), sans-serif;
+  font-family: var(--font-suisse), system-ui, sans-serif;
 }
 
 /* Pile display des dashboards et pages client : Gotham (licence client)
@@ -141,7 +285,7 @@
 .landing-satoshi,
 .landing-satoshi .font-title,
 .landing-satoshi .font-body {
-  font-family: var(--font-satoshi), var(--font-inter), sans-serif;
+  font-family: var(--font-satoshi), system-ui, sans-serif;
 }
 /* La règle globale h1…h6 impose Gotham à tout titre : les titres de la
    landing qui ne portent ni .font-title ni .font-body doivent la lever. */
@@ -150,6 +294,68 @@
 }
 .landing-satoshi .font-title em {
   font-weight: 300;
+}
+
+/* Entrée du héros : un simple glissement, sans opacité. Le titre, l'intro
+   et les boutons sont donc lisibles dès le HTML du serveur, avant (et
+   sans) JavaScript, et comptent tout de suite pour le LCP. */
+@keyframes landing-rise {
+  from {
+    transform: translateY(14px);
+  }
+  to {
+    transform: none;
+  }
+}
+.landing-rise {
+  animation: landing-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+/* Mot tournant d'un titre de héros (RotatingTitleWord) : le mot sort vers
+   le haut dans un léger flou, le suivant monte à sa place. 0,4 s chacun,
+   comme SWAP_MS dans le composant. */
+@keyframes landing-word-out {
+  to {
+    transform: translateY(-0.55em);
+    opacity: 0;
+    filter: blur(5px);
+  }
+}
+@keyframes landing-word-in {
+  from {
+    transform: translateY(0.55em);
+    opacity: 0;
+    filter: blur(5px);
+  }
+}
+.landing-word-out {
+  animation: landing-word-out 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.landing-word-in {
+  animation: landing-word-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+/* Apparition des blocs sous la ligne de flottaison (composant Reveal).
+   L'attribut n'est posé que par le script, et seulement sur un bloc encore
+   hors écran : sans JavaScript, tout reste visible. */
+.landing-satoshi [data-reveal] {
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.landing-satoshi [data-reveal="wait"] {
+  opacity: 0;
+  transform: translateY(20px);
+}
+/* Fondu de la photo du panneau des pages de compte quand elle change. */
+@keyframes landing-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.landing-fade {
+  animation: landing-fade 0.6s ease both;
 }
 
 /* ─── Espace Hôtel & menu client : Satoshi partout ─────────────────────
@@ -188,31 +394,19 @@
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-/* Panneaux du dashboard hôtel : verre sombre, une seule définition. */
-.hotel-panel {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border-radius: 1.25rem;
-}
-.hotel-panel-solid {
-  background: rgba(8, 10, 14, 0.55);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(28px);
-  -webkit-backdrop-filter: blur(28px);
-  border-radius: 1.25rem;
-}
-
-/* Impression des QR codes : une planche par code, fond blanc, rien d'autre. */
+/* Impression (cartes de chambre) : seule la planche sort. La coque, les
+   bandeaux, les toasts et tout ce qui porte .print-hide sont retirés. */
 @media print {
   .print-hide,
-  .hotel-shell-bg,
-  .hotel-shell-aside,
-  .hotel-shell-topbar { display: none !important; }
-  .hotel-shell,
-  .hotel-shell-main {
+  .tc-shell-chrome,
+  .tc-layer { display: none !important; }
+  html,
+  body,
+  .tc-shell,
+  .tc-shell-main {
+    display: block !important;
     height: auto !important;
+    min-height: 0 !important;
     overflow: visible !important;
     background: #fff !important;
     padding: 0 !important;
@@ -228,46 +422,6 @@
   @page { margin: 12mm; }
 }
 
-@keyframes moveBackground {
-  from {
-    background-position: 0% 0%;
-  }
-  to {
-    background-position: 0% -1000%;
-  }
-}
-
-/* Marquees de la section bento (contenu dupliqué → -50%) */
-@keyframes marquee-left {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
-}
-@keyframes marquee-right {
-  from { transform: translateX(-50%); }
-  to { transform: translateX(0); }
-}
-.animate-marquee-left {
-  animation: marquee-left 22s linear infinite;
-}
-.animate-marquee-right {
-  animation: marquee-right 26s linear infinite;
-}
-
-/* Grain photographique léger sur les cartes pleines */
-.noise-overlay {
-  position: relative;
-}
-.noise-overlay::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.55;
-  mix-blend-mode: soft-light;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix type='matrix' values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
-  background-size: 240px 240px;
-}
-
 /* Texte blanc posé sur la vidéo : l'ombre portée assombrit le pourtour des
    glyphes uniquement, ce qui préserve la lisibilité sur les plans clairs
    sans avoir à voiler l'image d'un aplat noir. */
@@ -276,59 +430,6 @@
     0 1px 2px rgba(0, 0, 0, 0.85),
     0 2px 10px rgba(0, 0, 0, 0.65),
     0 4px 30px rgba(0, 0, 0, 0.45);
-}
-
-/* Carrousel en éventail (card-fan-carousel).
-   Les cartes sont centrées par marges négatives et non par translate : GSAP
-   pilote lui-même translate/rotate/scale, un centrage par transform entrerait
-   en conflit. Opacité 0 au départ, GSAP la remonte à l'entrée. */
-.fan-layout {
-  height: 22rem;
-}
-.fan-card {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 8rem;
-  height: 14rem;
-  margin-left: -4rem;
-  margin-top: -7rem;
-  border-radius: 0.9rem;
-  overflow: hidden;
-  background: #e9e5df;
-  box-shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.45);
-  will-change: transform;
-  opacity: 0;
-}
-
-@media (min-width: 480px) {
-  .fan-layout { height: 26rem; }
-  .fan-card {
-    width: 9.5rem; height: 16.6rem;
-    margin-left: -4.75rem; margin-top: -8.3rem;
-  }
-}
-@media (min-width: 640px) {
-  .fan-layout { height: 28rem; }
-  .fan-card {
-    width: 10.5rem; height: 18.4rem;
-    margin-left: -5.25rem; margin-top: -9.2rem;
-  }
-}
-@media (min-width: 768px) {
-  .fan-layout { height: 34rem; }
-  .fan-card {
-    width: 12.5rem; height: 21.9rem;
-    margin-left: -6.25rem; margin-top: -10.95rem;
-    border-radius: 1.1rem;
-  }
-}
-@media (min-width: 1024px) {
-  .fan-layout { height: 38rem; }
-  .fan-card {
-    width: 14rem; height: 24.5rem;
-    margin-left: -7rem; margin-top: -12.25rem;
-  }
 }
 
 /* Accessibilité : coupe les animations décoratives longues */
@@ -343,55 +444,6 @@
   }
 }
 
-.landing-glass {
-  background: rgba(255, 255, 255, 0.01);
-  background-blend-mode: luminosity;
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  border: none;
-  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
-  position: relative;
-  overflow: hidden;
-}
-.landing-glass::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: 1.4px;
-  background: linear-gradient(180deg,
-    rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.15) 20%,
-    rgba(255,255,255,0) 40%, rgba(255,255,255,0) 60%,
-    rgba(255,255,255,0.15) 80%, rgba(255,255,255,0.45) 100%);
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
-}
-
-/* Liquid glass utilities */
-.liquid-glass {
-  background: rgba(255, 255, 255, 0.07);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-}
-
-.liquid-glass-header {
-  background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.liquid-glass-enhanced {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(32px);
-  -webkit-backdrop-filter: blur(32px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-}
-
 /* Scrollbar for glass backgrounds */
 .scrollbar-thin::-webkit-scrollbar {
   width: 4px;
@@ -400,24 +452,8 @@
   background: transparent;
 }
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(127, 127, 127, 0.35);
   border-radius: 9999px;
-}
-
-/* Logo marquee animations */
-@keyframes scroll-left {
-  from { transform: translateX(0); }
-  to { transform: translateX(-33.333%); }
-}
-@keyframes scroll-right {
-  from { transform: translateX(-33.333%); }
-  to { transform: translateX(0); }
-}
-.animate-scroll-left {
-  animation: scroll-left 25s linear infinite;
-}
-.animate-scroll-right {
-  animation: scroll-right 25s linear infinite;
 }
 
 /* ─── Tableaux en cartes sur téléphone ──────────────────────────────────
@@ -452,9 +488,10 @@
   .tc-stack tr {
     margin-bottom: 0.75rem;
     padding: 0.25rem 0;
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: 1px solid var(--app-line);
     border-radius: 1rem;
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--app-panel);
+    box-shadow: var(--shadow-card);
   }
   .tc-stack td {
     display: flex;
@@ -479,11 +516,9 @@
     content: attr(data-label);
     flex: none;
     text-align: left;
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.45);
+    color: var(--app-ink-3);
   }
   /* En-tête de carte et barre d'actions : pleine largeur, sans intitulé. */
   .tc-stack td[data-head] {
@@ -515,126 +550,4 @@
 /* Rien ne doit finir sous la barre d'onglets native. */
 .tc-app .tc-app-scroll {
   padding-bottom: 4.5rem;
-}
-
-
-/* ─── Mode application : les dashboards en clair ───────────────────────
-
-   Les écrans natifs de l'app sont clairs : cartes blanches, encre presque
-   noire, un bleu d'accent. Les pages du site qui s'y ouvrent gardent leur
-   balisage sombre (verre noir, texte blanc) ; ces règles les retraduisent
-   en clair, classe par classe, sans toucher au site vu dans un navigateur.
-   Elles vivent hors des couches Tailwind, donc l'emportent sur les
-   utilitaires. */
-.tc-app .tc-shell {
-  background: #f3f4f6 !important;
-  color: #0f172a;
-}
-.tc-app .tc-shell .tc-app-bg,
-.tc-app .tc-shell .hotel-shell-bg {
-  display: none !important;
-}
-
-/* Panneaux : le verre noir devient une carte blanche. */
-.tc-app .tc-shell [class*="bg-black/"],
-.tc-app .tc-shell .hotel-panel,
-.tc-app .tc-shell .hotel-panel-solid,
-.tc-app .tc-shell [class*="bg-[#0e1116]"],
-.tc-app .tc-shell [class*="bg-[#10131f]"],
-.tc-app .tc-shell [class*="bg-[#0d0f12]"] {
-  background: #ffffff !important;
-  border-color: #e5e7eb !important;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 8px 24px -12px rgba(15, 23, 42, 0.12);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-}
-/* Voile d'une fenêtre modale : il reste un voile, sombre. */
-.tc-app .tc-shell .fixed.inset-0[class*="bg-black/"] {
-  background: rgba(15, 23, 42, 0.45) !important;
-  box-shadow: none;
-}
-/* Surfaces internes (puces, champs, lignes survolées). */
-.tc-app .tc-shell [class*="bg-white/"] {
-  background: #f3f4f6 !important;
-}
-/* Bouton principal blanc sur fond noir → bleu sur fond blanc. */
-.tc-app .tc-shell .bg-white {
-  background: #2f5bea !important;
-  color: #ffffff !important;
-}
-.tc-app .tc-shell .bg-emerald-500,
-.tc-app .tc-shell .bg-amber-400 {
-  color: #ffffff !important;
-}
-
-/* Texte : blanc plein → encre, blanc atténué → gris, très atténué → gris clair. */
-.tc-app .tc-shell [class*="text-white/"] {
-  color: #6b7280 !important;
-}
-.tc-app .tc-shell [class*="text-white/2"],
-.tc-app .tc-shell [class*="text-white/3"],
-.tc-app .tc-shell [class*="text-white/4"] {
-  color: #9ca3af !important;
-}
-.tc-app .tc-shell .text-white {
-  color: #0f172a !important;
-}
-.tc-app .tc-shell input::placeholder,
-.tc-app .tc-shell textarea::placeholder {
-  color: #9ca3af !important;
-}
-.tc-app .tc-shell input,
-.tc-app .tc-shell textarea,
-.tc-app .tc-shell select {
-  color: #0f172a !important;
-}
-.tc-app .tc-shell option {
-  background: #ffffff !important;
-  color: #0f172a;
-}
-
-/* Couleurs d'accent pensées pour le noir, assombries pour le blanc. */
-.tc-app .tc-shell [class*="text-blue-3"],
-.tc-app .tc-shell [class*="text-blue-4"],
-.tc-app .tc-shell [class*="text-sky-2"],
-.tc-app .tc-shell [class*="text-sky-3"] {
-  color: #2f5bea !important;
-}
-.tc-app .tc-shell [class*="text-emerald-3"],
-.tc-app .tc-shell [class*="text-emerald-4"] {
-  color: #059669 !important;
-}
-.tc-app .tc-shell [class*="text-amber-2"],
-.tc-app .tc-shell [class*="text-amber-3"],
-.tc-app .tc-shell [class*="text-amber-4"] {
-  color: #b45309 !important;
-}
-.tc-app .tc-shell [class*="text-red-2"],
-.tc-app .tc-shell [class*="text-red-3"],
-.tc-app .tc-shell [class*="text-red-4"] {
-  color: #dc2626 !important;
-}
-.tc-app .tc-shell [class*="text-purple-3"],
-.tc-app .tc-shell [class*="text-violet-3"] {
-  color: #7c3aed !important;
-}
-
-/* Filets. */
-.tc-app .tc-shell [class*="border-white/"],
-.tc-app .tc-shell .border-white {
-  border-color: #e5e7eb !important;
-}
-.tc-app .tc-shell [class*="divide-white/"] > * + * {
-  border-color: #e5e7eb !important;
-}
-.tc-app .tc-shell .tc-stack tr {
-  border-color: #e5e7eb !important;
-  background: #ffffff !important;
-}
-.tc-app .tc-shell .tc-stack td[data-label]::before {
-  color: #9ca3af;
-}
-/* Barres de défilement discrètes sur fond clair. */
-.tc-app .tc-shell .scrollbar-thin::-webkit-scrollbar-thumb {
-  background: rgba(15, 23, 42, 0.15);
 }

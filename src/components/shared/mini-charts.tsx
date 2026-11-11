@@ -9,7 +9,7 @@ import { useT } from "@/lib/i18n/client";
 
 export function MiniBars({
   data,
-  color = "bg-blue-400/70",
+  color = "bg-info-soft",
   format = (n: number) => String(n),
 }: {
   data: { label: string; value: number }[];
@@ -26,16 +26,16 @@ export function MiniBars({
           className="flex-1 flex flex-col items-center gap-1 min-w-0"
           title={t(`${d.label} : ${format(d.value)}`, `${d.label}: ${format(d.value)}`)}
         >
-          <span className="text-[9px] text-white/50 font-ui tabular-nums">
+          <span className="text-xs text-ink-3 font-ui tabular-nums">
             {d.value > 0 ? format(d.value) : ""}
           </span>
           <div
-            className={`w-full rounded-t-md ${d.value > 0 ? color : "bg-white/10"}`}
+            className={`w-full rounded-t-md ${d.value > 0 ? color : "bg-fill-2"}`}
             style={{
               height: `${Math.max((d.value / max) * 72, 3)}px`,
             }}
           />
-          <span className="text-[9px] text-white/40 font-ui truncate max-w-full">
+          <span className="text-xs text-ink-3 font-ui truncate max-w-full">
             {d.label}
           </span>
         </div>
@@ -62,7 +62,7 @@ export function RatingStars({
           className={
             n <= Math.round(value)
               ? "fill-amber-400 text-amber-400"
-              : "text-white/25"
+              : "text-ink-3"
           }
         />
       ))}
@@ -80,7 +80,7 @@ export function SplitBar({
   const total = segments.reduce((s, x) => s + x.value, 0);
   if (total === 0)
     return (
-      <div className="h-2 rounded-full bg-white/10" aria-hidden />
+      <div className="h-2 rounded-full bg-fill-2" aria-hidden />
     );
   return (
     <div>
@@ -100,7 +100,7 @@ export function SplitBar({
         {segments.map((s) => (
           <span
             key={s.label}
-            className="flex items-center gap-1.5 text-[10px] text-white/50 font-ui"
+            className="flex items-center gap-1.5 text-xs text-ink-3 font-ui"
           >
             <span className={`h-2 w-2 rounded-full ${s.color}`} />
             {s.label} · {s.value}

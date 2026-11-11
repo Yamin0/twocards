@@ -1,283 +1,304 @@
 "use client";
 
-import { useState } from "react";
-import { Download, TrendingUp, Wallet, Clock, Percent, Check, Search } from "lucide-react";
-import { useAuthUser } from "@/hooks/use-auth-user";
-import { TableSkeleton } from "@/components/shared/loading-skeleton";
-import { useToast } from "@/hooks/use-toast";
-import { useT, useIntlLocale } from "@/lib/i18n/client";
+import { useMemo, useState } from "react";
+import { Coins, Download, Hourglass, Percent, TrendingUp, Wallet } from "lucide-react";
+import {
+  Button,
+  Card,
+  EmptyState,
+  InfoNote,
+  KpiGrid,
+  PageHeader,
+  PageSkeleton,
+  Select,
+  Table,
+  Td,
+  Th,
+  Tr,
+} from "@/components/app/ui";
+import { ConciergeLoadError } from "@/components/concierge/states";
+import { Bars } from "@/components/hotel/charts";
+import { CommissionDetailTable, StatementTable } from "@/components/hotel/commission-tables";
+import { commissionRule, loadFailed } from "@/components/hotel/states";
+import { useConciergeSpace } from "@/lib/concierge/space";
+import {
+  commissionRates,
+  hasCommission,
+  isLive,
+  monthlySeries,
+  previousMonthStart,
+} from "@/lib/hotel/analytics";
+import { exportCommissionsCsv } from "@/lib/hotel/exports";
+import { formatMad, formatNumber, monthKey, monthLabel, plural, sameMonth, todayIso } from "@/lib/hotel/format";
+import type { HotelReservation } from "@/lib/hotel/store";
+import { downloadCsv } from "@/lib/csv";
+import { useLocale, useT } from "@/lib/i18n/client";
 
-const DEMO_COMMISSIONS = [
-  { id: 1, venue: "Le Comptoir Darna", client: "Mehdi Alaoui", event: "OPENING NIGHT", date: "6 Avr.", montant: "6 400 MAD", status: "versé" },
-  { id: 2, venue: "Sky Bar Casa", client: "Sarah Cohen", event: "SUNSET SESSION", date: "5 Avr.", montant: "2 800 MAD", status: "versé" },
-  { id: 3, venue: "Le Lotus Club", client: "Omar Tazi", event: "LOTUS NIGHTS", date: "4 Avr.", montant: "9 600 MAD", status: "en attente" },
-  { id: 4, venue: "Le Comptoir Darna", client: "Lina Berrada", event: "LATIN VIBES", date: "3 Avr.", montant: "4 200 MAD", status: "versé" },
-  { id: 5, venue: "Pacha Marrakech", client: "Youssef Fassi", event: "HOUSE AFFAIR", date: "2 Avr.", montant: "7 800 MAD", status: "en attente" },
-  { id: 6, venue: "Sky Bar Casa", client: "Amira Benjelloun", event: "DEEP & CHILL", date: "1 Avr.", montant: "3 200 MAD", status: "versé" },
-  { id: 7, venue: "Le Comptoir Darna", client: "Karim Tazi", event: "R&B CLASSICS", date: "31 Mar.", montant: "5 400 MAD", status: "versé" },
-  { id: 8, venue: "Le Lotus Club", client: "Nadia Chraibi", event: "AFRO HOUSE", date: "30 Mar.", montant: "9 200 MAD", status: "en attente" },
-];
+const ALL = "tous";
+const sum = (rows: HotelReservation[]) => rows.reduce((s, r) => s + r.commission, 0);
+const spent = (rows: HotelReservation[]) => rows.reduce((s, r) => s + (r.amount_spent ?? 0), 0);
 
+/* Commissions du concierge : par mois, par établissement, puis ligne par
+   ligne. Ne comptent que les sorties dont l'établissement a saisi
+   l'addition ; le montant est celui que porte la réservation en base. */
 export default function ConciergeCommissionsPage() {
-  const { isDemoConcierge, isLoading } = useAuthUser();
   const t = useT();
-  const intl = useIntlLocale();
-  /* Le statut reste stocké en français ; seul le libellé est traduit. */
-  const statusLabel = (s: string) =>
-    s === "versé" ? t("Versé", "Paid") : s === "en attente" ? t("En attente", "Pending") : s;
-  const dateLabel = (d: string) => t(d, d.replace("Avr.", "Apr").replace("Mar.", "Mar"));
-  const [filter, setFilter] = useState("tous");
-  const [search, setSearch] = useState("");
-  const { toast, showToast } = useToast();
+  const locale = useLocale();
+  const { reservations, qrCodes, isLoading, failed, reload } = useConciergeSpace();
+  const [month, setMonth] = useState<string>(ALL);
 
-  if (isLoading) return <TableSkeleton />;
+  const earning = useMemo(() => reservations.filter(hasCommission), [reservations]);
+  const months = useMemo(
+    () => [...new Set(earning.map((r) => monthKey(r.reservation_date)))].sort().reverse(),
+    [earning]
+  );
 
-  const commissions = isDemoConcierge ? DEMO_COMMISSIONS : [];
-  const searchLower = search.toLowerCase();
-  const filtered = commissions.filter((c) => {
-    const matchesFilter = filter === "tous" || c.status === filter;
-    const matchesSearch =
-      !search ||
-      c.venue.toLowerCase().includes(searchLower) ||
-      c.client.toLowerCase().includes(searchLower);
-    return matchesFilter && matchesSearch;
+  if (isLoading) return <PageSkeleton kpis={4} rows={8} />;
+
+  const today = todayIso();
+  const thisKey = monthKey(today);
+  const prev = previousMonthStart();
+  const linkLabel = t("Lien", "Link");
+  const scope = month !== ALL && months.includes(month) ? month : ALL;
+  const detail = earning
+    .filter((r) => scope === ALL || monthKey(r.reservation_date) === scope)
+    .sort((a, b) => b.reservation_date.localeCompare(a.reservation_date));
+
+  const header = (
+    <PageHeader
+      title={t("Commissions", "Commissions")}
+      description={t(
+        "Ce que vous rapportent les réservations passées par vos liens, une fois l'addition saisie par l'établissement. Par mois, par établissement, ligne par ligne.",
+        "What reservations made through your links earn you, once the venue has entered the bill. By month, by venue, line by line."
+      )}
+      actions={
+        <Button
+          icon={Download}
+          onClick={() => exportCommissionsCsv(detail, scope === ALL ? "tout" : scope, t, locale, linkLabel)}
+          disabled={detail.length === 0}
+        >
+          {t("Exporter en CSV", "Export as CSV")}
+        </Button>
+      }
+    />
+  );
+
+  if (loadFailed(failed, reservations, qrCodes))
+    return (
+      <>
+        {header}
+        <ConciergeLoadError onRetry={reload} />
+      </>
+    );
+
+  const total = sum(earning);
+  const thisMonth = sum(earning.filter((r) => sameMonth(r.reservation_date)));
+  const prevMonth = sum(earning.filter((r) => sameMonth(r.reservation_date, prev)));
+  const pendingAmount = reservations.filter((r) => isLive(r) && r.amount_spent === null);
+  const awaiting = pendingAmount.filter((r) => r.reservation_date < today);
+  const upcoming = pendingAmount.filter((r) => r.reservation_date >= today);
+
+  const statement = months.map((key) => {
+    const rows = earning.filter((r) => monthKey(r.reservation_date) === key);
+    return { key, rows, spent: spent(rows), commission: sum(rows), current: key === thisKey };
   });
 
-  const totalMonth = isDemoConcierge ? 48600 : 0;
-  const pending = isDemoConcierge ? 18800 : 0;
-  const paid = isDemoConcierge ? 29800 : 0;
+  /* Par établissement, sur la période choisie. */
+  const byVenue = [...new Set(detail.map((r) => r.venue_name))]
+    .map((name) => {
+      const rows = detail.filter((r) => r.venue_name === name);
+      return { name, count: rows.length, spent: spent(rows), commission: sum(rows) };
+    })
+    .sort((a, b) => b.commission - a.commission);
 
-  const handleExport = () => {
-    const today = new Date().toISOString().split("T")[0];
-    const headers = [
-      t("Établissement", "Venue"),
-      t("Événement", "Event"),
-      t("Client", "Guest"),
-      t("Date", "Date"),
-      t("Montant", "Amount"),
-      t("Statut", "Status"),
-    ];
-    const csv = [
-      headers.join(","),
-      ...commissions.map((c) =>
-        [c.venue, c.event, c.client, dateLabel(c.date), c.montant, statusLabel(c.status)].map((v) => `"${v}"`).join(",")
-      ),
-    ].join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `commissions-concierge-${today}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-    showToast(t("CSV téléchargé", "CSV downloaded"));
-  };
+  const exportVenues = () =>
+    downloadCsv(
+      `commissions-${t("etablissements", "venues")}-${scope === ALL ? "tout" : scope}-${today}`,
+      [
+        t("Établissement", "Venue"),
+        t("Sorties", "Outings"),
+        t("Montant dépensé (MAD)", "Amount spent (MAD)"),
+        t("Commission (MAD)", "Commission (MAD)"),
+      ],
+      byVenue.map((v) => [v.name, v.count, v.spent, v.commission]),
+      ["TOTAL", detail.length, spent(detail), sum(detail)]
+    );
+
+  const periodSelect = months.length > 0 && (
+    <Select
+      label={t("Période", "Period")}
+      value={scope}
+      onChange={setMonth}
+      className="w-48"
+      options={[
+        { value: ALL, label: t("Tous les mois", "All months") },
+        ...months.map((k) => ({ value: k, label: monthLabel(k, true, locale) })),
+      ]}
+    />
+  );
 
   return (
-    <div className="bg-transparent min-h-screen">
-      {/* Header */}
-      <div className="px-4 sm:px-6 pt-6 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-bold text-white">
-            {t("Commissions", "Commissions")}
-          </h1>
-          <p className="text-sm text-white/60 font-ui mt-0.5">
-            {t("Suivez vos gains et versements", "Track your earnings and payouts")}
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60/40" size={16} strokeWidth={1.5} />
-            <input
-              type="text"
-              placeholder={t("Rechercher...", "Search...")}
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-10 pr-4 py-2 bg-white/[0.05] rounded-full text-sm text-white font-ui focus:ring-1 focus:ring-white/30/30 focus:outline-none w-48"
-            />
+    <>
+      {header}
+
+      <KpiGrid
+        items={[
+          {
+            label: t("Ce mois-ci", "This month"),
+            value: formatMad(thisMonth, true, locale),
+            delta: prevMonth > 0 ? (thisMonth - prevMonth) / prevMonth : null,
+            deltaLabel: t("pas de mois précédent", "no previous month"),
+            hint:
+              prevMonth > 0
+                ? t(`vs ${formatMad(prevMonth, true)} le mois dernier`, `vs ${formatMad(prevMonth, true, "en")} last month`)
+                : undefined,
+            icon: Wallet,
+            tone: "emerald",
+          },
+          {
+            label: t("Cumulées", "All-time"),
+            value: formatMad(total, true, locale),
+            hint: t(
+              `${earning.length} ${plural(earning.length, "sortie commissionnée", "sorties commissionnées")}`,
+              `${earning.length} ${plural(earning.length, "commissioned outing", undefined, "en")}`
+            ),
+            icon: Coins,
+            tone: "sky",
+          },
+          {
+            label: t("Commission moyenne", "Average commission"),
+            value: earning.length > 0 ? formatMad(total / earning.length, false, locale) : "—",
+            hint:
+              earning.length > 0
+                ? t(
+                    `sur une addition moyenne de ${formatMad(spent(earning) / earning.length)}`,
+                    `on an average bill of ${formatMad(spent(earning) / earning.length, false, "en")}`
+                  )
+                : t("aucune addition saisie", "no bill entered yet"),
+            icon: TrendingUp,
+            tone: "violet",
+          },
+          {
+            label: t("Addition attendue", "Bill awaited"),
+            value: formatNumber(awaiting.length, locale),
+            hint: t(
+              `${upcoming.length} ${plural(upcoming.length, "sortie")} à venir`,
+              `${upcoming.length} upcoming ${plural(upcoming.length, "outing", undefined, "en")}`
+            ),
+            icon: Hourglass,
+            tone: "amber",
+          },
+        ]}
+      />
+
+      {earning.length === 0 ? (
+        <Card padded={false}>
+          <EmptyState
+            icon={Coins}
+            title={t("Aucune commission pour le moment", "No commissions yet")}
+            description={
+              awaiting.length > 0
+                ? t(
+                    `${awaiting.length} ${plural(awaiting.length, "sortie passée attend", "sorties passées attendent")} encore son addition : la commission apparaît dès que l'établissement l'a saisie.`,
+                    `${awaiting.length} past ${plural(awaiting.length, "outing is", "outings are", "en")} still awaiting a bill: the commission appears as soon as the venue enters it.`
+                  )
+                : t(
+                    "Une commission apparaît ici dès qu'un établissement saisit l'addition d'une réservation passée par l'un de vos liens.",
+                    "A commission appears here as soon as a venue enters the bill for a reservation made through one of your links."
+                  )
+            }
+          />
+        </Card>
+      ) : (
+        <>
+          <div className="grid gap-4 xl:grid-cols-3">
+            <Card
+              title={t("Commissions par mois", "Commissions per month")}
+              description={t("6 derniers mois", "Last 6 months")}
+            >
+              <Bars
+                data={monthlySeries(earning, 6, (r) => r.commission, undefined, locale)}
+                color="bg-ok"
+                height={160}
+                format={(n) => formatMad(n, true, locale)}
+              />
+            </Card>
+            <Card title={t("Par mois", "By month")} padded={false} className="xl:col-span-2">
+              <StatementTable
+                months={statement}
+                onExport={(m) => exportCommissionsCsv(m.rows, m.key, t, locale, linkLabel)}
+              />
+            </Card>
           </div>
-          <button
-            onClick={handleExport}
-            className="flex items-center gap-2 bg-white/[0.07] border border-white/10/20 text-white/60 text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-white/[0.05] transition-colors font-ui"
+
+          <Card
+            title={t("Par établissement", "By venue")}
+            description={scope === ALL ? t("Tous les mois", "All months") : monthLabel(scope, true, locale)}
+            actions={
+              <>
+                {periodSelect}
+                <Button size="sm" icon={Download} onClick={exportVenues} disabled={byVenue.length === 0}>
+                  CSV
+                </Button>
+              </>
+            }
+            padded={false}
           >
-            <Download size={16} strokeWidth={1.5} />
-            {t("Exporter CSV", "Export CSV")}
-          </button>
-        </div>
-      </div>
-
-      {/* Stats cards */}
-      <div className="px-4 sm:px-6 pb-6 grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="bg-white/[0.07] rounded-xl border border-white/10/10 p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 rounded-lg bg-white/15/10 flex items-center justify-center">
-              <Wallet size={16} strokeWidth={1.5} className="text-white" />
-            </div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-ui">
-              {t("Total ce mois", "Total this month")}
-            </span>
-          </div>
-          <p className="text-xl font-extrabold text-white font-ui">
-            {totalMonth.toLocaleString(intl)} MAD
-          </p>
-        </div>
-        <div className="bg-white/[0.07] rounded-xl border border-white/10/10 p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
-              <Clock size={16} strokeWidth={1.5} className="text-amber-600" />
-            </div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-ui">
-              {t("En attente", "Pending")}
-            </span>
-          </div>
-          <p className="text-xl font-extrabold text-white font-ui">
-            {pending.toLocaleString(intl)} MAD
-          </p>
-        </div>
-        <div className="bg-white/[0.07] rounded-xl border border-white/10/10 p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-              <TrendingUp size={16} strokeWidth={1.5} className="text-emerald-600" />
-            </div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-ui">
-              {t("Versé", "Paid")}
-            </span>
-          </div>
-          <p className="text-xl font-extrabold text-white font-ui">
-            {paid.toLocaleString(intl)} MAD
-          </p>
-        </div>
-        <div className="bg-white/[0.07] rounded-xl border border-white/10/10 p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
-              <Percent size={16} strokeWidth={1.5} className="text-blue-600" />
-            </div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-ui">
-              {t("Taux moyen", "Average rate")}
-            </span>
-          </div>
-          <p className="text-xl font-extrabold text-white font-ui">
-            10%
-          </p>
-        </div>
-      </div>
-
-      {/* Filters */}
-      <div className="px-4 sm:px-6 pb-4 flex items-center gap-2">
-        {[
-          { key: "tous", label: t("Tous", "All") },
-          { key: "versé", label: t("Versé", "Paid") },
-          { key: "en attente", label: t("En attente", "Pending") },
-        ].map((f) => (
-          <button
-            key={f.key}
-            onClick={() => setFilter(f.key)}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors font-ui ${
-              filter === f.key
-                ? "bg-white/15 text-white"
-                : "bg-white/[0.07] border border-white/10/20 text-white/60 hover:bg-white/[0.05]"
-            }`}
-          >
-            {f.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Table */}
-      <div className="px-4 sm:px-6 pb-8">
-        <div className="bg-white/[0.07] rounded-xl border border-white/10/10 overflow-hidden">
-          <div className="tc-stack overflow-x-auto">
-            <table className="w-full text-sm">
+            <Table stack>
               <thead>
-                <tr className="border-b border-white/10/10">
-                  <th className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-ui">
-                    {t("Établissement", "Venue")}
-                  </th>
-                  <th className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-ui">
-                    {t("Événement", "Event")}
-                  </th>
-                  <th className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-ui">
-                    {t("Client", "Guest")}
-                  </th>
-                  <th className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-ui">
-                    {t("Date", "Date")}
-                  </th>
-                  <th className="text-right px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-ui">
-                    {t("Montant", "Amount")}
-                  </th>
-                  <th className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-ui">
-                    {t("Statut", "Status")}
-                  </th>
+                <tr>
+                  <Th>{t("Établissement", "Venue")}</Th>
+                  <Th align="right">{t("Sorties", "Outings")}</Th>
+                  <Th align="right">{t("Montant dépensé", "Amount spent")}</Th>
+                  <Th align="right">{t("Commission", "Commission")}</Th>
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((c, i) => (
-                  <tr
-                    key={c.id}
-                    className={`border-b border-white/10/5 hover:bg-white/[0.05]/50 transition-colors ${
-                      i % 2 === 0 ? "" : "bg-transparent/30"
-                    }`}
-                  >
-                    <td data-head className="px-4 py-3.5 text-white font-medium font-ui">
-                      {c.venue}
-                    </td>
-                    <td data-label={t("Événement", "Event")} className="px-4 py-3.5">
-                      <span className="text-xs font-bold text-white/60/80 font-ui">
-                        {c.event}
-                      </span>
-                    </td>
-                    <td data-label={t("Client", "Guest")} className="px-4 py-3.5 text-white font-ui">
-                      {c.client}
-                    </td>
-                    <td data-label={t("Date", "Date")} className="px-4 py-3.5 text-white/60 font-ui">
-                      {dateLabel(c.date)}
-                    </td>
-                    <td data-label={t("Montant", "Amount")} className="px-4 py-3.5 text-right text-white font-bold font-ui">
-                      {c.montant}
-                    </td>
-                    <td data-label={t("Statut", "Status")} className="px-4 py-3.5">
-                      <span
-                        className={`text-[10px] font-semibold px-2.5 py-1 rounded-full ${
-                          c.status === "versé"
-                            ? "bg-emerald-100 text-emerald-800"
-                            : "bg-amber-100 text-amber-800"
-                        }`}
-                      >
-                        {statusLabel(c.status)}
-                      </span>
-                    </td>
-                  </tr>
+                {byVenue.map((v) => (
+                  <Tr key={v.name}>
+                    <Td head className="font-bold">
+                      {v.name}
+                    </Td>
+                    <Td label={t("Sorties", "Outings")} align="right" className="num" muted>
+                      {formatNumber(v.count, locale)}
+                    </Td>
+                    <Td label={t("Montant dépensé", "Amount spent")} align="right" className="num whitespace-nowrap" muted>
+                      {formatMad(v.spent, false, locale)}
+                    </Td>
+                    <Td label={t("Commission", "Commission")} align="right" className="num whitespace-nowrap font-bold">
+                      {formatMad(v.commission, false, locale)}
+                    </Td>
+                  </Tr>
                 ))}
-                {filtered.length === 0 && (
-                  <tr>
-                    <td colSpan={6}>
-                      <div className="flex flex-col items-center justify-center py-16 text-center">
-                        <div className="w-12 h-12 rounded-full bg-white/[0.05] flex items-center justify-center mb-4">
-                          <Wallet size={24} strokeWidth={1.5} className="text-white/60/40" />
-                        </div>
-                        <p className="text-sm font-medium text-white/60 font-ui">
-                          {t("Aucune commission pour le moment", "No commissions yet")}
-                        </p>
-                        <p className="text-xs text-white/60/60 font-ui mt-1">
-                          {t("Vos commissions apparaîtront ici", "Your commissions will appear here")}
-                        </p>
-                      </div>
-                    </td>
-                  </tr>
-                )}
               </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+            </Table>
+          </Card>
 
-      {/* Toast */}
-      {toast && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-white/15-dark text-white px-4 py-3 rounded-md shadow-lg">
-          <Check size={16} strokeWidth={2} />
-          <span className="text-sm font-medium">{toast}</span>
-        </div>
+          <Card
+            title={t("Détail des commissions", "Commission details")}
+            description={t(
+              `${detail.length} ${plural(detail.length, "ligne")} · ${formatMad(sum(detail))}`,
+              `${detail.length} ${plural(detail.length, "line", undefined, "en")} · ${formatMad(sum(detail), false, "en")}`
+            )}
+            padded={false}
+          >
+            <CommissionDetailTable
+              rows={detail}
+              reservationHref={(id) => `/concierge/reservations?id=${id}`}
+              locationLabel={linkLabel}
+            />
+          </Card>
+        </>
       )}
-    </div>
+
+      <InfoNote icon={Percent}>
+        {t("Votre commission : ", "Your commission: ")}
+        {commissionRule(commissionRates(reservations), locale)}.{" "}
+        {t(
+          "Le taux de chaque sortie figure dans le détail. Le calcul est automatique dès que l'addition est saisie par l'établissement ou remontée par sa caisse.",
+          "Each outing's rate is shown in the details. It's calculated automatically as soon as the venue enters the bill or its till reports it."
+        )}
+      </InfoNote>
+    </>
   );
 }

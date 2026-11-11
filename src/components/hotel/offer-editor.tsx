@@ -5,7 +5,7 @@ import Image from "next/image";
 import { ImagePlus, Star, Trash2, X } from "lucide-react";
 import { CATEGORY_KEYS, categoryLabel, fallbackImage, type GuestCategoryKey } from "@/lib/guest-catalog";
 import { uploadImage } from "@/lib/hotel/upload-image";
-import { Button, Field, Modal, Segmented, Switch, inputClass } from "@/components/hotel/ui";
+import { Button, Field, IconButton, InfoNote, Modal, Segmented, Switch, inputClass } from "@/components/app/ui";
 import { cn } from "@/lib/utils";
 import type { Translate } from "@/lib/i18n";
 import { useLocale, useT } from "@/lib/i18n/client";
@@ -174,9 +174,9 @@ export function OfferEditor({
               e.target.value = "";
             }}
           />
-          <div className="relative aspect-[4/3] overflow-hidden rounded-xl border border-white/10 bg-white/[0.04]">
+          <div className="relative aspect-[4/3] overflow-hidden rounded-xl border border-line bg-fill">
             <Image src={preview} alt="" fill unoptimized={preview.startsWith("http")} sizes="240px" className="object-cover" />
-            <span className="absolute inset-x-0 bottom-0 bg-black/60 px-2 py-1 text-center text-[10px] font-bold uppercase tracking-wider text-white/70">
+            <span className="absolute inset-x-0 bottom-0 bg-panel px-2 py-1 text-center text-xs font-bold text-ink-2">
               {photos.length === 0 ? t("Photo par défaut", "Default photo") : t("Couverture", "Cover")}
             </span>
           </div>
@@ -185,29 +185,27 @@ export function OfferEditor({
           {photos.length > 1 && (
             <ul className="mt-2 grid grid-cols-3 gap-1.5">
               {photos.slice(1).map((url, i) => (
-                <li key={url} className="group relative aspect-square overflow-hidden rounded-lg border border-white/10">
+                <li key={url} className="group relative aspect-square overflow-hidden rounded-lg border border-line">
                   <Image src={url} alt="" fill unoptimized={url.startsWith("http")} sizes="80px" className="object-cover" />
-                  <div className="absolute inset-0 flex items-center justify-center gap-1 bg-black/55 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
-                    <button
-                      type="button"
+                  {/* Toujours visibles : au doigt, il n'y a pas de survol. */}
+                  <div className="absolute inset-x-0 bottom-0 flex justify-between p-0.5">
+                    <IconButton
+                      icon={Star}
+                      size={14}
+                      label={t("Définir comme couverture", "Set as cover")}
                       onClick={() => setPhotos([url, ...photos.filter((u) => u !== url)])}
-                      aria-label={t("Définir comme couverture", "Set as cover")}
-                      title={t("Définir comme couverture", "Set as cover")}
-                      className="rounded-md p-1 text-white/80 hover:text-amber-300"
-                    >
-                      <Star size={13} strokeWidth={2} />
-                    </button>
-                    <button
-                      type="button"
+                      className="h-8 w-8 bg-panel text-ink shadow-sm hover:bg-panel"
+                    />
+                    <IconButton
+                      icon={X}
+                      size={14}
+                      tone="danger"
+                      label={t("Retirer cette photo", "Remove this photo")}
                       onClick={() => setPhotos(photos.filter((u) => u !== url))}
-                      aria-label={t("Retirer cette photo", "Remove this photo")}
-                      title={t("Retirer", "Remove")}
-                      className="rounded-md p-1 text-white/80 hover:text-red-300"
-                    >
-                      <X size={13} strokeWidth={2.5} />
-                    </button>
+                      className="h-8 w-8 bg-panel text-ink shadow-sm hover:bg-panel"
+                    />
                   </div>
-                  <span className="num absolute left-1 top-1 rounded bg-black/60 px-1 text-[9px] font-bold text-white/80">
+                  <span className="num absolute left-1 top-1 rounded bg-panel px-1 text-xs font-bold text-ink">
                     {i + 2}
                   </span>
                 </li>
@@ -227,10 +225,10 @@ export function OfferEditor({
               {photos.length === 0 ? t("Ajouter des photos", "Add photos") : t("Ajouter", "Add")}
             </Button>
             {photos.length > 0 && (
-              <Button size="sm" variant="ghost" icon={Trash2} onClick={() => setPhotos(photos.slice(1))} aria-label={t("Retirer la couverture", "Remove cover")} title={t("Retirer la couverture", "Remove cover")} />
+              <IconButton icon={Trash2} tone="danger" size={16} label={t("Retirer la couverture", "Remove cover")} onClick={() => setPhotos(photos.slice(1))} className="h-9 w-9" />
             )}
           </div>
-          <p className="mt-2 text-[11px] leading-relaxed text-white/40">
+          <p className="mt-2 text-xs leading-relaxed text-ink-3">
             {t(
               <>
                 La première photo est la couverture, seule visible sur la carte. Les suivantes s&apos;affichent dans la
@@ -249,13 +247,14 @@ export function OfferEditor({
           <Field label={t("Catégorie", "Category")}>
             <Segmented<GuestCategoryKey>
               size="sm"
+              label={t("Catégorie", "Category")}
               value={draft.category}
               onChange={(v) => set("category", v)}
               options={CATEGORY_KEYS.map((k) => ({ value: k, label: categoryLabel(k, locale) }))}
             />
           </Field>
           <Field label={t("Nom", "Name")} htmlFor="offer-name">
-            <input id="offer-name" value={draft.name} onChange={(e) => set("name", e.target.value)} maxLength={120} className={inputClass} placeholder={t("Nom de l'adresse", "Name of the place")} autoFocus />
+            <input id="offer-name" value={draft.name} onChange={(e) => set("name", e.target.value)} maxLength={120} className={inputClass} placeholder={t("Nom de l'adresse", "Name of the place")} data-autofocus />
           </Field>
           <div className={cn("grid gap-4", admin ? "sm:grid-cols-3" : "sm:grid-cols-2")}>
             <Field label={t("Étiquette", "Tag")} htmlFor="offer-tag" hint={tagHints[draft.category]}>
@@ -297,16 +296,20 @@ export function OfferEditor({
                     setSlugTouched(true);
                     set("slug", slugify(e.target.value));
                   }}
-                  className={cn(inputClass, "font-mono-satoshi")}
+                  className={cn(inputClass, "num")}
                 />
               </Field>
             )}
-            <div className="flex h-11 items-center gap-3 rounded-xl border border-white/10 bg-white/[0.04] px-4">
+            <div className="flex h-11 items-center gap-3 rounded-xl border border-line-2 bg-panel px-3.5">
               <Switch checked={draft.active} onChange={(v) => set("active", v)} label={t("Adresse proposée", "Place offered")} />
-              <span className="text-sm text-white/70">{draft.active ? t("Proposée aux clients", "Offered to guests") : t("Masquée pour l'instant", "Hidden for now")}</span>
+              <span className="text-sm text-ink-2">{draft.active ? t("Proposée aux clients", "Offered to guests") : t("Masquée pour l'instant", "Hidden for now")}</span>
             </div>
           </div>
-          {error && <p className="rounded-xl border border-red-400/20 bg-red-500/10 px-3 py-2 text-xs text-red-200">{error}</p>}
+          {error && (
+            <div role="alert">
+              <InfoNote tone="danger">{error}</InfoNote>
+            </div>
+          )}
         </div>
       </div>
     </Modal>

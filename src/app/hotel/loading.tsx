@@ -1,5 +1,5 @@
-import { PageSkeleton } from "@/components/hotel/skeleton";
+import { PageSkeleton } from "@/components/app/ui";
 
 export default function HotelLoading() {
-  return <PageSkeleton kpis={4} />;
+  return <PageSkeleton kpis={4} rows={5} />;
 }

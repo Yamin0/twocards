@@ -23,7 +23,7 @@ export function Avatar({
   const t = useT();
   return (
     <div
-      className={`relative shrink-0 overflow-hidden rounded-full bg-white/15 flex items-center justify-center ${className}`}
+      className={`relative shrink-0 overflow-hidden rounded-full bg-fill-3 flex items-center justify-center ${className}`}
       style={{ width: size, height: size }}
     >
       {url ? (

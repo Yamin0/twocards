@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Sparkles } from "lucide-react";
 
@@ -76,23 +75,9 @@ export default function DisplayCards({ cards }: DisplayCardsProps) {
   return (
     <div className="grid [grid-template-areas:'stack'] place-items-center">
       {displayCards.map((cardProps, index) => (
-        /* Simple arrivée en fondu à l'entrée dans le viewport, une seule
-           fois. Aucune animation liée au scroll : trop coûteux au-dessus de
-           la vidéo scrubée sur mobile. */
-        <motion.div
-          key={index}
-          className="[grid-area:stack]"
-          initial={{ opacity: 0, y: 56, scale: 0.9 }}
-          whileInView={{ opacity: 1, y: 0, scale: 1 }}
-          viewport={{ once: true, margin: "-60px" }}
-          transition={{
-            duration: 0.55,
-            delay: index * 0.25,
-            ease: [0.22, 1, 0.36, 1],
-          }}
-        >
+        <div key={index} className="[grid-area:stack]">
           <DisplayCard {...cardProps} />
-        </motion.div>
+        </div>
       ))}
     </div>
   );

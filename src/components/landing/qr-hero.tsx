@@ -1,10 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import Link from "next/link";
-import { motion } from "framer-motion";
+import Image from "next/image";
 import { Play } from "lucide-react";
 import { LandingNavbar } from "@/components/landing/navbar";
+import { HeroCopy } from "@/components/landing/section-header";
 import { useLocale, useT } from "@/lib/i18n/client";
 
 /* Héros : l'accroche centrée sur fond noir, puis le film de marque en grand
@@ -14,6 +14,13 @@ import { useLocale, useT } from "@/lib/i18n/client";
    aperçu. « Regarder le film » le reprend au début, avec le son et les
    contrôles natifs ; à la fin, il redevient l'aperçu muet. Rien n'est posé
    par-dessus l'image : le film porte déjà ses propres titres.
+
+   L'affiche du film est l'image du premier écran sur mobile (LCP). Elle
+   passe donc par next/image, sous la vidéo : préchargée dès le <head>, en
+   priorité haute, à la taille du cadre et en WebP. La vidéo n'a pas
+   d'attribut poster : tant qu'elle n'a pas démarré elle est transparente
+   et laisse voir l'affiche, y compris sans JavaScript, en mouvement réduit
+   et en économie de données.
 
    Deux encodages de la même source (Downloads/twocards-hero-film-60s-
    musique-C.mp4, 1080p 24 i/s) :
@@ -46,15 +53,16 @@ export function QrHero() {
   const frameRef = useRef<HTMLDivElement>(null);
   const [withSound, setWithSound] = useState(false);
 
-  /* L'aperçu muet ne tourne que s'il est à l'écran, et jamais en
-     reduced-motion : il reste alors sur son poster. */
+  /* L'aperçu muet n'est ni préchargé ni lancé par le HTML : il démarre
+     quand le cadre arrive à l'écran, se met en pause quand il en sort, et
+     ne démarre jamais en mouvement réduit ni en économie de données (il
+     reste alors sur son affiche). */
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
-    if (prefersReducedMotion()) {
-      v.pause();
-      return;
-    }
+    const connection = (navigator as Navigator & { connection?: { saveData?: boolean } })
+      .connection;
+    if (prefersReducedMotion() || connection?.saveData) return;
     const io = new IntersectionObserver(([entry]) => {
       if (!v.muted) return;
       if (entry.isIntersecting) v.play().catch(() => {});
@@ -93,16 +101,9 @@ export function QrHero() {
       <div className="bg-[#0a0a0a] text-white">
         <LandingNavbar variant="dark" />
 
-        {/* max-w-5xl : le titre anglais, plus long, tient aussi sur une ligne
-            à partir de lg — sinon le bloc noir descend d'une ligne. */}
-        <div className="mx-auto max-w-5xl px-6 pb-12 pt-14 text-center md:pb-16 md:pt-20">
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.05 }}
-            className="font-title text-[44px] font-bold leading-[1.02] tracking-[-0.04em] sm:text-[60px] lg:text-[76px]"
-          >
-            {t(
+        <div className="px-6 pb-12 pt-14 md:pb-16 md:pt-20">
+          <HeroCopy
+            title={t(
               <>
                 Bien plus qu&apos;un <em className="font-light italic whitespace-nowrap">QR code</em>.
               </>,
@@ -110,66 +111,53 @@ export function QrHero() {
                 Much more than a <em className="font-light italic whitespace-nowrap">QR code</em>.
               </>,
             )}
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.14 }}
-            className="mx-auto mt-7 max-w-xl text-[16px] leading-relaxed text-white/60 md:text-[18px]"
-          >
-            {t(
+            intro={t(
               "Un QR en chambre, un lien par e-mail ou WhatsApp. Votre client découvre votre sélection, réserve en quelques secondes, et vous suivez tout : arrivée, facture vérifiée, commission.",
               "A QR code in the room, a link by email or WhatsApp. Your guest browses your selection, books in seconds, and you track everything: arrival, verified bill, commission.",
             )}
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.22 }}
-            className="mt-10 flex flex-col items-center justify-center gap-5 sm:flex-row sm:gap-7"
-          >
-            <Link
-              href="/signup"
-              className="rounded-full bg-white px-8 py-3.5 text-[14px] font-medium text-[var(--landing-ink)] transition-opacity hover:opacity-85"
-            >
-              {t("Demander un accès", "Request access")}
-            </Link>
-            <button
-              type="button"
-              onClick={playWithSound}
-              className="group flex items-center gap-3 text-[14px] font-medium text-white/75 transition-colors hover:text-white"
-            >
-              <span className="flex size-9 items-center justify-center rounded-full border border-white/25 transition-colors group-hover:border-white/60">
-                <Play size={12} fill="currentColor" className="ml-0.5" />
-              </span>
-              {t("Regarder le film · 1 min", "Watch the film · 1 min")}
-            </button>
-          </motion.div>
+            primary={{ label: t("Demander un accès", "Request access"), href: "/signup" }}
+            secondary={
+              <button
+                type="button"
+                onClick={playWithSound}
+                className="group flex items-center gap-3 text-[15px] font-medium text-white/90 transition-colors hover:text-white"
+              >
+                <span className="flex size-9 items-center justify-center rounded-full border border-white/30 transition-colors group-hover:border-white/70">
+                  <Play size={12} fill="currentColor" className="ml-0.5" aria-hidden />
+                </span>
+                {t("Regarder le film · 1 min", "Watch the film · 1 min")}
+              </button>
+            }
+          />
         </div>
       </div>
 
       {/* Le cadre du film chevauche la frontière noir / ivoire : le
           dégradé de fond coupe la section à mi-hauteur du cadre. */}
       <div className="bg-[linear-gradient(to_bottom,#0a0a0a_50%,var(--landing-ivory)_50%)] px-4 sm:px-6 md:px-10">
-        <motion.div
+        <div
           ref={frameRef}
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.9, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-          className="relative mx-auto aspect-video max-w-6xl overflow-hidden rounded-xl bg-black shadow-[0_50px_120px_-40px_rgba(0,0,0,0.55)] ring-1 ring-white/10 md:rounded-2xl"
+          className="landing-rise relative mx-auto aspect-video max-w-6xl overflow-hidden rounded-xl bg-black shadow-[0_50px_120px_-40px_rgba(0,0,0,0.55)] ring-1 ring-white/10 md:rounded-2xl"
         >
+          {/* Le cadre fait au plus 1152 px (max-w-6xl) ; en dessous, il
+              occupe l'écran moins ses gouttières. */}
+          <Image
+            src={film.poster}
+            alt=""
+            fill
+            preload
+            fetchPriority="high"
+            sizes="(min-width: 1232px) 1152px, calc(100vw - 32px)"
+            className="object-cover"
+          />
           {/* key : changer de langue recharge la vidéo sur la bonne source. */}
           <video
             key={locale}
             ref={videoRef}
-            poster={film.poster}
-            autoPlay
             muted
             loop
             playsInline
-            preload="metadata"
+            preload="none"
             controls={withSound}
             disablePictureInPicture
             disableRemotePlayback
@@ -196,7 +184,7 @@ export function QrHero() {
               {t("Regarder avec le son", "Watch with sound")}
             </button>
           )}
-        </motion.div>
+        </div>
       </div>
     </section>
   );

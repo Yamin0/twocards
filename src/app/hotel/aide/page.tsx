@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import {
   BedDouble,
   ChevronDown,
@@ -15,7 +14,7 @@ import {
   Smartphone,
   Star,
 } from "lucide-react";
-import { LinkButton, PageHeader, Panel } from "@/components/hotel/ui";
+import { Card, LinkButton, PageHeader } from "@/components/app/ui";
 import { cn } from "@/lib/utils";
 import type { Translate } from "@/lib/i18n";
 import { useT } from "@/lib/i18n/client";
@@ -81,8 +80,8 @@ const getFaq = (t: Translate) => [
   {
     q: t("Comment ma commission est-elle calculée ?", "How is my commission calculated?"),
     a: t(
-      "Un pourcentage du montant réellement dépensé par le client : 10 % par défaut, le taux peut varier selon l'établissement. Elle est calculée automatiquement dès que l'établissement (ou sa caisse) renseigne le montant, après la sortie.",
-      "A percentage of what the guest actually spends: 10% by default, and the rate may vary by venue. It's calculated automatically as soon as the venue (or its till) enters the amount, after the outing."
+      "Un pourcentage du montant réellement dépensé par le client, convenu avec chaque établissement. Le taux appliqué figure sur chaque ligne de la page Commissions. Le calcul est automatique dès que l'établissement (ou sa caisse) renseigne le montant, après la sortie.",
+      "A percentage of what the guest actually spends, set with each venue. The rate applied is shown on every line of the Commissions page. It's calculated automatically as soon as the venue (or its till) enters the amount, after the outing."
     ),
   },
   {
@@ -137,8 +136,7 @@ export default function HotelHelpPage() {
   return (
     <>
       <PageHeader
-        eyebrow={t("Aide", "Help")}
-        title={t("Comment ça marche", "How it works")}
+        title={t("Aide", "Help")}
         description={t(
           "Tout ce qu'il faut savoir pour transformer vos chambres en apporteur d'affaires, et qui contacter si quelque chose coince.",
           "Everything you need to turn your rooms into a source of referral revenue, and who to contact if something goes wrong."
@@ -147,53 +145,60 @@ export default function HotelHelpPage() {
 
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
         {STEPS.map((s, i) => (
-          <Panel key={s.title}>
+          <Card key={s.title}>
             <div className="flex items-center justify-between">
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10">
-                <s.icon size={18} strokeWidth={1.75} className="text-white" />
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-fill-2">
+                <s.icon size={18} strokeWidth={1.75} className="text-ink-2" aria-hidden />
               </span>
-              <span className="num text-xs font-black text-white/30">0{i + 1}</span>
+              <span className="num flex h-6 w-6 items-center justify-center rounded-full bg-brand text-xs font-bold text-on-brand">
+                {i + 1}
+              </span>
             </div>
-            <h2 className="font-display mt-4 text-base font-bold text-white">{s.title}</h2>
-            <p className="mt-1.5 text-xs leading-relaxed text-white/55">{s.text}</p>
-            <Link href={s.href} className="mt-4 inline-block text-xs font-bold text-sky-300 hover:text-sky-200">
-              {s.cta} →
-            </Link>
-          </Panel>
+            <h2 className="mt-4 text-base font-bold text-ink">{s.title}</h2>
+            <p className="mb-4 mt-1.5 text-[13px] leading-relaxed text-ink-2">{s.text}</p>
+            <LinkButton href={s.href} size="sm">
+              {s.cta}
+            </LinkButton>
+          </Card>
         ))}
       </div>
 
       <div className="grid gap-4 xl:grid-cols-3">
-        <Panel title={t("Questions fréquentes", "Frequently asked questions")} className="xl:col-span-2" padded={false}>
-          <ul className="divide-y divide-white/[0.06]">
+        <Card title={t("Questions fréquentes", "Frequently asked questions")} className="xl:col-span-2" padded={false}>
+          <ul className="divide-y divide-line">
             {FAQ.map((f, i) => (
               <li key={f.q}>
                 <button
                   type="button"
                   onClick={() => setOpen(open === i ? null : i)}
                   aria-expanded={open === i}
-                  className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition-colors hover:bg-white/[0.03] sm:px-6"
+                  aria-controls={`faq-${i}`}
+                  className="flex min-h-[52px] w-full items-center justify-between gap-4 px-5 py-3.5 text-left transition-colors hover:bg-fill sm:px-6"
                 >
-                  <span className="text-sm font-bold text-white">{f.q}</span>
-                  <ChevronDown size={16} strokeWidth={2} className={cn("shrink-0 text-white/40 transition-transform", open === i && "rotate-180")} />
+                  <span className="text-sm font-bold text-ink">{f.q}</span>
+                  <ChevronDown size={16} strokeWidth={2} aria-hidden className={cn("shrink-0 text-ink-3 transition-transform", open === i && "rotate-180")} />
                 </button>
-                {open === i && <p className="px-5 pb-5 text-sm leading-relaxed text-white/65 sm:px-6">{f.a}</p>}
+                {open === i && (
+                  <p id={`faq-${i}`} className="max-w-3xl px-5 pb-5 text-sm leading-relaxed text-ink-2 sm:px-6">
+                    {f.a}
+                  </p>
+                )}
               </li>
             ))}
           </ul>
-        </Panel>
+        </Card>
 
         <div className="space-y-4">
-          <Panel title={t("Conseils de terrain", "Tips from the field")}>
-            <ul className="space-y-3 text-xs leading-relaxed text-white/60">
-              <li className="flex gap-2.5"><BedDouble size={14} strokeWidth={1.75} className="mt-0.5 shrink-0 text-sky-300" /> {t("Un chevalet sur la table de nuit convertit mieux qu'un autocollant sur la porte.", "A tent card on the bedside table converts better than a sticker on the door.")}</li>
-              <li className="flex gap-2.5"><Smartphone size={14} strokeWidth={1.75} className="mt-0.5 shrink-0 text-sky-300" /> {t("Au check-in, montrez le geste : « scannez, choisissez, on s'occupe du reste ».", "At check-in, show them how: “scan, choose, we take care of the rest”.")}</li>
-              <li className="flex gap-2.5"><Star size={14} strokeWidth={1.75} className="mt-0.5 shrink-0 text-sky-300" /> {t("Un menu court (8 à 12 adresses) convertit mieux qu'un catalogue complet.", "A short menu (8 to 12 places) converts better than a full catalogue.")}</li>
-              <li className="flex gap-2.5"><Coins size={14} strokeWidth={1.75} className="mt-0.5 shrink-0 text-sky-300" /> {t("Surveillez la conversion par emplacement : déplacez les QR qui ne scannent pas.", "Watch conversion by location: move QR codes that don't get scanned.")}</li>
+          <Card title={t("Conseils de terrain", "Tips from the field")}>
+            <ul className="space-y-3 text-[13px] leading-relaxed text-ink-2">
+              <li className="flex gap-2.5"><BedDouble size={14} strokeWidth={1.75} className="mt-0.5 shrink-0 text-ink-3" aria-hidden /> {t("Un chevalet sur la table de nuit convertit mieux qu'un autocollant sur la porte.", "A tent card on the bedside table converts better than a sticker on the door.")}</li>
+              <li className="flex gap-2.5"><Smartphone size={14} strokeWidth={1.75} className="mt-0.5 shrink-0 text-ink-3" aria-hidden /> {t("Au check-in, montrez le geste : « scannez, choisissez, on s'occupe du reste ».", "At check-in, show them how: “scan, choose, we take care of the rest”.")}</li>
+              <li className="flex gap-2.5"><Star size={14} strokeWidth={1.75} className="mt-0.5 shrink-0 text-ink-3" aria-hidden /> {t("Un menu court (8 à 12 adresses) convertit mieux qu'un catalogue complet.", "A short menu (8 to 12 places) converts better than a full catalogue.")}</li>
+              <li className="flex gap-2.5"><Coins size={14} strokeWidth={1.75} className="mt-0.5 shrink-0 text-ink-3" aria-hidden /> {t("Surveillez la conversion par emplacement : déplacez les QR qui ne scannent pas.", "Watch conversion by location: move QR codes that don't get scanned.")}</li>
             </ul>
-          </Panel>
-          <Panel title={t("Besoin d'aide ?", "Need help?")}>
-            <p className="text-xs leading-relaxed text-white/55">
+          </Card>
+          <Card title={t("Besoin d'aide ?", "Need help?")}>
+            <p className="text-[13px] leading-relaxed text-ink-2">
               {t("Votre référent twocards répond en général sous une heure en journée.", "Your twocards contact usually replies within an hour during the day.")}
             </p>
             <div className="mt-4 flex flex-col gap-2">
@@ -204,11 +209,11 @@ export default function HotelHelpPage() {
                 {t("Vérifier mes coordonnées", "Check my contact details")}
               </LinkButton>
             </div>
-            <p className="mt-4 flex items-center gap-1.5 text-[11px] text-white/35">
-              <LifeBuoy size={12} strokeWidth={1.75} />{" "}
+            <p className="mt-4 flex items-center gap-1.5 text-xs text-ink-3">
+              <LifeBuoy size={13} strokeWidth={1.75} aria-hidden />{" "}
               {t("Mentionnez le nom de l'hôtel et, si possible, la chambre concernée.", "Mention the hotel's name and, if possible, the room concerned.")}
             </p>
-          </Panel>
+          </Card>
         </div>
       </div>
     </>

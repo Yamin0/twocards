@@ -1,17 +1,17 @@
 "use client";
 
-import QRCode from "react-qr-code";
+import { DemoQr } from "@/components/landing/demo-qr";
 import { RotatingTitleWord } from "@/components/landing/rotating-title-word";
 import { useT } from "@/lib/i18n/client";
 import type { Translate } from "@/lib/i18n";
+import { getCostFaq } from "@/components/landing/faq-home";
+import { CONTACT_MAILTO } from "@/components/landing/section-header";
 import {
   ShortAudiencePage,
   panel,
 } from "@/components/landing/short-audience-page";
 
-/* Page Hôtels & riads, sur le gabarit court des pages métiers. Le héros
-   vidéo et la bande « Le service que vos clients réclament… » sont repris
-   tels qu'ils étaient sur l'ancienne page. */
+/* Page Hôtels & riads, sur le gabarit commun des pages métiers. */
 
 const SIGNUP = "/signup?role=hotel";
 
@@ -24,16 +24,8 @@ function RoomQrVisual() {
       <p className="font-title text-[15px] font-semibold text-[var(--landing-ink)]">
         {t("Chambre 204", "Room 204")}
       </p>
-      <QRCode
-        value="https://twocardspro.com/?qr=demo"
-        size={96}
-        bgColor="#ffffff"
-        fgColor="#0d0d0d"
-        level="M"
-        style={{ display: "block", width: 96, height: 96 }}
-        aria-label={t("QR code de démonstration", "Demo QR code")}
-      />
-      <p className="text-center text-[12px] leading-snug text-[var(--landing-ink)]/55">
+      <DemoQr label={t("QR code de démonstration", "Demo QR code")} />
+      <p className="text-center text-[12px] leading-snug text-[var(--landing-ink)]/65">
         {t(
           <>
             Scannez pour réserver
@@ -55,7 +47,7 @@ function MessageVisual() {
   const t = useT();
   return (
     <div className="mx-auto flex max-w-[20rem] flex-col gap-2">
-      <p className="text-center text-[11px] text-[var(--landing-ink)]/45">
+      <p className="text-center text-[11px] text-[var(--landing-ink)]/65">
         {t("WhatsApp ou e-mail · 3 jours avant l'arrivée", "WhatsApp or email · 3 days before arrival")}
       </p>
       <div className="max-w-[90%] self-start rounded-2xl rounded-bl-md border border-black/[0.08] bg-white p-3.5 text-[13px] leading-relaxed text-[var(--landing-ink)] shadow-[0_16px_40px_-20px_rgba(60,40,10,0.35)]">
@@ -84,13 +76,9 @@ function DashboardVisual() {
   return (
     <div className={`${panel} p-5 text-left`}>
       <div className="mb-2 flex items-center justify-between">
-        <p className="text-[11px] uppercase tracking-[0.14em] text-[var(--landing-ink)]/45">
+        <p className="text-[12px] font-medium text-[var(--landing-ink)]/65">
           {t("Ce mois · par emplacement", "This month · by location")}
         </p>
-        <span className="flex items-center gap-1.5 text-[12px] text-emerald-600">
-          <span className="size-1.5 rounded-full bg-emerald-500" />
-          {t("en direct", "live")}
-        </span>
       </div>
       {rows.map((r) => (
         <div
@@ -98,7 +86,7 @@ function DashboardVisual() {
           className="flex items-center justify-between border-t border-black/[0.07] py-2.5 text-[13px]"
         >
           <span className="text-[var(--landing-ink)]">{r.place}</span>
-          <span className="text-[var(--landing-ink)]/50">
+          <span className="text-[var(--landing-ink)]/65">
             {t(`${r.count} réservations`, `${r.count} reservations`)}
           </span>
           <span className="w-20 text-right font-medium text-[var(--landing-ink)]">
@@ -197,13 +185,7 @@ const getFaq = (t: Translate) => [
       "Because many guests hesitate to call the concierge desk just for a table. Out of habit, they look for places on Instagram or TikTok and book elsewhere, without you. The in-room QR code brings them back to your recommendations at the very moment they're wondering, and every reservation stays attributed to your hotel.",
     ),
   },
-  {
-    q: t("Combien ça coûte ?", "How much does it cost?"),
-    a: t(
-      "Rien. Rejoindre le réseau est gratuit pour l'hôtel : TwoCards se rémunère côté établissements partenaires.",
-      "Nothing. Joining the network is free for hotels: TwoCards is paid by its partner venues.",
-    ),
-  },
+  getCostFaq(t),
   {
     q: t("Combien de temps pour être opérationnel ?", "How long does it take to get up and running?"),
     a: t(
@@ -221,39 +203,45 @@ export function HotelPage() {
     <ShortAudiencePage
       data={{
         hero: {
-          video: "/videos/hotels-hero-60.mp4",
-          poster: "/videos/hotels-hero-poster.jpg",
+          media: {
+            image: "/videos/hotels-hero-poster.jpg",
+            video: { src: "/videos/hotels-hero-60.mp4", rate: 0.8 },
+          },
           title: t(
             <>
               Offrez à vos clients{" "}
               <RotatingTitleWord words={["la table", "l'activité", "le service"]} />{" "}
-              qu&apos;ils <em className="italic">veulent vraiment</em>.
+              qu&apos;ils <em className="font-light italic">veulent vraiment</em>.
             </>,
             <>
               Give your guests{" "}
               <RotatingTitleWord words={["the table", "the experience", "the service"]} />{" "}
-              they <em className="italic">really want</em>.
+              they <em className="font-light italic">really want</em>.
             </>,
           ),
+          intro: t(
+            "Un QR code en chambre, un lien avant l'arrivée : vos clients réservent seuls vos adresses, et chaque réservation est attribuée à votre hôtel.",
+            "A QR code in the room, a link before arrival: guests book your recommended places on their own, and every reservation is attributed to your hotel.",
+          ),
           primary: { label: t("Équiper mon établissement", "Equip my property"), href: SIGNUP },
-          secondary: { label: t("Parler à notre équipe", "Talk to our team"), href: SIGNUP },
+          secondary: { label: t("Parler à notre équipe", "Talk to our team"), href: CONTACT_MAILTO },
         },
         how: {
           title: t(
             <>
               Deux chemins.
               <br />
-              <em className="font-light italic">Un seul suivi.</em>
+              Un seul suivi.
             </>,
             <>
               Two paths.
               <br />
-              <em className="font-light italic">One record.</em>
+              One record.
             </>,
           ),
           intro: t(
-            "Que le client réserve depuis sa chambre ou avant même d'arriver, la réservation est attribuée à votre hôtel.",
-            "Whether guests book from their room or before they even arrive, the reservation is attributed to your hotel.",
+            "Sur place ou avant l'arrivée, le client passe par la même sélection, et votre équipe voit tout au même endroit.",
+            "On site or before arrival, guests go through the same selection, and your team sees everything in one place.",
           ),
           items: getWays(t),
         },
@@ -266,16 +254,8 @@ export function HotelPage() {
         },
         gains: {
           title: t(
-            <>
-              Ce que votre hôtel
-              <br />
-              <em className="font-light italic">y gagne</em>.
-            </>,
-            <>
-              What your hotel
-              <br />
-              <em className="font-light italic">gains</em>.
-            </>,
+"Ce que votre hôtel y gagne.",
+            "What your hotel gains.",
           ),
           items: getGains(t),
           visual: DashboardVisual,
@@ -286,12 +266,12 @@ export function HotelPage() {
             <>
               Donnez la table à vos clients.
               <br />
-              <em className="font-light italic">Gardez la traçabilité.</em>
+              Gardez la traçabilité.
             </>,
             <>
               Give your guests the table.
               <br />
-              <em className="font-light italic">Keep the traceability.</em>
+              Keep the traceability.
             </>,
           ),
           text: t(

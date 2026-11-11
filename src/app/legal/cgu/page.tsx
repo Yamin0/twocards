@@ -1,20 +1,20 @@
 import type { Metadata } from "next";
 import { LegalArticle } from "@/components/landing/legal-article";
+import { pageMetadata } from "@/components/landing/seo";
 import { getT } from "@/lib/i18n/server";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const t = await getT();
-  return {
-    title: t("twocards. | Conditions générales d'utilisation", "twocards. | Terms of use"),
-    robots: { index: false },
-  };
+export function generateMetadata(): Promise<Metadata> {
+  return pageMetadata({
+    title: ["Conditions générales d'utilisation", "Terms of use"],
+    path: "/legal/cgu",
+    index: false,
+  });
 }
 
 export default async function CguPage() {
   const t = await getT();
   return (
     <LegalArticle
-      label={t("Juridique", "Legal")}
       title={t("Conditions générales d'utilisation", "Terms of use")}
       updated={t("31 juillet 2026", "31 July 2026")}
       sections={[

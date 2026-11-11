@@ -1,11 +1,23 @@
 "use client";
 
-import { Warp } from "@paper-design/shaders-react";
+import { useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
+
+/* Le shader WebGL (@paper-design/shaders-react) ne fait pas partie du
+   premier chargement : son code n'est demandé qu'au moment où une bande
+   qui le porte approche de l'écran. */
+const Warp = dynamic(
+  () => import("@paper-design/shaders-react").then((m) => m.Warp),
+  { ssr: false },
+);
 
 /**
  * Voile shader animé à poser au-dessus d'une photo (absolute inset-0).
  * Palette champagne/encre accordée à la direction éditoriale ivoire ;
  * le mix-blend laisse la photo respirer tout en la rendant vivante.
+ *
+ * Il ne tourne que lorsqu'il est à l'écran, et jamais si le visiteur a
+ * demandé moins d'animations : la photo reste alors seule.
  */
 export function WarpOverlay({
   className = "",
@@ -16,77 +28,29 @@ export function WarpOverlay({
   opacity?: number;
   speed?: number;
 }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const io = new IntersectionObserver(
+      ([entry]) => setVisible(entry.isIntersecting),
+      { rootMargin: "200px 0px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
   return (
     <div
+      ref={ref}
       aria-hidden
       className={`pointer-events-none absolute inset-0 mix-blend-overlay ${className}`}
       style={{ opacity }}
     >
-      <Warp
-        style={{ height: "100%", width: "100%" }}
-        proportion={0.45}
-        softness={1}
-        distortion={0.25}
-        swirl={0.8}
-        swirlIterations={10}
-        shape="checks"
-        shapeScale={0.1}
-        scale={1}
-        rotation={0}
-        speed={speed}
-        colors={[
-          "hsl(40, 45%, 12%)",
-          "hsl(42, 60%, 80%)",
-          "hsl(35, 35%, 38%)",
-          "hsl(45, 70%, 90%)",
-        ]}
-      />
-    </div>
-  );
-}
-
-/**
- * Fond shader pleine surface en palette ivoire/champagne claire —
- * pensé pour porter du texte encre par-dessus (héros éditorial).
- */
-export function WarpBackground({
-  className = "",
-  speed = 0.3,
-}: {
-  className?: string;
-  speed?: number;
-}) {
-  return (
-    <div aria-hidden className={`pointer-events-none absolute inset-0 ${className}`}>
-      <Warp
-        style={{ height: "100%", width: "100%" }}
-        proportion={0.45}
-        softness={1}
-        distortion={0.25}
-        swirl={0.8}
-        swirlIterations={10}
-        shape="checks"
-        shapeScale={0.1}
-        scale={1}
-        rotation={0}
-        speed={speed}
-        colors={[
-          "hsl(43, 70%, 97%)",
-          "hsl(42, 50%, 89%)",
-          "hsl(38, 38%, 82%)",
-          "hsl(45, 60%, 94%)",
-        ]}
-      />
-      {/* voile de lisibilité */}
-      <div className="absolute inset-0 bg-[var(--landing-ivory)]/35" />
-    </div>
-  );
-}
-
-export default function WarpShaderHero() {
-  return (
-    <main className="relative min-h-screen overflow-hidden">
-      <div className="absolute inset-0">
+      {visible && (
         <Warp
           style={{ height: "100%", width: "100%" }}
           proportion={0.45}
@@ -98,38 +62,15 @@ export default function WarpShaderHero() {
           shapeScale={0.1}
           scale={1}
           rotation={0}
-          speed={1}
+          speed={speed}
           colors={[
-            "hsl(200, 100%, 20%)",
-            "hsl(160, 100%, 75%)",
-            "hsl(180, 90%, 30%)",
-            "hsl(170, 100%, 80%)",
+            "hsl(40, 45%, 12%)",
+            "hsl(42, 60%, 80%)",
+            "hsl(35, 35%, 38%)",
+            "hsl(45, 70%, 90%)",
           ]}
         />
-      </div>
-
-      <div className="relative z-10 min-h-screen flex items-center justify-center px-8">
-        <div className="max-w-4xl w-full text-center space-y-8">
-          <h1 className="text-white text-5xl md:text-7xl font-sans font-light text-balance">
-            Elegant Shader Backgrounds
-          </h1>
-
-          <p className="text-white/90 text-xl md:text-2xl font-sans font-light leading-relaxed max-w-3xl mx-auto">
-            Beautiful, performant shader effects that enhance your content
-            without overwhelming it. Perfect for hero sections, landing pages,
-            and modern web experiences.
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
-            <button className="px-8 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-full text-white font-medium hover:bg-white/30 transition-all duration-300 hover:scale-105">
-              Get Started
-            </button>
-            <button className="px-8 py-4 bg-white rounded-full text-gray-800 font-medium hover:scale-105 transition-transform duration-300">
-              View Examples
-            </button>
-          </div>
-        </div>
-      </div>
-    </main>
+      )}
+    </div>
   );
 }

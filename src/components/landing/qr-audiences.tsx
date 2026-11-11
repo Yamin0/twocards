@@ -73,16 +73,8 @@ export function QrAudiences() {
       <div className={CONTAINER}>
         <SectionHeader
           title={t(
-            <>
-              Le même QR,
-              <br />
-              <em className="font-light italic">pour chaque métier</em>.
-            </>,
-            <>
-              One QR,
-              <br />
-              <em className="font-light italic">for every trade</em>.
-            </>
+            "Le même QR, pour chaque métier.",
+            "One QR, for every trade."
           )}
           intro={t(
             "Où qu'il soit posé, le QR sait d'où vient le client. Le réseau, lui, est commun : établissements vérifiés, disponibilités réelles, commissions calculées sur du revenu vérifié.",
@@ -107,7 +99,7 @@ export function QrAudiences() {
                   src={a.image}
                   alt=""
                   fill
-                  sizes="(min-width: 1024px) 760px, 100vw"
+                  sizes="(min-width: 1024px) 760px, (min-width: 640px) 90vw, 100vw"
                   className={`object-cover transition-transform duration-700 ${
                     open ? "lg:scale-100" : "lg:scale-110"
                   }`}
@@ -141,7 +133,7 @@ export function QrAudiences() {
                   <h3 className="text-[26px] font-semibold leading-tight tracking-[-0.02em] md:text-[30px]">
                     {a.label}
                   </h3>
-                  <p className="mt-3 max-w-sm text-[15px] leading-relaxed text-white/80">
+                  <p className="mt-3 max-w-sm text-[15px] leading-relaxed text-white/85">
                     {a.description}
                   </p>
                   <span className="mt-6 inline-flex items-center gap-2 text-[14px] font-medium">

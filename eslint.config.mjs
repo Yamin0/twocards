@@ -12,6 +12,20 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Hors de l'application : outillage local et dossiers qui ont leur
+    // propre chaîne (film du héros, app mobile, supports commerciaux).
+    ".claude/**",
+    ".agents/**",
+    "dashboard-video/**",
+    "video/**",
+    "mobile/**",
+    "supabase/functions/**",
+    "outreach/**",
+    "presentation/**",
+    "design-system/**",
+    "carte-de-visite/**",
+    "marrakech-best-of/**",
+    "stitch/**",
   ]),
 ]);
 

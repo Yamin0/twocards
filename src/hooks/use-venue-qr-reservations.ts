@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 export type VenueQrReservation = {
@@ -40,11 +40,12 @@ const SELECT =
 
 /* Réservations adressées à l'établissement connecté — la RLS ne laisse
    passer que celles dont venue_slug pointe vers sa fiche venues. Tenues à
-   jour en temps réel ; à défaut, l'état du chargement initial reste. */
+   jour en temps réel. Un échec du premier chargement est signalé (`error`)
+   au lieu de passer pour une liste vide ; `reload` relance la lecture. */
 export function useVenueQrReservations() {
-  const [reservations, setReservations] = useState<
-    VenueQrReservation[] | null
-  >(null);
+  const [reservations, setReservations] = useState<VenueQrReservation[] | null>(null);
+  const [error, setError] = useState(false);
+  const [tick, setTick] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -55,27 +56,40 @@ export function useVenueQrReservations() {
         .from("qr_reservations")
         .select(SELECT)
         .order("created_at", { ascending: false })
-        .then(({ data }) => {
+        .then(({ data, error: err }) => {
           if (cancelled) return;
-          setReservations((data as VenueQrReservation[] | null) ?? []);
+          if (err) {
+            /* Une relecture temps réel ratée ne vide pas l'écran. */
+            setError(true);
+            return;
+          }
+          setError(false);
+          setReservations((data as unknown as VenueQrReservation[] | null) ?? []);
         });
     };
 
     load();
     const channel = supabase
-      .channel("venue-qr-reservations")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "qr_reservations" },
-        load
-      )
+      .channel(`venue-qr-reservations-${++channelSeq}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "qr_reservations" }, load)
       .subscribe();
 
     return () => {
       cancelled = true;
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [tick]);
 
-  return { reservations, isLoading: reservations === null };
+  const reload = useCallback(() => setTick((n) => n + 1), []);
+
+  return {
+    reservations,
+    isLoading: reservations === null && !error,
+    error: error && reservations === null,
+    reload,
+  };
 }
+
+/* Deux écrans montés ensemble (accueil et coque) ne doivent pas partager un
+   nom de canal : le client Supabase est un singleton. */
+let channelSeq = 0;

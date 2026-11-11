@@ -1,16 +1,17 @@
 "use client";
 
 import { Check, ScanLine, Star } from "lucide-react";
+import { getCostFaq } from "@/components/landing/faq-home";
+import { CONTACT_MAILTO } from "@/components/landing/section-header";
 import {
   ShortAudiencePage,
   panel,
 } from "@/components/landing/short-audience-page";
 import { useT } from "@/lib/i18n/client";
 
-/* Page Établissements (restaurants, rooftops, clubs), sur le gabarit court
-   des pages métiers. Le héros vidéo est repris tel quel : la séquence va de
-   la salle au zellige fermé, elle se joue une fois et reste sur le mur
-   clos. Les adresses des exemples sont celles de la fiction du film. */
+/* Page Établissements (restaurants, rooftops, clubs), sur le gabarit commun
+   des pages métiers. La séquence du héros va de la salle au zellige fermé :
+   elle se joue une fois et reste sur le mur clos. Les adresses des exemples sont celles de la fiction du film. */
 
 const SIGNUP = "/signup?role=etablissement";
 
@@ -26,7 +27,7 @@ function InventoryVisual() {
   ];
   return (
     <div className={`${panel} p-5 text-left`}>
-      <p className="text-[11px] uppercase tracking-[0.14em] text-[var(--landing-ink)]/45">
+      <p className="text-[12px] font-medium text-[var(--landing-ink)]/65">
         {t("Mes conditions · Terrasse", "My conditions · Terrace")}
       </p>
       {rows.map(([label, value]) => (
@@ -34,7 +35,7 @@ function InventoryVisual() {
           key={label}
           className="flex items-center justify-between border-t border-black/[0.07] py-2.5 text-[13px] first-of-type:mt-2"
         >
-          <span className="text-[var(--landing-ink)]/55">{label}</span>
+          <span className="text-[var(--landing-ink)]/65">{label}</span>
           <span className="font-medium text-[var(--landing-ink)]">{value}</span>
         </div>
       ))}
@@ -47,10 +48,10 @@ function RequestVisual() {
   return (
     <div className={`${panel} p-5 text-left`}>
       <div className="flex items-center justify-between">
-        <p className="text-[11px] uppercase tracking-[0.14em] text-[var(--landing-ink)]/45">
+        <p className="text-[12px] font-medium text-[var(--landing-ink)]/65">
           {t("Nouvelle demande", "New request")}
         </p>
-        <span className="text-[11px] text-[var(--landing-ink)]/45">{t("il y a 2 min", "2 min ago")}</span>
+        <span className="text-[11px] text-[var(--landing-ink)]/65">{t("il y a 2 min", "2 min ago")}</span>
       </div>
       <p className="mt-2 text-[15px] font-semibold text-[var(--landing-ink)]">
         {t("Sam. 21:00 · 4 couverts", "Sat. 21:00 · 4 covers")}
@@ -80,11 +81,11 @@ function VerifiedVisual() {
         </span>
         <div>
           <p className="text-[14px] font-medium">{t("Arrivée confirmée", "Arrival confirmed")}</p>
-          <p className="text-[12px] text-[var(--landing-ink)]/50">{t("QR scanné à la porte · 21:04", "QR scanned at the door · 21:04")}</p>
+          <p className="text-[12px] text-[var(--landing-ink)]/65">{t("QR scanné à la porte · 21:04", "QR scanned at the door · 21:04")}</p>
         </div>
       </div>
       <div className="flex items-center justify-between py-3 text-[13px]">
-        <span className="text-[var(--landing-ink)]/55">{t("Addition vérifiée", "Bill verified")}</span>
+        <span className="text-[var(--landing-ink)]/65">{t("Addition vérifiée", "Bill verified")}</span>
         <span className="font-medium">2 300 MAD</span>
       </div>
       <div className="flex items-center gap-2 rounded-xl bg-emerald-50 px-3 py-2.5 text-[13px] font-medium text-emerald-800">
@@ -103,7 +104,7 @@ function ReviewVisual() {
   const t = useT();
   return (
     <div className="flex flex-col gap-3">
-      <p className="text-center text-[11px] text-[var(--landing-ink)]/45">
+      <p className="text-center text-[11px] text-[var(--landing-ink)]/65">
         {t("Le lendemain · par WhatsApp", "The next day · via WhatsApp")}
       </p>
       <div className={`${panel} p-5 text-left`}>
@@ -121,7 +122,7 @@ function ReviewVisual() {
         <p className="mt-3 rounded-lg bg-black/[0.04] px-3 py-2 text-[13px] italic text-[var(--landing-ink)]/70">
           {t("« Service parfait, la terrasse était magique. »", "“Perfect service, the terrace was magical.”")}
         </p>
-        <p className="mt-2 text-[11px] text-[var(--landing-ink)]/45">
+        <p className="mt-2 text-[11px] text-[var(--landing-ink)]/65">
           {t("Votre note est transmise à l'établissement.", "Your rating is shared with the venue.")}
         </p>
       </div>
@@ -147,20 +148,16 @@ function DashboardVisual() {
   return (
     <div className={`${panel} p-5 text-left`}>
       <div className="mb-2 flex items-center justify-between">
-        <p className="text-[11px] uppercase tracking-[0.14em] text-[var(--landing-ink)]/45">
+        <p className="text-[12px] font-medium text-[var(--landing-ink)]/65">
           {t("Le Comptoir du Soir · ce mois", "Le Comptoir du Soir · this month")}
         </p>
-        <span className="flex items-center gap-1.5 text-[12px] text-emerald-600">
-          <span className="size-1.5 rounded-full bg-emerald-500" />
-          {t("en direct", "live")}
-        </span>
       </div>
       {rows.map(([label, value]) => (
         <div
           key={label}
           className="flex items-center justify-between border-t border-black/[0.07] py-2.5 text-[13px]"
         >
-          <span className="text-[var(--landing-ink)]/55">{label}</span>
+          <span className="text-[var(--landing-ink)]/65">{label}</span>
           <span className="font-medium">{value}</span>
         </div>
       ))}
@@ -182,38 +179,43 @@ export function EstablishmentPage() {
     <ShortAudiencePage
       data={{
         hero: {
-          video: "/videos/etablissements-hero-60.mp4",
-          poster: "/videos/etablissements-hero-poster.jpg",
-          loop: false,
+          media: {
+            image: "/videos/etablissements-hero-poster.jpg",
+            video: { src: "/videos/etablissements-hero-60.mp4", loop: false, rate: 0.8 },
+          },
           title: t(
             <>
               Remplissez vos tables,{" "}
-              <em className="italic">à vos conditions</em>.
+              <em className="font-light italic">à vos conditions</em>.
             </>,
             <>
               Fill your tables,{" "}
-              <em className="italic">on your terms</em>.
+              <em className="font-light italic">on your terms</em>.
             </>,
           ),
+          intro: t(
+            "Les hôtels, concierges et RP de la ville vous envoient leurs clients. Vous ne payez que lorsqu'ils viennent.",
+            "The city's hotels, concierges and PRs send you their guests. You only pay when they show up.",
+          ),
           primary: { label: t("Devenir partenaire", "Become a partner"), href: SIGNUP },
-          secondary: { label: t("Parler à notre équipe", "Talk to our team"), href: SIGNUP },
+          secondary: { label: t("Parler à notre équipe", "Talk to our team"), href: CONTACT_MAILTO },
         },
         how: {
           title: t(
             <>
               Vos conditions.
               <br />
-              <em className="font-light italic">Notre réseau.</em>
+              Notre réseau.
             </>,
             <>
               Your terms.
               <br />
-              <em className="font-light italic">Our network.</em>
+              Our network.
             </>,
           ),
           intro: t(
-            "Les hôtels, concierges et RP de la ville vous envoient leurs clients. Vous ne payez que lorsqu'ils viennent.",
-            "The city's hotels, concierges and PRs send you their guests. You only pay when they show up.",
+            "Vous gardez le contrôle de chaque table, et chaque commission est calculée sur du revenu vérifié.",
+            "You keep control of every table, and every commission is calculated on verified revenue.",
           ),
           items: [
             {
@@ -252,16 +254,8 @@ export function EstablishmentPage() {
         },
         spotlight: {
           title: t(
-            <>
-              Votre réputation,
-              <br />
-              <em className="font-light italic">soignée après chaque visite</em>.
-            </>,
-            <>
-              Your reputation,
-              <br />
-              <em className="font-light italic">cared for after every visit</em>.
-            </>,
+"Votre réputation, soignée après chaque visite.",
+            "Your reputation, cared for after every visit.",
           ),
           intro: t(
             "Le lendemain de sa soirée, chaque client reçoit un message pour la noter. Vous n'avez rien à faire.",
@@ -301,16 +295,8 @@ export function EstablishmentPage() {
         },
         gains: {
           title: t(
-            <>
-              Ce que votre établissement
-              <br />
-              <em className="font-light italic">y gagne</em>.
-            </>,
-            <>
-              What your venue
-              <br />
-              <em className="font-light italic">gains</em>.
-            </>,
+"Ce que votre établissement y gagne.",
+            "What your venue gains.",
           ),
           items: [
             {
@@ -383,25 +369,19 @@ export function EstablishmentPage() {
               "No. You only share the tables you want with the network, when you want.",
             ),
           },
-          {
-            q: t("Combien ça coûte ?", "How much does it cost?"),
-            a: t(
-              "Rien pendant le pilote à Marrakech : installation gratuite et import de votre réseau d'apporteurs existant.",
-              "Nothing during the Marrakech pilot: free set-up, and we import your existing network of referral partners.",
-            ),
-          },
+          getCostFaq(t),
         ],
         cta: {
           title: t(
             <>
               Vos tables sont déjà là.
               <br />
-              <em className="font-light italic">Faites-en un actif.</em>
+              Faites-en un actif.
             </>,
             <>
               Your tables are already there.
               <br />
-              <em className="font-light italic">Make them an asset.</em>
+              Make them an asset.
             </>,
           ),
           text: t(

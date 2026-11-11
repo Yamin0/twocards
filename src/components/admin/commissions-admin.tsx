@@ -1,9 +1,9 @@
 "use client";
 
+import { currentPeriod, isDue, mad, monthLabel } from "@/lib/commissions";
 import { useMemo, useState } from "react";
 import { ArrowRight, Check, Loader2, RotateCcw } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { intlLocale, type Locale } from "@/lib/i18n";
 import { useIntlLocale, useLocale, useT } from "@/lib/i18n/client";
 
 /* Commissions vues du réseau : qui doit combien à qui. Chaque sortie
@@ -43,27 +43,7 @@ export type Settlement = {
   settled_at: string;
 };
 
-export const isDue = (r: LedgerRow) =>
-  r.source === "qr" &&
-  r.amount_spent !== null &&
-  r.status !== "annulée" &&
-  r.status !== "no-show";
-
-export const currentPeriod = () => {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-};
-
-export const monthLabel = (period: string, locale: Locale = "fr") => {
-  const label = new Date(`${period}-01T00:00:00`).toLocaleDateString(intlLocale(locale), {
-    month: "long",
-    year: "numeric",
-  });
-  return label.charAt(0).toUpperCase() + label.slice(1);
-};
-
-export const mad = (n: number, locale: Locale = "fr") =>
-  `${Math.round(n).toLocaleString(intlLocale(locale))} MAD`;
+export { currentPeriod, isDue, mad, monthLabel };
 
 type Pair = {
   key: string;
@@ -207,17 +187,17 @@ export function CommissionsAdmin({
     onChanged(t("Règlement annulé", "Settlement undone"));
   };
 
-  const th = "font-ui px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/50 text-left";
+  const th = "font-ui px-4 py-3 text-xs font-bold text-ink-3 text-left";
   const tabBtn = (active: boolean) =>
     `font-ui rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
-      active ? "bg-white text-black" : "text-white/60 hover:bg-white/10 hover:text-white"
+      active ? "bg-brand text-on-brand" : "text-ink-2 hover:bg-fill-2 hover:text-ink"
     }`;
 
   return (
     <div className="space-y-4">
       {/* Mois */}
       <div className={`${panel} p-4 sm:p-5`}>
-        <p className="font-ui mb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-white/45">{t("Période", "Period")}</p>
+        <p className="font-ui mb-2 text-xs font-bold text-ink-3">{t("Période", "Period")}</p>
         <div className="flex flex-wrap gap-1.5">
           {periods.map((p) => (
             <button key={p} type="button" onClick={() => setPeriod(p)} className={tabBtn(period === p)}>
@@ -235,10 +215,10 @@ export function CommissionsAdmin({
             { label: t("Restant à régler", "Outstanding"), value: mad(total - settledTotal, locale), hint: t("à collecter puis reverser", "to collect, then pay out") },
             { label: t("Couples", "Pairs"), value: String(pairs.length), hint: t("établissement → hôtel", "venue → hotel") },
           ].map((k) => (
-            <div key={k.label} className="rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-3">
-              <p className="font-ui text-[10px] font-bold uppercase tracking-wider text-white/45">{k.label}</p>
-              <p className="font-display mt-1 text-xl text-white tabular-nums">{k.value}</p>
-              <p className="font-ui text-[11px] text-white/40">{k.hint}</p>
+            <div key={k.label} className="rounded-xl border border-line bg-fill px-4 py-3">
+              <p className="font-ui text-xs font-bold text-ink-3">{k.label}</p>
+              <p className="font-display mt-1 text-xl text-ink tabular-nums">{k.value}</p>
+              <p className="font-ui text-xs text-ink-3">{k.hint}</p>
             </div>
           ))}
         </div>
@@ -258,7 +238,7 @@ export function CommissionsAdmin({
               {t("Hôtels", "Hotels")}
             </button>
           </div>
-          <p className="font-ui text-xs text-white/40">
+          <p className="font-ui text-xs text-ink-3">
             {view === "pairs"
               ? t("L'établissement paie, twocards reverse à l'hôtel.", "The venue pays; twocards passes it on to the hotel.")
               : view === "venues"
@@ -268,12 +248,12 @@ export function CommissionsAdmin({
         </div>
 
         {rows.length === 0 ? (
-          <p className="py-8 text-center font-ui text-sm text-white/40">{t("Aucune commission sur cette période.", "No commissions for this period.")}</p>
+          <p className="py-8 text-center font-ui text-sm text-ink-3">{t("Aucune commission sur cette période.", "No commissions for this period.")}</p>
         ) : view === "pairs" ? (
-          <div className="tc-stack overflow-x-auto rounded-xl border border-white/[0.08]">
+          <div className="tc-stack overflow-x-auto rounded-xl border border-line">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-white/10">
+                <tr className="border-b border-line">
                   <th className={th}>{t("Établissement", "Venue")}</th>
                   <th className={th}>{t("Hôtel", "Hotel")}</th>
                   <th className={th}>{t("Sorties", "Outings")}</th>
@@ -287,26 +267,26 @@ export function CommissionsAdmin({
                   const s = pairSettlement(p);
                   const canSettle = period !== "all" && !!p.venueOwnerId && !!p.hotelId;
                   return (
-                    <tr key={p.key} className="border-b border-white/[0.06] last:border-0">
+                    <tr key={p.key} className="border-b border-line last:border-0">
                       <td data-head className="px-4 py-3">
-                        <p className="font-ui text-sm font-semibold text-white">{p.venueLabel}</p>
+                        <p className="font-ui text-sm font-semibold text-ink">{p.venueLabel}</p>
                         {!p.venueOwnerId && (
-                          <p className="font-ui text-[11px] text-amber-300/90">{t("fiche sans compte relié", "listing with no linked account")}</p>
+                          <p className="font-ui text-xs text-warn">{t("fiche sans compte relié", "listing with no linked account")}</p>
                         )}
                       </td>
                       <td data-label={t("Hôtel", "Hotel")} className="px-4 py-3">
-                        <span className="font-ui inline-flex items-center gap-1.5 text-sm text-white/80">
-                          <ArrowRight size={12} strokeWidth={2} className="text-white/35" />
+                        <span className="font-ui inline-flex items-center gap-1.5 text-sm text-ink">
+                          <ArrowRight size={12} strokeWidth={2} className="text-ink-3" />
                           {p.hotelLabel}
                         </span>
                       </td>
-                      <td data-label={t("Sorties", "Outings")} className="font-ui px-4 py-3 text-sm text-white/70 tabular-nums">{p.count}</td>
-                      <td data-label={t("Dépensé", "Spent")} className="font-ui px-4 py-3 text-sm text-white/70 tabular-nums whitespace-nowrap">{mad(p.spent, locale)}</td>
-                      <td data-label={t("Commission", "Commission")} className="font-display px-4 py-3 text-sm text-amber-300 tabular-nums whitespace-nowrap">{mad(p.commission, locale)}</td>
+                      <td data-label={t("Sorties", "Outings")} className="font-ui px-4 py-3 text-sm text-ink-2 tabular-nums">{p.count}</td>
+                      <td data-label={t("Dépensé", "Spent")} className="font-ui px-4 py-3 text-sm text-ink-2 tabular-nums whitespace-nowrap">{mad(p.spent, locale)}</td>
+                      <td data-label={t("Commission", "Commission")} className="font-display px-4 py-3 text-sm text-warn tabular-nums whitespace-nowrap">{mad(p.commission, locale)}</td>
                       <td data-actions className="px-4 py-3">
                         {s ? (
                           <div className="flex items-center justify-end gap-2">
-                            <span className="font-ui inline-flex items-center gap-1 text-xs text-emerald-300">
+                            <span className="font-ui inline-flex items-center gap-1 text-xs text-ok">
                               <Check size={12} strokeWidth={2.5} />
                               {t("réglé le", "settled on")} {new Date(s.settled_at).toLocaleDateString(intl)}
                             </span>
@@ -315,7 +295,7 @@ export function CommissionsAdmin({
                               onClick={() => unmark(p)}
                               disabled={busy === p.key}
                               aria-label={t("Annuler le règlement", "Undo settlement")}
-                              className="flex h-8 w-8 items-center justify-center rounded-lg text-white/40 hover:bg-white/10 hover:text-white disabled:opacity-50"
+                              className="flex h-8 w-8 items-center justify-center rounded-lg text-ink-3 hover:bg-fill-2 hover:text-ink disabled:opacity-50"
                             >
                               {busy === p.key ? <Loader2 size={13} className="animate-spin" /> : <RotateCcw size={13} strokeWidth={1.75} />}
                             </button>
@@ -326,7 +306,7 @@ export function CommissionsAdmin({
                             onClick={() => markSettled(p)}
                             disabled={!canSettle || busy === p.key}
                             title={!canSettle ? (period === "all" ? t("Choisissez un mois", "Pick a month") : t("Fiche sans compte relié", "Listing with no linked account")) : undefined}
-                            className="font-ui inline-flex h-8 items-center gap-1.5 rounded-full bg-white px-3 text-xs font-bold text-black transition-colors hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-40"
+                            className="font-ui inline-flex h-8 items-center gap-1.5 rounded-full bg-brand px-3 text-xs font-bold text-on-brand transition-colors hover:bg-brand-strong disabled:cursor-not-allowed disabled:opacity-40"
                           >
                             {busy === p.key ? <Loader2 size={13} className="animate-spin" /> : <Check size={13} strokeWidth={2.5} />}
                             {t("Marquer réglé", "Mark as settled")}
@@ -340,10 +320,10 @@ export function CommissionsAdmin({
             </table>
           </div>
         ) : (
-          <div className="tc-stack overflow-x-auto rounded-xl border border-white/[0.08]">
+          <div className="tc-stack overflow-x-auto rounded-xl border border-line">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-white/10">
+                <tr className="border-b border-line">
                   <th className={th}>{view === "venues" ? t("Établissement", "Venue") : t("Hôtel", "Hotel")}</th>
                   <th className={th}>{t("Sorties", "Outings")}</th>
                   <th className={th}>{t("Dépensé", "Spent")}</th>
@@ -354,16 +334,16 @@ export function CommissionsAdmin({
               </thead>
               <tbody>
                 {(view === "venues" ? venues : hotels).map((s) => (
-                  <tr key={s.key} className="border-b border-white/[0.06] last:border-0">
+                  <tr key={s.key} className="border-b border-line last:border-0">
                     <td data-head className="px-4 py-3">
-                      <p className="font-ui text-sm font-semibold text-white">{s.label}</p>
-                      {!s.id && <p className="font-ui text-[11px] text-amber-300/90">{t("sans compte relié", "no linked account")}</p>}
+                      <p className="font-ui text-sm font-semibold text-ink">{s.label}</p>
+                      {!s.id && <p className="font-ui text-xs text-warn">{t("sans compte relié", "no linked account")}</p>}
                     </td>
-                    <td data-label={t("Sorties", "Outings")} className="font-ui px-4 py-3 text-sm text-white/70 tabular-nums">{s.count}</td>
-                    <td data-label={t("Dépensé", "Spent")} className="font-ui px-4 py-3 text-sm text-white/70 tabular-nums whitespace-nowrap">{mad(s.spent, locale)}</td>
-                    <td data-label={view === "venues" ? t("Doit payer", "Owes") : t("Doit recevoir", "Is owed")} className="font-display px-4 py-3 text-sm text-amber-300 tabular-nums whitespace-nowrap">{mad(s.commission, locale)}</td>
-                    <td data-label={t("Réglé", "Settled")} className="font-ui px-4 py-3 text-sm text-emerald-300 tabular-nums whitespace-nowrap">{mad(s.settledAmount, locale)}</td>
-                    <td data-label={t("Restant", "Outstanding")} className="font-ui px-4 py-3 text-sm text-white tabular-nums whitespace-nowrap">{mad(s.commission - s.settledAmount, locale)}</td>
+                    <td data-label={t("Sorties", "Outings")} className="font-ui px-4 py-3 text-sm text-ink-2 tabular-nums">{s.count}</td>
+                    <td data-label={t("Dépensé", "Spent")} className="font-ui px-4 py-3 text-sm text-ink-2 tabular-nums whitespace-nowrap">{mad(s.spent, locale)}</td>
+                    <td data-label={view === "venues" ? t("Doit payer", "Owes") : t("Doit recevoir", "Is owed")} className="font-display px-4 py-3 text-sm text-warn tabular-nums whitespace-nowrap">{mad(s.commission, locale)}</td>
+                    <td data-label={t("Réglé", "Settled")} className="font-ui px-4 py-3 text-sm text-ok tabular-nums whitespace-nowrap">{mad(s.settledAmount, locale)}</td>
+                    <td data-label={t("Restant", "Outstanding")} className="font-ui px-4 py-3 text-sm text-ink tabular-nums whitespace-nowrap">{mad(s.commission - s.settledAmount, locale)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -372,7 +352,7 @@ export function CommissionsAdmin({
         )}
       </div>
 
-      <p className="font-ui text-xs leading-relaxed text-white/40">
+      <p className="font-ui text-xs leading-relaxed text-ink-3">
         {t(
           <>
             Un règlement noté vaut pour les deux mouvements : l&apos;établissement a payé, l&apos;hôtel a été reversé.

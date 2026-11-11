@@ -1,10 +1,23 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { Plus } from "lucide-react";
-import { CONTAINER, SECTION, TITLE } from "@/components/landing/section-header";
+import {
+  CONTACT_MAILTO,
+  FaqSection,
+} from "@/components/landing/section-header";
 import { useT } from "@/lib/i18n/client";
 import type { Translate } from "@/lib/i18n";
+
+/* « Combien ça coûte ? » : une seule formulation pour tout le site.
+   L'accueil et les quatre pages métiers reprennent cette entrée mot pour
+   mot ; pour changer le discours tarifaire, c'est ici et nulle part
+   ailleurs. */
+export const getCostFaq = (t: Translate) => ({
+  q: t("Combien ça coûte ?", "How much does it cost?"),
+  a: t(
+    "Rien pendant le pilote Founding Circle à Marrakech : installation gratuite, import de votre réseau existant, rapport hebdomadaire. Le modèle payant n'est activé qu'après la preuve du retour sur investissement.",
+    "Nothing during the Founding Circle pilot in Marrakech: free setup, import of your existing network, a weekly report. Paid plans only kick in once the return on investment is proven.",
+  ),
+});
 
 const getFaq = (t: Translate) => [
   {
@@ -38,13 +51,7 @@ const getFaq = (t: Translate) => [
       "Venues (restaurants, rooftops, clubs, beach clubs, hotels and riads) and verified referrers (concierge services, hotel concierges, PRs, influencers). Every account is verified before it can access the network."
     ),
   },
-  {
-    q: t("Combien ça coûte ?", "How much does it cost?"),
-    a: t(
-      "Rien pendant le pilote Founding Circle à Marrakech : installation gratuite, import de votre réseau existant, rapport hebdomadaire. Le modèle payant n'est activé qu'après la preuve du retour sur investissement.",
-      "Nothing during the Founding Circle pilot in Marrakech: free setup, import of your existing network, a weekly report. Paid plans only kick in once the return on investment is proven."
-    ),
-  },
+  getCostFaq(t),
   {
     q: t("Où êtes-vous disponibles ?", "Where are you available?"),
     a: t(
@@ -63,67 +70,22 @@ const getFaq = (t: Translate) => [
 
 export function FaqHome() {
   const t = useT();
-  const FAQ = getFaq(t);
   return (
-    <section className={SECTION}>
-      <div
-        className={`${CONTAINER} grid gap-12 md:grid-cols-[1fr_1.5fr] md:gap-20`}
-      >
-        {/* Le titre reste à l'écran pendant qu'on parcourt les questions. */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.6 }}
-          className="md:sticky md:top-28 md:self-start"
-        >
-          <h2 className={TITLE}>
-            {t(
-              <>
-                Avant de nous
-                <br />
-                <em className="font-light italic">rejoindre</em>.
-              </>,
-              <>
-                Before you
-                <br />
-                <em className="font-light italic">join us</em>.
-              </>
-            )}
-          </h2>
-          <p className="mt-6 max-w-xs text-[16px] leading-relaxed text-[var(--landing-ink)]/65">
-            {t("Une autre question ?", "Another question?")}{" "}
-            <a
-              href="#contact"
-              className="font-medium text-[var(--landing-ink)] underline decoration-black/20 underline-offset-4 hover:decoration-black/60"
-            >
-              {t("Parlons-en", "Let's talk")}
-            </a>
-            .
-          </p>
-        </motion.div>
-
-        <div className="flex flex-col">
-          {FAQ.map((item) => (
-            <details
-              key={item.q}
-              className="group border-t border-black/[0.1] last:border-b"
-            >
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-6 text-[17px] font-medium text-[var(--landing-ink)] md:text-[18px] [&::-webkit-details-marker]:hidden">
-                {item.q}
-                <Plus
-                  size={18}
-                  strokeWidth={1.5}
-                  className="shrink-0 text-[var(--landing-mute)] transition-transform duration-300 group-open:rotate-45"
-                />
-              </summary>
-              <p className="-mt-1 pb-7 pr-10 text-[16px] leading-relaxed text-[var(--landing-ink)]/65">
-                {item.a}
-              </p>
-            </details>
-          ))}
-        </div>
-      </div>
-    </section>
+    <FaqSection
+      title={t("Avant de nous rejoindre.", "Before you join us.")}
+      aside={
+        <>
+          {t("Une autre question ?", "Another question?")}{" "}
+          <a
+            href={CONTACT_MAILTO}
+            className="font-medium text-[var(--landing-ink)] underline decoration-black/30 underline-offset-4 hover:decoration-black/70"
+          >
+            {t("Parlons-en", "Let's talk")}
+          </a>
+          .
+        </>
+      }
+      items={getFaq(t)}
+    />
   );
 }

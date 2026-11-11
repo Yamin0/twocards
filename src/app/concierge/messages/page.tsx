@@ -3,7 +3,7 @@
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Messenger } from "@/components/shared/messenger";
-import { ConciergeSkeleton } from "@/components/shared/loading-skeleton";
+import { PageSkeleton } from "@/components/app/ui";
 import { useAuthUser } from "@/hooks/use-auth-user";
 import { useT } from "@/lib/i18n/client";
 
@@ -16,11 +16,10 @@ function ConciergeMessages() {
   const { isLoading } = useAuthUser();
   const t = useT();
   const to = useSearchParams().get("to");
-  if (isLoading) return <ConciergeSkeleton />;
+  if (isLoading) return <PageSkeleton kpis={0} rows={6} />;
 
   return (
-    <div className="p-4 sm:p-6">
-      <Messenger
+    <Messenger
         initialCounterpartId={to}
         labels={{
           searchPlaceholder: t("Rechercher un établissement...", "Search venues..."),
@@ -32,15 +31,14 @@ function ConciergeMessages() {
             ),
           directoryEmpty: t("Aucun établissement inscrit pour le moment.", "No venues have signed up yet."),
         }}
-      />
-    </div>
+    />
   );
 }
 
 export default function ConciergeMessagesPage() {
   /* useSearchParams exige une frontière Suspense au prérendu. */
   return (
-    <Suspense fallback={<ConciergeSkeleton />}>
+    <Suspense fallback={<PageSkeleton kpis={0} rows={6} />}>
       <ConciergeMessages />
     </Suspense>
   );

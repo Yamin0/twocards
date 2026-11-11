@@ -7,7 +7,7 @@ export default function LegalLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-[var(--landing-ivory)] text-[var(--landing-ink)] font-body">
+    <div className="landing-satoshi min-h-screen bg-[var(--landing-ivory)] font-body text-[var(--landing-ink)]">
       <LandingNavbar />
       <main className="mx-auto max-w-3xl px-6 py-16 md:py-24">{children}</main>
       <Footer />

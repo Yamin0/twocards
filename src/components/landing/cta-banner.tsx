@@ -1,8 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
-import { motion } from "framer-motion";
+import { CtaLink, Reveal, type Cta } from "@/components/landing/section-header";
 import { useT } from "@/lib/i18n/client";
 import type { Translate } from "@/lib/i18n";
 
@@ -15,8 +14,8 @@ const BANNER =
 type CtaBannerProps = {
   title?: React.ReactNode;
   text?: string;
-  primary?: { label: string; href: string };
-  secondary?: { label: string; href: string } | null;
+  primary?: Cta;
+  secondary?: Cta | null;
 };
 
 const getDefaults = (t: Translate) => ({
@@ -24,12 +23,12 @@ const getDefaults = (t: Translate) => ({
     <>
       Digitalisez les relations
       <br />
-      qui <em className="font-light italic">existent déjà</em>.
+      qui existent déjà.
     </>,
     <>
       Digitise the relationships
       <br />
-      you <em className="font-light italic">already have</em>.
+      you already have.
     </>
   ),
   text: t(
@@ -66,38 +65,32 @@ export function CtaBanner(props: CtaBannerProps = {}) {
       />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0.7),rgba(0,0,0,0.45))]" />
 
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-100px" }}
-        transition={{ duration: 0.7 }}
-        className="relative z-10 flex max-w-3xl flex-col items-center text-center"
-      >
-        <h2 className="font-title text-[38px] font-bold leading-[1.04] tracking-[-0.035em] text-white sm:text-[52px] lg:text-[64px]">
+      <Reveal className="relative z-10 flex max-w-3xl flex-col items-center text-center">
+        <h2 className="font-title text-[36px] font-bold leading-[1.05] tracking-[-0.035em] text-white sm:text-[46px] lg:text-[56px]">
           {title}
         </h2>
 
-        <p className="mt-7 max-w-xl text-[16px] leading-relaxed text-white/80 md:text-[17px]">
+        <p className="mt-7 max-w-xl text-[16px] leading-relaxed text-white/85 md:text-[17px]">
           {text}
         </p>
 
         <div className="mt-10 flex flex-col items-center gap-5 sm:flex-row sm:gap-7">
-          <Link
+          <CtaLink
             href={primary.href}
-            className="rounded-full bg-white px-8 py-3.5 text-[14px] font-medium text-[var(--landing-ink)] transition-opacity hover:opacity-85"
+            className="rounded-full bg-white px-8 py-3.5 text-[15px] font-medium text-[var(--landing-ink)] transition-opacity hover:opacity-85"
           >
             {primary.label}
-          </Link>
+          </CtaLink>
           {secondary && (
-            <Link
+            <CtaLink
               href={secondary.href}
-              className="text-[14px] font-medium text-white/85 underline decoration-white/30 underline-offset-4 transition-colors hover:text-white"
+              className="text-[15px] font-medium text-white/90 underline decoration-white/40 underline-offset-4 transition-colors hover:text-white"
             >
               {secondary.label}
-            </Link>
+            </CtaLink>
           )}
         </div>
-      </motion.div>
+      </Reveal>
     </section>
   );
 }

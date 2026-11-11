@@ -2,35 +2,40 @@
 
 import Link from "next/link";
 import {
-  ArrowRight,
   BarChart3,
   Bell,
+  ChevronRight,
   CreditCard,
   Globe,
   Grid3X3,
-  HelpCircle,
+  LifeBuoy,
   Network,
   Plug,
   Settings,
+  Tags,
   Ticket,
   Users,
   type LucideIcon,
 } from "lucide-react";
 import { useAuthUser } from "@/hooks/use-auth-user";
+import { PageHeader, cardClass } from "@/components/app/ui";
+import { cn } from "@/lib/utils";
 import { useT } from "@/lib/i18n/client";
 import type { Translate } from "@/lib/i18n";
 
-/* Tout ce qui n'a pas sa place dans les premiers onglets. Au lancement,
+/* Tout ce qui n'a pas sa place dans les premiers onglets. Au quotidien,
    un établissement vit dans Réservations et Messages ; le reste est là,
-   rangé, sans encombrer. C'est aussi l'onglet « Plus » de l'application. */
+   rangé. C'est aussi l'onglet « Plus » de l'application. */
 
 type Entry = {
   icon: LucideIcon;
   label: string;
   description: string;
   href: string;
-  /* Un loueur de quads n'a ni salle ni soirées. */
+  /** Salle, soirées, caisse : un loueur de quads n'en a pas. */
   restaurantOnly?: boolean;
+  /** Prestations : activités et services seulement. */
+  activityOnly?: boolean;
 };
 
 const getGroups = (t: Translate): { title: string; entries: Entry[] }[] => [
@@ -39,26 +44,26 @@ const getGroups = (t: Translate): { title: string; entries: Entry[] }[] => [
     entries: [
       {
         icon: Network,
-        label: t("Réseau apporteurs", "Referral network"),
-        description: t("Quels hôtels et conciergeries vous envoient des clients", "Which hotels and concierge desks send you guests"),
+        label: t("Réseau d'apporteurs", "Referral network"),
+        description: t("Qui vous envoie des clients", "Who sends you guests"),
         href: "/dashboard/network",
       },
       {
         icon: CreditCard,
         label: t("Commissions", "Commissions"),
-        description: t("Ce que vous reversez, réservation par réservation", "What you pay out, reservation by reservation"),
+        description: t("Ce que vous reversez", "What you pay out"),
         href: "/dashboard/commissions",
       },
       {
         icon: BarChart3,
         label: t("Analyses", "Analytics"),
-        description: t("Volumes, panier moyen, tendances", "Volumes, average spend, trends"),
+        description: t("Volumes, panier moyen, canaux", "Volumes, average spend, channels"),
         href: "/dashboard/analytics",
       },
       {
         icon: Users,
         label: t("Clients", "Guests"),
-        description: t("Historique et fidélité de vos convives", "Your guests' history and loyalty"),
+        description: t("Visites, dépenses et avis", "Visits, spend and reviews"),
         href: "/dashboard/guests",
       },
     ],
@@ -69,8 +74,15 @@ const getGroups = (t: Translate): { title: string; entries: Entry[] }[] => [
       {
         icon: Globe,
         label: t("Portail de réservation", "Booking portal"),
-        description: t("Votre page de réservation directe, sans commission", "Your direct booking page, commission-free"),
+        description: t("Votre page directe, sans commission", "Your direct page, commission-free"),
         href: "/dashboard/portal",
+      },
+      {
+        icon: Tags,
+        label: t("Prestations", "Services"),
+        description: t("Ce que vos clients peuvent réserver", "What your guests can book"),
+        href: "/dashboard/prestations",
+        activityOnly: true,
       },
       {
         icon: Ticket,
@@ -88,8 +100,8 @@ const getGroups = (t: Translate): { title: string; entries: Entry[] }[] => [
       },
       {
         icon: Plug,
-        label: t("Caisse (POS)", "Point of sale (POS)"),
-        description: t("Rapprochement automatique des tickets", "Automatic ticket matching"),
+        label: t("Caisse (POS)", "Till (POS)"),
+        description: t("Additions rapprochées automatiquement", "Bills matched automatically"),
         href: "/dashboard/integrations",
         restaurantOnly: true,
       },
@@ -107,13 +119,13 @@ const getGroups = (t: Translate): { title: string; entries: Entry[] }[] => [
       {
         icon: Bell,
         label: t("Notifications", "Notifications"),
-        description: t("Tout ce qui s'est passé, dans l'ordre", "Everything that happened, in order"),
+        description: t("Réservations, avis, caisse", "Reservations, reviews, till"),
         href: "/dashboard/notifications",
       },
       {
-        icon: HelpCircle,
+        icon: LifeBuoy,
         label: t("Aide", "Help"),
-        description: t("Guides et contact", "Guides and contact"),
+        description: t("Réponses et contact", "Answers and contact"),
         href: "/dashboard/help",
       },
     ],
@@ -123,56 +135,50 @@ const getGroups = (t: Translate): { title: string; entries: Entry[] }[] => [
 export default function PlusPage() {
   const { isActivityVenue } = useAuthUser();
   const t = useT();
-  const GROUPS = getGroups(t);
 
   return (
     <div className="space-y-6">
-      <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
-        <h1 className="font-display text-3xl font-light text-white">{t("Plus", "More")}</h1>
-        <p className="font-ui text-sm text-white/60 mt-2">
-          {t(
-            <>Les sections que vous n&apos;ouvrez pas tous les jours.</>,
-            <>The sections you don&apos;t open every day.</>
-          )}
-        </p>
-      </div>
+      <PageHeader
+        title={t("Plus", "More")}
+        description={t(
+          "Les sections que vous n'ouvrez pas tous les jours.",
+          "The sections you don't open every day."
+        )}
+      />
 
-      {GROUPS.map((group) => {
+      {getGroups(t).map((group) => {
         const entries = group.entries.filter(
-          (e) => !(e.restaurantOnly && isActivityVenue)
+          (e) => !(e.restaurantOnly && isActivityVenue) && !(e.activityOnly && !isActivityVenue)
         );
         if (entries.length === 0) return null;
         return (
-          <section key={group.title}>
-            <h2 className="font-ui mb-3 px-1 text-[10px] font-bold uppercase tracking-[0.18em] text-white/45">
-              {group.title}
-            </h2>
+          <section key={group.title} className="space-y-3">
+            <h2 className="px-1 text-[13px] font-bold text-ink-3">{group.title}</h2>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {entries.map((e) => {
-                const Icon = e.icon;
-                return (
-                  <Link
-                    key={e.href}
-                    href={e.href}
-                    className="group flex items-center gap-4 rounded-2xl border border-white/[0.12] bg-black/45 p-4 backdrop-blur-2xl transition-all hover:bg-white/[0.06] active:scale-[0.99]"
-                  >
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/10">
-                      <Icon size={19} strokeWidth={1.5} className="text-white/80" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-white">{e.label}</p>
-                      <p className="font-ui mt-0.5 text-xs text-white/50">
-                        {e.description}
-                      </p>
-                    </div>
-                    <ArrowRight
-                      size={16}
-                      strokeWidth={1.5}
-                      className="shrink-0 text-white/30 transition-all group-hover:translate-x-0.5 group-hover:text-white/70"
-                    />
-                  </Link>
-                );
-              })}
+              {entries.map((e) => (
+                <Link
+                  key={e.href}
+                  href={e.href}
+                  className={cn(
+                    cardClass,
+                    "group flex items-center gap-4 p-4 transition-colors hover:border-line-2 hover:bg-fill"
+                  )}
+                >
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-fill-2">
+                    <e.icon size={19} strokeWidth={1.75} className="text-ink" aria-hidden />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-sm font-bold text-ink">{e.label}</span>
+                    <span className="mt-0.5 block text-[13px] text-ink-3">{e.description}</span>
+                  </span>
+                  <ChevronRight
+                    size={16}
+                    strokeWidth={2}
+                    aria-hidden
+                    className="shrink-0 text-ink-4 transition-colors group-hover:text-ink-2"
+                  />
+                </Link>
+              ))}
             </div>
           </section>
         );

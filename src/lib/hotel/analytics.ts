@@ -8,11 +8,12 @@ import { intlLocale, type Locale } from "@/lib/i18n";
 
 export const CATEGORIES = ["Restaurants", "Activités", "Clubs", "Services"] as const;
 
+/* Aplats des graphiques : les jetons du back-office, lisibles sur blanc. */
 export const CATEGORY_COLORS: Record<string, string> = {
-  Restaurants: "bg-sky-400",
-  Activités: "bg-emerald-400",
-  Clubs: "bg-violet-400",
-  Services: "bg-amber-400",
+  Restaurants: "bg-info",
+  Activités: "bg-ok",
+  Clubs: "bg-plum",
+  Services: "bg-warn",
 };
 
 /* Libellé affiché d'une catégorie (la clé reste en français : elle est
@@ -33,6 +34,26 @@ export const isLive = (r: HotelReservation) =>
 
 export const hasCommission = (r: HotelReservation) =>
   r.amount_spent !== null && isLive(r);
+
+/* Premier jour du mois précédent, en heure locale (jamais via toISOString,
+   qui repasse en UTC et recule d'un mois à l'est de Greenwich). */
+export function previousMonthStart(now = new Date()) {
+  return new Date(now.getFullYear(), now.getMonth() - 1, 1);
+}
+
+/* Clé « aaaa-mm » d'une date, en heure locale. */
+export function localMonthKey(d: Date) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+}
+
+/* Taux de commission réellement portés par les réservations (0,1 = 10 %).
+   null tant qu'aucune réservation n'existe : l'écran n'affiche alors aucun
+   pourcentage plutôt qu'un chiffre supposé. */
+export function commissionRates(rows: HotelReservation[]) {
+  const rates = rows.map((r) => r.commission_rate).filter((x) => Number.isFinite(x) && x > 0);
+  if (rates.length === 0) return null;
+  return { min: Math.min(...rates), max: Math.max(...rates) };
+}
 
 export type Series = { key: string; label: string; value: number }[];
 
@@ -227,6 +248,8 @@ export function guestsFromReservations(rows: HotelReservation[], now = new Date(
 export type QrPerformance = HotelQrCode & {
   reservations: number;
   liveReservations: number;
+  /* Montant dépensé par les clients venus de ce QR (additions saisies). */
+  spent: number;
   commission: number;
   conversion: number;
   lastReservation: string | null;
@@ -248,6 +271,7 @@ export function qrPerformance(
       ...q,
       reservations: list.length,
       liveReservations: live.length,
+      spent: live.reduce((s, r) => s + (r.amount_spent ?? 0), 0),
       commission: live.reduce((s, r) => s + r.commission, 0),
       conversion: conversionRate(q.scans, live.length),
       lastReservation: list[0]?.created_at ?? null,

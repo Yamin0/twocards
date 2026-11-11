@@ -2,34 +2,26 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { CalendarDays, Star, Receipt, Check, Trash2, BellOff } from "lucide-react";
-import {
-  useVenueNotifications,
-  type VenueNotificationKind,
-} from "@/hooks/use-venue-notifications";
-import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
+import { Bell, BellOff, CalendarDays, Check, Receipt, Star, Trash2, type LucideIcon } from "lucide-react";
+import { useVenueNotifications } from "@/hooks/use-venue-notifications";
+import { Button, Card, ConfirmDialog, EmptyState, PageHeader, PageSkeleton, Segmented } from "@/components/app/ui";
+import { cn } from "@/lib/utils";
 import { useLocale, useT } from "@/lib/i18n/client";
-import { intlLocale, type Locale, type Translate } from "@/lib/i18n";
+import { intlLocale, type Locale } from "@/lib/i18n";
+import { notificationText } from "./notification-text";
 
-const KIND_CONFIG: Record<
-  VenueNotificationKind,
-  { color: string; bg: string; icon: typeof CalendarDays }
-> = {
-  reservation: { color: "text-blue-400", bg: "bg-blue-500/20", icon: CalendarDays },
-  rating: { color: "text-amber-400", bg: "bg-amber-500/20", icon: Star },
-  pos: { color: "text-emerald-400", bg: "bg-emerald-500/20", icon: Receipt },
+/* Un `kind` inconnu (ajouté plus tard en base) garde une icône neutre. */
+const KIND_CONFIG: Record<string, { color: string; bg: string; icon: LucideIcon }> = {
+  reservation: { color: "text-info", bg: "bg-info-soft", icon: CalendarDays },
+  rating: { color: "text-warn", bg: "bg-warn-soft", icon: Star },
+  pos: { color: "text-ok", bg: "bg-ok-soft", icon: Receipt },
 };
+const FALLBACK_KIND = { color: "text-ink-3", bg: "bg-fill-2", icon: Bell };
 
-const getFilterTabs = (t: Translate) =>
-  [
-    { key: "all", label: t("Toutes", "All") },
-    { key: "unread", label: t("Non lues", "Unread") },
-  ] as const;
-
-type FilterKey = ReturnType<typeof getFilterTabs>[number]["key"];
+type FilterKey = "all" | "unread";
 
 /* Horodatage relatif recalculé à chaque rendu — jamais de texte figé. */
-function relativeTime(iso: string, locale: Locale = "fr"): string {
+function relativeTime(iso: string, locale: Locale): string {
   const en = locale === "en";
   const elapsedMin = Math.floor((Date.now() - new Date(iso).getTime()) / 60_000);
   if (elapsedMin < 1) return en ? "just now" : "à l’instant";
@@ -47,150 +39,148 @@ function relativeTime(iso: string, locale: Locale = "fr"): string {
 export default function NotificationsPage() {
   const { notifications, unreadCount, isLoading, markRead, markAllRead, clearAll } =
     useVenueNotifications();
+  const [confirmClear, setConfirmClear] = useState(false);
   const t = useT();
   const locale = useLocale();
-  const FILTER_TABS = getFilterTabs(t);
   const [activeFilter, setActiveFilter] = useState<FilterKey>("all");
 
   /* Re-rendu chaque minute pour que « il y a X min » reste vrai. */
   const [, setTick] = useState(0);
   useEffect(() => {
-    const timer = setInterval(() => setTick((t) => t + 1), 60_000);
+    const timer = setInterval(() => setTick((n) => n + 1), 60_000);
     return () => clearInterval(timer);
   }, []);
 
-  if (isLoading) return <DashboardSkeleton />;
+  if (isLoading) return <PageSkeleton kpis={0} />;
 
   const items = notifications ?? [];
-  const filtered =
-    activeFilter === "unread" ? items.filter((n) => !n.read) : items;
+  const filtered = activeFilter === "unread" ? items.filter((n) => !n.read) : items;
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-extrabold text-white font-display">
-              Notifications
-            </h1>
-            {unreadCount > 0 && (
-              <p className="text-sm text-white/40 mt-1 font-ui">
-                {t(`${unreadCount} non lue${unreadCount > 1 ? "s" : ""}`, `${unreadCount} unread`)}
-              </p>
-            )}
-          </div>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={markAllRead}
-              disabled={unreadCount === 0}
-              aria-label={t("Tout marquer lu", "Mark all as read")}
-              className="flex items-center gap-2 px-4 py-2.5 bg-blue-500 text-white rounded-xl text-xs font-semibold hover:bg-blue-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed font-ui"
-            >
-              <Check size={14} strokeWidth={2} />
-              {t("Tout marquer lu", "Mark all as read")}
-            </button>
-            <button
-              onClick={clearAll}
-              disabled={items.length === 0}
-              aria-label={t("Tout effacer", "Clear all")}
-              className="flex items-center gap-2 px-4 py-2.5 backdrop-blur-2xl bg-black/45 border border-white/[0.12] text-white/60 rounded-xl text-xs font-semibold hover:bg-white/[0.12] hover:text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed font-ui"
-            >
-              <Trash2 size={14} strokeWidth={2} />
+      <ConfirmDialog
+        open={confirmClear}
+        danger
+        onCancel={() => setConfirmClear(false)}
+        onConfirm={() => {
+          setConfirmClear(false);
+          void clearAll();
+        }}
+        title={t("Effacer toutes les notifications ?", "Clear all notifications?")}
+        description={t("Cette action est définitive.", "This cannot be undone.")}
+        confirmLabel={t("Tout effacer", "Clear all")}
+      />
+      <PageHeader
+        title={t("Notifications", "Notifications")}
+        description={
+          unreadCount > 0
+            ? t(`${unreadCount} non lue${unreadCount > 1 ? "s" : ""}`, `${unreadCount} unread`)
+            : t("Tout est lu.", "You're all caught up.")
+        }
+        actions={
+          <>
+            <Button variant="primary" icon={Check} onClick={markAllRead} disabled={unreadCount === 0}>
+              {t("Tout marquer lu", "Mark all read")}
+            </Button>
+            <Button icon={Trash2} onClick={() => setConfirmClear(true)} disabled={items.length === 0}>
               {t("Tout effacer", "Clear all")}
-            </button>
-          </div>
-        </div>
-      </div>
+            </Button>
+          </>
+        }
+      />
 
-      {/* Filtres */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1">
-        {FILTER_TABS.map((tab) => (
-          <button
-            key={tab.key}
-            onClick={() => setActiveFilter(tab.key)}
-            className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all font-ui ${
-              activeFilter === tab.key
-                ? "bg-blue-500 text-white"
-                : "backdrop-blur-2xl bg-black/45 border border-white/[0.12] text-white/50 hover:text-white hover:bg-white/[0.12]"
-            }`}
-          >
-            {tab.label}
-            {tab.key === "unread" && unreadCount > 0 && ` (${unreadCount})`}
-          </button>
-        ))}
-      </div>
+      <Segmented<FilterKey>
+        label={t("Filtrer", "Filter")}
+        value={activeFilter}
+        onChange={setActiveFilter}
+        options={[
+          { value: "all", label: t("Toutes", "All") },
+          {
+            value: "unread",
+            label: t("Non lues", "Unread"),
+            count: unreadCount > 0 ? unreadCount : undefined,
+          },
+        ]}
+      />
 
-      {/* Liste */}
-      <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl overflow-hidden">
+      <Card padded={false}>
         {filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-center px-6">
-            <div className="w-14 h-14 rounded-2xl bg-white/[0.06] flex items-center justify-center mb-4">
-              <BellOff size={24} strokeWidth={1.5} className="text-white/30" />
-            </div>
-            <p className="text-sm font-semibold text-white/60 font-ui">
-              {activeFilter === "unread"
+          <EmptyState
+            icon={BellOff}
+            title={
+              activeFilter === "unread"
                 ? t("Aucune notification non lue", "No unread notifications")
-                : t("Aucune notification", "No notifications")}
-            </p>
-            <p className="text-xs text-white/30 mt-1 max-w-xs font-ui">
-              {activeFilter === "unread"
-                ? t("Tout est lu, rien ne vous attend.", "You're all caught up.")
+                : t("Aucune notification", "No notifications")
+            }
+            description={
+              activeFilter === "unread"
+                ? t("Rien ne vous attend.", "Nothing is waiting for you.")
                 : t(
-                    "Les nouvelles réservations, avis clients et alertes caisse apparaîtront ici.",
-                    "New reservations, guest reviews and till alerts will appear here.",
-                  )}
-            </p>
-          </div>
+                    "Les nouvelles réservations, les avis et les alertes de caisse apparaîtront ici.",
+                    "New reservations, reviews and till alerts will appear here."
+                  )
+            }
+            action={
+              activeFilter === "unread" && items.length > 0 ? (
+                <Button onClick={() => setActiveFilter("all")}>
+                  {t("Voir toutes les notifications", "View all notifications")}
+                </Button>
+              ) : undefined
+            }
+          />
         ) : (
-          <div className="divide-y divide-white/[0.06]">
+          <ul className="divide-y divide-line">
             {filtered.map((notif) => {
-              const config = KIND_CONFIG[notif.kind];
+              const config = KIND_CONFIG[notif.kind] ?? FALLBACK_KIND;
               const Icon = config.icon;
+              /* Traduction à l'affichage ; la ligne en base reste française. */
+              const text = notificationText(notif, locale);
               return (
-                <Link
-                  key={notif.id}
-                  href={notif.href || "/dashboard"}
-                  onClick={() => markRead(notif.id)}
-                  className={`flex items-start gap-4 px-6 py-5 text-left transition-colors hover:bg-white/[0.04] ${
-                    !notif.read ? "bg-white/[0.03]" : ""
-                  }`}
-                >
-                  {/* Icône */}
-                  <div
-                    className={`w-10 h-10 rounded-xl ${config.bg} flex items-center justify-center shrink-0 mt-0.5`}
-                  >
-                    <Icon size={18} strokeWidth={1.5} className={config.color} />
-                  </div>
-
-                  {/* Contenu */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold text-white truncate font-ui">
-                        {notif.title}
-                      </span>
-                      {!notif.read && (
-                        <span
-                          className="w-2 h-2 rounded-full bg-blue-500 shrink-0"
-                          aria-label={t("Non lue", "Unread")}
-                        />
-                      )}
-                    </div>
-                    {notif.body && (
-                      <p className="text-xs text-white/40 mt-1 leading-relaxed line-clamp-2 font-ui">
-                        {notif.body}
-                      </p>
+                <li key={notif.id}>
+                  <Link
+                    href={notif.href || "/dashboard"}
+                    onClick={() => markRead(notif.id)}
+                    className={cn(
+                      "flex items-start gap-4 px-5 py-4 transition-colors hover:bg-fill sm:px-6",
+                      !notif.read && "bg-link-soft"
                     )}
-                    <span className="text-[11px] text-white/25 mt-2 block font-ui">
-                      {relativeTime(notif.created_at, locale)}
+                  >
+                    <span
+                      className={cn(
+                        "mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl",
+                        config.bg
+                      )}
+                    >
+                      <Icon size={18} strokeWidth={1.75} className={config.color} aria-hidden />
                     </span>
-                  </div>
-                </Link>
+                    <span className="min-w-0 flex-1">
+                      <span className="flex items-center gap-2">
+                        <span className={cn("truncate text-sm text-ink", !notif.read && "font-bold")}>
+                          {text.title}
+                        </span>
+                        {!notif.read && (
+                          <>
+                            <span className="h-2 w-2 shrink-0 rounded-full bg-link" aria-hidden />
+                            <span className="sr-only">{t("Non lue", "Unread")}</span>
+                          </>
+                        )}
+                      </span>
+                      {text.body && (
+                        <span className="mt-1 line-clamp-2 block text-[13px] leading-relaxed text-ink-2">
+                          {text.body}
+                        </span>
+                      )}
+                      <span className="num mt-1.5 block text-xs text-ink-3">
+                        {relativeTime(notif.created_at, locale)}
+                      </span>
+                    </span>
+                  </Link>
+                </li>
               );
             })}
-          </div>
+          </ul>
         )}
-      </div>
+      </Card>
     </div>
   );
 }

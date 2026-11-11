@@ -1,0 +1,612 @@
+[
+  {
+    "name": "/s/a1f3c07b?apercu=1 — fr — réservation jusqu'à la confirmation",
+    "checks": [
+      {
+        "label": "accueil : cibles ≥ 44 px",
+        "ok": true,
+        "detail": "[]"
+      },
+      {
+        "label": "catégorie : cibles ≥ 44 px",
+        "ok": true,
+        "detail": "[]"
+      },
+      {
+        "label": "catégorie : champs ≥ 16 px et étiquetés",
+        "ok": true,
+        "detail": "{\"small\":[],\"fields\":[],\"unlabeled\":[]}"
+      },
+      {
+        "label": "catégorie : photos visibles chargées, servies par l'optimiseur",
+        "ok": true,
+        "detail": "{\"n\":2,\"broken\":0,\"optimized\":2}"
+      },
+      {
+        "label": "feuille : dialogue modal, titre relié, focus à l'intérieur",
+        "ok": true,
+        "detail": "{\"modal\":\"true\",\"title\":\"Nobu Marrakech\",\"focusInside\":true,\"images\":3}"
+      },
+      {
+        "label": "étape 1 : cibles ≥ 44 px",
+        "ok": true,
+        "detail": "[]"
+      },
+      {
+        "label": "feuille : le focus reste piégé (60 tabulations)",
+        "ok": true
+      },
+      {
+        "label": "D7 : heure passée refusée, message visible",
+        "ok": true
+      },
+      {
+        "label": "D1 : Entrée à l'étape 1 n'envoie rien",
+        "ok": true
+      },
+      {
+        "label": "D1 : Entrée à l'étape 1 fait « Continuer »",
+        "ok": true
+      },
+      {
+        "label": "étape 2 : cibles ≥ 44 px",
+        "ok": true,
+        "detail": "[]"
+      },
+      {
+        "label": "étape 2 : champs ≥ 16 px et étiquetés",
+        "ok": true,
+        "detail": "{\"small\":[],\"fields\":[],\"unlabeled\":[]}"
+      },
+      {
+        "label": "étape 2 : téléphone manquant signalé",
+        "ok": true
+      },
+      {
+        "label": "confirmation affichée",
+        "ok": true
+      },
+      {
+        "label": "mode aperçu annoncé",
+        "ok": true
+      },
+      {
+        "label": "fermeture : le focus revient sur la carte",
+        "ok": true
+      },
+      {
+        "label": "aucune RPC d'écriture émise (ni réservation, ni scan)",
+        "ok": true
+      },
+      {
+        "label": "« Propulsé par twocards. » présent",
+        "ok": true
+      },
+      {
+        "label": "aucune erreur console",
+        "ok": true
+      }
+    ]
+  },
+  {
+    "name": "/s/a1f3c07b?apercu=1 — en — réservation jusqu'à la confirmation",
+    "checks": [
+      {
+        "label": "accueil : cibles ≥ 44 px",
+        "ok": true,
+        "detail": "[]"
+      },
+      {
+        "label": "catégorie : cibles ≥ 44 px",
+        "ok": true,
+        "detail": "[]"
+      },
+      {
+        "label": "catégorie : champs ≥ 16 px et étiquetés",
+        "ok": true,
+        "detail": "{\"small\":[],\"fields\":[],\"unlabeled\":[]}"
+      },
+      {
+        "label": "catégorie : photos visibles chargées, servies par l'optimiseur",
+        "ok": true,
+        "detail": "{\"n\":2,\"broken\":0,\"optimized\":2}"
+      },
+      {
+        "label": "feuille : dialogue modal, titre relié, focus à l'intérieur",
+        "ok": true,
+        "detail": "{\"modal\":\"true\",\"title\":\"Nobu Marrakech\",\"focusInside\":true,\"images\":3}"
+      },
+      {
+        "label": "étape 1 : cibles ≥ 44 px",
+        "ok": true,
+        "detail": "[]"
+      },
+      {
+        "label": "feuille : le focus reste piégé (60 tabulations)",
+        "ok": true
+      },
+      {
+        "label": "D7 : heure passée refusée, message visible",
+        "ok": true
+      },
+      {
+        "label": "D1 : Entrée à l'étape 1 n'envoie rien",
+        "ok": true
+      },
+      {
+        "label": "D1 : Entrée à l'étape 1 fait « Continuer »",
+        "ok": true
+      },
+      {
+        "label": "étape 2 : cibles ≥ 44 px",
+        "ok": true,
+        "detail": "[]"
+      },
+      {
+        "label": "étape 2 : champs ≥ 16 px et étiquetés",
+        "ok": true,
+        "detail": "{\"small\":[],\"fields\":[],\"unlabeled\":[]}"
+      },
+      {
+        "label": "étape 2 : téléphone manquant signalé",
+        "ok": true
+      },
+      {
+        "label": "confirmation affichée",
+        "ok": true
+      },
+      {
+        "label": "mode aperçu annoncé",
+        "ok": true
+      },
+      {
+        "label": "fermeture : le focus revient sur la carte",
+        "ok": true
+      },
+      {
+        "label": "aucune RPC d'écriture émise (ni réservation, ni scan)",
+        "ok": true
+      },
+      {
+        "label": "« Propulsé par twocards. » présent",
+        "ok": true
+      },
+      {
+        "label": "aucune erreur console",
+        "ok": true
+      }
+    ]
+  },
+  {
+    "name": "/s/a1f3c07b — fr — 22 h 45 : la feuille s'ouvre sur demain (D7)",
+    "checks": [
+      {
+        "label": "restaurants à 22 h 45 : jour choisi = demain",
+        "ok": true,
+        "detail": "dem.12nov."
+      }
+    ]
+  },
+  {
+    "name": "/s/a1f3c07b — fr — erreur « limite de débit » (réponse simulée dans le navigateur, D5)",
+    "checks": [
+      {
+        "label": "message par cause : « Patientez une dizaine de minutes »",
+        "ok": true,
+        "detail": "Vous avez déjà envoyé plusieurs demandes. Patientez une dizaine de minutes avant d'en envoyer une autre, ou contactez la réception."
+      },
+      {
+        "label": "pas de fausse confirmation",
+        "ok": true
+      }
+    ]
+  },
+  {
+    "name": "/s/a1f3c07b — fr — erreur « date invalide » (réponse simulée dans le navigateur, D5)",
+    "checks": [
+      {
+        "label": "message par cause : « plus réservable »",
+        "ok": true,
+        "detail": "Cette date n'est plus réservable. Revenez à l'étape précédente et choisissez un autre jour."
+      },
+      {
+        "label": "pas de fausse confirmation",
+        "ok": true
+      }
+    ]
+  },
+  {
+    "name": "/s/a1f3c07b — fr — erreur « adresse indisponible » (réponse simulée dans le navigateur, D5)",
+    "checks": [
+      {
+        "label": "message par cause : « n'est plus proposée »",
+        "ok": true,
+        "detail": "Cette adresse n'est plus proposée. Choisissez-en une autre, ou contactez la réception."
+      },
+      {
+        "label": "pas de fausse confirmation",
+        "ok": true
+      }
+    ]
+  },
+  {
+    "name": "/s/a1f3c07b — fr — erreur « nom invalide » (réponse simulée dans le navigateur, D5)",
+    "checks": [
+      {
+        "label": "message par cause : « Indiquez votre nom »",
+        "ok": true,
+        "detail": "Indiquez votre nom (120 caractères au plus)."
+      },
+      {
+        "label": "pas de fausse confirmation",
+        "ok": true
+      }
+    ]
+  },
+  {
+    "name": "/s/a1f3c07b — fr — erreur « QR inactif » (réponse simulée dans le navigateur, D5)",
+    "checks": [
+      {
+        "label": "message par cause : « n'est plus actif »",
+        "ok": true,
+        "detail": "Ce QR code n'est plus actif. Adressez-vous à la réception."
+      },
+      {
+        "label": "pas de fausse confirmation",
+        "ok": true
+      }
+    ]
+  },
+  {
+    "name": "/s/a1f3c07b — fr — erreur « réseau coupé » (réponse simulée dans le navigateur, D5)",
+    "checks": [
+      {
+        "label": "message par cause : « Pas de connexion »",
+        "ok": true,
+        "detail": "Pas de connexion. Vérifiez votre réseau puis réessayez : rien n'a été envoyé."
+      },
+      {
+        "label": "pas de fausse confirmation",
+        "ok": true
+      }
+    ]
+  },
+  {
+    "name": "/r/table-du-marche — fr — jusqu'au formulaire (rien n'est envoyé)",
+    "checks": [
+      {
+        "label": "étape 1 : cibles ≥ 44 px",
+        "ok": true,
+        "detail": "[]"
+      },
+      {
+        "label": "h1 = nom de l'établissement",
+        "ok": true
+      },
+      {
+        "label": "étape 2 : cibles ≥ 44 px",
+        "ok": true,
+        "detail": "[]"
+      },
+      {
+        "label": "étape 2 : champs ≥ 16 px et étiquetés",
+        "ok": true,
+        "detail": "{\"small\":[],\"fields\":[],\"unlabeled\":[]}"
+      },
+      {
+        "label": "formulaire vide : message visible",
+        "ok": true
+      },
+      {
+        "label": "aucune demande émise",
+        "ok": true,
+        "detail": "portal_full_slots,portal_full_slots"
+      },
+      {
+        "label": "« Propulsé par twocards. » présent",
+        "ok": true
+      },
+      {
+        "label": "aucune erreur console",
+        "ok": true
+      }
+    ]
+  },
+  {
+    "name": "/r/table-du-marche?embed=1 — fr — jusqu'au formulaire (rien n'est envoyé)",
+    "checks": [
+      {
+        "label": "étape 1 : cibles ≥ 44 px",
+        "ok": true,
+        "detail": "[]"
+      },
+      {
+        "label": "h1 = nom de l'établissement",
+        "ok": true
+      },
+      {
+        "label": "étape 2 : cibles ≥ 44 px",
+        "ok": true,
+        "detail": "[]"
+      },
+      {
+        "label": "étape 2 : champs ≥ 16 px et étiquetés",
+        "ok": true,
+        "detail": "{\"small\":[],\"fields\":[],\"unlabeled\":[]}"
+      },
+      {
+        "label": "formulaire vide : message visible",
+        "ok": true
+      },
+      {
+        "label": "aucune demande émise",
+        "ok": true,
+        "detail": "portal_full_slots,portal_full_slots"
+      },
+      {
+        "label": "« Propulsé par twocards. » présent",
+        "ok": true
+      },
+      {
+        "label": "aucune erreur console",
+        "ok": true
+      }
+    ]
+  },
+  {
+    "name": "/r/table-du-marche — en — jusqu'au formulaire (rien n'est envoyé)",
+    "checks": [
+      {
+        "label": "étape 1 : cibles ≥ 44 px",
+        "ok": true,
+        "detail": "[]"
+      },
+      {
+        "label": "h1 = nom de l'établissement",
+        "ok": true
+      },
+      {
+        "label": "étape 2 : cibles ≥ 44 px",
+        "ok": true,
+        "detail": "[]"
+      },
+      {
+        "label": "étape 2 : champs ≥ 16 px et étiquetés",
+        "ok": true,
+        "detail": "{\"small\":[],\"fields\":[],\"unlabeled\":[]}"
+      },
+      {
+        "label": "formulaire vide : message visible",
+        "ok": true
+      },
+      {
+        "label": "aucune demande émise",
+        "ok": true,
+        "detail": "portal_full_slots,portal_full_slots"
+      },
+      {
+        "label": "« Propulsé par twocards. » présent",
+        "ok": true
+      },
+      {
+        "label": "aucune erreur console",
+        "ok": true
+      }
+    ]
+  },
+  {
+    "name": "/r/table-du-marche?embed=1 — en — jusqu'au formulaire (rien n'est envoyé)",
+    "checks": [
+      {
+        "label": "étape 1 : cibles ≥ 44 px",
+        "ok": true,
+        "detail": "[]"
+      },
+      {
+        "label": "h1 = nom de l'établissement",
+        "ok": true
+      },
+      {
+        "label": "étape 2 : cibles ≥ 44 px",
+        "ok": true,
+        "detail": "[]"
+      },
+      {
+        "label": "étape 2 : champs ≥ 16 px et étiquetés",
+        "ok": true,
+        "detail": "{\"small\":[],\"fields\":[],\"unlabeled\":[]}"
+      },
+      {
+        "label": "formulaire vide : message visible",
+        "ok": true
+      },
+      {
+        "label": "aucune demande émise",
+        "ok": true,
+        "detail": "portal_full_slots,portal_full_slots"
+      },
+      {
+        "label": "« Propulsé par twocards. » présent",
+        "ok": true
+      },
+      {
+        "label": "aucune erreur console",
+        "ok": true
+      }
+    ]
+  },
+  {
+    "name": "/r/table-du-marche — fr — erreurs par cause (réponses simulées, D5)",
+    "checks": [
+      {
+        "label": "débit : « Patientez une dizaine de minutes »",
+        "ok": true,
+        "detail": "Vous avez déjà envoyé plusieurs demandes. Patientez une dizaine de minutes avant d'en envoyer une autre, ou appelez directement l'établissement."
+      },
+      {
+        "label": "réseau : « Pas de connexion »",
+        "ok": true,
+        "detail": "Pas de connexion. Vérifiez votre réseau puis réessayez : rien n'a été envoyé."
+      }
+    ]
+  },
+  {
+    "name": "/r/…?embed=1&lang=en — la langue voyage dans l'URL (D15)",
+    "checks": [
+      {
+        "label": "pas de redirection : ?lang=en reste dans l'adresse",
+        "ok": true,
+        "detail": "?embed=1&lang=en"
+      },
+      {
+        "label": "page en anglais",
+        "ok": true
+      },
+      {
+        "label": "sélecteur : bascule par l'URL (?lang=fr)",
+        "ok": true,
+        "detail": "?embed=1&lang=fr"
+      }
+    ]
+  },
+  {
+    "name": "pages introuvables — fr",
+    "checks": [
+      {
+        "label": "/s/zzzzzzzz : « menu plus disponible », sans bouton Réessayer",
+        "ok": true
+      },
+      {
+        "label": "/s/zzzzzzzz : signature et console propre",
+        "ok": true
+      },
+      {
+        "label": "/r/slug inexistant : « portail introuvable »",
+        "ok": true
+      },
+      {
+        "label": "/r/slug inexistant : signature et console propre",
+        "ok": true
+      }
+    ]
+  },
+  {
+    "name": "pages introuvables — en",
+    "checks": [
+      {
+        "label": "/s/zzzzzzzz : « menu plus disponible », sans bouton Réessayer",
+        "ok": true
+      },
+      {
+        "label": "/s/zzzzzzzz : signature et console propre",
+        "ok": true
+      },
+      {
+        "label": "/r/slug inexistant : « portail introuvable »",
+        "ok": true
+      },
+      {
+        "label": "/r/slug inexistant : signature et console propre",
+        "ok": true
+      }
+    ]
+  },
+  {
+    "name": "/avis/[id] — fr — échec d'envoi visible puis réussite (D2, réponses simulées)",
+    "checks": [
+      {
+        "label": "étoiles : radiogroup de 5 radios, relié au titre",
+        "ok": true,
+        "detail": "{\"radios\":5,\"labelled\":true}"
+      },
+      {
+        "label": "cibles ≥ 44 px, champ ≥ 16 px et étiqueté",
+        "ok": true,
+        "detail": "{\"small\":[],\"fields\":[],\"unlabeled\":[]}"
+      },
+      {
+        "label": "clavier : flèche droite passe à 5 étoiles",
+        "ok": true
+      },
+      {
+        "label": "D2 : échec d'envoi → message role=alert",
+        "ok": true,
+        "detail": "Pas de connexion : votre avis n'est pas parti. Vérifiez votre réseau puis réessayez."
+      },
+      {
+        "label": "D2 : la note est conservée, bouton « Réessayer »",
+        "ok": true
+      },
+      {
+        "label": "second envoi : remerciement",
+        "ok": true
+      },
+      {
+        "label": "signature et console propre",
+        "ok": true
+      }
+    ]
+  },
+  {
+    "name": "/avis/[id] — en — échec d'envoi visible puis réussite (D2, réponses simulées)",
+    "checks": [
+      {
+        "label": "étoiles : radiogroup de 5 radios, relié au titre",
+        "ok": true,
+        "detail": "{\"radios\":5,\"labelled\":true}"
+      },
+      {
+        "label": "cibles ≥ 44 px, champ ≥ 16 px et étiqueté",
+        "ok": true,
+        "detail": "{\"small\":[],\"fields\":[],\"unlabeled\":[]}"
+      },
+      {
+        "label": "clavier : flèche droite passe à 5 étoiles",
+        "ok": true
+      },
+      {
+        "label": "D2 : échec d'envoi → message role=alert",
+        "ok": true,
+        "detail": "No connection: your review was not sent. Check your network and try again."
+      },
+      {
+        "label": "D2 : la note est conservée, bouton « Réessayer »",
+        "ok": true
+      },
+      {
+        "label": "second envoi : remerciement",
+        "ok": true
+      },
+      {
+        "label": "signature et console propre",
+        "ok": true
+      }
+    ]
+  },
+  {
+    "name": "/avis/[id] inexistant — fr (vraie réponse de la base, lecture seule)",
+    "checks": [
+      {
+        "label": "« Lien invalide »",
+        "ok": true
+      },
+      {
+        "label": "aucune erreur console",
+        "ok": true
+      }
+    ]
+  },
+  {
+    "name": "/avis/[id] — fr — panne de chargement distincte de « lien invalide », bouton Réessayer (D3, réponses simulées)",
+    "checks": [
+      {
+        "label": "panne : message et bouton Réessayer, pas « Lien invalide »",
+        "ok": true
+      },
+      {
+        "label": "après Réessayer : le formulaire s'affiche",
+        "ok": true
+      }
+    ]
+  }
+]

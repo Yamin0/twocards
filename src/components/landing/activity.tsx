@@ -1,10 +1,10 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { BadgePercent, QrCode, CalendarCheck } from "lucide-react";
 import DisplayCards from "@/components/ui/display-cards";
 import {
   CONTAINER,
+  Reveal,
   SECTION,
   SectionHeader,
 } from "@/components/landing/section-header";
@@ -79,16 +79,12 @@ export function Activity() {
             <>
               Votre soirée se déroule.
               <br />
-              <em className="font-light italic">
-                Vous êtes déjà au courant.
-              </em>
+              Vous êtes déjà au courant.
             </>,
             <>
               The night unfolds.
               <br />
-              <em className="font-light italic">
-                You already know.
-              </em>
+              You already know.
             </>
           )}
           intro={t(
@@ -103,13 +99,7 @@ export function Activity() {
       <div
         className={`${CONTAINER} grid grid-cols-1 items-center gap-16 md:grid-cols-2 md:gap-12`}
       >
-        <motion.ul
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.6 }}
-          className="order-2 max-w-md md:order-1"
-        >
+        <Reveal as="ul" className="order-2 max-w-md md:order-1">
           {POINTS.map((point) => (
             <li
               key={point}
@@ -118,19 +108,13 @@ export function Activity() {
               {point}
             </li>
           ))}
-        </motion.ul>
+        </Reveal>
 
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.7, delay: 0.15 }}
-          className="order-1 flex justify-center pb-16 md:order-2 md:justify-end md:pr-8"
-        >
+        <Reveal className="order-1 flex justify-center pb-16 md:order-2 md:justify-end md:pr-8">
           <div className="w-full max-w-[26rem]">
             <DisplayCards cards={CARDS} />
           </div>
-        </motion.div>
+        </Reveal>
       </div>
     </section>
   );

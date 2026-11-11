@@ -10,7 +10,7 @@ const inputClass =
   "w-full rounded-xl border border-black/15 bg-white px-4 py-3.5 text-sm text-[var(--landing-ink)] outline-none transition-all placeholder:text-black/30 focus:border-black/40 focus:ring-1 focus:ring-black/10";
 
 const labelClass =
-  "block text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--landing-mute)]";
+  "block text-[14px] font-medium text-[var(--landing-ink)]";
 
 function SubmitButton() {
   const { pending } = useFormStatus();

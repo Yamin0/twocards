@@ -1,239 +1,231 @@
 "use client";
 
-import { TrendingUp, ArrowUpRight, Users, Wallet, CalendarDays, CheckCircle, BarChart3 } from "lucide-react";
-import { useAuthUser } from "@/hooks/use-auth-user";
-import { ConciergeSkeleton } from "@/components/shared/loading-skeleton";
-import { useT } from "@/lib/i18n/client";
+import { BarChart3, CalendarCheck, Coins, Info, Link2, Percent, ScanLine } from "lucide-react";
+import {
+  Card,
+  EmptyState,
+  InfoNote,
+  KpiGrid,
+  LinkButton,
+  PageHeader,
+  PageSkeleton,
+  StatusPill,
+  Table,
+  Td,
+  Th,
+  Tr,
+} from "@/components/app/ui";
+import { ConciergeLoadError } from "@/components/concierge/states";
+import { Bars, RankedBars, SplitBar } from "@/components/hotel/charts";
+import { loadFailed } from "@/components/hotel/states";
+import { useConciergeLinks } from "@/lib/concierge/use-links";
+import {
+  CATEGORIES,
+  CATEGORY_COLORS,
+  countBy,
+  isLive,
+  monthlySeries,
+  reservationCategoryLabel,
+  topN,
+  weekdayDistribution,
+} from "@/lib/hotel/analytics";
+import { formatMad, formatNumber, formatPercent, plural } from "@/lib/hotel/format";
+import { useLocale, useT } from "@/lib/i18n/client";
 
-const DEMO_MONTHLY_DATA = [
-  { month: "Jan.", covers: 98, commission: "28 400", growth: 0 },
-  { month: "Fév.", covers: 112, commission: "33 200", growth: 14 },
-  { month: "Mar.", covers: 134, commission: "41 800", growth: 20 },
-  { month: "Avr.", covers: 156, commission: "48 600", growth: 16 },
-];
-
-const DEMO_BAR_CHART = [
-  { label: "Jan.", value: 98, max: 156 },
-  { label: "Fév.", value: 112, max: 156 },
-  { label: "Mar.", value: 134, max: 156 },
-  { label: "Avr.", value: 156, max: 156 },
-];
-
-const DEMO_VENUE_BREAKDOWN = [
-  { venue: "Le Comptoir Darna", covers: 52, commission: "16 200 MAD", percentage: 33, color: "bg-blue-400" },
-  { venue: "Le Lotus Club", covers: 44, commission: "13 800 MAD", percentage: 28, color: "bg-purple-400" },
-  { venue: "Sky Bar Casa", covers: 35, commission: "11 000 MAD", percentage: 23, color: "bg-sky-400" },
-  { venue: "Pacha Marrakech", covers: 25, commission: "7 600 MAD", percentage: 16, color: "bg-amber-400" },
-];
-
-/* Mois de démonstration écrits à la main : libellé anglais à côté. */
-const MONTH_EN: Record<string, string> = { "Jan.": "Jan", "Fév.": "Feb", "Mar.": "Mar", "Avr.": "Apr" };
-
-const EMPTY_MONTHLY: typeof DEMO_MONTHLY_DATA = [];
-const EMPTY_BAR_CHART: typeof DEMO_BAR_CHART = [];
-const EMPTY_VENUE_BREAKDOWN: typeof DEMO_VENUE_BREAKDOWN = [];
-
+/* Statistiques du concierge : uniquement ce qui se calcule à partir de la
+   base — les ouvertures de chaque lien (compteur scans), les réservations
+   qui en sortent, le taux de conversion, et leur répartition. Pas
+   d'audience, pas de portée : ces chiffres n'existent pas en base. */
 export default function ConciergeStatsPage() {
-  const { isDemoConcierge, isLoading } = useAuthUser();
   const t = useT();
-  const monthLabel = (m: string) => t(m, MONTH_EN[m] ?? m);
+  const locale = useLocale();
+  const { rows, qrCodes, reservations, isLoading, failed, reload } = useConciergeLinks();
 
-  if (isLoading) return <ConciergeSkeleton />;
+  if (isLoading) return <PageSkeleton kpis={4} rows={6} />;
 
-  const monthlyData = isDemoConcierge ? DEMO_MONTHLY_DATA : EMPTY_MONTHLY;
-  const barChart = isDemoConcierge ? DEMO_BAR_CHART : EMPTY_BAR_CHART;
-  const venueBreakdown = isDemoConcierge ? DEMO_VENUE_BREAKDOWN : EMPTY_VENUE_BREAKDOWN;
-
-  return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
-        <h1 className="text-2xl font-bold text-white">
-          {t("Statistiques", "Stats")}
-        </h1>
-        <p className="text-sm text-white/50 font-ui mt-1">
-          {t("Analysez votre performance et croissance", "Analyse your performance and growth")}
-        </p>
-      </div>
-
-      {/* Stats cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { label: t("Couverts ce mois", "Covers this month"), value: isDemoConcierge ? "156" : "0", trend: "+16%", icon: Users, iconColor: "text-blue-400", iconBg: "bg-blue-400/10" },
-          { label: t("CA généré (MAD)", "Revenue generated (MAD)"), value: isDemoConcierge ? "486K" : "0", trend: "+22%", icon: Wallet, iconColor: "text-emerald-400", iconBg: "bg-emerald-400/10" },
-          { label: t("Commissions (MAD)", "Commissions (MAD)"), value: isDemoConcierge ? "48.6K" : "0", trend: "+16%", icon: CalendarDays, iconColor: "text-amber-400", iconBg: "bg-amber-400/10" },
-          { label: t("Taux confirmation", "Confirmation rate"), value: isDemoConcierge ? "87%" : "\u2014", trend: "+3%", icon: CheckCircle, iconColor: "text-purple-400", iconBg: "bg-purple-400/10" },
-        ].map((stat) => (
-          <div
-            key={stat.label}
-            className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-5 transition-all duration-500 hover:scale-[1.02] hover:bg-white/[0.1]"
-          >
-            <div className="flex items-center justify-between mb-3">
-              <div className={`w-10 h-10 rounded-xl ${stat.iconBg} flex items-center justify-center`}>
-                <stat.icon size={18} strokeWidth={1.5} className={stat.iconColor} />
-              </div>
-              {isDemoConcierge && (
-                <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-emerald-400/10">
-                  <ArrowUpRight size={12} strokeWidth={2} className="text-emerald-400" />
-                  <span className="text-xs font-semibold text-emerald-400">{stat.trend}</span>
-                </div>
-              )}
-            </div>
-            <p className="text-2xl font-extrabold text-white font-ui">
-              {stat.value}
-            </p>
-            <p className="text-xs text-white/40 font-ui mt-1">
-              {stat.label}
-            </p>
-          </div>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Chart */}
-        <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
-          <h3 className="text-lg font-bold text-white mb-6">
-            {t("Évolution des couverts", "Covers over time")}
-          </h3>
-          {barChart.length > 0 ? (
-            <div className="flex items-end justify-between gap-4 h-52 px-2">
-              {barChart.map((bar) => {
-                const isMax = bar.value === bar.max;
-                return (
-                  <div key={bar.label} className="flex-1 flex flex-col items-center gap-3">
-                    <span className="text-sm font-bold text-white font-ui">
-                      {bar.value}
-                    </span>
-                    <div className="w-full flex justify-center relative">
-                      <div
-                        className={`w-full max-w-[52px] rounded-xl transition-all ${
-                          isMax
-                            ? "bg-gradient-to-t from-blue-500 to-blue-400 shadow-[0_0_20px_rgba(96,165,250,0.3)]"
-                            : "bg-gradient-to-t from-blue-500/40 to-blue-400/10"
-                        }`}
-                        style={{ height: `${(bar.value / bar.max) * 170}px` }}
-                      />
-                    </div>
-                    <span className={`text-xs font-medium ${isMax ? "text-white" : "text-white/40"} font-ui`}>
-                      {monthLabel(bar.label)}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <EmptyState icon={TrendingUp} text={t("Aucune donnée disponible", "No data yet")} sub={t("Les statistiques apparaîtront ici", "Your stats will appear here")} />
-          )}
-        </div>
-
-        {/* Venue breakdown */}
-        <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
-          <h3 className="text-lg font-bold text-white mb-6">
-            {t("Répartition par établissement", "Breakdown by venue")}
-          </h3>
-          {venueBreakdown.length > 0 ? (
-            <div className="space-y-5">
-              {venueBreakdown.map((v) => (
-                <div key={v.venue}>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-semibold text-white font-ui">
-                      {v.venue}
-                    </span>
-                    <span className="text-sm font-bold text-white/70 font-ui">
-                      {v.commission}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="flex-1 h-2.5 bg-white/[0.06] rounded-full overflow-hidden">
-                      <div
-                        className={`h-full ${v.color} rounded-full transition-all`}
-                        style={{ width: `${v.percentage}%` }}
-                      />
-                    </div>
-                    <span className="text-xs text-white/40 font-ui w-8 text-right">
-                      {v.percentage}%
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <EmptyState icon={Users} text={t("Aucune donnée disponible", "No data yet")} sub={t("La répartition apparaîtra ici", "The breakdown will appear here")} />
-          )}
-        </div>
-
-        {/* Monthly detail table */}
-        <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6 lg:col-span-2">
-          <h3 className="text-lg font-bold text-white mb-4">
-            {t("Détail mensuel", "Monthly breakdown")}
-          </h3>
-          <div className="tc-stack overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-white/[0.1]">
-                  <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-white/40 font-ui">
-                    {t("Mois", "Month")}
-                  </th>
-                  <th className="text-center px-4 py-3 text-xs font-semibold uppercase tracking-wider text-white/40 font-ui">
-                    {t("Couverts", "Covers")}
-                  </th>
-                  <th className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wider text-white/40 font-ui">
-                    {t("Commission", "Commission")}
-                  </th>
-                  <th className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wider text-white/40 font-ui">
-                    {t("Croissance", "Growth")}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {monthlyData.length > 0 ? (
-                  monthlyData.map((m) => (
-                    <tr key={m.month} className="border-b border-white/[0.06] hover:bg-white/[0.03] transition-colors">
-                      <td data-head className="px-4 py-3.5 font-semibold text-white font-ui">
-                        {monthLabel(m.month)}
-                      </td>
-                      <td data-label={t("Couverts", "Covers")} className="px-4 py-3.5 text-center text-white/70 font-ui">
-                        {m.covers}
-                      </td>
-                      <td data-label={t("Commission", "Commission")} className="px-4 py-3.5 text-right font-bold text-white font-ui">
-                        {m.commission} MAD
-                      </td>
-                      <td data-label={t("Croissance", "Growth")} className="px-4 py-3.5 text-right">
-                        {m.growth > 0 ? (
-                          <span className="inline-flex items-center gap-1 text-emerald-400 font-semibold text-xs">
-                            <ArrowUpRight size={12} strokeWidth={2} />
-                            +{m.growth}%
-                          </span>
-                        ) : (
-                          <span className="text-xs text-white/30">&mdash;</span>
-                        )}
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={4}>
-                      <EmptyState icon={CalendarDays} text={t("Aucune donnée disponible", "No data yet")} sub={t("Le détail mensuel apparaîtra ici", "The monthly breakdown will appear here")} />
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
+  const header = (
+    <PageHeader
+      title={t("Statistiques", "Statistics")}
+      description={t(
+        "Combien de fois vos liens sont ouverts, combien de réservations en sortent, et lesquels fonctionnent le mieux.",
+        "How often your links are opened, how many reservations come out of them, and which ones work best."
+      )}
+    />
   );
-}
 
-function EmptyState({ icon: Icon, text, sub }: { icon: typeof BarChart3; text: string; sub: string }) {
+  if (loadFailed(failed, qrCodes, reservations))
+    return (
+      <>
+        {header}
+        <ConciergeLoadError onRetry={reload} />
+      </>
+    );
+
+  if (qrCodes.length === 0 && reservations.length === 0)
+    return (
+      <>
+        {header}
+        <Card padded={false}>
+          <EmptyState
+            icon={BarChart3}
+            title={t("Pas encore de statistiques", "No statistics yet")}
+            description={t(
+              "Les chiffres apparaissent dès que votre lien est ouvert pour la première fois.",
+              "Figures appear as soon as your link is opened for the first time."
+            )}
+            action={
+              <LinkButton href="/concierge" variant="primary" icon={Link2}>
+                {t("Créer mon lien", "Create my link")}
+              </LinkButton>
+            }
+          />
+        </Card>
+      </>
+    );
+
+  const live = reservations.filter(isLive);
+  const scans = qrCodes.reduce((s, q) => s + q.scans, 0);
+  /* Réservations rattachées à un lien encore existant : c'est le seul
+     numérateur comparable au compteur de scans. */
+  const linked = rows.reduce((s, q) => s + q.liveReservations, 0);
+  const commission = live.reduce((s, r) => s + r.commission, 0);
+  const ranked = [...rows].sort(
+    (a, b) => b.liveReservations - a.liveReservations || b.scans - a.scans || a.label.localeCompare(b.label, locale)
+  );
+  const byCategory = CATEGORIES.map((c) => ({
+    label: reservationCategoryLabel(c, locale),
+    value: live.filter((r) => r.category === c).length,
+    color: CATEGORY_COLORS[c],
+  }));
+  const count = (n: number) =>
+    `${formatNumber(n, locale)} ${t(plural(n, "réservation"), plural(n, "reservation", undefined, "en"))}`;
+
   return (
-    <div className="flex flex-col items-center justify-center py-16 text-center">
-      <div className="w-12 h-12 rounded-full bg-white/[0.06] flex items-center justify-center mb-4">
-        <Icon size={24} strokeWidth={1.5} className="text-white/20" />
-      </div>
-      <p className="text-sm font-medium text-white/40 font-ui">{text}</p>
-      <p className="text-xs text-white/25 font-ui mt-1">{sub}</p>
-    </div>
+    <>
+      {header}
+
+      <KpiGrid
+        items={[
+          {
+            label: t("Ouvertures", "Opens"),
+            value: formatNumber(scans, locale),
+            hint: t("liens ouverts et QR scannés", "links opened and QR codes scanned"),
+            icon: ScanLine,
+            tone: "violet",
+          },
+          {
+            label: t("Réservations", "Reservations"),
+            value: formatNumber(live.length, locale),
+            hint: t("hors annulées et no-show", "excluding cancelled and no-show"),
+            icon: CalendarCheck,
+            tone: "sky",
+          },
+          {
+            label: t("Taux de conversion", "Conversion rate"),
+            value: scans > 0 ? formatPercent(linked / scans, 1, locale) : "—",
+            hint:
+              scans > 0
+                ? t("réservations pour 100 ouvertures", "reservations per 100 opens")
+                : t("aucune ouverture pour l'instant", "no opens yet"),
+            icon: Percent,
+            tone: "amber",
+          },
+          {
+            label: t("Commissions", "Commissions"),
+            value: formatMad(commission, true, locale),
+            hint: t("cumulées", "all-time"),
+            icon: Coins,
+            tone: "emerald",
+            href: "/concierge/commissions",
+          },
+        ]}
+      />
+
+      <Card
+        title={t("Par lien", "By link")}
+        description={t(
+          "Un lien par canal permet de voir d'où viennent vos réservations.",
+          "One link per channel shows where your reservations come from."
+        )}
+        actions={
+          <LinkButton href="/concierge/liens" size="sm" variant="ghost">
+            {t("Gérer mes liens", "Manage my links")}
+          </LinkButton>
+        }
+        padded={false}
+      >
+        <Table stack>
+          <thead>
+            <tr>
+              <Th>{t("Lien", "Link")}</Th>
+              <Th>{t("Statut", "Status")}</Th>
+              <Th align="right">{t("Ouvertures", "Opens")}</Th>
+              <Th align="right">{t("Réservations", "Reservations")}</Th>
+              <Th align="right">{t("Conversion", "Conversion")}</Th>
+              <Th align="right">{t("Montant dépensé", "Amount spent")}</Th>
+              <Th align="right">{t("Commission", "Commission")}</Th>
+            </tr>
+          </thead>
+          <tbody>
+            {ranked.map((q) => (
+              <Tr key={q.id}>
+                <Td head className="font-bold">
+                  {q.label}
+                </Td>
+                <Td label={t("Statut", "Status")}>
+                  <StatusPill status={q.active ? "actif" : "inactif"} />
+                </Td>
+                <Td label={t("Ouvertures", "Opens")} align="right" className="num">
+                  {formatNumber(q.scans, locale)}
+                </Td>
+                <Td label={t("Réservations", "Reservations")} align="right" className="num">
+                  {formatNumber(q.liveReservations, locale)}
+                </Td>
+                <Td label={t("Conversion", "Conversion")} align="right" className="num" muted>
+                  {q.scans > 0 ? formatPercent(q.conversion, 1, locale) : "—"}
+                </Td>
+                <Td label={t("Montant dépensé", "Amount spent")} align="right" className="num whitespace-nowrap" muted>
+                  {q.spent > 0 ? formatMad(q.spent, false, locale) : "—"}
+                </Td>
+                <Td label={t("Commission", "Commission")} align="right" className="num whitespace-nowrap font-bold">
+                  {q.commission > 0 ? formatMad(q.commission, false, locale) : "—"}
+                </Td>
+              </Tr>
+            ))}
+          </tbody>
+        </Table>
+      </Card>
+
+      {live.length > 0 && (
+        <div className="grid gap-4 xl:grid-cols-3">
+          <Card
+            title={t("Réservations par mois", "Reservations per month")}
+            description={t("6 derniers mois, par date de sortie", "Last 6 months, by outing date")}
+            className="xl:col-span-2"
+          >
+            <Bars data={monthlySeries(live, 6, undefined, undefined, locale)} color="bg-link" height={160} />
+            <div className="mt-5 border-t border-line pt-4">
+              <h3 className="mb-2 text-[13px] font-bold text-ink-2">{t("Par catégorie", "By category")}</h3>
+              <SplitBar segments={byCategory} format={count} />
+            </div>
+          </Card>
+          <div className="space-y-4">
+            <Card title={t("Établissements les plus réservés", "Most-booked venues")}>
+              <RankedBars items={topN(countBy(live, (r) => r.venue_name), 5)} format={count} color="bg-link" />
+            </Card>
+            <Card title={t("Jours de sortie", "Outing days")}>
+              <Bars data={weekdayDistribution(live, locale)} color="bg-ok" height={110} />
+            </Card>
+          </div>
+        </div>
+      )}
+
+      <InfoNote icon={Info}>
+        {t(
+          "Une ouverture est comptée chaque fois que le menu s'ouvre depuis un lien ou un QR, une fois par session de navigateur ; l'aperçu depuis votre espace n'est pas compté. Le taux de conversion rapporte les réservations de vos liens existants à ces ouvertures.",
+          "An open is counted each time the menu opens from a link or a QR code, once per browser session; the preview from your workspace isn't counted. The conversion rate compares the reservations from your existing links with these opens."
+        )}
+      </InfoNote>
+    </>
   );
 }

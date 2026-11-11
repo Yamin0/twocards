@@ -13,7 +13,7 @@ const getNavLinks = (t: ReturnType<typeof useT>) => [
   { label: t("Accueil", "Home"), href: "/" },
   { label: t("Hôtels", "Hotels"), href: "/hotels" },
   { label: t("Établissements", "Venues"), href: "/restaurants" },
-  { label: t("Concierges / PR", "Concierges / PR"), href: "/concierges" },
+  { label: t("Concierges / RP", "Concierges / PR"), href: "/concierges" },
   { label: t("Influenceurs", "Influencers"), href: "/influenceurs" },
 ];
 
@@ -138,7 +138,7 @@ export function LandingNavbar({
           <span>
             twocards
             <span
-              className={onDark ? "text-white/50" : "text-[var(--landing-mute)]"}
+              className={onDark ? "text-white/55" : "text-[var(--landing-mute)]"}
             >
               .
             </span>
@@ -156,14 +156,15 @@ export function LandingNavbar({
               <Link
                 key={link.label}
                 href={link.href}
-                className={`whitespace-nowrap text-[11px] font-medium uppercase tracking-[0.18em] transition-colors ${
+                aria-current={active ? "page" : undefined}
+                className={`whitespace-nowrap text-[14px] font-medium transition-colors ${
                   onDark
                     ? active
-                      ? "text-white underline decoration-white/40 underline-offset-8"
-                      : "text-white/60 hover:text-white"
+                      ? "text-white underline decoration-white/50 underline-offset-8"
+                      : "text-white/75 hover:text-white"
                     : active
-                      ? "text-[var(--landing-ink)] underline decoration-black/30 underline-offset-8"
-                      : "text-[var(--landing-ink)]/60 hover:text-[var(--landing-ink)]"
+                      ? "text-[var(--landing-ink)] underline decoration-black/40 underline-offset-8"
+                      : "text-[var(--landing-ink)]/70 hover:text-[var(--landing-ink)]"
                 }`}
               >
                 {link.label}
@@ -176,17 +177,17 @@ export function LandingNavbar({
           <LanguageSwitcher tone={onDark ? "dark" : "light"} />
           <Link
             href="/login"
-            className={`hidden whitespace-nowrap text-[11px] font-medium uppercase tracking-[0.18em] transition-colors sm:block ${
+            className={`hidden whitespace-nowrap text-[14px] font-medium transition-colors sm:block ${
               onDark
-                ? "text-white/60 hover:text-white"
-                : "text-[var(--landing-ink)]/60 hover:text-[var(--landing-ink)]"
+                ? "text-white/75 hover:text-white"
+                : "text-[var(--landing-ink)]/70 hover:text-[var(--landing-ink)]"
             }`}
           >
             <StableLabel fr="Connexion" en="Log in" />
           </Link>
           <Link
             href="/signup"
-            className={`hidden whitespace-nowrap rounded-full px-5 py-2.5 text-[13px] font-medium transition-opacity hover:opacity-80 sm:block ${
+            className={`hidden whitespace-nowrap rounded-full px-5 py-2.5 text-[14px] font-medium transition-opacity hover:opacity-80 sm:block ${
               onDark
                 ? "bg-white text-black"
                 : "bg-[var(--landing-ink)] text-[var(--landing-ivory)]"
@@ -195,43 +196,64 @@ export function LandingNavbar({
             <StableLabel fr="Demander un accès" en="Request access" />
           </Link>
           <button
+            type="button"
             onClick={() => setMobileOpen(!mobileOpen)}
-            className={`transition-colors xl:hidden ${
+            className={`-m-2 p-2 transition-colors xl:hidden ${
               onDark
-                ? "text-white/70 hover:text-white"
-                : "text-[var(--landing-ink)]/70 hover:text-[var(--landing-ink)]"
+                ? "text-white/80 hover:text-white"
+                : "text-[var(--landing-ink)]/80 hover:text-[var(--landing-ink)]"
             }`}
-            aria-label={t("Ouvrir le menu", "Open menu")}
+            aria-expanded={mobileOpen}
+            aria-controls="menu-mobile"
+            aria-label={
+              mobileOpen ? t("Fermer le menu", "Close menu") : t("Ouvrir le menu", "Open menu")
+            }
           >
             {mobileOpen ? (
-              <X size={22} strokeWidth={1.5} />
+              <X size={22} strokeWidth={1.5} aria-hidden />
             ) : (
-              <Menu size={22} strokeWidth={1.5} />
+              <Menu size={22} strokeWidth={1.5} aria-hidden />
             )}
           </button>
         </div>
       </header>
 
-      {/* Menu mobile */}
+      {/* Menu mobile. Sous 640 px, « Connexion » et « Demander un accès »
+          ne tiennent pas dans la barre : ils sont ici. Le sélecteur de
+          langue, lui, ne quitte jamais la barre. */}
       {mobileOpen && (
-        <nav className="absolute left-0 right-0 top-full z-30 flex flex-col border-b border-black/[0.08] bg-[var(--landing-ivory)] px-6 py-4 xl:hidden">
+        <nav
+          id="menu-mobile"
+          aria-label={t("Menu principal", "Main menu")}
+          className="absolute left-0 right-0 top-full z-30 flex flex-col border-b border-black/[0.08] bg-[var(--landing-ivory)] px-6 py-4 xl:hidden"
+        >
           {navLinks.map((link) => (
             <Link
               key={link.label}
               href={link.href}
               onClick={() => setMobileOpen(false)}
-              className="border-b border-black/[0.05] py-3.5 text-[12px] font-medium uppercase tracking-[0.18em] text-[var(--landing-ink)]/70 last:border-b-0 hover:text-[var(--landing-ink)]"
+              aria-current={pathname === link.href ? "page" : undefined}
+              className="border-b border-black/[0.06] py-3.5 text-[16px] font-medium text-[var(--landing-ink)]/80 hover:text-[var(--landing-ink)]"
             >
               {link.label}
             </Link>
           ))}
-          <Link
-            href="/signup"
-            onClick={() => setMobileOpen(false)}
-            className="mt-4 rounded-full bg-[var(--landing-ink)] px-5 py-3 text-center text-[13px] font-medium text-[var(--landing-ivory)]"
-          >
-            {t("Demander un accès", "Request access")}
-          </Link>
+          <div className="mt-5 flex flex-col gap-3 sm:hidden">
+            <Link
+              href="/login"
+              onClick={() => setMobileOpen(false)}
+              className="rounded-full border border-black/15 px-5 py-3 text-center text-[15px] font-medium text-[var(--landing-ink)]"
+            >
+              {t("Connexion", "Log in")}
+            </Link>
+            <Link
+              href="/signup"
+              onClick={() => setMobileOpen(false)}
+              className="rounded-full bg-[var(--landing-ink)] px-5 py-3 text-center text-[15px] font-medium text-[var(--landing-ivory)]"
+            >
+              {t("Demander un accès", "Request access")}
+            </Link>
+          </div>
         </nav>
       )}
       </div>

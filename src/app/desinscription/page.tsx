@@ -1,15 +1,16 @@
 import type { Metadata } from "next";
 import { LandingNavbar } from "@/components/landing/navbar";
 import { Footer } from "@/components/layout/footer";
+import { pageMetadata } from "@/components/landing/seo";
 import { OptoutForm } from "./optout-form";
 import { getT } from "@/lib/i18n/server";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const t = await getT();
-  return {
-    title: t("twocards. | Désinscription", "twocards. | Unsubscribe"),
-    robots: { index: false, follow: false },
-  };
+export function generateMetadata(): Promise<Metadata> {
+  return pageMetadata({
+    title: ["Désinscription", "Unsubscribe"],
+    path: "/desinscription",
+    index: false,
+  });
 }
 
 /* L'adresse arrive encodée en base64url dans le lien de l'e-mail (?e=…), pour
@@ -38,16 +39,13 @@ export default async function DesinscriptionPage({
   const t = await getT();
 
   return (
-    <div className="min-h-screen bg-[var(--landing-ivory)] font-body text-[var(--landing-ink)]">
+    <div className="landing-satoshi min-h-screen bg-[var(--landing-ivory)] font-body text-[var(--landing-ink)]">
       <LandingNavbar />
       <main className="mx-auto max-w-xl px-6 py-16 md:py-24">
-        <p className="mb-3 text-[11px] font-medium uppercase tracking-[0.28em] text-[var(--landing-mute)]">
-          {t("Prospection", "Outreach")}
-        </p>
-        <h1 className="font-title text-3xl font-normal leading-tight md:text-4xl">
+        <h1 className="text-[36px] font-bold leading-[1.05] tracking-[-0.03em] md:text-[48px]">
           {t("Ne plus recevoir de messages", "Stop receiving messages")}
         </h1>
-        <p className="mt-4 text-[14px] leading-relaxed text-[var(--landing-ink)]/70">
+        <p className="mt-4 text-[16px] leading-relaxed text-[var(--landing-ink)]/70">
           {t(
             <>
               Confirmez votre adresse et nous la retirons de nos envois. Aucune

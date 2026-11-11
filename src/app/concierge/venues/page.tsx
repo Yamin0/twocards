@@ -1,130 +1,154 @@
 "use client";
 
-import { useState } from "react";
-import { MapPin, Star, ArrowRight, Phone, Mail, Globe, Building2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Building2, MessageSquare, SearchX } from "lucide-react";
+import {
+  Card,
+  EmptyState,
+  ErrorState,
+  LinkButton,
+  NameAvatar,
+  PageHeader,
+  PageSkeleton,
+  SearchInput,
+} from "@/components/app/ui";
 import { useAuthUser } from "@/hooks/use-auth-user";
-import { ConciergeSkeleton } from "@/components/shared/loading-skeleton";
-import { useT } from "@/lib/i18n/client";
+import { useIntlLocale, useT } from "@/lib/i18n/client";
+import { createClient } from "@/lib/supabase/client";
 
-const DEMO_VENUES = [
-  { id: 1, name: "Le Comptoir Darna", city: "Marrakech", type: "Restaurant-Club", commission: "10%", covers: 68, rating: 4.8, active: true, phone: "+212 5 24 43 77 02", email: "contact@comptoirdarna.com", address: "Avenue Echouhada, Hivernage, Marrakech", hours: "20h – 3h" },
-  { id: 2, name: "Sky Bar Casa", city: "Casablanca", type: "Rooftop Bar", commission: "10%", covers: 45, rating: 4.6, active: true, phone: "+212 5 22 43 88 10", email: "info@skybarcasa.ma", address: "Boulevard de la Corniche, Casablanca", hours: "18h – 2h" },
-  { id: 3, name: "Le Lotus Club", city: "Tanger", type: "Club", commission: "10%", covers: 31, rating: 4.5, active: true, phone: "+212 5 39 33 22 11", email: "booking@lotusclub.ma", address: "Place du Petit Socco, Tanger", hours: "22h – 5h" },
-  { id: 4, name: "Pacha Marrakech", city: "Marrakech", type: "Club", commission: "10%", covers: 22, rating: 4.7, active: true, phone: "+212 5 24 38 84 00", email: "vip@pachamarrakech.com", address: "Zone Hôtelière de l'Agdal, Marrakech", hours: "23h – 5h" },
-  { id: 5, name: "La Mamounia Lounge", city: "Marrakech", type: "Lounge", commission: "10%", covers: 18, rating: 4.9, active: true, phone: "+212 5 24 38 86 00", email: "lounge@mamounia.com", address: "Avenue Bab Jdid, Marrakech", hours: "19h – 1h" },
-  { id: 6, name: "Rick's Cafe", city: "Casablanca", type: "Restaurant", commission: "10%", covers: 12, rating: 4.4, active: false, phone: "+212 5 22 27 42 07", email: "info@rickscafe.ma", address: "Boulevard Sour Jdid, Casablanca", hours: "12h – 0h" },
-];
+/* Annuaire des établissements du réseau (table profiles, tenu à jour en
+   direct) : c'était l'accueil de l'espace avant que le concierge ait son
+   lien et son QR. Chaque ligne ouvre la messagerie avec l'établissement. */
+
+type Venue = {
+  id: string;
+  full_name: string | null;
+  role: string;
+  venue_name: string | null;
+  city: string | null;
+};
+
+const nameOf = (v: Venue) => v.venue_name || v.full_name || "—";
 
 export default function ConciergeVenuesPage() {
-  const { isDemoConcierge, isLoading } = useAuthUser();
   const t = useT();
-  const [expandedId, setExpandedId] = useState<number | null>(null);
+  const intl = useIntlLocale();
+  const { isLoading: authLoading } = useAuthUser();
+  const [venues, setVenues] = useState<Venue[] | null>(null);
+  const [failed, setFailed] = useState(false);
+  const [tick, setTick] = useState(0);
+  const [query, setQuery] = useState("");
 
-  const venues = isDemoConcierge ? DEMO_VENUES : [];
+  useEffect(() => {
+    const supabase = createClient();
+    let cancelled = false;
+    supabase
+      .from("profiles")
+      .select("id, full_name, role, venue_name, city")
+      .eq("role", "etablissement")
+      .order("venue_name", { ascending: true })
+      .then(({ data, error }) => {
+        if (cancelled) return;
+        setFailed(Boolean(error));
+        if (!error) setVenues((data ?? []) as Venue[]);
+      });
+    /* Un établissement qui s'inscrit apparaît sans recharger. */
+    const channel = supabase
+      .channel(`annuaire-etablissements-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`)
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "profiles" }, (payload) => {
+        const p = payload.new as Venue;
+        if (p.role !== "etablissement") return;
+        setVenues((prev) => (!prev || prev.some((v) => v.id === p.id) ? prev : [...prev, p]));
+      })
+      .subscribe();
+    return () => {
+      cancelled = true;
+      supabase.removeChannel(channel);
+    };
+  }, [tick]);
 
-  if (isLoading) return <ConciergeSkeleton />;
+  const list = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return (venues ?? [])
+      .filter((v) => !q || nameOf(v).toLowerCase().includes(q) || (v.city ?? "").toLowerCase().includes(q))
+      .sort((a, b) => nameOf(a).localeCompare(nameOf(b), intl));
+  }, [venues, query, intl]);
+
+  if (authLoading || (venues === null && !failed)) return <PageSkeleton kpis={0} rows={6} />;
 
   return (
-    <div className="bg-transparent min-h-screen">
-      <div className="px-8 pt-8 pb-6">
-        <h1 className="text-white text-2xl font-extrabold">
-          {t("Mes établissements", "My venues")}
-        </h1>
-        <p className="text-white/60 mt-1 text-sm">
-          {t("Les établissements avec lesquels vous travaillez.", "The venues you work with.")}
-        </p>
-      </div>
-
-      <div className="px-8 pb-8 grid grid-cols-1 md:grid-cols-2 gap-4">
-        {venues.map((venue) => (
-          <div key={venue.id} className="bg-white/[0.07] rounded-md editorial-shadow overflow-hidden hover:-translate-y-0.5 transition-transform group">
-            <div className="p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-bold text-lg text-white">
-                      {venue.name}
-                    </h3>
-                    {!venue.active && (
-                      <span className="text-[0.625rem] font-semibold px-2 py-0.5 rounded-full bg-white/[0.05] text-white/60">
-                        {t("inactif", "inactive")}
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-3 text-sm text-white/60">
-                    <span className="flex items-center gap-1">
-                      <MapPin size={13} strokeWidth={1.5} />
-                      {venue.city}
-                    </span>
-                    <span>{venue.type}</span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-1 text-sm">
-                  <Star size={14} strokeWidth={1.5} className="text-amber-500 fill-amber-500" />
-                  <span className="font-semibold text-white">{venue.rating}/5</span>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <p className="text-[0.625rem] uppercase tracking-wider text-white/60 font-semibold">{t("Commission", "Commission")}</p>
-                  <p className="text-white font-bold text-lg font-ui">{venue.commission}</p>
-                </div>
-                <div>
-                  <p className="text-[0.625rem] uppercase tracking-wider text-white/60 font-semibold">{t("Couverts ce mois", "Covers this month")}</p>
-                  <p className="text-white font-bold text-lg font-ui">{venue.covers}</p>
-                </div>
-                <div className="flex items-end justify-end">
-                  <button
-                    onClick={() => setExpandedId(expandedId === venue.id ? null : venue.id)}
-                    className="text-white text-sm font-medium flex items-center gap-1 hover:opacity-80 transition-opacity"
-                  >
-                    {expandedId === venue.id ? t("Fermer", "Close") : t("Voir", "View")}
-                    <ArrowRight size={14} strokeWidth={1.5} className={`transition-transform ${expandedId === venue.id ? "rotate-90" : ""}`} />
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Expanded details */}
-            {expandedId === venue.id && (
-              <div className="px-6 pb-6 pt-0 border-t border-white/10/10 mt-0 pt-4 space-y-3">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="flex items-center gap-2 text-sm text-white/60">
-                    <Phone size={14} strokeWidth={1.5} className="text-white" />
-                    <a href={`tel:${venue.phone}`} className="hover:text-white transition-colors">{venue.phone}</a>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-white/60">
-                    <Mail size={14} strokeWidth={1.5} className="text-white" />
-                    <a href={`mailto:${venue.email}`} className="truncate hover:text-white transition-colors">{venue.email}</a>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-white/60">
-                    <MapPin size={14} strokeWidth={1.5} className="text-white" />
-                    <span>{venue.address}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-white/60">
-                    <Globe size={14} strokeWidth={1.5} className="text-white" />
-                    <span>{t("Horaires :", "Hours:")} {venue.hours}</span>
-                  </div>
-                </div>
-                <a
-                  href={`mailto:${venue.email}`}
-                  className="block w-full bg-white/15 text-white text-sm font-medium py-2 rounded-lg hover:opacity-90 transition-opacity mt-2 text-center"
-                >
-                  {t("Contacter l'établissement", "Contact venue")}
-                </a>
-              </div>
-            )}
-          </div>
-        ))}
-        {venues.length === 0 && (
-          <div className="col-span-full text-center py-16">
-            <Building2 size={48} strokeWidth={1} className="mx-auto text-white/60/30 mb-4" />
-            <p className="text-sm text-white/60">{t("Aucun établissement partenaire", "No partner venues")}</p>
-          </div>
+    <>
+      <PageHeader
+        title={t("Établissements", "Venues")}
+        description={t(
+          "Les établissements du réseau, à un message de vous.",
+          "The venues in the network, one message away."
         )}
-      </div>
+        actions={
+          <LinkButton href="/concierge/messages" variant="primary" icon={MessageSquare}>
+            {t("Messages", "Messages")}
+          </LinkButton>
+        }
+      />
 
-    </div>
+      <Card
+        padded={false}
+        title={t("Annuaire", "Directory")}
+        description={
+          venues
+            ? t(
+                `${venues.length} établissement${venues.length > 1 ? "s" : ""} dans le réseau`,
+                `${venues.length} venue${venues.length === 1 ? "" : "s"} in the network`
+              )
+            : undefined
+        }
+        actions={
+          <SearchInput
+            value={query}
+            onChange={setQuery}
+            placeholder={t("Nom ou ville", "Name or city")}
+            className="w-full sm:w-64"
+          />
+        }
+      >
+        {failed ? (
+          <ErrorState compact onRetry={() => setTick((n) => n + 1)} />
+        ) : list.length === 0 ? (
+          query ? (
+            <EmptyState
+              compact
+              icon={SearchX}
+              title={t("Aucun résultat", "No results")}
+              description={t(`Aucun établissement ne correspond à « ${query} ».`, `No venue matches “${query}”.`)}
+            />
+          ) : (
+            <EmptyState
+              compact
+              icon={Building2}
+              title={t("Aucun établissement pour le moment", "No venues yet")}
+              description={t(
+                "Les établissements apparaissent ici dès leur inscription.",
+                "Venues appear here as soon as they sign up."
+              )}
+            />
+          )
+        ) : (
+          <ul className="divide-y divide-line border-t border-line">
+            {list.map((v) => (
+              <li key={v.id} className="flex items-center gap-3 px-5 py-3 sm:px-6">
+                <NameAvatar name={nameOf(v)} size={40} />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-bold text-ink">{nameOf(v)}</p>
+                  <p className="truncate text-[13px] text-ink-3">{v.city || t("Ville non renseignée", "City not set")}</p>
+                </div>
+                <LinkButton href={`/concierge/messages?to=${v.id}`} size="sm" icon={MessageSquare}>
+                  {t("Écrire", "Message")}
+                </LinkButton>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Card>
+    </>
   );
 }
