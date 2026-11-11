@@ -14,7 +14,7 @@ export type GuestCategoryKey = "restaurants" | "activites" | "clubs" | "services
 export const CATEGORY_KEYS: GuestCategoryKey[] = ["restaurants", "activites", "clubs", "services"];
 
 /* Photos des bandeaux : Unsplash (licence libre, usage commercial permis),
-   toutes à Marrakech et dans la même lumière chaude de fin de journée.
+   dans la même lumière chaude de fin de journée.
    Un hôtel peut les remplacer par les siennes (`category_images`). */
 export const CATEGORY_META: Record<
   GuestCategoryKey,
@@ -23,7 +23,7 @@ export const CATEGORY_META: Record<
   restaurants: {
     label: "Restaurants",
     tagline: "Tables raffinées et dîners d'exception",
-    image: "/images/menu/restaurants.jpg",
+    image: "/images/menu/restaurants-soir.jpg",
   },
   activites: {
     label: "Activités",
@@ -38,7 +38,7 @@ export const CATEGORY_META: Record<
   services: {
     label: "Services",
     tagline: "Une conciergerie à votre écoute",
-    image: "/images/menu/services.jpg",
+    image: "/images/menu/services-chauffeur.jpg",
   },
 };
 
