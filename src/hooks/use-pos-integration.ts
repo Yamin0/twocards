@@ -21,7 +21,8 @@ export type PosEvent = {
   ticket_id: string | null;
   table_label: string | null;
   amount: number | null;
-  status: "matched" | "unmatched" | "duplicate";
+  /* « test » : ticket de test du dashboard, jamais rapproché. */
+  status: "matched" | "unmatched" | "duplicate" | "test";
   reason: string | null;
   created_at: string;
 };
@@ -51,9 +52,23 @@ async function fetchPos(): Promise<PosData | null> {
   };
 }
 
+/* Issue d'un ticket de test. Le test n'envoie jamais de table ni de
+   montant : quelle que soit la version de la fonction déployée, il ne peut
+   pas se rapprocher d'une réservation.
+   - "confirmed"   : la fonction gère le mode test et l'a confirmé
+                     (logged : l'appel figure dans le journal) ;
+   - "outdated"    : la clé est acceptée, mais la fonction déployée ignore
+                     le mode test et a refusé le corps (400) sans rien écrire ;
+   - "invalid_key" : clé inconnue ou révoquée (401) ;
+   - "failed"      : réseau ou réponse inattendue. */
 export type PosTestResult =
-  | { ok: true; status: string | number; commission?: number | string }
-  | { ok: false };
+  | { outcome: "confirmed"; logged: boolean }
+  | { outcome: "outdated" | "invalid_key" | "failed" };
+
+/* Corps du ticket de test : uniquement le drapeau et un identifiant. Une
+   fonction qui ne connaît pas `test` répond « table et amount requis » (400)
+   avant toute écriture. */
+const testBody = () => JSON.stringify({ test: true, ticket_id: `TEST-${Date.now()}` });
 
 export function usePosIntegration() {
   const [data, setData] = useState<PosData | null>(null);
@@ -100,11 +115,11 @@ export function usePosIntegration() {
     [refresh]
   );
 
-  /* Ticket de test envoyé au webhook, sur la première table du plan. */
+  /* Ticket de test : vérifie la clé et la liaison avec le webhook, sans
+     jamais écrire sur une réservation. Le succès n'est annoncé que si la
+     fonction confirme explicitement le mode test. */
   const sendTest = useCallback(
     async (key: string): Promise<PosTestResult> => {
-      const table = data?.tables[0];
-      if (!table) return { ok: false };
       let result: PosTestResult;
       try {
         const res = await fetch(POS_WEBHOOK_URL, {
@@ -113,21 +128,29 @@ export function usePosIntegration() {
             "content-type": "application/json",
             "x-twocards-key": key,
           },
-          body: JSON.stringify({
-            table,
-            amount: 1234,
-            ticket_id: `TEST-${Date.now()}`,
-          }),
+          body: testBody(),
         });
-        const body = await res.json();
-        result = { ok: true, status: body.status ?? res.status, commission: body.commission };
+        const body = (await res.json().catch(() => null)) as {
+          status?: unknown;
+          test_mode?: unknown;
+          logged?: unknown;
+        } | null;
+        if (res.ok && body?.status === "test" && body.test_mode === true) {
+          result = { outcome: "confirmed", logged: body.logged !== false };
+        } else if (res.status === 401) {
+          result = { outcome: "invalid_key" };
+        } else if (res.status === 400) {
+          result = { outcome: "outdated" };
+        } else {
+          result = { outcome: "failed" };
+        }
       } catch {
-        result = { ok: false };
+        result = { outcome: "failed" };
       }
       refresh();
       return result;
     },
-    [data, refresh]
+    [refresh]
   );
 
   return {

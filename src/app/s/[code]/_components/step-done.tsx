@@ -11,13 +11,16 @@ export function StepDone({
   form,
   offer,
   hotelName,
+  kind,
   preview,
   titleId,
   onClose,
 }: {
   form: ReservationForm;
   offer: GuestOffer;
-  hotelName: string;
+  /* Hôtel ou concierge nommé ; `null` pour un concierge sans nom. */
+  hotelName: string | null;
+  kind: "hotel" | "concierge";
   preview: boolean;
   titleId: string;
   onClose: () => void;
@@ -26,6 +29,13 @@ export function StepDone({
   const intl = useIntlLocale();
   const n = form.partySize;
   const phone = form.phone.trim();
+  /* « Le Royal est prévenu. » chez un hôtel, mot pour mot comme avant. Chez
+     un concierge, une tournure qui ne suppose pas de genre ; sans nom, rien. */
+  const notified = !hotelName
+    ? null
+    : kind === "concierge"
+      ? t(` Votre demande a aussi été transmise à ${hotelName}.`, ` ${hotelName} has been notified.`)
+      : t(` ${hotelName} est prévenu.`, ` ${hotelName} has been notified.`);
   return (
     <div className="px-7 pb-[max(2.5rem,env(safe-area-inset-bottom))] pt-12 text-center" role="status">
       <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50 text-emerald-700">
@@ -46,11 +56,11 @@ export function StepDone({
         {t(
           <>
             L&apos;établissement vous confirme au <span className="num font-bold text-neutral-900">{phone}</span> par
-            téléphone ou WhatsApp. {hotelName} est prévenu.
+            téléphone ou WhatsApp.{notified}
           </>,
           <>
             The venue will confirm on <span className="num font-bold text-neutral-900">{phone}</span> by phone or
-            WhatsApp. {hotelName} has been notified.
+            WhatsApp.{notified}
           </>
         )}
       </p>

@@ -79,28 +79,42 @@ export default function IntegrationsPage() {
     setTestKey(key);
   };
 
+  /* Le ticket de test ne porte ni table ni montant : il ne peut écrire sur
+     aucune réservation, quelle que soit la version du webhook déployée. */
   const onSendTest = async () => {
     const key = testKey.trim();
-    if (!key || tables.length === 0) return;
+    if (!key) return;
     setBusy("test");
     const result = await sendTest(key);
     setBusy(null);
-    if (!result.ok) {
-      notify(t("Le test n'a pas abouti", "The test failed"), "error");
-    } else if (result.status === "matched") {
-      notify(
-        t(
-          `Test rapproché · ${result.commission} MAD de commission dérivés`,
-          `Test matched · ${result.commission} MAD commission derived`
-        )
-      );
-    } else {
-      notify(
-        t(
-          `Test reçu (${result.status}), voir le journal`,
-          `Test received (${result.status}), see the log`
-        )
-      );
+    switch (result.outcome) {
+      case "confirmed":
+        notify(
+          result.logged
+            ? t(
+                "Test reçu : clé valide, aucune réservation modifiée. Il figure dans le journal.",
+                "Test received: key is valid, no reservation changed. It is shown in the log."
+              )
+            : t(
+                "Test reçu : clé valide, aucune réservation modifiée.",
+                "Test received: key is valid, no reservation changed."
+              )
+        );
+        break;
+      case "outdated":
+        notify(
+          t(
+            "Clé acceptée, mais le webhook doit être mis à jour pour confirmer le test. Rien n'a été écrit.",
+            "Key accepted, but the webhook must be updated to confirm the test. Nothing was written."
+          ),
+          "error"
+        );
+        break;
+      case "invalid_key":
+        notify(t("Clé invalide ou révoquée", "Invalid or revoked key"), "error");
+        break;
+      default:
+        notify(t("Le test n'a pas abouti", "The test failed"), "error");
     }
   };
 
@@ -159,7 +173,6 @@ export default function IntegrationsPage() {
           testKey={testKey}
           onTestKey={setTestKey}
           onSendTest={onSendTest}
-          hasTables={tables.length > 0}
           busy={busy}
         />
         <div className="space-y-4">

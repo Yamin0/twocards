@@ -137,7 +137,19 @@ export function fallbackImage(slug: string) {
   return CAROUSEL[h % CAROUSEL.length];
 }
 
-export function toOffer(row: OfferRow, source: GuestOffer["source"], locale: Locale = "fr"): GuestOffer {
+/* Étiquette par défaut d'une adresse maison : « Adresse de l'hôtel » chez un
+   hôtel, « Coup de cœur » chez un concierge (rien n'y parle d'hôtel). */
+function defaultHouseTag(locale: Locale, ownerKind: "hotel" | "concierge") {
+  if (ownerKind === "concierge") return locale === "en" ? "Top pick" : "Coup de cœur";
+  return locale === "en" ? "Hotel pick" : "Adresse de l'hôtel";
+}
+
+export function toOffer(
+  row: OfferRow,
+  source: GuestOffer["source"],
+  locale: Locale = "fr",
+  ownerKind: "hotel" | "concierge" = "hotel"
+): GuestOffer {
   const cover = row.image_url || fallbackImage(row.slug);
   const services: GuestService[] = (row.services ?? []).map((s) => ({
     id: s.id,
@@ -155,7 +167,7 @@ export function toOffer(row: OfferRow, source: GuestOffer["source"], locale: Loc
     name: row.name,
     city: row.city ?? undefined,
     description: row.description ?? "",
-    tag: row.tag || (source === "hotel" ? (locale === "en" ? "Hotel pick" : "Adresse de l'hôtel") : ""),
+    tag: row.tag || (source === "hotel" ? defaultHouseTag(locale, ownerKind) : ""),
     price: row.price ?? (firstPrice ? (locale === "en" ? `from ${firstPrice}` : `dès ${firstPrice}`) : undefined),
     image: cover,
     images: [cover, ...(row.images ?? []).filter(Boolean)],
@@ -189,6 +201,7 @@ export function buildGuestMenu({
   categoryImages = {},
   hiddenCategories = [],
   locale = "fr",
+  ownerKind = "hotel",
 }: {
   city: string | null;
   hidden: string[];
@@ -200,6 +213,8 @@ export function buildGuestMenu({
   hiddenCategories?: string[];
   /* Langue des libellés affichés (catégories, étiquettes par défaut). */
   locale?: Locale;
+  /* Propriétaire du QR : change l'étiquette par défaut des adresses maison. */
+  ownerKind?: "hotel" | "concierge";
 }): GuestCategory[] {
   const hiddenSet = new Set(hidden);
   const hiddenCats = new Set(hiddenCategories);
@@ -213,7 +228,7 @@ export function buildGuestMenu({
 
   for (const row of sorted(hotelOffers)) {
     if (!isKey(row.category) || row.active === false) continue;
-    byCategory.get(row.category)!.push(toOffer(row, "hotel", locale));
+    byCategory.get(row.category)!.push(toOffer(row, "hotel", locale, ownerKind));
   }
   for (const row of sorted(catalog)) {
     if (!isKey(row.category) || row.active === false) continue;

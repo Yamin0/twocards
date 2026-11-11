@@ -59,9 +59,27 @@ export function PortalShare({
   /* Composant client monté après le chargement des données : window existe. */
   const portalUrl =
     typeof window === "undefined" || !slug ? "" : `${window.location.origin}/r/${slug}`;
-  /* La hauteur est fixe : la page /r n'annonce pas encore la sienne à la
-     page hôte, le code ne promet donc aucun redimensionnement. */
-  const embedCode = `<iframe src="${portalUrl}?embed=1" width="100%" height="760" style="border:0;border-radius:16px" title="${t("Réserver", "Book")} · ${displayName}"></iframe>`;
+  const origin = typeof window === "undefined" ? "" : window.location.origin;
+  const iframeTitle = `${t("Réserver", "Book")} · ${displayName}`.replace(/"/g, "&quot;");
+  const iframeId = `twocards-portail-${slug}`;
+  /* Code sans script : hauteur fixe, pour les sites qui interdisent le
+     JavaScript collé (certains constructeurs de sites). */
+  const embedCodeFixed = `<iframe src="${portalUrl}?embed=1" width="100%" height="760" style="border:0;border-radius:16px" title="${iframeTitle}"></iframe>`;
+  /* Code recommandé : la page /r annonce sa hauteur par postMessage
+     ({ type: "twocards:hauteur", hauteur }, voir use-embed-height), le
+     script n'écoute que l'origine twocards et que cette iframe. 760 px reste
+     la hauteur de départ, avant le premier message. */
+  const embedCode = `<iframe id="${iframeId}" src="${portalUrl}?embed=1" width="100%" height="760" style="border:0;border-radius:16px;display:block" title="${iframeTitle}"></iframe>
+<script>
+window.addEventListener("message", function (e) {
+  var f = document.getElementById("${iframeId}");
+  if (!f || e.origin !== "${origin}" || e.source !== f.contentWindow) return;
+  var d = e.data;
+  if (d && d.type === "twocards:hauteur" && typeof d.hauteur === "number" && d.hauteur > 0 && d.hauteur < 20000) {
+    f.style.height = Math.ceil(d.hauteur) + "px";
+  }
+});
+</script>`;
 
   return (
     <div className="space-y-4">
@@ -86,13 +104,27 @@ export function PortalShare({
             <Field
               label={t("Intégration sur votre site (iframe)", "Embed on your website (iframe)")}
               hint={t(
-                "Hauteur fixe de 760 px : ajustez la valeur height si votre page est plus courte ou plus longue.",
-                "Fixed 760 px height: adjust the height value if your page is shorter or longer."
+                "Recommandé : la hauteur du cadre suit le portail à chaque étape, sans barre de défilement.",
+                "Recommended: the frame height follows the booking page at every step, with no scrollbar."
               )}
             >
               <CopyRow
                 value={embedCode}
                 copyLabel={t("Copier le code d'intégration", "Copy embed code")}
+                wrap
+              />
+            </Field>
+
+            <Field
+              label={t("Sans script (hauteur fixe)", "Without script (fixed height)")}
+              hint={t(
+                "Si votre site refuse les scripts : hauteur fixe de 760 px, à ajuster dans la valeur height.",
+                "If your website blocks scripts: fixed 760 px height, adjust the height value as needed."
+              )}
+            >
+              <CopyRow
+                value={embedCodeFixed}
+                copyLabel={t("Copier le code sans script", "Copy code without script")}
                 wrap
               />
             </Field>

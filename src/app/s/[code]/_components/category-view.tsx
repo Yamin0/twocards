@@ -53,6 +53,7 @@ export function CategoryView({
   current,
   total,
   showPrices,
+  pickBadge,
   onPick,
   onOpen,
 }: {
@@ -60,6 +61,8 @@ export function CategoryView({
   current: GuestCategory;
   total: number;
   showPrices: boolean;
+  /* Pastille des adresses maison : « Par l'hôtel », « Coup de cœur »… */
+  pickBadge: string;
   onPick: (key: GuestCategoryKey | "tous") => void;
   onOpen: (offer: GuestOffer, category: GuestCategory, card: HTMLElement) => void;
 }) {
@@ -142,7 +145,7 @@ export function CategoryView({
         <ul className="mt-4 grid gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 lg:gap-6">
           {offers.map((o) => (
             <li key={o.id}>
-              <OfferCard offer={o} showPrice={showPrices} onPick={(card) => onOpen(o, current, card)} />
+              <OfferCard offer={o} showPrice={showPrices} pickBadge={pickBadge} onPick={(card) => onOpen(o, current, card)} />
             </li>
           ))}
         </ul>

@@ -31,12 +31,18 @@ export function usePortalBooking(slug: string, portal: Portal) {
   const [notes, setNotes] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  /* Créneaux complets pour la date affichée : toutes les tables du plan de
-     salle y portent déjà une réservation. Ils ne sont pas proposés. */
+  /* Message affiché au retour sur le choix de l'heure, quand le créneau
+     s'est rempli pendant la saisie des coordonnées. */
+  const [slotNotice, setSlotNotice] = useState<string | null>(null);
+  /* Créneaux complets pour la date affichée : les couverts déjà demandés y
+     atteignent la capacité du plan de salle. Ils ne sont pas proposés. */
   const [fullSlots, setFullSlots] = useState<Set<string>>(() => new Set());
+  /* Incrémenté pour relire la disponibilité sans changer de date. */
+  const [availabilityVersion, setAvailabilityVersion] = useState(0);
 
-  /* La disponibilité se recharge à chaque changement de date. En cas
-     d'échec réseau, on montre tout plutôt que de bloquer la vente. */
+  /* La disponibilité se recharge à chaque changement de date, et après un
+     refus « Créneau complet ». En cas d'échec réseau, on montre tout plutôt
+     que de bloquer la vente : la base revérifie le créneau à l'envoi. */
   useEffect(() => {
     let cancelled = false;
     createClient()
@@ -53,7 +59,7 @@ export function usePortalBooking(slug: string, portal: Portal) {
     return () => {
       cancelled = true;
     };
-  }, [slug, date]);
+  }, [slug, date, availabilityVersion]);
 
   /* Dès que le client corrige un champ, le message d'erreur s'efface. */
   const editing =
@@ -68,6 +74,7 @@ export function usePortalBooking(slug: string, portal: Portal) {
 
   const setDate = (iso: string) => {
     setDateState(iso);
+    setSlotNotice(null);
     /* Un créneau choisi peut être déjà passé sur la nouvelle date (retour
        sur aujourd'hui). */
     if (time) {
@@ -125,10 +132,30 @@ export function usePortalBooking(slug: string, portal: Portal) {
     }
     setSending(false);
     if (failure) {
-      setError(bookingErrorMessage(bookingErrorKind(failure), t, "venue"));
+      const kind = bookingErrorKind(failure);
+      if (kind === "full") {
+        /* Le créneau s'est rempli pendant la saisie : retour au choix de
+           l'heure, coordonnées conservées. Le créneau refusé disparaît tout
+           de suite, puis la liste est relue depuis la base. */
+        const refused = time;
+        setFullSlots((current) => new Set(current).add(refused));
+        setTime(null);
+        setSlotNotice(bookingErrorMessage(kind, t, "venue"));
+        setStep("slots");
+        setAvailabilityVersion((v) => v + 1);
+        return;
+      }
+      setError(bookingErrorMessage(kind, t, "venue"));
       return;
     }
+    setSlotNotice(null);
     setStep("done");
+  };
+
+  /* Choisir une heure ou un jour efface le message « créneau complet ». */
+  const chooseTime = (label: string) => {
+    setTime(label);
+    setSlotNotice(null);
   };
 
   /* « Faire une autre réservation » : on garde personnes et date. */
@@ -140,6 +167,7 @@ export function usePortalBooking(slug: string, portal: Portal) {
     setPhone("");
     setNotes("");
     setError(null);
+    setSlotNotice(null);
   };
 
   return {
@@ -154,7 +182,8 @@ export function usePortalBooking(slug: string, portal: Portal) {
     setDate,
     selectedDate,
     time,
-    setTime,
+    setTime: chooseTime,
+    slotNotice,
     firstName,
     setFirstName: editing(setFirstName),
     lastName,

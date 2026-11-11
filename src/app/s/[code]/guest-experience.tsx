@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { RetryPanel } from "@/components/booking/retry-panel";
+import { hostWords } from "@/lib/booking/host";
 import type { GuestMenuResult } from "@/lib/booking/load";
 import type { GuestCategory, GuestCategoryKey, GuestOffer } from "@/lib/guest-catalog";
 import { useT } from "@/lib/i18n/client";
@@ -59,7 +60,16 @@ export function GuestExperience({
   const { style, darkPage } = useGuestTheme(hotel?.accent ?? DEFAULT_ACCENT, hotel?.background ?? DEFAULT_BACKGROUND);
 
   const city = hotel?.city ?? fallbackCity;
-  const hotelName = hotel?.hotelName ?? fallbackHotelName ?? t("Votre hôtel", "Your hotel");
+  /* Hôtel ou concierge : sans réponse de la base (QR désactivé, panne) ou
+     avant la migration `owner_role`, c'est le vocabulaire de l'hôtel. */
+  const kind = hotel?.kind ?? "hotel";
+  const ownName = hotel?.hotelName ?? fallbackHotelName ?? null;
+  const words = hostWords(kind, ownName, t);
+  const hotelName = ownName ?? words.fallbackName;
+  /* Nom cité dans « … et l'établissement sont prévenus » : pour un hôtel,
+     toujours (« Votre hôtel » au besoin, comme avant) ; pour un concierge
+     sans nom, la phrase se passe de lui. */
+  const notifiedName = kind === "hotel" ? hotelName : ownName;
   const welcome =
     hotel?.welcome ??
     (city
@@ -80,7 +90,7 @@ export function GuestExperience({
     ? [
         counted ? t(`${total} adresse${total > 1 ? "s" : ""}`, `${total} place${total === 1 ? "" : "s"}`) : null,
         city,
-        t("Sélection de l'hôtel", "Curated by the hotel"),
+        words.curatedBy,
       ].filter((v): v is string => Boolean(v))
     : [];
 
@@ -114,7 +124,9 @@ export function GuestExperience({
       `}</style>
 
       <GuestHeader
-        label={hotel?.label ?? null}
+        /* Chez un concierge, le libellé est un nom de canal interne
+           (« Instagram », « Sélection ») : le client ne le voit pas. */
+        label={kind === "concierge" ? null : (hotel?.label ?? null)}
         hotelName={hotelName}
         welcome={welcome}
         metaItems={metaItems}
@@ -123,7 +135,7 @@ export function GuestExperience({
       />
 
       {result.status === "inactive" ? (
-        <InactiveMenu reception={null} hotelName={hotelName} />
+        <InactiveMenu reception={null} words={words} />
       ) : result.status === "error" ? (
         <main className="px-3 py-6">
           <RetryPanel
@@ -154,6 +166,7 @@ export function GuestExperience({
               current={current}
               total={total}
               showPrices={hotel?.showPrices ?? true}
+              pickBadge={words.pickBadge}
               onPick={pick}
               onOpen={(offer, cat, card) => {
                 openerRef.current = card;
@@ -161,19 +174,20 @@ export function GuestExperience({
               }}
             />
           ) : (
-            <CategoryBanners menu={menu} onPick={pick} />
+            <CategoryBanners menu={menu} emptyHint={words.emptyHint} onPick={pick} />
           )}
         </main>
       )}
 
-      <GuestFooter hotelName={hotelName} reception={hotel?.reception ?? null} darkPage={darkPage} />
+      <GuestFooter words={words} reception={hotel?.reception ?? null} darkPage={darkPage} />
 
       {open && (
         <ReservationSheet
           code={code}
           category={open.category}
           offer={open.offer}
-          hotelName={hotelName}
+          hotelName={notifiedName}
+          desk={words.desk}
           preview={preview}
           openerRef={openerRef}
           onClose={() => setOpen(null)}

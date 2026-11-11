@@ -6,13 +6,23 @@ import { useT } from "@/lib/i18n/client";
 
 /* Bandeaux de catégories : la première vue du menu. Presque bord à bord, ils
    portent les images de la page. */
-export function CategoryBanners({ menu, onPick }: { menu: GuestCategory[]; onPick: (key: GuestCategoryKey) => void }) {
+export function CategoryBanners({
+  menu,
+  emptyHint,
+  onPick,
+}: {
+  menu: GuestCategory[];
+  /* Vers qui se tourner quand rien n'est proposé (réception, ou la personne
+     qui a partagé le lien). */
+  emptyHint: string;
+  onPick: (key: GuestCategoryKey) => void;
+}) {
   const t = useT();
   if (menu.length === 0) {
     return (
       <div className="rounded-2xl border border-dashed border-black/15 bg-white px-6 py-12 text-center">
         <p className="text-base font-bold text-neutral-900">{t("Aucune adresse proposée pour le moment", "No places available yet")}</p>
-        <p className="mt-1 text-sm text-neutral-600">{t("Adressez-vous à la réception.", "Please ask at reception.")}</p>
+        <p className="mt-1 text-sm text-neutral-600">{emptyHint}</p>
       </div>
     );
   }
