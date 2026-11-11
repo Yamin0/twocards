@@ -75,19 +75,18 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
     <>
       <PageHeader
         back={{ href: "/hotel/chambres", label: t("Chambres & QR codes", "Rooms & QR codes") }}
-        eyebrow={
+        title={qr.label}
+        description={
           <span className="flex flex-wrap items-center gap-2">
             <span className="num">
               {t("Code", "Code")} {qr.code}
             </span>
             <StatusPill status={qr.active ? "actif" : "inactif"} />
+            <span>
+              {t(`Créé ${timeAgo(qr.created_at)}.`, `Created ${timeAgo(qr.created_at, undefined, "en")}.`)}
+            </span>
           </span>
         }
-        title={qr.label}
-        description={t(
-          `Créé ${timeAgo(qr.created_at)}.`,
-          `Created ${timeAgo(qr.created_at, undefined, "en")}.`
-        )}
         actions={
           <>
             <Button icon={Pencil} onClick={() => setRenameTo(qr.label)}>

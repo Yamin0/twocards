@@ -331,7 +331,6 @@ function Samples() {
       <Drawer
         open={drawer}
         onClose={() => setDrawer(false)}
-        eyebrow={t("Réservation", "Reservation")}
         title="Exemple A"
         footer={<Button variant="success">{t("Confirmer", "Confirm")}</Button>}
       >

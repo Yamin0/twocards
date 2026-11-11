@@ -87,7 +87,6 @@ export function ReservationSheet({
                 </div>
               )}
               <div className="min-w-0 flex-1 pl-1">
-                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-neutral-600">{category.label}</p>
                 <h2 id={titleId} className="font-display truncate text-[17px] font-bold leading-tight tracking-tight">
                   {offer.name}
                 </h2>
