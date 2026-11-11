@@ -6,7 +6,7 @@ import { ArrowDown, ArrowUp, BookOpen, Eye, EyeOff, MapPin, Pencil, Plus, Search
 import { createClient } from "@/lib/supabase/client";
 import { CATEGORY_KEYS, CATEGORY_LABELS, fallbackImage, type GuestCategoryKey } from "@/lib/guest-catalog";
 import { EMPTY_DRAFT, OfferEditor, type OfferDraft } from "@/components/hotel/offer-editor";
-import { ConfirmDialog, Segmented, Select, Switch } from "@/components/hotel/ui";
+import { ConfirmDialog, Segmented, Select, Switch } from "@/components/app/ui";
 import { cn } from "@/lib/utils";
 import { useLocale, useT } from "@/lib/i18n/client";
 

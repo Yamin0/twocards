@@ -3,7 +3,7 @@
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Messenger } from "@/components/shared/messenger";
-import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
+import { PageSkeleton } from "@/components/app/ui";
 import { useAuthUser } from "@/hooks/use-auth-user";
 import { useT } from "@/lib/i18n/client";
 
@@ -18,7 +18,7 @@ function MessagesContent() {
   const searchParams = useSearchParams();
   const withId = searchParams.get("with");
 
-  if (isLoading) return <DashboardSkeleton />;
+  if (isLoading) return <PageSkeleton kpis={0} rows={6} />;
 
   return (
     <Messenger
@@ -38,7 +38,7 @@ function MessagesContent() {
 
 export default function MessagesPage() {
   return (
-    <Suspense fallback={<DashboardSkeleton />}>
+    <Suspense fallback={<PageSkeleton kpis={0} rows={6} />}>
       <MessagesContent />
     </Suspense>
   );

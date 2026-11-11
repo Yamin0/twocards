@@ -3,12 +3,11 @@
 import { currentPeriod, isDue, mad, monthLabel } from "@/lib/commissions";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { Button, Card, ErrorState, KpiGrid, PageHeader } from "@/components/app/ui";
+import { Button, Card, ErrorState, KpiGrid, PageHeader, PageSkeleton } from "@/components/app/ui";
 import { useAuthUser } from "@/hooks/use-auth-user";
 import {
   useVenueQrReservations,
 } from "@/hooks/use-venue-qr-reservations";
-import { TableSkeleton } from "@/components/shared/loading-skeleton";
 import { useLocale, useT } from "@/lib/i18n/client";
 import { HotelList } from "@/components/venue/commissions/hotel-list";
 import {
@@ -73,7 +72,7 @@ export default function VenueCommissionsPage() {
       </Card>
     );
   if (isLoading || loadingData || reservations === null || settlements === null)
-    return <TableSkeleton />;
+    return <PageSkeleton kpis={4} rows={5} />;
 
   const due = reservations
     .filter(isDue)

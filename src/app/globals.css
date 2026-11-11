@@ -371,15 +371,6 @@
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-/* Carte blanche : même dessin que le composant Card du kit. */
-.hotel-panel,
-.hotel-panel-solid {
-  background: var(--app-panel);
-  border: 1px solid var(--app-line);
-  border-radius: 1rem;
-  box-shadow: var(--shadow-card);
-}
-
 /* Impression (cartes de chambre) : seule la planche sort. La coque, les
    bandeaux, les toasts et tout ce qui porte .print-hide sont retirés. */
 @media print {
