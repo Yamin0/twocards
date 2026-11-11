@@ -14,6 +14,8 @@ export type BookingErrorKind =
   | "length"
   | "closed"
   | "network"
+  | "deposit"
+  | "payment"
   | "unknown";
 
 type RpcError = { message?: string | null; code?: string | null } | null | undefined;
@@ -35,6 +37,10 @@ export function bookingErrorKind(error: RpcError): BookingErrorKind {
   if (message.includes("Nom invalide")) return "name";
   if (message.includes("Téléphone invalide")) return "phone";
   if (message.includes("Champ trop long")) return "length";
+  /* L'adresse demande désormais un acompte (page ouverte avant le réglage). */
+  if (message.includes("Acompte requis")) return "deposit";
+  /* Le paiement en ligne n'a pas pu être préparé (Stripe, configuration). */
+  if (message.includes("Paiement indisponible")) return "payment";
   /* « QR code introuvable ou inactif », « Portail introuvable ou désactivé ». */
   if (message.includes("introuvable")) return "closed";
   if (isNetworkError(error)) return "network";
@@ -86,6 +92,16 @@ export function bookingErrorMessage(kind: BookingErrorKind, t: Translate, desk: 
             "Ce portail de réservation n'est plus actif. Appelez directement l'établissement.",
             "This booking page is no longer active. Please call the venue directly."
           );
+    case "deposit":
+      return t(
+        "Cette adresse demande maintenant un acompte en ligne. Rechargez la page pour réserver avec paiement.",
+        "This place now requires an online deposit. Reload the page to book with payment."
+      );
+    case "payment":
+      return t(
+        `Le paiement en ligne est momentanément indisponible. Rien n'a été débité : réessayez dans un instant, ou ${fallback}.`,
+        `Online payment is temporarily unavailable. Nothing was charged: try again shortly, or ${fallback}.`
+      );
     case "network":
       return t(
         "Pas de connexion. Vérifiez votre réseau puis réessayez : rien n'a été envoyé.",

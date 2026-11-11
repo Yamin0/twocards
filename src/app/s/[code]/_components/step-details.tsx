@@ -4,6 +4,7 @@ import { useId } from "react";
 import { Calendar, ChevronRight, Clock, Minus, Plus, Sparkles, Users, type LucideIcon } from "lucide-react";
 import type { GuestCategory, GuestOffer } from "@/lib/guest-catalog";
 import { dayChip, isoDay, longDate } from "@/lib/booking/dates";
+import { formatDeposit } from "@/lib/booking/deposit";
 import { GUEST_SLOTS, isGuestSlotPast } from "@/lib/booking/slots";
 import { useIntlLocale, useT } from "@/lib/i18n/client";
 import { cn } from "@/lib/utils";
@@ -224,6 +225,19 @@ export function StepDetails({ form, offer, category }: { form: ReservationForm; 
           {t("Continuer", "Continue")}
           <ChevronRight size={17} strokeWidth={2.5} aria-hidden />
         </button>
+        {form.deposit && offer.deposit && (
+          <p className="num mt-2.5 text-center text-xs leading-relaxed text-neutral-600">
+            {offer.deposit.mode === "per_person"
+              ? t(
+                  `Acompte en ligne : ${formatDeposit(offer.deposit.unit, offer.deposit.currency, intl)} par personne, soit ${formatDeposit(form.deposit.amount, form.deposit.currency, intl)}.`,
+                  `Online deposit: ${formatDeposit(offer.deposit.unit, offer.deposit.currency, intl)} per guest, ${formatDeposit(form.deposit.amount, form.deposit.currency, intl)} in total.`
+                )
+              : t(
+                  `Acompte en ligne de ${formatDeposit(form.deposit.amount, form.deposit.currency, intl)} pour confirmer la réservation.`,
+                  `Online deposit of ${formatDeposit(form.deposit.amount, form.deposit.currency, intl)} to confirm the booking.`
+                )}
+          </p>
+        )}
       </SheetAction>
     </form>
   );

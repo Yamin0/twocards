@@ -1,8 +1,9 @@
 "use client";
 
 import { useId } from "react";
-import { Loader2, Phone, User } from "lucide-react";
+import { CreditCard, Loader2, Lock, Phone, User } from "lucide-react";
 import { fromIsoDay, longDate } from "@/lib/booking/dates";
+import { formatDeposit } from "@/lib/booking/deposit";
 import { useIntlLocale, useT } from "@/lib/i18n/client";
 import { cn } from "@/lib/utils";
 import type { ReservationForm } from "../_hooks/use-reservation-form";
@@ -19,6 +20,7 @@ export function StepContact({ form, hotelName }: { form: ReservationForm; hotelN
   const notesId = useId();
   const errorId = useId();
   const n = form.partySize;
+  const deposit = form.deposit ? formatDeposit(form.deposit.amount, form.deposit.currency, intl) : null;
 
   return (
     <form
@@ -120,7 +122,12 @@ export function StepContact({ form, hotelName }: { form: ReservationForm; hotelN
         >
           {form.sending ? (
             <>
-              <Loader2 size={17} strokeWidth={2.5} className="animate-spin" aria-hidden /> {t("Envoi…", "Sending…")}
+              <Loader2 size={17} strokeWidth={2.5} className="animate-spin" aria-hidden />{" "}
+              {deposit ? t("Ouverture du paiement…", "Opening payment…") : t("Envoi…", "Sending…")}
+            </>
+          ) : deposit ? (
+            <>
+              <CreditCard size={18} strokeWidth={2.25} aria-hidden /> {t(`Payer l'acompte · ${deposit}`, `Pay deposit · ${deposit}`)}
             </>
           ) : form.errorMsg ? (
             t("Réessayer l'envoi", "Try sending again")
@@ -128,6 +135,17 @@ export function StepContact({ form, hotelName }: { form: ReservationForm; hotelN
             t("Envoyer ma demande", "Send my request")
           )}
         </button>
+        {deposit ? (
+          <p className="mt-2.5 flex items-start justify-center gap-1.5 text-center text-xs leading-relaxed text-neutral-600">
+            <Lock size={12} strokeWidth={2.5} className="mt-[3px] shrink-0" aria-hidden />
+            <span>
+              {t(
+                `L'acompte de ${deposit} confirme votre réservation. Paiement sécurisé par Stripe pour Twocards, LLC ; ${hotelName} et l'établissement sont prévenus.`,
+                `The ${deposit} deposit confirms your booking. Secure payment by Stripe for Twocards, LLC; ${hotelName} and the venue are notified.`
+              )}
+            </span>
+          </p>
+        ) : (
         <p className="mt-2.5 text-center text-xs leading-relaxed text-neutral-600">
           {t(
             <>
@@ -138,6 +156,7 @@ export function StepContact({ form, hotelName }: { form: ReservationForm; hotelN
             </>
           )}
         </p>
+        )}
       </SheetAction>
     </form>
   );

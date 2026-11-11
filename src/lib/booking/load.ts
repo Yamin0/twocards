@@ -8,6 +8,7 @@ import {
 } from "@/lib/guest-catalog";
 import type { Locale } from "@/lib/i18n";
 import { safeHex } from "./color";
+import { isDepositCurrency, type OfferDeposit } from "./deposit";
 
 /* Chargement côté serveur des deux pages clients (menu QR, portail direct).
    Les RPC sont les mêmes que celles appelées jusqu'ici par le navigateur
@@ -81,11 +82,40 @@ export const loadGuestMenu = cache(async (code: string, locale: Locale): Promise
       hiddenCategories: asStrings(row.hidden_categories),
       locale,
     });
+    await attachDeposits(supabase, menu);
     return { status: "ready", hotel, menu };
   } catch {
     return { status: "error" };
   }
 });
+
+/* Acompte en ligne : réglé par adresse du catalogue réseau. Lu à part pour
+   ne pas toucher `qr_get_menu` ; si la lecture échoue (colonnes absentes
+   avant la migration), le menu reste sans acompte, comme avant. Le montant
+   qui fait foi est recalculé en base au moment de payer. */
+async function attachDeposits(supabase: Awaited<ReturnType<typeof createClient>>, menu: GuestCategory[]) {
+  const slugs = menu.flatMap((c) => c.offers.filter((o) => o.source === "reseau").map((o) => o.id));
+  if (slugs.length === 0) return;
+  const { data, error } = await supabase
+    .from("catalog_offers")
+    .select("slug, deposit_mode, deposit_amount, deposit_currency")
+    .in("slug", slugs)
+    .neq("deposit_mode", "none");
+  if (error || !data?.length) return;
+  const bySlug = new Map<string, OfferDeposit>();
+  for (const row of data) {
+    const unit = Number(row.deposit_amount);
+    if ((row.deposit_mode === "per_person" || row.deposit_mode === "fixed") && unit > 0 && isDepositCurrency(row.deposit_currency)) {
+      bySlug.set(row.slug, { mode: row.deposit_mode, unit, currency: row.deposit_currency });
+    }
+  }
+  for (const category of menu) {
+    for (const offer of category.offers) {
+      const deposit = offer.source === "reseau" ? bySlug.get(offer.id) : undefined;
+      if (deposit) offer.deposit = deposit;
+    }
+  }
+}
 
 /* ─── Portail direct ──────────────────────────────────────────────────────── */
 

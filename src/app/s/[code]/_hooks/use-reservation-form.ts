@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { CATEGORY_LABELS, type GuestCategory, type GuestOffer, type GuestService } from "@/lib/guest-catalog";
 import { nextDays } from "@/lib/booking/dates";
 import { bookingErrorKind, bookingErrorMessage } from "@/lib/booking/errors";
 import { defaultGuestDate, isGuestSlotPast, isGuestTimePast } from "@/lib/booking/slots";
+import { depositTotal } from "@/lib/booking/deposit";
 import { useT } from "@/lib/i18n/client";
 
 export type SheetStep = "details" | "contact" | "done";
@@ -44,6 +45,18 @@ export function useReservationForm({
   const [timeError, setTimeError] = useState("");
 
   const chosenTime = time === OTHER_TIME ? customTime : time;
+
+  /* Retour arrière depuis la page Stripe : le navigateur restaure la page
+     telle quelle (cache bfcache), bouton encore « en cours ». */
+  useEffect(() => {
+    const onShow = (e: PageTransitionEvent) => {
+      if (e.persisted) setSending(false);
+    };
+    window.addEventListener("pageshow", onShow);
+    return () => window.removeEventListener("pageshow", onShow);
+  }, []);
+  /* Adresse à acompte : montant affiché avant de payer (la base le recalcule). */
+  const deposit = offer.deposit ? { amount: depositTotal(offer.deposit, partySize), currency: offer.deposit.currency } : null;
 
   /* Dès que le client corrige un champ, le message d'erreur s'efface. */
   const editing =
@@ -109,6 +122,40 @@ export function useReservationForm({
     setSending(true);
     setErrorMsg("");
     let failure: { message?: string | null; code?: string | null } | null = null;
+    if (deposit) {
+      /* Acompte : on part sur la page de paiement Stripe. La réservation
+         sera enregistrée au retour, une fois le paiement confirmé. */
+      try {
+        const res = await fetch("/api/acompte/session", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            code,
+            category: CATEGORY_LABELS[category.key],
+            venue: offer.name,
+            slug: offer.id,
+            name: cleanName,
+            phone: cleanPhone,
+            date,
+            time: chosenTime || null,
+            party: partySize,
+            notes: notes || null,
+            service: service?.name ?? null,
+          }),
+        });
+        const payload = (await res.json().catch(() => ({}))) as { url?: string; message?: string };
+        if (res.ok && payload.url) {
+          window.location.assign(payload.url);
+          return;
+        }
+        failure = { message: payload.message ?? "Paiement indisponible" };
+      } catch (e) {
+        failure = { message: e instanceof Error ? e.message : "Failed to fetch" };
+      }
+      setSending(false);
+      setErrorMsg(bookingErrorMessage(bookingErrorKind(failure), t, "reception"));
+      return;
+    }
     try {
       const { error } = await createClient().rpc("qr_create_reservation", {
         p_code: code,
@@ -162,6 +209,7 @@ export function useReservationForm({
     notes,
     setNotes: editing(setNotes),
     sending,
+    deposit,
     errorMsg,
     toContact,
     submit,

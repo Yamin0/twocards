@@ -1,3 +1,4 @@
+import type { OfferDeposit } from "@/lib/booking/deposit";
 /* Catalogue présenté au client de l'hôtel après un scan de QR code.
 
    Les adresses vivent en base : le catalogue du réseau twocards
@@ -117,6 +118,9 @@ export type GuestOffer = {
   /* Vide pour un restaurant ou un club ; une balade, un transfert… pour
      une activité ou un service. */
   services: GuestService[];
+  /* Acompte en ligne demandé à la réservation (adresses du réseau à prix
+     fixe seulement). Absent : demande sans paiement, comme avant. */
+  deposit?: OfferDeposit;
 };
 
 export type GuestCategory = {

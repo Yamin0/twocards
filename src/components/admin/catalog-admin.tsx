@@ -2,13 +2,15 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
-import { ArrowDown, ArrowUp, BookOpen, Eye, EyeOff, MapPin, Pencil, Plus, Search, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, BookOpen, CreditCard, Eye, EyeOff, MapPin, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { CATEGORY_KEYS, CATEGORY_LABELS, fallbackImage, type GuestCategoryKey } from "@/lib/guest-catalog";
 import { EMPTY_DRAFT, OfferEditor, type OfferDraft } from "@/components/hotel/offer-editor";
 import { ConfirmDialog, Segmented, Select, Switch } from "@/components/app/ui";
 import { cn } from "@/lib/utils";
-import { useLocale, useT } from "@/lib/i18n/client";
+import { useIntlLocale, useLocale, useT } from "@/lib/i18n/client";
+import { formatDeposit, isDepositCurrency } from "@/lib/booking/deposit";
+import { DepositDialog, type DepositSetting } from "./deposit-dialog";
 
 /* Catalogue du réseau twocards, dans la console d'administration : les
    adresses proposées à tous les hôtels (filtrées par ville côté client).
@@ -76,6 +78,62 @@ export function CatalogAdmin({
   const [editing, setEditing] = useState<{ row: CatalogRow | null } | null>(null);
   const [toDelete, setToDelete] = useState<CatalogRow | null>(null);
   const [saving, setSaving] = useState(false);
+  const intl = useIntlLocale();
+  /* Acompte par adresse. Lu à part : avant la migration
+     20261112090000_acompte_stripe, les colonnes n'existent pas et le
+     catalogue doit continuer à s'afficher (null = réglage indisponible). */
+  const [deposits, setDeposits] = useState<Map<string, DepositSetting> | null>(null);
+  const [depositFor, setDepositFor] = useState<CatalogRow | null>(null);
+
+  const fetchDeposits = useCallback(async () => {
+    const { data, error } = await createClient()
+      .from("catalog_offers")
+      .select("slug, deposit_mode, deposit_amount, deposit_currency");
+    if (error) return null;
+    const map = new Map<string, DepositSetting>();
+    for (const d of data ?? []) {
+      const mode = d.deposit_mode === "per_person" || d.deposit_mode === "fixed" ? d.deposit_mode : "none";
+      map.set(d.slug, {
+        mode,
+        amount: d.deposit_amount === null ? null : Number(d.deposit_amount),
+        currency: isDepositCurrency(d.deposit_currency) ? d.deposit_currency : "mad",
+      });
+    }
+    return map;
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchDeposits().then((map) => {
+      if (!cancelled) setDeposits(map);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [fetchDeposits, reloadKey]);
+
+  const saveDeposit = async (row: CatalogRow, next: DepositSetting) => {
+    const { error } = await createClient()
+      .from("catalog_offers")
+      .update({ deposit_mode: next.mode, deposit_amount: next.amount, deposit_currency: next.currency })
+      .eq("slug", row.slug);
+    if (error) return t(`Impossible d'enregistrer : ${error.message}`, `Couldn’t save: ${error.message}`);
+    setDeposits((prev) => new Map(prev ?? []).set(row.slug, next));
+    setDepositFor(null);
+    onSaved(
+      next.mode === "none"
+        ? t(`Plus d'acompte pour « ${row.name} »`, `No more deposit for “${row.name}”`)
+        : t(`Acompte enregistré pour « ${row.name} »`, `Deposit saved for “${row.name}”`)
+    );
+    return null;
+  };
+
+  const depositLabel = (slug: string) => {
+    const d = deposits?.get(slug);
+    if (!d || d.mode === "none" || !d.amount) return null;
+    const amount = formatDeposit(d.amount, d.currency, intl);
+    return d.mode === "per_person" ? t(`Acompte ${amount}/pers.`, `Deposit ${amount}/guest`) : t(`Acompte ${amount}`, `Deposit ${amount}`);
+  };
 
   /* Lecture pure, sans setState : réutilisée au montage (dans le rappel de
      la promesse) et après chaque écriture. */
@@ -290,6 +348,9 @@ export function CatalogAdmin({
                     {categoryLabel(r.category)}
                   </span>
                   {!r.active && <span className="text-xs font-bold text-warn">{t("Masquée", "Hidden")}</span>}
+                  {depositLabel(r.slug) && (
+                    <span className="rounded-md bg-ok-soft px-1.5 py-0.5 text-xs font-bold text-ok">{depositLabel(r.slug)}</span>
+                  )}
                 </div>
                 <p className="truncate text-xs text-ink-3">
                   {r.tag || t("Sans étiquette", "No tag")}
@@ -315,6 +376,17 @@ export function CatalogAdmin({
                 <button type="button" onClick={() => toggle(r)} aria-label={r.active ? t("Masquer", "Hide") : t("Proposer", "Offer")} className="rounded-lg p-1.5 text-ink-3 hover:bg-fill-2 hover:text-ink sm:hidden">
                   {r.active ? <EyeOff size={14} /> : <Eye size={14} />}
                 </button>
+                {deposits && (
+                  <button
+                    type="button"
+                    onClick={() => setDepositFor(r)}
+                    aria-label={t(`Acompte de ${r.name}`, `Deposit for ${r.name}`)}
+                    title={t("Acompte en ligne", "Online deposit")}
+                    className="rounded-lg p-1.5 text-ink-2 hover:bg-fill-2 hover:text-ink"
+                  >
+                    <CreditCard size={14} />
+                  </button>
+                )}
                 <button type="button" onClick={() => setEditing({ row: r })} aria-label={t("Modifier", "Edit")} className="rounded-lg p-1.5 text-ink-2 hover:bg-fill-2 hover:text-ink">
                   <Pencil size={14} />
                 </button>
@@ -338,6 +410,15 @@ export function CatalogAdmin({
           userId={userId}
           uploadPrefix="catalog"
           title={editing.row ? t(`Modifier « ${editing.row.name} »`, `Edit “${editing.row.name}”`) : t("Nouvelle adresse du catalogue", "New catalogue place")}
+        />
+      )}
+
+      {depositFor && (
+        <DepositDialog
+          name={depositFor.name}
+          initial={deposits?.get(depositFor.slug) ?? { mode: "none", amount: null, currency: "mad" }}
+          onClose={() => setDepositFor(null)}
+          onSave={(next) => saveDeposit(depositFor, next)}
         />
       )}
 

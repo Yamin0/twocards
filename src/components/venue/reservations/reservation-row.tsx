@@ -5,6 +5,7 @@ import { Check, Link2, LogIn, Pencil, Phone, RotateCcw, UserX, X } from "lucide-
 import { Badge, Button, IconButton, StatusPill, inputClass } from "@/components/app/ui";
 import { RatingStars } from "@/components/shared/mini-charts";
 import { useIntlLocale, useT } from "@/lib/i18n/client";
+import { formatDeposit } from "@/lib/booking/deposit";
 import {
   awaitsArrival,
   billLocked,
@@ -162,6 +163,16 @@ export function ReservationRow({
             </span>
             <StatusPill status={r.status} />
             {r.arrived_at && !out && <Badge tone="ok">{t("Arrivé", "Arrived")}</Badge>}
+            {r.deposit_paid_at && r.deposit_amount != null && (
+              <Badge tone={r.deposit_refunded_at ? undefined : "ok"}>
+                {r.deposit_refunded_at
+                  ? t("Acompte remboursé", "Deposit refunded")
+                  : t(
+                      `Acompte payé ${formatDeposit(r.deposit_amount, r.deposit_currency ?? "mad", intl)}`,
+                      `Deposit paid ${formatDeposit(r.deposit_amount, r.deposit_currency ?? "mad", intl)}`
+                    )}
+              </Badge>
+            )}
           </div>
           <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-ink-3">
             <Source r={r} />
