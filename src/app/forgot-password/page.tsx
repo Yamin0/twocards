@@ -66,7 +66,6 @@ export default function ForgotPasswordPage() {
   return (
     <AuthShell
       image={PHOTO}
-      eyebrow={t("Votre espace", "Your workspace")}
       caption={t(
         "Un lien par e-mail, et vous retrouvez votre espace.",
         "One link by email, and you're back in your workspace.",

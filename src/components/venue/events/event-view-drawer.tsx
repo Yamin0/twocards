@@ -54,7 +54,6 @@ export function EventViewDrawer({
     <Drawer
       open
       onClose={onClose}
-      eyebrow={t("Événement", "Event")}
       title={event.title}
       footer={
         <Button variant="primary" icon={Pencil} onClick={() => onEdit(event.id)}>

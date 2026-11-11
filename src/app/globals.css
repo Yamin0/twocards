@@ -214,7 +214,7 @@
    - papier ivoire #FFFDF9 et encre #0D0D0D, comme le site ; filets à 8 %,
      pas d'ombres portées ;
    - Satoshi : titres gras qui finissent par un point, un mot en italique
-     fin ; libellés en capitales espacées ;
+     fin ; aucun surtitre en capitales espacées ;
    - action principale en pilule noire, action secondaire en lien souligné ;
    - les deux as en filigrane, comme au dos de la carte ;
    - derrière, la vue aérienne sable et océan des dashboards twocards,
@@ -306,13 +306,6 @@ body:has(.tc-shell) .tc-layer :is(h1, .font-display) {
   font-style: italic;
   font-weight: 300;
   letter-spacing: -0.02em;
-}
-/* Libellé en capitales espacées, comme la navbar et la carte de visite. */
-.tc-eyebrow {
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
 }
 /* Lien secondaire du site : souligné à distance. */
 .tc-link {

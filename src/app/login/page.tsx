@@ -182,7 +182,6 @@ export default function LoginPage() {
   return (
     <AuthShell
       image={PHOTO}
-      eyebrow={t("Votre espace", "Your workspace")}
       caption={t(
         "Réservations, arrivées et commissions, suivies au même endroit.",
         "Reservations, arrivals and commissions, tracked in one place.",

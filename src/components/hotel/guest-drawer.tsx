@@ -98,10 +98,6 @@ export function GuestDrawer({ guest: g, onClose }: { guest: GuestProfile | null;
     <Drawer
       open
       onClose={onClose}
-      eyebrow={t(
-        `${g.liveVisits} ${plural(g.liveVisits, "sortie")} · client depuis le ${formatDate(g.firstVisit)}`,
-        `${g.liveVisits} ${plural(g.liveVisits, "outing", undefined, "en")} · guest since ${formatDate(g.firstVisit, "medium", "en")}`
-      )}
       title={g.name}
       footer={
         <>
@@ -119,6 +115,12 @@ export function GuestDrawer({ guest: g, onClose }: { guest: GuestProfile | null;
         </>
       }
     >
+      <p className="mb-3 text-sm text-ink-2">
+        {t(
+        `${g.liveVisits} ${plural(g.liveVisits, "sortie")} · client depuis le ${formatDate(g.firstVisit)}`,
+        `${g.liveVisits} ${plural(g.liveVisits, "outing", undefined, "en")} · guest since ${formatDate(g.firstVisit, "medium", "en")}`
+      )}
+      </p>
       <dl className="grid grid-cols-2 gap-2">
         {totals.map((s) => (
           <div key={s.label} className="rounded-xl border border-line bg-fill px-3.5 py-3">
