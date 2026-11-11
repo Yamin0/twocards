@@ -138,9 +138,7 @@ export function ReservationRow({
 
   return (
     <li
-      className={`rounded-2xl border bg-panel p-4 shadow-card sm:p-5 ${
-        pending || wantsBill ? "border-warn/40" : "border-line"
-      } ${out ? "opacity-70" : ""}`}
+      className={`rounded-[18px] border border-line bg-panel p-4 sm:p-5 ${out ? "opacity-70" : ""}`}
     >
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
         {/* Quand */}
@@ -221,10 +219,10 @@ export function ReservationRow({
         <div className="flex flex-wrap items-center gap-2 lg:shrink-0 lg:justify-end">
           {pending && (
             <>
-              <Button variant="success" icon={Check} className="flex-1 sm:flex-none" onClick={() => actions.setStatus(r, "confirmée")}>
+              <Button variant="primary" icon={Check} className="flex-1 sm:flex-none" onClick={() => actions.setStatus(r, "confirmée")}>
                 {t("Confirmer", "Confirm")}
               </Button>
-              <Button variant="danger" icon={X} className="flex-1 sm:flex-none" onClick={() => actions.setStatus(r, "annulée")}>
+              <Button variant="secondary" icon={X} className="flex-1 sm:flex-none" onClick={() => actions.setStatus(r, "annulée")}>
                 {t("Refuser", "Decline")}
               </Button>
             </>
