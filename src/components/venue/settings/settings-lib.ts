@@ -29,7 +29,7 @@ export const venueTypeLabel = (type: string, t: Translate): string => {
 };
 
 export const deleteMailto = (t: Translate) =>
-  `mailto:support@twocards.io?subject=${encodeURIComponent(
+  `mailto:contact@twocardspro.com?subject=${encodeURIComponent(
     t("Suppression de compte", "Account deletion")
   )}&body=${encodeURIComponent(
     t(

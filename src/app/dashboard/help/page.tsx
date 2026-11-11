@@ -142,10 +142,10 @@ export default function HelpPage() {
             <div className="min-w-0">
               <p className="text-sm font-bold text-ink">{t("E-mail", "Email")}</p>
               <a
-                href="mailto:support@twocards.io"
+                href="mailto:contact@twocardspro.com"
                 className="rounded text-sm text-link underline-offset-2 hover:underline"
               >
-                support@twocards.io
+                contact@twocardspro.com
               </a>
               <p className="text-xs text-ink-3">{t("Réponse sous 24 h", "Reply within 24 hours")}</p>
             </div>

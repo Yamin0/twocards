@@ -118,7 +118,12 @@ export function RatingExperience({ reservationId }: { reservationId: string }) {
           "Cette sortie a déjà été notée, ou la réservation n'existe plus. Votre note n'a pas été enregistrée une seconde fois.",
           "This outing has already been rated, or the reservation no longer exists. Your rating was not recorded a second time."
         )
-      : isNetworkError(failure)
+      : (failure.message ?? "").includes("Sortie à venir")
+        ? t(
+            "Vous pourrez laisser votre avis à partir du jour de votre sortie.",
+            "You'll be able to leave your review from the day of your outing."
+          )
+        : isNetworkError(failure)
         ? t(
             "Pas de connexion : votre avis n'est pas parti. Vérifiez votre réseau puis réessayez.",
             "No connection: your review was not sent. Check your network and try again."
