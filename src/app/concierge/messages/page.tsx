@@ -19,8 +19,7 @@ function ConciergeMessages() {
   if (isLoading) return <ConciergeSkeleton />;
 
   return (
-    <div className="p-4 sm:p-6">
-      <Messenger
+    <Messenger
         initialCounterpartId={to}
         labels={{
           searchPlaceholder: t("Rechercher un établissement...", "Search venues..."),
@@ -32,8 +31,7 @@ function ConciergeMessages() {
             ),
           directoryEmpty: t("Aucun établissement inscrit pour le moment.", "No venues have signed up yet."),
         }}
-      />
-    </div>
+    />
   );
 }
 

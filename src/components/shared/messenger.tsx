@@ -91,7 +91,7 @@ export function Messenger({
   };
 
   return (
-    <div className="flex h-[calc(100vh-140px)] gap-4 lg:h-[calc(100vh-96px)]">
+    <div className="flex h-[calc(100dvh-13rem)] gap-4 lg:h-[calc(100dvh-9rem)]">
       {/* ── Liste des conversations ── */}
       <div
         className={`${panel} flex w-full flex-col overflow-hidden lg:w-80 lg:shrink-0 ${

@@ -1,9 +1,9 @@
 "use client";
 
+import { currentPeriod, isDue, mad, monthLabel } from "@/lib/commissions";
 import { useMemo, useState } from "react";
 import { ArrowRight, Check, Loader2, RotateCcw } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { intlLocale, type Locale } from "@/lib/i18n";
 import { useIntlLocale, useLocale, useT } from "@/lib/i18n/client";
 
 /* Commissions vues du réseau : qui doit combien à qui. Chaque sortie
@@ -43,27 +43,7 @@ export type Settlement = {
   settled_at: string;
 };
 
-export const isDue = (r: LedgerRow) =>
-  r.source === "qr" &&
-  r.amount_spent !== null &&
-  r.status !== "annulée" &&
-  r.status !== "no-show";
-
-export const currentPeriod = () => {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-};
-
-export const monthLabel = (period: string, locale: Locale = "fr") => {
-  const label = new Date(`${period}-01T00:00:00`).toLocaleDateString(intlLocale(locale), {
-    month: "long",
-    year: "numeric",
-  });
-  return label.charAt(0).toUpperCase() + label.slice(1);
-};
-
-export const mad = (n: number, locale: Locale = "fr") =>
-  `${Math.round(n).toLocaleString(intlLocale(locale))} MAD`;
+export { currentPeriod, isDue, mad, monthLabel };
 
 type Pair = {
   key: string;

@@ -1,7 +1,9 @@
 "use client";
 
+import { currentPeriod, isDue, mad, monthLabel } from "@/lib/commissions";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { Button, Card, ErrorState, KpiGrid, PageHeader } from "@/components/app/ui";
 import { useAuthUser } from "@/hooks/use-auth-user";
 import {
   useVenueQrReservations,
@@ -10,7 +12,6 @@ import {
 import { TableSkeleton } from "@/components/shared/loading-skeleton";
 import { useLocale, useT } from "@/lib/i18n/client";
 import { intlLocale, makeT, type Locale, type Translate } from "@/lib/i18n";
-import { StatStrip } from "@/components/shared/stat-strip";
 import {
   Check,
   ChevronDown,
@@ -38,28 +39,7 @@ type Settlement = {
   note: string;
 };
 
-const isDue = (r: VenueQrReservation) =>
-  r.source === "qr" &&
-  r.amount_spent !== null &&
-  r.status !== "annulée" &&
-  r.status !== "no-show";
-
 const periodOf = (r: VenueQrReservation) => r.reservation_date.slice(0, 7);
-
-const currentPeriod = () => {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-};
-
-const monthLabel = (period: string, locale: Locale = "fr") => {
-  const label = new Date(`${period}-01T00:00:00`).toLocaleDateString(intlLocale(locale), {
-    month: "long",
-    year: "numeric",
-  });
-  return label.charAt(0).toUpperCase() + label.slice(1);
-};
-
-const mad = (n: number, locale: Locale = "fr") => `${Math.round(n).toLocaleString(intlLocale(locale))} MAD`;
 
 const fmtDate = (iso: string, locale: Locale = "fr") =>
   new Date(`${iso}T00:00:00`).toLocaleDateString(intlLocale(locale), {
@@ -146,7 +126,7 @@ export default function VenueCommissionsPage() {
   const t = useT();
   const locale = useLocale();
   const { isLoading } = useAuthUser();
-  const { reservations, isLoading: loadingData } = useVenueQrReservations();
+  const { reservations, isLoading: loadingData, error, reload } = useVenueQrReservations();
   const [settlements, setSettlements] = useState<Settlement[] | null>(null);
   const [open, setOpen] = useState<Set<string>>(() => new Set());
 
@@ -174,6 +154,12 @@ export default function VenueCommissionsPage() {
     };
   }, []);
 
+  if (error)
+    return (
+      <Card padded={false}>
+        <ErrorState onRetry={reload} />
+      </Card>
+    );
   if (isLoading || loadingData || reservations === null || settlements === null)
     return <TableSkeleton />;
 
@@ -253,32 +239,26 @@ export default function VenueCommissionsPage() {
     });
 
   return (
-    <div className="space-y-6">
-      <div className=" bg-panel border border-line rounded-3xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="font-display text-3xl font-light text-ink">Commissions</h1>
-          <p className="font-ui text-sm text-ink-2 mt-1.5">
-            {t(
-              "Ce que vous reversez à chaque hôtel qui vous envoie des clients, mois par mois.",
-              "What you pay each hotel that sends you guests, month by month."
-            )}
-          </p>
-        </div>
-        {due.length > 0 && (
-          <button
-            onClick={() => exportCsv(due, locale)}
-            className="font-ui flex items-center gap-2 bg-fill-2 hover:bg-fill-3 text-ink text-sm font-medium px-4 py-2.5 rounded-xl transition-colors shrink-0"
-          >
-            <Download size={16} strokeWidth={1.5} />
-            {t("Exporter en CSV", "Export as CSV")}
-          </button>
+    <>
+      <PageHeader
+        title={t("Commissions", "Commissions")}
+        description={t(
+          "Ce que vous reversez à chaque hôtel qui vous envoie des clients, mois par mois.",
+          "What you pay each hotel that sends you guests, month by month."
         )}
-      </div>
+        actions={
+          due.length > 0 && (
+            <Button icon={Download} onClick={() => exportCsv(due, locale)}>
+              {t("Exporter en CSV", "Export as CSV")}
+            </Button>
+          )
+        }
+      />
 
-      <StatStrip stats={stats} />
+      <KpiGrid items={stats} />
 
       {/* Ce mois-ci */}
-      <div className=" bg-panel border border-line rounded-3xl p-6">
+      <div className="rounded-2xl border border-line bg-panel p-5 shadow-card sm:p-6">
         <div className="mb-1 flex items-center justify-between gap-3">
           <h2 className="font-display text-lg font-normal text-ink">{monthLabel(now, locale)}</h2>
           <span className="font-display text-lg text-warn tabular-nums">
@@ -314,7 +294,7 @@ export default function VenueCommissionsPage() {
       </div>
 
       {/* Historique */}
-      <div className=" bg-panel border border-line rounded-3xl p-6">
+      <div className="rounded-2xl border border-line bg-panel p-5 shadow-card sm:p-6">
         <h2 className="font-display text-lg font-normal text-ink mb-1">{t("Historique", "History")}</h2>
         <p className="font-ui text-xs text-ink-3 mb-4">
           {t(
@@ -391,7 +371,7 @@ export default function VenueCommissionsPage() {
           )}
         </p>
       </div>
-    </div>
+    </>
   );
 }
 

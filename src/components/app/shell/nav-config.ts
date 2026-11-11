@@ -18,7 +18,6 @@ import {
   QrCode,
   Settings,
   Shield,
-  Sparkles,
   Tags,
   Ticket,
   UserCheck,
@@ -132,23 +131,15 @@ export function getShellNav(
   }
 
   if (role === "concierge") {
+    /* Seules les sections qui ont de vraies données derrière elles sont au
+       menu. Réservations, clients, commissions, statistiques et assistant
+       gardent leur adresse mais n'y figurent pas tant qu'ils ne sont pas
+       branchés. */
     const today: NavItem = {
       icon: LayoutDashboard,
       label: t("Aujourd'hui", "Today"),
       href: "/concierge",
       exact: true,
-    };
-    const reservations: NavItem = {
-      icon: CalendarDays,
-      label: t("Réservations", "Reservations"),
-      short: t("Résas", "Bookings"),
-      href: "/concierge/reservations",
-    };
-    const commissions: NavItem = {
-      icon: CreditCard,
-      label: t("Commissions", "Commissions"),
-      short: t("Gains", "Earnings"),
-      href: "/concierge/commissions",
     };
     const messages: NavItem = {
       icon: MessageSquare,
@@ -164,29 +155,10 @@ export function getShellNav(
       home: "/concierge",
       space: t("Espace concierge", "Concierge workspace"),
       groups: [
-        {
-          items: [
-            today,
-            reservations,
-            messages,
-            { icon: Users, label: t("Clients", "Guests"), href: "/concierge/clients" },
-            { icon: Building2, label: t("Établissements", "Venues"), href: "/concierge/venues" },
-          ],
-        },
-        {
-          title: t("Résultats", "Results"),
-          items: [
-            commissions,
-            { icon: BarChart3, label: t("Statistiques", "Stats"), href: "/concierge/stats" },
-          ],
-        },
-        {
-          title: t("Outils", "Tools"),
-          items: [{ icon: Sparkles, label: t("Assistant", "Assistant"), href: "/concierge/ai" }],
-        },
+        { items: [today, messages] },
         { title: t("Compte", "Account"), items: [account, ...adminLink] },
       ],
-      tabs: [today, reservations, messages, commissions],
+      tabs: [today, messages, account],
       account,
     };
   }

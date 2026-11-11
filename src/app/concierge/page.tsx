@@ -1,410 +1,184 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useAuthUser } from "@/hooks/use-auth-user";
-import { ConciergeSkeleton } from "@/components/shared/loading-skeleton";
-import { createClient } from "@/lib/supabase/client";
-import {
-  displayName,
-  initialsOf,
-  type Profile,
-} from "@/hooks/use-messaging";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { ArrowRight, Building2, MessageSquare, SearchX } from "lucide-react";
 import {
-  CalendarDays,
-  CalendarPlus,
-  Users,
-  CreditCard,
-  BarChart3,
-  MessageSquare,
-  Building2,
-  Ticket,
-  ArrowRight,
-  TrendingUp,
-  Search,
-  Plus,
-  Sparkles,
-} from "lucide-react";
-import { useT, useIntlLocale } from "@/lib/i18n/client";
-import type { Translate } from "@/lib/i18n";
+  Card,
+  EmptyState,
+  ErrorState,
+  InfoNote,
+  LinkButton,
+  NameAvatar,
+  PageHeader,
+  PageSkeleton,
+  SearchInput,
+} from "@/components/app/ui";
+import { useAuthUser } from "@/hooks/use-auth-user";
+import { useUnreadMessages } from "@/hooks/use-unread-messages";
+import { useIntlLocale, useT } from "@/lib/i18n/client";
+import { createClient } from "@/lib/supabase/client";
 
-const VENUE_ROLES = ["etablissement", "hotel"];
+/* Accueil du concierge. Ce qui existe vraiment aujourd'hui : l'annuaire des
+   établissements du réseau (table profiles, tenu à jour en direct) et la
+   messagerie avec eux. Aucun chiffre d'exemple : le suivi des réservations
+   et des commissions viendra avec le lien et le QR personnels. */
 
-const getRoleLabels = (t: Translate): Record<string, string> => ({
-  etablissement: t("Établissement", "Venue"),
-  hotel: t("Hôtel", "Hotel"),
-});
+type Venue = {
+  id: string;
+  full_name: string | null;
+  role: string;
+  venue_name: string | null;
+  city: string | null;
+};
 
-const getFolders = (t: Translate) => [
-  {
-    label: t("Calendrier", "Calendar"),
-    description: t("Événements à venir et passés", "Upcoming and past events"),
-    href: "/concierge/reservations",
-    icon: CalendarDays,
-    iconColor: "text-info",
-    preview: [t("12 événements cette semaine", "12 events this week"), t("OPENING NIGHT · Jeu. 24", "OPENING NIGHT · Thu 24")],
-  },
-  {
-    label: t("CRM Clients", "Guest CRM"),
-    description: t("Base de données et suivi clients", "Guest database and follow-up"),
-    href: "/concierge/clients",
-    icon: Users,
-    iconColor: "text-ok",
-    preview: [t("326 clients actifs", "326 active guests"), t("48 nouveaux ce mois", "48 new this month")],
-  },
-  {
-    label: t("Commissions", "Commissions"),
-    description: t("Suivi de vos gains et paiements", "Track your earnings and payouts"),
-    href: "/concierge/commissions",
-    icon: CreditCard,
-    iconColor: "text-warn",
-    preview: [t("124 000 MAD ce mois", "124,000 MAD this month"), t("8 paiements en attente", "8 payouts pending")],
-  },
-  {
-    label: t("Statistiques", "Stats"),
-    description: t("Performances et analyses", "Performance and analytics"),
-    href: "/concierge/stats",
-    icon: BarChart3,
-    iconColor: "text-plum",
-    preview: [t("+22% de listes vs mois dernier", "+22% lists vs last month"), t("Taux de conversion: 68%", "Conversion rate: 68%")],
-  },
-  {
-    label: t("Messages", "Messages"),
-    description: t("Conversations avec les établissements", "Conversations with venues"),
-    href: "/concierge/messages",
-    icon: MessageSquare,
-    iconColor: "text-info",
-    preview: [t("3 messages non lus", "3 unread messages"), t("Le Comptoir · Confirmation VIP", "Le Comptoir · VIP confirmation")],
-  },
-  {
-    label: t("Établissements", "Venues"),
-    description: t("Vos partenaires et lieux affiliés", "Your partners and affiliated venues"),
-    href: "/concierge/venues",
-    icon: Building2,
-    iconColor: "text-info",
-    preview: [t("4 établissements actifs", "4 active venues"), "Le Comptoir, Sky Bar, Le Lotus..."],
-  },
-  {
-    label: t("Assistant IA", "AI assistant"),
-    description: t("Votre assistant intelligent twocards", "Your smart twocards assistant"),
-    href: "/concierge/ai",
-    icon: Sparkles,
-    iconColor: "text-info",
-    preview: [t("Créer des réservations par commande", "Create reservations by command"), t("Résumé de soirée automatique", "Automatic night summary")],
-  },
-];
+const nameOf = (v: Venue) => v.venue_name || v.full_name || "—";
 
-const getDemoStats = (t: Translate) => [
-  {
-    label: t("Listes cette semaine", "Lists this week"),
-    value: "18",
-    icon: Ticket,
-    trend: "+5",
-    color: "text-info",
-  },
-  {
-    label: t("Entrées confirmées", "Confirmed entries"),
-    value: "142",
-    icon: Users,
-    trend: "+22%",
-    color: "text-ok",
-  },
-  {
-    label: t("Événements à venir", "Upcoming events"),
-    value: "12",
-    icon: CalendarDays,
-    trend: null,
-    color: "text-plum",
-  },
-  {
-    label: t("Gains du mois", "Earnings this month"),
-    value: "124K MAD",
-    icon: TrendingUp,
-    trend: "+18%",
-    color: "text-warn",
-  },
-];
-
-export default function ConciergePage() {
-  const { isDemoConcierge, isLoading, fullName } = useAuthUser();
+export default function ConciergeTodayPage() {
   const t = useT();
   const intl = useIntlLocale();
+  const { isLoading: authLoading, fullName } = useAuthUser();
+  const unread = useUnreadMessages();
+  const [venues, setVenues] = useState<Venue[] | null>(null);
+  const [failed, setFailed] = useState(false);
+  const [tick, setTick] = useState(0);
   const [query, setQuery] = useState("");
-  /* Annuaire réel des établissements (table profiles), tenu à jour en
-     direct : chaque nouveau compte apparaît dès sa création, sans
-     recharger la page. */
-  const [venues, setVenues] = useState<Profile[] | null>(null);
 
   useEffect(() => {
     const supabase = createClient();
     let cancelled = false;
-
     supabase
       .from("profiles")
       .select("id, full_name, role, venue_name, city")
-      .in("role", VENUE_ROLES)
+      .eq("role", "etablissement")
       .order("venue_name", { ascending: true })
-      .then(({ data }) => {
-        if (!cancelled) setVenues((data ?? []) as Profile[]);
+      .then(({ data, error }) => {
+        if (cancelled) return;
+        setFailed(Boolean(error));
+        if (!error) setVenues((data ?? []) as Venue[]);
       });
-
+    /* Un établissement qui s'inscrit apparaît sans recharger. */
     const channel = supabase
-      .channel("profiles-directory")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "profiles" },
-        (payload) => {
-          const p = payload.new as Profile;
-          if (!VENUE_ROLES.includes(p.role)) return;
-          setVenues((prev) =>
-            !prev || prev.some((v) => v.id === p.id)
-              ? prev
-              : [...prev, p].sort((a, b) =>
-                  displayName(a).localeCompare(displayName(b), intl)
-                )
-          );
-        }
-      )
+      .channel(`annuaire-etablissements-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`)
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "profiles" }, (payload) => {
+        const p = payload.new as Venue;
+        if (p.role !== "etablissement") return;
+        setVenues((prev) => (!prev || prev.some((v) => v.id === p.id) ? prev : [...prev, p]));
+      })
       .subscribe();
-
     return () => {
       cancelled = true;
       supabase.removeChannel(channel);
     };
-  }, [intl]);
+  }, [tick]);
 
-  if (isLoading) return <ConciergeSkeleton />;
+  const list = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return (venues ?? [])
+      .filter((v) => !q || nameOf(v).toLowerCase().includes(q) || (v.city ?? "").toLowerCase().includes(q))
+      .sort((a, b) => nameOf(a).localeCompare(nameOf(b), intl));
+  }, [venues, query, intl]);
 
-  const stats = isDemoConcierge ? getDemoStats(t) : [];
-  const folders = getFolders(t);
-  const roleLabels = getRoleLabels(t);
+  if (authLoading || (venues === null && !failed)) return <PageSkeleton kpis={0} rows={6} />;
 
-  /* La recherche filtre les espaces : c'est la seule chose cherchable ici,
-     et le champ ne filtrait rien du tout. */
-  const q = query.trim().toLowerCase();
-  const visibleFolders = q
-    ? folders.filter(
-        (f) =>
-          f.label.toLowerCase().includes(q) ||
-          f.description.toLowerCase().includes(q)
-      )
-    : folders;
+  const firstName = fullName?.split(" ")[0];
 
   return (
-    <div className="space-y-6">
-      {/* Header Card */}
-      <div className=" bg-panel border border-line rounded-3xl p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-ink">
-              {t("Bonjour", "Hello")}, {fullName || "Concierge"}.
-            </h1>
-            <p className="text-ink-3 text-sm mt-1">
-              {t("Votre espace concierge en un coup d'œil", "Your concierge workspace at a glance")}
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="relative hidden sm:block">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-3 h-4 w-4" />
-              <input
-                placeholder={t("Rechercher un espace...", "Search a section...")}
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                className="pl-10 pr-4 py-2.5 bg-fill border border-line-2 rounded-xl text-sm text-ink placeholder:text-ink-4 focus:border-line-2 focus:bg-fill-2 focus:outline-none transition-all w-48"
-              />
-            </div>
-            {/* La cloche décorative a disparu : aucune page de notifications
-                n'existe côté concierge. « Nouvelle liste » désignait une
-                notion absente de l'app — l'action réelle est la réservation. */}
-            <Link
-              href="/concierge/reservations"
-              className="flex items-center gap-2 px-4 py-2.5 bg-fill-2 hover:bg-fill-3 border border-line-2 hover:border-line-2 text-ink rounded-xl text-sm font-medium transition-all duration-300 hover:scale-[1.02]"
-            >
-              <Plus size={16} strokeWidth={1.5} />
-              <span className="hidden sm:inline">{t("Nouvelle réservation", "New reservation")}</span>
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      {/* Stats Cards */}
-      {isDemoConcierge && (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-          {stats.map((stat) => {
-            const Icon = stat.icon;
-            return (
-              <div
-                key={stat.label}
-                className=" bg-panel border border-line rounded-3xl p-5 transition-all duration-500 hover:scale-[1.02] hover:bg-fill-2"
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-ink-3 text-xs font-ui">{stat.label}</p>
-                    <p className="text-2xl font-bold text-ink mt-1 font-ui">
-                      {stat.value}
-                    </p>
-                    {stat.trend && (
-                      <p className={`text-sm ${stat.color} mt-0.5`}>{stat.trend}</p>
-                    )}
-                  </div>
-                  <Icon size={28} strokeWidth={1.5} className={stat.color} />
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {/* ── Le réseau : tous les établissements référencés ── */}
-      <div className=" bg-panel border border-line rounded-3xl p-6">
-        <div className="mb-5 flex items-center justify-between">
-          <div>
-            <h2 className="text-xl font-semibold text-ink">
-              {t("Établissements du réseau", "Network venues")}
-            </h2>
-            <p className="text-ink-3 text-sm mt-0.5">
-              {venues === null
-                ? t("Chargement de l'annuaire…", "Loading directory…")
-                : t(
-                    `${venues.length} établissement${venues.length > 1 ? "s" : ""} référencé${venues.length > 1 ? "s" : ""}, mis à jour en direct`,
-                    `${venues.length} venue${venues.length === 1 ? "" : "s"} listed, updated live`,
-                  )}
-            </p>
-          </div>
-        </div>
-
-        {venues !== null && venues.length === 0 && (
-          <p className="py-8 text-center text-sm text-ink-3">
-            {t(
-              "Aucun établissement inscrit pour le moment. Ils apparaîtront ici dès la création de leur compte.",
-              "No venues have signed up yet. They'll appear here as soon as their account is created.",
-            )}
-          </p>
+    <>
+      <PageHeader
+        title={firstName ? t(`Bonjour, ${firstName}`, `Hello, ${firstName}`) : t("Aujourd'hui", "Today")}
+        description={t(
+          "Les établissements du réseau, à un message de vous.",
+          "The venues in the network, one message away."
         )}
+        actions={
+          <LinkButton href="/concierge/messages" variant="primary" icon={MessageSquare}>
+            {t("Messages", "Messages")}
+          </LinkButton>
+        }
+      />
 
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
-          {(venues ?? []).map((v) => (
-            <div
-              key={v.id}
-              className="flex flex-col gap-3 rounded-2xl border border-line bg-fill p-4 transition-colors hover:bg-fill-2"
-            >
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-fill-2 text-xs font-bold text-ink">
-                  {initialsOf(v)}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold text-ink">
-                    {displayName(v)}
-                  </p>
-                  <p className="truncate text-xs text-ink-3">
-                    {[roleLabels[v.role] ?? v.role, v.city]
-                      .filter(Boolean)
-                      .join(" · ")}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <Link
-                  href={`/concierge/reservations?new=1&venue=${encodeURIComponent(displayName(v))}`}
-                  className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-fill-3 px-3 py-2 text-xs font-semibold text-ink transition-colors hover:bg-fill-3"
-                >
-                  <CalendarPlus size={13} strokeWidth={2} />
-                  {t("Réserver", "Book")}
-                </Link>
-                <Link
-                  href={`/concierge/messages?to=${v.id}`}
-                  className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-line-2 bg-fill px-3 py-2 text-xs font-semibold text-ink transition-colors hover:bg-fill-2 hover:text-ink"
-                >
-                  <MessageSquare size={13} strokeWidth={2} />
-                  {t("Message", "Message")}
-                </Link>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Recent Activity */}
-      {isDemoConcierge && (
-        <div className=" bg-panel border border-line rounded-3xl p-6">
-          <h2 className="text-lg font-semibold text-ink mb-4">
-            {t("Activité récente", "Recent activity")}
-          </h2>
-          <div className="space-y-3">
-            {[
-              { text: t("Réservation confirmée · Famille Tazi, 6 pers. au Comptoir", "Reservation confirmed · Tazi family, party of 6 at Le Comptoir"), time: t("Il y a 12 min", "12 min ago"), color: "bg-ok" },
-              { text: t("Commission versée · 9 820 MAD (Le Comptoir, Mars)", "Commission paid · 9,820 MAD (Le Comptoir, March)"), time: t("Il y a 2h", "2h ago"), color: "bg-warn" },
-              { text: t("Nouveau client ajouté · Sarah Bennis (VIP)", "New guest added · Sarah Bennis (VIP)"), time: t("Il y a 5h", "5h ago"), color: "bg-link" },
-              { text: t("No-show déclaré · Réda F. au Sky Bar", "No-show reported · Réda F. at Sky Bar"), time: t("Hier", "Yesterday"), color: "bg-danger" },
-            ].map((a, i) => (
-              <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-fill hover:bg-fill transition-colors">
-                <div className={`w-2 h-2 rounded-full ${a.color} shrink-0`} />
-                <p className="text-sm text-ink-2 font-ui flex-1">{a.text}</p>
-                <span className="text-xs text-ink-3 shrink-0">{a.time}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+      {unread > 0 && (
+        <Link
+          href="/concierge/messages"
+          className="flex items-center gap-3 rounded-2xl border border-info/25 bg-info-soft px-5 py-3.5 text-sm text-ink transition-colors hover:border-info/50"
+        >
+          <MessageSquare size={18} strokeWidth={1.75} className="shrink-0 text-info" aria-hidden />
+          <span className="flex-1 font-bold">
+            {t(
+              `${unread} message${unread > 1 ? "s" : ""} non lu${unread > 1 ? "s" : ""}`,
+              `${unread} unread message${unread === 1 ? "" : "s"}`
+            )}
+          </span>
+          <ArrowRight size={16} strokeWidth={2} className="text-info" aria-hidden />
+        </Link>
       )}
 
-      {/* Folder Cards */}
-      <div className=" bg-panel border border-line rounded-3xl p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h2 className="text-xl font-semibold text-ink">
-              {t("Vos espaces", "Your sections")}
-            </h2>
-            <p className="text-ink-3 text-sm mt-0.5">{t("Cliquez pour accéder à un espace", "Click to open a section")}</p>
-          </div>
-        </div>
+      <InfoNote tone="sky">
+        {t(
+          "Votre lien et votre QR personnels, avec le suivi de vos réservations jusqu'à la commission, ne sont pas encore disponibles dans cet espace. Pour réserver, écrivez à l'établissement.",
+          "Your personal link and QR code, with booking tracking through to commission, aren't available in this workspace yet. To book, message the venue."
+        )}
+      </InfoNote>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-          {visibleFolders.length === 0 && (
-            <p className="col-span-full py-8 text-center text-sm text-ink-3">
-              {t(<>Aucun espace ne correspond à « {query} ».</>, <>No section matches “{query}”.</>)}
-            </p>
-          )}
-          {visibleFolders.map((folder) => {
-            const Icon = folder.icon;
-            return (
-              <Link
-                key={folder.href}
-                href={folder.href}
-                className="group flex flex-col p-5 bg-fill rounded-2xl border border-line hover:bg-fill-2 hover:border-line-2 transition-all duration-500 hover:scale-[1.02]"
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-10 h-10 rounded-xl bg-fill-2 flex items-center justify-center">
-                    <Icon size={20} strokeWidth={1.5} className={folder.iconColor} />
-                  </div>
-                  <ArrowRight
-                    size={14}
-                    strokeWidth={1.5}
-                    className="text-ink-4 group-hover:text-ink-2 group-hover:translate-x-1 transition-all duration-300"
-                  />
+      <Card
+        padded={false}
+        title={t("Établissements", "Venues")}
+        description={
+          venues
+            ? t(
+                `${venues.length} établissement${venues.length > 1 ? "s" : ""} dans le réseau`,
+                `${venues.length} venue${venues.length === 1 ? "" : "s"} in the network`
+              )
+            : undefined
+        }
+        actions={
+          <SearchInput
+            value={query}
+            onChange={setQuery}
+            placeholder={t("Nom ou ville", "Name or city")}
+            className="w-full sm:w-64"
+          />
+        }
+      >
+        {failed ? (
+          <ErrorState compact onRetry={() => setTick((n) => n + 1)} />
+        ) : list.length === 0 ? (
+          query ? (
+            <EmptyState
+              compact
+              icon={SearchX}
+              title={t("Aucun résultat", "No results")}
+              description={t(`Aucun établissement ne correspond à « ${query} ».`, `No venue matches “${query}”.`)}
+            />
+          ) : (
+            <EmptyState
+              compact
+              icon={Building2}
+              title={t("Aucun établissement pour le moment", "No venues yet")}
+              description={t(
+                "Les établissements apparaissent ici dès leur inscription.",
+                "Venues appear here as soon as they sign up."
+              )}
+            />
+          )
+        ) : (
+          <ul className="divide-y divide-line border-t border-line">
+            {list.map((v) => (
+              <li key={v.id} className="flex items-center gap-3 px-5 py-3 sm:px-6">
+                <NameAvatar name={nameOf(v)} size={40} />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-bold text-ink">{nameOf(v)}</p>
+                  <p className="truncate text-[13px] text-ink-3">{v.city || t("Ville non renseignée", "City not set")}</p>
                 </div>
-                <h3 className="font-semibold text-ink text-sm mb-1">
-                  {folder.label}
-                </h3>
-                <p className="text-xs text-ink-3 mb-3">{folder.description}</p>
-
-                {isDemoConcierge && (
-                  <div className="space-y-1.5 pt-3 border-t border-line mt-auto">
-                    {folder.preview.map((line, i) => (
-                      <p
-                        key={i}
-                        className="text-xs text-ink-3 leading-tight flex items-center gap-1.5"
-                      >
-                        <span className="w-1 h-1 rounded-full bg-fill-3 shrink-0" />
-                        {line}
-                      </p>
-                    ))}
-                  </div>
-                )}
-              </Link>
-            );
-          })}
-        </div>
-      </div>
-    </div>
+                <LinkButton href={`/concierge/messages?to=${v.id}`} size="sm" icon={MessageSquare}>
+                  {t("Écrire", "Message")}
+                </LinkButton>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Card>
+    </>
   );
 }

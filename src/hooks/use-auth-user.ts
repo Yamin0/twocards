@@ -3,9 +3,6 @@
 import { useSyncExternalStore } from "react";
 import { createClient } from "@/lib/supabase/client";
 
-const DEMO_VENUE_EMAILS = ["yaminbenhamou@gmail.com", "test@twocardspro.com"];
-const DEMO_CONCIERGE_EMAIL = "adminconcierge@twocardspro.com";
-
 type AuthSnapshot = {
   id: string | null;
   email: string | null;
@@ -109,8 +106,6 @@ export function useAuthUser() {
   const email = snap?.email ?? null;
   const fullName = snap?.fullName ?? null;
 
-  const isDemoVenue = email !== null && DEMO_VENUE_EMAILS.includes(email);
-  const isDemoConcierge = email === DEMO_CONCIERGE_EMAIL;
   const venueType = snap?.venueType ?? null;
   /* Un loueur de quads ou un chauffeur privé ne gère ni tables ni soirées :
      son espace montre ses prestations à la place. */
@@ -130,9 +125,6 @@ export function useAuthUser() {
     avatarUrl: snap?.avatarUrl ?? null,
     isAdmin: snap?.isAdmin ?? false,
     isLoading,
-    isDemoVenue,
-    isDemoConcierge,
-    isDemo: isDemoVenue || isDemoConcierge,
     initials: fullName
       ? fullName
           .split(" ")
