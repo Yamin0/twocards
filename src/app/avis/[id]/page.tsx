@@ -7,7 +7,7 @@ import { RatingExperience } from "./rating-experience";
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
   return {
-    title: t("Votre avis | twocards.", "Your review | twocards."),
+    title: t("Votre avis", "Your review"),
     description: t("Notez votre sortie en quelques secondes.", "Rate your outing in seconds."),
     robots: { index: false, follow: false },
   };

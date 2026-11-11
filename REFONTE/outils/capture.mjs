@@ -72,7 +72,8 @@ ws.onmessage = (ev) => {
   if (msg.id && pending.has(msg.id)) {
     const { res, rej } = pending.get(msg.id);
     pending.delete(msg.id);
-    msg.error ? rej(new Error(msg.error.message)) : res(msg.result);
+    if (msg.error) rej(new Error(msg.error.message));
+    else res(msg.result);
   } else for (const l of listeners) l(msg);
 };
 const send = (method, params = {}, sessionId) =>

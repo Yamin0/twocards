@@ -16,9 +16,16 @@ export async function proxy(request: NextRequest) {
   const changed = locale !== current;
   if (changed) request.cookies.set(LOCALE_COOKIE, locale);
 
-  /* `?lang=` est retiré de l'adresse une fois le cookie posé. */
+  /* Portail intégré en iframe sur le site d'un établissement (`/r/…?embed=1`) :
+     le cookie y est un cookie tiers, que le navigateur refuse le plus
+     souvent. La langue voyage donc dans l'adresse et `?lang=` y reste — une
+     redirection la ferait perdre. */
+  const embedded =
+    request.nextUrl.pathname.startsWith("/r/") && request.nextUrl.searchParams.get("embed") === "1";
+
+  /* Ailleurs, `?lang=` est retiré de l'adresse une fois le cookie posé. */
   let response: NextResponse;
-  if (isLocale(param)) {
+  if (isLocale(param) && !embedded) {
     const url = request.nextUrl.clone();
     url.searchParams.delete("lang");
     response = NextResponse.redirect(url);
