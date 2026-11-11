@@ -84,9 +84,10 @@ export function parseQuote(value: unknown): DepositQuote | null {
   if (!value || typeof value !== "object") return null;
   const q = value as Record<string, unknown>;
   const amount = Number(q.amount);
-  const unit = Number(q.unit);
-  const currency = String(q.currency ?? "");
   const mode = String(q.mode ?? "");
+  /* Un panier n'a pas de montant unitaire : on prend le total. */
+  const unit = mode === "lines" ? amount : Number(q.unit);
+  const currency = String(q.currency ?? "");
   if (!(amount > 0) || !(unit > 0)) return null;
   if (currency !== "mad" && currency !== "eur" && currency !== "usd") return null;
   if (mode === "lines") {
