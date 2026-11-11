@@ -76,3 +76,13 @@
 
 - **Changé** : anciens kits supprimés (`e5040d7`) ; page admin 721 → 292 lignes, signup 821 → 589 ; lint du dépôt limité à l'application ; `RAPPORT.md`.
 - **Vérifié** : `tsc` 0 erreur, `eslint .` 0 erreur 0 avertissement, `next build` 62 pages, 68 captures « après » sans erreur console.
+
+## Lot 8 — Suites, sans attendre de décision
+
+- **Types branchés** (`cd3e0d7`) : `createClient<Database>` des deux côtés. Dix erreurs révélées, toutes dues au générateur qui ignore qu'un paramètre de RPC accepte `null` ; corrigé dans les types, aucun appel modifié. Quatre dépendances sans import retirées ; `/onboarding` supprimée.
+- **Concierge réel** (`7d21aa7`) : voir `RAPPORT.md`. Vérifié : types et lint. Non vérifié : aucun compte concierge n'existe pour le voir.
+- **Protection des QR** (`7d21aa7`) : un QR qui a des réservations est désactivé au lieu d'être supprimé. Pourquoi : la clé étrangère efface en cascade les réservations et leurs commissions. Non vérifié en conditions réelles.
+- **Signup en deux écrans** (`9c423ac`). Vérifié : 136 contrôles au navigateur, contenu envoyé identique (215 040 combinaisons). Non vérifié : l'envoi réel.
+- **Performance** (`12ffb88`). Vérifié : Lighthouse sur le vrai build, trois passes, 91 / 91 / 91 et 93 / 93 / 93. Non vérifié : le bandeau d'impersonation, dont le chargement est différé.
+- **SQL proposé** (`1fa5b35`) : note refusée avant la sortie. Non lancé.
+- **Final** : `tsc` 0 erreur, `eslint .` 0 erreur 0 avertissement, `next build` 63 pages, 68 captures « après » sans erreur console.
