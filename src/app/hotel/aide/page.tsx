@@ -149,14 +149,14 @@ export default function HotelHelpPage() {
         {STEPS.map((s, i) => (
           <Panel key={s.title}>
             <div className="flex items-center justify-between">
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10">
-                <s.icon size={18} strokeWidth={1.75} className="text-white" />
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-fill-2">
+                <s.icon size={18} strokeWidth={1.75} className="text-ink" />
               </span>
-              <span className="num text-xs font-black text-white/30">0{i + 1}</span>
+              <span className="num text-xs font-black text-ink-3">0{i + 1}</span>
             </div>
-            <h2 className="font-display mt-4 text-base font-bold text-white">{s.title}</h2>
-            <p className="mt-1.5 text-xs leading-relaxed text-white/55">{s.text}</p>
-            <Link href={s.href} className="mt-4 inline-block text-xs font-bold text-sky-300 hover:text-sky-200">
+            <h2 className="font-display mt-4 text-base font-bold text-ink">{s.title}</h2>
+            <p className="mt-1.5 text-xs leading-relaxed text-ink-3">{s.text}</p>
+            <Link href={s.href} className="mt-4 inline-block text-xs font-bold text-info hover:text-info">
               {s.cta} →
             </Link>
           </Panel>
@@ -165,19 +165,19 @@ export default function HotelHelpPage() {
 
       <div className="grid gap-4 xl:grid-cols-3">
         <Panel title={t("Questions fréquentes", "Frequently asked questions")} className="xl:col-span-2" padded={false}>
-          <ul className="divide-y divide-white/[0.06]">
+          <ul className="divide-y divide-line">
             {FAQ.map((f, i) => (
               <li key={f.q}>
                 <button
                   type="button"
                   onClick={() => setOpen(open === i ? null : i)}
                   aria-expanded={open === i}
-                  className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition-colors hover:bg-white/[0.03] sm:px-6"
+                  className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition-colors hover:bg-fill sm:px-6"
                 >
-                  <span className="text-sm font-bold text-white">{f.q}</span>
-                  <ChevronDown size={16} strokeWidth={2} className={cn("shrink-0 text-white/40 transition-transform", open === i && "rotate-180")} />
+                  <span className="text-sm font-bold text-ink">{f.q}</span>
+                  <ChevronDown size={16} strokeWidth={2} className={cn("shrink-0 text-ink-3 transition-transform", open === i && "rotate-180")} />
                 </button>
-                {open === i && <p className="px-5 pb-5 text-sm leading-relaxed text-white/65 sm:px-6">{f.a}</p>}
+                {open === i && <p className="px-5 pb-5 text-sm leading-relaxed text-ink-2 sm:px-6">{f.a}</p>}
               </li>
             ))}
           </ul>
@@ -185,15 +185,15 @@ export default function HotelHelpPage() {
 
         <div className="space-y-4">
           <Panel title={t("Conseils de terrain", "Tips from the field")}>
-            <ul className="space-y-3 text-xs leading-relaxed text-white/60">
-              <li className="flex gap-2.5"><BedDouble size={14} strokeWidth={1.75} className="mt-0.5 shrink-0 text-sky-300" /> {t("Un chevalet sur la table de nuit convertit mieux qu'un autocollant sur la porte.", "A tent card on the bedside table converts better than a sticker on the door.")}</li>
-              <li className="flex gap-2.5"><Smartphone size={14} strokeWidth={1.75} className="mt-0.5 shrink-0 text-sky-300" /> {t("Au check-in, montrez le geste : « scannez, choisissez, on s'occupe du reste ».", "At check-in, show them how: “scan, choose, we take care of the rest”.")}</li>
-              <li className="flex gap-2.5"><Star size={14} strokeWidth={1.75} className="mt-0.5 shrink-0 text-sky-300" /> {t("Un menu court (8 à 12 adresses) convertit mieux qu'un catalogue complet.", "A short menu (8 to 12 places) converts better than a full catalogue.")}</li>
-              <li className="flex gap-2.5"><Coins size={14} strokeWidth={1.75} className="mt-0.5 shrink-0 text-sky-300" /> {t("Surveillez la conversion par emplacement : déplacez les QR qui ne scannent pas.", "Watch conversion by location: move QR codes that don't get scanned.")}</li>
+            <ul className="space-y-3 text-xs leading-relaxed text-ink-2">
+              <li className="flex gap-2.5"><BedDouble size={14} strokeWidth={1.75} className="mt-0.5 shrink-0 text-info" /> {t("Un chevalet sur la table de nuit convertit mieux qu'un autocollant sur la porte.", "A tent card on the bedside table converts better than a sticker on the door.")}</li>
+              <li className="flex gap-2.5"><Smartphone size={14} strokeWidth={1.75} className="mt-0.5 shrink-0 text-info" /> {t("Au check-in, montrez le geste : « scannez, choisissez, on s'occupe du reste ».", "At check-in, show them how: “scan, choose, we take care of the rest”.")}</li>
+              <li className="flex gap-2.5"><Star size={14} strokeWidth={1.75} className="mt-0.5 shrink-0 text-info" /> {t("Un menu court (8 à 12 adresses) convertit mieux qu'un catalogue complet.", "A short menu (8 to 12 places) converts better than a full catalogue.")}</li>
+              <li className="flex gap-2.5"><Coins size={14} strokeWidth={1.75} className="mt-0.5 shrink-0 text-info" /> {t("Surveillez la conversion par emplacement : déplacez les QR qui ne scannent pas.", "Watch conversion by location: move QR codes that don't get scanned.")}</li>
             </ul>
           </Panel>
           <Panel title={t("Besoin d'aide ?", "Need help?")}>
-            <p className="text-xs leading-relaxed text-white/55">
+            <p className="text-xs leading-relaxed text-ink-3">
               {t("Votre référent twocards répond en général sous une heure en journée.", "Your twocards contact usually replies within an hour during the day.")}
             </p>
             <div className="mt-4 flex flex-col gap-2">
@@ -204,7 +204,7 @@ export default function HotelHelpPage() {
                 {t("Vérifier mes coordonnées", "Check my contact details")}
               </LinkButton>
             </div>
-            <p className="mt-4 flex items-center gap-1.5 text-[11px] text-white/35">
+            <p className="mt-4 flex items-center gap-1.5 text-xs text-ink-3">
               <LifeBuoy size={12} strokeWidth={1.75} />{" "}
               {t("Mentionnez le nom de l'hôtel et, si possible, la chambre concernée.", "Mention the hotel's name and, if possible, the room concerned.")}
             </p>

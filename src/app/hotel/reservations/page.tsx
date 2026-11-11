@@ -303,33 +303,33 @@ function ReservationsContent() {
           {groups.map((g) => (
             <section key={g.date}>
               <div className="mb-2 flex items-baseline gap-3 px-1">
-                <h2 className={cn("font-display text-sm font-bold", g.date === today ? "text-sky-300" : "text-white")}>
+                <h2 className={cn("font-display text-sm font-bold", g.date === today ? "text-info" : "text-ink")}>
                   {relativeDay(g.date, undefined, locale)}
                 </h2>
-                <span className="text-xs text-white/40">
+                <span className="text-xs text-ink-3">
                   {g.date !== today && formatDate(g.date, "long", locale)} · {g.rows.length}{" "}
                   {t(plural(g.rows.length, "réservation"), plural(g.rows.length, "reservation", undefined, "en"))}
                 </span>
               </div>
               <Panel padded={false}>
-                <ul className="divide-y divide-white/[0.06]">
+                <ul className="divide-y divide-line">
                   {g.rows.map((r) => (
                     <li key={r.id}>
                       <button
                         type="button"
                         onClick={() => setOpenId(r.id)}
-                        className="flex w-full items-center gap-4 px-4 py-3 text-left transition-colors hover:bg-white/[0.04] sm:px-5"
+                        className="flex w-full items-center gap-4 px-4 py-3 text-left transition-colors hover:bg-fill sm:px-5"
                       >
-                        <span className="num flex w-12 shrink-0 flex-col items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] py-1.5 text-sm font-black text-white">
+                        <span className="num flex w-12 shrink-0 flex-col items-center justify-center rounded-lg border border-line bg-fill py-1.5 text-sm font-black text-ink">
                           {r.reservation_time ?? "—"}
                         </span>
                         <Avatar name={r.guest_name} size={36} className="hidden sm:inline-flex" />
                         <span className="min-w-0 flex-1">
-                          <span className="block truncate text-sm font-bold text-white">
+                          <span className="block truncate text-sm font-bold text-ink">
                             {r.guest_name}
-                            <span className="font-medium text-white/45"> · {r.venue_name}</span>
+                            <span className="font-medium text-ink-3"> · {r.venue_name}</span>
                           </span>
-                          <span className="block truncate text-xs text-white/50">
+                          <span className="block truncate text-xs text-ink-3">
                             {reservationCategoryLabel(r.category, locale)} · {r.party_size} {t("pers.", r.party_size === 1 ? "guest" : "guests")}
                             {r.qr_label ? ` · ${r.qr_label}` : ""}
                             {r.notes ? " · note" : ""}
@@ -337,10 +337,10 @@ function ReservationsContent() {
                         </span>
                         {r.rating !== null && <RatingStars value={r.rating} size={11} className="hidden md:inline-flex" />}
                         {r.commission > 0 && (
-                          <span className="num hidden shrink-0 text-xs font-bold text-amber-300 sm:inline">+{formatMad(r.commission, false, locale)}</span>
+                          <span className="num hidden shrink-0 text-xs font-bold text-warn sm:inline">+{formatMad(r.commission, false, locale)}</span>
                         )}
                         {r.arrived_at && (
-                          <span className="num hidden shrink-0 items-center gap-1 rounded-md bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-bold text-emerald-300 sm:inline-flex">
+                          <span className="num hidden shrink-0 items-center gap-1 rounded-md bg-ok-soft px-1.5 py-0.5 text-xs font-bold text-ok sm:inline-flex">
                             {t("Arrivé", "Arrived")} {new Date(r.arrived_at).toLocaleTimeString(intlLocale(locale), { hour: "2-digit", minute: "2-digit" })}
                           </span>
                         )}
@@ -410,7 +410,7 @@ export function ReservationDrawer({
             {t("Appeler", "Call")}
           </LinkButton>
           {r.qr_code_id && (
-            <Link href={`/hotel/chambres/${r.qr_code_id}`} className="ml-auto self-center text-xs font-bold text-sky-300 hover:text-sky-200">
+            <Link href={`/hotel/chambres/${r.qr_code_id}`} className="ml-auto self-center text-xs font-bold text-info hover:text-info">
               {t("Voir l'emplacement", "View location")}
             </Link>
           )}
@@ -419,32 +419,32 @@ export function ReservationDrawer({
     >
       <div className="flex items-center justify-between gap-3">
         <StatusPill status={r.status} />
-        <span className="num text-xs text-white/45">{r.guest_phone}</span>
+        <span className="num text-xs text-ink-3">{r.guest_phone}</span>
       </div>
 
-      <dl className="mt-5 divide-y divide-white/[0.06] rounded-xl border border-white/10 bg-white/[0.03]">
+      <dl className="mt-5 divide-y divide-line rounded-xl border border-line bg-fill">
         {rows.map((row) => (
           <div key={row.label} className="flex items-center justify-between gap-4 px-4 py-2.5">
-            <dt className="text-xs text-white/45">{row.label}</dt>
-            <dd className="num text-right text-sm font-medium text-white">{row.value}</dd>
+            <dt className="text-xs text-ink-3">{row.label}</dt>
+            <dd className="num text-right text-sm font-medium text-ink">{row.value}</dd>
           </div>
         ))}
       </dl>
 
       {r.notes && (
         <div className="mt-4">
-          <p className="mb-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-white/40">{t("Précisions du client", "Guest's notes")}</p>
-          <p className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm leading-relaxed text-white/80">“{r.notes}”</p>
+          <p className="mb-1.5 text-xs font-bold text-ink-3">{t("Précisions du client", "Guest's notes")}</p>
+          <p className="rounded-xl border border-line bg-fill px-4 py-3 text-sm leading-relaxed text-ink">“{r.notes}”</p>
         </div>
       )}
 
-      <div className="mt-4 rounded-xl border border-amber-400/15 bg-amber-500/[0.06] px-4 py-3">
-        <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.14em] text-amber-300">{t("Commission", "Commission")}</p>
+      <div className="mt-4 rounded-xl border border-warn/25 bg-warn-soft px-4 py-3">
+        <p className="mb-2 text-xs font-bold text-warn">{t("Commission", "Commission")}</p>
         {r.amount_spent !== null ? (
           <div className="flex items-end justify-between gap-3">
             <div>
-              <p className="num text-2xl font-black text-white">{formatMad(r.commission, false, locale)}</p>
-              <p className="num text-xs text-white/50">
+              <p className="num text-2xl font-black text-ink">{formatMad(r.commission, false, locale)}</p>
+              <p className="num text-xs text-ink-3">
                 {t(
                   `${Math.round(r.commission_rate * 100)} % de ${formatMad(r.amount_spent)} dépensés`,
                   `${Math.round(r.commission_rate * 100)}% of ${formatMad(r.amount_spent, false, "en")} spent`
@@ -455,7 +455,7 @@ export function ReservationDrawer({
             <Tag>{isLive(r) ? t("acquise", "earned") : t("annulée", "cancelled")}</Tag>
           </div>
         ) : (
-          <p className="text-xs leading-relaxed text-white/55">
+          <p className="text-xs leading-relaxed text-ink-3">
             {isLive(r)
               ? t(
                   "Le montant dépensé n'est pas encore renseigné : la commission se calculera automatiquement après la sortie.",
@@ -468,19 +468,19 @@ export function ReservationDrawer({
 
       {r.rating !== null && (
         <div className="mt-4">
-          <p className="mb-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-white/40">{t("Avis du client", "Guest review")}</p>
-          <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
+          <p className="mb-1.5 text-xs font-bold text-ink-3">{t("Avis du client", "Guest review")}</p>
+          <div className="rounded-xl border border-line bg-fill px-4 py-3">
             <div className="flex items-center gap-2">
               <RatingStars value={r.rating} size={14} />
-              <span className="num text-sm font-bold text-white">{r.rating}/5</span>
-              {r.rated_at && <span className="text-xs text-white/40">· {formatDate(r.rated_at.slice(0, 10), "medium", locale)}</span>}
+              <span className="num text-sm font-bold text-ink">{r.rating}/5</span>
+              {r.rated_at && <span className="text-xs text-ink-3">· {formatDate(r.rated_at.slice(0, 10), "medium", locale)}</span>}
             </div>
-            {r.rating_comment && <p className="mt-2 text-sm leading-relaxed text-white/75">“{r.rating_comment}”</p>}
+            {r.rating_comment && <p className="mt-2 text-sm leading-relaxed text-ink-2">“{r.rating_comment}”</p>}
           </div>
         </div>
       )}
       {r.rating === null && isLive(r) && r.reservation_date < todayIso() && (
-        <p className="mt-4 flex items-center gap-2 text-xs text-white/40">
+        <p className="mt-4 flex items-center gap-2 text-xs text-ink-3">
           <Star size={12} strokeWidth={1.5} /> {t("Pas encore d'avis pour cette sortie.", "No review for this outing yet.")}
         </p>
       )}

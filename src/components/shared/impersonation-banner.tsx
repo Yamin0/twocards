@@ -31,7 +31,7 @@ export function ImpersonationBanner() {
   if (!flag) return null;
 
   return (
-    <div className="fixed inset-x-0 top-0 z-[200] flex items-center justify-center gap-3 bg-amber-500 px-4 py-2 text-[13px] font-semibold text-black shadow-lg">
+    <div className="print-hide fixed inset-x-0 top-0 z-[200] flex items-center justify-center gap-3 bg-amber-500 px-4 py-2 text-[13px] font-semibold text-black shadow-lg">
       <Eye size={15} strokeWidth={2} className="shrink-0" />
       <span className="truncate">
         {t("Vue administrateur, connecté en tant que", "Admin view, logged in as")}{" "}

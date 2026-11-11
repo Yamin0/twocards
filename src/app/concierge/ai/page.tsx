@@ -157,23 +157,23 @@ export default function ConciergeAIPage() {
 
   return (
     <div className="h-[calc(100vh-80px)] lg:h-[calc(100vh-48px)] flex flex-col">
-      <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl flex-1 flex flex-col overflow-hidden">
+      <div className=" bg-panel border border-line rounded-3xl flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="flex items-center gap-3 px-5 py-4 border-b border-white/[0.08]">
-          <div className="w-10 h-10 rounded-2xl bg-blue-500/15 flex items-center justify-center">
-            <Sparkles size={20} strokeWidth={1.5} className="text-blue-400" />
+        <div className="flex items-center gap-3 px-5 py-4 border-b border-line">
+          <div className="w-10 h-10 rounded-2xl bg-info-soft flex items-center justify-center">
+            <Sparkles size={20} strokeWidth={1.5} className="text-info" />
           </div>
           <div>
-            <h2 className="text-lg font-bold text-white">
+            <h2 className="text-lg font-bold text-ink">
               {t("Assistant IA", "AI assistant")}
             </h2>
-            <p className="text-xs text-white/40">
+            <p className="text-xs text-ink-3">
               twocards AI &middot; {t("Toujours disponible", "Always available")}
             </p>
           </div>
           <div className="ml-auto flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-            <span className="text-[0.6875rem] text-green-400/70">{t("En ligne", "Online")}</span>
+            <span className="w-2 h-2 rounded-full bg-ok animate-pulse" />
+            <span className="text-xs text-ok">{t("En ligne", "Online")}</span>
           </div>
         </div>
 
@@ -186,33 +186,33 @@ export default function ConciergeAIPage() {
             >
               {msg.role === "ai" && (
                 <div className="flex-shrink-0 mr-3 mt-1">
-                  <div className="w-8 h-8 rounded-xl bg-blue-500/15 flex items-center justify-center">
-                    <Bot size={16} strokeWidth={1.5} className="text-blue-400" />
+                  <div className="w-8 h-8 rounded-xl bg-info-soft flex items-center justify-center">
+                    <Bot size={16} strokeWidth={1.5} className="text-info" />
                   </div>
                 </div>
               )}
               <div
                 className={`max-w-[75%] px-4 py-3 ${
                   msg.role === "user"
-                    ? "bg-blue-500/20 border border-blue-400/15 rounded-2xl rounded-br-md"
-                    : "bg-white/[0.06] border border-white/[0.08] rounded-2xl rounded-bl-md"
+                    ? "bg-info-soft border border-info/25 rounded-2xl rounded-br-md"
+                    : "bg-fill border border-line rounded-2xl rounded-bl-md"
                 }`}
               >
                 {msg.role === "ai" && (
-                  <p className="text-[0.625rem] font-semibold text-blue-400/70 mb-1 font-ui">
+                  <p className="text-xs font-semibold text-info mb-1 font-ui">
                     {t("Assistant IA", "AI assistant")}
                   </p>
                 )}
                 <p
                   className={`text-sm leading-relaxed font-ui ${
-                    msg.role === "user" ? "text-white/90" : "text-white/70"
+                    msg.role === "user" ? "text-ink" : "text-ink-2"
                   }`}
                 >
                   {msg.text}
                 </p>
                 <span
-                  className={`block text-[0.5625rem] mt-1.5 ${
-                    msg.role === "user" ? "text-blue-300/40 text-right" : "text-white/20"
+                  className={`block text-xs mt-1.5 ${
+                    msg.role === "user" ? "text-info text-right" : "text-ink-4"
                   }`}
                 >
                   {msg.time}
@@ -224,13 +224,13 @@ export default function ConciergeAIPage() {
         </div>
 
         {/* Suggested actions */}
-        <div className="px-5 py-3 border-t border-white/[0.06]">
+        <div className="px-5 py-3 border-t border-line">
           <div className="flex flex-wrap gap-2">
             {getSuggestedActions(t).map((action) => (
               <button
                 key={action}
                 onClick={() => sendMessage(action)}
-                className="px-3.5 py-2 bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.1] hover:border-blue-400/30 rounded-xl text-xs text-white/60 hover:text-white transition-all font-ui"
+                className="px-3.5 py-2 bg-fill hover:bg-fill-2 border border-line hover:border-info/25 rounded-xl text-xs text-ink-2 hover:text-ink transition-all font-ui"
               >
                 {action}
               </button>
@@ -239,7 +239,7 @@ export default function ConciergeAIPage() {
         </div>
 
         {/* Input */}
-        <div className="px-5 py-3.5 border-t border-white/[0.08]">
+        <div className="px-5 py-3.5 border-t border-line">
           <div className="flex items-center gap-2.5">
             <input
               type="text"
@@ -247,13 +247,13 @@ export default function ConciergeAIPage() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && sendMessage(input)}
-              className="flex-1 px-4 py-2.5 bg-white/[0.05] border border-white/[0.08] rounded-xl text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-blue-400/30 transition-colors font-ui"
+              className="flex-1 px-4 py-2.5 bg-fill border border-line rounded-xl text-sm text-ink placeholder:text-ink-4 focus:outline-none focus:border-info/25 transition-colors font-ui"
             />
             <button
               onClick={() => sendMessage(input)}
               disabled={!input.trim()}
               aria-label={t("Envoyer", "Send")}
-              className="p-2.5 bg-blue-500 hover:bg-blue-400 disabled:bg-white/[0.06] disabled:text-white/15 text-white rounded-xl transition-all shadow-[0_0_15px_rgba(96,165,250,0.2)] disabled:shadow-none"
+              className="p-2.5 bg-link hover:bg-link-strong disabled:bg-fill disabled:text-ink-4 text-white rounded-xl transition-all shadow-[0_0_15px_rgba(96,165,250,0.2)] disabled:shadow-none"
             >
               <Send size={17} strokeWidth={1.5} />
             </button>

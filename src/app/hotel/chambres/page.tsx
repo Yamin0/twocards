@@ -374,18 +374,18 @@ function ChambresContent() {
                   { value: "conversion", label: t("Meilleure conversion", "Best conversion") },
                 ]}
               />
-              <div className="inline-flex rounded-xl border border-white/10 bg-black/30 p-1">
+              <div className="inline-flex rounded-xl border border-line bg-panel p-1">
                 <IconButton
                   icon={LayoutGrid}
                   label={t("Vue grille", "Grid view")}
                   onClick={() => setView2("grille")}
-                  className={cn("h-8 w-8", view === "grille" && "bg-white text-black hover:bg-white hover:text-black")}
+                  className={cn("h-8 w-8", view === "grille" && "bg-brand text-on-brand hover:bg-white hover:text-on-brand")}
                 />
                 <IconButton
                   icon={List}
                   label={t("Vue liste", "List view")}
                   onClick={() => setView2("liste")}
-                  className={cn("h-8 w-8", view === "liste" && "bg-white text-black hover:bg-white hover:text-black")}
+                  className={cn("h-8 w-8", view === "liste" && "bg-brand text-on-brand hover:bg-white hover:text-on-brand")}
                 />
               </div>
             </div>
@@ -396,7 +396,7 @@ function ChambresContent() {
             <button
               type="button"
               onClick={selectAll}
-              className="inline-flex items-center gap-2 rounded-lg px-2 py-1 text-xs font-medium text-white/60 hover:text-white"
+              className="inline-flex items-center gap-2 rounded-lg px-2 py-1 text-xs font-medium text-ink-2 hover:text-ink"
             >
               {selected.size > 0 && selected.size === filtered.length ? (
                 <CheckSquare size={15} strokeWidth={1.75} />
@@ -480,27 +480,27 @@ function ChambresContent() {
                   {filtered.map((q) => (
                     <Tr key={q.id}>
                       <Td>
-                        <button type="button" onClick={() => toggleSelect(q.id)} aria-label={t("Sélectionner", "Select")} className="text-white/50 hover:text-white">
+                        <button type="button" onClick={() => toggleSelect(q.id)} aria-label={t("Sélectionner", "Select")} className="text-ink-3 hover:text-ink">
                           {selected.has(q.id) ? <CheckSquare size={16} strokeWidth={1.75} /> : <Square size={16} strokeWidth={1.75} />}
                         </button>
                       </Td>
                       <Td>
-                        <Link href={`/hotel/chambres/${q.id}`} className="font-bold text-white hover:underline">
+                        <Link href={`/hotel/chambres/${q.id}`} className="font-bold text-ink hover:underline">
                           {q.label}
                         </Link>
-                        <p className="font-mono-satoshi text-[11px] text-white/40">{q.code}</p>
+                        <p className="font-mono-satoshi text-xs text-ink-3">{q.code}</p>
                       </Td>
                       <Td><StatusPill status={q.active ? "actif" : "inactif"} /></Td>
                       <Td align="right" className="num">{formatNumber(q.scans, locale)}</Td>
                       <Td align="right" className="num">{formatNumber(q.liveReservations, locale)}</Td>
                       <Td align="right" className="num" muted>{q.scans > 0 ? formatPercent(q.conversion, 1, locale) : "—"}</Td>
-                      <Td align="right" className="num font-bold text-amber-300">{q.commission > 0 ? formatMad(q.commission, false, locale) : "—"}</Td>
+                      <Td align="right" className="num font-bold text-warn">{q.commission > 0 ? formatMad(q.commission, false, locale) : "—"}</Td>
                       <Td muted className="whitespace-nowrap text-xs">{q.lastReservation ? timeAgo(q.lastReservation, undefined, locale) : "—"}</Td>
                       <Td align="right">
                         <div className="inline-flex items-center gap-0.5">
                           <IconButton icon={Copy} label={t("Copier le lien", "Copy link")} onClick={() => copyLink(q)} className="h-8 w-8" size={14} />
                           <IconButton icon={Power} label={q.active ? t("Désactiver", "Deactivate") : t("Activer", "Activate")} onClick={() => toggleActive(q)} className="h-8 w-8" size={14} />
-                          <Link href={`/hotel/chambres/${q.id}`} className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-white/55 hover:bg-white/10 hover:text-white" aria-label={t("Ouvrir", "Open")}>
+                          <Link href={`/hotel/chambres/${q.id}`} className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-ink-3 hover:bg-fill-2 hover:text-ink" aria-label={t("Ouvrir", "Open")}>
                             <MoreHorizontal size={14} strokeWidth={1.75} />
                           </Link>
                         </div>
@@ -592,7 +592,7 @@ function QrCard({
     <div
       className={cn(
         "hotel-panel group relative flex flex-col p-4 transition-all",
-        selected && "ring-2 ring-sky-400/70",
+        selected && "ring-2 ring-info/25",
         !q.active && "opacity-60"
       )}
     >
@@ -602,8 +602,8 @@ function QrCard({
           onClick={onSelect}
           aria-label={selected ? t("Désélectionner", "Deselect") : t("Sélectionner", "Select")}
           className={cn(
-            "mt-0.5 shrink-0 text-white/40 transition-opacity hover:text-white",
-            selected ? "opacity-100 text-sky-300" : "opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
+            "mt-0.5 shrink-0 text-ink-3 transition-opacity hover:text-ink",
+            selected ? "opacity-100 text-info" : "opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
           )}
         >
           {selected ? <CheckSquare size={16} strokeWidth={1.75} /> : <Square size={16} strokeWidth={1.75} />}
@@ -611,13 +611,13 @@ function QrCard({
         <div className="min-w-0 flex-1">
           <Link href={`/hotel/chambres/${q.id}`} className="flex items-center gap-1.5">
             {room ? (
-              <BedDouble size={14} strokeWidth={1.75} className="shrink-0 text-white/45" />
+              <BedDouble size={14} strokeWidth={1.75} className="shrink-0 text-ink-3" />
             ) : (
-              <MapPin size={14} strokeWidth={1.75} className="shrink-0 text-white/45" />
+              <MapPin size={14} strokeWidth={1.75} className="shrink-0 text-ink-3" />
             )}
-            <span className="truncate text-sm font-bold text-white group-hover:underline">{q.label}</span>
+            <span className="truncate text-sm font-bold text-ink group-hover:underline">{q.label}</span>
           </Link>
-          <p className="font-mono-satoshi mt-0.5 text-[11px] text-white/40">{t("Code", "Code")} {q.code}</p>
+          <p className="font-mono-satoshi mt-0.5 text-xs text-ink-3">{t("Code", "Code")} {q.code}</p>
         </div>
         <StatusPill status={q.active ? "actif" : "inactif"} />
       </div>
@@ -637,9 +637,9 @@ function QrCard({
           { l: t("Résas", "Bookings"), v: formatNumber(q.liveReservations, locale) },
           { l: t("Conv.", "Conv."), v: q.scans > 0 ? formatPercent(q.conversion, 0, locale) : "—" },
         ].map((s) => (
-          <div key={s.l} className="rounded-lg bg-white/[0.05] py-1.5">
-            <dt className="text-[10px] font-medium uppercase tracking-wider text-white/40">{s.l}</dt>
-            <dd className="text-sm font-black text-white">{s.v}</dd>
+          <div key={s.l} className="rounded-lg bg-fill py-1.5">
+            <dt className="text-xs font-medium text-ink-3">{s.l}</dt>
+            <dd className="text-sm font-black text-ink">{s.v}</dd>
           </div>
         ))}
       </dl>
@@ -656,7 +656,7 @@ function QrCard({
           rel="noopener noreferrer"
           aria-label={t("Ouvrir le menu client", "Open the guest menu")}
           title={t("Ouvrir le menu client", "Open the guest menu")}
-          className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-white/55 hover:bg-white/10 hover:text-white"
+          className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-ink-3 hover:bg-fill-2 hover:text-ink"
         >
           <ExternalLink size={14} strokeWidth={1.75} />
         </a>
@@ -763,14 +763,14 @@ function CreateDialog({
             />
           </Field>
           <div>
-            <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.14em] text-white/40">{t("Suggestions", "Suggestions")}</p>
+            <p className="mb-2 text-xs font-bold text-ink-3">{t("Suggestions", "Suggestions")}</p>
             <div className="flex flex-wrap gap-2">
               {getSuggested(t).filter((s) => !existingSet.has(s.toLowerCase())).map((s) => (
                 <button
                   key={s}
                   type="button"
                   onClick={() => setLabel(s)}
-                  className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1.5 text-xs font-medium text-white/65 transition-colors hover:bg-white/10 hover:text-white"
+                  className="rounded-full border border-line bg-fill px-3 py-1.5 text-xs font-medium text-ink-2 transition-colors hover:bg-fill-2 hover:text-ink"
                 >
                   {s}
                 </button>
@@ -812,7 +812,7 @@ function CreateDialog({
           <Field label={t("À", "To")} htmlFor="qr-to">
             <input id="qr-to" value={to} onChange={(e) => setTo(e.target.value.replace(/\D/g, ""))} inputMode="numeric" className={cn(inputClass, "num")} />
           </Field>
-          <p className="col-span-full text-xs text-white/50">
+          <p className="col-span-full text-xs text-ink-3">
             {labels.length > 0
               ? t(
                   `${labels.length} emplacements : ${labels[0]}${labels.length > 1 ? ` → ${labels[labels.length - 1]}` : ""}`,
@@ -827,7 +827,7 @@ function CreateDialog({
       )}
 
       {duplicates.length > 0 && (
-        <p className="mt-4 rounded-xl border border-amber-400/15 bg-amber-500/[0.07] px-3 py-2 text-xs text-white/65">
+        <p className="mt-4 rounded-xl border border-warn/25 bg-warn-soft px-3 py-2 text-xs text-ink-2">
           {t(
             `Déjà existant${duplicates.length > 1 ? "s" : ""}, ignoré${duplicates.length > 1 ? "s" : ""} : `,
             "Already exist, skipped: "

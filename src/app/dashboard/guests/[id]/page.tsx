@@ -96,10 +96,10 @@ function computeSegments(
 /* ---------- Présentation ---------- */
 
 const SEGMENT_STYLES: Record<string, string> = {
-  VIP: "bg-amber-400/15 text-amber-400 border-amber-400/20",
-  Habitué: "bg-emerald-500/15 text-emerald-400 border-emerald-400/20",
-  Nouveau: "bg-blue-500/15 text-blue-300 border-blue-400/20",
-  "À risque": "bg-red-500/15 text-red-400 border-red-400/20",
+  VIP: "bg-warn-soft text-warn border-warn/25",
+  Habitué: "bg-ok-soft text-ok border-ok/25",
+  Nouveau: "bg-info-soft text-info border-info/25",
+  "À risque": "bg-danger-soft text-danger border-danger/25",
 };
 
 /* Libellé affiché d'un segment (la clé reste en français). */
@@ -162,19 +162,19 @@ export default function GuestProfilePage({
       <div className="space-y-6">
         <Link
           href="/dashboard/guests"
-          className="font-ui inline-flex items-center gap-2 text-sm text-white/50 hover:text-white transition-colors"
+          className="font-ui inline-flex items-center gap-2 text-sm text-ink-3 hover:text-ink transition-colors"
         >
           <ArrowLeft size={16} strokeWidth={1.5} />
           {t("Retour aux clients", "Back to guests")}
         </Link>
-        <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-12 text-center">
-          <div className="w-14 h-14 rounded-2xl bg-white/[0.07] border border-white/[0.12] flex items-center justify-center mx-auto mb-5">
-            <UserX size={26} strokeWidth={1.5} className="text-white/50" />
+        <div className=" bg-panel border border-line rounded-3xl p-12 text-center">
+          <div className="w-14 h-14 rounded-2xl bg-fill-2 border border-line flex items-center justify-center mx-auto mb-5">
+            <UserX size={26} strokeWidth={1.5} className="text-ink-3" />
           </div>
-          <h1 className="font-display text-xl font-normal text-white mb-2">
+          <h1 className="font-display text-xl font-normal text-ink mb-2">
             {t("Client introuvable", "Guest not found")}
           </h1>
-          <p className="font-ui text-sm text-white/50 max-w-md mx-auto">
+          <p className="font-ui text-sm text-ink-3 max-w-md mx-auto">
             {t(
               "Aucune réservation ne correspond à ce numéro pour votre établissement. La fiche a peut-être été ouverte depuis un ancien lien.",
               "No reservation matches this number at your venue. The profile may have been opened from an old link."
@@ -257,34 +257,34 @@ export default function GuestProfilePage({
       {/* Retour */}
       <Link
         href="/dashboard/guests"
-        className="font-ui inline-flex items-center gap-2 text-sm text-white/50 hover:text-white transition-colors"
+        className="font-ui inline-flex items-center gap-2 text-sm text-ink-3 hover:text-ink transition-colors"
       >
         <ArrowLeft size={16} strokeWidth={1.5} />
         {t("Retour aux clients", "Back to guests")}
       </Link>
 
       {/* En-tête */}
-      <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6 flex flex-wrap items-center gap-5">
-        <div className="h-16 w-16 rounded-full bg-white/10 border border-white/[0.12] flex items-center justify-center shrink-0">
-          <span className="font-ui text-xl font-semibold text-white">
+      <div className=" bg-panel border border-line rounded-3xl p-6 flex flex-wrap items-center gap-5">
+        <div className="h-16 w-16 rounded-full bg-fill-2 border border-line flex items-center justify-center shrink-0">
+          <span className="font-ui text-xl font-semibold text-ink">
             {initials || "?"}
           </span>
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2.5">
-            <h1 className="font-display text-2xl font-light text-white">
+            <h1 className="font-display text-2xl font-light text-ink">
               {name}
             </h1>
             {segments.map((s) => (
               <span
                 key={s}
-                className={`font-ui inline-flex rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${SEGMENT_STYLES[s] ?? "bg-white/10 text-white/50 border-white/10"}`}
+                className={`font-ui inline-flex rounded-full border px-2 py-0.5 text-xs font-bold ${SEGMENT_STYLES[s] ?? "bg-fill-2 text-ink-3 border-line"}`}
               >
                 {segmentLabel(s, t)}
               </span>
             ))}
           </div>
-          <p className="font-ui mt-1 inline-flex items-center gap-1.5 text-sm text-white/50">
+          <p className="font-ui mt-1 inline-flex items-center gap-1.5 text-sm text-ink-3">
             <Phone size={13} strokeWidth={1.5} />
             {phone}
           </p>
@@ -293,7 +293,7 @@ export default function GuestProfilePage({
           href={`https://wa.me/${phone.replace(/\D/g, "")}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="font-ui inline-flex items-center gap-2 bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-400/20 text-emerald-400 text-sm font-medium px-4 py-2.5 rounded-xl transition-colors shrink-0"
+          className="font-ui inline-flex items-center gap-2 bg-ok-soft hover:bg-ok-soft border border-ok/25 text-ok text-sm font-medium px-4 py-2.5 rounded-xl transition-colors shrink-0"
         >
           <MessageCircle size={16} strokeWidth={1.5} />
           {t("Contacter sur WhatsApp", "Message on WhatsApp")}
@@ -305,14 +305,14 @@ export default function GuestProfilePage({
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* Historique des visites */}
-        <div className="xl:col-span-2 backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl overflow-hidden">
+        <div className="xl:col-span-2 bg-panel border border-line rounded-2xl overflow-hidden">
           <div className="px-5 pt-5 pb-3">
-            <h2 className="font-ui text-base font-semibold text-white">
+            <h2 className="font-ui text-base font-semibold text-ink">
               {t("Historique des visites", "Visit history")}
             </h2>
           </div>
           {history.length === 0 ? (
-            <p className="font-ui px-5 pb-6 text-sm text-white/40">
+            <p className="font-ui px-5 pb-6 text-sm text-ink-3">
               {t(
                 "Pas encore de visite passée, la première réservation de ce client est à venir.",
                 "No past visits yet. This guest's first reservation is still to come."
@@ -322,7 +322,7 @@ export default function GuestProfilePage({
             <div className="overflow-x-auto">
               <table className="w-full text-left">
                 <thead>
-                  <tr className="border-y border-white/10 bg-white/[0.04]">
+                  <tr className="border-y border-line bg-fill">
                     {[
                       t("Date", "Date"),
                       t("Heure", "Time"),
@@ -335,7 +335,7 @@ export default function GuestProfilePage({
                       (h) => (
                         <th
                           key={h}
-                          className="font-ui px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-white/50 whitespace-nowrap"
+                          className="font-ui px-4 py-2.5 text-xs font-bold text-ink-3 whitespace-nowrap"
                         >
                           {h}
                         </th>
@@ -347,18 +347,18 @@ export default function GuestProfilePage({
                   {history.map((r) => (
                     <tr
                       key={r.id}
-                      className="border-b border-white/[0.06] last:border-0"
+                      className="border-b border-line last:border-0"
                     >
-                      <td className="font-ui px-4 py-3 text-sm text-white whitespace-nowrap">
+                      <td className="font-ui px-4 py-3 text-sm text-ink whitespace-nowrap">
                         {fmtDate(r.reservation_date, locale)}
                       </td>
-                      <td className="font-ui px-4 py-3 text-sm text-white/70 whitespace-nowrap">
+                      <td className="font-ui px-4 py-3 text-sm text-ink-2 whitespace-nowrap">
                         {fmtTime(r.reservation_time, locale)}
                       </td>
-                      <td className="font-ui px-4 py-3 text-sm text-white/70 tabular-nums">
+                      <td className="font-ui px-4 py-3 text-sm text-ink-2 tabular-nums">
                         {r.party_size}
                       </td>
-                      <td className="font-ui px-4 py-3 text-sm text-white tabular-nums whitespace-nowrap">
+                      <td className="font-ui px-4 py-3 text-sm text-ink tabular-nums whitespace-nowrap">
                         {r.amount_spent !== null
                           ? `${r.amount_spent.toLocaleString(intl)} MAD`
                           : "—"}
@@ -367,7 +367,7 @@ export default function GuestProfilePage({
                         <StatusBadge status={r.status} />
                       </td>
                       <td className="px-4 py-3">
-                        <span className="font-ui rounded-md bg-white/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white/50 whitespace-nowrap">
+                        <span className="font-ui rounded-md bg-fill-2 px-1.5 py-0.5 text-xs font-bold text-ink-3 whitespace-nowrap">
                           {sourceLabel(r.source, t)}
                         </span>
                       </td>
@@ -376,13 +376,13 @@ export default function GuestProfilePage({
                           <div>
                             <RatingStars value={r.rating} size={12} />
                             {r.rating_comment && (
-                              <p className="font-ui mt-1 text-xs text-white/50 leading-snug max-w-[16rem]">
+                              <p className="font-ui mt-1 text-xs text-ink-3 leading-snug max-w-[16rem]">
                                 {t(`« ${r.rating_comment} »`, `“${r.rating_comment}”`)}
                               </p>
                             )}
                           </div>
                         ) : (
-                          <span className="text-white/25">—</span>
+                          <span className="text-ink-3">—</span>
                         )}
                       </td>
                     </tr>
@@ -396,12 +396,12 @@ export default function GuestProfilePage({
         {/* Colonne droite */}
         <div className="space-y-6">
           {/* Réservations à venir */}
-          <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl p-5">
-            <h2 className="font-ui text-base font-semibold text-white mb-4">
+          <div className=" bg-panel border border-line rounded-2xl p-5">
+            <h2 className="font-ui text-base font-semibold text-ink mb-4">
               {t("Réservations à venir", "Upcoming reservations")}
             </h2>
             {upcoming.length === 0 ? (
-              <p className="font-ui text-sm text-white/40">
+              <p className="font-ui text-sm text-ink-3">
                 {t("Aucune réservation à venir pour ce client.", "No upcoming reservations for this guest.")}
               </p>
             ) : (
@@ -409,13 +409,13 @@ export default function GuestProfilePage({
                 {upcoming.map((r) => (
                   <div
                     key={r.id}
-                    className="bg-white/[0.05] border border-white/[0.08] rounded-xl p-4 flex items-center justify-between gap-3"
+                    className="bg-fill border border-line rounded-xl p-4 flex items-center justify-between gap-3"
                   >
                     <div>
-                      <p className="font-ui text-sm font-medium text-white">
+                      <p className="font-ui text-sm font-medium text-ink">
                         {fmtDate(r.reservation_date, locale)}
                       </p>
-                      <div className="flex items-center gap-3 mt-1 text-xs text-white/50 font-ui">
+                      <div className="flex items-center gap-3 mt-1 text-xs text-ink-3 font-ui">
                         <span className="inline-flex items-center gap-1">
                           <Clock size={12} strokeWidth={1.5} />
                           {fmtTime(r.reservation_time, locale)}
@@ -435,13 +435,13 @@ export default function GuestProfilePage({
           </div>
 
           {/* Notes laissées par le client */}
-          <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl p-5">
-            <h2 className="font-ui text-base font-semibold text-white mb-4 inline-flex items-center gap-2">
-              <StickyNote size={15} strokeWidth={1.5} className="text-white/50" />
+          <div className=" bg-panel border border-line rounded-2xl p-5">
+            <h2 className="font-ui text-base font-semibold text-ink mb-4 inline-flex items-center gap-2">
+              <StickyNote size={15} strokeWidth={1.5} className="text-ink-3" />
               {t("Notes du client", "Guest notes")}
             </h2>
             {clientNotes.length === 0 ? (
-              <p className="font-ui text-sm text-white/40">
+              <p className="font-ui text-sm text-ink-3">
                 {t(
                   "Ce client n'a laissé aucune note avec ses réservations.",
                   "This guest hasn't left any notes with their reservations."
@@ -452,12 +452,12 @@ export default function GuestProfilePage({
                 {clientNotes.map((r) => (
                   <div
                     key={r.id}
-                    className="bg-white/[0.05] rounded-xl p-3"
+                    className="bg-fill rounded-xl p-3"
                   >
-                    <p className="font-ui text-xs text-white/40 mb-1">
+                    <p className="font-ui text-xs text-ink-3 mb-1">
                       {fmtDate(r.reservation_date, locale)}
                     </p>
-                    <p className="font-ui text-sm text-white/70 leading-relaxed">
+                    <p className="font-ui text-sm text-ink-2 leading-relaxed">
                       {r.notes}
                     </p>
                   </div>

@@ -190,19 +190,19 @@ function Bars({
           className="group flex-1 flex flex-col items-center gap-1 min-w-0"
         >
           {showValues && (
-            <span className="font-ui text-[9px] text-white/50 tabular-nums">
+            <span className="font-ui text-xs text-ink-3 tabular-nums">
               {d.value > 0 ? (short ?? format)(d.value) : ""}
             </span>
           )}
           <div
             className={`w-full rounded-t-md transition-colors ${
               d.value > 0
-                ? "bg-blue-400/80 group-hover:bg-blue-300"
-                : "bg-white/[0.06]"
+                ? "bg-info-soft group-hover:bg-link-strong"
+                : "bg-fill"
             }`}
             style={{ height: `${Math.max((d.value / max) * 96, 3)}px` }}
           />
-          <span className="font-ui text-[9px] text-white/40 truncate max-w-full">
+          <span className="font-ui text-xs text-ink-3 truncate max-w-full">
             {i % labelEvery === 0 ? d.label : ""}
           </span>
         </div>
@@ -255,7 +255,7 @@ function ChannelDonut({
             cy="18"
             r={DONUT_RADIUS}
             fill="none"
-            stroke="rgba(255,255,255,0.06)"
+            stroke="var(--app-line)"
             strokeWidth="4"
           />
           {arcs.map(({ segment, arc, offset }) => (
@@ -273,10 +273,10 @@ function ChannelDonut({
           ))}
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="font-display text-2xl font-light text-white tabular-nums">
+          <span className="font-display text-2xl font-light text-ink tabular-nums">
             {total}
           </span>
-          <span className="font-ui text-[9px] text-white/40">
+          <span className="font-ui text-xs text-ink-3">
             {t(`réservation${total > 1 ? "s" : ""}`, `reservation${total === 1 ? "" : "s"}`)}
           </span>
         </div>
@@ -290,15 +290,15 @@ function ChannelDonut({
             <div key={s.label} className="flex items-center gap-2.5">
               <span className={`w-3 h-3 rounded-full flex-shrink-0 ${s.dot}`} />
               <div className="min-w-0">
-                <p className="font-ui text-sm text-white font-medium flex items-center gap-1.5">
+                <p className="font-ui text-sm text-ink font-medium flex items-center gap-1.5">
                   <Icon
                     size={13}
                     strokeWidth={1.5}
-                    className="text-white/40 flex-shrink-0"
+                    className="text-ink-3 flex-shrink-0"
                   />
                   {s.label}
                 </p>
-                <p className="font-ui text-xs text-white/40 tabular-nums">
+                <p className="font-ui text-xs text-ink-3 tabular-nums">
                   {s.value} · {pct}%
                 </p>
               </div>
@@ -322,14 +322,14 @@ function Kpi({
   hint?: string;
 }) {
   return (
-    <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl p-5">
-      <p className="font-ui text-[10px] font-medium uppercase tracking-[0.18em] text-white/45">
+    <div className=" bg-panel border border-line rounded-2xl p-5">
+      <p className="font-ui text-xs font-medium text-ink-3">
         {label}
       </p>
-      <p className="font-display mt-2 text-3xl font-light text-white tabular-nums">
+      <p className="font-display mt-2 text-3xl font-light text-ink tabular-nums">
         {value}
       </p>
-      {hint && <p className="font-ui mt-1 text-[11px] text-white/40">{hint}</p>}
+      {hint && <p className="font-ui mt-1 text-xs text-ink-3">{hint}</p>}
     </div>
   );
 }
@@ -494,21 +494,21 @@ export default function AnalyticsPage() {
         label: t("Réseau QR", "QR network"),
         value: qr,
         stroke: "#60a5fa",
-        dot: "bg-blue-400",
+        dot: "bg-link",
         icon: QrCode,
       },
       {
         label: t("Portail direct", "Direct portal"),
         value: portal,
         stroke: "#34d399",
-        dot: "bg-emerald-400",
+        dot: "bg-ok",
         icon: Globe,
       },
       {
         label: t("Établissement", "Venue"),
         value: venue,
-        stroke: "rgba(255,255,255,0.35)",
-        dot: "bg-white/35",
+        stroke: "var(--app-ink-4)",
+        dot: "bg-fill-3",
         icon: Store,
       },
     ];
@@ -555,13 +555,13 @@ export default function AnalyticsPage() {
   return (
     <div className="space-y-6">
       {/* En-tête + sélecteur de période */}
-      <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6 sm:p-8">
+      <div className=" bg-panel border border-line rounded-3xl p-6 sm:p-8">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
           <div>
-            <h1 className="font-display text-3xl font-light text-white">
+            <h1 className="font-display text-3xl font-light text-ink">
               {t("Analyses", "Analytics")}
             </h1>
-            <p className="font-ui text-sm text-white/60 mt-1.5">
+            <p className="font-ui text-sm text-ink-2 mt-1.5">
               {t(
                 "Les performances réelles de votre établissement, calculées sur vos réservations, mises à jour en temps réel.",
                 "Your venue's real performance, calculated from your reservations and updated in real time."
@@ -570,15 +570,15 @@ export default function AnalyticsPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            <div className="flex gap-1 bg-white/[0.07] border border-white/[0.12] rounded-2xl p-1">
+            <div className="flex gap-1 bg-fill-2 border border-line rounded-2xl p-1">
               {periods.map((p) => (
                 <button
                   key={p.key}
                   onClick={() => setPeriod(p.key)}
                   className={`font-ui px-4 py-2 text-xs font-medium rounded-xl transition-all ${
                     period === p.key
-                      ? "bg-blue-500 text-white shadow-lg shadow-blue-500/25"
-                      : "text-white/50 hover:text-white/80"
+                      ? "bg-link text-white shadow-lg shadow-blue-500/25"
+                      : "text-ink-3 hover:text-ink"
                   }`}
                 >
                   {p.label}
@@ -588,7 +588,7 @@ export default function AnalyticsPage() {
             {filtered.length > 0 && (
               <button
                 onClick={handleExport}
-                className="font-ui flex items-center gap-2 bg-white/10 hover:bg-white/15 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors"
+                className="font-ui flex items-center gap-2 bg-fill-2 hover:bg-fill-3 text-ink text-sm font-medium px-4 py-2.5 rounded-xl transition-colors"
               >
                 <Download size={16} strokeWidth={1.5} />
                 {t("Exporter en CSV", "Export as CSV")}
@@ -601,14 +601,14 @@ export default function AnalyticsPage() {
       {reservations.length === 0 ? (
         /* Aucune réservation, toutes périodes confondues : on explique
            d'où viendront les chiffres au lieu d'aligner des zéros. */
-        <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-12 text-center">
-          <div className="w-14 h-14 rounded-2xl bg-blue-500/15 border border-blue-400/20 flex items-center justify-center mx-auto mb-5">
-            <BarChart3 size={26} strokeWidth={1.5} className="text-blue-400" />
+        <div className=" bg-panel border border-line rounded-3xl p-12 text-center">
+          <div className="w-14 h-14 rounded-2xl bg-info-soft border border-info/25 flex items-center justify-center mx-auto mb-5">
+            <BarChart3 size={26} strokeWidth={1.5} className="text-info" />
           </div>
-          <h2 className="font-display text-xl font-normal text-white mb-2">
+          <h2 className="font-display text-xl font-normal text-ink mb-2">
             {t("Pas encore de données à analyser", "No data to analyse yet")}
           </h2>
-          <p className="font-ui text-sm text-white/50 max-w-md mx-auto">
+          <p className="font-ui text-sm text-ink-3 max-w-md mx-auto">
             {t(
               "Dès vos premières réservations, via le réseau QR des hôtels ou votre portail direct, cette page calculera automatiquement votre chiffre d'affaires, vos couverts, votre note moyenne et vos meilleurs jours. Rien à configurer.",
               "From your very first reservations, via the hotels' QR network or your direct portal, this page will automatically calculate your revenue, covers, average rating and best days. Nothing to set up."
@@ -617,18 +617,18 @@ export default function AnalyticsPage() {
         </div>
       ) : filtered.length === 0 ? (
         /* Des réservations existent, mais pas sur la période choisie. */
-        <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-12 text-center">
-          <div className="w-14 h-14 rounded-2xl bg-white/[0.07] border border-white/[0.12] flex items-center justify-center mx-auto mb-5">
+        <div className=" bg-panel border border-line rounded-3xl p-12 text-center">
+          <div className="w-14 h-14 rounded-2xl bg-fill-2 border border-line flex items-center justify-center mx-auto mb-5">
             <CalendarRange
               size={26}
               strokeWidth={1.5}
-              className="text-white/60"
+              className="text-ink-2"
             />
           </div>
-          <h2 className="font-display text-xl font-normal text-white mb-2">
+          <h2 className="font-display text-xl font-normal text-ink mb-2">
             {t(`Aucune réservation sur « ${periodLabel} »`, `No reservations in “${periodLabel}”`)}
           </h2>
-          <p className="font-ui text-sm text-white/50 max-w-md mx-auto">
+          <p className="font-ui text-sm text-ink-3 max-w-md mx-auto">
             {t(
               `Votre historique contient ${reservations.length} réservation${reservations.length > 1 ? "s" : ""}, mais aucune sur cette période. Élargissez la période : « Tout » affiche l'ensemble de votre historique.`,
               `Your history has ${reservations.length} reservation${reservations.length === 1 ? "" : "s"}, but none in this period. Widen the period: “All time” shows your full history.`
@@ -717,13 +717,13 @@ export default function AnalyticsPage() {
 
           {/* Histogrammes */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
-              <h3 className="font-ui text-white font-bold text-sm mb-1">
+            <div className=" bg-panel border border-line rounded-3xl p-6">
+              <h3 className="font-ui text-ink font-bold text-sm mb-1">
                 {buckets.daily
                   ? t("Couverts par jour", "Covers per day")
                   : t("Couverts par mois", "Covers per month")}
               </h3>
-              <p className="font-ui text-[11px] text-white/40 mb-5">
+              <p className="font-ui text-xs text-ink-3 mb-5">
                 {t("hors annulations et no-shows", "excluding cancellations and no-shows")}
               </p>
               <Bars
@@ -737,13 +737,13 @@ export default function AnalyticsPage() {
               />
             </div>
 
-            <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
-              <h3 className="font-ui text-white font-bold text-sm mb-1">
+            <div className=" bg-panel border border-line rounded-3xl p-6">
+              <h3 className="font-ui text-ink font-bold text-sm mb-1">
                 {buckets.daily
                   ? t("Chiffre d'affaires par jour", "Revenue per day")
                   : t("Chiffre d'affaires par mois", "Revenue per month")}
               </h3>
-              <p className="font-ui text-[11px] text-white/40 mb-5">
+              <p className="font-ui text-xs text-ink-3 mb-5">
                 {t("montants saisis ou remontés par la caisse", "amounts entered manually or synced from the POS")}
               </p>
               <Bars
@@ -760,8 +760,8 @@ export default function AnalyticsPage() {
 
           {/* Canaux + meilleurs jours */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
-              <h3 className="font-ui text-white font-bold text-sm mb-5">
+            <div className=" bg-panel border border-line rounded-3xl p-6">
+              <h3 className="font-ui text-ink font-bold text-sm mb-5">
                 {t("Répartition par canal", "Breakdown by channel")}
               </h3>
               <ChannelDonut
@@ -770,11 +770,11 @@ export default function AnalyticsPage() {
               />
             </div>
 
-            <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
-              <h3 className="font-ui text-white font-bold text-sm mb-1">
+            <div className=" bg-panel border border-line rounded-3xl p-6">
+              <h3 className="font-ui text-ink font-bold text-sm mb-1">
                 {t("Meilleurs jours de la semaine", "Best days of the week")}
               </h3>
-              <p className="font-ui text-[11px] text-white/40 mb-5">
+              <p className="font-ui text-xs text-ink-3 mb-5">
                 {t("couverts moyens par jour d'activité", "average covers per trading day")}
               </p>
               <Bars
@@ -790,11 +790,11 @@ export default function AnalyticsPage() {
                 }
               />
               {weekdays.best >= 0 && (
-                <p className="font-ui mt-4 flex items-center gap-1.5 text-xs text-white/50">
+                <p className="font-ui mt-4 flex items-center gap-1.5 text-xs text-ink-3">
                   <Star
                     size={13}
                     strokeWidth={1.5}
-                    className="text-amber-400"
+                    className="text-warn"
                   />
                   {t(
                     `Votre meilleur jour : ${weekdays.data[weekdays.best].full} (${weekdays.data[weekdays.best].value.toLocaleString(intl, { maximumFractionDigits: 1 })} couverts en moyenne)`,

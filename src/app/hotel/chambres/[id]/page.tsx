@@ -358,7 +358,7 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
               <QRCode value={link} size={148} />
             </div>
             <div className="min-w-0 flex-1 space-y-3">
-              <p className="font-mono-satoshi truncate rounded-xl border border-white/10 bg-black/30 px-3 py-2.5 text-xs text-white/70">
+              <p className="font-mono-satoshi truncate rounded-xl border border-line bg-panel px-3 py-2.5 text-xs text-ink-2">
                 {link}
               </p>
               <div className="flex flex-wrap gap-2">
@@ -375,8 +375,8 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
                   PNG
                 </Button>
               </div>
-              <div className="border-t border-white/[0.08] pt-3">
-                <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.14em] text-white/40">{t("Partager sans QR", "Share without QR")}</p>
+              <div className="border-t border-line pt-3">
+                <p className="mb-2 text-xs font-bold text-ink-3">{t("Partager sans QR", "Share without QR")}</p>
                 <div className="flex flex-wrap gap-2">
                   <LinkButton size="sm" variant="ghost" href={shareByWhatsapp(link, hotelName, locale)} external icon={MessageCircle}>
                     WhatsApp
@@ -392,8 +392,8 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
             </div>
           </div>
           {preview && (
-            <div className="mt-5 flex justify-center border-t border-white/[0.08] pt-5">
-              <div className="w-[300px] overflow-hidden rounded-[2rem] border-[6px] border-black bg-black shadow-2xl">
+            <div className="mt-5 flex justify-center border-t border-line pt-5">
+              <div className="w-[300px] overflow-hidden rounded-[2rem] border-[6px] border-black bg-ink shadow-2xl">
                 <iframe
                   title={t("Aperçu du menu client", "Guest menu preview")}
                   src={`${link}${link.includes("?") ? "&" : "?"}apercu=1`}
@@ -446,13 +446,13 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
                   className={cn(
                     "flex items-center gap-2 rounded-xl border px-3.5 py-2.5 text-sm font-bold transition-colors",
                     off
-                      ? "border-red-400/40 bg-red-500/15 text-red-100"
-                      : "border-white/10 bg-white/[0.04] text-white hover:bg-white/[0.08]"
+                      ? "border-danger/25 bg-danger-soft text-red-100"
+                      : "border-line bg-fill text-ink hover:bg-fill-2"
                   )}
                 >
                   <Icon size={15} strokeWidth={1.75} />
                   <span className={cn(off && "line-through decoration-red-300/70")}>{categoryLabel(key, locale)}</span>
-                  <span className="text-[10px] font-medium uppercase tracking-wider opacity-60">
+                  <span className="text-xs font-medium opacity-60">
                     {off ? t("retirée", "removed") : t("proposée", "offered")}
                   </span>
                 </button>
@@ -476,7 +476,7 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
                 </Button>
               )}
             </div>
-            <label className="flex flex-wrap items-center gap-2 text-xs text-white/60">
+            <label className="flex flex-wrap items-center gap-2 text-xs text-ink-2">
               {t(<>Jusqu&apos;au</>, <>Until</>)}
               <input
                 type="date"
@@ -486,16 +486,16 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
                 className={cn(inputClass, "h-9 w-auto py-0 text-[13px]")}
               />
               {until ? (
-                <button type="button" onClick={() => setUntil(null)} className="text-[11px] font-bold text-sky-300 hover:text-sky-200">
+                <button type="button" onClick={() => setUntil(null)} className="text-xs font-bold text-info hover:text-info">
                   {t("sans limite", "no limit")}
                 </button>
               ) : (
-                <span className="text-[11px] text-white/35">{t("sans limite", "no limit")}</span>
+                <span className="text-xs text-ink-3">{t("sans limite", "no limit")}</span>
               )}
             </label>
           </div>
           {qr.hidden_categories.length > 0 && (
-            <p className="mt-3 text-xs text-white/45">
+            <p className="mt-3 text-xs text-ink-3">
               {rulesExpired
                 ? t(
                     "L'échéance est passée : le menu de ce QR est de nouveau complet.",
@@ -515,12 +515,12 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
           description={
             hotelCity
               ? t(
-                  <>Catalogue twocards de {hotelCity} et vos <Link href="/hotel/adresses" className="font-bold text-sky-300">adresses maison</Link> · {shownOffers}/{totalOffers} proposées. Retirez ce que vous ne souhaitez pas suggérer à ce client.</>,
-                  <>The twocards catalogue for {hotelCity} and your <Link href="/hotel/adresses" className="font-bold text-sky-300">own places</Link> · {shownOffers}/{totalOffers} offered. Remove anything you don&apos;t want to suggest to this guest.</>
+                  <>Catalogue twocards de {hotelCity} et vos <Link href="/hotel/adresses" className="font-bold text-info">adresses maison</Link> · {shownOffers}/{totalOffers} proposées. Retirez ce que vous ne souhaitez pas suggérer à ce client.</>,
+                  <>The twocards catalogue for {hotelCity} and your <Link href="/hotel/adresses" className="font-bold text-info">own places</Link> · {shownOffers}/{totalOffers} offered. Remove anything you don&apos;t want to suggest to this guest.</>
                 )
               : t(
-                  <>Indiquez la ville de l&apos;hôtel dans les <Link href="/hotel/settings" className="font-bold text-sky-300">paramètres</Link> pour limiter le catalogue à votre ville, en attendant, tout est proposé.</>,
-                  <>Add the hotel&apos;s city in <Link href="/hotel/settings" className="font-bold text-sky-300">settings</Link> to limit the catalogue to your city; until then, everything is offered.</>
+                  <>Indiquez la ville de l&apos;hôtel dans les <Link href="/hotel/settings" className="font-bold text-info">paramètres</Link> pour limiter le catalogue à votre ville, en attendant, tout est proposé.</>,
+                  <>Add the hotel&apos;s city in <Link href="/hotel/settings" className="font-bold text-info">settings</Link> to limit the catalogue to your city; until then, everything is offered.</>
                 )
           }
           actions={
@@ -538,7 +538,7 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
           className="xl:col-span-3"
         >
           <div className="relative mb-4">
-            <Search size={14} strokeWidth={1.75} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
+            <Search size={14} strokeWidth={1.75} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-3" />
             <input
               value={menuSearch}
               onChange={(e) => setMenuSearch(e.target.value)}
@@ -554,15 +554,15 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
               const offers = q ? cat.offers.filter((o) => o.name.toLowerCase().includes(q) || o.tag.toLowerCase().includes(q)) : cat.offers;
               if (q && offers.length === 0) return null;
               return (
-                <div key={cat.key} className="rounded-xl border border-white/10 bg-white/[0.03]">
-                  <div className="flex items-center justify-between gap-2 border-b border-white/[0.08] px-3.5 py-2.5">
+                <div key={cat.key} className="rounded-xl border border-line bg-fill">
+                  <div className="flex items-center justify-between gap-2 border-b border-line px-3.5 py-2.5">
                     <div className="flex items-center gap-2.5">
-                      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10">
-                        <Icon size={15} strokeWidth={1.75} className="text-white/85" />
+                      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-fill-2">
+                        <Icon size={15} strokeWidth={1.75} className="text-ink" />
                       </span>
                       <div>
-                        <p className="text-sm font-bold text-white">{cat.label}</p>
-                        <p className="num text-[11px] text-white/45">
+                        <p className="text-sm font-bold text-ink">{cat.label}</p>
+                        <p className="num text-xs text-ink-3">
                           {shown}/{ids.length} {t(`proposée${shown > 1 ? "s" : ""}`, "offered")}
                         </p>
                       </div>
@@ -570,28 +570,28 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
                     <button
                       type="button"
                       onClick={() => setCategory(ids, shown !== ids.length)}
-                      className="text-[11px] font-bold text-sky-300 hover:text-sky-200"
+                      className="text-xs font-bold text-info hover:text-info"
                     >
                       {shown === ids.length ? t("Tout retirer", "Remove all") : t("Tout proposer", "Offer all")}
                     </button>
                   </div>
-                  <ul className="divide-y divide-white/[0.05] px-1.5 py-1">
+                  <ul className="divide-y divide-line px-1.5 py-1">
                     {offers.map((o) => {
                       const global = globalHidden.has(o.id);
                       const on = !global && !hiddenSet.has(o.id);
                       return (
                         <li key={o.id} className={cn("flex items-center justify-between gap-3 rounded-lg px-2 py-2 transition-opacity", !on && "opacity-50")}>
                           <button type="button" onClick={() => toggleOffer(o.id)} className="min-w-0 flex-1 text-left">
-                            <span className="flex items-center gap-1.5 truncate text-[13px] font-medium text-white">
+                            <span className="flex items-center gap-1.5 truncate text-[13px] font-medium text-ink">
                               <span className="truncate">{o.name}</span>
                               {o.source === "hotel" && (
-                                <span className="shrink-0 rounded-md bg-sky-500/20 px-1.5 py-0.5 text-[10px] font-bold text-sky-200">{t("Maison", "Own")}</span>
+                                <span className="shrink-0 rounded-md bg-info-soft px-1.5 py-0.5 text-xs font-bold text-info">{t("Maison", "Own")}</span>
                               )}
                               {global && (
-                                <span className="shrink-0 rounded-md bg-white/10 px-1.5 py-0.5 text-[10px] font-bold text-white/60" title={t("Retirée pour tout l'hôtel dans Mes adresses", "Removed for the whole hotel in My places")}>{t(<>Tout l&apos;hôtel</>, <>Whole hotel</>)}</span>
+                                <span className="shrink-0 rounded-md bg-fill-2 px-1.5 py-0.5 text-xs font-bold text-ink-2" title={t("Retirée pour tout l'hôtel dans Mes adresses", "Removed for the whole hotel in My places")}>{t(<>Tout l&apos;hôtel</>, <>Whole hotel</>)}</span>
                               )}
                             </span>
-                            <span className="flex items-center gap-1 text-[11px] text-white/45">
+                            <span className="flex items-center gap-1 text-xs text-ink-3">
                               {o.city && (
                                 <>
                                   <MapPin size={10} strokeWidth={1.75} /> {o.city} ·
@@ -655,13 +655,13 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
                 <Tr key={r.id} onClick={() => router.push(`/hotel/reservations?id=${r.id}`)}>
                   <Td>
                     <p className="font-bold">{r.guest_name}</p>
-                    <a href={whatsappLink(r.guest_phone)} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="num text-xs text-white/45 hover:text-emerald-300">
+                    <a href={whatsappLink(r.guest_phone)} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="num text-xs text-ink-3 hover:text-ok">
                       {r.guest_phone}
                     </a>
                   </Td>
                   <Td>
                     <p className="font-medium">{r.venue_name}</p>
-                    <p className="text-xs text-white/45">{reservationCategoryLabel(r.category, locale)}</p>
+                    <p className="text-xs text-ink-3">{reservationCategoryLabel(r.category, locale)}</p>
                   </Td>
                   <Td muted className="whitespace-nowrap">
                     {formatDate(r.reservation_date, undefined, locale)}
@@ -679,11 +679,11 @@ export default function HotelQrDetailPage({ params }: { params: Promise<{ id: st
                         <RatingStars value={r.rating} size={11} />
                       </span>
                     ) : (
-                      <Star size={12} strokeWidth={1.5} className="text-white/20" />
+                      <Star size={12} strokeWidth={1.5} className="text-ink-4" />
                     )}
                   </Td>
                   <Td align="right" muted className="num whitespace-nowrap">{r.amount_spent !== null ? formatMad(r.amount_spent, false, locale) : "—"}</Td>
-                  <Td align="right" className="num whitespace-nowrap font-bold text-amber-300">{r.commission > 0 ? formatMad(r.commission, false, locale) : "—"}</Td>
+                  <Td align="right" className="num whitespace-nowrap font-bold text-warn">{r.commission > 0 ? formatMad(r.commission, false, locale) : "—"}</Td>
                 </Tr>
               ))}
             </tbody>

@@ -75,10 +75,10 @@ function PrintContent() {
             <LinkButton href="/hotel/chambres" variant="ghost" size="sm" icon={ArrowLeft} className="-ml-3 mb-2">
               {t("Retour aux chambres", "Back to rooms")}
             </LinkButton>
-            <h1 className="font-display text-3xl font-bold tracking-tight text-white">
+            <h1 className="font-display text-3xl font-bold tracking-tight text-ink">
               {t("Imprimer les QR codes", "Print QR codes")}
             </h1>
-            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-white/60">
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-2">
               {t(
                 <>
                   Une carte par emplacement, prête à poser sur la table de nuit, au lobby ou au spa. Réglez le format, le
@@ -101,7 +101,7 @@ function PrintContent() {
 
         <div className="hotel-panel grid gap-4 p-5 md:grid-cols-2 xl:grid-cols-4">
           <div className="space-y-1.5">
-            <p className="text-xs font-bold text-white/70">{t("Emplacements", "Locations")}</p>
+            <p className="text-xs font-bold text-ink-2">{t("Emplacements", "Locations")}</p>
             <Segmented
               size="sm"
               value={scope}
@@ -114,7 +114,7 @@ function PrintContent() {
             />
           </div>
           <div className="space-y-1.5">
-            <p className="text-xs font-bold text-white/70">{t("Format", "Format")}</p>
+            <p className="text-xs font-bold text-ink-2">{t("Format", "Format")}</p>
             <Segmented<Size>
               size="sm"
               value={size}
@@ -127,7 +127,7 @@ function PrintContent() {
             />
           </div>
           <div className="space-y-1.5">
-            <p className="text-xs font-bold text-white/70">{t("Style", "Style")}</p>
+            <p className="text-xs font-bold text-ink-2">{t("Style", "Style")}</p>
             <Select<Theme>
               label={t("Style", "Style")}
               value={theme}
@@ -139,35 +139,35 @@ function PrintContent() {
             />
           </div>
           <div className="space-y-1.5">
-            <p className="text-xs font-bold text-white/70">{t("Titre", "Title")}</p>
+            <p className="text-xs font-bold text-ink-2">{t("Titre", "Title")}</p>
             <input value={headline} onChange={(e) => setHeadline(e.target.value)} maxLength={60} className={cn(inputClass, "h-10 py-0")} />
           </div>
           <div className="space-y-1.5 md:col-span-2 xl:col-span-4">
-            <p className="text-xs font-bold text-white/70">{t(<>Texte d&apos;accompagnement</>, <>Supporting text</>)}</p>
+            <p className="text-xs font-bold text-ink-2">{t(<>Texte d&apos;accompagnement</>, <>Supporting text</>)}</p>
             <input value={subline} onChange={(e) => setSubline(e.target.value)} maxLength={160} className={cn(inputClass, "h-10 py-0")} />
           </div>
         </div>
       </div>
 
       {list.length === 0 ? (
-        <p className="print-hide mt-6 text-sm text-white/50">{t("Aucun QR code à imprimer.", "No QR codes to print.")}</p>
+        <p className="print-hide mt-6 text-sm text-ink-3">{t("Aucun QR code à imprimer.", "No QR codes to print.")}</p>
       ) : (
         <div className={cn("mt-6 grid gap-5 print:mt-0 print:gap-4", conf.cols)}>
           {list.map((q) => (
             <article
               key={q.id}
               className={cn(
-                "print-card flex flex-col items-center overflow-hidden rounded-2xl bg-white text-center text-black shadow-xl print:rounded-xl print:shadow-none print:border print:border-neutral-300",
+                "print-card flex flex-col items-center overflow-hidden rounded-2xl bg-brand text-center text-on-brand shadow-xl print:rounded-xl print:shadow-none print:border print:border-neutral-300",
                 conf.card
               )}
             >
               {theme === "accent" && (
-                <div className="-mx-10 -mt-10 mb-6 w-[calc(100%+5rem)] px-6 py-3 text-white" style={{ background: accent }}>
-                  <p className="text-[11px] font-bold uppercase tracking-[0.25em]">{hotelName}</p>
+                <div className="-mx-10 -mt-10 mb-6 w-[calc(100%+5rem)] px-6 py-3 text-ink" style={{ background: accent }}>
+                  <p className="text-xs font-bold">{hotelName}</p>
                 </div>
               )}
               {theme === "clair" && (
-                <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-neutral-500">{hotelName}</p>
+                <p className="text-xs font-bold text-neutral-500">{hotelName}</p>
               )}
               <h2 className={cn("font-display font-black tracking-tight", size === "grand" ? "mt-3 text-4xl" : size === "moyen" ? "mt-2 text-2xl" : "mt-1.5 text-lg")}>
                 {q.label}
@@ -183,14 +183,14 @@ function PrintContent() {
                   {subline}
                 </p>
               )}
-              <p className="mt-4 inline-flex items-center gap-1.5 text-[11px] font-medium text-neutral-500">
+              <p className="mt-4 inline-flex items-center gap-1.5 text-xs font-medium text-neutral-500">
                 <Smartphone size={12} strokeWidth={1.75} />
                 {t(<>Ouvrez l&apos;appareil photo, visez le code</>, <>Open your camera and point it at the code</>)}
               </p>
               <div className="mt-5 flex items-center justify-center gap-1.5 text-neutral-400">
-                <span className="text-[10px]">{t("Propulsé par", "Powered by")}</span>
+                <span className="text-xs">{t("Propulsé par", "Powered by")}</span>
                 <Image src="/logo-header.png" alt="twocards." width={16} height={16} className="h-4 w-auto opacity-70" />
-                <span className="text-[11px] font-black text-neutral-600">twocards.</span>
+                <span className="text-xs font-black text-neutral-600">twocards.</span>
               </div>
             </article>
           ))}

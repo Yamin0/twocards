@@ -52,9 +52,9 @@ type PosEvent = {
 const getEventBadge = (
   t: Translate
 ): Record<PosEvent["status"], { label: string; cls: string }> => ({
-  matched: { label: t("rapproché", "matched"), cls: "bg-emerald-500/15 text-emerald-400" },
-  unmatched: { label: t("non rapproché", "unmatched"), cls: "bg-amber-500/15 text-amber-400" },
-  duplicate: { label: t("doublon", "duplicate"), cls: "bg-white/10 text-white/40" },
+  matched: { label: t("rapproché", "matched"), cls: "bg-ok-soft text-ok" },
+  unmatched: { label: t("non rapproché", "unmatched"), cls: "bg-warn-soft text-warn" },
+  duplicate: { label: t("doublon", "duplicate"), cls: "bg-fill-2 text-ink-3" },
 });
 
 export default function IntegrationsPage() {
@@ -178,16 +178,16 @@ export default function IntegrationsPage() {
   };
 
   const inputLike =
-    "font-mono truncate rounded-xl bg-black/30 border border-white/10 px-3 py-2.5 text-xs text-white/70";
+    "font-mono truncate rounded-xl bg-panel border border-line px-3 py-2.5 text-xs text-ink-2";
 
   return (
     <div className="bg-transparent min-h-screen">
       {/* Header */}
       <div className="px-4 sm:px-6 pt-6 pb-4">
-        <h1 className="font-display text-3xl font-light text-white">
+        <h1 className="font-display text-3xl font-light text-ink">
           {t("Caisse (POS)", "Point of sale (POS)")}
         </h1>
-        <p className="font-ui text-sm text-white/60 mt-1.5 max-w-2xl">
+        <p className="font-ui text-sm text-ink-2 mt-1.5 max-w-2xl">
           {t(
             "Connectez votre caisse : chaque ticket fermé remplit automatiquement le montant de la sortie twocards correspondante, la commission se calcule sans aucune saisie.",
             "Connect your till: every closed ticket automatically fills in the amount of the matching twocards outing, and the commission is calculated with no manual entry."
@@ -197,23 +197,23 @@ export default function IntegrationsPage() {
 
       {/* Statut */}
       <div className="px-4 sm:px-6 pb-6">
-        <div className="flex items-center gap-3 rounded-2xl border border-white/[0.12] backdrop-blur-xl bg-black/35 p-4">
+        <div className="flex items-center gap-3 rounded-2xl border border-line bg-panel p-4">
           <div
             className={`flex h-10 w-10 items-center justify-center rounded-xl ${
               integration?.status === "active"
-                ? "bg-emerald-500/15 text-emerald-400"
-                : "bg-white/10 text-white/40"
+                ? "bg-ok-soft text-ok"
+                : "bg-fill-2 text-ink-3"
             }`}
           >
             <Plug size={18} strokeWidth={1.5} />
           </div>
           <div className="min-w-0">
-            <p className="font-ui text-sm font-semibold text-white">
+            <p className="font-ui text-sm font-semibold text-ink">
               {integration?.status === "active"
                 ? `${t("Intégration active", "Integration active")} · ${PROVIDERS.find((p) => p.id === integration.provider)?.label ?? integration.provider}`
                 : t("Aucune caisse connectée", "No till connected")}
             </p>
-            <p className="font-ui text-xs text-white/40 mt-0.5">
+            <p className="font-ui text-xs text-ink-3 mt-0.5">
               {integration?.last_event_at
                 ? t(
                     `Dernier événement reçu le ${new Date(integration.last_event_at).toLocaleString(intl)}`,
@@ -230,9 +230,9 @@ export default function IntegrationsPage() {
 
       <div className="px-4 sm:px-6 pb-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Étapes de connexion */}
-        <div className="backdrop-blur-xl bg-black/35 border border-white/[0.12] rounded-2xl p-6 space-y-6">
+        <div className=" bg-panel border border-line rounded-2xl p-6 space-y-6">
           <div>
-            <h2 className="font-display text-lg font-normal text-white mb-3">
+            <h2 className="font-display text-lg font-normal text-ink mb-3">
               {t("1. Votre caisse", "1. Your till")}
             </h2>
             <div className="flex flex-wrap gap-2">
@@ -242,8 +242,8 @@ export default function IntegrationsPage() {
                   onClick={() => setProvider(p.id)}
                   className={`font-ui px-3 py-1.5 rounded-full text-xs transition-colors ${
                     provider === p.id
-                      ? "bg-white/20 text-white border border-white/20"
-                      : "bg-white/[0.05] text-white/50 border border-white/10 hover:text-white"
+                      ? "bg-fill-3 text-ink border border-line-2"
+                      : "bg-fill text-ink-3 border border-line hover:text-ink"
                   }`}
                 >
                   {p.label}
@@ -253,7 +253,7 @@ export default function IntegrationsPage() {
           </div>
 
           <div>
-            <h2 className="font-display text-lg font-normal text-white mb-3">
+            <h2 className="font-display text-lg font-normal text-ink mb-3">
               {t(<>2. Votre clé d&apos;API</>, <>2. Your API key</>)}
             </h2>
             {freshKey ? (
@@ -263,16 +263,16 @@ export default function IntegrationsPage() {
                   <button
                     onClick={() => copy(freshKey, "key")}
                     aria-label={t("Copier la clé", "Copy key")}
-                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/10 text-white/70 hover:bg-white/15"
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-fill-2 text-ink-2 hover:bg-fill-3"
                   >
                     {copied === "key" ? (
-                      <Check size={14} strokeWidth={2} className="text-emerald-400" />
+                      <Check size={14} strokeWidth={2} className="text-ok" />
                     ) : (
                       <Copy size={14} strokeWidth={1.5} />
                     )}
                   </button>
                 </div>
-                <p className="font-ui text-[11px] text-amber-300/80">
+                <p className="font-ui text-xs text-warn">
                   {t(
                     "Copiez-la maintenant : elle ne sera plus jamais affichée.",
                     "Copy it now: it will never be shown again."
@@ -283,7 +283,7 @@ export default function IntegrationsPage() {
               <button
                 onClick={rotateKey}
                 disabled={busy === "key"}
-                className="font-ui flex items-center gap-2 bg-blue-500 hover:bg-blue-400 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors disabled:opacity-60"
+                className="font-ui flex items-center gap-2 bg-link hover:bg-link-strong text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors disabled:opacity-60"
               >
                 {busy === "key" ? (
                   <Loader2 size={15} strokeWidth={2} className="animate-spin" />
@@ -298,7 +298,7 @@ export default function IntegrationsPage() {
           </div>
 
           <div>
-            <h2 className="font-display text-lg font-normal text-white mb-3">
+            <h2 className="font-display text-lg font-normal text-ink mb-3">
               {t("3. Le webhook dans votre caisse", "3. The webhook in your till")}
             </h2>
             <div className="flex items-center gap-2">
@@ -306,34 +306,34 @@ export default function IntegrationsPage() {
               <button
                 onClick={() => copy(WEBHOOK_URL, "url")}
                 aria-label={t("Copier l'URL du webhook", "Copy webhook URL")}
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/10 text-white/70 hover:bg-white/15"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-fill-2 text-ink-2 hover:bg-fill-3"
               >
                 {copied === "url" ? (
-                  <Check size={14} strokeWidth={2} className="text-emerald-400" />
+                  <Check size={14} strokeWidth={2} className="text-ok" />
                 ) : (
                   <Copy size={14} strokeWidth={1.5} />
                 )}
               </button>
             </div>
-            <p className="font-ui text-xs text-white/40 mt-2 leading-relaxed">
+            <p className="font-ui text-xs text-ink-3 mt-2 leading-relaxed">
               {t(
                 <>
                   À chaque ticket fermé, envoyez{" "}
-                  <code className="text-white/60">
+                  <code className="text-ink-2">
                     {"{ table, amount, ticket_id }"}
                   </code>{" "}
                   avec l&apos;en-tête{" "}
-                  <code className="text-white/60">x-twocards-key</code>. Depuis la
+                  <code className="text-ink-2">x-twocards-key</code>. Depuis la
                   caisse directement, ou via Zapier / Make si elle ne gère pas les
                   webhooks sortants.
                 </>,
                 <>
                   For every closed ticket, send{" "}
-                  <code className="text-white/60">
+                  <code className="text-ink-2">
                     {"{ table, amount, ticket_id }"}
                   </code>{" "}
                   with the{" "}
-                  <code className="text-white/60">x-twocards-key</code> header.
+                  <code className="text-ink-2">x-twocards-key</code> header.
                   Straight from the till, or via Zapier / Make if it does not
                   support outgoing webhooks.
                 </>
@@ -341,11 +341,11 @@ export default function IntegrationsPage() {
             </p>
           </div>
 
-          <div className="border-t border-white/[0.08] pt-4 space-y-3">
+          <div className="border-t border-line pt-4 space-y-3">
             <div>
               <label
                 htmlFor="pos-test-key"
-                className="font-ui block text-xs text-white/60 mb-1.5"
+                className="font-ui block text-xs text-ink-2 mb-1.5"
               >
                 {t("Clé API", "API key")}
               </label>
@@ -357,9 +357,9 @@ export default function IntegrationsPage() {
                 placeholder={t("Collez votre clé pour tester", "Paste your key to test")}
                 autoComplete="off"
                 spellCheck={false}
-                className="font-mono w-full rounded-xl bg-black/30 border border-white/10 px-3 py-2.5 text-xs text-white/70 placeholder:text-white/25 focus:outline-none focus:ring-1 focus:ring-white/40"
+                className="font-mono w-full rounded-xl bg-panel border border-line px-3 py-2.5 text-xs text-ink-2 placeholder:text-ink-4 focus:outline-none focus:ring-1 focus:ring-line-2"
               />
-              <p className="font-ui text-[11px] text-white/40 mt-1.5">
+              <p className="font-ui text-xs text-ink-3 mt-1.5">
                 {t(
                   <>
                     La clé n&apos;est jamais réaffichée après sa génération,
@@ -370,7 +370,7 @@ export default function IntegrationsPage() {
               </p>
             </div>
             {tables.length === 0 && (
-              <p className="font-ui text-[11px] text-amber-300/80">
+              <p className="font-ui text-xs text-warn">
                 {t(
                   <>
                     Créez d&apos;abord une table dans le plan de salle pour tester
@@ -381,7 +381,7 @@ export default function IntegrationsPage() {
               </p>
             )}
             <div className="flex items-center justify-between">
-              <p className="font-ui text-xs text-white/40 flex items-center gap-1.5">
+              <p className="font-ui text-xs text-ink-3 flex items-center gap-1.5">
                 <ShieldCheck size={13} strokeWidth={1.5} />
                 {t("Clé hachée en base, jamais stockée en clair", "Key is hashed, never stored in plain text")}
               </p>
@@ -395,7 +395,7 @@ export default function IntegrationsPage() {
                       ? undefined
                       : t("Collez d'abord votre clé API", "Paste your API key first")
                 }
-                className="font-ui flex items-center gap-2 bg-white/10 hover:bg-white/15 text-white text-xs font-medium px-3 py-2 rounded-lg transition-colors disabled:opacity-40"
+                className="font-ui flex items-center gap-2 bg-fill-2 hover:bg-fill-3 text-ink text-xs font-medium px-3 py-2 rounded-lg transition-colors disabled:opacity-40"
               >
                 {busy === "test" ? (
                   <Loader2 size={13} strokeWidth={2} className="animate-spin" />
@@ -410,43 +410,43 @@ export default function IntegrationsPage() {
 
         {/* Journal + correspondance des tables */}
         <div className="space-y-4">
-          <div className="backdrop-blur-xl bg-black/35 border border-white/[0.12] rounded-2xl p-6">
+          <div className=" bg-panel border border-line rounded-2xl p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-display text-lg font-normal text-white">
+              <h2 className="font-display text-lg font-normal text-ink">
                 {t("Journal des événements", "Event log")}
               </h2>
               <button
                 onClick={() => load()}
                 aria-label={t("Rafraîchir", "Refresh")}
-                className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/[0.06] text-white/50 hover:text-white"
+                className="flex h-8 w-8 items-center justify-center rounded-lg bg-fill text-ink-3 hover:text-ink"
               >
                 <RefreshCw size={14} strokeWidth={1.5} />
               </button>
             </div>
             {events.length === 0 ? (
-              <p className="font-ui text-xs text-white/40 leading-relaxed">
+              <p className="font-ui text-xs text-ink-3 leading-relaxed">
                 {t(
                   "Aucun événement reçu. Dès que votre caisse appellera le webhook, chaque ticket apparaîtra ici, rapproché ou non.",
                   "No events received yet. As soon as your till calls the webhook, every ticket will appear here, matched or not."
                 )}
               </p>
             ) : (
-              <ul className="divide-y divide-white/[0.06]">
+              <ul className="divide-y divide-line">
                 {events.map((e) => (
                   <li key={e.id} className="py-2.5 flex items-center justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="font-ui text-xs text-white truncate">
+                      <p className="font-ui text-xs text-ink truncate">
                         Table {e.table_label ?? "?"} ·{" "}
                         {(e.amount ?? 0).toLocaleString(intl)} MAD
                         {e.ticket_id ? ` · ${e.ticket_id}` : ""}
                       </p>
-                      <p className="font-ui text-[11px] text-white/40 truncate">
+                      <p className="font-ui text-xs text-ink-3 truncate">
                         {new Date(e.created_at).toLocaleString(intl)}
                         {e.reason ? ` · ${e.reason}` : ""}
                       </p>
                     </div>
                     <span
-                      className={`font-ui shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider whitespace-nowrap ${EVENT_BADGE[e.status].cls}`}
+                      className={`font-ui shrink-0 rounded-full px-2 py-0.5 text-xs font-bold whitespace-nowrap ${EVENT_BADGE[e.status].cls}`}
                     >
                       {EVENT_BADGE[e.status].label}
                     </span>
@@ -456,24 +456,24 @@ export default function IntegrationsPage() {
             )}
           </div>
 
-          <div className="backdrop-blur-xl bg-black/35 border border-white/[0.12] rounded-2xl p-6">
-            <h2 className="font-display text-lg font-normal text-white mb-2">
+          <div className=" bg-panel border border-line rounded-2xl p-6">
+            <h2 className="font-display text-lg font-normal text-ink mb-2">
               {t("Correspondance des tables", "Table mapping")}
             </h2>
-            <p className="font-ui text-xs text-white/40 leading-relaxed mb-3">
+            <p className="font-ui text-xs text-ink-3 leading-relaxed mb-3">
               {t(
                 <>
-                  Le champ <code className="text-white/60">table</code> envoyé par
+                  Le champ <code className="text-ink-2">table</code> envoyé par
                   la caisse doit porter le même libellé que vos tables twocards :
                 </>,
                 <>
-                  The <code className="text-white/60">table</code> field sent by
+                  The <code className="text-ink-2">table</code> field sent by
                   the till must use the same label as your twocards tables:
                 </>
               )}
             </p>
             {tables.length === 0 ? (
-              <p className="font-ui text-xs text-amber-300/80">
+              <p className="font-ui text-xs text-warn">
                 {t(
                   <>Aucune table dans votre plan de salle, créez-les d&apos;abord.</>,
                   <>No tables in your floor plan yet. Create them first.</>
@@ -484,7 +484,7 @@ export default function IntegrationsPage() {
                 {tables.map((label) => (
                   <span
                     key={label}
-                    className="font-mono rounded-lg bg-white/[0.06] border border-white/10 px-2 py-1 text-[11px] text-white/60"
+                    className="font-mono rounded-lg bg-fill border border-line px-2 py-1 text-xs text-ink-2"
                   >
                     {label}
                   </span>
@@ -497,7 +497,7 @@ export default function IntegrationsPage() {
 
       {/* Note d'accompagnement */}
       <div className="px-4 sm:px-6 pb-8">
-        <p className="font-ui flex items-start gap-2 text-xs text-white/40 max-w-2xl">
+        <p className="font-ui flex items-start gap-2 text-xs text-ink-3 max-w-2xl">
           <Webhook size={13} strokeWidth={1.5} className="shrink-0 mt-0.5" />
           {t(
             <>
@@ -516,7 +516,7 @@ export default function IntegrationsPage() {
 
       {/* Toast */}
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-black/70 backdrop-blur-xl border border-white/15 text-white px-4 py-3 rounded-xl shadow-lg">
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-ink border border-line-2 text-white px-4 py-3 rounded-xl shadow-lg">
           <Check size={16} strokeWidth={2} />
           <span className="font-ui text-sm font-medium">{toast}</span>
         </div>

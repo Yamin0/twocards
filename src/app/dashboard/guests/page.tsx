@@ -165,21 +165,21 @@ function buildGuests(reservations: VenueQrReservation[]): GuestProfile[] {
 /* ---------- Présentation ---------- */
 
 const SEGMENT_STYLES: Record<string, string> = {
-  VIP: "bg-amber-400/15 text-amber-400 border-amber-400/20",
-  Habitué: "bg-emerald-500/15 text-emerald-400 border-emerald-400/20",
-  Nouveau: "bg-blue-500/15 text-blue-300 border-blue-400/20",
-  "À risque": "bg-red-500/15 text-red-400 border-red-400/20",
+  VIP: "bg-warn-soft text-warn border-warn/25",
+  Habitué: "bg-ok-soft text-ok border-ok/25",
+  Nouveau: "bg-info-soft text-info border-info/25",
+  "À risque": "bg-danger-soft text-danger border-danger/25",
 };
 
 function SegmentBadges({ segments }: { segments: string[] }) {
   const t = useT();
-  if (segments.length === 0) return <span className="text-white/25">—</span>;
+  if (segments.length === 0) return <span className="text-ink-3">—</span>;
   return (
     <span className="flex flex-wrap gap-1">
       {segments.map((s) => (
         <span
           key={s}
-          className={`font-ui inline-flex rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${SEGMENT_STYLES[s] ?? "bg-white/10 text-white/50 border-white/10"}`}
+          className={`font-ui inline-flex rounded-full border px-2 py-0.5 text-xs font-bold ${SEGMENT_STYLES[s] ?? "bg-fill-2 text-ink-3 border-line"}`}
         >
           {segmentLabel(s, t)}
         </span>
@@ -342,7 +342,7 @@ export default function GuestsPage() {
             setSortAsc(false);
           }
         }}
-        className={`font-ui inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm transition-colors ${active ? "bg-blue-500 text-white" : "bg-white/[0.07] text-white/50 border border-white/[0.1] hover:bg-white/[0.1]"}`}
+        className={`font-ui inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm transition-colors ${active ? "bg-link text-white" : "bg-fill-2 text-ink-3 border border-line hover:bg-fill-2"}`}
       >
         {label}
         {active &&
@@ -358,12 +358,12 @@ export default function GuestsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className=" bg-panel border border-line rounded-3xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="font-display text-3xl font-light text-white">
+          <h1 className="font-display text-3xl font-light text-ink">
             {t("Clients", "Guests")}
           </h1>
-          <p className="font-ui text-sm text-white/60 mt-1.5">
+          <p className="font-ui text-sm text-ink-2 mt-1.5">
             {t(
               "Votre base clients, construite automatiquement à partir des réservations, un client naît d'une réservation.",
               "Your guest database, built automatically from reservations: every reservation creates a guest."
@@ -373,7 +373,7 @@ export default function GuestsPage() {
         <div className="flex items-center gap-2 shrink-0">
           <Link
             href="/dashboard/reservations"
-            className="font-ui flex items-center gap-2 bg-white/10 hover:bg-white/15 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors"
+            className="font-ui flex items-center gap-2 bg-fill-2 hover:bg-fill-3 text-ink text-sm font-medium px-4 py-2.5 rounded-xl transition-colors"
           >
             <CalendarPlus size={16} strokeWidth={1.5} />
             {t("Réservations", "Reservations")}
@@ -381,7 +381,7 @@ export default function GuestsPage() {
           {filtered.length > 0 && (
             <button
               onClick={() => exportCsv(filtered, locale)}
-              className="font-ui flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors shadow-lg shadow-blue-500/20"
+              className="font-ui flex items-center gap-2 bg-link hover:bg-link-strong text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors shadow-lg shadow-blue-500/20"
             >
               <Download size={16} strokeWidth={1.5} />
               {t("Exporter CSV", "Export CSV")}
@@ -396,7 +396,7 @@ export default function GuestsPage() {
       {/* Recherche */}
       <div className="relative">
         <Search
-          className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30"
+          className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-3"
           strokeWidth={1.5}
         />
         <input
@@ -404,7 +404,7 @@ export default function GuestsPage() {
           placeholder={t("Rechercher un client par nom ou téléphone...", "Search guests by name or phone...")}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="font-ui w-full bg-white/[0.05] border border-white/[0.1] rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-blue-400/40 transition-colors"
+          className="font-ui w-full bg-fill border border-line rounded-xl py-3 pl-11 pr-4 text-sm text-ink placeholder:text-ink-4 focus:outline-none focus:border-info/25 transition-colors"
         />
       </div>
 
@@ -413,7 +413,7 @@ export default function GuestsPage() {
         <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={() => setSegmentFilter(null)}
-            className={`font-ui rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${segmentFilter === null ? "bg-white text-black" : "bg-white/[0.07] text-white/50 border border-white/[0.1] hover:bg-white/[0.1]"}`}
+            className={`font-ui rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${segmentFilter === null ? "bg-brand text-on-brand" : "bg-fill-2 text-ink-3 border border-line hover:bg-fill-2"}`}
           >
             {t("Tous", "All")} · {guests.length}
           </button>
@@ -425,7 +425,7 @@ export default function GuestsPage() {
                 onClick={() =>
                   setSegmentFilter(segmentFilter === s ? null : s)
                 }
-                className={`font-ui rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${segmentFilter === s ? "bg-white text-black" : "bg-white/[0.07] text-white/50 border border-white/[0.1] hover:bg-white/[0.1]"}`}
+                className={`font-ui rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${segmentFilter === s ? "bg-brand text-on-brand" : "bg-fill-2 text-ink-3 border border-line hover:bg-fill-2"}`}
               >
                 {segmentLabel(s, t)} · {count}
               </button>
@@ -433,7 +433,7 @@ export default function GuestsPage() {
           })}
         </div>
         <div className="ml-auto flex flex-wrap items-center gap-2">
-          <span className="font-ui text-[10px] uppercase tracking-wider text-white/30">
+          <span className="font-ui text-xs text-ink-3">
             {t("Trier", "Sort")}
           </span>
           {sortButton("derniereVisite", t("Dernière visite", "Last visit"))}
@@ -444,14 +444,14 @@ export default function GuestsPage() {
 
       {/* Table / état vide */}
       {guests.length === 0 ? (
-        <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-12 text-center">
-          <div className="w-14 h-14 rounded-2xl bg-blue-500/15 border border-blue-400/20 flex items-center justify-center mx-auto mb-5">
-            <Users size={26} strokeWidth={1.5} className="text-blue-400" />
+        <div className=" bg-panel border border-line rounded-3xl p-12 text-center">
+          <div className="w-14 h-14 rounded-2xl bg-info-soft border border-info/25 flex items-center justify-center mx-auto mb-5">
+            <Users size={26} strokeWidth={1.5} className="text-info" />
           </div>
-          <h2 className="font-display text-xl font-normal text-white mb-2">
+          <h2 className="font-display text-xl font-normal text-ink mb-2">
             {t("Aucun client pour le moment", "No guests yet")}
           </h2>
-          <p className="font-ui text-sm text-white/50 max-w-md mx-auto">
+          <p className="font-ui text-sm text-ink-3 max-w-md mx-auto">
             {t(
               "Votre base clients se construit toute seule : dès qu'une réservation arrive, QR du réseau ou portail direct, le client apparaît ici avec ses visites, ses dépenses et ses avis.",
               "Your guest database builds itself: as soon as a reservation comes in, via the QR network or your direct portal, the guest appears here with their visits, spend and reviews."
@@ -459,23 +459,23 @@ export default function GuestsPage() {
           </p>
           <Link
             href="/dashboard/reservations"
-            className="font-ui inline-flex items-center gap-2 mt-6 bg-white/10 hover:bg-white/15 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors"
+            className="font-ui inline-flex items-center gap-2 mt-6 bg-fill-2 hover:bg-fill-3 text-ink text-sm font-medium px-4 py-2.5 rounded-xl transition-colors"
           >
             <CalendarPlus size={16} strokeWidth={1.5} />
             {t("Voir les réservations", "View reservations")}
           </Link>
         </div>
       ) : filtered.length === 0 ? (
-        <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-10 text-center">
-          <p className="font-ui text-sm text-white/50">
+        <div className=" bg-panel border border-line rounded-3xl p-10 text-center">
+          <p className="font-ui text-sm text-ink-3">
             {t("Aucun client ne correspond à cette recherche.", "No guests match this search.")}
           </p>
         </div>
       ) : (
-        <div className="tc-stack backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl overflow-x-auto">
+        <div className="tc-stack bg-panel border border-line rounded-2xl overflow-x-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="border-b border-white/10">
+              <tr className="border-b border-line">
                 {[
                   t("Client", "Guest"),
                   t("Visites", "Visits"),
@@ -489,7 +489,7 @@ export default function GuestsPage() {
                 ].map((h) => (
                   <th
                     key={h}
-                    className="font-ui px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/50 whitespace-nowrap"
+                    className="font-ui px-4 py-3 text-xs font-bold text-ink-3 whitespace-nowrap"
                   >
                     {h}
                   </th>
@@ -505,31 +505,31 @@ export default function GuestsPage() {
                       `/dashboard/guests/${encodeURIComponent(g.id)}`
                     )
                   }
-                  className="border-b border-white/[0.06] last:border-0 cursor-pointer hover:bg-white/[0.06] transition-colors"
+                  className="border-b border-line last:border-0 cursor-pointer hover:bg-fill transition-colors"
                 >
                   <td data-head className="px-4 py-3">
-                    <p className="font-ui text-sm font-medium text-white">
+                    <p className="font-ui text-sm font-medium text-ink">
                       {g.name}
                     </p>
-                    <p className="font-ui text-xs text-white/40">{g.phone}</p>
+                    <p className="font-ui text-xs text-ink-3">{g.phone}</p>
                   </td>
-                  <td data-label={t("Visites", "Visits")} className="font-ui px-4 py-3 text-sm text-white tabular-nums">
+                  <td data-label={t("Visites", "Visits")} className="font-ui px-4 py-3 text-sm text-ink tabular-nums">
                     {g.visits}
                   </td>
-                  <td data-label={t("Total dépensé", "Total spent")} className="font-ui px-4 py-3 text-sm text-white tabular-nums whitespace-nowrap">
+                  <td data-label={t("Total dépensé", "Total spent")} className="font-ui px-4 py-3 text-sm text-ink tabular-nums whitespace-nowrap">
                     {g.totalSpent > 0
                       ? `${g.totalSpent.toLocaleString(intl)} MAD`
                       : "—"}
                   </td>
-                  <td data-label={t("Panier moyen", "Average spend")} className="font-ui px-4 py-3 text-sm text-white/70 tabular-nums whitespace-nowrap">
+                  <td data-label={t("Panier moyen", "Average spend")} className="font-ui px-4 py-3 text-sm text-ink-2 tabular-nums whitespace-nowrap">
                     {g.avgBasket !== null
                       ? `${Math.round(g.avgBasket).toLocaleString(intl)} MAD`
                       : "—"}
                   </td>
-                  <td data-label={t("Dernière visite", "Last visit")} className="font-ui px-4 py-3 text-sm text-white/70 whitespace-nowrap">
+                  <td data-label={t("Dernière visite", "Last visit")} className="font-ui px-4 py-3 text-sm text-ink-2 whitespace-nowrap">
                     {g.lastVisit ? fmtDate(g.lastVisit, locale) : "—"}
                   </td>
-                  <td data-label={t("Prochaine résa", "Next booking")} className="font-ui px-4 py-3 text-sm text-white/70 whitespace-nowrap">
+                  <td data-label={t("Prochaine résa", "Next booking")} className="font-ui px-4 py-3 text-sm text-ink-2 whitespace-nowrap">
                     {g.nextReservation
                       ? fmtDate(g.nextReservation.reservation_date, locale)
                       : "—"}
@@ -538,12 +538,12 @@ export default function GuestsPage() {
                     {g.avgRating !== null ? (
                       <span className="inline-flex items-center gap-1.5">
                         <RatingStars value={g.avgRating} size={12} />
-                        <span className="font-ui text-xs text-white/60 tabular-nums">
+                        <span className="font-ui text-xs text-ink-2 tabular-nums">
                           {g.avgRating.toLocaleString(intl, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
                         </span>
                       </span>
                     ) : (
-                      <span className="text-white/25">—</span>
+                      <span className="text-ink-3">—</span>
                     )}
                   </td>
                   <td data-label={t("Canaux", "Channels")} className="px-4 py-3">
@@ -551,7 +551,7 @@ export default function GuestsPage() {
                       {g.sources.map((s) => (
                         <span
                           key={s}
-                          className="font-ui rounded-md bg-white/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white/50 whitespace-nowrap"
+                          className="font-ui rounded-md bg-fill-2 px-1.5 py-0.5 text-xs font-bold text-ink-3 whitespace-nowrap"
                         >
                           {sourceLabel(s, t)}
                         </span>
@@ -570,7 +570,7 @@ export default function GuestsPage() {
 
       {/* Lecture des segments */}
       {guests.length > 0 && (
-        <p className="font-ui text-xs text-white/40 max-w-3xl">
+        <p className="font-ui text-xs text-ink-3 max-w-3xl">
           {t(
             "Segments calculés sur vos réservations réelles : « Nouveau » = 1 visite, « Habitué » = 3 visites ou plus, « À risque » = habitué sans visite depuis 60 jours, « VIP » = top 10 % des dépenses totales.",
             "Segments are based on your actual reservations: “New” = 1 visit, “Regular” = 3 or more visits, “At risk” = a regular with no visit in 60 days, “VIP” = top 10% by total spend."

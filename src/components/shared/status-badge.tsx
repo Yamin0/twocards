@@ -8,10 +8,10 @@ import { useT } from "@/lib/i18n/client";
    par-dessus la primitive, une seule définition pour tous les tableaux. */
 
 const STYLES: Record<string, string> = {
-  confirmée: "bg-emerald-500/15 text-emerald-400",
-  "en attente": "bg-amber-500/15 text-amber-400",
-  annulée: "bg-red-500/15 text-red-400",
-  "no-show": "bg-white/10 text-white/50 line-through decoration-white/30",
+  confirmée: "bg-ok-soft text-ok",
+  "en attente": "bg-warn-soft text-warn",
+  annulée: "bg-danger-soft text-danger",
+  "no-show": "bg-fill-2 text-ink-3 line-through decoration-ink-4",
 };
 
 /* Libellés affichés seulement : les valeurs restent celles de la base. */
@@ -26,7 +26,7 @@ export function StatusBadge({ status }: { status: string }) {
   const t = useT();
   return (
     <Badge
-      className={`${STYLES[status] ?? "bg-white/10 text-white/60"} font-ui h-auto border-0 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider whitespace-nowrap`}
+      className={`${STYLES[status] ?? "bg-fill-2 text-ink-2"} font-ui h-auto border-0 px-2 py-0.5 text-xs font-bold whitespace-nowrap`}
     >
       {getLabels(t)[status] ?? status}
     </Badge>

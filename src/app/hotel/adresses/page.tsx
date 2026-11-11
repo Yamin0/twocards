@@ -212,7 +212,7 @@ export default function HotelAddressesPage() {
           ]}
         />
         <div className="relative w-full lg:w-64">
-          <Search size={14} strokeWidth={1.75} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
+          <Search size={14} strokeWidth={1.75} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-3" />
           <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("Rechercher une adresse…", "Search for a place…")} className={cn(inputClass, "h-10 py-0 pl-9")} />
         </div>
       </div>
@@ -228,14 +228,14 @@ export default function HotelAddressesPage() {
             )
           ) : (
             t(
-              <>Indiquez la ville de l&apos;hôtel dans les <Link href="/hotel/settings" className="font-bold text-sky-300">paramètres</Link> pour limiter le catalogue à votre ville. En attendant, tout le réseau est proposé.</>,
-              <>Add the hotel&apos;s city in <Link href="/hotel/settings" className="font-bold text-sky-300">settings</Link> to limit the catalogue to your city. Until then, the whole network is offered.</>
+              <>Indiquez la ville de l&apos;hôtel dans les <Link href="/hotel/settings" className="font-bold text-info">paramètres</Link> pour limiter le catalogue à votre ville. En attendant, tout le réseau est proposé.</>,
+              <>Add the hotel&apos;s city in <Link href="/hotel/settings" className="font-bold text-info">settings</Link> to limit the catalogue to your city. Until then, the whole network is offered.</>
             )
           )
         }
       >
         {networkVisible.length === 0 ? (
-          <p className="py-6 text-center text-sm text-white/40">
+          <p className="py-6 text-center text-sm text-ink-3">
             {networkTotal === 0
               ? t("Aucune adresse du réseau pour votre ville pour le moment.", "No network places in your city yet.")
               : t("Aucune adresse ne correspond.", "No places match.")}
@@ -250,15 +250,15 @@ export default function HotelAddressesPage() {
                 <section key={cat.key}>
                   <div className="mb-3 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2.5">
-                      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10">
-                        <Icon size={15} strokeWidth={1.75} className="text-white/85" />
+                      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-fill-2">
+                        <Icon size={15} strokeWidth={1.75} className="text-ink" />
                       </span>
                       <div>
-                        <p className="font-display text-sm font-bold uppercase tracking-[0.2em] text-white">{catLabel(cat.key)}</p>
-                        <p className="num text-[11px] text-white/45">{shown}/{ids.length} {t(`proposée${shown > 1 ? "s" : ""}`, "offered")}</p>
+                        <p className="font-display text-sm font-bold text-ink">{catLabel(cat.key)}</p>
+                        <p className="num text-xs text-ink-3">{shown}/{ids.length} {t(`proposée${shown > 1 ? "s" : ""}`, "offered")}</p>
                       </div>
                     </div>
-                    <button type="button" onClick={() => setCategory(ids, shown !== ids.length, catLabel(cat.key))} className="text-[11px] font-bold text-sky-300 hover:text-sky-200">
+                    <button type="button" onClick={() => setCategory(ids, shown !== ids.length, catLabel(cat.key))} className="text-xs font-bold text-info hover:text-info">
                       {shown === ids.length ? t("Tout retirer", "Remove all") : t("Tout proposer", "Offer all")}
                     </button>
                   </div>
@@ -313,7 +313,7 @@ export default function HotelAddressesPage() {
             compact
           />
         ) : mine.length === 0 ? (
-          <p className="py-6 text-center text-sm text-white/40">{t("Aucune adresse maison ne correspond.", "No in-house places match.")}</p>
+          <p className="py-6 text-center text-sm text-ink-3">{t("Aucune adresse maison ne correspond.", "No in-house places match.")}</p>
         ) : (
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
             {mine.map((o) => (
@@ -347,14 +347,14 @@ export default function HotelAddressesPage() {
         {t(
           <>
             Les réglages de cette page valent pour tous vos QR codes. Pour proposer une adresse à certaines chambres seulement, ouvrez la chambre dans{" "}
-            <Link href="/hotel/chambres" className="font-bold text-sky-300">
+            <Link href="/hotel/chambres" className="font-bold text-info">
               Chambres &amp; QR
             </Link>{" "}
             et réglez son menu.
           </>,
           <>
             Settings on this page apply to all your QR codes. To offer a place to certain rooms only, open the room in{" "}
-            <Link href="/hotel/chambres" className="font-bold text-sky-300">
+            <Link href="/hotel/chambres" className="font-bold text-info">
               Rooms &amp; QR
             </Link>{" "}
             and adjust its menu.

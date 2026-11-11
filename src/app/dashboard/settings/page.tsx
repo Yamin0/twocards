@@ -35,12 +35,12 @@ const getSettingsNav = (t: Translate) => [
 /*  Reusable glass classes                                             */
 /* ------------------------------------------------------------------ */
 const glassCard =
-  "backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl";
+  " bg-panel border border-line rounded-3xl";
 const inputCls =
-  "w-full px-4 py-2.5 bg-white/[0.05] border border-white/[0.1] rounded-xl text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-blue-400/40 transition-colors";
+  "w-full px-4 py-2.5 bg-fill border border-line rounded-xl text-sm text-ink placeholder:text-ink-4 focus:outline-none focus:border-info/25 transition-colors";
 const labelCls =
-  "block text-[0.625rem] text-white/30 uppercase tracking-wider mb-1.5";
-const managedNoteCls = "text-[0.6875rem] text-white/25 mt-1.5";
+  "block text-xs text-ink-3 mb-1.5";
+const managedNoteCls = "text-xs text-ink-3 mt-1.5";
 const getManagedNote = (t: Translate) =>
   t(
     "Géré par twocards, contactez le support pour le modifier.",
@@ -87,7 +87,7 @@ function Toggle({
       onClick={onToggle}
       disabled={disabled}
       className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${
-        enabled ? "bg-blue-500" : "bg-white/10"
+        enabled ? "bg-link" : "bg-fill-2"
       } ${disabled ? "opacity-40 cursor-not-allowed" : ""}`}
     >
       <span
@@ -335,7 +335,7 @@ export default function SettingsPage() {
     <button
       onClick={onClick ?? handleSave}
       disabled={saving}
-      className="px-6 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-xl text-sm font-medium transition-colors disabled:opacity-50 flex items-center gap-2"
+      className="px-6 py-2.5 bg-link hover:bg-link-strong text-white rounded-xl text-sm font-medium transition-colors disabled:opacity-50 flex items-center gap-2"
     >
       {saving && <Loader2 size={16} className="animate-spin" />}
       {saving ? t("Enregistrement...", "Saving...") : t("Enregistrer", "Save")}
@@ -399,8 +399,8 @@ export default function SettingsPage() {
       {/* Langue de l'interface (visible aussi dans l'app mobile) */}
       <div className={`${glassCard} p-6 flex items-center justify-between gap-4`}>
         <div>
-          <p className="text-sm text-white font-medium">Language / Langue</p>
-          <p className="text-xs text-white/40 mt-0.5">
+          <p className="text-sm text-ink font-medium">Language / Langue</p>
+          <p className="text-xs text-ink-3 mt-0.5">
             {t(
               "Langue de votre espace twocards.",
               "The language of your twocards workspace."
@@ -415,11 +415,11 @@ export default function SettingsPage() {
         <div className="text-right">
           <a
             href={DELETE_MAILTO}
-            className="px-4 py-2.5 inline-block text-sm font-medium text-red-400 hover:text-red-300 transition-colors"
+            className="px-4 py-2.5 inline-block text-sm font-medium text-danger hover:text-danger transition-colors"
           >
             {t("Supprimer le compte", "Delete account")}
           </a>
-          <p className="text-[0.6875rem] text-white/25 max-w-[16rem]">
+          <p className="text-xs text-ink-3 max-w-[16rem]">
             {t(
               "La demande est envoyée à notre support et traitée sous 30 jours.",
               "Your request goes to our support team and is handled within 30 days."
@@ -572,15 +572,15 @@ export default function SettingsPage() {
 
   const renderNotifications = () => (
     <div className="space-y-6">
-      <div className={`${glassCard} p-6 divide-y divide-white/[0.06]`}>
+      <div className={`${glassCard} p-6 divide-y divide-line`}>
         {notifItems.map((item) => (
           <div
             key={item.key}
             className="flex items-center justify-between py-4 first:pt-0 last:pb-0"
           >
             <div>
-              <p className="text-sm text-white font-medium">{item.label}</p>
-              <p className="text-xs text-white/40 mt-0.5">{item.desc}</p>
+              <p className="text-sm text-ink font-medium">{item.label}</p>
+              <p className="text-xs text-ink-3 mt-0.5">{item.desc}</p>
             </div>
             <Toggle
               enabled={notifs[item.key]}
@@ -601,7 +601,7 @@ export default function SettingsPage() {
     <div className="space-y-6">
       {/* Password */}
       <div className={`${glassCard} p-6 space-y-5`}>
-        <h3 className="text-sm font-semibold text-white">
+        <h3 className="text-sm font-semibold text-ink">
           {t("Changer le mot de passe", "Change password")}
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -625,7 +625,7 @@ export default function SettingsPage() {
                     ? t("Masquer le mot de passe", "Hide password")
                     : t("Afficher le mot de passe", "Show password")
                 }
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/50"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-3 hover:text-ink-3"
               >
                 {showNewPw ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
@@ -644,7 +644,7 @@ export default function SettingsPage() {
             />
           </div>
         </div>
-        <p className="text-xs text-white/40">
+        <p className="text-xs text-ink-3">
           {t(
             <>
               8 caractères minimum. Le changement s&apos;applique immédiatement à
@@ -660,16 +660,16 @@ export default function SettingsPage() {
       <div className={`${glassCard} p-6 space-y-4`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <Shield size={16} className="text-white/40" />
-            <h3 className="text-sm font-semibold text-white">
+            <Shield size={16} className="text-ink-3" />
+            <h3 className="text-sm font-semibold text-ink">
               {t("Sécurité avancée", "Advanced security")}
             </h3>
           </div>
-          <span className="text-[0.625rem] uppercase tracking-wider text-blue-400 bg-blue-500/10 border border-blue-400/20 px-2.5 py-1 rounded-full">
+          <span className="text-xs text-info bg-info-soft border border-info/25 px-2.5 py-1 rounded-full">
             {t("Bientôt disponible", "Coming soon")}
           </span>
         </div>
-        <p className="text-xs text-white/40">
+        <p className="text-xs text-ink-3">
           {t(
             <>
               L&apos;authentification à deux facteurs et la gestion des sessions
@@ -678,12 +678,12 @@ export default function SettingsPage() {
             <>Two-factor authentication and active session management are coming soon.</>
           )}
         </p>
-        <div className="flex items-center justify-between pt-2 border-t border-white/[0.06] opacity-60">
+        <div className="flex items-center justify-between pt-2 border-t border-line opacity-60">
           <div>
-            <p className="text-sm text-white font-medium">
+            <p className="text-sm text-ink font-medium">
               {t("Authentification à deux facteurs", "Two-factor authentication")}
             </p>
-            <p className="text-xs text-white/40 mt-0.5">
+            <p className="text-xs text-ink-3 mt-0.5">
               {t("Ajoutez une couche de sécurité supplémentaire.", "Add an extra layer of security.")}
             </p>
           </div>
@@ -694,10 +694,10 @@ export default function SettingsPage() {
       {/* Delete account */}
       <div className={`${glassCard} p-6 flex items-start justify-between gap-4`}>
         <div>
-          <p className="text-sm text-white font-medium">
+          <p className="text-sm text-ink font-medium">
             {t("Supprimer le compte", "Delete account")}
           </p>
-          <p className="text-xs text-white/40 mt-0.5 max-w-md">
+          <p className="text-xs text-ink-3 mt-0.5 max-w-md">
             {t(
               "Envoyez votre demande à notre support, la suppression est traitée sous 30 jours.",
               "Send your request to our support team. Deletion is handled within 30 days."
@@ -706,7 +706,7 @@ export default function SettingsPage() {
         </div>
         <a
           href={DELETE_MAILTO}
-          className="flex-shrink-0 px-4 py-2.5 text-sm font-medium text-red-400 hover:text-red-300 transition-colors"
+          className="flex-shrink-0 px-4 py-2.5 text-sm font-medium text-danger hover:text-danger transition-colors"
         >
           {t("Contacter le support", "Contact support")}
         </a>
@@ -750,8 +750,8 @@ export default function SettingsPage() {
                   onClick={() => setActiveTab(item.id)}
                   className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-ui transition-all whitespace-nowrap ${
                     isActive
-                      ? "bg-white/[0.1] text-blue-400 font-bold"
-                      : "text-white/40 hover:text-white hover:bg-white/[0.05]"
+                      ? "bg-fill-2 text-info font-bold"
+                      : "text-ink-3 hover:text-ink hover:bg-fill"
                   }`}
                 >
                   <Icon size={18} strokeWidth={1.5} />
@@ -766,10 +766,10 @@ export default function SettingsPage() {
         <div className="flex-1 space-y-6">
           {/* Header */}
           <div>
-            <h1 className="text-2xl font-extrabold text-white">
+            <h1 className="text-2xl font-extrabold text-ink">
               {header.title}
             </h1>
-            <p className="text-sm text-white/40 mt-1">{header.subtitle}</p>
+            <p className="text-sm text-ink-3 mt-1">{header.subtitle}</p>
           </div>
 
           {/* Active tab content */}
@@ -779,11 +779,11 @@ export default function SettingsPage() {
 
       {/* ---- Toast ---- */}
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 backdrop-blur-xl bg-white/15 border border-white/20 text-white px-5 py-3 rounded-xl shadow-2xl">
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-fill-3 border border-line-2 text-ink px-5 py-3 rounded-xl shadow-2xl">
           {toast.type === "error" ? (
-            <AlertCircle size={16} strokeWidth={2} className="text-red-400" />
+            <AlertCircle size={16} strokeWidth={2} className="text-danger" />
           ) : (
-            <Check size={16} strokeWidth={2} className="text-blue-400" />
+            <Check size={16} strokeWidth={2} className="text-info" />
           )}
           <span className="text-sm font-medium">{toast.message}</span>
         </div>

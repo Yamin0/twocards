@@ -198,11 +198,11 @@ export default function VenueDashboardPage() {
   return (
     <div className="space-y-6">
       {/* En-tête */}
-      <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
-        <h1 className="font-display text-3xl font-light text-white">
+      <div className=" bg-panel border border-line rounded-3xl p-6">
+        <h1 className="font-display text-3xl font-light text-ink">
           {t("Bienvenue", "Welcome")}{fullName ? `, ${fullName.split(" ")[0]}` : ""}
         </h1>
-        <p className="font-ui text-sm text-white/60 mt-2">
+        <p className="font-ui text-sm text-ink-2 mt-2">
           {venueName ? `${venueName} · ` : ""}
           {t(
             <>
@@ -216,33 +216,33 @@ export default function VenueDashboardPage() {
             </>,
           )}
         </p>
-        <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-white/[0.08] pt-4">
-          <span className="font-ui inline-flex items-center gap-1.5 text-sm text-white/70">
-            <CalendarDays size={14} strokeWidth={1.5} className="text-blue-400" />
+        <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-line pt-4">
+          <span className="font-ui inline-flex items-center gap-1.5 text-sm text-ink-2">
+            <CalendarDays size={14} strokeWidth={1.5} className="text-info" />
             {isActivityVenue ? t("Aujourd'hui :", "Today:") : t("Ce soir :", "Tonight:")}{" "}
-            <span className="font-semibold text-white">
+            <span className="font-semibold text-ink">
               {t(
                 `${today.length} réservation${today.length > 1 ? "s" : ""}`,
                 `${today.length} reservation${today.length === 1 ? "" : "s"}`,
               )}
             </span>
           </span>
-          <span className="font-ui inline-flex items-center gap-1.5 text-sm text-white/70">
-            <Users size={14} strokeWidth={1.5} className="text-blue-400" />
-            <span className="font-semibold text-white">{todayPeople}</span>
+          <span className="font-ui inline-flex items-center gap-1.5 text-sm text-ink-2">
+            <Users size={14} strokeWidth={1.5} className="text-info" />
+            <span className="font-semibold text-ink">{todayPeople}</span>
             {people}
           </span>
           {nextArrival && (
-            <span className="font-ui text-sm text-white/70">
+            <span className="font-ui text-sm text-ink-2">
               {t("Prochaine arrivée :", "Next arrival:")}{" "}
-              <span className="font-semibold text-white">
+              <span className="font-semibold text-ink">
                 {nextArrival.slice(0, 5)}
               </span>
             </span>
           )}
           <Link
             href="/dashboard/reservations"
-            className="font-ui ml-auto inline-flex items-center gap-1 text-xs font-medium text-blue-400 hover:text-blue-300 transition-colors"
+            className="font-ui ml-auto inline-flex items-center gap-1 text-xs font-medium text-info hover:text-info transition-colors"
           >
             {t("Voir les réservations", "View reservations")}
             <ArrowRight size={12} strokeWidth={1.5} />
@@ -255,42 +255,42 @@ export default function VenueDashboardPage() {
 
       {/* Ce qui attend une réponse + le rythme */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6 flex flex-col">
+        <div className=" bg-panel border border-line rounded-3xl p-6 flex flex-col">
           <div className="flex items-center justify-between mb-1">
-            <h2 className="font-display text-lg font-normal text-white">
+            <h2 className="font-display text-lg font-normal text-ink">
               {t("En attente de réponse", "Awaiting reply")}
             </h2>
             {pending > 0 && (
-              <span className="font-ui flex h-6 min-w-6 items-center justify-center rounded-full bg-amber-400 px-2 text-[11px] font-bold text-black">
+              <span className="font-ui flex h-6 min-w-6 items-center justify-center rounded-full bg-warn px-2 text-xs font-bold text-ink">
                 {pending}
               </span>
             )}
           </div>
-          <p className="font-ui text-xs text-white/40 mb-4">
+          <p className="font-ui text-xs text-ink-3 mb-4">
             {t(
               "Le client attend votre confirmation par téléphone ou WhatsApp.",
               "The guest is waiting for your confirmation by phone or WhatsApp.",
             )}
           </p>
           {pendingList.length === 0 ? (
-            <p className="font-ui text-sm text-white/40 leading-relaxed">
+            <p className="font-ui text-sm text-ink-3 leading-relaxed">
               {t(
                 "Rien en attente. Chaque nouvelle demande apparaît ici et vous est notifiée sur votre téléphone.",
                 "Nothing pending. Every new request shows up here and is sent to your phone as a notification.",
               )}
             </p>
           ) : (
-            <ul className="divide-y divide-white/[0.06]">
+            <ul className="divide-y divide-line">
               {pendingList.slice(0, 5).map((r) => (
                 <li key={r.id} className="py-2.5 flex items-center justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="font-ui text-sm text-white truncate">
+                    <p className="font-ui text-sm text-ink truncate">
                       {r.guest_name}
                       {r.service_name && (
-                        <span className="text-blue-300/80"> · {r.service_name}</span>
+                        <span className="text-info"> · {r.service_name}</span>
                       )}
                     </p>
-                    <p className="font-ui text-xs text-white/40 mt-0.5 flex items-center gap-1.5">
+                    <p className="font-ui text-xs text-ink-3 mt-0.5 flex items-center gap-1.5">
                       <Clock size={11} strokeWidth={1.5} />
                       {formatDay(r.reservation_date, intl)}
                       {r.reservation_time ? ` · ${r.reservation_time}` : ""}
@@ -300,7 +300,7 @@ export default function VenueDashboardPage() {
                   </div>
                   <a
                     href={`tel:${r.guest_phone.replace(/\s/g, "")}`}
-                    className="font-ui shrink-0 rounded-full border border-white/15 px-3 py-1.5 text-xs font-medium text-white/80 hover:bg-white/10 transition-colors"
+                    className="font-ui shrink-0 rounded-full border border-line-2 px-3 py-1.5 text-xs font-medium text-ink hover:bg-fill-2 transition-colors"
                   >
                     {t("Appeler", "Call")}
                   </a>
@@ -310,42 +310,42 @@ export default function VenueDashboardPage() {
           )}
           <Link
             href="/dashboard/reservations"
-            className="font-ui mt-auto pt-4 inline-flex items-center gap-1.5 text-xs font-medium text-blue-400 hover:text-blue-300 transition-colors"
+            className="font-ui mt-auto pt-4 inline-flex items-center gap-1.5 text-xs font-medium text-info hover:text-info transition-colors"
           >
             {t("Confirmer ou refuser", "Confirm or decline")}
             <ArrowRight size={13} strokeWidth={1.5} />
           </Link>
         </div>
 
-        <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
-          <h2 className="font-display text-lg font-normal text-white mb-1">
+        <div className=" bg-panel border border-line rounded-3xl p-6">
+          <h2 className="font-display text-lg font-normal text-ink mb-1">
             {isActivityVenue
               ? t("Réservations par semaine", "Reservations per week")
               : t("Sorties par semaine", "Outings per week")}
           </h2>
-          <p className="font-ui text-xs text-white/40 mb-5">
+          <p className="font-ui text-xs text-ink-3 mb-5">
             {t("8 dernières semaines", "Last 8 weeks")}
           </p>
-          <MiniBars data={weekly} color="bg-purple-400/70" />
+          <MiniBars data={weekly} color="bg-plum-soft" />
         </div>
       </div>
 
       {/* Prestations : ce que le client voit sur le menu */}
       {isActivityVenue && services !== null && (
-        <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
+        <div className=" bg-panel border border-line rounded-3xl p-6">
           <div className="flex items-center justify-between mb-1">
-            <h2 className="font-display text-lg font-normal text-white">
+            <h2 className="font-display text-lg font-normal text-ink">
               {t("Vos prestations", "Your services")}
             </h2>
             <Link
               href="/dashboard/prestations"
-              className="font-ui flex items-center gap-1 text-xs font-medium text-blue-400 hover:text-blue-300 transition-colors"
+              className="font-ui flex items-center gap-1 text-xs font-medium text-info hover:text-info transition-colors"
             >
               {t("Gérer", "Manage")}
               <ArrowRight size={13} strokeWidth={1.5} />
             </Link>
           </div>
-          <p className="font-ui text-xs text-white/40 mb-4">
+          <p className="font-ui text-xs text-ink-3 mb-4">
             {activeServices.length === 0
               ? t(
                   "Aucune prestation visible : votre fiche n'affiche que son nom.",
@@ -359,7 +359,7 @@ export default function VenueDashboardPage() {
           {activeServices.length === 0 ? (
             <Link
               href="/dashboard/prestations"
-              className="font-ui inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-semibold text-black hover:bg-white/90 transition-colors"
+              className="font-ui inline-flex items-center gap-2 rounded-full bg-brand px-4 py-2 text-xs font-semibold text-on-brand hover:bg-brand-strong transition-colors"
             >
               <Tags size={14} strokeWidth={1.75} />
               {t("Ajouter une prestation", "Add a service")}
@@ -369,15 +369,15 @@ export default function VenueDashboardPage() {
               {activeServices.slice(0, 6).map((s) => (
                 <li
                   key={s.id}
-                  className="flex items-center justify-between gap-3 rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-3"
+                  className="flex items-center justify-between gap-3 rounded-xl border border-line bg-fill px-4 py-3"
                 >
                   <div className="min-w-0">
-                    <p className="font-ui text-sm font-medium text-white truncate">{s.name}</p>
+                    <p className="font-ui text-sm font-medium text-ink truncate">{s.name}</p>
                     {s.duration && (
-                      <p className="font-ui text-xs text-white/40">{s.duration}</p>
+                      <p className="font-ui text-xs text-ink-3">{s.duration}</p>
                     )}
                   </div>
-                  <span className="font-display shrink-0 text-sm text-white tabular-nums">
+                  <span className="font-display shrink-0 text-sm text-ink tabular-nums">
                     {s.price || "—"}
                   </span>
                 </li>
@@ -389,33 +389,33 @@ export default function VenueDashboardPage() {
 
       {/* Dernières réservations */}
       {latest.length > 0 && (
-        <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
+        <div className=" bg-panel border border-line rounded-3xl p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-display text-lg font-normal text-white">
+            <h2 className="font-display text-lg font-normal text-ink">
               {t("Dernières réservations", "Latest reservations")}
             </h2>
             <Link
               href="/dashboard/reservations"
-              className="font-ui flex items-center gap-1 text-xs font-medium text-blue-400 hover:text-blue-300 transition-colors"
+              className="font-ui flex items-center gap-1 text-xs font-medium text-info hover:text-info transition-colors"
             >
               {t("Tout voir", "View all")}
               <ArrowRight size={13} strokeWidth={1.5} />
             </Link>
           </div>
-          <ul className="divide-y divide-white/[0.06]">
+          <ul className="divide-y divide-line">
             {latest.map((r) => (
               <li
                 key={r.id}
                 className="py-3 flex items-center justify-between gap-4"
               >
                 <div className="min-w-0">
-                  <p className="font-ui text-sm text-white truncate">
+                  <p className="font-ui text-sm text-ink truncate">
                     {r.guest_name}
-                    <span className="text-white/40">
+                    <span className="text-ink-3">
                       {" "}· {r.service_name ?? r.category}
                     </span>
                   </p>
-                  <p className="font-ui text-xs text-white/40 mt-0.5 flex items-center gap-1.5">
+                  <p className="font-ui text-xs text-ink-3 mt-0.5 flex items-center gap-1.5">
                     <CalendarDays size={11} strokeWidth={1.5} />
                     {new Date(
                       r.reservation_date + "T00:00:00"
@@ -427,7 +427,7 @@ export default function VenueDashboardPage() {
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
                   {r.amount_spent !== null && (
-                    <span className="font-display text-sm text-white tabular-nums">
+                    <span className="font-display text-sm text-ink tabular-nums">
                       {r.amount_spent.toLocaleString(intl)} MAD
                     </span>
                   )}
@@ -447,22 +447,22 @@ export default function VenueDashboardPage() {
             <Link
               key={q.href}
               href={q.href}
-              className="group backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl p-5 hover:bg-white/[0.06] transition-all"
+              className="group bg-panel border border-line rounded-2xl p-5 hover:bg-fill transition-all"
             >
               <div className="flex items-start justify-between mb-4">
-                <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
-                  <Icon size={18} strokeWidth={1.5} className="text-white/70" />
+                <div className="w-10 h-10 rounded-xl bg-fill-2 flex items-center justify-center">
+                  <Icon size={18} strokeWidth={1.5} className="text-ink-2" />
                 </div>
                 <ArrowRight
                   size={16}
                   strokeWidth={1.5}
-                  className="text-white/30 group-hover:text-white/70 group-hover:translate-x-0.5 transition-all"
+                  className="text-ink-3 group-hover:text-ink-2 group-hover:translate-x-0.5 transition-all"
                 />
               </div>
-              <h3 className="text-sm font-semibold text-white">
+              <h3 className="text-sm font-semibold text-ink">
                 {q.label}
               </h3>
-              <p className="font-ui text-xs text-white/50 mt-0.5">
+              <p className="font-ui text-xs text-ink-3 mt-0.5">
                 {q.description}
               </p>
             </Link>

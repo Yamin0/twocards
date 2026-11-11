@@ -119,31 +119,31 @@ export default function HotelAnalysesPage() {
 
       <div className="grid gap-4 xl:grid-cols-3">
         <Panel title={t("Réservations par semaine", "Reservations per week")} description={t("12 dernières semaines, hors annulations", "Last 12 weeks, excluding cancellations")} className="xl:col-span-2">
-          <Bars data={weekly} color="bg-sky-400" height={160} />
+          <Bars data={weekly} color="bg-link" height={160} />
         </Panel>
         <Panel title={t("Entonnoir", "Funnel")} description={t("Depuis la création des QR", "Since the QR codes were created")}>
           <div className="flex items-center gap-5">
             <Ring ratio={Math.min(conversion * 4, 1)} size={92} stroke={9} color="#38bdf8">
-              <span className="num text-sm font-black text-white">{formatPercent(conversion, 1, locale)}</span>
+              <span className="num text-sm font-black text-ink">{formatPercent(conversion, 1, locale)}</span>
             </Ring>
             <ul className="num flex-1 space-y-2 text-sm">
               <li className="flex items-center justify-between gap-3">
-                <span className="flex items-center gap-2 text-white/60"><ScanLine size={14} strokeWidth={1.75} /> Scans</span>
-                <span className="font-bold text-white">{formatNumber(scans, locale)}</span>
+                <span className="flex items-center gap-2 text-ink-2"><ScanLine size={14} strokeWidth={1.75} /> Scans</span>
+                <span className="font-bold text-ink">{formatNumber(scans, locale)}</span>
               </li>
               <li className="flex items-center justify-between gap-3">
-                <span className="flex items-center gap-2 text-white/60"><CalendarDays size={14} strokeWidth={1.75} /> {t("Demandes", "Requests")}</span>
-                <span className="font-bold text-white">{formatNumber(reservations.length, locale)}</span>
+                <span className="flex items-center gap-2 text-ink-2"><CalendarDays size={14} strokeWidth={1.75} /> {t("Demandes", "Requests")}</span>
+                <span className="font-bold text-ink">{formatNumber(reservations.length, locale)}</span>
               </li>
               <li className="flex items-center justify-between gap-3">
-                <span className="flex items-center gap-2 text-white/60"><BarChart3 size={14} strokeWidth={1.75} /> {t("Sorties réalisées", "Completed outings")}</span>
-                <span className="font-bold text-white">{formatNumber(allLive.length, locale)}</span>
+                <span className="flex items-center gap-2 text-ink-2"><BarChart3 size={14} strokeWidth={1.75} /> {t("Sorties réalisées", "Completed outings")}</span>
+                <span className="font-bold text-ink">{formatNumber(allLive.length, locale)}</span>
               </li>
             </ul>
           </div>
-          <p className="mt-4 border-t border-white/[0.08] pt-3 text-xs leading-relaxed text-white/50">
+          <p className="mt-4 border-t border-line pt-3 text-xs leading-relaxed text-ink-3">
             {t(<>Taux d&apos;annulation sur la période : </>, <>Cancellation rate over the period: </>)}
-            <span className="num font-bold text-white/80">{formatPercent(cancelRate, 0, locale)}</span>.
+            <span className="num font-bold text-ink">{formatPercent(cancelRate, 0, locale)}</span>.
             {cancelRate > 0.15
               ? t(" Un rappel WhatsApp la veille réduit nettement les absences.", " A WhatsApp reminder the day before cuts no-shows significantly.")
               : t(" C'est un très bon niveau.", " That's a very good level.")}
@@ -153,27 +153,27 @@ export default function HotelAnalysesPage() {
 
       <div className="grid gap-4 xl:grid-cols-3">
         <Panel title={t("14 derniers jours", "Last 14 days")} description={t("Réservations par jour", "Reservations per day")}>
-          <Bars data={daily} color="bg-emerald-400" height={120} />
+          <Bars data={daily} color="bg-ok" height={120} />
         </Panel>
         <Panel title={t("Chambres vs espaces communs", "Rooms vs common areas")} description={t("Où vos clients scannent et réservent", "Where your guests scan and book")}>
           <div className="grid grid-cols-2 gap-3">
             {[
-              { label: t("Chambres", "Rooms"), scans: roomsScans, resas: roomsResas, n: roomsPerf.length, color: "text-sky-300" },
-              { label: t("Espaces communs", "Common areas"), scans: spacesScans, resas: spacesResas, n: spacesPerf.length, color: "text-violet-300" },
+              { label: t("Chambres", "Rooms"), scans: roomsScans, resas: roomsResas, n: roomsPerf.length, color: "text-info" },
+              { label: t("Espaces communs", "Common areas"), scans: spacesScans, resas: spacesResas, n: spacesPerf.length, color: "text-plum" },
             ].map((s) => (
-              <div key={s.label} className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
-                <p className={`text-[11px] font-bold uppercase tracking-[0.14em] ${s.color}`}>{s.label}</p>
-                <p className="num mt-2 text-2xl font-black text-white">{formatNumber(s.resas, locale)}</p>
-                <p className="num text-xs text-white/50">
+              <div key={s.label} className="rounded-xl border border-line bg-fill p-4">
+                <p className={`text-xs font-bold ${s.color}`}>{s.label}</p>
+                <p className="num mt-2 text-2xl font-black text-ink">{formatNumber(s.resas, locale)}</p>
+                <p className="num text-xs text-ink-3">
                   {t("réservations", "reservations")} · {formatNumber(s.scans, locale)} scans · {s.n} QR
                 </p>
-                <p className="num mt-2 text-xs font-bold text-white/70">
+                <p className="num mt-2 text-xs font-bold text-ink-2">
                   {s.scans > 0 ? formatPercent(s.resas / s.scans, 1, locale) : "—"} {t("de conversion", "conversion")}
                 </p>
               </div>
             ))}
           </div>
-          <p className="mt-3 text-xs leading-relaxed text-white/50">
+          <p className="mt-3 text-xs leading-relaxed text-ink-3">
             {spacesScans > roomsScans
               ? t(
                   "Les espaces communs génèrent le plus de scans : un QR bien visible au lobby ou à la piscine vaut plusieurs chambres.",
@@ -187,16 +187,16 @@ export default function HotelAnalysesPage() {
         </Panel>
         <Panel title={t("Mix par catégorie", "Category mix")} description={t("Réservations sur la période", "Reservations over the period")}>
           <SplitBar segments={byCategory} />
-          <div className="mt-4 border-t border-white/[0.08] pt-3">
-            <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.14em] text-white/45">{t("Montant dépensé par mois", "Amount spent per month")}</p>
-            <Bars data={monthly} color="bg-amber-400" height={90} format={(n) => formatMad(n, true, locale)} />
+          <div className="mt-4 border-t border-line pt-3">
+            <p className="mb-2 text-xs font-bold text-ink-3">{t("Montant dépensé par mois", "Amount spent per month")}</p>
+            <Bars data={monthly} color="bg-warn" height={90} format={(n) => formatMad(n, true, locale)} />
           </div>
         </Panel>
       </div>
 
       <div className="grid gap-4 xl:grid-cols-3">
         <Panel title={t("Jours de sortie", "Outing days")} description={t("Quand vos clients sortent", "When your guests go out")}>
-          <Bars data={weekday} color="bg-violet-400" height={110} highlightLast={false} />
+          <Bars data={weekday} color="bg-plum" height={110} highlightLast={false} />
         </Panel>
         <Panel
           title={t("Moments de la journée", "Time of day")}
@@ -206,25 +206,25 @@ export default function HotelAnalysesPage() {
               : t("Aucune heure renseignée", "No times provided")
           }
         >
-          <Bars data={hours} color="bg-sky-400" height={110} highlightLast={false} />
-          <p className="mt-2 flex items-center gap-1.5 text-[11px] text-white/40">
+          <Bars data={hours} color="bg-link" height={110} highlightLast={false} />
+          <p className="mt-2 flex items-center gap-1.5 text-xs text-ink-3">
             <Clock size={11} strokeWidth={1.75} /> {t("Nuit = après 23 h", "Night = after 11 pm")}
           </p>
         </Panel>
         <Panel title={t("Adresses les mieux notées", "Top-rated places")} description={t("Par vos clients, sur la période", "By your guests, over the period")}>
           {bestRated.length === 0 ? (
-            <p className="text-xs text-white/40">{t("Aucun avis sur la période.", "No reviews over the period.")}</p>
+            <p className="text-xs text-ink-3">{t("Aucun avis sur la période.", "No reviews over the period.")}</p>
           ) : (
             <ul className="space-y-2.5">
               {bestRated.map((b) => (
                 <li key={b.label} className="flex items-center justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-medium text-white">{b.label}</p>
-                    <p className="text-[11px] text-white/40">{b.sub}</p>
+                    <p className="truncate text-sm font-medium text-ink">{b.label}</p>
+                    <p className="text-xs text-ink-3">{b.sub}</p>
                   </div>
                   <span className="flex shrink-0 items-center gap-1.5">
                     <RatingStars value={b.value} size={11} />
-                    <span className="num text-xs font-bold text-white/80">{fmt1(b.value)}</span>
+                    <span className="num text-xs font-bold text-ink">{fmt1(b.value)}</span>
                   </span>
                 </li>
               ))}
@@ -235,11 +235,11 @@ export default function HotelAnalysesPage() {
 
       <div className="grid gap-4 xl:grid-cols-3">
         <Panel title={t("Adresses les plus réservées", "Most-booked places")} description={t("Sur la période", "Over the period")}>
-          <RankedBars items={topVenues} color="bg-emerald-400/80" empty={t("Aucune réservation sur la période.", "No reservations over the period.")} />
+          <RankedBars items={topVenues} color="bg-ok-soft" empty={t("Aucune réservation sur la période.", "No reservations over the period.")} />
         </Panel>
         <Panel title={t("Performance par emplacement", "Performance by location")} description={t("Scans, réservations et commissions, sur la période", "Scans, reservations and commissions over the period")} className="xl:col-span-2" padded={false}>
           {ranked.length === 0 ? (
-            <p className="px-6 py-8 text-sm text-white/40">{t("Aucun QR code.", "No QR codes.")}</p>
+            <p className="px-6 py-8 text-sm text-ink-3">{t("Aucun QR code.", "No QR codes.")}</p>
           ) : (
             <Table>
               <thead>
@@ -260,7 +260,7 @@ export default function HotelAnalysesPage() {
                     <Td align="right" className="num" muted>{formatNumber(q.scans, locale)}</Td>
                     <Td align="right" className="num">{formatNumber(q.liveReservations, locale)}</Td>
                     <Td align="right" className="num" muted>{q.scans > 0 ? formatPercent(q.conversion, 1, locale) : "—"}</Td>
-                    <Td align="right" className="num font-bold text-amber-300">{q.commission > 0 ? formatMad(q.commission, true, locale) : "—"}</Td>
+                    <Td align="right" className="num font-bold text-warn">{q.commission > 0 ? formatMad(q.commission, true, locale) : "—"}</Td>
                   </Tr>
                 ))}
               </tbody>

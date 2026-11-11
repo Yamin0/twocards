@@ -174,9 +174,9 @@ export function OfferEditor({
               e.target.value = "";
             }}
           />
-          <div className="relative aspect-[4/3] overflow-hidden rounded-xl border border-white/10 bg-white/[0.04]">
+          <div className="relative aspect-[4/3] overflow-hidden rounded-xl border border-line bg-fill">
             <Image src={preview} alt="" fill unoptimized={preview.startsWith("http")} sizes="240px" className="object-cover" />
-            <span className="absolute inset-x-0 bottom-0 bg-black/60 px-2 py-1 text-center text-[10px] font-bold uppercase tracking-wider text-white/70">
+            <span className="absolute inset-x-0 bottom-0 bg-panel px-2 py-1 text-center text-xs font-bold text-ink-2">
               {photos.length === 0 ? t("Photo par défaut", "Default photo") : t("Couverture", "Cover")}
             </span>
           </div>
@@ -185,15 +185,15 @@ export function OfferEditor({
           {photos.length > 1 && (
             <ul className="mt-2 grid grid-cols-3 gap-1.5">
               {photos.slice(1).map((url, i) => (
-                <li key={url} className="group relative aspect-square overflow-hidden rounded-lg border border-white/10">
+                <li key={url} className="group relative aspect-square overflow-hidden rounded-lg border border-line">
                   <Image src={url} alt="" fill unoptimized={url.startsWith("http")} sizes="80px" className="object-cover" />
-                  <div className="absolute inset-0 flex items-center justify-center gap-1 bg-black/55 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
+                  <div className="absolute inset-0 flex items-center justify-center gap-1 bg-scrim opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
                     <button
                       type="button"
                       onClick={() => setPhotos([url, ...photos.filter((u) => u !== url)])}
                       aria-label={t("Définir comme couverture", "Set as cover")}
                       title={t("Définir comme couverture", "Set as cover")}
-                      className="rounded-md p-1 text-white/80 hover:text-amber-300"
+                      className="rounded-md p-1 text-ink hover:text-warn"
                     >
                       <Star size={13} strokeWidth={2} />
                     </button>
@@ -202,12 +202,12 @@ export function OfferEditor({
                       onClick={() => setPhotos(photos.filter((u) => u !== url))}
                       aria-label={t("Retirer cette photo", "Remove this photo")}
                       title={t("Retirer", "Remove")}
-                      className="rounded-md p-1 text-white/80 hover:text-red-300"
+                      className="rounded-md p-1 text-ink hover:text-danger"
                     >
                       <X size={13} strokeWidth={2.5} />
                     </button>
                   </div>
-                  <span className="num absolute left-1 top-1 rounded bg-black/60 px-1 text-[9px] font-bold text-white/80">
+                  <span className="num absolute left-1 top-1 rounded bg-panel px-1 text-xs font-bold text-ink">
                     {i + 2}
                   </span>
                 </li>
@@ -230,7 +230,7 @@ export function OfferEditor({
               <Button size="sm" variant="ghost" icon={Trash2} onClick={() => setPhotos(photos.slice(1))} aria-label={t("Retirer la couverture", "Remove cover")} title={t("Retirer la couverture", "Remove cover")} />
             )}
           </div>
-          <p className="mt-2 text-[11px] leading-relaxed text-white/40">
+          <p className="mt-2 text-xs leading-relaxed text-ink-3">
             {t(
               <>
                 La première photo est la couverture, seule visible sur la carte. Les suivantes s&apos;affichent dans la
@@ -301,12 +301,12 @@ export function OfferEditor({
                 />
               </Field>
             )}
-            <div className="flex h-11 items-center gap-3 rounded-xl border border-white/10 bg-white/[0.04] px-4">
+            <div className="flex h-11 items-center gap-3 rounded-xl border border-line bg-fill px-4">
               <Switch checked={draft.active} onChange={(v) => set("active", v)} label={t("Adresse proposée", "Place offered")} />
-              <span className="text-sm text-white/70">{draft.active ? t("Proposée aux clients", "Offered to guests") : t("Masquée pour l'instant", "Hidden for now")}</span>
+              <span className="text-sm text-ink-2">{draft.active ? t("Proposée aux clients", "Offered to guests") : t("Masquée pour l'instant", "Hidden for now")}</span>
             </div>
           </div>
-          {error && <p className="rounded-xl border border-red-400/20 bg-red-500/10 px-3 py-2 text-xs text-red-200">{error}</p>}
+          {error && <p className="rounded-xl border border-danger/25 bg-danger-soft px-3 py-2 text-xs text-danger">{error}</p>}
         </div>
       </div>
     </Modal>

@@ -222,13 +222,13 @@ function SettingsContent() {
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label={t("Nom de l'hôtel", "Hotel name")} htmlFor="h-name">
                 <div className="relative">
-                  <Hotel size={15} strokeWidth={1.75} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
+                  <Hotel size={15} strokeWidth={1.75} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-3" />
                   <input id="h-name" value={hotel.name} onChange={(e) => setHotel({ ...hotel, name: e.target.value })} maxLength={120} className={cn(inputClass, "pl-10")} placeholder="Riad des Orangers" />
                 </div>
               </Field>
               <Field label={t("Ville", "City")} htmlFor="h-city" hint={t("Détermine le catalogue de sorties proposé à vos clients.", "Determines the catalogue of outings offered to your guests.")}>
                 <div className="relative">
-                  <MapPin size={15} strokeWidth={1.75} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
+                  <MapPin size={15} strokeWidth={1.75} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-3" />
                   <input id="h-city" list="h-cities" value={hotel.city} onChange={(e) => setHotel({ ...hotel, city: e.target.value })} maxLength={80} className={cn(inputClass, "pl-10")} placeholder="Marrakech" />
                   <datalist id="h-cities">
                     {CITIES.map((c) => (
@@ -239,13 +239,13 @@ function SettingsContent() {
               </Field>
               <Field label={t("Nombre de chambres", "Number of rooms")} htmlFor="h-rooms">
                 <div className="relative">
-                  <BedDouble size={15} strokeWidth={1.75} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
+                  <BedDouble size={15} strokeWidth={1.75} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-3" />
                   <input id="h-rooms" type="number" min={1} value={hotel.rooms} onChange={(e) => setHotel({ ...hotel, rooms: e.target.value })} className={cn(inputClass, "num pl-10")} />
                 </div>
               </Field>
               <Field label={t("Téléphone de l'hôtel", "Hotel phone")} htmlFor="h-phone" hint={t("Pour twocards et les établissements partenaires.", "For twocards and partner venues.")}>
                 <div className="relative">
-                  <Phone size={15} strokeWidth={1.75} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
+                  <Phone size={15} strokeWidth={1.75} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-3" />
                   <input id="h-phone" type="tel" value={hotel.phone} onChange={(e) => setHotel({ ...hotel, phone: e.target.value })} maxLength={40} className={cn(inputClass, "num pl-10")} placeholder="+212 6 …" />
                 </div>
               </Field>
@@ -258,10 +258,10 @@ function SettingsContent() {
           </Panel>
           <div className="space-y-4">
             <Panel title={t("Ce que ça change", "What this changes")}>
-              <ul className="space-y-3 text-xs leading-relaxed text-white/60">
-                <li className="flex gap-2.5"><Check size={14} strokeWidth={2} className="mt-0.5 shrink-0 text-emerald-300" /> {t("Le nom apparaît en tête du menu client et sur les cartes QR imprimées.", "The name appears at the top of the guest menu and on printed QR cards.")}</li>
-                <li className="flex gap-2.5"><Check size={14} strokeWidth={2} className="mt-0.5 shrink-0 text-emerald-300" /> {t("La ville filtre le catalogue : un client de Marrakech ne voit pas les adresses de Casablanca.", "The city filters the catalogue: a guest in Marrakech won't see places in Casablanca.")}</li>
-                <li className="flex gap-2.5"><Check size={14} strokeWidth={2} className="mt-0.5 shrink-0 text-emerald-300" /> {t("Les QR déjà imprimés suivent automatiquement, sans réimpression.", "QR codes already printed update automatically, no reprint needed.")}</li>
+              <ul className="space-y-3 text-xs leading-relaxed text-ink-2">
+                <li className="flex gap-2.5"><Check size={14} strokeWidth={2} className="mt-0.5 shrink-0 text-ok" /> {t("Le nom apparaît en tête du menu client et sur les cartes QR imprimées.", "The name appears at the top of the guest menu and on printed QR cards.")}</li>
+                <li className="flex gap-2.5"><Check size={14} strokeWidth={2} className="mt-0.5 shrink-0 text-ok" /> {t("La ville filtre le catalogue : un client de Marrakech ne voit pas les adresses de Casablanca.", "The city filters the catalogue: a guest in Marrakech won't see places in Casablanca.")}</li>
+                <li className="flex gap-2.5"><Check size={14} strokeWidth={2} className="mt-0.5 shrink-0 text-ok" /> {t("Les QR déjà imprimés suivent automatiquement, sans réimpression.", "QR codes already printed update automatically, no reprint needed.")}</li>
               </ul>
             </Panel>
             <InfoNote icon={ShieldCheck} tone="sky">
@@ -300,12 +300,12 @@ function SettingsContent() {
                   const custom = menu.categoryImages[k];
                   const img = custom || CATEGORY_META[k].image;
                   return (
-                    <div key={k} className="relative h-28 overflow-hidden rounded-xl border border-white/10 bg-white/[0.04]">
+                    <div key={k} className="relative h-28 overflow-hidden rounded-xl border border-line bg-fill">
                       <Image src={img} alt="" fill unoptimized={img.startsWith("http")} sizes="400px" className="object-cover" />
-                      <div className="absolute inset-0 bg-black/40" />
-                      <div className="absolute inset-0 flex flex-col items-center justify-center text-white">
-                        <span className="font-display text-sm font-bold uppercase tracking-[0.3em]">{categoryLabel(k, locale)}</span>
-                        <span className="mt-0.5 text-[10px] text-white/70">{custom ? t("Votre photo", "Your photo") : t("Photo twocards", "twocards photo")}</span>
+                      <div className="absolute inset-0 bg-scrim" />
+                      <div className="absolute inset-0 flex flex-col items-center justify-center text-ink">
+                        <span className="font-display text-sm font-bold">{categoryLabel(k, locale)}</span>
+                        <span className="mt-0.5 text-xs text-ink-2">{custom ? t("Votre photo", "Your photo") : t("Photo twocards", "twocards photo")}</span>
                       </div>
                       <div className="absolute inset-x-2 bottom-2 flex justify-center gap-1.5">
                         <Button
@@ -359,7 +359,7 @@ function SettingsContent() {
                         type="button"
                         aria-label={`Accent ${c}`}
                         onClick={() => setMenu({ ...menu, accent: c })}
-                        className={cn("h-9 w-9 rounded-full border-2 transition-transform hover:scale-105", menu.accent.toLowerCase() === c ? "border-white" : "border-transparent")}
+                        className={cn("h-9 w-9 rounded-full border-2 transition-transform hover:scale-105", menu.accent.toLowerCase() === c ? "border-line-2" : "border-transparent")}
                         style={{ background: c }}
                       />
                     ))}
@@ -374,7 +374,7 @@ function SettingsContent() {
                         type="button"
                         aria-label={t(`Fond ${c}`, `Background ${c}`)}
                         onClick={() => setMenu({ ...menu, background: c })}
-                        className={cn("h-9 w-9 rounded-full border-2 transition-transform hover:scale-105", menu.background.toLowerCase() === c ? "border-white" : "border-white/20")}
+                        className={cn("h-9 w-9 rounded-full border-2 transition-transform hover:scale-105", menu.background.toLowerCase() === c ? "border-line-2" : "border-line-2")}
                         style={{ background: c }}
                       />
                     ))}
@@ -398,25 +398,25 @@ function SettingsContent() {
                     )}
                     className={cn(inputClass, "resize-none")}
                   />
-                  <p className="num text-right text-[11px] text-white/35">{menu.welcome.length}/240</p>
+                  <p className="num text-right text-xs text-ink-3">{menu.welcome.length}/240</p>
                 </Field>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <Field label={t("WhatsApp de la réception", "Front desk WhatsApp")} htmlFor="m-reception" hint={t("Le client peut vous écrire directement depuis le menu.", "Guests can message you directly from the menu.")}>
                     <div className="relative">
-                      <MessageCircle size={15} strokeWidth={1.75} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
+                      <MessageCircle size={15} strokeWidth={1.75} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-3" />
                       <input id="m-reception" type="tel" value={menu.reception} onChange={(e) => setMenu({ ...menu, reception: e.target.value })} maxLength={40} className={cn(inputClass, "num pl-10")} placeholder="+212 6 …" />
                     </div>
                   </Field>
                   <Field label={t("Prix indicatifs", "Indicative prices")} hint={t("Afficher « dès 450 MAD » sur les activités et services qui en ont un.", "Show “from 450 MAD” on activities and services that have one.")}>
-                    <div className="flex h-11 items-center gap-3 rounded-xl border border-white/10 bg-white/[0.04] px-4">
+                    <div className="flex h-11 items-center gap-3 rounded-xl border border-line bg-fill px-4">
                       <Switch checked={menu.prices} onChange={(v) => setMenu({ ...menu, prices: v })} label={t("Afficher les prix indicatifs", "Show indicative prices")} />
-                      <span className="text-sm text-white/70">{menu.prices ? t("Affichés", "Shown") : t("Masqués", "Hidden")}</span>
+                      <span className="text-sm text-ink-2">{menu.prices ? t("Affichés", "Shown") : t("Masqués", "Hidden")}</span>
                     </div>
                   </Field>
                 </div>
               </div>
-              <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-white/[0.08] pt-4">
-                <p className="text-xs text-white/45">{t("Les adresses proposées se règlent QR par QR, depuis la fiche de l'emplacement.", "Places offered are set QR by QR, from each location's page.")}</p>
+              <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-4">
+                <p className="text-xs text-ink-3">{t("Les adresses proposées se règlent QR par QR, depuis la fiche de l'emplacement.", "Places offered are set QR by QR, from each location's page.")}</p>
                 <div className="flex gap-2">
                   {previewCode && (
                     <LinkButton href={guestUrl(previewCode, hotel.name, hotel.city)} external icon={ExternalLink}>
@@ -440,13 +440,13 @@ function SettingsContent() {
                   ce sont les catégories qui portent les images. */}
               <div className="px-4 pb-3 pt-5" style={{ color: darkPage ? "#fff" : "#171717" }}>
                 <p
-                  className="text-[10px] font-bold"
+                  className="text-xs font-bold"
                   style={{ color: darkAccent !== darkPage ? menu.accent : "inherit" }}
                 >
                   {t("Chambre 129", "Room 129")}
                 </p>
                 <p className="font-display mt-1 text-xl font-black leading-[0.9] tracking-[-0.03em]">{hotel.name || t("Votre hôtel", "Your hotel")}</p>
-                <p className="mt-1.5 line-clamp-3 text-[10px] font-light leading-snug opacity-75">
+                <p className="mt-1.5 line-clamp-3 text-xs font-light leading-snug opacity-75">
                   {menu.welcome ||
                     t(
                       "Réservez vos plus belles sorties en quelques secondes — notre conciergerie s'occupe du reste.",
@@ -454,7 +454,7 @@ function SettingsContent() {
                     )}
                 </p>
                 <p
-                  className="mt-2.5 border-t pt-1.5 text-[8px] font-bold uppercase tracking-[0.18em] opacity-55"
+                  className="mt-2.5 border-t pt-1.5 text-xs font-bold opacity-55"
                   style={{ borderColor: darkPage ? "rgba(255,255,255,0.16)" : "rgba(23,23,23,0.16)" }}
                 >
                   {hotel.city ? `${hotel.city} — ` : ""}{t("Sélection de l'hôtel", "Hotel's selection")}
@@ -465,7 +465,7 @@ function SettingsContent() {
                   {[t("Tout", "All"), categoryLabel("restaurants", locale), categoryLabel("activites", locale), categoryLabel("clubs", locale)].map((c, i) => (
                     <span
                       key={c}
-                      className="shrink-0 rounded-full px-2.5 py-1 text-[9px] font-bold"
+                      className="shrink-0 rounded-full px-2.5 py-1 text-xs font-bold"
                       style={i === 0 ? { background: menu.accent, color: onAccent } : { background: "#f1f0ec", color: "#333" }}
                     >
                       {c}
@@ -480,22 +480,22 @@ function SettingsContent() {
                     <div key={o.n} className="flex items-stretch gap-2.5 rounded-xl border border-black/[0.06] bg-white p-2">
                       <div className="w-12 shrink-0 rounded-lg bg-gradient-to-br from-neutral-300 to-neutral-200" />
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-[11px] font-bold text-black">{o.n}</p>
-                        <p className="truncate text-[9px] text-black/50">{o.t}</p>
+                        <p className="truncate text-xs font-bold text-ink">{o.n}</p>
+                        <p className="truncate text-xs text-ink-2">{o.t}</p>
                         <div className="mt-1.5 flex items-center justify-between">
-                          <span className="text-[9px] font-bold text-black/70">{menu.prices && o.p ? o.p : ""}</span>
-                          <span className="rounded-full px-2 py-0.5 text-[9px] font-bold" style={{ background: menu.accent, color: onAccent }}>{t("Réserver", "Book")}</span>
+                          <span className="text-xs font-bold text-ink">{menu.prices && o.p ? o.p : ""}</span>
+                          <span className="rounded-full px-2 py-0.5 text-xs font-bold" style={{ background: menu.accent, color: onAccent }}>{t("Réserver", "Book")}</span>
                         </div>
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
-              <div className={cn("flex items-center justify-center gap-1 py-2 text-[8px]", darkPage ? "text-white/50" : "text-black/40")}>
+              <div className={cn("flex items-center justify-center gap-1 py-2 text-xs", darkPage ? "text-ink-3" : "text-ink-2")}>
                 <Smartphone size={9} strokeWidth={1.75} /> {t("Propulsé par twocards.", "Powered by twocards.")}
               </div>
             </div>
-            <p className="mt-3 flex items-center justify-center gap-1.5 text-[11px] text-white/40">
+            <p className="mt-3 flex items-center justify-center gap-1.5 text-xs text-ink-3">
               <Eye size={12} strokeWidth={1.75} />{" "}
               {t(
                 "Aperçu mobile simplifié — sur ordinateur, le menu s'affiche en pleine page avec une colonne de navigation",
@@ -515,13 +515,13 @@ function SettingsContent() {
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label={t("Nom du contact", "Contact name")} htmlFor="a-name">
                 <div className="relative">
-                  <User size={15} strokeWidth={1.75} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
+                  <User size={15} strokeWidth={1.75} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-3" />
                   <input id="a-name" value={account.fullName} onChange={(e) => setAccount({ fullName: e.target.value })} maxLength={120} className={cn(inputClass, "pl-10")} />
                 </div>
               </Field>
               <Field label={t("E-mail de connexion", "Login email")} htmlFor="a-email" hint={t("Ne se change pas ici : contactez votre référent twocards.", "Can't be changed here: contact your twocards representative.")}>
                 <div className="relative">
-                  <Mail size={15} strokeWidth={1.75} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
+                  <Mail size={15} strokeWidth={1.75} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-3" />
                   <input id="a-email" value={email ?? ""} disabled className={cn(inputClass, "pl-10")} />
                 </div>
               </Field>
@@ -533,7 +533,7 @@ function SettingsContent() {
             </div>
             <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
               <form action="/auth/signout" method="post">
-                <button type="submit" className="text-xs font-bold text-white/45 transition-colors hover:text-red-300">
+                <button type="submit" className="text-xs font-bold text-ink-3 transition-colors hover:text-danger">
                   {t("Se déconnecter de cet appareil", "Log out of this device")}
                 </button>
               </form>
@@ -552,7 +552,7 @@ function SettingsContent() {
 
 function ColorInput({ value, onChange, label }: { value: string; onChange: (v: string) => void; label: string }) {
   return (
-    <label className="ml-1 inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.05] px-3 py-1.5 text-xs font-medium text-white/70">
+    <label className="ml-1 inline-flex items-center gap-2 rounded-xl border border-line bg-fill px-3 py-1.5 text-xs font-medium text-ink-2">
       <Palette size={13} strokeWidth={1.75} />
       <input
         type="color"
@@ -561,7 +561,7 @@ function ColorInput({ value, onChange, label }: { value: string; onChange: (v: s
         className="h-6 w-8 cursor-pointer rounded border-0 bg-transparent p-0"
         aria-label={label}
       />
-      <span className="num uppercase">{value}</span>
+      <span className="num">{value}</span>
     </label>
   );
 }

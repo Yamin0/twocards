@@ -254,10 +254,10 @@ export default function VenueCommissionsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className=" bg-panel border border-line rounded-3xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="font-display text-3xl font-light text-white">Commissions</h1>
-          <p className="font-ui text-sm text-white/60 mt-1.5">
+          <h1 className="font-display text-3xl font-light text-ink">Commissions</h1>
+          <p className="font-ui text-sm text-ink-2 mt-1.5">
             {t(
               "Ce que vous reversez à chaque hôtel qui vous envoie des clients, mois par mois.",
               "What you pay each hotel that sends you guests, month by month."
@@ -267,7 +267,7 @@ export default function VenueCommissionsPage() {
         {due.length > 0 && (
           <button
             onClick={() => exportCsv(due, locale)}
-            className="font-ui flex items-center gap-2 bg-white/10 hover:bg-white/15 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors shrink-0"
+            className="font-ui flex items-center gap-2 bg-fill-2 hover:bg-fill-3 text-ink text-sm font-medium px-4 py-2.5 rounded-xl transition-colors shrink-0"
           >
             <Download size={16} strokeWidth={1.5} />
             {t("Exporter en CSV", "Export as CSV")}
@@ -278,14 +278,14 @@ export default function VenueCommissionsPage() {
       <StatStrip stats={stats} />
 
       {/* Ce mois-ci */}
-      <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
+      <div className=" bg-panel border border-line rounded-3xl p-6">
         <div className="mb-1 flex items-center justify-between gap-3">
-          <h2 className="font-display text-lg font-normal text-white">{monthLabel(now, locale)}</h2>
-          <span className="font-display text-lg text-amber-300 tabular-nums">
+          <h2 className="font-display text-lg font-normal text-ink">{monthLabel(now, locale)}</h2>
+          <span className="font-display text-lg text-warn tabular-nums">
             {mad(thisMonth?.commission ?? 0, locale)}
           </span>
         </div>
-        <p className="font-ui text-xs text-white/40 mb-4">
+        <p className="font-ui text-xs text-ink-3 mb-4">
           {t(
             "Par hôtel d'origine. Le règlement se fait au mois clôturé, consolidé par twocards.",
             "By referring hotel. Settlement happens once the month closes, consolidated by twocards."
@@ -299,7 +299,7 @@ export default function VenueCommissionsPage() {
             toggle={toggle}
           />
         ) : (
-          <p className="font-ui text-sm text-white/40 leading-relaxed">
+          <p className="font-ui text-sm text-ink-3 leading-relaxed">
             {t(
               "Aucune sortie commissionnée ce mois-ci pour le moment.",
               "No commissionable outings this month yet."
@@ -314,9 +314,9 @@ export default function VenueCommissionsPage() {
       </div>
 
       {/* Historique */}
-      <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
-        <h2 className="font-display text-lg font-normal text-white mb-1">{t("Historique", "History")}</h2>
-        <p className="font-ui text-xs text-white/40 mb-4">
+      <div className=" bg-panel border border-line rounded-3xl p-6">
+        <h2 className="font-display text-lg font-normal text-ink mb-1">{t("Historique", "History")}</h2>
+        <p className="font-ui text-xs text-ink-3 mb-4">
           {t(
             "Un mois, puis chaque hôtel, puis chaque sortie. Touchez pour déplier.",
             "Each month, then each hotel, then each outing. Tap to expand."
@@ -324,10 +324,10 @@ export default function VenueCommissionsPage() {
         </p>
         {history.length === 0 ? (
           <div className="py-8 text-center">
-            <div className="w-12 h-12 rounded-2xl bg-amber-500/15 border border-amber-400/20 flex items-center justify-center mx-auto mb-4">
-              <Coins size={22} strokeWidth={1.5} className="text-amber-400" />
+            <div className="w-12 h-12 rounded-2xl bg-warn-soft border border-warn/25 flex items-center justify-center mx-auto mb-4">
+              <Coins size={22} strokeWidth={1.5} className="text-warn" />
             </div>
-            <p className="font-ui text-sm text-white/45 max-w-md mx-auto">
+            <p className="font-ui text-sm text-ink-3 max-w-md mx-auto">
               {t(
                 "Les mois passés apparaîtront ici avec, pour chacun, ce qui a été reversé à chaque hôtel.",
                 "Past months will appear here, each showing what was paid to every hotel."
@@ -335,7 +335,7 @@ export default function VenueCommissionsPage() {
             </p>
           </div>
         ) : (
-          <ul className="divide-y divide-white/[0.06]">
+          <ul className="divide-y divide-line">
             {history.map((m) => {
               const isOpen = open.has(m.period);
               const remaining = m.hotels.filter((h) => !settled(m.period, h.hotelId)).reduce((s, h) => s + h.commission, 0);
@@ -350,11 +350,11 @@ export default function VenueCommissionsPage() {
                     <ChevronDown
                       size={16}
                       strokeWidth={1.75}
-                      className={`shrink-0 text-white/40 transition-transform ${isOpen ? "rotate-180" : ""}`}
+                      className={`shrink-0 text-ink-3 transition-transform ${isOpen ? "rotate-180" : ""}`}
                     />
                     <div className="min-w-0 flex-1">
-                      <p className="font-ui text-sm font-semibold text-white">{monthLabel(m.period, locale)}</p>
-                      <p className="font-ui text-xs text-white/45">
+                      <p className="font-ui text-sm font-semibold text-ink">{monthLabel(m.period, locale)}</p>
+                      <p className="font-ui text-xs text-ink-3">
                         {t(
                           `${m.rows.length} sortie${m.rows.length > 1 ? "s" : ""} · ${m.hotels.length} hôtel${m.hotels.length > 1 ? "s" : ""}`,
                           `${m.rows.length} outing${m.rows.length === 1 ? "" : "s"} · ${m.hotels.length} hotel${m.hotels.length === 1 ? "" : "s"}`
@@ -362,8 +362,8 @@ export default function VenueCommissionsPage() {
                       </p>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className="font-display text-base text-white tabular-nums">{mad(m.commission, locale)}</p>
-                      <p className={`font-ui text-[11px] ${remaining > 0 ? "text-amber-300" : "text-emerald-300"}`}>
+                      <p className="font-display text-base text-ink tabular-nums">{mad(m.commission, locale)}</p>
+                      <p className={`font-ui text-xs ${remaining > 0 ? "text-warn" : "text-ok"}`}>
                         {remaining > 0
                           ? t(`${mad(remaining, locale)} à régler`, `${mad(remaining, locale)} due`)
                           : t("réglé", "settled")}
@@ -382,9 +382,9 @@ export default function VenueCommissionsPage() {
         )}
       </div>
 
-      <div className="flex items-start gap-3 rounded-2xl border border-amber-400/15 bg-amber-500/[0.07] backdrop-blur-xl p-4">
-        <Percent size={16} strokeWidth={1.5} className="text-amber-400 shrink-0 mt-0.5" />
-        <p className="font-ui text-xs leading-relaxed text-white/60 max-w-2xl">
+      <div className="flex items-start gap-3 rounded-2xl border border-warn/25 bg-warn-soft p-4">
+        <Percent size={16} strokeWidth={1.5} className="text-warn shrink-0 mt-0.5" />
+        <p className="font-ui text-xs leading-relaxed text-ink-2 max-w-2xl">
           {t(
             "Vous reversez un pourcentage du montant réellement dépensé, 10 % par défaut, uniquement sur les clients apportés par un hôtel du réseau. La commission se calcule dès que l'addition est saisie ou remontée par votre caisse. Les réservations de votre portail direct et celles prises par vous-même ne sont jamais commissionnées. Le même détail, ligne par ligne, est celui que voit l'hôtel.",
             "You pay a percentage of the amount actually spent, 10% by default, only on guests sent by a hotel in the network. Commission is calculated as soon as the bill is entered or synced from your POS. Reservations from your direct portal and those you take yourself are never commissioned. The hotel sees exactly the same line-by-line breakdown."
@@ -415,19 +415,19 @@ function HotelList({
         const isOpen = open.has(key);
         const s = settled(month.period, h.hotelId);
         return (
-          <li key={key} className="rounded-xl border border-white/[0.08] bg-white/[0.03]">
+          <li key={key} className="rounded-xl border border-line bg-fill">
             <button
               type="button"
               onClick={() => toggle(key)}
               aria-expanded={isOpen}
               className="flex w-full items-center gap-3 px-4 py-3 text-left"
             >
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/10">
-                <Hotel size={15} strokeWidth={1.75} className="text-white/80" />
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-fill-2">
+                <Hotel size={15} strokeWidth={1.75} className="text-ink" />
               </span>
               <div className="min-w-0 flex-1">
-                <p className="font-ui text-sm font-semibold text-white truncate">{h.name}</p>
-                <p className="font-ui text-xs text-white/45">
+                <p className="font-ui text-sm font-semibold text-ink truncate">{h.name}</p>
+                <p className="font-ui text-xs text-ink-3">
                   {t(
                     `${h.rows.length} sortie${h.rows.length > 1 ? "s" : ""} · ${mad(h.spent, locale)} dépensés`,
                     `${h.rows.length} outing${h.rows.length === 1 ? "" : "s"} · ${mad(h.spent, locale)} spent`
@@ -435,14 +435,14 @@ function HotelList({
                 </p>
               </div>
               <div className="text-right shrink-0">
-                <p className="font-display text-base text-amber-300 tabular-nums">{mad(h.commission, locale)}</p>
+                <p className="font-display text-base text-warn tabular-nums">{mad(h.commission, locale)}</p>
                 {s ? (
-                  <p className="font-ui inline-flex items-center gap-1 text-[11px] text-emerald-300">
+                  <p className="font-ui inline-flex items-center gap-1 text-xs text-ok">
                     <Check size={11} strokeWidth={2.5} />
                     {t("réglé le", "settled on")} {new Date(s.settled_at).toLocaleDateString(intlLocale(locale))}
                   </p>
                 ) : (
-                  <p className="font-ui inline-flex items-center gap-1 text-[11px] text-amber-300/90">
+                  <p className="font-ui inline-flex items-center gap-1 text-xs text-warn">
                     <Clock size={11} strokeWidth={2} />
                     {t("à régler", "due")}
                   </p>
@@ -451,24 +451,24 @@ function HotelList({
               <ChevronDown
                 size={15}
                 strokeWidth={1.75}
-                className={`shrink-0 text-white/40 transition-transform ${isOpen ? "rotate-180" : ""}`}
+                className={`shrink-0 text-ink-3 transition-transform ${isOpen ? "rotate-180" : ""}`}
               />
             </button>
             {isOpen && (
-              <ul className="divide-y divide-white/[0.05] border-t border-white/[0.08] px-4">
+              <ul className="divide-y divide-line border-t border-line px-4">
                 {h.rows.map((r) => (
                   <li key={r.id} className="flex items-center justify-between gap-3 py-2.5">
                     <div className="min-w-0">
-                      <p className="font-ui text-sm text-white truncate">
+                      <p className="font-ui text-sm text-ink truncate">
                         {r.guest_name}
-                        {r.service_name && <span className="text-blue-300/80"> · {r.service_name}</span>}
+                        {r.service_name && <span className="text-info"> · {r.service_name}</span>}
                       </p>
-                      <p className="font-ui text-xs text-white/45">
+                      <p className="font-ui text-xs text-ink-3">
                         {fmtDate(r.reservation_date, locale)} · {mad(r.amount_spent ?? 0, locale)} {t("dépensés", "spent")} · {Math.round(r.commission_rate * 100)}{t(" %", "%")}
                         {r.amount_source === "pos" ? t(" · caisse", " · POS") : ""}
                       </p>
                     </div>
-                    <span className="font-display shrink-0 text-sm text-amber-300 tabular-nums">{mad(r.commission, locale)}</span>
+                    <span className="font-display shrink-0 text-sm text-warn tabular-nums">{mad(r.commission, locale)}</span>
                   </li>
                 ))}
               </ul>

@@ -202,18 +202,18 @@ export default function PrestationsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
+      <div className=" bg-panel border border-line rounded-3xl p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <h1 className="font-display text-3xl font-light text-white">{t("Prestations", "Services")}</h1>
-            <p className="font-ui text-sm text-white/60 mt-2 max-w-xl">
+            <h1 className="font-display text-3xl font-light text-ink">{t("Prestations", "Services")}</h1>
+            <p className="font-ui text-sm text-ink-2 mt-2 max-w-xl">
               {t(
                 "Ce que vos clients peuvent réserver : durée, prix, une photo. Chaque prestation visible apparaît aussitôt sous votre fiche dans le menu des hôtels partenaires, et le client la choisit avec sa date.",
                 "What your guests can book: duration, price, a photo. Every visible service appears straight away under your listing on partner hotels' menus, and guests pick it along with their date."
               )}
             </p>
             {!isActivityVenue && (
-              <p className="font-ui mt-2 text-xs text-amber-300/80">
+              <p className="font-ui mt-2 text-xs text-warn">
                 {t(
                   <>
                     Votre compte est enregistré comme restaurant ou club : les
@@ -239,16 +239,16 @@ export default function PrestationsPage() {
           </Button>
         </div>
         {services.length > 0 && (
-          <p className="font-ui mt-4 border-t border-white/[0.08] pt-4 text-xs text-white/50">
+          <p className="font-ui mt-4 border-t border-line pt-4 text-xs text-ink-3">
             {t(
               <>
                 {services.length} prestation{services.length > 1 ? "s" : ""} ·{" "}
-                <span className="text-white/80">{visible} visible{visible > 1 ? "s" : ""}</span> sur le
+                <span className="text-ink">{visible} visible{visible > 1 ? "s" : ""}</span> sur le
                 menu · l&apos;ordre ci-dessous est celui du menu.
               </>,
               <>
                 {services.length} service{services.length === 1 ? "" : "s"} ·{" "}
-                <span className="text-white/80">{visible} visible</span> on the
+                <span className="text-ink">{visible} visible</span> on the
                 menu · the order below is the menu order.
               </>
             )}
@@ -257,7 +257,7 @@ export default function PrestationsPage() {
       </div>
 
       {services.length === 0 ? (
-        <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl">
+        <div className=" bg-panel border border-line rounded-3xl">
           <EmptyState
             icon={Tags}
             title={t("Aucune prestation pour le moment", "No services yet")}
@@ -277,13 +277,13 @@ export default function PrestationsPage() {
           {services.map((s, i) => (
             <li
               key={s.id}
-              className={`backdrop-blur-2xl border rounded-2xl p-4 flex gap-4 transition-colors ${
+              className={` border rounded-2xl p-4 flex gap-4 transition-colors ${
                 s.active
-                  ? "bg-black/45 border-white/[0.12]"
-                  : "bg-black/30 border-white/[0.06]"
+                  ? "bg-panel border-line"
+                  : "bg-panel border-line"
               }`}
             >
-              <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-white/[0.06]">
+              <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-fill">
                 {s.image_url ? (
                   <Image
                     src={s.image_url}
@@ -294,7 +294,7 @@ export default function PrestationsPage() {
                     className={`object-cover ${s.active ? "" : "opacity-50"}`}
                   />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center text-white/25">
+                  <div className="flex h-full w-full items-center justify-center text-ink-3">
                     <Tags size={22} strokeWidth={1.5} />
                   </div>
                 )}
@@ -302,21 +302,21 @@ export default function PrestationsPage() {
               <div className="min-w-0 flex-1">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className={`font-ui text-[15px] font-semibold truncate ${s.active ? "text-white" : "text-white/50"}`}>
+                    <p className={`font-ui text-[15px] font-semibold truncate ${s.active ? "text-ink" : "text-ink-3"}`}>
                       {s.name}
                     </p>
-                    <p className="font-ui text-xs text-white/50 mt-0.5">
+                    <p className="font-ui text-xs text-ink-3 mt-0.5">
                       {[s.duration, s.price].filter(Boolean).join(" · ") || t("Durée et prix à préciser", "Duration and price to be added")}
                     </p>
                   </div>
                   {!s.active && (
-                    <span className="font-ui shrink-0 rounded-full border border-white/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white/50">
+                    <span className="font-ui shrink-0 rounded-full border border-line-2 px-2 py-0.5 text-xs font-bold text-ink-3">
                       {t("masquée", "hidden")}
                     </span>
                   )}
                 </div>
                 {s.description && (
-                  <p className="font-ui mt-1.5 text-xs leading-relaxed text-white/45 line-clamp-2">
+                  <p className="font-ui mt-1.5 text-xs leading-relaxed text-ink-3 line-clamp-2">
                     {s.description}
                   </p>
                 )}
@@ -324,7 +324,7 @@ export default function PrestationsPage() {
                   <button
                     type="button"
                     onClick={() => setEditor({ id: s.id, draft: { ...s } })}
-                    className="font-ui inline-flex h-9 items-center gap-1.5 rounded-lg border border-white/15 px-3 text-xs font-medium text-white hover:bg-white/10 transition-colors"
+                    className="font-ui inline-flex h-9 items-center gap-1.5 rounded-lg border border-line-2 px-3 text-xs font-medium text-ink hover:bg-fill-2 transition-colors"
                   >
                     <Pencil size={13} strokeWidth={1.75} />
                     {t("Modifier", "Edit")}
@@ -332,7 +332,7 @@ export default function PrestationsPage() {
                   <button
                     type="button"
                     onClick={() => toggle(s)}
-                    className="font-ui inline-flex h-9 items-center gap-1.5 rounded-lg border border-white/15 px-3 text-xs font-medium text-white/80 hover:bg-white/10 transition-colors"
+                    className="font-ui inline-flex h-9 items-center gap-1.5 rounded-lg border border-line-2 px-3 text-xs font-medium text-ink hover:bg-fill-2 transition-colors"
                   >
                     {s.active ? <EyeOff size={13} strokeWidth={1.75} /> : <Eye size={13} strokeWidth={1.75} />}
                     {s.active ? t("Masquer", "Hide") : t("Afficher", "Show")}
@@ -343,7 +343,7 @@ export default function PrestationsPage() {
                       onClick={() => move(s, -1)}
                       disabled={i === 0}
                       aria-label={t("Monter", "Move up")}
-                      className="flex h-9 w-9 items-center justify-center rounded-lg text-white/50 hover:bg-white/10 hover:text-white disabled:opacity-25 transition-colors"
+                      className="flex h-9 w-9 items-center justify-center rounded-lg text-ink-3 hover:bg-fill-2 hover:text-ink disabled:opacity-25 transition-colors"
                     >
                       <ArrowUp size={15} strokeWidth={1.75} />
                     </button>
@@ -352,7 +352,7 @@ export default function PrestationsPage() {
                       onClick={() => move(s, 1)}
                       disabled={i === services.length - 1}
                       aria-label={t("Descendre", "Move down")}
-                      className="flex h-9 w-9 items-center justify-center rounded-lg text-white/50 hover:bg-white/10 hover:text-white disabled:opacity-25 transition-colors"
+                      className="flex h-9 w-9 items-center justify-center rounded-lg text-ink-3 hover:bg-fill-2 hover:text-ink disabled:opacity-25 transition-colors"
                     >
                       <ArrowDown size={15} strokeWidth={1.75} />
                     </button>
@@ -360,7 +360,7 @@ export default function PrestationsPage() {
                       type="button"
                       onClick={() => setDeleting(s)}
                       aria-label={t("Supprimer", "Delete")}
-                      className="flex h-9 w-9 items-center justify-center rounded-lg text-red-400/60 hover:bg-red-500/10 hover:text-red-400 transition-colors"
+                      className="flex h-9 w-9 items-center justify-center rounded-lg text-danger hover:bg-danger-soft hover:text-danger transition-colors"
                     >
                       <Trash2 size={15} strokeWidth={1.75} />
                     </button>
@@ -526,11 +526,11 @@ function ServiceEditor({
           )}
         >
           <div className="flex items-center gap-3">
-            <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-white/[0.06]">
+            <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-fill">
               {draft.image_url ? (
                 <Image src={draft.image_url} alt="" fill unoptimized sizes="64px" className="object-cover" />
               ) : (
-                <div className="flex h-full w-full items-center justify-center text-white/25">
+                <div className="flex h-full w-full items-center justify-center text-ink-3">
                   <ImagePlus size={20} strokeWidth={1.5} />
                 </div>
               )}
@@ -557,7 +557,7 @@ function ServiceEditor({
                 type="button"
                 onClick={() => onChange({ ...draft, image_url: null })}
                 aria-label={t("Retirer la photo", "Remove photo")}
-                className="flex h-9 w-9 items-center justify-center rounded-lg text-white/50 hover:bg-white/10 hover:text-white transition-colors"
+                className="flex h-9 w-9 items-center justify-center rounded-lg text-ink-3 hover:bg-fill-2 hover:text-ink transition-colors"
               >
                 <X size={16} strokeWidth={1.75} />
               </button>

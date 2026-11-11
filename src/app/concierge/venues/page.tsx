@@ -27,31 +27,31 @@ export default function ConciergeVenuesPage() {
   return (
     <div className="bg-transparent min-h-screen">
       <div className="px-8 pt-8 pb-6">
-        <h1 className="text-white text-2xl font-extrabold">
+        <h1 className="text-ink text-2xl font-extrabold">
           {t("Mes établissements", "My venues")}
         </h1>
-        <p className="text-white/60 mt-1 text-sm">
+        <p className="text-ink-2 mt-1 text-sm">
           {t("Les établissements avec lesquels vous travaillez.", "The venues you work with.")}
         </p>
       </div>
 
       <div className="px-8 pb-8 grid grid-cols-1 md:grid-cols-2 gap-4">
         {venues.map((venue) => (
-          <div key={venue.id} className="bg-white/[0.07] rounded-md editorial-shadow overflow-hidden hover:-translate-y-0.5 transition-transform group">
+          <div key={venue.id} className="bg-fill-2 rounded-md editorial-shadow overflow-hidden hover:-translate-y-0.5 transition-transform group">
             <div className="p-6">
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-bold text-lg text-white">
+                    <h3 className="font-bold text-lg text-ink">
                       {venue.name}
                     </h3>
                     {!venue.active && (
-                      <span className="text-[0.625rem] font-semibold px-2 py-0.5 rounded-full bg-white/[0.05] text-white/60">
+                      <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-fill text-ink-2">
                         {t("inactif", "inactive")}
                       </span>
                     )}
                   </div>
-                  <div className="flex items-center gap-3 text-sm text-white/60">
+                  <div className="flex items-center gap-3 text-sm text-ink-2">
                     <span className="flex items-center gap-1">
                       <MapPin size={13} strokeWidth={1.5} />
                       {venue.city}
@@ -60,24 +60,24 @@ export default function ConciergeVenuesPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-1 text-sm">
-                  <Star size={14} strokeWidth={1.5} className="text-amber-500 fill-amber-500" />
-                  <span className="font-semibold text-white">{venue.rating}/5</span>
+                  <Star size={14} strokeWidth={1.5} className="text-warn fill-amber-500" />
+                  <span className="font-semibold text-ink">{venue.rating}/5</span>
                 </div>
               </div>
 
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <p className="text-[0.625rem] uppercase tracking-wider text-white/60 font-semibold">{t("Commission", "Commission")}</p>
-                  <p className="text-white font-bold text-lg font-ui">{venue.commission}</p>
+                  <p className="text-xs text-ink-2 font-semibold">{t("Commission", "Commission")}</p>
+                  <p className="text-ink font-bold text-lg font-ui">{venue.commission}</p>
                 </div>
                 <div>
-                  <p className="text-[0.625rem] uppercase tracking-wider text-white/60 font-semibold">{t("Couverts ce mois", "Covers this month")}</p>
-                  <p className="text-white font-bold text-lg font-ui">{venue.covers}</p>
+                  <p className="text-xs text-ink-2 font-semibold">{t("Couverts ce mois", "Covers this month")}</p>
+                  <p className="text-ink font-bold text-lg font-ui">{venue.covers}</p>
                 </div>
                 <div className="flex items-end justify-end">
                   <button
                     onClick={() => setExpandedId(expandedId === venue.id ? null : venue.id)}
-                    className="text-white text-sm font-medium flex items-center gap-1 hover:opacity-80 transition-opacity"
+                    className="text-ink text-sm font-medium flex items-center gap-1 hover:opacity-80 transition-opacity"
                   >
                     {expandedId === venue.id ? t("Fermer", "Close") : t("Voir", "View")}
                     <ArrowRight size={14} strokeWidth={1.5} className={`transition-transform ${expandedId === venue.id ? "rotate-90" : ""}`} />
@@ -88,28 +88,28 @@ export default function ConciergeVenuesPage() {
 
             {/* Expanded details */}
             {expandedId === venue.id && (
-              <div className="px-6 pb-6 pt-0 border-t border-white/10/10 mt-0 pt-4 space-y-3">
+              <div className="px-6 pb-6 pt-0 border-t border-line/10 mt-0 pt-4 space-y-3">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="flex items-center gap-2 text-sm text-white/60">
-                    <Phone size={14} strokeWidth={1.5} className="text-white" />
-                    <a href={`tel:${venue.phone}`} className="hover:text-white transition-colors">{venue.phone}</a>
+                  <div className="flex items-center gap-2 text-sm text-ink-2">
+                    <Phone size={14} strokeWidth={1.5} className="text-ink" />
+                    <a href={`tel:${venue.phone}`} className="hover:text-ink transition-colors">{venue.phone}</a>
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-white/60">
-                    <Mail size={14} strokeWidth={1.5} className="text-white" />
-                    <a href={`mailto:${venue.email}`} className="truncate hover:text-white transition-colors">{venue.email}</a>
+                  <div className="flex items-center gap-2 text-sm text-ink-2">
+                    <Mail size={14} strokeWidth={1.5} className="text-ink" />
+                    <a href={`mailto:${venue.email}`} className="truncate hover:text-ink transition-colors">{venue.email}</a>
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-white/60">
-                    <MapPin size={14} strokeWidth={1.5} className="text-white" />
+                  <div className="flex items-center gap-2 text-sm text-ink-2">
+                    <MapPin size={14} strokeWidth={1.5} className="text-ink" />
                     <span>{venue.address}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-white/60">
-                    <Globe size={14} strokeWidth={1.5} className="text-white" />
+                  <div className="flex items-center gap-2 text-sm text-ink-2">
+                    <Globe size={14} strokeWidth={1.5} className="text-ink" />
                     <span>{t("Horaires :", "Hours:")} {venue.hours}</span>
                   </div>
                 </div>
                 <a
                   href={`mailto:${venue.email}`}
-                  className="block w-full bg-white/15 text-white text-sm font-medium py-2 rounded-lg hover:opacity-90 transition-opacity mt-2 text-center"
+                  className="block w-full bg-fill-3 text-ink text-sm font-medium py-2 rounded-lg hover:opacity-90 transition-opacity mt-2 text-center"
                 >
                   {t("Contacter l'établissement", "Contact venue")}
                 </a>
@@ -119,8 +119,8 @@ export default function ConciergeVenuesPage() {
         ))}
         {venues.length === 0 && (
           <div className="col-span-full text-center py-16">
-            <Building2 size={48} strokeWidth={1} className="mx-auto text-white/60/30 mb-4" />
-            <p className="text-sm text-white/60">{t("Aucun établissement partenaire", "No partner venues")}</p>
+            <Building2 size={48} strokeWidth={1} className="mx-auto text-ink-2/30 mb-4" />
+            <p className="text-sm text-ink-2">{t("Aucun établissement partenaire", "No partner venues")}</p>
           </div>
         )}
       </div>

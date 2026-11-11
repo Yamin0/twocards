@@ -10,7 +10,7 @@ import { useLocale, useT } from "@/lib/i18n/client";
 
 export function Bars({
   data,
-  color = "bg-sky-400",
+  color = "bg-link",
   format = (n: number) => String(n),
   height = 120,
   highlightLast = true,
@@ -34,18 +34,18 @@ export function Bars({
             className="group flex min-w-0 flex-1 flex-col items-center justify-end gap-1.5"
             title={`${d.label}${sep} ${format(d.value)}`}
           >
-            <span className="num text-[10px] font-bold text-white/70 opacity-0 transition-opacity group-hover:opacity-100">
+            <span className="num text-xs font-bold text-ink-2 opacity-0 transition-opacity group-hover:opacity-100">
               {d.value > 0 ? format(d.value) : ""}
             </span>
             <div
               className={cn(
                 "w-full rounded-md transition-all",
-                d.value > 0 ? color : "bg-white/10",
+                d.value > 0 ? color : "bg-fill-2",
                 d.value > 0 && !last && "opacity-70 group-hover:opacity-100"
               )}
               style={{ height: `${Math.max((d.value / max) * (height - 40), 4)}px` }}
             />
-            <span className="num max-w-full truncate text-[10px] text-white/40">{d.label}</span>
+            <span className="num max-w-full truncate text-xs text-ink-3">{d.label}</span>
           </div>
         );
       })}
@@ -81,22 +81,22 @@ export function DualBars({
             >
               <div className="flex w-full items-end justify-center gap-0.5">
                 <div
-                  className={cn("w-1/2 rounded-t-md", d.value > 0 ? primary.color : "bg-white/10")}
+                  className={cn("w-1/2 rounded-t-md", d.value > 0 ? primary.color : "bg-fill-2")}
                   style={{ height: `${Math.max((d.value / max) * (height - 28), 3)}px` }}
                 />
                 <div
-                  className={cn("w-1/2 rounded-t-md", s > 0 ? secondary.color : "bg-white/10")}
+                  className={cn("w-1/2 rounded-t-md", s > 0 ? secondary.color : "bg-fill-2")}
                   style={{ height: `${Math.max((s / max) * (height - 28), 3)}px` }}
                 />
               </div>
               {labels !== false && (
-                <span className="num max-w-full truncate text-[10px] text-white/40">{d.label}</span>
+                <span className="num max-w-full truncate text-xs text-ink-3">{d.label}</span>
               )}
             </div>
           );
         })}
       </div>
-      <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-white/50">
+      <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-ink-3">
         <span className="inline-flex items-center gap-1.5">
           <span className={cn("h-2 w-2 rounded-sm", primary.color)} /> {primary.label}
         </span>
@@ -146,7 +146,7 @@ export function SplitBar({
   return (
     <div>
       {total === 0 ? (
-        <div className="h-2.5 rounded-full bg-white/10" aria-hidden />
+        <div className="h-2.5 rounded-full bg-fill-2" aria-hidden />
       ) : (
         <div className="flex h-2.5 gap-0.5 overflow-hidden rounded-full">
           {segments
@@ -163,10 +163,10 @@ export function SplitBar({
       )}
       <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1.5 sm:grid-cols-4">
         {segments.map((s) => (
-          <span key={s.label} className="flex items-center gap-2 text-xs text-white/60">
+          <span key={s.label} className="flex items-center gap-2 text-xs text-ink-2">
             <span className={cn("h-2 w-2 shrink-0 rounded-full", s.color)} />
             <span className="truncate">{s.label}</span>
-            <span className="num ml-auto font-bold text-white/80">
+            <span className="num ml-auto font-bold text-ink">
               {total > 0 ? `${Math.round((s.value / total) * 100)}${pct}` : "—"}
             </span>
           </span>
@@ -180,7 +180,7 @@ export function SplitBar({
 export function RankedBars({
   items,
   format = (n: number) => String(n),
-  color = "bg-sky-400/80",
+  color = "bg-info-soft",
   empty,
   href,
 }: {
@@ -193,7 +193,7 @@ export function RankedBars({
   const t = useT();
   const max = Math.max(...items.map((i) => i.value), 1);
   if (items.length === 0)
-    return <p className="text-xs text-white/40">{empty ?? t("Aucune donnée", "No data yet")}</p>;
+    return <p className="text-xs text-ink-3">{empty ?? t("Aucune donnée", "No data yet")}</p>;
   return (
     <ul className="space-y-3">
       {items.map((it, i) => {
@@ -201,13 +201,13 @@ export function RankedBars({
           <>
             <div className="flex items-baseline justify-between gap-3">
               <span className="flex min-w-0 items-baseline gap-2">
-                <span className="num w-4 shrink-0 text-[11px] font-bold text-white/35">{i + 1}</span>
-                <span className="truncate text-sm font-medium text-white">{it.label}</span>
-                {it.sub && <span className="hidden truncate text-xs text-white/40 sm:inline">{it.sub}</span>}
+                <span className="num w-4 shrink-0 text-xs font-bold text-ink-3">{i + 1}</span>
+                <span className="truncate text-sm font-medium text-ink">{it.label}</span>
+                {it.sub && <span className="hidden truncate text-xs text-ink-3 sm:inline">{it.sub}</span>}
               </span>
-              <span className="num shrink-0 text-sm font-bold text-white/85">{format(it.value)}</span>
+              <span className="num shrink-0 text-sm font-bold text-ink">{format(it.value)}</span>
             </div>
-            <div className="mt-1.5 ml-6 h-1.5 overflow-hidden rounded-full bg-white/10">
+            <div className="mt-1.5 ml-6 h-1.5 overflow-hidden rounded-full bg-fill-2">
               <div className={cn("h-full rounded-full", color)} style={{ width: `${(it.value / max) * 100}%` }} />
             </div>
           </>
@@ -215,7 +215,7 @@ export function RankedBars({
         return (
           <li key={it.id ?? it.label}>
             {href && it.id ? (
-              <a href={href(it.id)} className="block rounded-lg transition-colors hover:bg-white/[0.04]">
+              <a href={href(it.id)} className="block rounded-lg transition-colors hover:bg-fill">
                 {inner}
               </a>
             ) : (
@@ -240,7 +240,7 @@ export function RatingStars({ value, size = 14, className }: { value: number; si
           key={n}
           size={size}
           strokeWidth={1.5}
-          className={n <= Math.round(value) ? "fill-amber-400 text-amber-400" : "text-white/20"}
+          className={n <= Math.round(value) ? "fill-amber-400 text-amber-400" : "text-ink-4"}
         />
       ))}
     </span>
@@ -267,7 +267,7 @@ export function Ring({
   return (
     <div className="relative inline-flex shrink-0 items-center justify-center" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90">
-        <circle cx={size / 2} cy={size / 2} r={r} stroke="rgba(255,255,255,0.1)" strokeWidth={stroke} fill="none" />
+        <circle cx={size / 2} cy={size / 2} r={r} stroke="var(--app-fill-3)" strokeWidth={stroke} fill="none" />
         <circle
           cx={size / 2}
           cy={size / 2}

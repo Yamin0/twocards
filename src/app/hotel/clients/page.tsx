@@ -180,16 +180,16 @@ export default function HotelClientsPage() {
               key={g.key}
               type="button"
               onClick={() => setOpenKey(g.key)}
-              className="hotel-panel group p-4 text-left transition-colors hover:bg-white/[0.09]"
+              className="hotel-panel group p-4 text-left transition-colors hover:bg-fill-2"
             >
               <div className="flex items-start gap-3">
                 <Avatar name={g.name} size={42} />
                 <div className="min-w-0 flex-1">
-                  <p className="flex items-center gap-1.5 truncate text-sm font-bold text-white">
+                  <p className="flex items-center gap-1.5 truncate text-sm font-bold text-ink">
                     {g.name}
-                    {g.liveVisits >= 3 && <Crown size={13} strokeWidth={2} className="shrink-0 text-amber-300" />}
+                    {g.liveVisits >= 3 && <Crown size={13} strokeWidth={2} className="shrink-0 text-warn" />}
                   </p>
-                  <p className="num truncate text-xs text-white/45">{g.phone}</p>
+                  <p className="num truncate text-xs text-ink-3">{g.phone}</p>
                 </div>
                 {g.rating !== null && <RatingStars value={g.rating} size={10} />}
               </div>
@@ -199,15 +199,15 @@ export default function HotelClientsPage() {
                   { l: t("Dépensé", "Spent"), v: g.totalSpent > 0 ? formatMad(g.totalSpent, true, locale) : "—" },
                   { l: t("Commission", "Commission"), v: g.totalCommission > 0 ? formatMad(g.totalCommission, true, locale) : "—" },
                 ].map((s) => (
-                  <div key={s.l} className="rounded-lg bg-white/[0.05] py-1.5">
-                    <dt className="text-[10px] font-medium uppercase tracking-wider text-white/40">{s.l}</dt>
-                    <dd className="truncate px-1 text-[13px] font-black text-white">{s.v}</dd>
+                  <div key={s.l} className="rounded-lg bg-fill py-1.5">
+                    <dt className="text-xs font-medium text-ink-3">{s.l}</dt>
+                    <dd className="truncate px-1 text-[13px] font-black text-ink">{s.v}</dd>
                   </div>
                 ))}
               </dl>
-              <div className="mt-3 flex flex-wrap items-center gap-1.5 text-[11px] text-white/50">
+              <div className="mt-3 flex flex-wrap items-center gap-1.5 text-xs text-ink-3">
                 {g.nextVisit ? (
-                  <Tag className="bg-emerald-500/15 text-emerald-300">{t("Prochaine :", "Next:")} {relativeDay(g.nextVisit, undefined, locale)}</Tag>
+                  <Tag className="bg-ok-soft text-ok">{t("Prochaine :", "Next:")} {relativeDay(g.nextVisit, undefined, locale)}</Tag>
                 ) : (
                   <Tag>{t("Dernière :", "Last:")} {formatDate(g.lastVisit, "medium", locale)}</Tag>
                 )}
@@ -255,9 +255,9 @@ function GuestDrawer({ guest: g, onClose }: { guest: GuestProfile | null; onClos
           { l: t("Taille moyenne", "Average party"), v: t(`${fmt1(g.averageParty, locale)} pers.`, `${fmt1(g.averageParty, locale)} guests`), icon: Users },
           { l: t("Note moyenne", "Average rating"), v: g.rating !== null ? `${fmt1(g.rating, locale)}/5` : "—", icon: Star },
         ].map((s) => (
-          <div key={s.l} className="rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-3">
-            <p className="text-[10px] font-medium uppercase tracking-wider text-white/40">{s.l}</p>
-            <p className="num mt-1 text-base font-black text-white">{s.v}</p>
+          <div key={s.l} className="rounded-xl border border-line bg-fill px-3.5 py-3">
+            <p className="text-xs font-medium text-ink-3">{s.l}</p>
+            <p className="num mt-1 text-base font-black text-ink">{s.v}</p>
           </div>
         ))}
       </div>
@@ -267,31 +267,31 @@ function GuestDrawer({ guest: g, onClose }: { guest: GuestProfile | null; onClos
           <Tag key={c}>{reservationCategoryLabel(c, locale)}</Tag>
         ))}
         {g.rooms.map((r) => (
-          <Tag key={r} className="bg-sky-500/15 text-sky-200">{r}</Tag>
+          <Tag key={r} className="bg-info-soft text-info">{r}</Tag>
         ))}
       </div>
 
-      <p className="mb-2 mt-6 text-[11px] font-bold uppercase tracking-[0.14em] text-white/40">{t("Historique des sorties", "Outing history")}</p>
-      <ul className="divide-y divide-white/[0.06] rounded-xl border border-white/10 bg-white/[0.03]">
+      <p className="mb-2 mt-6 text-xs font-bold text-ink-3">{t("Historique des sorties", "Outing history")}</p>
+      <ul className="divide-y divide-line rounded-xl border border-line bg-fill">
         {g.reservations.map((r) => (
           <li key={r.id} className="px-4 py-3">
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0">
-                <p className="truncate text-sm font-bold text-white">{r.venue_name}</p>
-                <p className="num text-xs text-white/50">
+                <p className="truncate text-sm font-bold text-ink">{r.venue_name}</p>
+                <p className="num text-xs text-ink-3">
                   {r.reservation_date >= today ? relativeDay(r.reservation_date, undefined, locale) : formatDate(r.reservation_date, "long", locale)}
                   {r.reservation_time ? ` · ${r.reservation_time}` : ""} · {r.party_size} {t("pers.", r.party_size === 1 ? "guest" : "guests")}
                 </p>
               </div>
               <div className="flex shrink-0 flex-col items-end gap-1">
                 <StatusPill status={r.status} />
-                {r.commission > 0 && isLive(r) && <span className="num text-[11px] font-bold text-amber-300">+{formatMad(r.commission, false, locale)}</span>}
+                {r.commission > 0 && isLive(r) && <span className="num text-xs font-bold text-warn">+{formatMad(r.commission, false, locale)}</span>}
               </div>
             </div>
             {r.rating !== null && (
               <div className="mt-1.5 flex items-center gap-2">
                 <RatingStars value={r.rating} size={11} />
-                {r.rating_comment && <span className="truncate text-xs text-white/55">“{r.rating_comment}”</span>}
+                {r.rating_comment && <span className="truncate text-xs text-ink-3">“{r.rating_comment}”</span>}
               </div>
             )}
           </li>

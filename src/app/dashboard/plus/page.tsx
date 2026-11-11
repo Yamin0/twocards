@@ -127,9 +127,9 @@ export default function PlusPage() {
 
   return (
     <div className="space-y-6">
-      <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
-        <h1 className="font-display text-3xl font-light text-white">{t("Plus", "More")}</h1>
-        <p className="font-ui text-sm text-white/60 mt-2">
+      <div className=" bg-panel border border-line rounded-3xl p-6">
+        <h1 className="font-display text-3xl font-light text-ink">{t("Plus", "More")}</h1>
+        <p className="font-ui text-sm text-ink-2 mt-2">
           {t(
             <>Les sections que vous n&apos;ouvrez pas tous les jours.</>,
             <>The sections you don&apos;t open every day.</>
@@ -144,7 +144,7 @@ export default function PlusPage() {
         if (entries.length === 0) return null;
         return (
           <section key={group.title}>
-            <h2 className="font-ui mb-3 px-1 text-[10px] font-bold uppercase tracking-[0.18em] text-white/45">
+            <h2 className="font-ui mb-3 px-1 text-xs font-bold text-ink-3">
               {group.title}
             </h2>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -154,21 +154,21 @@ export default function PlusPage() {
                   <Link
                     key={e.href}
                     href={e.href}
-                    className="group flex items-center gap-4 rounded-2xl border border-white/[0.12] bg-black/45 p-4 backdrop-blur-2xl transition-all hover:bg-white/[0.06] active:scale-[0.99]"
+                    className="group flex items-center gap-4 rounded-2xl border border-line bg-panel p-4 transition-all hover:bg-fill active:scale-[0.99]"
                   >
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/10">
-                      <Icon size={19} strokeWidth={1.5} className="text-white/80" />
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-fill-2">
+                      <Icon size={19} strokeWidth={1.5} className="text-ink" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-white">{e.label}</p>
-                      <p className="font-ui mt-0.5 text-xs text-white/50">
+                      <p className="text-sm font-semibold text-ink">{e.label}</p>
+                      <p className="font-ui mt-0.5 text-xs text-ink-3">
                         {e.description}
                       </p>
                     </div>
                     <ArrowRight
                       size={16}
                       strokeWidth={1.5}
-                      className="shrink-0 text-white/30 transition-all group-hover:translate-x-0.5 group-hover:text-white/70"
+                      className="shrink-0 text-ink-3 transition-all group-hover:translate-x-0.5 group-hover:text-ink-2"
                     />
                   </Link>
                 );

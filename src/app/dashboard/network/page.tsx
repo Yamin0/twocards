@@ -101,11 +101,11 @@ export default function NetworkPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
-        <h1 className="font-display text-3xl font-light text-white">
+      <div className=" bg-panel border border-line rounded-3xl p-6">
+        <h1 className="font-display text-3xl font-light text-ink">
           {t("Réseau apporteurs", "Referral network")}
         </h1>
-        <p className="font-ui text-sm text-white/60 mt-1.5">
+        <p className="font-ui text-sm text-ink-2 mt-1.5">
           {t(
             "Les hôtels partenaires qui vous envoient des clients, ce que chacun apporte, ce que vous lui reversez",
             "The partner hotels sending you guests, what each one brings in, and what you pay them"
@@ -122,31 +122,31 @@ export default function NetworkPage() {
           <Search
             size={15}
             strokeWidth={1.5}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-3"
           />
           <input
             type="text"
             placeholder={t("Rechercher un hôtel...", "Search for a hotel...")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="font-ui w-full pl-9 pr-4 py-2.5 backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-xl text-sm text-white placeholder:text-white/25 focus:outline-none focus:border-blue-400/40 transition-colors"
+            className="font-ui w-full pl-9 pr-4 py-2.5 bg-panel border border-line rounded-xl text-sm text-ink placeholder:text-ink-4 focus:outline-none focus:border-info/25 transition-colors"
           />
         </div>
       )}
 
       {/* Cartes apporteurs / état vide */}
       {referrers.length === 0 ? (
-        <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-12 text-center">
-          <div className="w-14 h-14 rounded-2xl bg-blue-500/15 border border-blue-400/20 flex items-center justify-center mx-auto mb-5">
-            <Building2 size={26} strokeWidth={1.5} className="text-blue-400" />
+        <div className=" bg-panel border border-line rounded-3xl p-12 text-center">
+          <div className="w-14 h-14 rounded-2xl bg-info-soft border border-info/25 flex items-center justify-center mx-auto mb-5">
+            <Building2 size={26} strokeWidth={1.5} className="text-info" />
           </div>
-          <h2 className="font-display text-xl font-normal text-white mb-2">
+          <h2 className="font-display text-xl font-normal text-ink mb-2">
             {t(
               "Aucun hôtel ne vous a encore envoyé de client",
               "No hotel has sent you a guest yet"
             )}
           </h2>
-          <p className="font-ui text-sm text-white/50 max-w-md mx-auto">
+          <p className="font-ui text-sm text-ink-3 max-w-md mx-auto">
             {t(
               <>
                 Dès qu&apos;un client réserve chez vous en scannant le QR code
@@ -163,9 +163,9 @@ export default function NetworkPage() {
           </p>
         </div>
       ) : filtered.length === 0 ? (
-        <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-12 text-center">
-          <Users size={36} strokeWidth={1} className="mx-auto text-white/15 mb-3" />
-          <p className="font-ui text-sm text-white/30">
+        <div className=" bg-panel border border-line rounded-3xl p-12 text-center">
+          <Users size={36} strokeWidth={1} className="mx-auto text-ink-4 mb-3" />
+          <p className="font-ui text-sm text-ink-3">
             {t(
               <>Aucun apporteur ne correspond à « {searchQuery} »</>,
               <>No referrer matches “{searchQuery}”</>
@@ -177,21 +177,21 @@ export default function NetworkPage() {
           {filtered.map((r) => (
             <div
               key={r.referrer_id}
-              className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl p-5 transition-colors hover:bg-white/[0.07]"
+              className=" bg-panel border border-line rounded-2xl p-5 transition-colors hover:bg-fill-2"
             >
               {/* En-tête : identité + note moyenne */}
               <div className="flex items-start justify-between gap-3 mb-4">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="h-11 w-11 shrink-0 rounded-full bg-blue-400/15 flex items-center justify-center">
-                    <span className="font-ui text-sm font-semibold text-blue-400">
+                  <div className="h-11 w-11 shrink-0 rounded-full bg-info-soft flex items-center justify-center">
+                    <span className="font-ui text-sm font-semibold text-info">
                       {initialsOf(r.referrer_name)}
                     </span>
                   </div>
                   <div className="min-w-0">
-                    <p className="font-ui text-sm font-medium text-white truncate">
+                    <p className="font-ui text-sm font-medium text-ink truncate">
                       {r.referrer_name}
                     </p>
-                    <p className="font-ui text-[0.6875rem] text-white/35">
+                    <p className="font-ui text-xs text-ink-3">
                       {t("Hôtel partenaire", "Partner hotel")}
                     </p>
                   </div>
@@ -202,7 +202,7 @@ export default function NetworkPage() {
                     title={t("Note moyenne laissée par les clients envoyés", "Average rating from referred guests")}
                   >
                     <RatingStars value={Number(r.avg_rating)} size={12} />
-                    <span className="font-ui text-xs text-white/50 tabular-nums">
+                    <span className="font-ui text-xs text-ink-3 tabular-nums">
                       {Number(r.avg_rating).toFixed(1)}
                     </span>
                   </div>
@@ -211,35 +211,35 @@ export default function NetworkPage() {
 
               {/* Chiffres */}
               <div className="grid grid-cols-2 gap-3 mb-4">
-                <div className="bg-white/[0.04] rounded-xl p-3">
-                  <p className="font-ui text-[0.5625rem] text-white/25 uppercase tracking-wider">
+                <div className="bg-fill rounded-xl p-3">
+                  <p className="font-ui text-xs text-ink-3">
                     {t("Sorties", "Outings")}
                   </p>
-                  <p className="font-display text-lg font-light text-white mt-0.5 tabular-nums">
+                  <p className="font-display text-lg font-light text-ink mt-0.5 tabular-nums">
                     {Number(r.reservations).toLocaleString(intl)}
                   </p>
                 </div>
-                <div className="bg-white/[0.04] rounded-xl p-3">
-                  <p className="font-ui text-[0.5625rem] text-white/25 uppercase tracking-wider">
+                <div className="bg-fill rounded-xl p-3">
+                  <p className="font-ui text-xs text-ink-3">
                     {t("Couverts", "Covers")}
                   </p>
-                  <p className="font-display text-lg font-light text-white mt-0.5 tabular-nums">
+                  <p className="font-display text-lg font-light text-ink mt-0.5 tabular-nums">
                     {Number(r.covers).toLocaleString(intl)}
                   </p>
                 </div>
-                <div className="bg-white/[0.04] rounded-xl p-3">
-                  <p className="font-ui text-[0.5625rem] text-white/25 uppercase tracking-wider">
+                <div className="bg-fill rounded-xl p-3">
+                  <p className="font-ui text-xs text-ink-3">
                     {t("CA apporté", "Revenue generated")}
                   </p>
-                  <p className="font-display text-sm font-light text-white mt-1 tabular-nums whitespace-nowrap">
+                  <p className="font-display text-sm font-light text-ink mt-1 tabular-nums whitespace-nowrap">
                     {Number(r.revenue).toLocaleString(intl)} MAD
                   </p>
                 </div>
-                <div className="bg-white/[0.04] rounded-xl p-3">
-                  <p className="font-ui text-[0.5625rem] text-white/25 uppercase tracking-wider">
+                <div className="bg-fill rounded-xl p-3">
+                  <p className="font-ui text-xs text-ink-3">
                     {t("Commission reversée", "Commission paid")}
                   </p>
-                  <p className="font-display text-sm font-light text-amber-400 mt-1 tabular-nums whitespace-nowrap">
+                  <p className="font-display text-sm font-light text-warn mt-1 tabular-nums whitespace-nowrap">
                     {Number(r.commissions).toLocaleString(intl)} MAD
                   </p>
                 </div>
@@ -247,11 +247,11 @@ export default function NetworkPage() {
 
               {/* Pied : dernière sortie + contact */}
               <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-1.5 font-ui text-xs text-white/40">
+                <div className="flex items-center gap-1.5 font-ui text-xs text-ink-3">
                   <CalendarDays
                     size={13}
                     strokeWidth={1.5}
-                    className="text-white/25"
+                    className="text-ink-3"
                   />
                   {t("Dernière sortie le", "Last outing on")}{" "}
                   {new Date(
@@ -262,7 +262,7 @@ export default function NetworkPage() {
                   onClick={() =>
                     router.push(`/dashboard/messages?with=${r.referrer_id}`)
                   }
-                  className="font-ui flex items-center gap-1.5 px-3 py-2 bg-blue-500/15 hover:bg-blue-500/25 border border-blue-400/20 rounded-xl text-xs font-medium text-blue-400 transition-colors shrink-0"
+                  className="font-ui flex items-center gap-1.5 px-3 py-2 bg-info-soft hover:bg-info-soft border border-info/25 rounded-xl text-xs font-medium text-info transition-colors shrink-0"
                 >
                   <Send size={13} strokeWidth={1.5} />
                   {t("Message", "Message")}
@@ -274,7 +274,7 @@ export default function NetworkPage() {
       )}
 
       {/* Note de périmètre */}
-      <p className="font-ui flex items-start gap-2 text-xs text-white/40 max-w-2xl">
+      <p className="font-ui flex items-start gap-2 text-xs text-ink-3 max-w-2xl">
         <Globe size={13} strokeWidth={1.5} className="shrink-0 mt-0.5" />
         {t(
           <>

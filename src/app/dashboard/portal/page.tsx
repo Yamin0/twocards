@@ -207,17 +207,17 @@ export default function PortalAdminPage() {
   };
 
   const input =
-    "font-ui w-full rounded-xl bg-white/[0.06] border border-white/10 px-4 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-white/40";
+    "font-ui w-full rounded-xl bg-fill border border-line px-4 py-2.5 text-sm text-ink placeholder:text-ink-4 focus:outline-none focus:ring-1 focus:ring-line-2";
   const label =
-    "font-ui block text-[10px] font-bold uppercase tracking-[0.15em] text-white/45 mb-1.5";
+    "font-ui block text-xs font-bold text-ink-3 mb-1.5";
 
   return (
     <div className="bg-transparent min-h-screen">
       <div className="px-4 sm:px-6 pt-6 pb-4">
-        <h1 className="font-display text-3xl font-light text-white">
+        <h1 className="font-display text-3xl font-light text-ink">
           {t("Portail de réservation", "Booking portal")}
         </h1>
-        <p className="font-ui text-sm text-white/60 mt-1.5 max-w-2xl">
+        <p className="font-ui text-sm text-ink-2 mt-1.5 max-w-2xl">
           {t(
             "Votre page de réservation directe, hébergée par twocards, à mettre en bio Instagram, sur Google et sur votre site (intégration iframe). Réservations sans commission : le canal direct est gratuit.",
             "Your direct booking page, hosted by twocards, for your Instagram bio, Google and your website (iframe embed). Commission-free reservations: the direct channel is free."
@@ -227,8 +227,8 @@ export default function PortalAdminPage() {
 
       <div className="px-4 sm:px-6 pb-8 grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* ── Configuration ── */}
-        <div className="backdrop-blur-xl bg-black/35 border border-white/[0.12] rounded-2xl p-6 space-y-5">
-          <h2 className="font-display text-lg font-normal text-white">
+        <div className=" bg-panel border border-line rounded-2xl p-6 space-y-5">
+          <h2 className="font-display text-lg font-normal text-ink">
             {t("Configuration", "Setup")}
           </h2>
 
@@ -246,7 +246,7 @@ export default function PortalAdminPage() {
           <div>
             <label className={label}>{t("Adresse de la page", "Page address")}</label>
             <div className="flex items-center gap-2">
-              <span className="font-mono text-xs text-white/40">/r/</span>
+              <span className="font-mono text-xs text-ink-3">/r/</span>
               <input
                 className={input}
                 value={form.slug}
@@ -277,7 +277,7 @@ export default function PortalAdminPage() {
                   onClick={() => set("accent_color", c)}
                   aria-label={`${t("Couleur", "Colour")} ${c}`}
                   className={`h-8 w-8 rounded-full border-2 transition-transform hover:scale-110 ${
-                    form.accent_color === c ? "border-white" : "border-transparent"
+                    form.accent_color === c ? "border-line-2" : "border-transparent"
                   }`}
                   style={{ background: c }}
                 />
@@ -287,7 +287,7 @@ export default function PortalAdminPage() {
                 value={form.accent_color}
                 onChange={(e) => set("accent_color", e.target.value)}
                 aria-label={t("Couleur personnalisée", "Custom colour")}
-                className="h-8 w-8 cursor-pointer rounded-full border border-white/20 bg-transparent"
+                className="h-8 w-8 cursor-pointer rounded-full border border-line-2 bg-transparent"
               />
             </div>
           </div>
@@ -301,7 +301,7 @@ export default function PortalAdminPage() {
                   onClick={() => set("background_color", c)}
                   aria-label={`${t("Fond", "Background")} ${c}`}
                   className={`h-8 w-8 rounded-full border-2 transition-transform hover:scale-110 ${
-                    form.background_color === c ? "border-white" : "border-white/20"
+                    form.background_color === c ? "border-line-2" : "border-line-2"
                   }`}
                   style={{ background: c }}
                 />
@@ -311,7 +311,7 @@ export default function PortalAdminPage() {
                 value={form.background_color}
                 onChange={(e) => set("background_color", e.target.value)}
                 aria-label={t("Fond personnalisé", "Custom background")}
-                className="h-8 w-8 cursor-pointer rounded-full border border-white/20 bg-transparent"
+                className="h-8 w-8 cursor-pointer rounded-full border border-line-2 bg-transparent"
               />
             </div>
           </div>
@@ -324,10 +324,10 @@ export default function PortalAdminPage() {
                 <img
                   src={form.cover_url}
                   alt={t("Couverture du portail", "Portal cover")}
-                  className="h-16 w-28 rounded-lg object-cover border border-white/15"
+                  className="h-16 w-28 rounded-lg object-cover border border-line-2"
                 />
                 <div className="flex flex-col gap-1.5">
-                  <label className="font-ui cursor-pointer text-xs font-medium text-blue-400 hover:text-blue-300">
+                  <label className="font-ui cursor-pointer text-xs font-medium text-info hover:text-info">
                     {t("Remplacer", "Replace")}
                     <input
                       type="file"
@@ -342,14 +342,14 @@ export default function PortalAdminPage() {
                   </label>
                   <button
                     onClick={() => set("cover_url", null)}
-                    className="font-ui text-left text-xs text-white/40 hover:text-red-400"
+                    className="font-ui text-left text-xs text-ink-3 hover:text-danger"
                   >
                     {t("Retirer", "Remove")}
                   </button>
                 </div>
               </div>
             ) : (
-              <label className="font-ui flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-white/20 bg-white/[0.03] px-4 py-4 text-xs text-white/50 transition-colors hover:border-white/40 hover:text-white">
+              <label className="font-ui flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-line-2 bg-fill px-4 py-4 text-xs text-ink-3 transition-colors hover:border-line-2 hover:text-ink">
                 {uploading ? (
                   <Loader2 size={14} strokeWidth={2} className="animate-spin" />
                 ) : (
@@ -382,7 +382,7 @@ export default function PortalAdminPage() {
                 onChange={(e) => set("party_max", Number(e.target.value))}
               >
                 {[4, 6, 8, 10, 12, 15, 20].map((n) => (
-                  <option key={n} value={n} className="bg-[#10131f]">
+                  <option key={n} value={n} className="bg-panel">
                     {t(`${n} personnes`, `${n} guests`)}
                   </option>
                 ))}
@@ -396,7 +396,7 @@ export default function PortalAdminPage() {
                 onChange={(e) => set("interval_minutes", Number(e.target.value))}
               >
                 {[15, 30, 60].map((n) => (
-                  <option key={n} value={n} className="bg-[#10131f]">
+                  <option key={n} value={n} className="bg-panel">
                     {n} minutes
                   </option>
                 ))}
@@ -410,7 +410,7 @@ export default function PortalAdminPage() {
                 onChange={(e) => set("start_time", e.target.value)}
               >
                 {HOURS.map((h) => (
-                  <option key={h} value={h} className="bg-[#10131f]">
+                  <option key={h} value={h} className="bg-panel">
                     {h}
                   </option>
                 ))}
@@ -424,7 +424,7 @@ export default function PortalAdminPage() {
                 onChange={(e) => set("end_time", e.target.value)}
               >
                 {HOURS.map((h) => (
-                  <option key={h} value={h} className="bg-[#10131f]">
+                  <option key={h} value={h} className="bg-panel">
                     {h}
                   </option>
                 ))}
@@ -432,7 +432,7 @@ export default function PortalAdminPage() {
             </div>
           </div>
 
-          <div className="flex items-center justify-between border-t border-white/[0.08] pt-4">
+          <div className="flex items-center justify-between border-t border-line pt-4">
             <button
               onClick={() => set("active", !form.active)}
               role="switch"
@@ -441,7 +441,7 @@ export default function PortalAdminPage() {
             >
               <span
                 className={`relative h-5 w-9 rounded-full transition-colors ${
-                  form.active ? "bg-emerald-500/80" : "bg-white/15"
+                  form.active ? "bg-ok-soft" : "bg-fill-3"
                 }`}
               >
                 <span
@@ -450,14 +450,14 @@ export default function PortalAdminPage() {
                   }`}
                 />
               </span>
-              <span className="font-ui text-xs text-white/60">
+              <span className="font-ui text-xs text-ink-2">
                 {form.active ? t("Portail en ligne", "Portal live") : t("Portail désactivé", "Portal disabled")}
               </span>
             </button>
             <button
               onClick={save}
               disabled={saving}
-              className="font-ui flex items-center gap-2 bg-blue-500 hover:bg-blue-400 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors disabled:opacity-60"
+              className="font-ui flex items-center gap-2 bg-link hover:bg-link-strong text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors disabled:opacity-60"
             >
               {saving ? (
                 <Loader2 size={15} strokeWidth={2} className="animate-spin" />
@@ -471,12 +471,12 @@ export default function PortalAdminPage() {
 
         {/* ── Partage ── */}
         <div className="space-y-4">
-          <div className="backdrop-blur-xl bg-black/35 border border-white/[0.12] rounded-2xl p-6">
-            <h2 className="font-display text-lg font-normal text-white mb-4">
+          <div className=" bg-panel border border-line rounded-2xl p-6">
+            <h2 className="font-display text-lg font-normal text-ink mb-4">
               {t("Partager", "Share")}
             </h2>
             {!exists ? (
-              <p className="font-ui text-xs text-white/40 leading-relaxed">
+              <p className="font-ui text-xs text-ink-3 leading-relaxed">
                 {t(
                   <>
                     Enregistrez votre portail : son adresse publique, le code
@@ -492,16 +492,16 @@ export default function PortalAdminPage() {
                     {t("Page publique, réseaux sociaux, bio, Google", "Public page, social media, bio, Google")}
                   </label>
                   <div className="flex items-center gap-2">
-                    <p className="font-mono flex-1 truncate rounded-xl bg-black/30 border border-white/10 px-3 py-2.5 text-xs text-white/70">
+                    <p className="font-mono flex-1 truncate rounded-xl bg-panel border border-line px-3 py-2.5 text-xs text-ink-2">
                       {portalUrl}
                     </p>
                     <button
                       onClick={() => copy(portalUrl, "url")}
                       aria-label={t("Copier l'adresse", "Copy address")}
-                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/10 text-white/70 hover:bg-white/15"
+                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-fill-2 text-ink-2 hover:bg-fill-3"
                     >
                       {copied === "url" ? (
-                        <Check size={14} strokeWidth={2} className="text-emerald-400" />
+                        <Check size={14} strokeWidth={2} className="text-ok" />
                       ) : (
                         <Copy size={14} strokeWidth={1.5} />
                       )}
@@ -511,7 +511,7 @@ export default function PortalAdminPage() {
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label={t("Ouvrir la page", "Open page")}
-                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/10 text-white/70 hover:bg-white/15"
+                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-fill-2 text-ink-2 hover:bg-fill-3"
                     >
                       <ExternalLink size={14} strokeWidth={1.5} />
                     </a>
@@ -523,16 +523,16 @@ export default function PortalAdminPage() {
                     {t("Intégration sur votre site (iframe)", "Embed on your website (iframe)")}
                   </label>
                   <div className="flex items-start gap-2">
-                    <p className="font-mono flex-1 break-all rounded-xl bg-black/30 border border-white/10 px-3 py-2.5 text-[10px] leading-relaxed text-white/50">
+                    <p className="font-mono flex-1 break-all rounded-xl bg-panel border border-line px-3 py-2.5 text-xs leading-relaxed text-ink-3">
                       {embedCode}
                     </p>
                     <button
                       onClick={() => copy(embedCode, "embed")}
                       aria-label={t("Copier le code d'intégration", "Copy embed code")}
-                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/10 text-white/70 hover:bg-white/15"
+                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-fill-2 text-ink-2 hover:bg-fill-3"
                     >
                       {copied === "embed" ? (
-                        <Check size={14} strokeWidth={2} className="text-emerald-400" />
+                        <Check size={14} strokeWidth={2} className="text-ok" />
                       ) : (
                         <Copy size={14} strokeWidth={1.5} />
                       )}
@@ -548,7 +548,7 @@ export default function PortalAdminPage() {
                     <QRCode value={portalUrl} size={96} />
                   </div>
                   <div>
-                    <p className="font-ui text-xs text-white/60 leading-relaxed mb-2">
+                    <p className="font-ui text-xs text-ink-2 leading-relaxed mb-2">
                       {t(
                         "QR code de votre portail, cartes, vitrine, flyers.",
                         "Your portal QR code, for cards, windows and flyers."
@@ -559,7 +559,7 @@ export default function PortalAdminPage() {
                         if (downloadSvg("portal-qr", `portail-${form.slug}`))
                           showToast(t("QR code téléchargé", "QR code downloaded"));
                       }}
-                      className="font-ui flex items-center gap-2 bg-white/10 hover:bg-white/15 text-white text-xs font-medium px-3 py-2 rounded-lg transition-colors"
+                      className="font-ui flex items-center gap-2 bg-fill-2 hover:bg-fill-3 text-ink text-xs font-medium px-3 py-2 rounded-lg transition-colors"
                     >
                       <Download size={13} strokeWidth={1.5} />
                       {t("Télécharger (SVG)", "Download (SVG)")}
@@ -570,11 +570,11 @@ export default function PortalAdminPage() {
             )}
           </div>
 
-          <div className="backdrop-blur-xl bg-black/35 border border-white/[0.12] rounded-2xl p-6">
-            <h2 className="font-display text-lg font-normal text-white mb-2">
+          <div className=" bg-panel border border-line rounded-2xl p-6">
+            <h2 className="font-display text-lg font-normal text-ink mb-2">
               {t("Comment ça marche", "How it works")}
             </h2>
-            <ul className="font-ui space-y-2 text-xs text-white/50 leading-relaxed">
+            <ul className="font-ui space-y-2 text-xs text-ink-3 leading-relaxed">
               <li className="flex gap-2">
                 <Globe size={13} strokeWidth={1.5} className="mt-0.5 shrink-0" />
                 {t(
@@ -595,7 +595,7 @@ export default function PortalAdminPage() {
       </div>
 
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-black/70 backdrop-blur-xl border border-white/15 text-white px-4 py-3 rounded-xl shadow-lg">
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-ink border border-line-2 text-white px-4 py-3 rounded-xl shadow-lg">
           <Check size={16} strokeWidth={2} />
           <span className="font-ui text-sm font-medium">{toast}</span>
         </div>

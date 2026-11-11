@@ -178,15 +178,15 @@ export function AvatarUploader({
             url={avatarUrl}
             initials={initials}
             size={80}
-            className="border border-white/20 bg-blue-500/20"
-            textClassName="text-2xl font-bold text-blue-400"
+            className="border border-line-2 bg-info-soft"
+            textClassName="text-2xl font-bold text-info"
           />
           <button
             type="button"
             onClick={() => inputRef.current?.click()}
             disabled={busy}
             aria-label={t("Changer la photo de profil", "Change profile photo")}
-            className="absolute bottom-0 right-0 flex h-7 w-7 items-center justify-center rounded-full bg-blue-500 text-white shadow-lg transition-colors hover:bg-blue-600 disabled:opacity-50"
+            className="absolute bottom-0 right-0 flex h-7 w-7 items-center justify-center rounded-full bg-link text-white shadow-lg transition-colors hover:bg-link-strong disabled:opacity-50"
           >
             {busy ? (
               <Loader2 size={14} className="animate-spin" />
@@ -197,8 +197,8 @@ export function AvatarUploader({
         </div>
 
         <div>
-          <p className="text-sm font-medium text-white">{label ?? t("Photo de profil", "Profile photo")}</p>
-          <p className="mt-0.5 text-xs text-white/40">
+          <p className="text-sm font-medium text-ink">{label ?? t("Photo de profil", "Profile photo")}</p>
+          <p className="mt-0.5 text-xs text-ink-3">
             {t(
               <>
                 JPG, PNG, WebP ou GIF · 10 Mo maximum. L&apos;image est recadrée en
@@ -212,7 +212,7 @@ export function AvatarUploader({
               type="button"
               onClick={() => inputRef.current?.click()}
               disabled={busy}
-              className="text-xs font-medium text-blue-400 transition-opacity hover:underline disabled:opacity-50"
+              className="text-xs font-medium text-info transition-opacity hover:underline disabled:opacity-50"
             >
               {avatarUrl ? t("Changer la photo", "Change photo") : t("Ajouter une photo", "Add a photo")}
             </button>
@@ -221,7 +221,7 @@ export function AvatarUploader({
                 type="button"
                 onClick={handleRemove}
                 disabled={busy}
-                className="flex items-center gap-1 text-xs font-medium text-red-400/80 transition-colors hover:text-red-400 disabled:opacity-50"
+                className="flex items-center gap-1 text-xs font-medium text-danger transition-colors hover:text-danger disabled:opacity-50"
               >
                 <Trash2 size={12} strokeWidth={1.5} />
                 {t("Retirer", "Remove")}
@@ -232,7 +232,7 @@ export function AvatarUploader({
       </div>
 
       {error && (
-        <p className="text-xs text-red-400" role="alert">
+        <p className="text-xs text-danger" role="alert">
           {error}
         </p>
       )}

@@ -148,18 +148,18 @@ export default function HotelCommissionsPage() {
 
       <div className="grid gap-4 xl:grid-cols-3">
         <Panel title={t("Commissions par mois", "Commissions per month")} description={t("6 derniers mois, sorties commissionnées", "Last 6 months, commissioned outings")} className="xl:col-span-2">
-          <Bars data={series} color="bg-amber-400" height={160} format={(n) => formatMad(n, true, locale)} />
-          <div className="mt-5 border-t border-white/[0.08] pt-4">
-            <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.16em] text-white/45">{t("Par catégorie", "By category")}</p>
+          <Bars data={series} color="bg-warn" height={160} format={(n) => formatMad(n, true, locale)} />
+          <div className="mt-5 border-t border-line pt-4">
+            <p className="mb-2 text-xs font-bold text-ink-3">{t("Par catégorie", "By category")}</p>
             <SplitBar segments={byCategory} format={(n) => formatMad(n, false, locale)} />
           </div>
         </Panel>
         <div className="space-y-4">
           <Panel title={t("Emplacements les plus rentables", "Top-earning locations")}>
-            <RankedBars items={byRoom} format={(n) => formatMad(n, true, locale)} color="bg-amber-400/80" empty={t("Aucune commission pour le moment.", "No commissions yet.")} />
+            <RankedBars items={byRoom} format={(n) => formatMad(n, true, locale)} color="bg-warn-soft" empty={t("Aucune commission pour le moment.", "No commissions yet.")} />
           </Panel>
           <Panel title={t("Adresses les plus rentables", "Top-earning places")}>
-            <RankedBars items={byVenue} format={(n) => formatMad(n, true, locale)} color="bg-emerald-400/80" empty={t("Aucune commission pour le moment.", "No commissions yet.")} />
+            <RankedBars items={byVenue} format={(n) => formatMad(n, true, locale)} color="bg-ok-soft" empty={t("Aucune commission pour le moment.", "No commissions yet.")} />
           </Panel>
         </div>
       </div>
@@ -189,18 +189,18 @@ export default function HotelCommissionsPage() {
                 <Tr key={m.key}>
                   <Td className="font-bold capitalize">{monthLabel(m.key, true, locale)}</Td>
                   <Td>
-                    <Tag className={m.current ? "bg-sky-500/15 text-sky-200" : "bg-emerald-500/15 text-emerald-300"}>
+                    <Tag className={m.current ? "bg-info-soft text-info" : "bg-ok-soft text-ok"}>
                       {m.current ? t("En cours", "In progress") : t("Clôturé", "Closed")}
                     </Tag>
                   </Td>
                   <Td align="right" className="num" muted>{formatNumber(m.rows, locale)}</Td>
                   <Td align="right" className="num" muted>{formatMad(m.spent, false, locale)}</Td>
-                  <Td align="right" className="num font-bold text-amber-300">{formatMad(m.commission, false, locale)}</Td>
+                  <Td align="right" className="num font-bold text-warn">{formatMad(m.commission, false, locale)}</Td>
                   <Td align="right">
                     <button
                       type="button"
                       onClick={() => exportCsv(earning.filter((r) => monthKey(r.reservation_date) === m.key), m.key, t, locale)}
-                      className="inline-flex items-center gap-1 text-xs font-bold text-sky-300 hover:text-sky-200"
+                      className="inline-flex items-center gap-1 text-xs font-bold text-info hover:text-info"
                     >
                       <Download size={12} strokeWidth={2} /> CSV
                     </button>
@@ -282,15 +282,15 @@ export default function HotelCommissionsPage() {
                   </Td>
                   <Td>
                     <p className="font-medium">{r.venue_name}</p>
-                    <p className="text-xs text-white/45">{reservationCategoryLabel(r.category, locale)}</p>
+                    <p className="text-xs text-ink-3">{reservationCategoryLabel(r.category, locale)}</p>
                   </Td>
                   <Td muted>{r.qr_label ?? "—"}</Td>
                   <Td align="right" muted className="num whitespace-nowrap">
                     {formatMad(r.amount_spent ?? 0, false, locale)}
-                    {r.amount_source === "pos" && <span className="ml-1 text-[10px] text-white/35" title={t("Montant remonté par la caisse", "Amount reported by the till")}>POS</span>}
+                    {r.amount_source === "pos" && <span className="ml-1 text-xs text-ink-3" title={t("Montant remonté par la caisse", "Amount reported by the till")}>POS</span>}
                   </Td>
                   <Td align="right" muted className="num">{Math.round(r.commission_rate * 100)}{t(" %", "%")}</Td>
-                  <Td align="right" className="num whitespace-nowrap font-bold text-amber-300">{formatMad(r.commission, false, locale)}</Td>
+                  <Td align="right" className="num whitespace-nowrap font-bold text-warn">{formatMad(r.commission, false, locale)}</Td>
                 </Tr>
               ))}
             </tbody>

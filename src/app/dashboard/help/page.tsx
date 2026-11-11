@@ -20,7 +20,7 @@ import { useT } from "@/lib/i18n/client";
 import type { Translate } from "@/lib/i18n";
 
 const glassCard =
-  "backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl";
+  " bg-panel border border-line rounded-3xl";
 
 /* La FAQ décrit le produit tel qu'il est — chaque réponse correspond à une
    fonctionnalité réellement présente dans le dashboard. */
@@ -131,12 +131,12 @@ export default function HelpPage() {
       {/* Header */}
       <div>
         <div className="flex items-center gap-3 mb-1">
-          <HelpCircle size={28} strokeWidth={1.5} className="text-blue-400" />
-          <h1 className="text-2xl font-extrabold text-white">
+          <HelpCircle size={28} strokeWidth={1.5} className="text-info" />
+          <h1 className="text-2xl font-extrabold text-ink">
             {t(<>Centre d&apos;aide</>, <>Help centre</>)}
           </h1>
         </div>
-        <p className="text-sm text-white/40 font-ui">
+        <p className="text-sm text-ink-3 font-ui">
           {t(
             "Trouvez des réponses à vos questions et contactez notre équipe de support.",
             "Find answers to your questions and get in touch with our support team."
@@ -146,29 +146,29 @@ export default function HelpPage() {
 
       {/* FAQ */}
       <section className="space-y-3">
-        <h2 className="text-lg font-bold text-white">
+        <h2 className="text-lg font-bold text-ink">
           {t("Questions fréquentes", "Frequently asked questions")}
         </h2>
-        <div className={`${glassCard} divide-y divide-white/[0.06]`}>
+        <div className={`${glassCard} divide-y divide-line`}>
           {faqItems.map((item, i) => (
             <div key={i}>
               <button
                 onClick={() => toggle(i)}
                 className="w-full flex items-center justify-between px-6 py-4 text-left group"
               >
-                <span className="text-sm font-medium text-white group-hover:text-blue-400 transition-colors font-ui">
+                <span className="text-sm font-medium text-ink group-hover:text-info transition-colors font-ui">
                   {item.question}
                 </span>
                 <ChevronDown
                   size={16}
-                  className={`text-white/30 flex-shrink-0 ml-4 transition-transform duration-200 ${
+                  className={`text-ink-3 flex-shrink-0 ml-4 transition-transform duration-200 ${
                     openIndex === i ? "rotate-180" : ""
                   }`}
                 />
               </button>
               {openIndex === i && (
                 <div className="px-6 pb-4">
-                  <p className="text-sm text-white/50 leading-relaxed font-ui">
+                  <p className="text-sm text-ink-3 leading-relaxed font-ui">
                     {item.answer}
                   </p>
                 </div>
@@ -180,25 +180,25 @@ export default function HelpPage() {
 
       {/* Contact support */}
       <section className="space-y-3">
-        <h2 className="text-lg font-bold text-white">
+        <h2 className="text-lg font-bold text-ink">
           {t("Contacter le support", "Contact support")}
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className={`${glassCard} p-6`}>
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-400/20 flex items-center justify-center">
-                <Mail size={18} className="text-blue-400" />
+              <div className="w-10 h-10 rounded-xl bg-info-soft border border-info/25 flex items-center justify-center">
+                <Mail size={18} className="text-info" />
               </div>
               <div>
-                <p className="text-sm font-medium text-white font-ui">
+                <p className="text-sm font-medium text-ink font-ui">
                   {t("E-mail", "Email")}
                 </p>
-                <p className="text-xs text-white/30">{t("Réponse sous 24 h", "Reply within 24 hrs")}</p>
+                <p className="text-xs text-ink-3">{t("Réponse sous 24 h", "Reply within 24 hrs")}</p>
               </div>
             </div>
             <a
               href="mailto:support@twocards.io"
-              className="text-sm text-blue-400 hover:underline font-ui"
+              className="text-sm text-info hover:underline font-ui"
             >
               support@twocards.io
             </a>
@@ -206,19 +206,19 @@ export default function HelpPage() {
 
           <div className={`${glassCard} p-6 relative overflow-hidden`}>
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-xl bg-white/[0.05] border border-white/[0.1] flex items-center justify-center">
-                <MessageCircle size={18} className="text-white/30" />
+              <div className="w-10 h-10 rounded-xl bg-fill border border-line flex items-center justify-center">
+                <MessageCircle size={18} className="text-ink-3" />
               </div>
               <div>
-                <p className="text-sm font-medium text-white font-ui">
+                <p className="text-sm font-medium text-ink font-ui">
                   {t("Chat en direct", "Live chat")}
                 </p>
-                <p className="text-xs text-white/30">
+                <p className="text-xs text-ink-3">
                   {t("Assistance instantanée", "Instant support")}
                 </p>
               </div>
             </div>
-            <span className="inline-block text-xs text-white/20 bg-white/[0.05] border border-white/[0.08] px-3 py-1 rounded-full font-ui">
+            <span className="inline-block text-xs text-ink-4 bg-fill border border-line px-3 py-1 rounded-full font-ui">
               {t("Bientôt disponible", "Coming soon")}
             </span>
           </div>
@@ -227,7 +227,7 @@ export default function HelpPage() {
 
       {/* Quick links */}
       <section className="space-y-3">
-        <h2 className="text-lg font-bold text-white">
+        <h2 className="text-lg font-bold text-ink">
           {t("Accès rapide", "Quick links")}
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -237,17 +237,17 @@ export default function HelpPage() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`${glassCard} p-4 hover:bg-white/[0.1] transition-colors group`}
+                className={`${glassCard} p-4 hover:bg-fill-2 transition-colors group`}
               >
                 <Icon
                   size={20}
                   strokeWidth={1.5}
-                  className="text-blue-400 mb-2"
+                  className="text-info mb-2"
                 />
-                <p className="text-sm font-medium text-white group-hover:text-blue-400 transition-colors font-ui">
+                <p className="text-sm font-medium text-ink group-hover:text-info transition-colors font-ui">
                   {link.label}
                 </p>
-                <p className="text-xs text-white/30 mt-0.5 font-ui">
+                <p className="text-xs text-ink-3 mt-0.5 font-ui">
                   {link.desc}
                 </p>
               </Link>

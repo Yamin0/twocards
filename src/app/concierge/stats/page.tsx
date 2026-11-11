@@ -20,10 +20,10 @@ const DEMO_BAR_CHART = [
 ];
 
 const DEMO_VENUE_BREAKDOWN = [
-  { venue: "Le Comptoir Darna", covers: 52, commission: "16 200 MAD", percentage: 33, color: "bg-blue-400" },
-  { venue: "Le Lotus Club", covers: 44, commission: "13 800 MAD", percentage: 28, color: "bg-purple-400" },
-  { venue: "Sky Bar Casa", covers: 35, commission: "11 000 MAD", percentage: 23, color: "bg-sky-400" },
-  { venue: "Pacha Marrakech", covers: 25, commission: "7 600 MAD", percentage: 16, color: "bg-amber-400" },
+  { venue: "Le Comptoir Darna", covers: 52, commission: "16 200 MAD", percentage: 33, color: "bg-link" },
+  { venue: "Le Lotus Club", covers: 44, commission: "13 800 MAD", percentage: 28, color: "bg-plum" },
+  { venue: "Sky Bar Casa", covers: 35, commission: "11 000 MAD", percentage: 23, color: "bg-link" },
+  { venue: "Pacha Marrakech", covers: 25, commission: "7 600 MAD", percentage: 16, color: "bg-warn" },
 ];
 
 /* Mois de démonstration écrits à la main : libellé anglais à côté. */
@@ -47,11 +47,11 @@ export default function ConciergeStatsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
-        <h1 className="text-2xl font-bold text-white">
+      <div className=" bg-panel border border-line rounded-3xl p-6">
+        <h1 className="text-2xl font-bold text-ink">
           {t("Statistiques", "Stats")}
         </h1>
-        <p className="text-sm text-white/50 font-ui mt-1">
+        <p className="text-sm text-ink-3 font-ui mt-1">
           {t("Analysez votre performance et croissance", "Analyse your performance and growth")}
         </p>
       </div>
@@ -59,30 +59,30 @@ export default function ConciergeStatsPage() {
       {/* Stats cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: t("Couverts ce mois", "Covers this month"), value: isDemoConcierge ? "156" : "0", trend: "+16%", icon: Users, iconColor: "text-blue-400", iconBg: "bg-blue-400/10" },
-          { label: t("CA généré (MAD)", "Revenue generated (MAD)"), value: isDemoConcierge ? "486K" : "0", trend: "+22%", icon: Wallet, iconColor: "text-emerald-400", iconBg: "bg-emerald-400/10" },
-          { label: t("Commissions (MAD)", "Commissions (MAD)"), value: isDemoConcierge ? "48.6K" : "0", trend: "+16%", icon: CalendarDays, iconColor: "text-amber-400", iconBg: "bg-amber-400/10" },
-          { label: t("Taux confirmation", "Confirmation rate"), value: isDemoConcierge ? "87%" : "\u2014", trend: "+3%", icon: CheckCircle, iconColor: "text-purple-400", iconBg: "bg-purple-400/10" },
+          { label: t("Couverts ce mois", "Covers this month"), value: isDemoConcierge ? "156" : "0", trend: "+16%", icon: Users, iconColor: "text-info", iconBg: "bg-info-soft" },
+          { label: t("CA généré (MAD)", "Revenue generated (MAD)"), value: isDemoConcierge ? "486K" : "0", trend: "+22%", icon: Wallet, iconColor: "text-ok", iconBg: "bg-ok-soft" },
+          { label: t("Commissions (MAD)", "Commissions (MAD)"), value: isDemoConcierge ? "48.6K" : "0", trend: "+16%", icon: CalendarDays, iconColor: "text-warn", iconBg: "bg-warn-soft" },
+          { label: t("Taux confirmation", "Confirmation rate"), value: isDemoConcierge ? "87%" : "\u2014", trend: "+3%", icon: CheckCircle, iconColor: "text-plum", iconBg: "bg-plum-soft" },
         ].map((stat) => (
           <div
             key={stat.label}
-            className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-5 transition-all duration-500 hover:scale-[1.02] hover:bg-white/[0.1]"
+            className=" bg-panel border border-line rounded-3xl p-5 transition-all duration-500 hover:scale-[1.02] hover:bg-fill-2"
           >
             <div className="flex items-center justify-between mb-3">
               <div className={`w-10 h-10 rounded-xl ${stat.iconBg} flex items-center justify-center`}>
                 <stat.icon size={18} strokeWidth={1.5} className={stat.iconColor} />
               </div>
               {isDemoConcierge && (
-                <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-emerald-400/10">
-                  <ArrowUpRight size={12} strokeWidth={2} className="text-emerald-400" />
-                  <span className="text-xs font-semibold text-emerald-400">{stat.trend}</span>
+                <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-ok-soft">
+                  <ArrowUpRight size={12} strokeWidth={2} className="text-ok" />
+                  <span className="text-xs font-semibold text-ok">{stat.trend}</span>
                 </div>
               )}
             </div>
-            <p className="text-2xl font-extrabold text-white font-ui">
+            <p className="text-2xl font-extrabold text-ink font-ui">
               {stat.value}
             </p>
-            <p className="text-xs text-white/40 font-ui mt-1">
+            <p className="text-xs text-ink-3 font-ui mt-1">
               {stat.label}
             </p>
           </div>
@@ -91,8 +91,8 @@ export default function ConciergeStatsPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Chart */}
-        <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
-          <h3 className="text-lg font-bold text-white mb-6">
+        <div className=" bg-panel border border-line rounded-3xl p-6">
+          <h3 className="text-lg font-bold text-ink mb-6">
             {t("Évolution des couverts", "Covers over time")}
           </h3>
           {barChart.length > 0 ? (
@@ -101,7 +101,7 @@ export default function ConciergeStatsPage() {
                 const isMax = bar.value === bar.max;
                 return (
                   <div key={bar.label} className="flex-1 flex flex-col items-center gap-3">
-                    <span className="text-sm font-bold text-white font-ui">
+                    <span className="text-sm font-bold text-ink font-ui">
                       {bar.value}
                     </span>
                     <div className="w-full flex justify-center relative">
@@ -114,7 +114,7 @@ export default function ConciergeStatsPage() {
                         style={{ height: `${(bar.value / bar.max) * 170}px` }}
                       />
                     </div>
-                    <span className={`text-xs font-medium ${isMax ? "text-white" : "text-white/40"} font-ui`}>
+                    <span className={`text-xs font-medium ${isMax ? "text-ink" : "text-ink-3"} font-ui`}>
                       {monthLabel(bar.label)}
                     </span>
                   </div>
@@ -127,8 +127,8 @@ export default function ConciergeStatsPage() {
         </div>
 
         {/* Venue breakdown */}
-        <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
-          <h3 className="text-lg font-bold text-white mb-6">
+        <div className=" bg-panel border border-line rounded-3xl p-6">
+          <h3 className="text-lg font-bold text-ink mb-6">
             {t("Répartition par établissement", "Breakdown by venue")}
           </h3>
           {venueBreakdown.length > 0 ? (
@@ -136,21 +136,21 @@ export default function ConciergeStatsPage() {
               {venueBreakdown.map((v) => (
                 <div key={v.venue}>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-semibold text-white font-ui">
+                    <span className="text-sm font-semibold text-ink font-ui">
                       {v.venue}
                     </span>
-                    <span className="text-sm font-bold text-white/70 font-ui">
+                    <span className="text-sm font-bold text-ink-2 font-ui">
                       {v.commission}
                     </span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="flex-1 h-2.5 bg-white/[0.06] rounded-full overflow-hidden">
+                    <div className="flex-1 h-2.5 bg-fill rounded-full overflow-hidden">
                       <div
                         className={`h-full ${v.color} rounded-full transition-all`}
                         style={{ width: `${v.percentage}%` }}
                       />
                     </div>
-                    <span className="text-xs text-white/40 font-ui w-8 text-right">
+                    <span className="text-xs text-ink-3 font-ui w-8 text-right">
                       {v.percentage}%
                     </span>
                   </div>
@@ -163,24 +163,24 @@ export default function ConciergeStatsPage() {
         </div>
 
         {/* Monthly detail table */}
-        <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6 lg:col-span-2">
-          <h3 className="text-lg font-bold text-white mb-4">
+        <div className=" bg-panel border border-line rounded-3xl p-6 lg:col-span-2">
+          <h3 className="text-lg font-bold text-ink mb-4">
             {t("Détail mensuel", "Monthly breakdown")}
           </h3>
           <div className="tc-stack overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-white/[0.1]">
-                  <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-white/40 font-ui">
+                <tr className="border-b border-line">
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-ink-3 font-ui">
                     {t("Mois", "Month")}
                   </th>
-                  <th className="text-center px-4 py-3 text-xs font-semibold uppercase tracking-wider text-white/40 font-ui">
+                  <th className="text-center px-4 py-3 text-xs font-semibold text-ink-3 font-ui">
                     {t("Couverts", "Covers")}
                   </th>
-                  <th className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wider text-white/40 font-ui">
+                  <th className="text-right px-4 py-3 text-xs font-semibold text-ink-3 font-ui">
                     {t("Commission", "Commission")}
                   </th>
-                  <th className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wider text-white/40 font-ui">
+                  <th className="text-right px-4 py-3 text-xs font-semibold text-ink-3 font-ui">
                     {t("Croissance", "Growth")}
                   </th>
                 </tr>
@@ -188,24 +188,24 @@ export default function ConciergeStatsPage() {
               <tbody>
                 {monthlyData.length > 0 ? (
                   monthlyData.map((m) => (
-                    <tr key={m.month} className="border-b border-white/[0.06] hover:bg-white/[0.03] transition-colors">
-                      <td data-head className="px-4 py-3.5 font-semibold text-white font-ui">
+                    <tr key={m.month} className="border-b border-line hover:bg-fill transition-colors">
+                      <td data-head className="px-4 py-3.5 font-semibold text-ink font-ui">
                         {monthLabel(m.month)}
                       </td>
-                      <td data-label={t("Couverts", "Covers")} className="px-4 py-3.5 text-center text-white/70 font-ui">
+                      <td data-label={t("Couverts", "Covers")} className="px-4 py-3.5 text-center text-ink-2 font-ui">
                         {m.covers}
                       </td>
-                      <td data-label={t("Commission", "Commission")} className="px-4 py-3.5 text-right font-bold text-white font-ui">
+                      <td data-label={t("Commission", "Commission")} className="px-4 py-3.5 text-right font-bold text-ink font-ui">
                         {m.commission} MAD
                       </td>
                       <td data-label={t("Croissance", "Growth")} className="px-4 py-3.5 text-right">
                         {m.growth > 0 ? (
-                          <span className="inline-flex items-center gap-1 text-emerald-400 font-semibold text-xs">
+                          <span className="inline-flex items-center gap-1 text-ok font-semibold text-xs">
                             <ArrowUpRight size={12} strokeWidth={2} />
                             +{m.growth}%
                           </span>
                         ) : (
-                          <span className="text-xs text-white/30">&mdash;</span>
+                          <span className="text-xs text-ink-3">&mdash;</span>
                         )}
                       </td>
                     </tr>
@@ -229,11 +229,11 @@ export default function ConciergeStatsPage() {
 function EmptyState({ icon: Icon, text, sub }: { icon: typeof BarChart3; text: string; sub: string }) {
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center">
-      <div className="w-12 h-12 rounded-full bg-white/[0.06] flex items-center justify-center mb-4">
-        <Icon size={24} strokeWidth={1.5} className="text-white/20" />
+      <div className="w-12 h-12 rounded-full bg-fill flex items-center justify-center mb-4">
+        <Icon size={24} strokeWidth={1.5} className="text-ink-4" />
       </div>
-      <p className="text-sm font-medium text-white/40 font-ui">{text}</p>
-      <p className="text-xs text-white/25 font-ui mt-1">{sub}</p>
+      <p className="text-sm font-medium text-ink-3 font-ui">{text}</p>
+      <p className="text-xs text-ink-3 font-ui mt-1">{sub}</p>
     </div>
   );
 }

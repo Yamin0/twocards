@@ -124,16 +124,16 @@ export default function ConciergeClientsPage() {
       {/* Header */}
       <div className="px-4 sm:px-6 pt-6 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold text-white">
+          <h1 className="text-xl font-bold text-ink">
             {t("Carnet de contacts", "Contact book")}
           </h1>
-          <p className="text-sm text-white/60 font-ui mt-0.5">
+          <p className="text-sm text-ink-2 font-ui mt-0.5">
             {clients.length} {t("clients", clients.length === 1 ? "guest" : "guests")} &middot; {clients.filter((c) => c.vip).length} VIP
           </p>
         </div>
         <button
           onClick={() => setShowNewClient(true)}
-          className="flex items-center gap-2 bg-white/15 text-white text-sm font-medium px-4 py-2.5 rounded-lg hover:opacity-90 transition-opacity font-ui"
+          className="flex items-center gap-2 bg-fill-3 text-ink text-sm font-medium px-4 py-2.5 rounded-lg hover:opacity-90 transition-opacity font-ui"
         >
           <Plus size={16} strokeWidth={1.5} />
           {t("Nouveau client", "New guest")}
@@ -146,14 +146,14 @@ export default function ConciergeClientsPage() {
           <Search
             size={16}
             strokeWidth={1.5}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-3"
           />
           <input
             type="text"
             placeholder={t("Rechercher par nom ou téléphone...", "Search by name or phone...")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 text-sm bg-white/[0.07] border border-white/10 rounded-lg text-white placeholder:text-white/40 font-ui focus:ring-1 focus:ring-white/30 focus:border-primary/30 focus:outline-none transition-colors"
+            className="w-full pl-9 pr-4 py-2 text-sm bg-fill-2 border border-line rounded-lg text-ink placeholder:text-ink-4 font-ui focus:ring-1 focus:ring-line-2 focus:border-primary/30 focus:outline-none transition-colors"
           />
         </div>
         <div className="flex items-center gap-2 overflow-x-auto">
@@ -163,8 +163,8 @@ export default function ConciergeClientsPage() {
               onClick={() => setFilterTag(tag)}
               className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors font-ui ${
                 filterTag === tag
-                  ? "bg-white/15 text-white"
-                  : "bg-white/[0.07] border border-white/10 text-white/60 hover:bg-white/[0.05]"
+                  ? "bg-fill-3 text-ink"
+                  : "bg-fill-2 border border-line text-ink-2 hover:bg-fill"
               }`}
             >
               {tagLabel(tag)}
@@ -175,27 +175,27 @@ export default function ConciergeClientsPage() {
 
       {/* Client list - table style */}
       <div className="px-4 sm:px-6 pb-8">
-        <div className="bg-white/[0.07] rounded-xl border border-white/10/10 overflow-hidden">
+        <div className="bg-fill-2 rounded-xl border border-line/10 overflow-hidden">
           <div className="tc-stack overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-white/10/10">
-                  <th className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-ui">
+                <tr className="border-b border-line/10">
+                  <th className="text-left px-4 py-3 text-xs font-bold text-ink-2/60 font-ui">
                     {t("Client", "Guest")}
                   </th>
-                  <th className="hidden sm:table-cell text-left px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-ui">
+                  <th className="hidden sm:table-cell text-left px-4 py-3 text-xs font-bold text-ink-2/60 font-ui">
                     {t("Contact", "Contact")}
                   </th>
-                  <th className="text-center px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-ui">
+                  <th className="text-center px-4 py-3 text-xs font-bold text-ink-2/60 font-ui">
                     {t("Visites", "Visits")}
                   </th>
-                  <th className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-ui">
+                  <th className="text-left px-4 py-3 text-xs font-bold text-ink-2/60 font-ui">
                     {t("Dépenses", "Spend")}
                   </th>
-                  <th className="hidden sm:table-cell text-center px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-ui">
+                  <th className="hidden sm:table-cell text-center px-4 py-3 text-xs font-bold text-ink-2/60 font-ui">
                     {t("Grp. moy.", "Avg. party")}
                   </th>
-                  <th className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/60/60 font-ui">
+                  <th className="text-left px-4 py-3 text-xs font-bold text-ink-2/60 font-ui">
                     {t("Tags", "Tags")}
                   </th>
                   <th className="w-10 px-4 py-3" />
@@ -205,14 +205,14 @@ export default function ConciergeClientsPage() {
                 {filtered.map((client, i) => (
                   <tr
                     key={client.id}
-                    className={`border-b border-white/10/5 hover:bg-white/[0.05]/50 transition-colors ${
+                    className={`border-b border-line/5 hover:bg-fill/50 transition-colors ${
                       i % 2 === 0 ? "" : "bg-transparent/30"
                     }`}
                   >
                     <td data-head className="px-4 py-3.5">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-white/15 flex items-center justify-center shrink-0">
-                          <span className="text-xs font-bold text-white/70 font-ui">
+                        <div className="w-9 h-9 rounded-full bg-fill-3 flex items-center justify-center shrink-0">
+                          <span className="text-xs font-bold text-ink-2 font-ui">
                             {client.name
                               .split(" ")
                               .map((n) => n[0])
@@ -221,18 +221,18 @@ export default function ConciergeClientsPage() {
                         </div>
                         <div>
                           <div className="flex items-center gap-1.5">
-                            <span className="font-semibold text-white font-ui">
+                            <span className="font-semibold text-ink font-ui">
                               {client.name}
                             </span>
                             {client.vip && (
                               <Star
                                 size={12}
                                 strokeWidth={1.5}
-                                className="text-amber-500 fill-amber-500"
+                                className="text-warn fill-amber-500"
                               />
                             )}
                           </div>
-                          <p className="text-[11px] text-white/60/60 font-ui">
+                          <p className="text-xs text-ink-2/60 font-ui">
                             {t("Dernier :", "Last:")} {visitLabel(client.lastVisit)}
                           </p>
                         </div>
@@ -242,7 +242,7 @@ export default function ConciergeClientsPage() {
                       <div className="flex items-center gap-3">
                         <a
                           href={`tel:${client.phone}`}
-                          className="flex items-center gap-1 text-xs text-white/60 hover:text-white transition-colors"
+                          className="flex items-center gap-1 text-xs text-ink-2 hover:text-ink transition-colors"
                         >
                           <Phone size={12} strokeWidth={1.5} />
                           {client.phone}
@@ -250,17 +250,17 @@ export default function ConciergeClientsPage() {
                       </div>
                     </td>
                     <td data-label={t("Visites", "Visits")} className="px-4 py-3.5 text-center">
-                      <span className="font-bold text-white font-ui">
+                      <span className="font-bold text-ink font-ui">
                         {client.visits}
                       </span>
                     </td>
                     <td data-label={t("Dépenses", "Spend")} className="px-4 py-3.5">
-                      <span className="font-semibold text-white font-ui">
+                      <span className="font-semibold text-ink font-ui">
                         {client.totalSpent}
                       </span>
                     </td>
                     <td data-label={t("Grp. moy.", "Avg. party")} className="hidden sm:table-cell px-4 py-3.5 text-center">
-                      <span className="text-white/60 font-ui">
+                      <span className="text-ink-2 font-ui">
                         {client.avgGroup}
                       </span>
                     </td>
@@ -269,14 +269,14 @@ export default function ConciergeClientsPage() {
                         {client.tags.map((tag) => (
                           <span
                             key={tag}
-                            className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                            className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
                               tag === "VIP"
-                                ? "bg-amber-100 text-amber-800"
+                                ? "bg-warn-soft text-amber-800"
                                 : tag === "Top client"
-                                ? "bg-emerald-100 text-emerald-800"
+                                ? "bg-ok-soft text-emerald-800"
                                 : tag === "Nouveau"
-                                ? "bg-blue-100 text-blue-800"
-                                : "bg-white/[0.05] text-white/60"
+                                ? "bg-info-soft text-blue-800"
+                                : "bg-fill text-ink-2"
                             }`}
                           >
                             {tagLabel(tag)}
@@ -288,29 +288,29 @@ export default function ConciergeClientsPage() {
                       <button
                         onClick={() => setMenuOpen(menuOpen === client.id ? null : client.id)}
                         aria-label={t("Actions", "Actions")}
-                        className="p-1 rounded-lg text-white/60/40 hover:text-white/60 hover:bg-white/[0.05] transition-colors"
+                        className="p-1 rounded-lg text-ink-2/40 hover:text-ink-2 hover:bg-fill transition-colors"
                       >
                         <MoreHorizontal size={16} strokeWidth={1.5} />
                       </button>
                       {menuOpen === client.id && (
                         <>
                           <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(null)} />
-                          <div className="absolute right-4 top-10 z-50 w-44 bg-white/[0.07] rounded-lg border border-white/10/10 shadow-lg py-1">
+                          <div className="absolute right-4 top-10 z-50 w-44 bg-fill-2 rounded-lg border border-line/10 shadow-lg py-1">
                             <button
                               onClick={() => handleMenuAction("vip", client.name)}
-                              className="w-full text-left px-4 py-2 text-sm text-white hover:bg-white/[0.05] transition-colors"
+                              className="w-full text-left px-4 py-2 text-sm text-ink hover:bg-fill transition-colors"
                             >
                               {client.vip ? t("Retirer VIP", "Remove VIP") : t("Marquer VIP", "Mark as VIP")}
                             </button>
                             <button
                               onClick={() => handleMenuAction("call", client.name)}
-                              className="w-full text-left px-4 py-2 text-sm text-white hover:bg-white/[0.05] transition-colors"
+                              className="w-full text-left px-4 py-2 text-sm text-ink hover:bg-fill transition-colors"
                             >
                               {t("Appeler", "Call")}
                             </button>
                             <button
                               onClick={() => handleMenuAction("email", client.name)}
-                              className="w-full text-left px-4 py-2 text-sm text-white hover:bg-white/[0.05] transition-colors"
+                              className="w-full text-left px-4 py-2 text-sm text-ink hover:bg-fill transition-colors"
                             >
                               {t("Envoyer un email", "Send an email")}
                             </button>
@@ -322,7 +322,7 @@ export default function ConciergeClientsPage() {
                 ))}
                 {filtered.length === 0 && (
                   <tr>
-                    <td colSpan={7} className="px-4 py-12 text-center text-sm text-white/60">
+                    <td colSpan={7} className="px-4 py-12 text-center text-sm text-ink-2">
                       {t("Aucun client trouvé", "No guests found")}
                     </td>
                   </tr>
@@ -335,23 +335,23 @@ export default function ConciergeClientsPage() {
 
       {/* New Client Modal */}
       {showNewClient && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white/[0.07] rounded-xl shadow-xl w-full max-w-md mx-4 p-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-scrim">
+          <div className="bg-fill-2 rounded-xl shadow-xl w-full max-w-md mx-4 p-6">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-lg font-bold text-white">
+              <h2 className="text-lg font-bold text-ink">
                 {t("Nouveau client", "New guest")}
               </h2>
               <button
                 onClick={() => setShowNewClient(false)}
                 aria-label={t("Fermer", "Close")}
-                className="p-1 rounded-lg text-white/60 hover:text-white hover:bg-white/[0.05] transition-colors"
+                className="p-1 rounded-lg text-ink-2 hover:text-ink hover:bg-fill transition-colors"
               >
                 <X size={18} strokeWidth={1.5} />
               </button>
             </div>
             <form onSubmit={handleAddClient} className="space-y-4">
               <div>
-                <label className="block text-xs font-medium text-white/60 mb-1 font-ui">
+                <label className="block text-xs font-medium text-ink-2 mb-1 font-ui">
                   {t("Nom complet *", "Full name *")}
                 </label>
                 <input
@@ -359,12 +359,12 @@ export default function ConciergeClientsPage() {
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
                   placeholder={t("Ex: Mohamed Tazi", "e.g. Mohamed Tazi")}
-                  className="w-full px-3 py-2 text-sm bg-white/[0.05] border-none rounded-lg text-white placeholder:text-white/40 font-ui focus:ring-1 focus:ring-white/30 focus:outline-none"
+                  className="w-full px-3 py-2 text-sm bg-fill border-none rounded-lg text-ink placeholder:text-ink-4 font-ui focus:ring-1 focus:ring-line-2 focus:outline-none"
                   required
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-white/60 mb-1 font-ui">
+                <label className="block text-xs font-medium text-ink-2 mb-1 font-ui">
                   {t("Téléphone", "Phone")}
                 </label>
                 <input
@@ -372,11 +372,11 @@ export default function ConciergeClientsPage() {
                   value={newPhone}
                   onChange={(e) => setNewPhone(e.target.value)}
                   placeholder="+212 6 XX XX XX XX"
-                  className="w-full px-3 py-2 text-sm bg-white/[0.05] border-none rounded-lg text-white placeholder:text-white/40 font-ui focus:ring-1 focus:ring-white/30 focus:outline-none"
+                  className="w-full px-3 py-2 text-sm bg-fill border-none rounded-lg text-ink placeholder:text-ink-4 font-ui focus:ring-1 focus:ring-line-2 focus:outline-none"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-white/60 mb-1 font-ui">
+                <label className="block text-xs font-medium text-ink-2 mb-1 font-ui">
                   {t("Email", "Email")}
                 </label>
                 <input
@@ -384,12 +384,12 @@ export default function ConciergeClientsPage() {
                   value={newEmail}
                   onChange={(e) => setNewEmail(e.target.value)}
                   placeholder="email@example.com"
-                  className="w-full px-3 py-2 text-sm bg-white/[0.05] border-none rounded-lg text-white placeholder:text-white/40 font-ui focus:ring-1 focus:ring-white/30 focus:outline-none"
+                  className="w-full px-3 py-2 text-sm bg-fill border-none rounded-lg text-ink placeholder:text-ink-4 font-ui focus:ring-1 focus:ring-line-2 focus:outline-none"
                 />
               </div>
               <button
                 type="submit"
-                className="w-full bg-white/15 text-white text-sm font-medium py-2.5 rounded-lg hover:opacity-90 transition-opacity"
+                className="w-full bg-fill-3 text-ink text-sm font-medium py-2.5 rounded-lg hover:opacity-90 transition-opacity"
               >
                 {t("Ajouter le client", "Add guest")}
               </button>
@@ -400,7 +400,7 @@ export default function ConciergeClientsPage() {
 
       {/* Toast */}
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-white/15-dark text-white px-4 py-3 rounded-md shadow-lg">
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-fill-3-dark text-ink px-4 py-3 rounded-md shadow-lg">
           <Check size={16} strokeWidth={2} />
           <span className="text-sm font-medium">{toast}</span>
         </div>

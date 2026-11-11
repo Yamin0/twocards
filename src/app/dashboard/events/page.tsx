@@ -212,10 +212,10 @@ function eventToRow(e: Omit<DemoEvent, "id">): Omit<EventRow, "id"> {
 
 function statusBadge(status: EventStatus) {
   switch (status) {
-    case "Ouvert": return "bg-green-400/15 text-green-400 border border-green-400/20";
-    case "Bientôt complet": return "bg-amber-400/15 text-amber-400 border border-amber-400/20";
-    case "Fermé": return "bg-white/[0.06] text-white/30 border border-white/10";
-    case "Brouillon": return "bg-blue-400/10 text-blue-400/60 border border-blue-400/15";
+    case "Ouvert": return "bg-ok-soft text-ok border border-ok/25";
+    case "Bientôt complet": return "bg-warn-soft text-warn border border-warn/25";
+    case "Fermé": return "bg-fill text-ink-3 border border-line";
+    case "Brouillon": return "bg-info-soft text-info border border-info/25";
   }
 }
 
@@ -349,19 +349,19 @@ function MiniCalendar({ selected, onSelect }: {
   };
 
   return (
-    <div className="bg-white/[0.04] border border-white/[0.08] rounded-xl p-3">
+    <div className="bg-fill border border-line rounded-xl p-3">
       <div className="flex items-center justify-between mb-2">
-        <button onClick={prevMonth} className="p-1 rounded-lg text-white/30 hover:text-white hover:bg-white/[0.08] transition-all">
+        <button onClick={prevMonth} className="p-1 rounded-lg text-ink-3 hover:text-ink hover:bg-fill-2 transition-all">
           <ChevronLeft size={14} strokeWidth={1.5} />
         </button>
-        <span className="text-xs font-medium text-white/70">{pick(locale, MONTH_NAMES.fr, MONTH_NAMES.en)[month]} {year}</span>
-        <button onClick={nextMonth} className="p-1 rounded-lg text-white/30 hover:text-white hover:bg-white/[0.08] transition-all">
+        <span className="text-xs font-medium text-ink-2">{pick(locale, MONTH_NAMES.fr, MONTH_NAMES.en)[month]} {year}</span>
+        <button onClick={nextMonth} className="p-1 rounded-lg text-ink-3 hover:text-ink hover:bg-fill-2 transition-all">
           <ChevronRight size={14} strokeWidth={1.5} />
         </button>
       </div>
       <div className="grid grid-cols-7 gap-0.5 mb-1">
         {pick(locale, DAY_NAMES.fr, DAY_NAMES.en).map((d, i) => (
-          <div key={i} className="text-center text-[0.5rem] text-white/20 font-medium py-0.5">{d.charAt(0)}</div>
+          <div key={i} className="text-center text-xs text-ink-4 font-medium py-0.5">{d.charAt(0)}</div>
         ))}
       </div>
       <div className="grid grid-cols-7 gap-0.5">
@@ -373,12 +373,12 @@ function MiniCalendar({ selected, onSelect }: {
             <button
               key={idx}
               onClick={() => onSelect({ day, month, year })}
-              className={`h-7 w-full rounded-lg text-[0.6875rem] font-medium transition-all ${
+              className={`h-7 w-full rounded-lg text-xs font-medium transition-all ${
                 isSelected
-                  ? "bg-blue-500 text-white"
+                  ? "bg-link text-white"
                   : isToday
-                    ? "bg-white/[0.08] text-blue-400"
-                    : "text-white/50 hover:bg-white/[0.06] hover:text-white"
+                    ? "bg-fill-2 text-info"
+                    : "text-ink-3 hover:bg-fill hover:text-ink"
               }`}
             >
               {day}
@@ -687,23 +687,23 @@ export default function EventsPage() {
       const fillPercent = panelEvent.totalSpots > 0 ? Math.round(((panelEvent.totalSpots - panelEvent.spots) / panelEvent.totalSpots) * 100) : 0;
       return (
         <div className="fixed inset-0 z-50 flex items-start justify-end">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={closePanel} />
-          <div className="relative z-10 w-full max-w-lg h-full overflow-y-auto backdrop-blur-xl bg-[#0e0e1a]/95 border-l border-white/[0.1] p-6 space-y-6">
+          <div className="absolute inset-0 bg-scrim" onClick={closePanel} />
+          <div className="relative z-10 w-full max-w-lg h-full overflow-y-auto bg-[#0e0e1a]/95 border-l border-line p-6 space-y-6">
             <div className="flex items-center justify-between">
-              <button onClick={closePanel} className="flex items-center gap-2 text-sm text-white/40 hover:text-white transition-colors">
+              <button onClick={closePanel} className="flex items-center gap-2 text-sm text-ink-3 hover:text-ink transition-colors">
                 <ArrowLeft size={16} strokeWidth={1.5} /> {t("Retour", "Back")}
               </button>
               <div className="flex items-center gap-2">
-                <button onClick={() => openEdit(panelEvent.id)} className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-500/15 hover:bg-blue-500/25 border border-blue-400/20 rounded-lg text-xs font-medium text-blue-400 transition-all">
+                <button onClick={() => openEdit(panelEvent.id)} className="flex items-center gap-1.5 px-3 py-1.5 bg-info-soft hover:bg-info-soft border border-info/25 rounded-lg text-xs font-medium text-info transition-all">
                   <Pencil size={12} strokeWidth={1.5} /> {t("Modifier", "Edit")}
                 </button>
-                <button onClick={closePanel} className="p-1.5 rounded-lg text-white/30 hover:text-white hover:bg-white/[0.08] transition-all">
+                <button onClick={closePanel} className="p-1.5 rounded-lg text-ink-3 hover:text-ink hover:bg-fill-2 transition-all">
                   <X size={18} strokeWidth={1.5} />
                 </button>
               </div>
             </div>
 
-            <div className="relative h-40 rounded-2xl overflow-hidden">
+            <div className="tc-dark relative h-40 rounded-2xl overflow-hidden">
               {panelEvent.coverImage ? (
                 <>
                   <Image src={panelEvent.coverImage} alt={panelEvent.title} fill className="object-cover" unoptimized />
@@ -711,61 +711,61 @@ export default function EventsPage() {
                 </>
               ) : (
                 <div className={`absolute inset-0 bg-gradient-to-br ${panelEvent.gradient}`}>
-                  <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-40 h-40 rounded-full bg-white/5 blur-2xl" />
-                  <PanelIcon size={100} strokeWidth={0.5} className="absolute bottom-2 right-4 text-white/[0.08]" />
+                  <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-40 h-40 rounded-full bg-fill blur-2xl" />
+                  <PanelIcon size={100} strokeWidth={0.5} className="absolute bottom-2 right-4 text-ink-4" />
                 </div>
               )}
               <div className="absolute top-3 right-3">
-                <span className={`text-[0.625rem] font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm ${statusBadge(panelEvent.status)}`}>{statusLabel(panelEvent.status, t)}</span>
+                <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${statusBadge(panelEvent.status)}`}>{statusLabel(panelEvent.status, t)}</span>
               </div>
               <div className="absolute bottom-4 left-4 z-10">
-                <h2 className="text-2xl font-bold text-white">{panelEvent.title}</h2>
-                <p className="text-sm text-white/60 flex items-center gap-1 mt-1"><MapPin size={12} strokeWidth={1.5} />{panelEvent.venue}</p>
+                <h2 className="text-2xl font-bold text-ink">{panelEvent.title}</h2>
+                <p className="text-sm text-ink-2 flex items-center gap-1 mt-1"><MapPin size={12} strokeWidth={1.5} />{panelEvent.venue}</p>
               </div>
             </div>
 
-            {panelEvent.description && <p className="text-sm text-white/50 leading-relaxed">{panelEvent.description}</p>}
+            {panelEvent.description && <p className="text-sm text-ink-3 leading-relaxed">{panelEvent.description}</p>}
 
             <div className="grid grid-cols-2 gap-3">
-              <div className="bg-white/[0.04] border border-white/[0.06] rounded-xl p-3.5">
-                <div className="flex items-center gap-2 mb-1"><Clock size={13} strokeWidth={1.5} className="text-white/25" /><p className="text-[0.625rem] text-white/30 uppercase tracking-wider">{t("Date & Heure", "Date & time")}</p></div>
-                <p className="text-sm font-medium text-white">{dateLabel(panelEvent)}</p>
-                <p className="text-xs text-white/40">{panelEvent.time}</p>
+              <div className="bg-fill border border-line rounded-xl p-3.5">
+                <div className="flex items-center gap-2 mb-1"><Clock size={13} strokeWidth={1.5} className="text-ink-3" /><p className="text-xs text-ink-3">{t("Date & Heure", "Date & time")}</p></div>
+                <p className="text-sm font-medium text-ink">{dateLabel(panelEvent)}</p>
+                <p className="text-xs text-ink-3">{panelEvent.time}</p>
               </div>
-              <div className="bg-white/[0.04] border border-white/[0.06] rounded-xl p-3.5">
-                <div className="flex items-center gap-2 mb-1"><Users size={13} strokeWidth={1.5} className="text-white/25" /><p className="text-[0.625rem] text-white/30 uppercase tracking-wider">{t("Capacité", "Capacity")}</p></div>
-                <p className="text-sm font-medium text-white">{t(`${panelEvent.totalSpots} places`, `${panelEvent.totalSpots} spots`)}</p>
-                <p className="text-xs text-white/40">{t(`${panelEvent.spots} disponibles`, `${panelEvent.spots} available`)}</p>
+              <div className="bg-fill border border-line rounded-xl p-3.5">
+                <div className="flex items-center gap-2 mb-1"><Users size={13} strokeWidth={1.5} className="text-ink-3" /><p className="text-xs text-ink-3">{t("Capacité", "Capacity")}</p></div>
+                <p className="text-sm font-medium text-ink">{t(`${panelEvent.totalSpots} places`, `${panelEvent.totalSpots} spots`)}</p>
+                <p className="text-xs text-ink-3">{t(`${panelEvent.spots} disponibles`, `${panelEvent.spots} available`)}</p>
               </div>
-              <div className="bg-white/[0.04] border border-white/[0.06] rounded-xl p-3.5">
-                <div className="flex items-center gap-2 mb-1"><UserCheck size={13} strokeWidth={1.5} className="text-white/25" /><p className="text-[0.625rem] text-white/30 uppercase tracking-wider">{t("RP Actifs", "Active PRs")}</p></div>
-                <p className="text-sm font-medium text-white">{panelEvent.rpCount}</p>
+              <div className="bg-fill border border-line rounded-xl p-3.5">
+                <div className="flex items-center gap-2 mb-1"><UserCheck size={13} strokeWidth={1.5} className="text-ink-3" /><p className="text-xs text-ink-3">{t("RP Actifs", "Active PRs")}</p></div>
+                <p className="text-sm font-medium text-ink">{panelEvent.rpCount}</p>
               </div>
-              <div className="bg-white/[0.04] border border-white/[0.06] rounded-xl p-3.5">
-                <div className="flex items-center gap-2 mb-1"><DollarSign size={13} strokeWidth={1.5} className="text-white/25" /><p className="text-[0.625rem] text-white/30 uppercase tracking-wider">{t("CA", "Revenue")}</p></div>
-                <p className="text-sm font-medium text-white">{panelEvent.revenue}</p>
+              <div className="bg-fill border border-line rounded-xl p-3.5">
+                <div className="flex items-center gap-2 mb-1"><DollarSign size={13} strokeWidth={1.5} className="text-ink-3" /><p className="text-xs text-ink-3">{t("CA", "Revenue")}</p></div>
+                <p className="text-sm font-medium text-ink">{panelEvent.revenue}</p>
               </div>
             </div>
 
-            <div className="bg-white/[0.04] border border-white/[0.06] rounded-xl p-4">
+            <div className="bg-fill border border-line rounded-xl p-4">
               <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2"><BarChart3 size={13} strokeWidth={1.5} className="text-white/25" /><span className="text-[0.625rem] text-white/30 uppercase tracking-wider">{t("Remplissage", "Fill rate")}</span></div>
-                <span className="text-sm font-semibold text-white">{fillPercent}%</span>
+                <div className="flex items-center gap-2"><BarChart3 size={13} strokeWidth={1.5} className="text-ink-3" /><span className="text-xs text-ink-3">{t("Remplissage", "Fill rate")}</span></div>
+                <span className="text-sm font-semibold text-ink">{fillPercent}%</span>
               </div>
-              <div className="h-2 bg-white/[0.06] rounded-full overflow-hidden">
-                <div className={`h-full rounded-full transition-all duration-500 ${fillPercent >= 90 ? "bg-amber-400" : fillPercent >= 50 ? "bg-blue-400" : "bg-white/20"}`} style={{ width: `${fillPercent}%` }} />
+              <div className="h-2 bg-fill rounded-full overflow-hidden">
+                <div className={`h-full rounded-full transition-all duration-500 ${fillPercent >= 90 ? "bg-warn" : fillPercent >= 50 ? "bg-link" : "bg-fill-3"}`} style={{ width: `${fillPercent}%` }} />
               </div>
-              <p className="text-xs text-white/25 mt-1.5">{t(
+              <p className="text-xs text-ink-3 mt-1.5">{t(
                 `${panelEvent.reservations} réservations sur ${panelEvent.totalSpots}`,
                 `${panelEvent.reservations} of ${panelEvent.totalSpots} reserved`
               )}</p>
             </div>
 
             <div>
-              <p className="text-[0.625rem] text-white/30 uppercase tracking-wider mb-2">{t("Genres", "Genres")}</p>
+              <p className="text-xs text-ink-3 mb-2">{t("Genres", "Genres")}</p>
               <div className="flex flex-wrap gap-2">
                 {panelEvent.genre.map((g) => (
-                  <span key={g} className="text-xs font-medium bg-white/[0.06] border border-white/[0.08] text-white/60 px-3 py-1 rounded-full">{g}</span>
+                  <span key={g} className="text-xs font-medium bg-fill border border-line text-ink-2 px-3 py-1 rounded-full">{g}</span>
                 ))}
               </div>
             </div>
@@ -780,24 +780,24 @@ export default function EventsPage() {
       const FormIcon = ICONS[form.iconIdx] ?? Sparkles;
       return (
         <div className="fixed inset-0 z-50 flex items-start justify-end">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={closePanel} />
-          <div className="relative z-10 w-full max-w-lg h-full overflow-y-auto backdrop-blur-xl bg-[#0e0e1a]/95 border-l border-white/[0.1] p-6 space-y-5">
+          <div className="absolute inset-0 bg-scrim" onClick={closePanel} />
+          <div className="relative z-10 w-full max-w-lg h-full overflow-y-auto bg-[#0e0e1a]/95 border-l border-line p-6 space-y-5">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-bold text-white">
+                <h2 className="text-xl font-bold text-ink">
                   {isEdit ? t("Modifier l'événement", "Edit event") : t("Nouvel événement", "New event")}
                 </h2>
-                <p className="text-xs text-white/30 mt-0.5">
+                <p className="text-xs text-ink-3 mt-0.5">
                   {isEdit ? t("Modifiez les détails", "Update the details") : t("Remplissez les informations", "Fill in the details")}
                 </p>
               </div>
-              <button onClick={closePanel} className="p-1.5 rounded-lg text-white/30 hover:text-white hover:bg-white/[0.08] transition-all">
+              <button onClick={closePanel} className="p-1.5 rounded-lg text-ink-3 hover:text-ink hover:bg-fill-2 transition-all">
                 <X size={18} strokeWidth={1.5} />
               </button>
             </div>
 
             {/* Cover image / gradient preview */}
-            <div className="relative h-36 rounded-2xl overflow-hidden group">
+            <div className="tc-dark relative h-36 rounded-2xl overflow-hidden group">
               {form.coverImage ? (
                 <>
                   <Image src={form.coverImage} alt={t("Couverture", "Cover")} fill className="object-cover" unoptimized />
@@ -805,12 +805,12 @@ export default function EventsPage() {
                 </>
               ) : (
                 <div className={`absolute inset-0 bg-gradient-to-br ${form.gradient}`}>
-                  <FormIcon size={70} strokeWidth={0.5} className="absolute bottom-2 right-4 text-white/[0.08]" />
+                  <FormIcon size={70} strokeWidth={0.5} className="absolute bottom-2 right-4 text-ink-4" />
                 </div>
               )}
               {form.title && (
                 <div className="absolute bottom-3 left-4 z-10">
-                  <p className="text-lg font-bold text-white font-ui">{form.title}</p>
+                  <p className="text-lg font-bold text-ink font-ui">{form.title}</p>
                 </div>
               )}
               {/* Upload overlay */}
@@ -818,19 +818,19 @@ export default function EventsPage() {
                 onClick={() => {
                   if (!uploadingCover) fileInputRef.current?.click();
                 }}
-                className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-2 bg-black/0 group-hover:bg-black/40 transition-all cursor-pointer opacity-0 group-hover:opacity-100"
+                className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-2 bg-scrim group-hover:bg-fill transition-all cursor-pointer opacity-0 group-hover:opacity-100"
               >
-                <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                  {form.coverImage ? <Pencil size={18} strokeWidth={1.5} className="text-white" /> : <Upload size={18} strokeWidth={1.5} className="text-white" />}
+                <div className="w-10 h-10 rounded-full bg-fill-3 flex items-center justify-center">
+                  {form.coverImage ? <Pencil size={18} strokeWidth={1.5} className="text-ink" /> : <Upload size={18} strokeWidth={1.5} className="text-ink" />}
                 </div>
-                <span className="text-xs font-medium text-white/80">
+                <span className="text-xs font-medium text-ink">
                   {form.coverImage ? t("Changer l'image", "Change image") : t("Importer une image", "Upload an image")}
                 </span>
               </div>
               {form.coverImage && (
                 <button
                   onClick={(e) => { e.stopPropagation(); setForm({ ...form, coverImage: null }); }}
-                  className="absolute top-2 right-2 z-30 p-1 rounded-lg bg-black/40 text-white/70 hover:text-white hover:bg-red-500/40 transition-all"
+                  className="absolute top-2 right-2 z-30 p-1 rounded-lg bg-panel text-ink-2 hover:text-ink hover:bg-danger-soft transition-all"
                 >
                   <X size={14} strokeWidth={1.5} />
                 </button>
@@ -844,7 +844,7 @@ export default function EventsPage() {
               <button
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploadingCover}
-                className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-white/[0.12] bg-white/[0.06] px-3 py-2.5 text-xs font-medium text-white/70 transition-colors hover:bg-white/[0.12] hover:text-white disabled:opacity-50 disabled:hover:bg-white/[0.06] disabled:hover:text-white/70"
+                className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-line bg-fill px-3 py-2.5 text-xs font-medium text-ink-2 transition-colors hover:bg-fill-2 hover:text-ink disabled:opacity-50 disabled:hover:bg-fill disabled:hover:text-ink-2"
               >
                 {uploadingCover ? (
                   <Loader2 size={14} strokeWidth={2} className="animate-spin" />
@@ -858,8 +858,8 @@ export default function EventsPage() {
                 aria-expanded={galleryOpen}
                 className={`flex flex-1 items-center justify-center gap-2 rounded-xl border px-3 py-2.5 text-xs font-medium transition-colors ${
                   galleryOpen
-                    ? "border-blue-400/30 bg-blue-500/20 text-blue-300"
-                    : "border-white/[0.12] bg-white/[0.06] text-white/70 hover:bg-white/[0.12] hover:text-white"
+                    ? "border-info/25 bg-info-soft text-info"
+                    : "border-line bg-fill text-ink-2 hover:bg-fill-2 hover:text-ink"
                 }`}
               >
                 <ImageIcon size={14} strokeWidth={1.5} />
@@ -868,7 +868,7 @@ export default function EventsPage() {
             </div>
 
             {galleryOpen && (
-              <div className="rounded-2xl border border-white/[0.12] bg-black/30 p-3">
+              <div className="rounded-2xl border border-line bg-panel p-3">
                 <div className="grid max-h-56 grid-cols-4 gap-2 overflow-y-auto scrollbar-thin">
                   {UNSPLASH_PHOTOS.map((photo) => {
                     const full = unsplashFull(photo.id);
@@ -883,8 +883,8 @@ export default function EventsPage() {
                         aria-pressed={active}
                         className={`relative aspect-[3/2] overflow-hidden rounded-lg border transition-all ${
                           active
-                            ? "border-blue-400 ring-2 ring-blue-400/40"
-                            : "border-white/10 hover:border-white/40"
+                            ? "border-info/25 ring-2 ring-info/25"
+                            : "border-line hover:border-line-2"
                         }`}
                       >
                         <Image
@@ -896,8 +896,8 @@ export default function EventsPage() {
                           unoptimized
                         />
                         {active && (
-                          <span className="absolute inset-0 flex items-center justify-center bg-blue-500/30">
-                            <Check size={16} strokeWidth={2.5} className="text-white" />
+                          <span className="absolute inset-0 flex items-center justify-center bg-info-soft">
+                            <Check size={16} strokeWidth={2.5} className="text-ink" />
                           </span>
                         )}
                       </button>
@@ -905,13 +905,13 @@ export default function EventsPage() {
                   })}
                 </div>
                 {/* Crédit : Unsplash demande d'attribuer la source. */}
-                <p className="mt-2.5 text-[10px] text-white/30">
+                <p className="mt-2.5 text-xs text-ink-3">
                   {t("Photos", "Photos")}{" "}
                   <a
                     href="https://unsplash.com"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="underline underline-offset-2 hover:text-white/60"
+                    className="underline underline-offset-2 hover:text-ink-2"
                   >
                     Unsplash
                   </a>
@@ -923,10 +923,10 @@ export default function EventsPage() {
             {/* Gradient picker (hidden if cover image) */}
             {!form.coverImage && (
               <div>
-                <label className="text-[0.625rem] text-white/30 uppercase tracking-wider block mb-2">{t("Couleur de fond", "Background colour")}</label>
+                <label className="text-xs text-ink-3 block mb-2">{t("Couleur de fond", "Background colour")}</label>
                 <div className="flex flex-wrap gap-2">
                   {GRADIENTS.map((g) => (
-                    <button key={g} onClick={() => setForm({ ...form, gradient: g })} className={`w-7 h-7 rounded-lg bg-gradient-to-br ${g} border-2 transition-all ${form.gradient === g ? "border-blue-400 scale-110" : "border-transparent hover:scale-105"}`} />
+                    <button key={g} onClick={() => setForm({ ...form, gradient: g })} className={`w-7 h-7 rounded-lg bg-gradient-to-br ${g} border-2 transition-all ${form.gradient === g ? "border-info/25 scale-110" : "border-transparent hover:scale-105"}`} />
                   ))}
                 </div>
               </div>
@@ -934,29 +934,29 @@ export default function EventsPage() {
 
             {/* Icon dropdown */}
             <div>
-              <label className="text-[0.625rem] text-white/30 uppercase tracking-wider block mb-2">{t("Icône", "Icon")}</label>
+              <label className="text-xs text-ink-3 block mb-2">{t("Icône", "Icon")}</label>
               <div className="relative">
                 <button
                   onClick={() => setIconDropdownOpen(!iconDropdownOpen)}
-                  className="w-full flex items-center justify-between px-4 py-2.5 bg-white/[0.05] border border-white/[0.1] rounded-xl text-sm text-white hover:border-white/[0.15] transition-colors"
+                  className="w-full flex items-center justify-between px-4 py-2.5 bg-fill border border-line rounded-xl text-sm text-ink hover:border-line-2 transition-colors"
                 >
                   <div className="flex items-center gap-2.5">
-                    {(() => { const Ic = ICONS[form.iconIdx] ?? Sparkles; return <Ic size={16} strokeWidth={1.5} className="text-blue-400" />; })()}
-                    <span className="text-white/70">{pick(locale, ICON_LABELS.fr, ICON_LABELS.en)[form.iconIdx] ?? t("Icône", "Icon")}</span>
+                    {(() => { const Ic = ICONS[form.iconIdx] ?? Sparkles; return <Ic size={16} strokeWidth={1.5} className="text-info" />; })()}
+                    <span className="text-ink-2">{pick(locale, ICON_LABELS.fr, ICON_LABELS.en)[form.iconIdx] ?? t("Icône", "Icon")}</span>
                   </div>
-                  <ChevronDown size={14} strokeWidth={1.5} className="text-white/30" />
+                  <ChevronDown size={14} strokeWidth={1.5} className="text-ink-3" />
                 </button>
                 {iconDropdownOpen && (
                   <>
                     <div className="fixed inset-0 z-30" onClick={() => setIconDropdownOpen(false)} />
-                    <div className="absolute left-0 right-0 top-full mt-1 z-40 backdrop-blur-xl bg-[#1a1a2e] border border-white/15 rounded-xl p-1.5 shadow-xl max-h-[240px] overflow-y-auto scrollbar-thin">
+                    <div className="absolute left-0 right-0 top-full mt-1 z-40 bg-[#1a1a2e] border border-line-2 rounded-xl p-1.5 shadow-xl max-h-[240px] overflow-y-auto scrollbar-thin">
                       {ICONS.map((Ic, idx) => (
                         <button
                           key={idx}
                           onClick={() => { setForm({ ...form, iconIdx: idx }); setIconDropdownOpen(false); }}
-                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all hover:bg-white/10 ${form.iconIdx === idx ? "bg-white/[0.08] text-blue-400" : "text-white/60"}`}
+                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all hover:bg-fill-2 ${form.iconIdx === idx ? "bg-fill-2 text-info" : "text-ink-2"}`}
                         >
-                          <Ic size={16} strokeWidth={1.5} className={form.iconIdx === idx ? "text-blue-400" : "text-white/30"} />
+                          <Ic size={16} strokeWidth={1.5} className={form.iconIdx === idx ? "text-info" : "text-ink-3"} />
                           {pick(locale, ICON_LABELS.fr, ICON_LABELS.en)[idx]}
                         </button>
                       ))}
@@ -969,24 +969,24 @@ export default function EventsPage() {
             {/* Form fields */}
             <div className="space-y-4">
               <div>
-                <label className="text-[0.625rem] text-white/30 uppercase tracking-wider block mb-1.5">{t("Nom *", "Name *")}</label>
+                <label className="text-xs text-ink-3 block mb-1.5">{t("Nom *", "Name *")}</label>
                 <input type="text" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder={t("Ex: Gala de Minuit", "e.g. Midnight Gala")}
-                  className="w-full px-4 py-2.5 bg-white/[0.05] border border-white/[0.1] rounded-xl text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-blue-400/40 transition-colors" />
+                  className="w-full px-4 py-2.5 bg-fill border border-line rounded-xl text-sm text-ink placeholder:text-ink-4 focus:outline-none focus:border-info/25 transition-colors" />
               </div>
 
               <div>
-                <label className="text-[0.625rem] text-white/30 uppercase tracking-wider block mb-1.5">{t("Lieu", "Location")}</label>
+                <label className="text-xs text-ink-3 block mb-1.5">{t("Lieu", "Location")}</label>
                 <input type="text" value={form.venue} onChange={(e) => setForm({ ...form, venue: e.target.value })} placeholder={t("Ex: Maison Dorée", "e.g. Maison Dorée")}
-                  className="w-full px-4 py-2.5 bg-white/[0.05] border border-white/[0.1] rounded-xl text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-blue-400/40 transition-colors" />
+                  className="w-full px-4 py-2.5 bg-fill border border-line rounded-xl text-sm text-ink placeholder:text-ink-4 focus:outline-none focus:border-info/25 transition-colors" />
               </div>
 
               {/* Date - mini calendar */}
               <div>
-                <label className="text-[0.625rem] text-white/30 uppercase tracking-wider block mb-1.5">{t("Date", "Date")}</label>
+                <label className="text-xs text-ink-3 block mb-1.5">{t("Date", "Date")}</label>
                 {form.dateObj && (
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="text-sm font-medium text-white bg-white/[0.06] px-3 py-1 rounded-lg">{formatDateObj(form.dateObj, locale)}</span>
-                    <button onClick={() => setForm({ ...form, dateObj: null })} className="text-white/30 hover:text-red-400 transition-colors"><X size={14} strokeWidth={1.5} /></button>
+                    <span className="text-sm font-medium text-ink bg-fill px-3 py-1 rounded-lg">{formatDateObj(form.dateObj, locale)}</span>
+                    <button onClick={() => setForm({ ...form, dateObj: null })} className="text-ink-3 hover:text-danger transition-colors"><X size={14} strokeWidth={1.5} /></button>
                   </div>
                 )}
                 <MiniCalendar selected={form.dateObj} onSelect={(d) => setForm({ ...form, dateObj: d })} />
@@ -995,22 +995,22 @@ export default function EventsPage() {
               {/* Time dropdowns - Ouverture / Fermeture */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[0.625rem] text-white/30 uppercase tracking-wider block mb-1.5">{t("Ouverture", "Opens")}</label>
+                  <label className="text-xs text-ink-3 block mb-1.5">{t("Ouverture", "Opens")}</label>
                   <div className="relative">
                     <button
                       onClick={() => { setOpenDropdownOpen(!openDropdownOpen); setCloseDropdownOpen(false); }}
-                      className="w-full flex items-center justify-between px-3 py-2.5 bg-white/[0.05] border border-white/[0.1] rounded-xl text-sm text-white hover:border-white/[0.15] transition-colors"
+                      className="w-full flex items-center justify-between px-3 py-2.5 bg-fill border border-line rounded-xl text-sm text-ink hover:border-line-2 transition-colors"
                     >
-                      <span className={form.timeOpen ? "text-white" : "text-white/20"}>{form.timeOpen || "-- : --"}</span>
-                      <ChevronDown size={14} strokeWidth={1.5} className="text-white/30" />
+                      <span className={form.timeOpen ? "text-ink" : "text-ink-4"}>{form.timeOpen || "-- : --"}</span>
+                      <ChevronDown size={14} strokeWidth={1.5} className="text-ink-3" />
                     </button>
                     {openDropdownOpen && (
                       <>
                         <div className="fixed inset-0 z-30" onClick={() => setOpenDropdownOpen(false)} />
-                        <div className="absolute left-0 right-0 top-full mt-1 z-40 backdrop-blur-xl bg-[#1a1a2e] border border-white/15 rounded-xl p-1 shadow-xl max-h-[180px] overflow-y-auto scrollbar-thin">
+                        <div className="absolute left-0 right-0 top-full mt-1 z-40 bg-[#1a1a2e] border border-line-2 rounded-xl p-1 shadow-xl max-h-[180px] overflow-y-auto scrollbar-thin">
                           {HOURS.map((h) => (
                             <button key={h} onClick={() => { setForm({ ...form, timeOpen: h }); setOpenDropdownOpen(false); }}
-                              className={`w-full text-left px-3 py-1.5 rounded-lg text-sm transition-all hover:bg-white/10 ${form.timeOpen === h ? "bg-white/[0.08] text-blue-400" : "text-white/60"}`}>
+                              className={`w-full text-left px-3 py-1.5 rounded-lg text-sm transition-all hover:bg-fill-2 ${form.timeOpen === h ? "bg-fill-2 text-info" : "text-ink-2"}`}>
                               {h}
                             </button>
                           ))}
@@ -1020,22 +1020,22 @@ export default function EventsPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="text-[0.625rem] text-white/30 uppercase tracking-wider block mb-1.5">{t("Fermeture", "Closes")}</label>
+                  <label className="text-xs text-ink-3 block mb-1.5">{t("Fermeture", "Closes")}</label>
                   <div className="relative">
                     <button
                       onClick={() => { setCloseDropdownOpen(!closeDropdownOpen); setOpenDropdownOpen(false); }}
-                      className="w-full flex items-center justify-between px-3 py-2.5 bg-white/[0.05] border border-white/[0.1] rounded-xl text-sm text-white hover:border-white/[0.15] transition-colors"
+                      className="w-full flex items-center justify-between px-3 py-2.5 bg-fill border border-line rounded-xl text-sm text-ink hover:border-line-2 transition-colors"
                     >
-                      <span className={form.timeClose ? "text-white" : "text-white/20"}>{form.timeClose || "-- : --"}</span>
-                      <ChevronDown size={14} strokeWidth={1.5} className="text-white/30" />
+                      <span className={form.timeClose ? "text-ink" : "text-ink-4"}>{form.timeClose || "-- : --"}</span>
+                      <ChevronDown size={14} strokeWidth={1.5} className="text-ink-3" />
                     </button>
                     {closeDropdownOpen && (
                       <>
                         <div className="fixed inset-0 z-30" onClick={() => setCloseDropdownOpen(false)} />
-                        <div className="absolute left-0 right-0 top-full mt-1 z-40 backdrop-blur-xl bg-[#1a1a2e] border border-white/15 rounded-xl p-1 shadow-xl max-h-[180px] overflow-y-auto scrollbar-thin">
+                        <div className="absolute left-0 right-0 top-full mt-1 z-40 bg-[#1a1a2e] border border-line-2 rounded-xl p-1 shadow-xl max-h-[180px] overflow-y-auto scrollbar-thin">
                           {HOURS.map((h) => (
                             <button key={h} onClick={() => { setForm({ ...form, timeClose: h }); setCloseDropdownOpen(false); }}
-                              className={`w-full text-left px-3 py-1.5 rounded-lg text-sm transition-all hover:bg-white/10 ${form.timeClose === h ? "bg-white/[0.08] text-blue-400" : "text-white/60"}`}>
+                              className={`w-full text-left px-3 py-1.5 rounded-lg text-sm transition-all hover:bg-fill-2 ${form.timeClose === h ? "bg-fill-2 text-info" : "text-ink-2"}`}>
                               {h}
                             </button>
                           ))}
@@ -1048,15 +1048,15 @@ export default function EventsPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[0.625rem] text-white/30 uppercase tracking-wider block mb-1.5">{t("Statut", "Status")}</label>
+                  <label className="text-xs text-ink-3 block mb-1.5">{t("Statut", "Status")}</label>
                   {/* Les quatre statuts du cycle de vie, plus seulement deux */}
                   <div className="grid grid-cols-2 gap-2">
                     {(
                       [
-                        ["Brouillon", "bg-blue-400/15 border-blue-400/30 text-blue-400"],
-                        ["Ouvert", "bg-green-400/15 border-green-400/30 text-green-400"],
-                        ["Bientôt complet", "bg-amber-400/15 border-amber-400/30 text-amber-400"],
-                        ["Fermé", "bg-white/15 border-white/25 text-white/70"],
+                        ["Brouillon", "bg-info-soft border-info/25 text-info"],
+                        ["Ouvert", "bg-ok-soft border-ok/25 text-ok"],
+                        ["Bientôt complet", "bg-warn-soft border-warn/25 text-warn"],
+                        ["Fermé", "bg-fill-3 border-line-2 text-ink-2"],
                       ] as const
                     ).map(([st, activeCls]) => (
                       <button
@@ -1065,7 +1065,7 @@ export default function EventsPage() {
                         className={`px-3 py-2.5 rounded-xl text-xs font-medium border transition-all whitespace-nowrap ${
                           form.status === st
                             ? activeCls
-                            : "bg-white/[0.04] border-white/[0.08] text-white/30 hover:text-white/50"
+                            : "bg-fill border-line text-ink-3 hover:text-ink-3"
                         }`}
                       >
                         {statusLabel(st, t)}
@@ -1074,31 +1074,31 @@ export default function EventsPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="text-[0.625rem] text-white/30 uppercase tracking-wider block mb-1.5">{t("Capacité", "Capacity")}</label>
+                  <label className="text-xs text-ink-3 block mb-1.5">{t("Capacité", "Capacity")}</label>
                   <input type="number" value={form.totalSpots} onChange={(e) => setForm({ ...form, totalSpots: parseInt(e.target.value) || 0 })}
-                    className="w-full px-4 py-2.5 bg-white/[0.05] border border-white/[0.1] rounded-xl text-sm text-white focus:outline-none focus:border-blue-400/40 transition-colors" />
+                    className="w-full px-4 py-2.5 bg-fill border border-line rounded-xl text-sm text-ink focus:outline-none focus:border-info/25 transition-colors" />
                 </div>
               </div>
 
               <div>
-                <label className="text-[0.625rem] text-white/30 uppercase tracking-wider block mb-1.5">{t("Genres (virgule)", "Genres (comma-separated)")}</label>
+                <label className="text-xs text-ink-3 block mb-1.5">{t("Genres (virgule)", "Genres (comma-separated)")}</label>
                 <input type="text" value={form.genre} onChange={(e) => setForm({ ...form, genre: e.target.value })} placeholder={t("Ex: Electro, House", "e.g. Electro, House")}
-                  className="w-full px-4 py-2.5 bg-white/[0.05] border border-white/[0.1] rounded-xl text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-blue-400/40 transition-colors" />
+                  className="w-full px-4 py-2.5 bg-fill border border-line rounded-xl text-sm text-ink placeholder:text-ink-4 focus:outline-none focus:border-info/25 transition-colors" />
               </div>
 
               <div>
-                <label className="text-[0.625rem] text-white/30 uppercase tracking-wider block mb-1.5">{t("Description", "Description")}</label>
+                <label className="text-xs text-ink-3 block mb-1.5">{t("Description", "Description")}</label>
                 <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder={t("Décrivez votre événement...", "Describe your event...")} rows={3}
-                  className="w-full px-4 py-2.5 bg-white/[0.05] border border-white/[0.1] rounded-xl text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-blue-400/40 transition-colors resize-none" />
+                  className="w-full px-4 py-2.5 bg-fill border border-line rounded-xl text-sm text-ink placeholder:text-ink-4 focus:outline-none focus:border-info/25 transition-colors resize-none" />
               </div>
             </div>
 
             {/* Actions */}
             <div className="flex items-center gap-3 pt-2 pb-6">
-              <button onClick={closePanel} className="flex-1 px-4 py-2.5 bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.1] rounded-xl text-sm font-medium text-white/50 hover:text-white transition-all">
+              <button onClick={closePanel} className="flex-1 px-4 py-2.5 bg-fill hover:bg-fill-2 border border-line rounded-xl text-sm font-medium text-ink-3 hover:text-ink transition-all">
                 {t("Annuler", "Cancel")}
               </button>
-              <button onClick={saveForm} disabled={!form.title.trim()} className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-500 hover:bg-blue-400 disabled:opacity-30 disabled:hover:bg-blue-500 text-white rounded-xl text-sm font-medium transition-all shadow-[0_0_20px_rgba(96,165,250,0.2)]">
+              <button onClick={saveForm} disabled={!form.title.trim()} className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-link hover:bg-link-strong disabled:opacity-30 disabled:hover:bg-blue-500 text-white rounded-xl text-sm font-medium transition-all shadow-[0_0_20px_rgba(96,165,250,0.2)]">
                 <Save size={15} strokeWidth={1.5} />
                 {isEdit ? t("Enregistrer", "Save") : t("Créer", "Create")}
               </button>
@@ -1114,21 +1114,21 @@ export default function EventsPage() {
   return (
     <div className="space-y-6">
       {/* ── Header ── */}
-      <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-6">
+      <div className=" bg-panel border border-line rounded-3xl p-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-white">{t("Événements", "Events")}</h1>
-            <p className="text-white/50 text-sm mt-1">{t("Gérez et planifiez vos événements", "Manage and plan your events")}</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-ink">{t("Événements", "Events")}</h1>
+            <p className="text-ink-3 text-sm mt-1">{t("Gérez et planifiez vos événements", "Manage and plan your events")}</p>
           </div>
           <div className="flex items-center gap-3">
-            <div className="flex rounded-xl overflow-hidden border border-white/[0.12]">
+            <div className="flex rounded-xl overflow-hidden border border-line">
               {viewButtons.map(({ mode, icon: Icon, label }) => (
-                <button key={mode} onClick={() => setViewMode(mode)} className={`flex items-center gap-1.5 text-xs font-medium px-3 py-2 transition-all ${viewMode === mode ? "bg-blue-500 text-white" : "bg-white/[0.05] text-white/40 hover:text-white hover:bg-white/[0.08]"}`}>
+                <button key={mode} onClick={() => setViewMode(mode)} className={`flex items-center gap-1.5 text-xs font-medium px-3 py-2 transition-all ${viewMode === mode ? "bg-link text-white" : "bg-fill text-ink-3 hover:text-white hover:bg-fill-2"}`}>
                   <Icon size={14} strokeWidth={1.5} /><span className="hidden sm:inline">{label}</span>
                 </button>
               ))}
             </div>
-            <button onClick={openCreate} className="flex items-center gap-2 px-4 py-2.5 bg-blue-500 hover:bg-blue-400 text-white rounded-xl text-sm font-medium transition-all shadow-[0_0_20px_rgba(96,165,250,0.2)] hover:shadow-[0_0_30px_rgba(96,165,250,0.3)]">
+            <button onClick={openCreate} className="flex items-center gap-2 px-4 py-2.5 bg-link hover:bg-link-strong text-white rounded-xl text-sm font-medium transition-all shadow-[0_0_20px_rgba(96,165,250,0.2)] hover:shadow-[0_0_30px_rgba(96,165,250,0.3)]">
               <Plus size={16} strokeWidth={2} /> {t("Créer", "Create")}
             </button>
           </div>
@@ -1138,21 +1138,21 @@ export default function EventsPage() {
       {/* ── Stats strip ── */}
       {displayEvents.length > 0 && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl p-4">
-            <p className="text-white/40 text-xs">{t("Événements actifs", "Active events")}</p>
-            <p className="text-xl font-bold text-white mt-1 font-ui">{activeEvents}</p>
+          <div className=" bg-panel border border-line rounded-2xl p-4">
+            <p className="text-ink-3 text-xs">{t("Événements actifs", "Active events")}</p>
+            <p className="text-xl font-bold text-ink mt-1 font-ui">{activeEvents}</p>
           </div>
-          <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl p-4">
-            <p className="text-white/40 text-xs">{t("Réservations totales", "Total reservations")}</p>
-            <p className="text-xl font-bold text-blue-400 mt-1 font-ui">{totalReservations}</p>
+          <div className=" bg-panel border border-line rounded-2xl p-4">
+            <p className="text-ink-3 text-xs">{t("Réservations totales", "Total reservations")}</p>
+            <p className="text-xl font-bold text-info mt-1 font-ui">{totalReservations}</p>
           </div>
-          <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl p-4">
-            <p className="text-white/40 text-xs">{t("RP mobilisés", "PRs involved")}</p>
-            <p className="text-xl font-bold text-white mt-1 font-ui">{totalRp}</p>
+          <div className=" bg-panel border border-line rounded-2xl p-4">
+            <p className="text-ink-3 text-xs">{t("RP mobilisés", "PRs involved")}</p>
+            <p className="text-xl font-bold text-ink mt-1 font-ui">{totalRp}</p>
           </div>
-          <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-2xl p-4">
-            <p className="text-white/40 text-xs">{t("Taux de remplissage moy.", "Avg. fill rate")}</p>
-            <p className="text-xl font-bold text-green-400 mt-1 font-ui">{avgFill}%</p>
+          <div className=" bg-panel border border-line rounded-2xl p-4">
+            <p className="text-ink-3 text-xs">{t("Taux de remplissage moy.", "Avg. fill rate")}</p>
+            <p className="text-xl font-bold text-ok mt-1 font-ui">{avgFill}%</p>
           </div>
         </div>
       )}
@@ -1160,55 +1160,55 @@ export default function EventsPage() {
       {/* ── Filters ── */}
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative flex-1 min-w-[200px] max-w-sm">
-          <Search size={15} strokeWidth={1.5} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
+          <Search size={15} strokeWidth={1.5} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-3" />
           <input type="text" placeholder={t("Rechercher un événement...", "Search events...")} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-xl text-sm text-white placeholder:text-white/25 focus:outline-none focus:border-blue-400/40 transition-colors" />
+            className="w-full pl-9 pr-4 py-2.5 bg-panel border border-line rounded-xl text-sm text-ink placeholder:text-ink-4 focus:outline-none focus:border-info/25 transition-colors" />
         </div>
         <div className="relative">
-          <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="appearance-none pl-4 pr-9 py-2.5 backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-xl text-sm text-white/70 focus:outline-none focus:border-blue-400/40 transition-colors cursor-pointer">
+          <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="appearance-none pl-4 pr-9 py-2.5 bg-panel border border-line rounded-xl text-sm text-ink-2 focus:outline-none focus:border-info/25 transition-colors cursor-pointer">
             <option value="" className="bg-[#1a1a2e]">{t("Tous les statuts", "All statuses")}</option>
             <option value="Ouvert" className="bg-[#1a1a2e]">{t("Ouvert", "Open")}</option>
             <option value="Fermé" className="bg-[#1a1a2e]">{t("Fermé", "Closed")}</option>
             <option value="Brouillon" className="bg-[#1a1a2e]">{t("Brouillon", "Draft")}</option>
           </select>
-          <ChevronDown size={13} strokeWidth={1.5} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none" />
+          <ChevronDown size={13} strokeWidth={1.5} className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-3 pointer-events-none" />
         </div>
       </div>
 
       {/* ── Content ── */}
       {filteredEvents.length === 0 && viewMode !== "calendar" ? (
-        <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl p-12 text-center">
-          <Ticket size={36} strokeWidth={1} className="mx-auto text-white/15 mb-3" />
-          <p className="text-sm text-white/30">{t("Aucun événement trouvé", "No events found")}</p>
+        <div className=" bg-panel border border-line rounded-3xl p-12 text-center">
+          <Ticket size={36} strokeWidth={1} className="mx-auto text-ink-4 mb-3" />
+          <p className="text-sm text-ink-3">{t("Aucun événement trouvé", "No events found")}</p>
         </div>
       ) : viewMode === "calendar" ? (
         /* ── Calendar view ── */
-        <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.08]">
-            <button onClick={() => { if (calMonth === 0) { setCalMonth(11); setCalYear(calYear - 1); } else setCalMonth(calMonth - 1); }} className="p-2 rounded-xl text-white/40 hover:text-white hover:bg-white/[0.08] transition-all">
+        <div className=" bg-panel border border-line rounded-3xl overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-line">
+            <button onClick={() => { if (calMonth === 0) { setCalMonth(11); setCalYear(calYear - 1); } else setCalMonth(calMonth - 1); }} className="p-2 rounded-xl text-ink-3 hover:text-ink hover:bg-fill-2 transition-all">
               <ChevronLeft size={18} strokeWidth={1.5} />
             </button>
-            <h2 className="text-lg font-semibold text-white">{pick(locale, MONTH_NAMES.fr, MONTH_NAMES.en)[calMonth]} {calYear}</h2>
-            <button onClick={() => { if (calMonth === 11) { setCalMonth(0); setCalYear(calYear + 1); } else setCalMonth(calMonth + 1); }} className="p-2 rounded-xl text-white/40 hover:text-white hover:bg-white/[0.08] transition-all">
+            <h2 className="text-lg font-semibold text-ink">{pick(locale, MONTH_NAMES.fr, MONTH_NAMES.en)[calMonth]} {calYear}</h2>
+            <button onClick={() => { if (calMonth === 11) { setCalMonth(0); setCalYear(calYear + 1); } else setCalMonth(calMonth + 1); }} className="p-2 rounded-xl text-ink-3 hover:text-ink hover:bg-fill-2 transition-all">
               <ChevronRight size={18} strokeWidth={1.5} />
             </button>
           </div>
-          <div className="grid grid-cols-7 border-b border-white/[0.06]">
+          <div className="grid grid-cols-7 border-b border-line">
             {pick(locale, DAY_NAMES.fr, DAY_NAMES.en).map((d, i) => (
-              <div key={i} className="px-2 py-2.5 text-center text-[0.6875rem] text-white/25 uppercase tracking-wider font-semibold">{d}</div>
+              <div key={i} className="px-2 py-2.5 text-center text-xs text-ink-3 font-semibold">{d}</div>
             ))}
           </div>
           <div className="grid grid-cols-7">
             {calendarDays.map((day, idx) => {
               const dayEvents = day ? eventsOnDay(day) : [];
               return (
-                <div key={idx} className={`min-h-[100px] md:min-h-[120px] border-b border-r border-white/[0.04] p-1.5 ${day ? "hover:bg-white/[0.02]" : "bg-white/[0.01]"} transition-colors`}>
+                <div key={idx} className={`min-h-[100px] md:min-h-[120px] border-b border-r border-line p-1.5 ${day ? "hover:bg-fill" : "bg-fill"} transition-colors`}>
                   {day && (
                     <>
-                      <p className={`text-xs font-medium mb-1 px-1 ${dayEvents.length > 0 ? "text-white/70" : "text-white/20"}`}>{day}</p>
+                      <p className={`text-xs font-medium mb-1 px-1 ${dayEvents.length > 0 ? "text-ink-2" : "text-ink-4"}`}>{day}</p>
                       <div className="space-y-1">
                         {dayEvents.map((ev) => (
-                          <button key={ev.id} onClick={() => openView(ev.id)} className={`w-full text-left px-1.5 py-1 rounded-lg bg-gradient-to-r ${ev.gradient} text-[0.5625rem] font-medium text-white/90 truncate hover:opacity-80 transition-opacity`}>
+                          <button key={ev.id} onClick={() => openView(ev.id)} className={`w-full text-left px-1.5 py-1 rounded-lg bg-gradient-to-r ${ev.gradient} text-xs font-medium text-ink truncate hover:opacity-80 transition-opacity`}>
                             {ev.title}
                           </button>
                         ))}
@@ -1222,8 +1222,8 @@ export default function EventsPage() {
         </div>
       ) : viewMode === "list" ? (
         /* ── List view ── */
-        <div className="backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl overflow-hidden">
-          <div className="grid grid-cols-12 gap-4 px-5 py-3 border-b border-white/[0.08] text-[0.6875rem] text-white/30 uppercase tracking-wider font-semibold">
+        <div className=" bg-panel border border-line rounded-3xl overflow-hidden">
+          <div className="grid grid-cols-12 gap-4 px-5 py-3 border-b border-line text-xs text-ink-3 font-semibold">
             <div className="col-span-4">{t("Événement", "Event")}</div>
             <div className="col-span-2 hidden md:block">{t("Date & Heure", "Date & time")}</div>
             <div className="col-span-1 hidden lg:block text-center">{t("RP", "PR")}</div>
@@ -1236,46 +1236,46 @@ export default function EventsPage() {
             const fillPercent = event.totalSpots > 0 ? Math.round(((event.totalSpots - event.spots) / event.totalSpots) * 100) : 0;
             const Icon = ICONS[event.iconIdx] ?? Sparkles;
             return (
-              <div key={event.id} className={`grid grid-cols-12 gap-4 px-5 py-4 border-b border-white/[0.05] hover:bg-white/[0.03] transition-colors items-center ${event.closed ? "opacity-50" : ""}`}>
+              <div key={event.id} className={`grid grid-cols-12 gap-4 px-5 py-4 border-b border-line hover:bg-fill transition-colors items-center ${event.closed ? "opacity-50" : ""}`}>
                 <div className="col-span-4 flex items-center gap-3 min-w-0">
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 cursor-pointer overflow-hidden relative ${!event.coverImage ? `bg-gradient-to-br ${event.gradient}` : ""}`} onClick={() => openView(event.id)}>
-                    {event.coverImage ? <Image src={event.coverImage} alt="" fill className="object-cover" unoptimized /> : <Icon size={18} strokeWidth={1.5} className="text-white/70" />}
+                    {event.coverImage ? <Image src={event.coverImage} alt="" fill className="object-cover" unoptimized /> : <Icon size={18} strokeWidth={1.5} className="text-ink-2" />}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-white truncate font-ui cursor-pointer hover:text-blue-400 transition-colors" onClick={() => openView(event.id)}>{event.title}</p>
-                    <p className="text-[0.6875rem] text-white/35 flex items-center gap-1 truncate"><MapPin size={10} strokeWidth={1.5} />{event.venue}</p>
+                    <p className="text-sm font-medium text-ink truncate font-ui cursor-pointer hover:text-info transition-colors" onClick={() => openView(event.id)}>{event.title}</p>
+                    <p className="text-xs text-ink-3 flex items-center gap-1 truncate"><MapPin size={10} strokeWidth={1.5} />{event.venue}</p>
                   </div>
                 </div>
-                <div className="col-span-2 hidden md:flex items-center gap-1.5 text-xs text-white/50">
-                  <Clock size={12} strokeWidth={1.5} className="text-white/25" />
-                  <div><p>{dateLabel(event)}</p><p className="text-white/25">{event.time}</p></div>
+                <div className="col-span-2 hidden md:flex items-center gap-1.5 text-xs text-ink-3">
+                  <Clock size={12} strokeWidth={1.5} className="text-ink-3" />
+                  <div><p>{dateLabel(event)}</p><p className="text-ink-3">{event.time}</p></div>
                 </div>
-                <div className="col-span-1 hidden lg:flex items-center justify-center"><span className="text-sm text-white/60 font-medium">{event.rpCount}</span></div>
+                <div className="col-span-1 hidden lg:flex items-center justify-center"><span className="text-sm text-ink-2 font-medium">{event.rpCount}</span></div>
                 <div className="col-span-2 hidden md:block">
                   <div className="flex items-center gap-2">
-                    <div className="flex-1 h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
-                      <div className={`h-full rounded-full transition-all ${fillPercent >= 90 ? "bg-amber-400" : fillPercent >= 50 ? "bg-blue-400" : "bg-white/20"}`} style={{ width: `${fillPercent}%` }} />
+                    <div className="flex-1 h-1.5 bg-fill rounded-full overflow-hidden">
+                      <div className={`h-full rounded-full transition-all ${fillPercent >= 90 ? "bg-warn" : fillPercent >= 50 ? "bg-link" : "bg-fill-3"}`} style={{ width: `${fillPercent}%` }} />
                     </div>
-                    <span className="text-xs text-white/40 w-8 text-right">{fillPercent}%</span>
+                    <span className="text-xs text-ink-3 w-8 text-right">{fillPercent}%</span>
                   </div>
-                  <p className="text-[0.625rem] text-white/25 mt-0.5">{event.reservations}/{event.totalSpots}</p>
+                  <p className="text-xs text-ink-3 mt-0.5">{event.reservations}/{event.totalSpots}</p>
                 </div>
-                <div className="col-span-1 hidden lg:block text-right"><p className="text-sm font-medium text-white/60">{event.revenue}</p></div>
+                <div className="col-span-1 hidden lg:block text-right"><p className="text-sm font-medium text-ink-2">{event.revenue}</p></div>
                 <div className="col-span-1 flex justify-center">
-                  <span className={`text-[0.625rem] font-semibold px-2 py-0.5 rounded-full ${statusBadge(event.status)}`}>{statusLabel(event.status, t)}</span>
+                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${statusBadge(event.status)}`}>{statusLabel(event.status, t)}</span>
                 </div>
                 <div className="col-span-1 flex justify-end relative">
-                  <button onClick={() => setOpenMenu(openMenu === event.id ? null : event.id)} className="p-1.5 rounded-lg text-white/30 hover:text-white hover:bg-white/[0.08] transition-all">
+                  <button onClick={() => setOpenMenu(openMenu === event.id ? null : event.id)} className="p-1.5 rounded-lg text-ink-3 hover:text-ink hover:bg-fill-2 transition-all">
                     <MoreVertical size={16} strokeWidth={1.5} />
                   </button>
                   {openMenu === event.id && (
                     <>
                       <div className="fixed inset-0 z-30" onClick={() => setOpenMenu(null)} />
-                      <div className="absolute right-0 top-full mt-1 z-40 backdrop-blur-xl bg-[#1a1a2e] border border-white/15 rounded-xl p-1 shadow-xl min-w-[160px]">
-                        <button onClick={() => openView(event.id)} className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-white/70 hover:bg-white/10 hover:text-white transition-all"><Eye size={13} strokeWidth={1.5} />{t("Voir détails", "View details")}</button>
-                        <button onClick={() => openEdit(event.id)} className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-white/70 hover:bg-white/10 hover:text-white transition-all"><Pencil size={13} strokeWidth={1.5} />{t("Modifier", "Edit")}</button>
-                        <button onClick={() => duplicateEvent(event.id)} className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-white/70 hover:bg-white/10 hover:text-white transition-all"><Copy size={13} strokeWidth={1.5} />{t("Dupliquer", "Duplicate")}</button>
-                        <button onClick={() => deleteEvent(event.id)} className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-red-400/70 hover:bg-red-400/10 hover:text-red-400 transition-all"><Trash2 size={13} strokeWidth={1.5} />{t("Supprimer", "Delete")}</button>
+                      <div className="absolute right-0 top-full mt-1 z-40 bg-[#1a1a2e] border border-line-2 rounded-xl p-1 shadow-xl min-w-[160px]">
+                        <button onClick={() => openView(event.id)} className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-ink-2 hover:bg-fill-2 hover:text-ink transition-all"><Eye size={13} strokeWidth={1.5} />{t("Voir détails", "View details")}</button>
+                        <button onClick={() => openEdit(event.id)} className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-ink-2 hover:bg-fill-2 hover:text-ink transition-all"><Pencil size={13} strokeWidth={1.5} />{t("Modifier", "Edit")}</button>
+                        <button onClick={() => duplicateEvent(event.id)} className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-ink-2 hover:bg-fill-2 hover:text-ink transition-all"><Copy size={13} strokeWidth={1.5} />{t("Dupliquer", "Duplicate")}</button>
+                        <button onClick={() => deleteEvent(event.id)} className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-danger hover:bg-danger-soft hover:text-danger transition-all"><Trash2 size={13} strokeWidth={1.5} />{t("Supprimer", "Delete")}</button>
                       </div>
                     </>
                   )}
@@ -1291,8 +1291,8 @@ export default function EventsPage() {
             const fillPercent = event.totalSpots > 0 ? Math.round(((event.totalSpots - event.spots) / event.totalSpots) * 100) : 0;
             const Icon = ICONS[event.iconIdx] ?? Sparkles;
             return (
-              <div key={event.id} className={`group backdrop-blur-2xl bg-black/45 border border-white/[0.12] rounded-3xl overflow-hidden hover:bg-white/[0.09] transition-all duration-300 ${event.closed ? "opacity-50" : ""}`}>
-                <div className={`relative h-32 overflow-hidden cursor-pointer ${!event.coverImage ? `bg-gradient-to-br ${event.gradient}` : ""}`} onClick={() => openView(event.id)}>
+              <div key={event.id} className={`group bg-panel border border-line rounded-3xl overflow-hidden hover:bg-fill-2 transition-all duration-300 ${event.closed ? "opacity-50" : ""}`}>
+                <div className={`tc-dark relative h-32 overflow-hidden cursor-pointer ${!event.coverImage ? `bg-gradient-to-br ${event.gradient}` : ""}`} onClick={() => openView(event.id)}>
                   {event.coverImage ? (
                     <>
                       <Image src={event.coverImage} alt={event.title} fill className="object-cover group-hover:scale-105 transition-transform duration-300" unoptimized />
@@ -1300,55 +1300,55 @@ export default function EventsPage() {
                     </>
                   ) : (
                     <div className="absolute inset-0">
-                      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-32 h-32 rounded-full bg-white/5 blur-2xl" />
-                      <Icon size={80} strokeWidth={0.5} className="absolute bottom-2 right-4 text-white/[0.08]" />
+                      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-32 h-32 rounded-full bg-fill blur-2xl" />
+                      <Icon size={80} strokeWidth={0.5} className="absolute bottom-2 right-4 text-ink-4" />
                     </div>
                   )}
-                  <div className="absolute top-3 right-3"><span className={`text-[0.625rem] font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm ${statusBadge(event.status)}`}>{statusLabel(event.status, t)}</span></div>
+                  <div className="absolute top-3 right-3"><span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${statusBadge(event.status)}`}>{statusLabel(event.status, t)}</span></div>
                   <div className="absolute bottom-3 left-3 flex gap-1.5">
-                    {event.genre.map((g) => (<span key={g} className="text-[0.5625rem] font-medium bg-black/30 backdrop-blur-sm text-white/80 px-2 py-0.5 rounded-full">{g}</span>))}
+                    {event.genre.map((g) => (<span key={g} className="text-xs font-medium bg-panel text-ink px-2 py-0.5 rounded-full">{g}</span>))}
                   </div>
                 </div>
                 <div className="p-5 space-y-4">
                   <div>
-                    <h3 className="text-base font-bold text-white cursor-pointer hover:text-blue-400 transition-colors" onClick={() => openView(event.id)}>{event.title}</h3>
-                    <p className="text-[0.6875rem] text-white/40 flex items-center gap-1 mt-1"><MapPin size={11} strokeWidth={1.5} />{event.venue}</p>
+                    <h3 className="text-base font-bold text-ink cursor-pointer hover:text-info transition-colors" onClick={() => openView(event.id)}>{event.title}</h3>
+                    <p className="text-xs text-ink-3 flex items-center gap-1 mt-1"><MapPin size={11} strokeWidth={1.5} />{event.venue}</p>
                   </div>
-                  <div className="flex items-center gap-3 text-xs text-white/50">
-                    <span className="flex items-center gap-1"><Clock size={12} strokeWidth={1.5} className="text-white/25" />{dateLabel(event)}</span>
-                    <span className="text-white/15">·</span><span>{event.time}</span>
+                  <div className="flex items-center gap-3 text-xs text-ink-3">
+                    <span className="flex items-center gap-1"><Clock size={12} strokeWidth={1.5} className="text-ink-3" />{dateLabel(event)}</span>
+                    <span className="text-ink-4">·</span><span>{event.time}</span>
                   </div>
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-[0.625rem] text-white/30 uppercase tracking-wider">{t("Remplissage", "Fill rate")}</span>
-                      <span className="text-xs text-white/50 font-medium">{fillPercent}%</span>
+                      <span className="text-xs text-ink-3">{t("Remplissage", "Fill rate")}</span>
+                      <span className="text-xs text-ink-3 font-medium">{fillPercent}%</span>
                     </div>
-                    <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
-                      <div className={`h-full rounded-full transition-all duration-500 ${fillPercent >= 90 ? "bg-amber-400" : fillPercent >= 50 ? "bg-blue-400" : "bg-white/20"}`} style={{ width: `${fillPercent}%` }} />
+                    <div className="h-1.5 bg-fill rounded-full overflow-hidden">
+                      <div className={`h-full rounded-full transition-all duration-500 ${fillPercent >= 90 ? "bg-warn" : fillPercent >= 50 ? "bg-link" : "bg-fill-3"}`} style={{ width: `${fillPercent}%` }} />
                     </div>
-                    <p className="text-[0.625rem] text-white/20 mt-1">{t(
+                    <p className="text-xs text-ink-4 mt-1">{t(
                       `${event.reservations}/${event.totalSpots} places réservées`,
                       `${event.reservations}/${event.totalSpots} spots booked`
                     )}</p>
                   </div>
                   <div className="grid grid-cols-3 gap-3">
-                    <div className="bg-white/[0.04] rounded-xl p-2.5 text-center"><p className="text-[0.5625rem] text-white/25 uppercase tracking-wider">{t("Résa", "Bookings")}</p><p className="text-sm font-semibold text-white mt-0.5">{event.reservations}</p></div>
-                    <div className="bg-white/[0.04] rounded-xl p-2.5 text-center"><p className="text-[0.5625rem] text-white/25 uppercase tracking-wider">{t("RP", "PR")}</p><p className="text-sm font-semibold text-white mt-0.5">{event.rpCount}</p></div>
-                    <div className="bg-white/[0.04] rounded-xl p-2.5 text-center"><p className="text-[0.5625rem] text-white/25 uppercase tracking-wider">{t("CA", "Revenue")}</p><p className="text-[0.6875rem] font-semibold text-white mt-0.5 truncate">{event.revenue}</p></div>
+                    <div className="bg-fill rounded-xl p-2.5 text-center"><p className="text-xs text-ink-3">{t("Résa", "Bookings")}</p><p className="text-sm font-semibold text-ink mt-0.5">{event.reservations}</p></div>
+                    <div className="bg-fill rounded-xl p-2.5 text-center"><p className="text-xs text-ink-3">{t("RP", "PR")}</p><p className="text-sm font-semibold text-ink mt-0.5">{event.rpCount}</p></div>
+                    <div className="bg-fill rounded-xl p-2.5 text-center"><p className="text-xs text-ink-3">{t("CA", "Revenue")}</p><p className="text-xs font-semibold text-ink mt-0.5 truncate">{event.revenue}</p></div>
                   </div>
                   <div className="flex items-center gap-2 pt-1">
-                    <button onClick={() => openView(event.id)} className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.08] rounded-xl text-xs font-medium text-white/60 hover:text-white transition-all"><Eye size={13} strokeWidth={1.5} />{t("Voir", "View")}</button>
-                    <button onClick={() => openEdit(event.id)} className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-blue-500/15 hover:bg-blue-500/25 border border-blue-400/20 rounded-xl text-xs font-medium text-blue-400 transition-all"><Pencil size={13} strokeWidth={1.5} />{t("Modifier", "Edit")}</button>
+                    <button onClick={() => openView(event.id)} className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-fill hover:bg-fill-2 border border-line rounded-xl text-xs font-medium text-ink-2 hover:text-ink transition-all"><Eye size={13} strokeWidth={1.5} />{t("Voir", "View")}</button>
+                    <button onClick={() => openEdit(event.id)} className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-info-soft hover:bg-info-soft border border-info/25 rounded-xl text-xs font-medium text-info transition-all"><Pencil size={13} strokeWidth={1.5} />{t("Modifier", "Edit")}</button>
                     <div className="relative">
-                      <button onClick={() => setOpenMenu(openMenu === event.id ? null : event.id)} className="p-2 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] rounded-xl text-white/30 hover:text-white transition-all">
+                      <button onClick={() => setOpenMenu(openMenu === event.id ? null : event.id)} className="p-2 bg-fill hover:bg-fill-2 border border-line rounded-xl text-ink-3 hover:text-ink transition-all">
                         <MoreVertical size={14} strokeWidth={1.5} />
                       </button>
                       {openMenu === event.id && (
                         <>
                           <div className="fixed inset-0 z-30" onClick={() => setOpenMenu(null)} />
-                          <div className="absolute right-0 bottom-full mb-1 z-40 backdrop-blur-xl bg-[#1a1a2e] border border-white/15 rounded-xl p-1 shadow-xl min-w-[160px]">
-                            <button onClick={() => duplicateEvent(event.id)} className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-white/70 hover:bg-white/10 hover:text-white transition-all"><Copy size={13} strokeWidth={1.5} />{t("Dupliquer", "Duplicate")}</button>
-                            <button onClick={() => deleteEvent(event.id)} className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-red-400/70 hover:bg-red-400/10 hover:text-red-400 transition-all"><Trash2 size={13} strokeWidth={1.5} />{t("Supprimer", "Delete")}</button>
+                          <div className="absolute right-0 bottom-full mb-1 z-40 bg-[#1a1a2e] border border-line-2 rounded-xl p-1 shadow-xl min-w-[160px]">
+                            <button onClick={() => duplicateEvent(event.id)} className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-ink-2 hover:bg-fill-2 hover:text-ink transition-all"><Copy size={13} strokeWidth={1.5} />{t("Dupliquer", "Duplicate")}</button>
+                            <button onClick={() => deleteEvent(event.id)} className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-danger hover:bg-danger-soft hover:text-danger transition-all"><Trash2 size={13} strokeWidth={1.5} />{t("Supprimer", "Delete")}</button>
                           </div>
                         </>
                       )}
@@ -1363,7 +1363,7 @@ export default function EventsPage() {
 
       {filteredEvents.length > 0 && viewMode !== "calendar" && (
         <div className="flex items-center justify-between px-1">
-          <p className="text-xs text-white/25">
+          <p className="text-xs text-ink-3">
             {t(
               `${filteredEvents.length} sur ${displayEvents.length} événements`,
               `${filteredEvents.length} of ${displayEvents.length} event${displayEvents.length === 1 ? "" : "s"}`
@@ -1375,7 +1375,7 @@ export default function EventsPage() {
       {renderPanel()}
 
       {toast && (
-        <div className="fixed bottom-6 right-6 z-[60] backdrop-blur-xl bg-white/15 border border-white/20 text-white px-5 py-3 rounded-xl shadow-xl">
+        <div className="fixed bottom-6 right-6 z-[60] bg-fill-3 border border-line-2 text-ink px-5 py-3 rounded-xl shadow-xl">
           <span className="text-sm font-medium">{toast}</span>
         </div>
       )}

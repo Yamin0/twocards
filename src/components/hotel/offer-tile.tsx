@@ -37,21 +37,21 @@ export function OfferTile({
   return (
     <div
       className={cn(
-        "flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] transition-opacity",
+        "flex h-full flex-col overflow-hidden rounded-2xl border border-line bg-fill transition-opacity",
         !active && "opacity-55"
       )}
     >
-      <div className="relative aspect-[4/3] w-full overflow-hidden bg-white/5">
+      <div className="tc-dark relative aspect-[4/3] w-full overflow-hidden bg-fill-3">
         <Image src={image} alt="" fill unoptimized={image.startsWith("http")} sizes="(max-width: 640px) 100vw, 360px" className="object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
         {badges && <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">{badges}</div>}
       </div>
       <div className="flex flex-1 flex-col px-4 pb-3 pt-3.5">
-        <p className="font-display text-base font-black leading-tight tracking-tight text-white">{name}</p>
-        <p className="num mt-0.5 min-h-[1.25rem] text-sm font-light italic text-white/55">{price ?? ""}</p>
-        <div className="mt-auto flex items-center gap-2 border-t border-white/[0.08] pt-2.5">
+        <p className="font-display text-base font-black leading-tight tracking-tight text-ink">{name}</p>
+        <p className="num mt-0.5 min-h-[1.25rem] text-sm font-light italic text-ink-3">{price ?? ""}</p>
+        <div className="mt-auto flex items-center gap-2 border-t border-line pt-2.5">
           <Switch size="sm" checked={active} disabled={disabled} onChange={onToggle} label={toggleLabel} />
-          <span className="mr-auto truncate text-xs text-white/55">{hint ?? (active ? t("Proposée", "Offered") : t("Masquée", "Hidden"))}</span>
+          <span className="mr-auto truncate text-xs text-ink-3">{hint ?? (active ? t("Proposée", "Offered") : t("Masquée", "Hidden"))}</span>
           {actions}
         </div>
       </div>
@@ -63,8 +63,8 @@ export function TileBadge({ children, tone = "dark" }: { children: ReactNode; to
   return (
     <Tag
       className={cn(
-        "backdrop-blur",
-        tone === "accent" ? "bg-sky-500/80 text-white" : tone === "muted" ? "bg-black/55 text-white/70" : "bg-black/55 text-white"
+        "",
+        tone === "accent" ? "bg-info-soft text-ink" : tone === "muted" ? "bg-panel text-ink-2" : "bg-panel text-ink"
       )}
     >
       {children}
