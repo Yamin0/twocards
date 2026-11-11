@@ -141,7 +141,7 @@ export function OfferEditor({
     setUploading(false);
   };
 
-  const preview = photos[0] || fallbackImage(draft.slug || draft.name || "x");
+  const preview = photos[0] || fallbackImage(draft.slug || draft.name || "x", draft.category);
 
   return (
     <Modal

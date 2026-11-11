@@ -13,6 +13,9 @@ export type GuestCategoryKey = "restaurants" | "activites" | "clubs" | "services
 
 export const CATEGORY_KEYS: GuestCategoryKey[] = ["restaurants", "activites", "clubs", "services"];
 
+/* Photos des bandeaux : Unsplash (licence libre, usage commercial permis),
+   toutes à Marrakech et dans la même lumière chaude de fin de journée.
+   Un hôtel peut les remplacer par les siennes (`category_images`). */
 export const CATEGORY_META: Record<
   GuestCategoryKey,
   { label: string; tagline: string; image: string }
@@ -20,22 +23,22 @@ export const CATEGORY_META: Record<
   restaurants: {
     label: "Restaurants",
     tagline: "Tables raffinées et dîners d'exception",
-    image: "/images/menu/restaurants.png",
+    image: "/images/menu/restaurants.jpg",
   },
   activites: {
     label: "Activités",
     tagline: "Vivez le meilleur de la destination",
-    image: "/images/carousel/05.jpg",
+    image: "/images/menu/activites.jpg",
   },
   clubs: {
     label: "Clubs",
     tagline: "Les nuits les plus courues du pays",
-    image: "/images/menu/clubs.jpg",
+    image: "/images/menu/clubs-nuit.jpg",
   },
   services: {
     label: "Services",
     tagline: "Une conciergerie à votre écoute",
-    image: "/images/carousel/01.jpg",
+    image: "/images/menu/services.jpg",
   },
 };
 
@@ -146,11 +149,13 @@ export type GuestCategory = {
   offers: GuestOffer[];
 };
 
-/* Photo de secours quand l'adresse n'en a pas : une image du carrousel,
-   stable pour un slug donné. */
 const CAROUSEL = Array.from({ length: 9 }, (_, i) => `/images/carousel/0${i + 1}.jpg`);
 
-export function fallbackImage(slug: string) {
+/* Photo de secours d'une adresse sans photo : celle de sa catégorie quand on
+   la connaît (un spa sans photo montre la cour du riad, pas un cocktail),
+   sinon une image du carrousel, stable pour un slug donné. */
+export function fallbackImage(slug: string, category?: string | null) {
+  if (category && isKey(category)) return CATEGORY_META[category].image;
   let h = 0;
   for (const c of slug) h = (h * 31 + c.charCodeAt(0)) % 9973;
   return CAROUSEL[h % CAROUSEL.length];
@@ -169,7 +174,7 @@ export function toOffer(
   locale: Locale = "fr",
   ownerKind: "hotel" | "concierge" = "hotel"
 ): GuestOffer {
-  const cover = row.image_url || fallbackImage(row.slug);
+  const cover = row.image_url || fallbackImage(row.slug, row.category);
   const services: GuestService[] = (row.services ?? []).map((s) => ({
     id: s.id,
     name: s.name,

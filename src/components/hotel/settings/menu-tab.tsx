@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 import { useLocale, useT } from "@/lib/i18n/client";
 
 const ACCENTS = ["#13305c", "#0d0d0d", "#7c2d3a", "#1f6a4f", "#8a6d1d", "#4c3a8f", "#b45309", "#0f766e"];
-const BACKGROUNDS = ["#f4f3ef", "#ffffff", "#ece4d8", "#e8eef2", "#101726", "#0d0d0d", "#0e2a22", "#2a1a1a"];
+const BACKGROUNDS = ["#fffdf9", "#ffffff", "#ece4d8", "#e8eef2", "#101726", "#0d0d0d", "#0e2a22", "#2a1a1a"];
 
 /* Choix d'une couleur du menu client : pastilles proposées, puis une
    couleur libre. La pastille choisie porte une coche et un anneau. */

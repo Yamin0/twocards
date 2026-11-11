@@ -22,7 +22,7 @@ import { hostKind, type HostKind } from "./host";
    « error » (la base n'a pas répondu). */
 
 export const DEFAULT_ACCENT = "#13305c";
-export const DEFAULT_GUEST_BACKGROUND = "#f4f3ef";
+export const DEFAULT_GUEST_BACKGROUND = "#fffdf9";
 export const DEFAULT_PORTAL_BACKGROUND = "#f5f5f4";
 
 /* ─── Menu QR ─────────────────────────────────────────────────────────────── */
