@@ -11,6 +11,7 @@ import type { PortalResult } from "@/lib/booking/load";
 import { useT } from "@/lib/i18n/client";
 import { cn } from "@/lib/utils";
 import { PortalBookingFlow } from "./_components/portal-booking";
+import { useEmbedHeight } from "./_hooks/use-embed-height";
 
 /* Style « widget de réservation » à la SevenRooms : carte blanche centrée,
    typographie noire, beaucoup d'air, une couleur d'accent par établissement,
@@ -32,6 +33,8 @@ export function PortalExperience({ slug, embed, result }: { slug: string; embed:
   const accent = portal?.accent_color ?? DEFAULT_ACCENT;
   const background = portal?.background_color ?? DEFAULT_BACKGROUND;
   const darkBg = isDarkHex(background);
+  /* En iframe : la hauteur du portail est annoncée à la page hôte. */
+  const embedRef = useEmbedHeight(embed);
 
   const style = {
     background,
@@ -44,7 +47,9 @@ export function PortalExperience({ slug, embed, result }: { slug: string; embed:
   } as CSSProperties;
 
   return (
-    <div data-portal="" className={cn("min-h-screen text-neutral-900", !embed && "sm:py-10")} style={style}>
+    /* En iframe, pas de min-h-screen : le bloc prend la hauteur de son contenu,
+       c'est elle que la page hôte reçoit (voir useEmbedHeight). */
+    <div ref={embedRef} data-portal="" className={cn("text-neutral-900", !embed && "min-h-screen sm:py-10")} style={style}>
       {/* L'accent de l'établissement signe jusqu'aux détails du navigateur. */}
       <style>{`
         [data-portal] ::selection { background: var(--portal-accent); color: var(--portal-on-accent); }
@@ -56,11 +61,14 @@ export function PortalExperience({ slug, embed, result }: { slug: string; embed:
         [data-portal] .portal-rail::-webkit-scrollbar-track { background: transparent; }
         @keyframes portal-pop { from { opacity: 0; transform: scale(0.82); } }
       `}</style>
+      {/* En iframe de hauteur fixe (code sans script), l'espace sous le
+          portail garde le blanc de la carte. */}
+      {embed && <style>{`html, body { background: #ffffff; }`}</style>}
       <main
         className={cn(
           "relative mx-auto flex w-full flex-col bg-white",
           embed
-            ? "min-h-screen"
+            ? undefined
             : cn(
                 "min-h-screen sm:min-h-0 sm:max-w-[480px] sm:overflow-hidden sm:rounded-2xl",
                 darkBg ? "sm:shadow-[0_32px_90px_-24px_rgba(0,0,0,0.85)]" : "sm:shadow-[0_20px_60px_-30px_rgba(0,0,0,0.3)]"

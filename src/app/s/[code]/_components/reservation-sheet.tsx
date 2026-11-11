@@ -20,6 +20,7 @@ export function ReservationSheet({
   category,
   offer,
   hotelName,
+  desk,
   preview,
   openerRef,
   onClose,
@@ -27,7 +28,10 @@ export function ReservationSheet({
   code: string;
   category: GuestCategory;
   offer: GuestOffer;
-  hotelName: string;
+  /* Nommé dans « … sont prévenus » ; `null` pour un concierge sans nom. */
+  hotelName: string | null;
+  /* Vers qui orienter le client en cas d'échec d'envoi. */
+  desk: "reception" | "host";
   preview: boolean;
   /* La carte d'où la feuille a été ouverte : le focus y revient. */
   openerRef: RefObject<HTMLElement | null>;
@@ -36,7 +40,7 @@ export function ReservationSheet({
   const t = useT();
   const titleId = useId();
   const sheetRef = useRef<HTMLDivElement>(null);
-  const form = useReservationForm({ code, category, offer, preview });
+  const form = useReservationForm({ code, category, offer, preview, desk });
   const { step } = form;
   useDialog(sheetRef, onClose, openerRef);
 
@@ -66,7 +70,10 @@ export function ReservationSheet({
         className="relative z-10 flex max-h-[94dvh] w-full max-w-lg flex-col overflow-y-auto overscroll-contain rounded-t-[1.75rem] bg-white text-neutral-900 shadow-2xl outline-none animate-in slide-in-from-bottom-4 motion-reduce:animate-none sm:rounded-[1.75rem]"
       >
         {step === "done" ? (
-          <StepDone form={form} offer={offer} hotelName={hotelName} preview={preview} titleId={titleId} onClose={onClose} />
+          <StepDone form={form} offer={offer}
+            hotelName={hotelName}
+            kind={desk === "host" ? "concierge" : "hotel"}
+            preview={preview} titleId={titleId} onClose={onClose} />
         ) : (
           <>
             <div className="sticky top-0 z-20 flex items-center gap-2 border-b border-black/[0.08] bg-white/95 py-2.5 pl-4 pr-2 backdrop-blur">

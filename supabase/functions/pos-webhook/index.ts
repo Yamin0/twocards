@@ -12,6 +12,18 @@
 // de salle twocards ; la réservation assignée à cette table (fenêtre J-1 à
 // J+1, montant non renseigné) reçoit le montant — la commission est dérivée
 // par trigger. Tout appel est journalisé dans pos_events, rapproché ou non.
+//
+// Ticket de test (bouton du dashboard) :
+//
+//   Body    { "test": true, "ticket_id": "TEST-…" }
+//
+// La clé est vérifiée comme pour un vrai ticket, puis l'appel est journalisé
+// avec le statut « test » et la réponse confirme le mode test
+// (test_mode: true). Aucune table, aucune réservation n'est lue ni modifiée,
+// aucune commission n'est dérivée — même si le corps porte aussi une table
+// et un montant. Le dashboard n'envoie jamais de table ni de montant : une
+// version antérieure de cette fonction, qui ignore `test`, répond 400
+// (champs manquants) sans rien écrire.
 
 import { createClient } from "npm:@supabase/supabase-js@2";
 
@@ -61,6 +73,7 @@ Deno.serve(async (req) => {
   const owner = integration.owner_id as string;
 
   let payload: {
+    test?: unknown;
     table?: unknown;
     amount?: unknown;
     ticket_id?: unknown;
@@ -71,10 +84,43 @@ Deno.serve(async (req) => {
   } catch {
     return json(400, { error: "Corps JSON invalide" });
   }
+  if (!payload || typeof payload !== "object") {
+    return json(400, { error: "Corps JSON invalide" });
+  }
+
+  const ticketId = payload.ticket_id ? String(payload.ticket_id).slice(0, 80) : null;
+
+  // Ticket de test : traité AVANT toute validation des champs et toute
+  // lecture du plan de salle ou des réservations. Il ne peut rien écrire
+  // ailleurs que dans pos_events (statut « test ») et last_event_at.
+  if (payload.test === true) {
+    await sb
+      .from("venue_integrations")
+      .update({ last_event_at: new Date().toISOString() })
+      .eq("owner_id", owner);
+    const { error: logError } = await sb.from("pos_events").insert({
+      owner_id: owner,
+      provider: integration.provider,
+      ticket_id: ticketId,
+      table_label: null,
+      amount: null,
+      status: "test",
+      reason: "Ticket de test : aucune réservation lue ni modifiée",
+      reservation_id: null,
+    });
+    // Si la contrainte de statut n'accepte pas encore « test » (migration
+    // 20261112130000 non appliquée), l'insertion échoue : on le dit, sans
+    // jamais se rabattre sur un autre statut.
+    return json(200, {
+      status: "test",
+      test_mode: true,
+      logged: !logError,
+      message: "Ticket de test reçu : clé valide, aucune réservation modifiée",
+    });
+  }
 
   const tableLabel = String(payload.table ?? "").trim();
   const amount = Number(payload.amount);
-  const ticketId = payload.ticket_id ? String(payload.ticket_id).slice(0, 80) : null;
   if (!tableLabel || !Number.isFinite(amount) || amount < 0) {
     return json(400, {
       error: "Champs requis : table (texte) et amount (nombre ≥ 0)",

@@ -11,6 +11,7 @@ const EVENT_TONE: Record<PosEvent["status"], BadgeTone> = {
   matched: "ok",
   unmatched: "warn",
   duplicate: "neutral",
+  test: "info",
 };
 
 /* Journal des dix derniers tickets reçus. */
@@ -29,6 +30,7 @@ export function PosEventLog({
     matched: t("Rapproché", "Matched"),
     unmatched: t("Non rapproché", "Unmatched"),
     duplicate: t("Doublon", "Duplicate"),
+    test: t("Test", "Test"),
   };
   return (
     <Card
@@ -59,12 +61,20 @@ export function PosEventLog({
             <li key={e.id} className="flex items-center justify-between gap-3 py-2.5">
               <div className="min-w-0">
                 <p className="num truncate text-sm text-ink">
-                  {t("Table", "Table")} {e.table_label ?? "?"} · {(e.amount ?? 0).toLocaleString(intl)} MAD
+                  {e.status === "test"
+                    ? t("Ticket de test", "Test ticket")
+                    : `${t("Table", "Table")} ${e.table_label ?? "?"} · ${(e.amount ?? 0).toLocaleString(intl)} MAD`}
                   {e.ticket_id ? ` · ${e.ticket_id}` : ""}
                 </p>
                 <p className="truncate text-xs text-ink-3">
                   {new Date(e.created_at).toLocaleString(intl)}
-                  {e.reason ? ` · ${e.reason}` : ""}
+                  {/* Le motif d'un test est écrit en français par la fonction :
+                      on affiche le libellé traduit à la place. */}
+                  {e.status === "test"
+                    ? ` · ${t("aucune réservation modifiée", "no reservation changed")}`
+                    : e.reason
+                      ? ` · ${e.reason}`
+                      : ""}
                 </p>
               </div>
               <Badge tone={EVENT_TONE[e.status] ?? "neutral"} className="shrink-0">

@@ -20,11 +20,15 @@ export function useReservationForm({
   category,
   offer,
   preview,
+  desk = "reception",
 }: {
   code: string;
   category: GuestCategory;
   offer: GuestOffer;
   preview: boolean;
+  /* Vers qui orienter le client en cas d'échec : la réception d'un hôtel, ou
+     la personne qui a partagé le lien d'un concierge. */
+  desk?: "reception" | "host";
 }) {
   const t = useT();
   const [days] = useState(() => nextDays(14));
@@ -107,11 +111,11 @@ export function useReservationForm({
     const cleanName = name.trim();
     const cleanPhone = phone.trim();
     if (!cleanName) {
-      setErrorMsg(bookingErrorMessage("name", t, "reception"));
+      setErrorMsg(bookingErrorMessage("name", t, desk));
       return;
     }
     if (cleanPhone.replace(/\D/g, "").length < 6) {
-      setErrorMsg(bookingErrorMessage("phone", t, "reception"));
+      setErrorMsg(bookingErrorMessage("phone", t, desk));
       return;
     }
     /* Aperçu ouvert par l'hôtel depuis son espace : rien n'est écrit. */
@@ -153,7 +157,7 @@ export function useReservationForm({
         failure = { message: e instanceof Error ? e.message : "Failed to fetch" };
       }
       setSending(false);
-      setErrorMsg(bookingErrorMessage(bookingErrorKind(failure), t, "reception"));
+      setErrorMsg(bookingErrorMessage(bookingErrorKind(failure), t, desk));
       return;
     }
     try {
@@ -180,7 +184,7 @@ export function useReservationForm({
     }
     setSending(false);
     if (failure) {
-      setErrorMsg(bookingErrorMessage(bookingErrorKind(failure), t, "reception"));
+      setErrorMsg(bookingErrorMessage(bookingErrorKind(failure), t, desk));
       return;
     }
     setStep("done");

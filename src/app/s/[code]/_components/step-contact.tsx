@@ -12,7 +12,15 @@ import { FIELD, SheetAction } from "./sheet-parts";
 const LABEL = "mb-1.5 block text-sm font-bold text-neutral-800";
 
 /* Étape 2 : nom, téléphone, précision. Seul ce formulaire envoie la demande. */
-export function StepContact({ form, hotelName }: { form: ReservationForm; hotelName: string }) {
+export function StepContact({
+  form,
+  hotelName,
+}: {
+  form: ReservationForm;
+  /* Qui est prévenu avec l'établissement : l'hôtel (toujours nommé) ou le
+     concierge ; `null` pour un concierge sans nom, la phrase s'en passe. */
+  hotelName: string | null;
+}) {
   const t = useT();
   const intl = useIntlLocale();
   const nameId = useId();
@@ -20,6 +28,9 @@ export function StepContact({ form, hotelName }: { form: ReservationForm; hotelN
   const notesId = useId();
   const errorId = useId();
   const n = form.partySize;
+  const notified = hotelName
+    ? t(`${hotelName} et l'établissement sont prévenus`, `${hotelName} and the venue are notified`)
+    : t("l'établissement est prévenu", "the venue is notified");
   const deposit = form.deposit ? formatDeposit(form.deposit.amount, form.deposit.currency, intl) : null;
 
   return (
@@ -140,8 +151,8 @@ export function StepContact({ form, hotelName }: { form: ReservationForm; hotelN
             <Lock size={12} strokeWidth={2.5} className="mt-[3px] shrink-0" aria-hidden />
             <span>
               {t(
-                `L'acompte de ${deposit} confirme votre réservation. Paiement sécurisé par Stripe pour Twocards, LLC ; ${hotelName} et l'établissement sont prévenus.`,
-                `The ${deposit} deposit confirms your booking. Secure payment by Stripe for Twocards, LLC; ${hotelName} and the venue are notified.`
+                `L'acompte de ${deposit} confirme votre réservation. Paiement sécurisé par Stripe pour Twocards, LLC ; ${notified}.`,
+                `The ${deposit} deposit confirms your booking. Secure payment by Stripe for Twocards, LLC; ${notified}.`
               )}
             </span>
           </p>
@@ -149,10 +160,10 @@ export function StepContact({ form, hotelName }: { form: ReservationForm; hotelN
         <p className="mt-2.5 text-center text-xs leading-relaxed text-neutral-600">
           {t(
             <>
-              Sans engagement ni paiement : {hotelName} et l&apos;établissement sont prévenus, la confirmation arrive par téléphone ou WhatsApp.
+              Sans engagement ni paiement : {notified}, la confirmation arrive par téléphone ou WhatsApp.
             </>,
             <>
-              No commitment, no payment: {hotelName} and the venue are notified, and confirmation comes by phone or WhatsApp.
+              No commitment, no payment: {notified}, and confirmation comes by phone or WhatsApp.
             </>
           )}
         </p>

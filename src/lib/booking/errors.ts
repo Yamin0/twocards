@@ -16,6 +16,7 @@ export type BookingErrorKind =
   | "network"
   | "deposit"
   | "payment"
+  | "full"
   | "unknown";
 
 type RpcError = { message?: string | null; code?: string | null } | null | undefined;
@@ -41,6 +42,9 @@ export function bookingErrorKind(error: RpcError): BookingErrorKind {
   if (message.includes("Acompte requis")) return "deposit";
   /* Le paiement en ligne n'a pas pu être préparé (Stripe, configuration). */
   if (message.includes("Paiement indisponible")) return "payment";
+  /* Portail : le créneau s'est rempli entre l'affichage et l'envoi
+     (20261112120000_portail_creneaux_complets). */
+  if (message.includes("Créneau complet")) return "full";
   /* « QR code introuvable ou inactif », « Portail introuvable ou désactivé ». */
   if (message.includes("introuvable")) return "closed";
   if (isNetworkError(error)) return "network";
@@ -48,12 +52,19 @@ export function bookingErrorKind(error: RpcError): BookingErrorKind {
 }
 
 /** Message affiché au client pour une cause donnée. `desk` nomme vers qui se
-    tourner : la réception (menu QR) ou l'établissement (portail direct). */
-export function bookingErrorMessage(kind: BookingErrorKind, t: Translate, desk: "reception" | "venue"): string {
+    tourner : la réception (menu QR d'un hôtel), la personne qui a partagé le
+    lien (menu QR d'un concierge, `host`) ou l'établissement (portail direct). */
+export function bookingErrorMessage(
+  kind: BookingErrorKind,
+  t: Translate,
+  desk: "reception" | "host" | "venue"
+): string {
   const fallback =
     desk === "reception"
       ? t("contactez la réception", "contact reception")
-      : t("appelez directement l'établissement", "call the venue directly");
+      : desk === "host"
+        ? t("contactez la personne qui vous a partagé ce lien", "contact the person who shared this link with you")
+        : t("appelez directement l'établissement", "call the venue directly");
   switch (kind) {
     case "rate":
       return t(
@@ -83,6 +94,11 @@ export function bookingErrorMessage(kind: BookingErrorKind, t: Translate, desk: 
         "Your message is too long. Please shorten your note and send again."
       );
     case "closed":
+      if (desk === "host")
+        return t(
+          "Ce lien n'est plus actif. Contactez la personne qui vous l'a partagé.",
+          "This link is no longer active. Please contact the person who shared it with you."
+        );
       return desk === "reception"
         ? t(
             "Ce QR code n'est plus actif. Adressez-vous à la réception.",
@@ -101,6 +117,11 @@ export function bookingErrorMessage(kind: BookingErrorKind, t: Translate, desk: 
       return t(
         `Le paiement en ligne est momentanément indisponible. Rien n'a été débité : réessayez dans un instant, ou ${fallback}.`,
         `Online payment is temporarily unavailable. Nothing was charged: try again shortly, or ${fallback}.`
+      );
+    case "full":
+      return t(
+        "Ce créneau vient d'être complet. Choisissez une autre heure.",
+        "This time has just been fully booked. Please choose another time."
       );
     case "network":
       return t(

@@ -9,6 +9,7 @@ import {
 import type { Locale } from "@/lib/i18n";
 import { safeHex } from "./color";
 import { isDepositCurrency, type OfferDeposit } from "./deposit";
+import { hostKind, type HostKind } from "./host";
 
 /* Chargement côté serveur des deux pages clients (menu QR, portail direct).
    Les RPC sont les mêmes que celles appelées jusqu'ici par le navigateur
@@ -27,7 +28,11 @@ export const DEFAULT_PORTAL_BACKGROUND = "#f5f5f4";
 /* ─── Menu QR ─────────────────────────────────────────────────────────────── */
 
 export type GuestHotel = {
-  /* Libellé du QR tel que l'hôtel l'a saisi : « Chambre 129 », « Lobby ». */
+  /* Hôtel ou concierge : décide du vocabulaire du menu (voir `./host`). */
+  kind: HostKind;
+  /* Libellé du QR tel que l'hôtel l'a saisi : « Chambre 129 », « Lobby ».
+     Pour un concierge, c'est un nom de canal interne (« Instagram ») : il
+     n'est pas montré au client. */
   label: string | null;
   hotelName: string | null;
   city: string | null;
@@ -58,7 +63,11 @@ export const loadGuestMenu = cache(async (code: string, locale: Locale): Promise
     /* QR inconnu ou désactivé : la RPC ne renvoie aucune ligne. */
     if (!row) return { status: "inactive" };
 
+    /* `owner_role` n'existe qu'après la migration 20261112100000 : absent,
+       le menu reste exactement celui d'un hôtel. */
+    const kind = hostKind(row.owner_role);
     const hotel: GuestHotel = {
+      kind,
       label: row.label ?? null,
       hotelName: row.hotel_name || null,
       city: row.city || null,
@@ -81,6 +90,7 @@ export const loadGuestMenu = cache(async (code: string, locale: Locale): Promise
           : {},
       hiddenCategories: asStrings(row.hidden_categories),
       locale,
+      ownerKind: kind,
     });
     await attachDeposits(supabase, menu);
     return { status: "ready", hotel, menu };

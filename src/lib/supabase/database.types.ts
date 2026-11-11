@@ -423,6 +423,9 @@ export type Database = {
           hotel_name: string;
           hotel_offers: Json;
           label: string;
+          /* Ajoutée par 20261112100000_menu_role_du_proprietaire : absente
+             tant que la migration n'est pas lancée. */
+          owner_role?: string;
           reception_phone: string;
           show_prices: boolean;
           welcome_message: string;

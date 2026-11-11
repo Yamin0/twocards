@@ -1,14 +1,18 @@
 "use client";
 
-import { Info } from "lucide-react";
+import { Info, Smartphone } from "lucide-react";
 import { useT } from "@/lib/i18n/client";
 import { Button, Card, InfoNote, Switch } from "@/components/app/ui";
 import type { NotifPrefs, VenueSettings } from "./use-venue-settings";
 
-/* Préférences de notification. Elles sont bien enregistrées sur le compte
-   (métadonnée notif_prefs) mais aucun envoi ne les lit encore : la note en
-   tête le dit sans détour. Les notifications affichées dans l'espace, elles,
-   arrivent toujours. */
+/* Préférences de notification : un interrupteur par notification push que
+   twocards envoie réellement sur le téléphone de l'établissement. La cloche
+   de l'espace reçoit toujours tout ; seul le push est coupé. Aucun e-mail ni
+   SMS n'est envoyé aux établissements : aucun réglage ne le laisse croire.
+
+   Le respect de ces réglages par la base vient de la migration
+   20261112140000_preferences_de_notification.sql. Une fois appliquée,
+   supprimer le bloc <PendingNote /> ci-dessous (et la fonction PendingNote). */
 export function NotificationsTab({
   settings,
   onSave,
@@ -21,42 +25,46 @@ export function NotificationsTab({
 
   const items: { key: keyof NotifPrefs; label: string; desc: string }[] = [
     {
-      key: "emailNotifs",
-      label: t("Notifications par e-mail", "Email notifications"),
-      desc: t("Résumés et alertes par e-mail.", "Summaries and alerts by email."),
+      key: "pushReservations",
+      label: t("Nouvelle réservation", "New reservation"),
+      desc: t(
+        "Une demande arrive par le QR d'un hôtel, d'un concierge ou par votre portail.",
+        "A request comes in through a hotel's or concierge's QR code, or through your portal."
+      ),
     },
     {
-      key: "smsAlerts",
-      label: t("Alertes SMS", "SMS alerts"),
-      desc: t("Alertes importantes par SMS.", "Important alerts by text message."),
+      key: "pushRatings",
+      label: t("Nouvel avis client", "New guest review"),
+      desc: t("Un client note sa sortie.", "A guest rates their outing."),
     },
     {
-      key: "commissionAlerts",
-      label: t("Alertes commissions", "Commission alerts"),
-      desc: t("À chaque nouvelle commission.", "For every new commission."),
+      key: "pushPos",
+      label: t("Ticket de caisse non rapproché", "Unmatched till ticket"),
+      desc: t(
+        "Un ticket reçu de votre caisse ne correspond à aucune réservation.",
+        "A ticket received from your till matches no reservation."
+      ),
     },
     {
-      key: "newRpNotifs",
-      label: t("Nouveaux RP", "New PRs"),
-      desc: t("Quand un nouveau RP rejoint votre réseau.", "When a new PR joins your network."),
-    },
-    {
-      key: "weeklyReport",
-      label: t("Rapport hebdomadaire", "Weekly report"),
-      desc: t("Un résumé chaque semaine.", "A summary every week."),
+      key: "pushMessages",
+      label: t("Nouveau message", "New message"),
+      desc: t("Un message arrive dans votre messagerie.", "A message arrives in your inbox."),
     },
   ];
 
   return (
     <div className="space-y-4">
-      <InfoNote icon={Info} tone="amber">
+      <InfoNote icon={Smartphone}>
         {t(
-          "Ces réglages sont enregistrés sur votre compte, mais ils ne déclenchent encore aucun envoi : ni e-mail, ni SMS, ni rapport. Les notifications de votre espace (nouvelle réservation, avis, caisse) arrivent dans tous les cas.",
-          "These settings are saved to your account, but they don't trigger anything yet: no email, no text message, no report. Notifications inside your workspace (new reservation, review, POS) always arrive."
+          "Ces réglages concernent les notifications sur votre téléphone (application twocards). Dans votre espace, la cloche affiche toujours tout.",
+          "These settings apply to notifications on your phone (twocards app). In your workspace, the bell always shows everything."
         )}
       </InfoNote>
 
-      <Card title={t("Vos préférences", "Your preferences")}>
+      {/* À RETIRER une fois la migration 20261112140000 appliquée. */}
+      <PendingNote />
+
+      <Card title={t("Notifications sur le téléphone", "Phone notifications")}>
         <ul className="divide-y divide-line">
           {items.map((item) => (
             <li
@@ -82,5 +90,19 @@ export function NotificationsTab({
         </div>
       </Card>
     </div>
+  );
+}
+
+/* Tant que la migration n'est pas appliquée, les choix sont enregistrés
+   mais la base envoie encore tous les push. À supprimer ensuite. */
+function PendingNote() {
+  const t = useT();
+  return (
+    <InfoNote icon={Info} tone="amber">
+      {t(
+        "Vos choix sont enregistrés et prendront effet très prochainement : pour l'instant, toutes ces notifications vous sont encore envoyées.",
+        "Your choices are saved and will take effect very soon. For now, all of these notifications are still sent to you."
+      )}
+    </InfoNote>
   );
 }
