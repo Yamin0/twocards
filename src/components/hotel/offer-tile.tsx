@@ -2,14 +2,13 @@
 
 import Image from "next/image";
 import type { ReactNode } from "react";
-import { Switch, Tag } from "@/components/hotel/ui";
+import { Badge, Switch } from "@/components/app/ui";
 import { cn } from "@/lib/utils";
 import { useT } from "@/lib/i18n/client";
 
-/* Carte d'adresse du dashboard hôtel : même dessin que la carte du menu
-   client (photo en 4/3, nom en Satoshi Black, prix en italique léger), en
-   verre sombre, avec l'interrupteur « proposée » à la place du bouton
-   Réserver. */
+/* Carte d'adresse de l'espace hôtel : la photo en 4/3, le nom, le prix
+   indicatif, et l'interrupteur « proposée » à la place du bouton Réserver
+   du menu client. */
 export function OfferTile({
   image,
   name,
@@ -37,18 +36,24 @@ export function OfferTile({
   return (
     <div
       className={cn(
-        "flex h-full flex-col overflow-hidden rounded-2xl border border-line bg-fill transition-opacity",
-        !active && "opacity-55"
+        "flex h-full flex-col overflow-hidden rounded-xl border border-line bg-panel",
+        !active && "bg-fill"
       )}
     >
-      <div className="tc-dark relative aspect-[4/3] w-full overflow-hidden bg-fill-3">
-        <Image src={image} alt="" fill unoptimized={image.startsWith("http")} sizes="(max-width: 640px) 100vw, 360px" className="object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+      <div className="relative aspect-[4/3] w-full overflow-hidden bg-fill-2">
+        <Image
+          src={image}
+          alt=""
+          fill
+          unoptimized={image.startsWith("http")}
+          sizes="(max-width: 640px) 100vw, 360px"
+          className={cn("object-cover", !active && "opacity-50 grayscale")}
+        />
         {badges && <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">{badges}</div>}
       </div>
       <div className="flex flex-1 flex-col px-4 pb-3 pt-3.5">
-        <p className="font-display text-base font-black leading-tight tracking-tight text-ink">{name}</p>
-        <p className="num mt-0.5 min-h-[1.25rem] text-sm font-light italic text-ink-3">{price ?? ""}</p>
+        <p className="text-sm font-bold leading-tight text-ink">{name}</p>
+        <p className="num mt-0.5 min-h-[1.25rem] text-[13px] text-ink-3">{price ?? ""}</p>
         <div className="mt-auto flex items-center gap-2 border-t border-line pt-2.5">
           <Switch size="sm" checked={active} disabled={disabled} onChange={onToggle} label={toggleLabel} />
           <span className="mr-auto truncate text-xs text-ink-3">{hint ?? (active ? t("Proposée", "Offered") : t("Masquée", "Hidden"))}</span>
@@ -59,15 +64,12 @@ export function OfferTile({
   );
 }
 
+/* Pastille posée sur la photo : fond plein, pour rester lisible quelle
+   que soit l'image. */
 export function TileBadge({ children, tone = "dark" }: { children: ReactNode; tone?: "dark" | "accent" | "muted" }) {
   return (
-    <Tag
-      className={cn(
-        "",
-        tone === "accent" ? "bg-info-soft text-ink" : tone === "muted" ? "bg-panel text-ink-2" : "bg-panel text-ink"
-      )}
-    >
+    <Badge tone={tone === "accent" ? "brand" : "neutral"} className={cn("shadow-sm", tone !== "accent" && "bg-panel text-ink")}>
       {children}
-    </Tag>
+    </Badge>
   );
 }

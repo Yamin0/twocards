@@ -11,14 +11,12 @@ import {
   Palmtree,
   Pencil,
   Plus,
-  Search,
   Sparkles,
   Trash2,
   UtensilsCrossed,
 } from "lucide-react";
 import { useAuthUser } from "@/hooks/use-auth-user";
-import { useToast } from "@/hooks/use-toast";
-import { useHotelOffers, useHotelSpace, type HotelOffer } from "@/lib/hotel/store";
+import { useCatalog, useHotelOffers, useHotelSpace, type HotelOffer } from "@/lib/hotel/store";
 import {
   CATEGORY_KEYS,
   categoryLabel,
@@ -30,21 +28,21 @@ import { plural } from "@/lib/hotel/format";
 import { useLocale, useT } from "@/lib/i18n/client";
 import {
   Button,
+  Card,
   ConfirmDialog,
   EmptyState,
+  ErrorState,
   IconButton,
   InfoNote,
   KpiGrid,
   PageHeader,
-  Panel,
+  PageSkeleton,
+  SearchInput,
   Segmented,
-  Toast,
-  inputClass,
-} from "@/components/hotel/ui";
+  useNotify,
+} from "@/components/app/ui";
 import { EMPTY_DRAFT, OfferEditor, type OfferDraft } from "@/components/hotel/offer-editor";
 import { OfferTile, TileBadge } from "@/components/hotel/offer-tile";
-import { PageSkeleton } from "@/components/hotel/skeleton";
-import { cn } from "@/lib/utils";
 
 /* Le menu de l'hôtel, en deux temps. D'abord le catalogue du réseau twocards
    pour sa ville : chaque adresse se propose ou se retire pour tout l'hôtel
@@ -75,9 +73,10 @@ const toDraft = (o: HotelOffer): OfferDraft => ({
 
 export default function HotelAddressesPage() {
   const { isLoading: authLoading, userId, city: authCity } = useAuthUser();
-  const { catalog, profile, saveProfile, isLoading } = useHotelSpace();
-  const { offers, create, update, remove } = useHotelOffers();
-  const { toast, showToast } = useToast();
+  const { catalog, profile, saveProfile, isLoading, reload } = useHotelSpace();
+  const { offers, create, update, remove, failed: offersFailed } = useHotelOffers();
+  const { failed: catalogFailed } = useCatalog();
+  const notify = useNotify();
   const [filter, setFilter] = useState<Filter>("toutes");
   const [search, setSearch] = useState("");
   const [editing, setEditing] = useState<{ offer: HotelOffer | null } | null>(null);
@@ -92,7 +91,7 @@ export default function HotelAddressesPage() {
      leur propre interrupteur (active). */
   const network = useMemo(() => cityCatalog(hotelCity, catalog, [], locale), [hotelCity, catalog, locale]);
 
-  if (authLoading || isLoading) return <PageSkeleton kpis={3} table />;
+  if (authLoading || isLoading) return <PageSkeleton kpis={3} rows={6} />;
 
   const hidden = new Set(profile.hidden_offers);
   const networkTotal = network.reduce((s, c) => s + c.offers.length, 0);
@@ -110,7 +109,8 @@ export default function HotelAddressesPage() {
 
   const setHidden = async (next: Set<string>, message: string) => {
     const ok = await saveProfile({ hidden_offers: [...next] });
-    showToast(ok ? message : t("Impossible d'enregistrer. Réessayez dans un instant.", "Couldn't save. Please try again in a moment."));
+    if (ok) notify(message);
+    else notify(t("Impossible d'enregistrer. Réessayez dans un instant.", "Couldn't save. Please try again in a moment."), "error");
   };
 
   const toggleNetwork = (id: string, name: string) => {
@@ -151,7 +151,7 @@ export default function HotelAddressesPage() {
     setSaving(false);
     if (!ok) return t("Impossible d'enregistrer. Réessayez dans un instant.", "Couldn't save. Please try again in a moment.");
     setEditing(null);
-    showToast(
+    notify(
       editing?.offer
         ? t("Adresse mise à jour", "Place updated")
         : t("Adresse ajoutée, proposée dès le prochain scan", "Place added, offered from the next scan")
@@ -161,27 +161,22 @@ export default function HotelAddressesPage() {
 
   const toggleMine = async (o: HotelOffer) => {
     const ok = await update(o.id, { active: !o.active });
-    showToast(
-      ok
-        ? o.active
-          ? t(`« ${o.name} » masquée`, `“${o.name}” hidden`)
-          : t(`« ${o.name} » proposée`, `“${o.name}” offered`)
-        : t("Échec de la mise à jour", "Update failed")
-    );
+    if (!ok) return notify(t("Échec de la mise à jour", "Update failed"), "error");
+    notify(o.active ? t(`« ${o.name} » masquée`, `“${o.name}” hidden`) : t(`« ${o.name} » proposée`, `“${o.name}” offered`));
   };
 
   const confirmDelete = async () => {
     if (!toDelete) return;
     const ok = await remove(toDelete.id);
     setToDelete(null);
-    showToast(ok ? t("Adresse supprimée", "Place deleted") : t("Échec de la suppression", "Delete failed"));
+    if (ok) notify(t("Adresse supprimée", "Place deleted"));
+    else notify(t("Échec de la suppression", "Delete failed"), "error");
   };
 
   return (
     <>
       <PageHeader
-        eyebrow={t("Mes adresses", "My places")}
-        title={t("Le menu de votre hôtel", "Your hotel's menu")}
+        title={t("Mes adresses", "My places")}
         description={t(
           "Choisissez ce que vos clients voient après un scan : les adresses du réseau twocards de votre ville, que vous proposez ou retirez d'un geste, et vos adresses maison, que vous créez vous-même. Les deux se cumulent.",
           "Choose what your guests see after a scan: places from the twocards network in your city, which you offer or remove in one tap, and your own in-house places, which you create yourself. The two add up."
@@ -204,6 +199,7 @@ export default function HotelAddressesPage() {
 
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <Segmented<Filter>
+          label={t("Catégorie", "Category")}
           value={filter}
           onChange={setFilter}
           options={[
@@ -211,14 +207,16 @@ export default function HotelAddressesPage() {
             ...CATEGORY_KEYS.map((k) => ({ value: k, label: catLabel(k) })),
           ]}
         />
-        <div className="relative w-full lg:w-64">
-          <Search size={14} strokeWidth={1.75} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-3" />
-          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("Rechercher une adresse…", "Search for a place…")} className={cn(inputClass, "h-10 py-0 pl-9")} />
-        </div>
+        <SearchInput
+          value={search}
+          onChange={setSearch}
+          placeholder={t("Rechercher une adresse…", "Search for a place…")}
+          className="w-full lg:w-64"
+        />
       </div>
 
       {/* ─── Catalogue réseau ──────────────────────────────────────────────── */}
-      <Panel
+      <Card
         title={t("Catalogue twocards", "twocards catalogue")}
         description={
           hotelCity ? (
@@ -228,13 +226,15 @@ export default function HotelAddressesPage() {
             )
           ) : (
             t(
-              <>Indiquez la ville de l&apos;hôtel dans les <Link href="/hotel/settings" className="font-bold text-info">paramètres</Link> pour limiter le catalogue à votre ville. En attendant, tout le réseau est proposé.</>,
-              <>Add the hotel&apos;s city in <Link href="/hotel/settings" className="font-bold text-info">settings</Link> to limit the catalogue to your city. Until then, the whole network is offered.</>
+              <>Indiquez la ville de l&apos;hôtel dans les <Link href="/hotel/settings" className="font-bold text-link underline">paramètres</Link> pour limiter le catalogue à votre ville. En attendant, tout le réseau est proposé.</>,
+              <>Add the hotel&apos;s city in <Link href="/hotel/settings" className="font-bold text-link underline">settings</Link> to limit the catalogue to your city. Until then, the whole network is offered.</>
             )
           )
         }
       >
-        {networkVisible.length === 0 ? (
+        {catalogFailed && networkTotal === 0 ? (
+          <ErrorState compact onRetry={reload} />
+        ) : networkVisible.length === 0 ? (
           <p className="py-6 text-center text-sm text-ink-3">
             {networkTotal === 0
               ? t("Aucune adresse du réseau pour votre ville pour le moment.", "No network places in your city yet.")
@@ -251,16 +251,16 @@ export default function HotelAddressesPage() {
                   <div className="mb-3 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2.5">
                       <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-fill-2">
-                        <Icon size={15} strokeWidth={1.75} className="text-ink" />
+                        <Icon size={15} strokeWidth={1.75} className="text-ink-2" aria-hidden />
                       </span>
                       <div>
-                        <p className="font-display text-sm font-bold text-ink">{catLabel(cat.key)}</p>
+                        <h3 className="text-sm font-bold text-ink">{catLabel(cat.key)}</h3>
                         <p className="num text-xs text-ink-3">{shown}/{ids.length} {t(`proposée${shown > 1 ? "s" : ""}`, "offered")}</p>
                       </div>
                     </div>
-                    <button type="button" onClick={() => setCategory(ids, shown !== ids.length, catLabel(cat.key))} className="text-xs font-bold text-info hover:text-info">
+                    <Button size="sm" variant="ghost" onClick={() => setCategory(ids, shown !== ids.length, catLabel(cat.key))}>
                       {shown === ids.length ? t("Tout retirer", "Remove all") : t("Tout proposer", "Offer all")}
-                    </button>
+                    </Button>
                   </div>
                   <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
                     {cat.offers.map((o) => (
@@ -281,10 +281,10 @@ export default function HotelAddressesPage() {
             })}
           </div>
         )}
-      </Panel>
+      </Card>
 
       {/* ─── Adresses maison ───────────────────────────────────────────────── */}
-      <Panel
+      <Card
         title={t("Vos adresses maison", "Your in-house places")}
         description={t(
           "Votre restaurant, votre spa, votre chauffeur, un partenaire de confiance : en tête de leur catégorie sur vos QR codes, et nulle part ailleurs. Les demandes vous arrivent directement, sans commission.",
@@ -297,7 +297,9 @@ export default function HotelAddressesPage() {
         }
         padded={offers.length > 0}
       >
-        {offers.length === 0 ? (
+        {offersFailed && offers.length === 0 ? (
+          <ErrorState compact onRetry={reload} />
+        ) : offers.length === 0 ? (
           <EmptyState
             icon={MapPin}
             title={t("Aucune adresse maison pour le moment", "No in-house places yet")}
@@ -333,28 +335,28 @@ export default function HotelAddressesPage() {
                 }
                 actions={
                   <>
-                    <IconButton icon={Pencil} label={t("Modifier", "Edit")} size={14} className="h-8 w-8" onClick={() => setEditing({ offer: o })} />
-                    <IconButton icon={Trash2} label={t("Supprimer", "Delete")} size={14} tone="danger" className="h-8 w-8" onClick={() => setToDelete(o)} />
+                    <IconButton icon={Pencil} label={t(`Modifier ${o.name}`, `Edit ${o.name}`)} size={16} onClick={() => setEditing({ offer: o })} />
+                    <IconButton icon={Trash2} label={t(`Supprimer ${o.name}`, `Delete ${o.name}`)} size={16} tone="danger" onClick={() => setToDelete(o)} />
                   </>
                 }
               />
             ))}
           </div>
         )}
-      </Panel>
+      </Card>
 
       <InfoNote icon={Info} tone="sky">
         {t(
           <>
             Les réglages de cette page valent pour tous vos QR codes. Pour proposer une adresse à certaines chambres seulement, ouvrez la chambre dans{" "}
-            <Link href="/hotel/chambres" className="font-bold text-info">
+            <Link href="/hotel/chambres" className="font-bold text-link underline">
               Chambres &amp; QR
             </Link>{" "}
             et réglez son menu.
           </>,
           <>
             Settings on this page apply to all your QR codes. To offer a place to certain rooms only, open the room in{" "}
-            <Link href="/hotel/chambres" className="font-bold text-info">
+            <Link href="/hotel/chambres" className="font-bold text-link underline">
               Rooms &amp; QR
             </Link>{" "}
             and adjust its menu.
@@ -388,7 +390,6 @@ export default function HotelAddressesPage() {
         )}
       />
 
-      <Toast message={toast} />
     </>
   );
 }

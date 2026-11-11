@@ -1,34 +1,37 @@
 "use client";
 
 import { Suspense, useMemo, useState } from "react";
-import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import QRCode from "react-qr-code";
-import { ArrowLeft, Printer, Smartphone } from "lucide-react";
+import { Plus, Printer, QrCode } from "lucide-react";
+import {
+  Button,
+  Card,
+  EmptyState,
+  Field,
+  LinkButton,
+  PageHeader,
+  PageSkeleton,
+  Segmented,
+  Select,
+  inputClass,
+} from "@/components/app/ui";
+import { PRINT_SIZES, PrintCard, type PrintSize, type PrintTheme } from "@/components/hotel/qr/print-card";
+import { HotelLoadError, loadFailed } from "@/components/hotel/states";
 import { useAuthUser } from "@/hooks/use-auth-user";
 import { useHotelSpace } from "@/lib/hotel/store";
 import { guestUrl } from "@/lib/qr";
-import { Button, LinkButton, Segmented, Select, inputClass } from "@/components/hotel/ui";
-import { PageSkeleton } from "@/components/hotel/skeleton";
 import { cn } from "@/lib/utils";
 import { useT } from "@/lib/i18n/client";
 
-/* Planche d'impression : une carte par QR, prête pour la chambre. Le fond
-   zellige et la barre latérale sont masqués à l'impression (print-hide),
-   seules les cartes blanches restent — sur du A4, deux à six par page. */
+/* Planche d'impression : une carte par QR, prête pour la chambre. À
+   l'impression, la coque (tc-shell-chrome) et les réglages (print-hide)
+   disparaissent : seules les cartes sortent, sur fond blanc. */
 
-type Size = "petit" | "moyen" | "grand";
-type Theme = "clair" | "accent";
-
-const SIZES: Record<Size, { cols: string; qr: number; card: string }> = {
-  petit: { cols: "grid-cols-2 md:grid-cols-3 print:grid-cols-3", qr: 128, card: "p-5" },
-  moyen: { cols: "grid-cols-1 sm:grid-cols-2 print:grid-cols-2", qr: 176, card: "p-7" },
-  grand: { cols: "grid-cols-1 print:grid-cols-1", qr: 260, card: "p-10" },
-};
+type Scope = "selection" | "actifs" | "tous";
 
 export default function PrintPage() {
   return (
-    <Suspense fallback={<PageSkeleton kpis={0} />}>
+    <Suspense fallback={<PageSkeleton kpis={0} rows={4} />}>
       <PrintContent />
     </Suspense>
   );
@@ -38,9 +41,9 @@ function PrintContent() {
   const params = useSearchParams();
   const t = useT();
   const { isLoading: authLoading, venueName, city } = useAuthUser();
-  const { qrCodes, profile, isLoading } = useHotelSpace();
-  const [size, setSize] = useState<Size>("moyen");
-  const [theme, setTheme] = useState<Theme>("clair");
+  const { qrCodes, profile, isLoading, failed, reload } = useHotelSpace();
+  const [size, setSize] = useState<PrintSize>("moyen");
+  const [theme, setTheme] = useState<PrintTheme>("clair");
   /* null = texte par défaut, dans la langue courante. */
   const [headlineEdit, setHeadline] = useState<string | null>(null);
   const [sublineEdit, setSubline] = useState<string | null>(null);
@@ -48,151 +51,157 @@ function PrintContent() {
   const subline =
     sublineEdit ??
     t(
-      "Restaurants, activités, clubs et services, réservez en quelques secondes, la réception s'occupe du reste.",
+      "Restaurants, activités, clubs et services : réservez en quelques secondes, la réception s'occupe du reste.",
       "Restaurants, activities, clubs and services: book in seconds, the front desk takes care of the rest."
     );
+  /* ?ids=a,b,c : les emplacements choisis dans la liste. */
   const ids = useMemo(() => new Set((params.get("ids") ?? "").split(",").filter(Boolean)), [params]);
-  const [scope, setScope] = useState<"selection" | "actifs" | "tous">(ids.size > 0 ? "selection" : "actifs");
+  const [scope, setScope] = useState<Scope>(ids.size > 0 ? "selection" : "actifs");
 
-  if (authLoading || isLoading) return <PageSkeleton kpis={0} />;
+  if (authLoading || isLoading) return <PageSkeleton kpis={0} rows={4} />;
 
   const hotelName = profile.hotel_name || venueName || t("Votre hôtel", "Your hotel");
   const hotelCity = profile.city || city;
-  const accent = profile.accent_color;
-  const list =
-    scope === "selection" && ids.size > 0
-      ? qrCodes.filter((q) => ids.has(q.id))
-      : scope === "tous"
-        ? qrCodes
-        : qrCodes.filter((q) => q.active);
-  const conf = SIZES[size];
+  const picked = qrCodes.filter((q) => ids.has(q.id));
+  const list = scope === "selection" && ids.size > 0 ? picked : scope === "tous" ? qrCodes : qrCodes.filter((q) => q.active);
 
   return (
     <div className="print-sheet">
-      <div className="print-hide space-y-5">
-        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div>
-            <LinkButton href="/hotel/chambres" variant="ghost" size="sm" icon={ArrowLeft} className="-ml-3 mb-2">
-              {t("Retour aux chambres", "Back to rooms")}
-            </LinkButton>
-            <h1 className="font-display text-3xl font-bold tracking-tight text-ink">
-              {t("Imprimer les QR codes", "Print QR codes")}
-            </h1>
-            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-2">
+      <div className="print-hide space-y-6">
+        <PageHeader
+          back={{ href: "/hotel/chambres", label: t("Chambres & QR codes", "Rooms & QR codes") }}
+          title={t("Imprimer les cartes", "Print the cards")}
+          description={t(
+            "Une carte par emplacement, à poser sur la table de nuit, au lobby ou au spa. Réglez le format et le message : seules les cartes sont imprimées.",
+            "One card per location, for the bedside table, the lobby or the spa. Set the format and the message: only the cards are printed."
+          )}
+          actions={
+            <Button variant="primary" size="lg" icon={Printer} onClick={() => window.print()} disabled={list.length === 0}>
               {t(
-                <>
-                  Une carte par emplacement, prête à poser sur la table de nuit, au lobby ou au spa. Réglez le format, le
-                  message, puis lancez l&apos;impression : seules les cartes sont imprimées.
-                </>,
-                <>
-                  One card per location, ready for the bedside table, the lobby or the spa. Set the format and the
-                  message, then print: only the cards are printed.
-                </>
+                `Imprimer ${list.length} carte${list.length > 1 ? "s" : ""}`,
+                `Print ${list.length} card${list.length === 1 ? "" : "s"}`
               )}
-            </p>
-          </div>
-          <Button variant="primary" size="lg" icon={Printer} onClick={() => window.print()}>
-            {t(
-              `Imprimer ${list.length} carte${list.length > 1 ? "s" : ""}`,
-              `Print ${list.length} card${list.length === 1 ? "" : "s"}`
-            )}
-          </Button>
-        </div>
+            </Button>
+          }
+        />
 
-        <div className="hotel-panel grid gap-4 p-5 md:grid-cols-2 xl:grid-cols-4">
-          <div className="space-y-1.5">
-            <p className="text-xs font-bold text-ink-2">{t("Emplacements", "Locations")}</p>
-            <Segmented
-              size="sm"
-              value={scope}
-              onChange={setScope}
-              options={[
-                ...(ids.size > 0 ? [{ value: "selection" as const, label: t("Sélection", "Selection"), count: ids.size }] : []),
-                { value: "actifs" as const, label: t("Actifs", "Active"), count: qrCodes.filter((q) => q.active).length },
-                { value: "tous" as const, label: t("Tous", "All"), count: qrCodes.length },
-              ]}
+        {loadFailed(failed, qrCodes) ? (
+          <HotelLoadError onRetry={reload} />
+        ) : qrCodes.length === 0 ? (
+          <Card padded={false}>
+            <EmptyState
+              icon={QrCode}
+              title={t("Aucun QR code à imprimer", "No QR codes to print")}
+              description={t(
+                "Créez d'abord un QR code par chambre ou par espace.",
+                "Create one QR code per room or area first."
+              )}
+              action={
+                <LinkButton href="/hotel/chambres?nouveau=1" variant="primary" icon={Plus}>
+                  {t("Nouveau QR code", "New QR code")}
+                </LinkButton>
+              }
             />
-          </div>
-          <div className="space-y-1.5">
-            <p className="text-xs font-bold text-ink-2">{t("Format", "Format")}</p>
-            <Segmented<Size>
-              size="sm"
-              value={size}
-              onChange={setSize}
-              options={[
-                { value: "petit", label: t("Petit", "Small") },
-                { value: "moyen", label: t("Moyen", "Medium") },
-                { value: "grand", label: t("Grand", "Large") },
-              ]}
+          </Card>
+        ) : (
+          <Card>
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              <Field label={t("Emplacements", "Locations")}>
+                <Segmented<Scope>
+                  size="sm"
+                  label={t("Emplacements", "Locations")}
+                  value={scope}
+                  onChange={setScope}
+                  options={[
+                    ...(ids.size > 0
+                      ? [{ value: "selection" as const, label: t("Sélection", "Selection"), count: picked.length }]
+                      : []),
+                    { value: "actifs", label: t("Actifs", "Active"), count: qrCodes.filter((q) => q.active).length },
+                    { value: "tous", label: t("Tous", "All"), count: qrCodes.length },
+                  ]}
+                />
+              </Field>
+              <Field label={t("Format", "Format")}>
+                <Segmented<PrintSize>
+                  size="sm"
+                  label={t("Format", "Format")}
+                  value={size}
+                  onChange={setSize}
+                  options={[
+                    { value: "petit", label: t("Petit", "Small") },
+                    { value: "moyen", label: t("Moyen", "Medium") },
+                    { value: "grand", label: t("Grand", "Large") },
+                  ]}
+                />
+              </Field>
+              <Field label={t("Style", "Style")}>
+                <Select<PrintTheme>
+                  label={t("Style", "Style")}
+                  value={theme}
+                  onChange={setTheme}
+                  options={[
+                    { value: "clair", label: t("Blanc, sobre", "White, minimal") },
+                    { value: "accent", label: t("Bandeau à la couleur de l'hôtel", "Banner in the hotel's colour") },
+                  ]}
+                />
+              </Field>
+              <Field label={t("Titre", "Title")} htmlFor="print-title">
+                <input
+                  id="print-title"
+                  value={headline}
+                  onChange={(e) => setHeadline(e.target.value)}
+                  maxLength={60}
+                  className={cn(inputClass, "h-11 py-0")}
+                />
+              </Field>
+              <Field
+                label={t("Texte d'accompagnement", "Supporting text")}
+                htmlFor="print-text"
+                hint={t("Absent du petit format.", "Not shown on the small format.")}
+                className="md:col-span-2 xl:col-span-4"
+              >
+                <input
+                  id="print-text"
+                  value={subline}
+                  onChange={(e) => setSubline(e.target.value)}
+                  maxLength={160}
+                  className={cn(inputClass, "h-11 py-0")}
+                />
+              </Field>
+            </div>
+          </Card>
+        )}
+
+        {qrCodes.length > 0 && list.length === 0 && (
+          <Card padded={false}>
+            <EmptyState
+              compact
+              icon={QrCode}
+              title={t("Aucun QR code actif", "No active QR codes")}
+              description={t(
+                "Les QR désactivés ne sont pas imprimés par défaut.",
+                "Deactivated QR codes aren't printed by default."
+              )}
+              action={<Button onClick={() => setScope("tous")}>{t("Tout imprimer", "Print all")}</Button>}
             />
-          </div>
-          <div className="space-y-1.5">
-            <p className="text-xs font-bold text-ink-2">{t("Style", "Style")}</p>
-            <Select<Theme>
-              label={t("Style", "Style")}
-              value={theme}
-              onChange={setTheme}
-              options={[
-                { value: "clair", label: t("Blanc, sobre", "White, minimal") },
-                { value: "accent", label: t("Bandeau à la couleur de l'hôtel", "Banner in the hotel's colour") },
-              ]}
-            />
-          </div>
-          <div className="space-y-1.5">
-            <p className="text-xs font-bold text-ink-2">{t("Titre", "Title")}</p>
-            <input value={headline} onChange={(e) => setHeadline(e.target.value)} maxLength={60} className={cn(inputClass, "h-10 py-0")} />
-          </div>
-          <div className="space-y-1.5 md:col-span-2 xl:col-span-4">
-            <p className="text-xs font-bold text-ink-2">{t(<>Texte d&apos;accompagnement</>, <>Supporting text</>)}</p>
-            <input value={subline} onChange={(e) => setSubline(e.target.value)} maxLength={160} className={cn(inputClass, "h-10 py-0")} />
-          </div>
-        </div>
+          </Card>
+        )}
       </div>
 
-      {list.length === 0 ? (
-        <p className="print-hide mt-6 text-sm text-ink-3">{t("Aucun QR code à imprimer.", "No QR codes to print.")}</p>
-      ) : (
-        <div className={cn("mt-6 grid gap-5 print:mt-0 print:gap-4", conf.cols)}>
+      {list.length > 0 && (
+        <div className={cn("mt-6 grid gap-5 print:mt-0 print:gap-4", PRINT_SIZES[size].cols)}>
           {list.map((q) => (
-            <article
+            <PrintCard
               key={q.id}
-              className={cn(
-                "print-card flex flex-col items-center overflow-hidden rounded-2xl bg-brand text-center text-on-brand shadow-xl print:rounded-xl print:shadow-none print:border print:border-neutral-300",
-                conf.card
-              )}
-            >
-              {theme === "accent" && (
-                <div className="-mx-10 -mt-10 mb-6 w-[calc(100%+5rem)] px-6 py-3 text-ink" style={{ background: accent }}>
-                  <p className="text-xs font-bold">{hotelName}</p>
-                </div>
-              )}
-              {theme === "clair" && (
-                <p className="text-xs font-bold text-neutral-500">{hotelName}</p>
-              )}
-              <h2 className={cn("font-display font-black tracking-tight", size === "grand" ? "mt-3 text-4xl" : size === "moyen" ? "mt-2 text-2xl" : "mt-1.5 text-lg")}>
-                {q.label}
-              </h2>
-              <div className={cn("rounded-xl border-4 border-neutral-100 p-3", size === "petit" ? "mt-4" : "mt-6")}>
-                <QRCode value={guestUrl(q.code, hotelName, hotelCity)} size={conf.qr} />
-              </div>
-              <p className={cn("font-bold leading-snug", size === "grand" ? "mt-6 text-xl" : size === "moyen" ? "mt-5 text-base" : "mt-4 text-sm")}>
-                {headline}
-              </p>
-              {size !== "petit" && (
-                <p className={cn("mx-auto mt-2 max-w-xs leading-relaxed text-neutral-500", size === "grand" ? "text-sm" : "text-xs")}>
-                  {subline}
-                </p>
-              )}
-              <p className="mt-4 inline-flex items-center gap-1.5 text-xs font-medium text-neutral-500">
-                <Smartphone size={12} strokeWidth={1.75} />
-                {t(<>Ouvrez l&apos;appareil photo, visez le code</>, <>Open your camera and point it at the code</>)}
-              </p>
-              <div className="mt-5 flex items-center justify-center gap-1.5 text-neutral-400">
-                <span className="text-xs">{t("Propulsé par", "Powered by")}</span>
-                <Image src="/logo-header.png" alt="twocards." width={16} height={16} className="h-4 w-auto opacity-70" />
-                <span className="text-xs font-black text-neutral-600">twocards.</span>
-              </div>
-            </article>
+              label={q.label}
+              url={guestUrl(q.code, hotelName, hotelCity)}
+              hotelName={hotelName}
+              accent={profile.accent_color}
+              size={size}
+              theme={theme}
+              headline={headline}
+              subline={subline}
+            />
           ))}
         </div>
       )}

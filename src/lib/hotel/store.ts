@@ -515,6 +515,17 @@ export function useHotelSpace() {
   const profile = useHotelProfile();
   const catalog = useCatalog();
   const offers = useHotelOffers();
+  /* Nouvel essai après un échec de chargement : les cinq tables sont
+     relues, sans rien changer aux requêtes. */
+  const reload = useCallback(async () => {
+    await Promise.all([
+      qrStore.reload(),
+      reservationStore.reload(),
+      profileStore.reload(),
+      catalogStore.reload(),
+      offersStore.reload(),
+    ]);
+  }, []);
   return {
     ...qr,
     reservations: res.reservations,
@@ -525,5 +536,6 @@ export function useHotelSpace() {
     isLoading:
       qr.isLoading || res.isLoading || profile.isLoading || catalog.isLoading || offers.isLoading,
     failed: qr.failed || res.failed,
+    reload,
   };
 }

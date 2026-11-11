@@ -1,6 +1,7 @@
 /* Outils autour du QR code affiché par react-qr-code : le SVG rendu est
    sérialisé tel quel, le fichier téléchargé est identique au QR affiché. */
 
+import { downloadBlob } from "@/lib/csv";
 import type { Locale } from "@/lib/i18n";
 
 const slug = (label: string) =>
@@ -17,20 +18,12 @@ function svgSource(containerId: string) {
   return new XMLSerializer().serializeToString(svg);
 }
 
-function triggerDownload(url: string, filename: string) {
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  a.click();
-}
-
 export function downloadSvg(containerId: string, label: string) {
   const source = svgSource(containerId);
   if (!source) return false;
-  const blob = new Blob([source], { type: "image/svg+xml;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  triggerDownload(url, `qr-${slug(label)}.svg`);
-  URL.revokeObjectURL(url);
+  /* downloadBlob révoque l'adresse blob après coup : la révoquer juste
+     après le clic faisait échouer le téléchargement sur Safari et Firefox. */
+  downloadBlob(new Blob([source], { type: "image/svg+xml;charset=utf-8" }), `qr-${slug(label)}.svg`);
   return true;
 }
 
@@ -63,9 +56,7 @@ export function downloadPng(containerId: string, label: string, size = 1024) {
           resolve(false);
           return;
         }
-        const pngUrl = URL.createObjectURL(blob);
-        triggerDownload(pngUrl, `qr-${slug(label)}.png`);
-        URL.revokeObjectURL(pngUrl);
+        downloadBlob(blob, `qr-${slug(label)}.png`);
         resolve(true);
       }, "image/png");
     };

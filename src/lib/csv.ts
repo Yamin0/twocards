@@ -2,6 +2,9 @@
    marque d'ordre d'octets UTF-8 : le fichier s'ouvre tel quel dans Excel
    en français, accents compris. */
 
+/* Marque d'ordre d'octets, écrite par son code pour rester visible ici. */
+const BOM = String.fromCharCode(0xfeff);
+
 export type CsvCell = string | number | null | undefined;
 
 /* Une cellule saisie par un client (nom, précisions) ne doit pas pouvoir
@@ -46,7 +49,7 @@ export function downloadCsv(
   rows: CsvCell[][],
   footer?: CsvCell[]
 ) {
-  const blob = new Blob(["﻿" + toCsv(header, rows, footer)], {
+  const blob = new Blob([BOM + toCsv(header, rows, footer)], {
     type: "text/csv;charset=utf-8",
   });
   downloadBlob(blob, `${filename}.csv`);
