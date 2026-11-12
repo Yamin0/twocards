@@ -40,15 +40,24 @@ function Section({
 }
 
 /* Prestation à prix partenaire : l'acompte (la part twocards) se paie en
-   ligne, par véhicule ; le reste se règle sur place au partenaire. */
-function VehicleDepositNote({ amount, unit, onSite, vehicles }: { amount: string; unit?: string; onSite: string; vehicles: number }) {
+   ligne, par véhicule ou par entrée ; le reste se règle sur place au
+   partenaire. */
+function VehicleDepositNote({
+  amount,
+  unit,
+  onSite,
+  vehicles,
+  tickets = false,
+}: {
+  amount: string;
+  unit?: string;
+  onSite: string;
+  vehicles: number;
+  tickets?: boolean;
+}) {
   const t = useT();
-  const split =
-    vehicles <= 1
-      ? ""
-      : unit
-        ? t(` (${vehicles} véhicules × ${unit})`, ` (${vehicles} vehicles × ${unit})`)
-        : t(` (${vehicles} véhicules)`, ` (${vehicles} vehicles)`);
+  const what = tickets ? t("personnes", "guests") : t("véhicules", "vehicles");
+  const split = vehicles <= 1 ? "" : unit ? ` (${vehicles} ${what} × ${unit})` : ` (${vehicles} ${what})`;
   return (
     <p className="num mt-2.5 text-center text-xs leading-relaxed text-neutral-600">
       {t(
@@ -260,6 +269,7 @@ export function StepDetails({ form, offer, category }: { form: ReservationForm; 
             unit={form.deposit.unit ? formatDeposit(form.deposit.unit, form.deposit.currency, intl) : undefined}
             onSite={formatDeposit(form.deposit.onSite ?? 0, form.deposit.currency, intl)}
             vehicles={form.deposit.vehicles}
+            tickets={form.ticketMode}
           />
         ) : form.deposit && offer.deposit && (
           <p className="num mt-2.5 text-center text-xs leading-relaxed text-neutral-600">

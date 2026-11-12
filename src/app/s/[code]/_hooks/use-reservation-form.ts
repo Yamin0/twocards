@@ -42,6 +42,10 @@ export function useReservationForm({
      choisir une seule prestation. Trois personnes peuvent ainsi prendre trois
      modèles différents. */
   const cartMode = offer.services.some((s) => s.deposit && s.clientPrice);
+  /* Entrées à la personne (day pass adulte, enfant…) : même panier et même
+     acompte, mais aucune prestation n'a de nombre de places. Le menu parle
+     alors de personnes, pas de véhicules. */
+  const ticketMode = cartMode && offer.services.every((s) => !(s.deposit && s.clientPrice) || !s.seats);
   const [cart, setCart] = useState<VehicleCart>({});
   /* Demain si plus aucun créneau n'est réservable ce soir, comme le portail. */
   const [date, setDateState] = useState(() => defaultGuestDate(category.key));
@@ -153,7 +157,11 @@ export function useReservationForm({
      la feuille reste alors sur l'étape 1, message affiché sous le champ. */
   const toContact = () => {
     if (cartMode && vehicleCount === 0) {
-      setErrorMsg(t("Choisissez au moins un véhicule.", "Choose at least one vehicle."));
+      setErrorMsg(
+        ticketMode
+          ? t("Choisissez au moins une entrée.", "Choose at least one ticket.")
+          : t("Choisissez au moins un véhicule.", "Choose at least one vehicle.")
+      );
       return false;
     }
     if (time === OTHER_TIME && customTime && isGuestTimePast(date, customTime)) {
@@ -261,6 +269,7 @@ export function useReservationForm({
     step,
     setStep,
     cartMode,
+    ticketMode,
     cart,
     setQty,
     lines,
