@@ -146,7 +146,8 @@ export function ConciergePage() {
     <ShortAudiencePage
       data={{
         hero: {
-          media: { image: "/images/concierges-hero.jpg" },
+          /* Photo Unsplash (licence libre) : un rooftop au coucher du soleil. */
+          media: { image: "/images/concierges-rooftop.jpg" },
           title: t(
             <>
               Vos recommandations valent de l&apos;argent.{" "}
