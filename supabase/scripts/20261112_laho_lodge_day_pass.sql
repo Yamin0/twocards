@@ -22,6 +22,9 @@
 -- établissement de Yamin) -> public/images/partners/laho-lodge-N.webp.
 --
 -- Relançable : remplace l'offre et ses prestations tenues par twocards.
+-- Description limitée à 300 caractères (catalog_offers_description_check).
+-- APPLIQUÉ en production le 12 nov. 2026 par Claude (offre désactivée ; le
+-- connecteur Supabase refuse le delete, d'où un insert simple ce jour-là).
 
 begin;
 
@@ -34,7 +37,7 @@ values (
   'Day pass au Lahô Lodge',
   'Marrakech',
   'Piscine & déjeuner',
-  'Une journée au bord d''une piscine à débordement face au lac de Lalla Takerkoust et aux collines de l''Atlas, à moins d''une heure de Marrakech. Le day pass comprend transat, serviette et déjeuner entrée, plat, dessert, cuisiné avec les légumes du potager bio. Tous les jours dès 11 h, jusqu''au coucher du soleil. Acompte en ligne, le reste se règle sur place ; au-delà de 30 minutes de retard, la réservation est annulée.',
+  'Piscine à débordement face au lac de Lalla Takerkoust et à l''Atlas, à moins d''une heure de Marrakech. Transat, serviette et déjeuner entrée, plat, dessert du potager bio. Tous les jours dès 11 h. Acompte en ligne, le reste sur place ; au-delà de 30 min de retard, la réservation est annulée.',
   null, -- la carte affiche « dès » le plus petit prix des prestations
   '/images/partners/laho-lodge-1.webp',
   array[
@@ -50,7 +53,7 @@ values (
   jsonb_build_object('en', jsonb_build_object(
     'name', 'Day pass at Lahô Lodge',
     'tag', 'Pool & lunch',
-    'description', 'A day by an infinity pool overlooking Lake Lalla Takerkoust and the Atlas foothills, less than an hour from Marrakech. The day pass includes a sun lounger, a towel and a three-course lunch (starter, main, dessert) cooked with vegetables from the organic garden. Every day from 11 am until sunset. Pay the deposit online and the rest on site; bookings more than 30 minutes late are cancelled.'
+    'description', 'Infinity pool overlooking Lake Lalla Takerkoust and the Atlas, less than an hour from Marrakech. Sun lounger, towel and a three-course lunch from the organic garden. Every day from 11 am. Deposit online, the rest on site; bookings more than 30 min late are cancelled.'
   ))
 )
 on conflict (slug) do update set
