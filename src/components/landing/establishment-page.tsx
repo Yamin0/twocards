@@ -179,10 +179,8 @@ export function EstablishmentPage() {
     <ShortAudiencePage
       data={{
         hero: {
-          media: {
-            image: "/videos/etablissements-hero-poster.jpg",
-            video: { src: "/videos/etablissements-hero-60.mp4", loop: false, rate: 0.8 },
-          },
+          /* Photo Unsplash (licence libre) : un bar le soir, sans enseigne. */
+          media: { image: "/images/etablissements-bar.jpg" },
           title: t(
             <>
               Remplissez vos tables,{" "}
