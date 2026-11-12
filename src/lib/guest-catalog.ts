@@ -38,7 +38,7 @@ export const CATEGORY_META: Record<
   services: {
     label: "Services",
     tagline: "Une conciergerie à votre écoute",
-    image: "/images/menu/services-chauffeur.jpg",
+    image: "/images/menu/services-voiture.jpg",
   },
 };
 
