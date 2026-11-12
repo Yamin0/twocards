@@ -56,9 +56,11 @@ export async function POST(request: NextRequest) {
   const code = encodeURIComponent(req.code);
   const when = [req.date, req.time].filter(Boolean).join(" ");
   const guests = locale === "en" ? `${req.party} guest${req.party > 1 ? "s" : ""}` : `${req.party} pers.`;
-  /* Prestation à prix partenaire : nombre de véhicules et reste payé sur place. */
+  /* Prestation à prix partenaire : nombre de véhicules et reste payé sur place.
+     Un panier (véhicules ou entrées à la personne) porte déjà les quantités
+     dans son résumé : « 2 × Day pass adulte, 1 × Day pass enfant ». */
   const vehicles =
-    (quote.mode === "per_vehicle" || quote.mode === "lines") && quote.units
+    quote.mode === "per_vehicle" && quote.units
       ? locale === "en"
         ? `${quote.units} vehicle${quote.units > 1 ? "s" : ""}`
         : `${quote.units} véhicule${quote.units > 1 ? "s" : ""}`

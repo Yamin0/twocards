@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useState } from "react";
-import { Car, ChevronDown, Minus, Plus } from "lucide-react";
+import { Car, ChevronDown, Minus, Plus, Ticket } from "lucide-react";
 import type { GuestOffer, GuestService } from "@/lib/guest-catalog";
 import { formatDeposit } from "@/lib/booking/deposit";
 import { useIntlLocale, useT } from "@/lib/i18n/client";
@@ -32,18 +32,26 @@ function Stepper({
   label,
   onChange,
   canAdd,
+  tickets = false,
 }: {
   value: number;
   label: string;
   onChange: (next: number) => void;
   canAdd: boolean;
+  tickets?: boolean;
 }) {
   const t = useT();
+  const remove = tickets
+    ? t(`Retirer une personne : ${label}`, `Remove a guest: ${label}`)
+    : t(`Retirer un véhicule : ${label}`, `Remove a vehicle: ${label}`);
+  const add = tickets
+    ? t(`Ajouter une personne : ${label}`, `Add a guest: ${label}`)
+    : t(`Ajouter un véhicule : ${label}`, `Add a vehicle: ${label}`);
   return (
     <div className="flex shrink-0 items-center gap-1.5">
       <button
         type="button"
-        aria-label={t(`Retirer un véhicule : ${label}`, `Remove a vehicle: ${label}`)}
+        aria-label={remove}
         disabled={value <= 0}
         onClick={() => onChange(value - 1)}
         className="flex h-10 w-10 items-center justify-center rounded-full border border-black/[0.12] bg-white text-neutral-800 disabled:opacity-30"
@@ -55,7 +63,7 @@ function Stepper({
       </span>
       <button
         type="button"
-        aria-label={t(`Ajouter un véhicule : ${label}`, `Add a vehicle: ${label}`)}
+        aria-label={add}
         disabled={!canAdd}
         onClick={() => onChange(value + 1)}
         className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--accent)] text-[var(--on-accent)] disabled:opacity-30"
@@ -66,7 +74,58 @@ function Stepper({
   );
 }
 
+/* Entrées à la personne (day pass adulte, enfant…) : une ligne par tarif,
+   sans accordéon, et le nombre de personnes sur chaque ligne. */
+function TicketPicker({ form, offer }: { form: ReservationForm; offer: GuestOffer }) {
+  const t = useT();
+  const titleId = useId();
+  const count = form.vehicleCount;
+  const full = count >= 20;
+  return (
+    <section role="group" aria-labelledby={titleId}>
+      <h3 id={titleId} className="mb-2.5 flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.16em] text-neutral-700">
+        <Ticket size={13} strokeWidth={2.25} aria-hidden /> {t("Entrées", "Tickets")}
+      </h3>
+      <ul className="divide-y divide-black/[0.08] overflow-hidden rounded-xl border border-black/[0.12] bg-white">
+        {offer.services.map((s) => (
+          <li key={s.id} className="flex items-center gap-3 px-4 py-3">
+            <span className="min-w-0 flex-1">
+              <span className="block text-[15px] font-bold leading-tight text-neutral-900">{s.name}</span>
+              {s.description && <span className="mt-0.5 block text-sm leading-relaxed text-neutral-600">{s.description}</span>}
+              {s.price && (
+                <span className="num mt-0.5 block text-sm text-neutral-700">
+                  {t(`${s.price} par personne`, `${s.price} per guest`)}
+                </span>
+              )}
+            </span>
+            <Stepper
+              value={form.cart[s.id] ?? 0}
+              label={s.name}
+              canAdd={!full}
+              tickets
+              onChange={(next) => form.setQty(s.id, next)}
+            />
+          </li>
+        ))}
+      </ul>
+      {count > 0 && count !== form.partySize && (
+        <p className="num mt-3 text-sm font-medium leading-relaxed text-red-700">
+          {t(
+            `${count} entrée${count > 1 ? "s" : ""} pour ${form.partySize} personne${form.partySize > 1 ? "s" : ""} : ajustez l'un ou l'autre.`,
+            `${count} ticket${count > 1 ? "s" : ""} for ${form.partySize} guest${form.partySize > 1 ? "s" : ""}: adjust one or the other.`
+          )}
+        </p>
+      )}
+    </section>
+  );
+}
+
 export function VehiclePicker({ form, offer }: { form: ReservationForm; offer: GuestOffer }) {
+  if (form.ticketMode) return <TicketPicker form={form} offer={offer} />;
+  return <VehicleCartPicker form={form} offer={offer} />;
+}
+
+function VehicleCartPicker({ form, offer }: { form: ReservationForm; offer: GuestOffer }) {
   const t = useT();
   const intl = useIntlLocale();
   const titleId = useId();
