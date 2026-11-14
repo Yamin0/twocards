@@ -139,6 +139,9 @@ export type GuestOffer = {
   /* Acompte en ligne demandé à la réservation (adresses du réseau à prix
      fixe seulement). Absent : demande sans paiement, comme avant. */
   deposit?: OfferDeposit;
+  /* Heure fixée par le prestataire (montgolfière au lever du soleil…) :
+     le menu affiche cette phrase au lieu des créneaux à choisir. */
+  timeInfo?: string;
 };
 
 export type GuestCategory = {

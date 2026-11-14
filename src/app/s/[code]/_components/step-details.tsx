@@ -194,60 +194,67 @@ export function StepDetails({ form, offer, category }: { form: ReservationForm; 
           </div>
         </Section>
 
-        <Section icon={Clock} title={t("Heure", "Time")} hint={t("(facultatif)", "(optional)")}>
-          <div className="grid grid-cols-4 gap-2 sm:grid-cols-5">
-            {slots.map((s) => {
-              const past = isGuestSlotPast(form.date, s);
-              const active = form.time === s;
-              return (
-                <button
-                  key={s}
-                  type="button"
-                  disabled={past}
-                  onClick={() => form.pickTime(active ? null : s)}
-                  aria-pressed={active}
-                  className={cn(
-                    "num h-11 rounded-xl border text-sm font-bold transition-colors",
-                    active ? CHOSEN : past ? "border-transparent bg-neutral-100 text-neutral-400 line-through" : CHOICE
-                  )}
-                >
-                  {s}
-                </button>
-              );
-            })}
-            <button
-              type="button"
-              onClick={() => form.pickTime(form.time === OTHER_TIME ? null : OTHER_TIME)}
-              aria-pressed={form.time === OTHER_TIME}
-              aria-expanded={form.time === OTHER_TIME}
-              className={cn("h-11 rounded-xl border text-sm font-bold transition-colors", form.time === OTHER_TIME ? CHOSEN : CHOICE)}
-            >
-              {t("Autre", "Other")}
-            </button>
-          </div>
-          {form.time === OTHER_TIME && (
-            <div className="mt-3">
-              <label htmlFor={timeId} className="mb-1.5 block text-sm font-bold text-neutral-800">
-                {t("Heure souhaitée", "Preferred time")}
-              </label>
-              <input
-                id={timeId}
-                type="time"
-                value={form.customTime}
-                onChange={(e) => form.changeCustomTime(e.target.value)}
-                aria-invalid={form.timeError ? true : undefined}
-                aria-describedby={form.timeError ? timeErrorId : undefined}
-                className={cn(FIELD, "num", form.timeError && "border-red-600")}
-                autoFocus
-              />
-              {form.timeError && (
-                <p id={timeErrorId} role="alert" className="mt-2 text-sm font-medium leading-relaxed text-red-700">
-                  {form.timeError}
-                </p>
-              )}
+        {offer.timeInfo ? (
+          /* L'heure est fixée par le prestataire : pas de créneau à choisir. */
+          <Section icon={Clock} title={t("Heure", "Time")}>
+            <p className="rounded-xl bg-[#f7f6f3] px-4 py-3 text-[15px] leading-relaxed text-neutral-800">{offer.timeInfo}</p>
+          </Section>
+        ) : (
+          <Section icon={Clock} title={t("Heure", "Time")} hint={t("(facultatif)", "(optional)")}>
+            <div className="grid grid-cols-4 gap-2 sm:grid-cols-5">
+              {slots.map((s) => {
+                const past = isGuestSlotPast(form.date, s);
+                const active = form.time === s;
+                return (
+                  <button
+                    key={s}
+                    type="button"
+                    disabled={past}
+                    onClick={() => form.pickTime(active ? null : s)}
+                    aria-pressed={active}
+                    className={cn(
+                      "num h-11 rounded-xl border text-sm font-bold transition-colors",
+                      active ? CHOSEN : past ? "border-transparent bg-neutral-100 text-neutral-400 line-through" : CHOICE
+                    )}
+                  >
+                    {s}
+                  </button>
+                );
+              })}
+              <button
+                type="button"
+                onClick={() => form.pickTime(form.time === OTHER_TIME ? null : OTHER_TIME)}
+                aria-pressed={form.time === OTHER_TIME}
+                aria-expanded={form.time === OTHER_TIME}
+                className={cn("h-11 rounded-xl border text-sm font-bold transition-colors", form.time === OTHER_TIME ? CHOSEN : CHOICE)}
+              >
+                {t("Autre", "Other")}
+              </button>
             </div>
-          )}
-        </Section>
+            {form.time === OTHER_TIME && (
+              <div className="mt-3">
+                <label htmlFor={timeId} className="mb-1.5 block text-sm font-bold text-neutral-800">
+                  {t("Heure souhaitée", "Preferred time")}
+                </label>
+                <input
+                  id={timeId}
+                  type="time"
+                  value={form.customTime}
+                  onChange={(e) => form.changeCustomTime(e.target.value)}
+                  aria-invalid={form.timeError ? true : undefined}
+                  aria-describedby={form.timeError ? timeErrorId : undefined}
+                  className={cn(FIELD, "num", form.timeError && "border-red-600")}
+                  autoFocus
+                />
+                {form.timeError && (
+                  <p id={timeErrorId} role="alert" className="mt-2 text-sm font-medium leading-relaxed text-red-700">
+                    {form.timeError}
+                  </p>
+                )}
+              </div>
+            )}
+          </Section>
+        )}
       </div>
 
       <SheetAction>

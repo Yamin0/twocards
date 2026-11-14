@@ -134,14 +134,21 @@ async function attachDeposits(supabase: Awaited<ReturnType<typeof createClient>>
      endroit) ;
    - traductions anglaises du nom, de la description, de l'étiquette.
    Avant la migration, la RPC n'existe pas : le menu reste tel quel. */
-type Translation = { name?: string; description?: string; tag?: string; duration?: string; model?: string };
+type Translation = {
+  name?: string;
+  description?: string;
+  tag?: string;
+  duration?: string;
+  model?: string;
+  time_info?: string;
+};
 
 const translationFor = (value: unknown, locale: Locale): Translation => {
   if (locale === "fr" || !value || typeof value !== "object") return {};
   const entry = (value as Record<string, unknown>)[locale];
   if (!entry || typeof entry !== "object") return {};
   const out: Translation = {};
-  for (const key of ["name", "description", "tag", "duration", "model"] as const) {
+  for (const key of ["name", "description", "tag", "duration", "model", "time_info"] as const) {
     const text = (entry as Record<string, unknown>)[key];
     if (typeof text === "string" && text.trim()) out[key] = text.trim();
   }
@@ -167,11 +174,21 @@ async function attachExtras(
   if (slugs.length === 0) return;
   const { data, error } = await supabase.rpc("qr_menu_extras", { p_slugs: slugs });
   if (error || !data || typeof data !== "object") return;
-  const extras = data as { offers?: { slug?: string; translations?: unknown }[]; services?: ExtrasService[] };
+  const extras = data as {
+    offers?: { slug?: string; translations?: unknown; time_info?: string | null }[];
+    services?: ExtrasService[];
+  };
 
   const offerText = new Map<string, Translation>();
+  /* Heure fixée par le prestataire (migration 20261114100000) : français en
+     colonne, anglais dans les traductions. */
+  const offerTime = new Map<string, string>();
   for (const row of extras.offers ?? []) {
-    if (row.slug) offerText.set(row.slug, translationFor(row.translations, locale));
+    if (!row.slug) continue;
+    const text = translationFor(row.translations, locale);
+    offerText.set(row.slug, text);
+    const time = text.time_info || (typeof row.time_info === "string" ? row.time_info.trim() : "");
+    if (time) offerTime.set(row.slug, time);
   }
   const services = new Map<string, ExtrasService>();
   for (const row of extras.services ?? []) if (row.id) services.set(row.id, row);
@@ -185,6 +202,8 @@ async function attachExtras(
       if (text?.name) offer.name = text.name;
       if (text?.description) offer.description = text.description;
       if (text?.tag) offer.tag = text.tag;
+      const time = offerTime.get(offer.id);
+      if (time) offer.timeInfo = time;
 
       let lowest: { amount: number; currency: string } | null = null;
       for (const service of offer.services) {
