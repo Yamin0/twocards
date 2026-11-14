@@ -33,7 +33,9 @@ export function useReservationForm({
   const t = useT();
   const [days] = useState(() => nextDays(14));
   const [step, setStep] = useState<SheetStep>("details");
-  const [partySize, setPartySize] = useState(2);
+  /* Une activité (spa, vol, day pass…) s'ouvre sur 1 personne ; une table
+     de restaurant ou de club, sur 2. */
+  const [partySize, setPartySize] = useState(category.key === "activites" ? 1 : 2);
   /* La première prestation est proposée d'office : c'est l'établissement
      qui a choisi l'ordre, et le client peut en changer d'un geste. */
   const [service, setService] = useState<GuestService | null>(offer.services[0] ?? null);
